@@ -54,8 +54,8 @@ Position.prototype.equals = function(otherPosition) {
 }
 
 function Grid(width, height) {
-  this.width = width;
-  this.height = height;
+  this.width = width || 20;
+  this.height = height || 20;
   this.grid = [];
   this.fruitPos = new Position(0, 0);
 
@@ -130,10 +130,10 @@ Grid.prototype.toString = function() {
 }
 
 function Snake(direction, startPos, length, grid, player) {
-  this.direction = direction;
+  this.direction = direction || RIGHT;
   this.grid = grid;
   this.queue = [];
-  this.player = player;
+  this.player = player || PLAYER_HUMAN;
 
   this.init = function() {
     for(i = length; i >= 0; i--) {
@@ -196,20 +196,20 @@ function Snake(direction, startPos, length, grid, player) {
     var graph = new Graph(this.grid.getGraph(this.getHeadPosition()));
     var start = graph.grid[currentPosition.x][currentPosition.y];
     var end = graph.grid[fruitPos.x][fruitPos.y];
-    var result = astar.search(graph, start, end);
+    var result = astar.search(graph, start, end, {}, true);
 
-    if(result.length > 0) {
-      var nextPosition = new Position(result[0].x, result[0].y);
+    if(result.length > 1) {
+      var nextPosition = new Position(result[1].x, result[1].y);
       console.log(result, start, end, this.grid.getGraph(this.getHeadPosition()));
 
       if(nextPosition.x > currentPosition.x) {
         return KEY_RIGHT;
       } else if(nextPosition.x < currentPosition.x) {
         return KEY_LEFT;
-      } else if(nextPosition.y > currentPosition.y) {
-        return KEY_BOTTOM;
       } else if(nextPosition.y < currentPosition.y) {
         return KEY_UP;
+      } else if(nextPosition.y > currentPosition.y) {
+        return KEY_BOTTOM;
       }
     }
   }
@@ -218,10 +218,10 @@ function Snake(direction, startPos, length, grid, player) {
 }
 
 function Game(grid, snake, speed, outputType) {
-  this.grid = grid;
-  this.snake = snake;
-  this.speed = speed;
-  this.outputType = outputType;
+  this.grid = grid || new Grid(20, 20);
+  this.snake = snake || new Snake(RIGHT, grid.getRandomPosition(), 3, grid, PLAYER_HUMAN);
+  this.speed = speed || 5;
+  this.outputType = outputType || OUTPUT_TEXT;
   this.score = 0;
   this.frame = 0;
   this.paused = true;
@@ -332,12 +332,12 @@ function Game(grid, snake, speed, outputType) {
 }
 
 Game.prototype.toString = function() {
-  return this.grid.toString() + "\nScore : " + this.score;
+  return this.grid.toString() + "\nScore : " + this.score + "\nFrames : " + this.frame;
 }
 
 function gameTest() {
   var grid = new Grid(20, 20);
-  var snake = new Snake(RIGHT, grid.getRandomPosition(), 2, grid, PLAYER_IA);
+  var snake = new Snake(RIGHT, grid.getRandomPosition(), 2, grid, PLAYER_HUMAN);
   var game = new Game(grid, snake, 8, OUTPUT_TEXT);
   game.start();
 
@@ -349,8 +349,10 @@ function gameTest() {
     game.start();
   }
 
-  /* document.getElementById("restartBtn").onclick = function() {
-  } */
+  document.getElementById("restartBtn").onclick = function() {
+    game.stop();
+    gameTest();
+  }
 }
 
 gameTest();
