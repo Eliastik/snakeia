@@ -49,6 +49,10 @@ function Position(x, y) {
   this.y = y;
 }
 
+Position.prototype.equals = function(otherPosition) {
+  return this.x == otherPosition.x && this.y == otherPosition.y;
+}
+
 function Grid(width, height) {
   this.width = width;
   this.height = height;
@@ -70,6 +74,25 @@ function Grid(width, height) {
 
   this.get = function(position) {
     return this.grid[position.y][position.x];
+  }
+
+  this.getGraph = function(snakePos) {
+    var res = [];
+
+    for(i = 0; i < this.height; i++) {
+      res.push([]);
+      for(j = 0; j < this.width; j++) {
+        var currentVal = this.get(new Position(j, i));
+
+        if(!snakePos.equals(new Position(j, i)) && (currentVal == SNAKE_VAL || currentVal == WALL_VAL)) {
+          res[i].push(0);
+        } else {
+          res[i].push(1);
+        }
+      }
+    }
+
+    return res;
   }
 
   this.getRandomPosition = function() {
@@ -146,6 +169,51 @@ function Snake(direction, startPos, length, grid, player) {
     return new Position(this.queue[this.length() - 1].x, this.queue[this.length() - 1].y);
   }
 
+  this.moveTo = function(direction) {
+    if(direction != null) {
+      if(direction == KEY_LEFT && this.direction != RIGHT) {
+        this.direction = LEFT;
+      }
+
+      if(direction == KEY_UP && this.direction != BOTTOM) {
+        this.direction = UP;
+      }
+
+      if(direction == KEY_RIGHT && this.direction != LEFT) {
+        this.direction = RIGHT;
+      }
+
+      if(direction == KEY_BOTTOM && this.direction != UP) {
+        this.direction = BOTTOM;
+      }
+    }
+  }
+
+  this.ia = function() {
+    var currentPosition = this.getHeadPosition();
+    var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
+
+    var graph = new Graph(this.grid.getGraph(this.getHeadPosition()));
+    var start = graph.grid[currentPosition.x][currentPosition.y];
+    var end = graph.grid[fruitPos.x][fruitPos.y];
+    var result = astar.search(graph, start, end);
+
+    if(result.length > 0) {
+      var nextPosition = new Position(result[0].x, result[0].y);
+      console.log(result, start, end, this.grid.getGraph(this.getHeadPosition()));
+
+      if(nextPosition.x > currentPosition.x) {
+        return KEY_RIGHT;
+      } else if(nextPosition.x < currentPosition.x) {
+        return KEY_LEFT;
+      } else if(nextPosition.y > currentPosition.y) {
+        return KEY_BOTTOM;
+      } else if(nextPosition.y < currentPosition.y) {
+        return KEY_UP;
+      }
+    }
+  }
+
   this.init();
 }
 
@@ -175,7 +243,7 @@ function Game(grid, snake, speed, outputType) {
   }
 
   this.start = function() {
-    if(this.paused) {
+    if(this.paused && !this.gameOver) {
       this.paused = false;
       this.tick();
     }
@@ -190,21 +258,9 @@ function Game(grid, snake, speed, outputType) {
         self.frame++;
 
         if(self.snake.player == PLAYER_HUMAN) {
-          if(self.lastKey == KEY_LEFT && self.snake.direction != RIGHT) {
-            self.snake.direction = LEFT;
-          }
-
-          if(self.lastKey == KEY_UP && self.snake.direction != BOTTOM) {
-            self.snake.direction = UP;
-          }
-
-          if(self.lastKey == KEY_RIGHT && self.snake.direction != LEFT) {
-            self.snake.direction = RIGHT;
-          }
-
-          if(self.lastKey == KEY_BOTTOM && self.snake.direction != UP) {
-            self.snake.direction = BOTTOM;
-          }
+          self.snake.moveTo(self.lastKey);
+        } else if(self.snake.player == PLAYER_IA) {
+          self.snake.moveTo(self.snake.ia());
         }
 
         if(self.frame % self.speed == 0) {
@@ -237,7 +293,7 @@ function Game(grid, snake, speed, outputType) {
             headSnakePos.y = 0;
           }
 
-          if(self.grid.get(headSnakePos) == SNAKE_VAL) {
+          if(self.grid.get(headSnakePos) == SNAKE_VAL || self.grid.get(headSnakePos) == WALL_VAL) {
             self.stop();
             alert("Perdu !");
           }
@@ -281,8 +337,8 @@ Game.prototype.toString = function() {
 
 function gameTest() {
   var grid = new Grid(20, 20);
-  var snake = new Snake(RIGHT, grid.getRandomPosition(), 3, grid, PLAYER_HUMAN);
-  var game = new Game(grid, snake, 3, OUTPUT_TEXT);
+  var snake = new Snake(RIGHT, grid.getRandomPosition(), 2, grid, PLAYER_IA);
+  var game = new Game(grid, snake, 8, OUTPUT_TEXT);
   game.start();
 
   document.getElementById("pauseBtn").onclick = function() {
@@ -293,13 +349,8 @@ function gameTest() {
     game.start();
   }
 
-  document.getElementById("restartBtn").onclick = function() {
-    game.stop();
-    grid = new Grid(20, 20);
-    snake = new Snake(RIGHT, grid.getRandomPosition(), 3, grid, PLAYER_HUMAN);
-    game = new Game(grid, snake, 3, OUTPUT_TEXT);
-    game.start();
-  }
+  /* document.getElementById("restartBtn").onclick = function() {
+  } */
 }
 
 gameTest();
