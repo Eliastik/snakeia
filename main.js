@@ -53,9 +53,9 @@ Position.prototype.equals = function(otherPosition) {
   return this.x == otherPosition.x && this.y == otherPosition.y;
 }
 
-function Grid(width, height) {
-  this.width = width || 20;
-  this.height = height || 20;
+function Grid(width, height, generateWalls, borderWalls) {
+  this.width = width;
+  this.height = height;
   this.grid = [];
   this.fruitPos = new Position(0, 0);
 
@@ -63,7 +63,11 @@ function Grid(width, height) {
     for(i = 0; i < this.height; i++) {
       this.grid.push([]);
       for(j = 0; j < this.width; j++) {
-        this.grid[i].push(EMPTY_VAL);
+        if((generateWalls && Math.random() > 0.85) || (borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1))) {
+          this.grid[i].push(WALL_VAL);
+        } else {
+          this.grid[i].push(EMPTY_VAL);
+        }
       }
     }
   }
@@ -129,14 +133,34 @@ Grid.prototype.toString = function() {
   return res;
 }
 
-function Snake(direction, startPos, length, grid, player) {
-  this.direction = direction || RIGHT;
+function Snake(direction, length, grid, player) {
+  this.direction = direction;
   this.grid = grid;
   this.queue = [];
-  this.player = player || PLAYER_HUMAN;
+  this.player = player;
 
   this.init = function() {
-    for(i = length; i >= 0; i--) {
+    var posValidated = false;
+    var startPos;
+
+    while(!posValidated) {
+      posValidated = true;
+      startPos = grid.getRandomPosition();
+
+      for(i = length - 1; i >= 0; i--) {
+        var posX = startPos.x - i;
+
+        if(posX < 0) {
+          posX = this.grid.width - -posX;
+        }
+
+        if(grid.get(new Position(posX, startPos.y)) == WALL_VAL) {
+          posValidated = false;
+        }
+      }
+    }
+
+    for(i = length - 1; i >= 0; i--) {
         var posX = startPos.x - i;
 
         if(posX < 0) {
@@ -193,14 +217,18 @@ function Snake(direction, startPos, length, grid, player) {
     var currentPosition = this.getHeadPosition();
     var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
 
-    var graph = new Graph(this.grid.getGraph(this.getHeadPosition()));
+    var graph = new Graph(this.grid.getGraph(currentPosition));
+    console.log(graph.toString());
     var start = graph.grid[currentPosition.x][currentPosition.y];
     var end = graph.grid[fruitPos.x][fruitPos.y];
-    var result = astar.search(graph, start, end, {}, true);
+    var result = astar.search(graph, start, end);
 
-    if(result.length > 1) {
-      var nextPosition = new Position(result[1].x, result[1].y);
-      console.log(result, start, end, this.grid.getGraph(this.getHeadPosition()));
+    if(result.length > 0) {
+        var nextPosition = new Position(result[0].x, result[0].y);
+    }
+
+    if(result.length > 0) {
+      console.log(result.toString(), start.toString(), end.toString());
 
       if(nextPosition.x > currentPosition.x) {
         return KEY_RIGHT;
@@ -218,10 +246,10 @@ function Snake(direction, startPos, length, grid, player) {
 }
 
 function Game(grid, snake, speed, outputType) {
-  this.grid = grid || new Grid(20, 20);
-  this.snake = snake || new Snake(RIGHT, grid.getRandomPosition(), 3, grid, PLAYER_HUMAN);
-  this.speed = speed || 5;
-  this.outputType = outputType || OUTPUT_TEXT;
+  this.grid = grid;
+  this.snake = snake;
+  this.speed = speed;
+  this.outputType = outputType;
   this.score = 0;
   this.frame = 0;
   this.paused = true;
@@ -260,6 +288,7 @@ function Game(grid, snake, speed, outputType) {
         if(self.snake.player == PLAYER_HUMAN) {
           self.snake.moveTo(self.lastKey);
         } else if(self.snake.player == PLAYER_IA) {
+          console.log(self.snake.ia());
           self.snake.moveTo(self.snake.ia());
         }
 
@@ -336,8 +365,8 @@ Game.prototype.toString = function() {
 }
 
 function gameTest() {
-  var grid = new Grid(20, 20);
-  var snake = new Snake(RIGHT, grid.getRandomPosition(), 2, grid, PLAYER_HUMAN);
+  var grid = new Grid(20, 20, false, true);
+  var snake = new Snake(RIGHT, 2, grid, PLAYER_HUMAN);
   var game = new Game(grid, snake, 8, OUTPUT_TEXT);
   game.start();
 
