@@ -1,5 +1,7 @@
 // Constants
 window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+document.fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+document.onfullscreenchange = document.onfullscreenchange || document.onwebkitfullscreenchange || document.onwebkitfullscreenchange || document.MSFullscreenChange;
 // Case type
 EMPTY_VAL = 0;
 SNAKE_VAL = 1;
@@ -12,8 +14,8 @@ PLAYER_HUMAN = "PLAYER_HUMAN";
 OUTPUT_TEXT = "OUTPUT_TEXT";
 OUTPUT_GRAPHICAL = "OUTPUT_GRAPHICAL";
 // Canvas size
-CANVAS_WIDTH = 550;
-CANVAS_HEIGHT = 625;
+CANVAS_WIDTH = 800;
+CANVAS_HEIGHT = 600;
 // Directions
 UP = 0;
 RIGHT = 1;
@@ -60,17 +62,19 @@ Position.prototype.equals = function(otherPosition) {
 function Grid(width, height, generateWalls, borderWalls) {
   this.width = width;
   this.height = height;
-  this.grid = [];
+  this.grid;
   this.fruitPos = new Position(0, 0);
 
   this.init = function() {
+    this.grid = new Array(this.height);
+
     for(i = 0; i < this.height; i++) {
-      this.grid.push([]);
+      this.grid[i] = new Array(this.width);
       for(j = 0; j < this.width; j++) {
-        if((generateWalls && Math.random() > 0.85) || (borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1))) {
-          this.grid[i].push(WALL_VAL);
+        if((borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (generateWalls && Math.random() > 0.90)) {
+          this.grid[i][j] = WALL_VAL;
         } else {
-          this.grid[i].push(EMPTY_VAL);
+          this.grid[i][j] = EMPTY_VAL;
         }
       }
     }
@@ -189,22 +193,22 @@ function Snake(direction, length, grid, player) {
     return this.queue.length;
   }
 
+  this.get = function(index) {
+    return new Position(this.queue[index].x, this.queue[index].y, this.queue[index].direction);
+  }
+
+  this.set = function(index, position) {
+    if(index >= 0 && index < this.length()) {
+      this.queue[index] = position;
+    }
+  }
+
   this.getHeadPosition = function() {
-    return new Position(this.queue[0].x, this.queue[0].y, this.queue[0].direction);
+    return this.get(0);
   }
 
   this.getTailPosition = function() {
-    return new Position(this.queue[this.length() - 1].x, this.queue[this.length() - 1].y, this.queue[this.length() - 1].direction);
-  }
-
-  this.get = function(position) {
-    for(i = 0; i < this.length(); i++) {
-      if(this.queue[i].equals(position)) {
-        return new Position(this.queue[i].x, this.queue[i].y, this.queue[i].direction);
-      }
-    }
-
-    return null;
+    return this.get(this.length() - 1);
   }
 
   this.moveTo = function(direction) {
@@ -232,7 +236,6 @@ function Snake(direction, length, grid, player) {
     var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
 
     var graph = new Graph(this.grid.getGraph(currentPosition));
-    console.log(graph.toString());
     var start = graph.grid[currentPosition.x][currentPosition.y];
     var end = graph.grid[fruitPos.x][fruitPos.y];
     var result = astar.search(graph, start, end);
@@ -242,8 +245,6 @@ function Snake(direction, length, grid, player) {
     }
 
     if(result.length > 0) {
-      console.log(result.toString(), start.toString(), end.toString());
-
       if(nextPosition.x > currentPosition.x) {
         return KEY_RIGHT;
       } else if(nextPosition.x < currentPosition.x) {
@@ -259,7 +260,7 @@ function Snake(direction, length, grid, player) {
   this.init();
 }
 
-function Game(grid, snake, speed, outputType) {
+function Game(grid, snake, speed, outputType, appendTo) {
   this.grid = grid;
   this.snake = snake;
   this.speed = speed;
@@ -273,21 +274,21 @@ function Game(grid, snake, speed, outputType) {
   this.canvas;
   this.canvasCtx;
   this.assetsLoaded = false;
+  this.appendTo = appendTo;
 
   this.init = function() {
     if(this.outputType == OUTPUT_TEXT) {
       this.textarea = document.createElement("textarea");
       this.textarea.style.width = this.grid.width * 16.5 + "px";
       this.textarea.style.height = this.grid.height * 19 + "px";
-      document.getElementById("gameDiv").appendChild(this.textarea);
+      this.appendTo.appendChild(this.textarea);
       this.assetsLoaded = true;
     } else if(this.outputType == OUTPUT_GRAPHICAL) {
       this.canvas = document.createElement("canvas");
       this.canvas.width = CANVAS_WIDTH;
       this.canvas.height = CANVAS_HEIGHT;
       this.canvasCtx = this.canvas.getContext("2d");
-      document.getElementById("gameDiv").appendChild(this.canvas);
-      this.loadAssets();
+      this.appendTo.appendChild(this.canvas);
     }
 
     this.grid.setFruit();
@@ -308,6 +309,8 @@ function Game(grid, snake, speed, outputType) {
       this.paused = false;
       this.tick();
     }
+
+    this.loadAssets();
   }
 
   this.tick = function() {
@@ -321,7 +324,6 @@ function Game(grid, snake, speed, outputType) {
         if(self.snake.player == PLAYER_HUMAN) {
           self.snake.moveTo(self.lastKey);
         } else if(self.snake.player == PLAYER_IA) {
-          console.log(self.snake.ia());
           self.snake.moveTo(self.snake.ia());
         }
 
@@ -341,6 +343,9 @@ function Game(grid, snake, speed, outputType) {
               break;
             case BOTTOM:
               headSnakePos.y++;
+              break;
+            default:
+              headSnakePos.x++;
               break;
           }
 
@@ -381,11 +386,74 @@ function Game(grid, snake, speed, outputType) {
   }
 
   this.pause = function() {
-      this.paused = true;
+    this.paused = true;
+  }
+
+  this.kill = function() {
+    this.stop();
+
+    if(this.outputType == OUTPUT_TEXT) {
+      this.appendTo.removeChild(this.textarea);
+    } else if(this.outputType == OUTPUT_GRAPHICAL) {
+      this.appendTo.removeChild(this.canvas);
+    }
+  }
+
+  this.toggleFullscreen = function() {
+    var full = false;
+
+    if(!document.fullscreenElement) {
+      if(this.canvas.requestFullscreen) {
+        this.canvas.requestFullscreen();
+        full = true;
+      } else if(this.canvas.mozRequestFullScreen) {
+        this.canvas.mozRequestFullScreen();
+        full = true;
+      } else if(this.canvas.webkitRequestFullscreen) {
+        this.canvas.webkitRequestFullscreen();
+        full = true;
+      } else if(this.canvas.msRequestFullscreen) {
+        this.canvas.msRequestFullscreen();
+        full = true;
+      }
+    } else {
+      if(document.exitFullscreen) {
+        if(this.canvas.exitFullscreen) {
+          this.canvas.exitFullscreen();
+          full = true;
+        } else if(this.canvas.mozCancelFullScreen) {
+          this.canvas.mozCancelFullScreen();
+          full = true;
+        } else if(this.canvas.webkitExitFullscreen) {
+          this.canvas.webkitExitFullscreen();
+          full = true;
+        } else if(this.canvas.msExitFullscreen) {
+          this.canvas.msExitFullscreen();
+          full = true;
+        }
+      }
+    }
+
+    if(full) {
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = window.innerHeight;
+
+      var self = this;
+
+      document.onfullscreenchange = function(event) {
+        if(!document.fullscreenElement) {
+          self.canvas.width = CANVAS_WIDTH;
+          self.canvas.height = CANVAS_HEIGHT;
+        }
+      };
+    } else {
+      this.canvas.width = CANVAS_WIDTH;
+      this.canvas.height = CANVAS_HEIGHT;
+    }
   }
 
   this.loadAssets = function() {
-    var assets = ["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_4.png", "assets/images/body_3.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png"];
+    var assets = ["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png"];
     var numLoaded = 0;
     var self = this;
 
@@ -395,9 +463,12 @@ function Game(grid, snake, speed, outputType) {
 
         image.onload = function() {
           numLoaded++;
+
           if(numLoaded >= assets.length) {
-            self.assetsLoaded = true;
-            self.start();
+            if(!self.assetsLoaded) {
+              self.assetsLoaded = true;
+              self.start();
+            }
           }
         };
 
@@ -405,8 +476,10 @@ function Game(grid, snake, speed, outputType) {
           numLoaded++;
 
           if(numLoaded >= assets.length) {
-            self.assetsLoaded = true;
-            self.start();
+            if(!self.assetsLoaded) {
+              self.assetsLoaded = true;
+              self.start();
+            }
           }
         };
       }
@@ -417,12 +490,14 @@ function Game(grid, snake, speed, outputType) {
       this.textarea.innerHTML = this.toString();
     } else if(this.outputType == OUTPUT_GRAPHICAL) {
       var ctx = this.canvasCtx;
-      var caseHeight = (this.canvas.height - 75) / this.grid.height;
-      var caseWidth = this.canvas.width / this.grid.width;
+      var caseHeight = Math.floor((this.canvas.height - 75) / this.grid.height);
+      var caseWidth = Math.floor(this.canvas.width / this.grid.width);
       caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
       caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
 
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      ctx.fillStyle = "rgba(44, 62, 80, 0.25)";
+      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.fillStyle = "#27AE60";
       ctx.fillRect(0, 0, this.canvas.width, 75);
       ctx.font = '32px sans-serif';
@@ -430,9 +505,11 @@ function Game(grid, snake, speed, outputType) {
       ctx.fillText("Score : " + this.score, 15, 50);
 
       if(this.assetsLoaded) {
+        var totalWidth = caseWidth * this.grid.width;
+
         for(i = 0; i < this.grid.height; i++) {
           for(j = 0; j < this.grid.width; j++) {
-            var caseX = j * caseWidth;
+            var caseX = Math.floor(j * caseWidth + ((this.canvas.width - totalWidth) / 2));
             var caseY = 75 + i * caseHeight;
 
             if((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
@@ -442,32 +519,11 @@ function Game(grid, snake, speed, outputType) {
             }
 
             ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
-
-            if(this.grid.get(new Position(j, i)) == SNAKE_VAL) {
-              var animX = caseX;
-              var animY = caseY;
-
-              /* switch(this.snake.direction) {
-                case UP:
-                  animY = animY - (this.frame % this.speed) - 1;
-                  break;
-                case BOTTOM:
-                  animY = animY + (this.frame % this.speed) - 1;
-                  break;
-                case LEFT:
-                  animX = animX - (this.frame % this.speed) - 1;
-                  break;
-                case RIGHT:
-                  animX = animX + (this.frame % this.speed) - 1;
-                  break;
-              } */
-
-              this.drawImage(ctx, this.getImageCase(new Position(j, i)), animX, animY, caseWidth, caseHeight);
-            } else {
-              this.drawImage(ctx, this.getImageCase(new Position(j, i)), caseX, caseY, caseWidth, caseHeight);
-            }
+            this.drawImage(ctx, this.getImageCase(new Position(j, i)), caseX, caseY, caseWidth, caseHeight);
           }
         }
+
+        this.drawSnake(ctx, caseWidth, caseHeight, totalWidth);
       } else {
         this.drawText(ctx, "Chargement des ressources…", "black", 0, this.canvas.height / 2, true);
       }
@@ -491,69 +547,6 @@ Game.prototype.getImageCase = function(position) {
   var imageRes = "";
 
   switch(this.grid.get(new Position(j, i))) {
-    case SNAKE_VAL:
-      if(this.snake.getHeadPosition().equals(position)) {
-        var headDirection = this.snake.getHeadPosition().direction;
-
-        switch(headDirection) {
-          case LEFT:
-            imageRes = "assets/images/snake_4.png";
-            break;
-          case UP:
-            imageRes = "assets/images/snake_3.png";
-            break;
-          case RIGHT:
-            imageRes = "assets/images/snake_2.png";
-            break;
-          case BOTTOM:
-            imageRes = "assets/images/snake.png";
-            break;
-          default:
-            imageRes = "assets/images/snake.png";
-            break;
-        }
-      } else if(this.snake.getTailPosition().equals(position)) {
-        var tailDirection = this.snake.getTailPosition().direction;
-
-        switch(tailDirection) {
-          case LEFT:
-            imageRes = "assets/images/body_4_end.png";
-            break;
-          case UP:
-            imageRes = "assets/images/body_3_end.png";
-            break;
-          case RIGHT:
-            imageRes = "assets/images/body_2_end.png";
-            break;
-          case BOTTOM:
-            imageRes = "assets/images/body_end.png";
-            break;
-          default:
-            imageRes = "assets/images/body_end.png";
-            break;
-        }
-      } else {
-        var direction = UP;
-
-        switch(direction) {
-          case LEFT:
-            imageRes = "assets/images/body_4.png";
-            break;
-          case UP:
-            imageRes = "assets/images/body_3.png";
-            break;
-          case RIGHT:
-            imageRes = "assets/images/body_2.png";
-            break;
-          case BOTTOM:
-            imageRes = "assets/images/body.png";
-            break;
-          default:
-            imageRes = "assets/images/body.png";
-            break;
-        }
-      }
-      break;
       case WALL_VAL:
         imageRes = "assets/images/wall.png";
         break;
@@ -584,10 +577,80 @@ Game.prototype.drawText = function(ctx, text, color, x, y, alignCenter) {
   }
 }
 
+Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
+  for(var i = 0; i < this.snake.length(); i++) {
+    var position = this.snake.get(i);
+    var posX = position.x;
+    var posY = position.y;
+    var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
+    var caseY = 75 + posY * caseHeight;
+    var imageLoc = "";
+
+    if(i == 0) {
+      var direction = this.snake.getHeadPosition().direction;
+
+      switch(direction) {
+        case BOTTOM:
+          imageLoc = "assets/images/snake.png";
+          break;
+        case RIGHT:
+          imageLoc = "assets/images/snake_2.png";
+          break;
+        case UP:
+          imageLoc = "assets/images/snake_3.png";
+          break;
+        case LEFT:
+          imageLoc = "assets/images/snake_4.png";
+          break;
+      }
+    } else if(i == this.snake.length() - 1) {
+      var direction = this.snake.get(i - 1).direction;
+
+      switch(direction) {
+        case BOTTOM:
+          imageLoc = "assets/images/body_end.png";
+          break;
+        case RIGHT:
+          imageLoc = "assets/images/body_2_end.png";
+          break;
+        case UP:
+          imageLoc = "assets/images/body_3_end.png";
+          break;
+        case LEFT:
+          imageLoc = "assets/images/body_4_end.png";
+          break;
+      }
+    } else {
+      var prec = this.snake.get(i - 1);
+      var next = this.snake.get(i + 1);
+
+      if(prec.x < posX && next.x > posX || next.x < posX && prec.x > posX) {
+        imageLoc = "assets/images/body_2.png";
+      } else if(prec.x < posX && next.y > posY || next.x < posX && prec.y > posY) {
+        imageLoc = "assets/images/body_angle_1.png";
+      } else if(prec.y < posY && next.y > posY || next.y < posY && prec.y > posY) {
+        imageLoc = "assets/images/body.png";
+      } else if(prec.y < posY && next.x < posX || next.y < posY && prec.x < posX) {
+        imageLoc = "assets/images/body_angle_4.png";
+      } else if(prec.x > posX && next.y < posY || next.x > posX && prec.y < posY) {
+        imageLoc = "assets/images/body_angle_3.png";
+      } else if(prec.y > posY && next.x > posX || next.y > posY && prec.x > posX) {
+        imageLoc = "assets/images/body_angle_2.png";
+      } else if(prec.y == posY) {
+        imageLoc = "assets/images/body_2.png";
+      } else if(prec.x == posX) {
+        imageLoc = "assets/images/body.png";
+      }
+    }
+
+    this.drawImage(ctx, imageLoc, caseX, caseY, caseWidth, caseHeight);
+  }
+}
+
 function gameTest() {
-  var grid = new Grid(10, 10, false, false);
-  var snake = new Snake(RIGHT, 5, grid, PLAYER_HUMAN);
-  var game = new Game(grid, snake, 15, OUTPUT_GRAPHICAL);
+  var grid = new Grid(20, 20, false, false);
+  var snake = new Snake(RIGHT, 1, grid, PLAYER_HUMAN);
+  var game = new Game(grid, snake, 5, OUTPUT_GRAPHICAL, document.getElementById("gameDiv"));
   game.start();
 
   document.getElementById("pauseBtn").onclick = function() {
@@ -599,8 +662,12 @@ function gameTest() {
   }
 
   document.getElementById("restartBtn").onclick = function() {
-    game.stop();
+    game.kill();
     gameTest();
+  }
+
+  document.getElementById("fullscreenBtn").onclick = function() {
+    game.toggleFullscreen();
   }
 }
 
