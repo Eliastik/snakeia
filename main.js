@@ -125,6 +125,7 @@ function Grid(width, height, generateWalls, borderWalls) {
 
     this.fruitPos = randomPos;
     this.set(FRUIT_VAL, randomPos);
+    console.log(randomPos);
   }
 
   this.init();
@@ -215,7 +216,6 @@ function Snake(direction, length, grid, player) {
   }
 
   this.moveTo = function(direction) {
-    if(direction != null) {
       if(direction == KEY_LEFT && this.direction != RIGHT) {
         this.direction = LEFT;
       }
@@ -231,7 +231,6 @@ function Snake(direction, length, grid, player) {
       if(direction == KEY_BOTTOM && this.direction != UP) {
         this.direction = BOTTOM;
       }
-    }
   }
 
   this.ia = function() {
@@ -390,6 +389,7 @@ function Game(grid, snake, speed, outputType, appendTo) {
 
   this.pause = function() {
     this.paused = true;
+    this.updateUI();
   }
 
   this.kill = function() {
@@ -437,22 +437,19 @@ function Game(grid, snake, speed, outputType, appendTo) {
       }
     }
 
-    if(full) {
-      this.canvas.width = window.innerWidth;
-      this.canvas.height = window.innerHeight;
+    var self = this;
 
-      var self = this;
+    document.onfullscreenchange = function(event) {
+      if(document.fullscreenElement == self.canvas) {
+        self.canvas.width = window.innerWidth;
+        self.canvas.height = window.innerHeight;
+      } else {
+        self.canvas.width = CANVAS_WIDTH;
+        self.canvas.height = CANVAS_HEIGHT;
+      }
 
-      document.onfullscreenchange = function(event) {
-        if(!document.fullscreenElement) {
-          self.canvas.width = CANVAS_WIDTH;
-          self.canvas.height = CANVAS_HEIGHT;
-        }
-      };
-    } else {
-      this.canvas.width = CANVAS_WIDTH;
-      this.canvas.height = CANVAS_HEIGHT;
-    }
+      self.updateUI();
+    };
   }
 
   this.loadAssets = function() {
@@ -535,6 +532,10 @@ function Game(grid, snake, speed, outputType, appendTo) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawText(ctx, "Game Over !", "#E74C3C", 0, this.canvas.height / 2, true);
+      } else if(this.paused && this.assetsLoaded) {
+        ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.drawText(ctx, "Pause", "white", 0, this.canvas.height / 2, true);
       }
     }
   }
@@ -543,7 +544,7 @@ function Game(grid, snake, speed, outputType, appendTo) {
 }
 
 Game.prototype.toString = function() {
-  return this.grid.toString() + "\nScore : " + this.score + "\nFrames : " + this.frame + (this.gameOver ? "\nGame Over !" : "");
+  return this.grid.toString() + "\nScore : " + this.score + "\nFrames : " + this.frame + (this.gameOver ? "\nGame Over !" : "") + (!this.gameOver && this.paused ? "\nEn pause" : "");
 }
 
 Game.prototype.getImageCase = function(position) {
@@ -580,6 +581,17 @@ Game.prototype.drawText = function(ctx, text, color, x, y, alignCenter) {
   }
 }
 
+Game.prototype.drawButton = function(ctx, text, color, x, y, alignCenter) {
+  var precFillStyle = ctx.fillStyle;
+  ctx.fillStyle = color;
+
+  if(alignCenter) {
+    ctx.fillText(text, (this.canvas.width / 2) - (ctx.measureText(text).width / 2), y);
+  } else {
+    ctx.fillText(text, x, y);
+  }
+}
+
 Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
   for(var i = 0; i < this.snake.length(); i++) {
     var position = this.snake.get(i);
@@ -587,6 +599,11 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
     var posY = position.y;
     var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
     var caseY = 75 + posY * caseHeight;
+    var nextX = Math.floor((posX + 1) * caseWidth + ((this.canvas.width - totalWidth) / 2));
+    var nextY = 75 + (posY + 1) * caseHeight;
+    var frame = (this.frame % this.speed == 0 ? 1 : this.frame % this.speed);
+    var offsetX = Math.floor((nextX - caseX) / frame);
+    var offsetY = Math.floor((nextY - caseY) / frame);
     var imageLoc = "";
 
     if(i == 0) {
@@ -651,9 +668,9 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
 }
 
 function gameTest() {
-  var grid = new Grid(20, 20, false, true);
+  var grid = new Grid(20, 20, false, false);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_HUMAN);
-  game = new Game(grid, snake, 5, OUTPUT_GRAPHICAL, document.getElementById("gameDiv"));
+  game = new Game(grid, snake, 4, OUTPUT_GRAPHICAL, document.getElementById("gameDiv"));
   game.start();
 
   document.getElementById("pauseBtn").onclick = function() {
