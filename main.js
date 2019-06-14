@@ -63,13 +63,14 @@ function Grid(width, height, generateWalls, borderWalls) {
   this.width = width;
   this.height = height;
   this.grid;
-  this.fruitPos = new Position(0, 0);
+  this.fruitPos;
 
   this.init = function() {
     this.grid = new Array(this.height);
 
     for(i = 0; i < this.height; i++) {
       this.grid[i] = new Array(this.width);
+      this.grid[i] = [];
       for(j = 0; j < this.width; j++) {
         if((borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (generateWalls && Math.random() > 0.90)) {
           this.grid[i][j] = WALL_VAL;
@@ -112,7 +113,9 @@ function Grid(width, height, generateWalls, borderWalls) {
   }
 
   this.setFruit = function() {
-    this.set(EMPTY_VAL, this.fruitPos);
+    if(this.fruitPos != null) {
+      this.set(EMPTY_VAL, this.fruitPos);
+    }
 
     var randomPos = this.getRandomPosition();
 
@@ -648,9 +651,9 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
 }
 
 function gameTest() {
-  var grid = new Grid(20, 20, false, false);
+  var grid = new Grid(20, 20, false, true);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_HUMAN);
-  var game = new Game(grid, snake, 5, OUTPUT_GRAPHICAL, document.getElementById("gameDiv"));
+  game = new Game(grid, snake, 5, OUTPUT_GRAPHICAL, document.getElementById("gameDiv"));
   game.start();
 
   document.getElementById("pauseBtn").onclick = function() {
