@@ -6,11 +6,14 @@ SNAKE_VAL = 1;
 FRUIT_VAL = 2;
 WALL_VAL = 3;
 // Player type
-PLAYER_IA = 0;
-PLAYER_HUMAN = 1;
+PLAYER_IA = "PLAYER_IA";
+PLAYER_HUMAN = "PLAYER_HUMAN";
 // Output prototype
-OUTPUT_TEXT = 0;
-OUTPUT_GRAPHICAL = 1;
+OUTPUT_TEXT = "OUTPUT_TEXT";
+OUTPUT_GRAPHICAL = "OUTPUT_GRAPHICAL";
+// Canvas size
+CANVAS_WIDTH = 550;
+CANVAS_HEIGHT = 625;
 // Directions
 UP = 0;
 RIGHT = 1;
@@ -44,9 +47,10 @@ function valToChar(value) {
   }
 }
 
-function Position(x, y) {
+function Position(x, y, direction) {
   this.x = x;
   this.y = y;
+  this.direction = direction;
 }
 
 Position.prototype.equals = function(otherPosition) {
@@ -167,7 +171,7 @@ function Snake(direction, length, grid, player) {
           posX = this.grid.width - -posX;
         }
 
-        this.insert(new Position(posX, startPos.y));
+        this.insert(new Position(posX, startPos.y, this.direction));
     }
   }
 
@@ -186,11 +190,21 @@ function Snake(direction, length, grid, player) {
   }
 
   this.getHeadPosition = function() {
-    return new Position(this.queue[0].x, this.queue[0].y);
+    return new Position(this.queue[0].x, this.queue[0].y, this.queue[0].direction);
   }
 
   this.getTailPosition = function() {
-    return new Position(this.queue[this.length() - 1].x, this.queue[this.length() - 1].y);
+    return new Position(this.queue[this.length() - 1].x, this.queue[this.length() - 1].y, this.queue[this.length() - 1].direction);
+  }
+
+  this.get = function(position) {
+    for(i = 0; i < this.length(); i++) {
+      if(this.queue[i].equals(position)) {
+        return new Position(this.queue[i].x, this.queue[i].y, this.queue[i].direction);
+      }
+    }
+
+    return null;
   }
 
   this.moveTo = function(direction) {
@@ -255,8 +269,27 @@ function Game(grid, snake, speed, outputType) {
   this.paused = true;
   this.gameOver = false;
   this.lastKey = -1;
+  this.textarea;
+  this.canvas;
+  this.canvasCtx;
+  this.assetsLoaded = false;
 
   this.init = function() {
+    if(this.outputType == OUTPUT_TEXT) {
+      this.textarea = document.createElement("textarea");
+      this.textarea.style.width = this.grid.width * 16.5 + "px";
+      this.textarea.style.height = this.grid.height * 19 + "px";
+      document.getElementById("gameDiv").appendChild(this.textarea);
+      this.assetsLoaded = true;
+    } else if(this.outputType == OUTPUT_GRAPHICAL) {
+      this.canvas = document.createElement("canvas");
+      this.canvas.width = CANVAS_WIDTH;
+      this.canvas.height = CANVAS_HEIGHT;
+      this.canvasCtx = this.canvas.getContext("2d");
+      document.getElementById("gameDiv").appendChild(this.canvas);
+      this.loadAssets();
+    }
+
     this.grid.setFruit();
     this.updateUI();
 
@@ -271,7 +304,7 @@ function Game(grid, snake, speed, outputType) {
   }
 
   this.start = function() {
-    if(this.paused && !this.gameOver) {
+    if(this.paused && !this.gameOver && this.assetsLoaded) {
       this.paused = false;
       this.tick();
     }
@@ -294,6 +327,7 @@ function Game(grid, snake, speed, outputType) {
 
         if(self.frame % self.speed == 0) {
           var headSnakePos = self.snake.getHeadPosition();
+          headSnakePos.direction = self.snake.direction;
 
           switch(self.snake.direction) {
             case LEFT:
@@ -324,17 +358,16 @@ function Game(grid, snake, speed, outputType) {
 
           if(self.grid.get(headSnakePos) == SNAKE_VAL || self.grid.get(headSnakePos) == WALL_VAL) {
             self.stop();
-            alert("Perdu !");
-          }
-
-          if(self.grid.get(headSnakePos) == FRUIT_VAL) {
-            self.score++;
-            self.grid.setFruit();
           } else {
-            self.snake.remove();
-          }
+            if(self.grid.get(headSnakePos) == FRUIT_VAL) {
+              self.score++;
+              self.grid.setFruit();
+            } else {
+              self.snake.remove();
+            }
 
-          self.snake.insert(headSnakePos);
+            self.snake.insert(headSnakePos);
+          }
         }
 
         self.tick();
@@ -351,9 +384,99 @@ function Game(grid, snake, speed, outputType) {
       this.paused = true;
   }
 
+  this.loadAssets = function() {
+    var assets = ["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_4.png", "assets/images/body_3.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png"];
+    var numLoaded = 0;
+    var self = this;
+
+    for(var i = 0; i < assets.length; i++) {
+        var image = new Image();
+        image.src = assets[i];
+
+        image.onload = function() {
+          numLoaded++;
+          if(numLoaded >= assets.length) {
+            self.assetsLoaded = true;
+            self.start();
+          }
+        };
+
+        image.onerror = function() {
+          numLoaded++;
+
+          if(numLoaded >= assets.length) {
+            self.assetsLoaded = true;
+            self.start();
+          }
+        };
+      }
+  }
+
   this.updateUI = function() {
     if(this.outputType == OUTPUT_TEXT) {
-      document.getElementById("test").innerHTML = this.toString();
+      this.textarea.innerHTML = this.toString();
+    } else if(this.outputType == OUTPUT_GRAPHICAL) {
+      var ctx = this.canvasCtx;
+      var caseHeight = (this.canvas.height - 75) / this.grid.height;
+      var caseWidth = this.canvas.width / this.grid.width;
+      caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
+      caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
+
+      ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      ctx.fillStyle = "#27AE60";
+      ctx.fillRect(0, 0, this.canvas.width, 75);
+      ctx.font = '32px sans-serif';
+      ctx.fillStyle = "black";
+      ctx.fillText("Score : " + this.score, 15, 50);
+
+      if(this.assetsLoaded) {
+        for(i = 0; i < this.grid.height; i++) {
+          for(j = 0; j < this.grid.width; j++) {
+            var caseX = j * caseWidth;
+            var caseY = 75 + i * caseHeight;
+
+            if((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
+              ctx.fillStyle = "rgba(127, 140, 141, 0.75)";
+            } else {
+              ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+            }
+
+            ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
+
+            if(this.grid.get(new Position(j, i)) == SNAKE_VAL) {
+              var animX = caseX;
+              var animY = caseY;
+
+              /* switch(this.snake.direction) {
+                case UP:
+                  animY = animY - (this.frame % this.speed) - 1;
+                  break;
+                case BOTTOM:
+                  animY = animY + (this.frame % this.speed) - 1;
+                  break;
+                case LEFT:
+                  animX = animX - (this.frame % this.speed) - 1;
+                  break;
+                case RIGHT:
+                  animX = animX + (this.frame % this.speed) - 1;
+                  break;
+              } */
+
+              this.drawImage(ctx, this.getImageCase(new Position(j, i)), animX, animY, caseWidth, caseHeight);
+            } else {
+              this.drawImage(ctx, this.getImageCase(new Position(j, i)), caseX, caseY, caseWidth, caseHeight);
+            }
+          }
+        }
+      } else {
+        this.drawText(ctx, "Chargement des ressources…", "black", 0, this.canvas.height / 2, true);
+      }
+
+      if(this.gameOver) {
+        ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.drawText(ctx, "Game Over !", "#E74C3C", 0, this.canvas.height / 2, true);
+      }
     }
   }
 
@@ -361,13 +484,110 @@ function Game(grid, snake, speed, outputType) {
 }
 
 Game.prototype.toString = function() {
-  return this.grid.toString() + "\nScore : " + this.score + "\nFrames : " + this.frame;
+  return this.grid.toString() + "\nScore : " + this.score + "\nFrames : " + this.frame + (this.gameOver ? "\nGame Over !" : "");
+}
+
+Game.prototype.getImageCase = function(position) {
+  var imageRes = "";
+
+  switch(this.grid.get(new Position(j, i))) {
+    case SNAKE_VAL:
+      if(this.snake.getHeadPosition().equals(position)) {
+        var headDirection = this.snake.getHeadPosition().direction;
+
+        switch(headDirection) {
+          case LEFT:
+            imageRes = "assets/images/snake_4.png";
+            break;
+          case UP:
+            imageRes = "assets/images/snake_3.png";
+            break;
+          case RIGHT:
+            imageRes = "assets/images/snake_2.png";
+            break;
+          case BOTTOM:
+            imageRes = "assets/images/snake.png";
+            break;
+          default:
+            imageRes = "assets/images/snake.png";
+            break;
+        }
+      } else if(this.snake.getTailPosition().equals(position)) {
+        var tailDirection = this.snake.getTailPosition().direction;
+
+        switch(tailDirection) {
+          case LEFT:
+            imageRes = "assets/images/body_4_end.png";
+            break;
+          case UP:
+            imageRes = "assets/images/body_3_end.png";
+            break;
+          case RIGHT:
+            imageRes = "assets/images/body_2_end.png";
+            break;
+          case BOTTOM:
+            imageRes = "assets/images/body_end.png";
+            break;
+          default:
+            imageRes = "assets/images/body_end.png";
+            break;
+        }
+      } else {
+        var direction = UP;
+
+        switch(direction) {
+          case LEFT:
+            imageRes = "assets/images/body_4.png";
+            break;
+          case UP:
+            imageRes = "assets/images/body_3.png";
+            break;
+          case RIGHT:
+            imageRes = "assets/images/body_2.png";
+            break;
+          case BOTTOM:
+            imageRes = "assets/images/body.png";
+            break;
+          default:
+            imageRes = "assets/images/body.png";
+            break;
+        }
+      }
+      break;
+      case WALL_VAL:
+        imageRes = "assets/images/wall.png";
+        break;
+      case FRUIT_VAL:
+        imageRes = "assets/images/fruit.png";
+        break;
+  }
+
+  return imageRes;
+}
+
+Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
+  if(imgSrc != "") {
+    var imageCase = new Image();
+    imageCase.src = imgSrc;
+    ctx.drawImage(imageCase, x, y, width, height);
+  }
+}
+
+Game.prototype.drawText = function(ctx, text, color, x, y, alignCenter) {
+  var precFillStyle = ctx.fillStyle;
+  ctx.fillStyle = color;
+
+  if(alignCenter) {
+    ctx.fillText(text, (this.canvas.width / 2) - (ctx.measureText(text).width / 2), y);
+  } else {
+    ctx.fillText(text, x, y);
+  }
 }
 
 function gameTest() {
-  var grid = new Grid(20, 20, false, true);
-  var snake = new Snake(RIGHT, 2, grid, PLAYER_HUMAN);
-  var game = new Game(grid, snake, 8, OUTPUT_TEXT);
+  var grid = new Grid(10, 10, false, false);
+  var snake = new Snake(RIGHT, 5, grid, PLAYER_HUMAN);
+  var game = new Game(grid, snake, 15, OUTPUT_GRAPHICAL);
   game.start();
 
   document.getElementById("pauseBtn").onclick = function() {
