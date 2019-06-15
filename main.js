@@ -261,11 +261,11 @@ function Snake(direction, length, grid, player, iaLevel) {
   this.init();
 }
 
-function Game(grid, snake, speed, outputType, appendTo) {
+function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
   this.grid = grid;
   this.snake = snake;
-  this.speed = speed;
-  this.outputType = outputType;
+  this.speed = speed || 5;
+  this.outputType = outputType || OUTPUT_GRAPHICAL;
   this.score = 0;
   this.frame = 0;
   this.paused = true;
@@ -278,9 +278,14 @@ function Game(grid, snake, speed, outputType, appendTo) {
   this.appendTo = appendTo;
   this.scoreMax = false;
   this.errorOccured = false;
-
-
-  this.btn = new Button("Test", 5, 5, 200, 200, 24, "sans-serif", "blue", "assets/images/body.png", true);
+  this.displayFPS = displayFPS || false;
+  this.lastFrame = 0;
+  this.currentFPS = 0;
+  this.intervalCountFPS;
+  // Buttons
+  this.btnFullScreen;
+  this.btnPause;
+  this.btnContinue;
 
   this.init = function() {
      if(this.outputType == OUTPUT_TEXT) {
@@ -295,6 +300,9 @@ function Game(grid, snake, speed, outputType, appendTo) {
         this.canvas.height = CANVAS_HEIGHT;
         this.canvasCtx = this.canvas.getContext("2d");
         this.appendTo.appendChild(this.canvas);
+        this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", 64, 64);
+        this.btnPause = new ButtonImage("assets/images/pause.png", 75, 5, "right", 64, 64);
+        this.btnContinue = new Button("Reprendre", null, null, "center", "#3498db", "#246A99");
       }
 
       if((this.grid.width * this.grid.height) <= this.snake.length() || (this.snake.length() > this.grid.width)) {
@@ -315,6 +323,11 @@ function Game(grid, snake, speed, outputType, appendTo) {
           self.lastKey = evt.keyCode;
         }
       });
+
+      this.intervalCountFPS = window.setInterval(function() {
+          self.currentFPS = self.frame - self.lastFrame;
+          self.lastFrame = self.frame;
+      }, 1000);
   };
 
   this.start = function() {
@@ -425,32 +438,22 @@ function Game(grid, snake, speed, outputType, appendTo) {
     if(!document.fullscreenElement) {
       if(this.canvas.requestFullscreen) {
         this.canvas.requestFullscreen();
-        full = true;
       } else if(this.canvas.mozRequestFullScreen) {
         this.canvas.mozRequestFullScreen();
-        full = true;
       } else if(this.canvas.webkitRequestFullscreen) {
         this.canvas.webkitRequestFullscreen();
-        full = true;
       } else if(this.canvas.msRequestFullscreen) {
         this.canvas.msRequestFullscreen();
-        full = true;
       }
     } else {
       if(document.exitFullscreen) {
-        if(this.canvas.exitFullscreen) {
-          this.canvas.exitFullscreen();
-          full = true;
-        } else if(this.canvas.mozCancelFullScreen) {
-          this.canvas.mozCancelFullScreen();
-          full = true;
-        } else if(this.canvas.webkitExitFullscreen) {
-          this.canvas.webkitExitFullscreen();
-          full = true;
-        } else if(this.canvas.msExitFullscreen) {
-          this.canvas.msExitFullscreen();
-          full = true;
-        }
+        document.exitFullscreen();
+      } else if(document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if(document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if(document.msExitFullscreen) {
+        document.msExitFullscreen();
       }
     }
 
@@ -479,7 +482,7 @@ function Game(grid, snake, speed, outputType, appendTo) {
   };
 
   this.loadAssets = function() {
-    var assets = ["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png"];
+    var assets = ["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png"];
     var numLoaded = 0;
     var self = this;
 
@@ -515,6 +518,7 @@ function Game(grid, snake, speed, outputType, appendTo) {
     if(this.outputType == OUTPUT_TEXT) {
       this.textarea.innerHTML = this.toString();
     } else if(this.outputType == OUTPUT_GRAPHICAL) {
+      var self = this;
       var ctx = this.canvasCtx;
       var caseHeight = Math.floor((this.canvas.height - 75) / this.grid.height);
       var caseWidth = Math.floor(this.canvas.width / this.grid.width);
@@ -529,6 +533,12 @@ function Game(grid, snake, speed, outputType, appendTo) {
       ctx.font = '32px sans-serif';
       ctx.fillStyle = "black";
       ctx.fillText("Score : " + this.score, 15, 50);
+
+      this.btnFullScreen.draw(this.canvas);
+      this.btnFullScreen.disable();
+
+      this.btnPause.draw(this.canvas);
+      this.btnPause.disable();
 
       if(this.assetsLoaded) {
         var totalWidth = caseWidth * this.grid.width;
@@ -551,34 +561,48 @@ function Game(grid, snake, speed, outputType, appendTo) {
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth);
       } else {
-        this.drawText(ctx, "Chargement des ressources…", "black", 0, this.canvas.height / 2, true, 32, "sans-serif");
+        this.drawText(ctx, "Chargement des ressources…", "black", 0, this.canvas.height / 2, "center", 32, "sans-serif");
       }
 
       if(this.errorOccured) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Une erreur est survenue !", "red", 0, this.canvas.height / 2, true, 32, "sans-serif");
+        this.drawText(ctx, "Une erreur est survenue !", "red", 0, this.canvas.height / 2, "center", 32, "sans-serif");
       } else if(this.scoreMax) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Score maximal atteint !", "green", 0, this.canvas.height / 2, true, 32, "sans-serif");
+        this.drawText(ctx, "Score maximal atteint !", "green", 0, this.canvas.height / 2, "center", 32, "sans-serif");
       } else if(this.gameOver) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Game Over !", "#E74C3C", 0, this.canvas.height / 2, true, 32, "sans-serif");
+        this.drawText(ctx, "Game Over !", "#E74C3C", 0, this.canvas.height / 2, "center", 32, "sans-serif");
       } else if(this.paused && this.assetsLoaded) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Pause", "white", 0, this.canvas.height / 2, true, 32, "sans-serif");
+        this.drawText(ctx, "Pause", "white", 0, (this.canvas.height / 2) - 32, "center", 32, "sans-serif");
 
-        this.btn.enable();
-        this.btn.draw(this.canvas);
+        this.btnContinue.y = this.canvas.height / 2;
+        this.btnContinue.enable();
+        this.btnContinue.draw(this.canvas);
 
-        var self = this;
-        this.btn.addClickAction(this.canvas, function() {
+        this.btnContinue.addClickAction(this.canvas, function() {
           self.start();
-          this.disable();
         });
+      } else if(this.assetsLoaded) {
+        this.btnFullScreen.enable();
+        this.btnPause.enable();
+
+        this.btnFullScreen.addClickAction(this.canvas, function() {
+          self.toggleFullscreen();
+        });
+
+        this.btnPause.addClickAction(this.canvas, function() {
+          self.pause();
+        });
+      }
+
+      if(this.displayFPS) {
+        this.drawText(ctx, "FPS : " + this.currentFPS + " / Frames : " + this.frame, "rgba(255, 255, 255, 0.5)", 0, (this.canvas.height - 15), "right", 24, "sans-serif");
       }
     }
   };
@@ -613,15 +637,17 @@ Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
   }
 }
 
-Game.prototype.drawText = function(ctx, text, color, x, y, alignCenter, size, fontFamily) {
+Game.prototype.drawText = function(ctx, text, color, x, y, alignement, size, fontFamily) {
   var precFillStyle = ctx.fillStyle;
   var precFont = ctx.font;
 
   ctx.fillStyle = color;
   ctx.font = size + "px " + fontFamily;
 
-  if(alignCenter) {
+  if(alignement == "center") {
     ctx.fillText(text, (this.canvas.width / 2) - (ctx.measureText(text).width / 2), y);
+  } else if(alignement == "right") {
+    ctx.fillText(text, (this.canvas.width) - (ctx.measureText(text).width) - 15, y);
   } else {
     ctx.fillText(text, x, y);
   }
@@ -706,81 +732,101 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
   }
 }
 
-function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, imgSrc, center, color, colorHover) {
-  this.x = x;
+function Button(text, x, y, alignement, color, colorHover, width, height, fontSize, fontFamily, fontColor, imgSrc) {
+  this.x = x || 0;
   this.y = y;
-  this.width = width;
-  this.height = height;
+  this.initialX = x;
+  this.width = width || "auto";
+  this.height = height || "auto";
   this.clicked = false;
   this.hovered = false;
   this.text = text;
-  this.fontSize = fontSize;
-  this.fontFamily = fontFamily;
-  this.fontColor = fontColor;
+  this.fontSize = fontSize || 24;
+  this.fontFamily = fontFamily || "sans-serif";
+  this.fontColor = fontColor || "black";
   this.color = color || "rgba(0, 0, 0, 0)";
   this.colorHover = colorHover || "#95a5a6";
   this.triggerClick;
   this.triggerHover;
   this.init = false;
   this.disabled = false;
-  this.center = center;
+  this.alignement = alignement || "default";
   this.imgSrc = imgSrc;
 
   this.draw = function(canvas) {
-    if(!this.disabled) {
-      var ctx = canvas.getContext("2d");
-      var precFillStyle = ctx.fillStyle;
-      var precFont = ctx.font;
+    var ctx = canvas.getContext("2d");
+    var precFillStyle = ctx.fillStyle;
+    var precFont = ctx.font;
 
-      if(this.center) {
-        this.x = (canvas.width / 2) - (this.width / 2);
+    ctx.font = this.fontSize + "px " + this.fontFamily;
+    var textSize = ctx.measureText(this.text);
+
+    if(imgSrc != null) {
+      var image = new Image();
+      image.src = this.imgSrc;
+
+      var imgWidth = image.width;
+      var imgHeight = image.height;
+
+      if(this.width == "auto") {
+        this.width = imgWidth * 1.25;
       }
 
-      if(this.hovered) {
-        ctx.fillStyle = this.colorHover;
-      } else {
-        ctx.fillStyle = this.color;
+      if(this.height == "auto") {
+        this.height = imgHeight * 1.5;
+      }
+    } else {
+      if(this.width == "auto") {
+        this.width = textSize.width + 25;
       }
 
-      ctx.fillRect(this.x, this.y, this.width, this.height);
-      ctx.font = this.fontSize + "px " + this.fontFamily;
-
-      if(imgSrc != null) {
-        var image = new Image();
-        image.src = this.imgSrc;
-
-        var imgWidth = image.width;
-        var imgHeight = image.height;
-
-        if(image.width > this.width || image.height > this.height) {
-          var aspectRatio = image.width / image.height;
-          imgWidth = Math.floor(this.width / 1.5);
-          imgHeight = Math.floor(imgWidth / aspectRatio);
-        }
-
-        var imgX = this.x + (this.width / 2) - (imgWidth / 2);
-        var imgY = this.y + (this.height / 2) - (imgHeight / 2);
-
-        ctx.drawImage(image, imgX, imgY, imgWidth, imgHeight);
-      } else {
-        ctx.fillStyle = this.fontColor;
-
-        var textSize = ctx.measureText(this.text);
-        var textX = this.x + (this.width / 2) - (textSize.width / 2);
-        var textY = this.y + (this.height / 2) - (this.fontSize / 2);
-
-        ctx.fillText(this.text, textX, textY);
+      if(this.height == "auto") {
+        this.height = this.fontSize * 1.75;
       }
-
-      ctx.fillStyle = precFillStyle;
-      ctx.font = precFont;
-
-      if(!this.init) {
-        this.addMouseOverAction(canvas, null);
-      }
-
-      this.init = true;
     }
+
+    if(this.alignement == "center") {
+      this.x =  (canvas.width / 2) - (this.width / 2) - this.initialX;
+    } else if(this.alignement == "right") {
+      this.x = (canvas.width) - (this.width) - 5 - this.initialX;
+    }
+
+    if(this.hovered) {
+      ctx.fillStyle = this.colorHover;
+    } else {
+      ctx.fillStyle = this.color;
+    }
+
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+
+    if(imgSrc != null) {
+      if(image.width > this.width || image.height > this.height) {
+        var aspectRatio = image.width / image.height;
+        imgWidth = Math.floor(this.width / 1.25);
+        imgHeight = Math.floor(imgWidth / aspectRatio);
+      }
+
+      var imgX = this.x + (this.width / 2) - (imgWidth / 2);
+      var imgY = this.y + (this.height / 2) - (imgHeight / 2);
+
+      ctx.drawImage(image, imgX, imgY, imgWidth, imgHeight);
+    } else {
+      ctx.fillStyle = this.fontColor;
+
+      var textX = this.x + (this.width / 2) - (textSize.width / 2);
+      var textY = this.y + (this.height) - (this.fontSize / 2);
+
+      ctx.fillText(this.text, textX, textY);
+    }
+
+    ctx.fillStyle = precFillStyle;
+    ctx.font = precFont;
+
+    if(!this.init) {
+      this.addMouseOverAction(canvas, null);
+    }
+
+    this.init = true;
   };
 
   this.getMousePos = function(canvas, event) {
@@ -830,8 +876,8 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, imgS
 
   this.addMouseOverAction = function(canvas, trigger) {
     if(!this.disabled) {
+      document.body.style.cursor = "";
       this.triggerHover = trigger;
-  		document.body.style.cursor = "";
 
       var self = this;
 
@@ -840,7 +886,7 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, imgS
     			if(self.isInside(self.getMousePos(canvas, evt))) {
     				document.body.style.cursor = "pointer";
 
-    				if(self.triggerHover != null) {
+    				if(self.triggerHover != null && !self.disabled) {
               self.triggerHover();
             }
 
@@ -848,7 +894,7 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, imgS
             self.clicked = false;
     			} else {
             self.hovered = false;
-        		document.body.style.cursor = "";
+            document.body.style.cursor = "";
     			}
 
           self.draw(canvas);
@@ -874,10 +920,14 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, imgS
   }
 }
 
+function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover) {
+  return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc);
+}
+
 function gameTest() {
   var grid = new Grid(20, 20, false, false);
   var snake = new Snake(RIGHT, 10, grid, PLAYER_IA);
-  game = new Game(grid, snake, 5, OUTPUT_GRAPHICAL, document.getElementById("gameDiv"));
+  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true);
   game.start();
 
   document.getElementById("pauseBtn").onclick = function() {
