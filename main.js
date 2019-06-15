@@ -216,19 +216,19 @@ function Snake(direction, length, grid, player, iaLevel) {
   };
 
   this.moveTo = function(direction) {
-      if(direction == KEY_LEFT && this.direction != RIGHT) {
+      if(direction == KEY_LEFT && this.direction != RIGHT && this.direction != LEFT) {
         this.direction = LEFT;
       }
 
-      if(direction == KEY_UP && this.direction != BOTTOM) {
+      if(direction == KEY_UP && this.direction != BOTTOM && this.direction != UP) {
         this.direction = UP;
       }
 
-      if(direction == KEY_RIGHT && this.direction != LEFT) {
+      if(direction == KEY_RIGHT && this.direction != LEFT && this.direction != RIGHT) {
         this.direction = RIGHT;
       }
 
-      if(direction == KEY_BOTTOM && this.direction != UP) {
+      if(direction == KEY_BOTTOM && this.direction != UP && this.direction != BOTTOM) {
         this.direction = BOTTOM;
       }
   };
@@ -261,7 +261,58 @@ function Snake(direction, length, grid, player, iaLevel) {
   this.init();
 }
 
+function ImageLoader() {
+  this.images = {};
+  this.triedLoading = 0;
+
+  this.load = function(img, func) {
+    var self = this;
+
+    if(img.length > 0) {
+      this.loadImage(img[0], function(result) {
+        if(result == true) {
+          img.shift();
+          self.load(img, func);
+        }
+      });
+    } else {
+      return func();
+    }
+  }
+
+  this.loadImage = function(src, func) {
+    var self = this;
+    this.triedLoading++;
+
+    var image = new Image();
+    image.src = src;
+
+    image.onload = function() {
+      self.images[src] = image;
+      self.triedLoading = 0;
+
+      return func(true);
+    };
+
+    image.onerror = function() {
+      if(self.triedLoading >= 5) {
+        self.triedLoading = 0;
+        self.images[src] = image;
+
+        return func(true);
+      }
+
+      self.loadImage(src, func);
+    }
+  }
+
+  this.get = function(src) {
+    return this.images[src];
+  }
+}
+
 function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
+  this.imageLoader;
   this.grid = grid;
   this.snake = snake;
   this.speed = speed || 5;
@@ -288,46 +339,54 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
   this.btnContinue;
 
   this.init = function() {
-     if(this.outputType == OUTPUT_TEXT) {
-        this.textarea = document.createElement("textarea");
-        this.textarea.style.width = this.grid.width * 16.5 + "px";
-        this.textarea.style.height = this.grid.height * 19 + "px";
-        this.appendTo.appendChild(this.textarea);
-        this.assetsLoaded = true;
-      } else if(this.outputType == OUTPUT_GRAPHICAL) {
-        this.canvas = document.createElement("canvas");
-        this.canvas.width = CANVAS_WIDTH;
-        this.canvas.height = CANVAS_HEIGHT;
-        this.canvasCtx = this.canvas.getContext("2d");
-        this.appendTo.appendChild(this.canvas);
-        this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", 64, 64);
-        this.btnPause = new ButtonImage("assets/images/pause.png", 75, 5, "right", 64, 64);
-        this.btnContinue = new Button("Reprendre", null, null, "center", "#3498db", "#246A99");
+    this.imageLoader = new ImageLoader();
+
+    if(this.outputType == OUTPUT_TEXT) {
+      this.textarea = document.createElement("textarea");
+      this.textarea.style.width = this.grid.width * 16.5 + "px";
+      this.textarea.style.height = this.grid.height * 19 + "px";
+      this.appendTo.appendChild(this.textarea);
+      this.assetsLoaded = true;
+    } else if(this.outputType == OUTPUT_GRAPHICAL) {
+      this.canvas = document.createElement("canvas");
+      this.canvas.width = CANVAS_WIDTH;
+      this.canvas.height = CANVAS_HEIGHT;
+      this.canvasCtx = this.canvas.getContext("2d");
+      this.appendTo.appendChild(this.canvas);
+      this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", 64, 64);
+      this.btnPause = new ButtonImage("assets/images/pause.png", 75, 5, "right", 64, 64);
+      this.btnContinue = new Button("Reprendre", null, null, "center", "#3498db", "#246A99");
+    }
+
+    if((this.grid.width * this.grid.height) <= this.snake.length() || (this.snake.length() > this.grid.width)) {
+      console.error("Game init failed: the snake is bigger than the grid");
+      this.errorOccured = true;
+      this.stop();
+    } else {
+      this.grid.setFruit();
+    }
+
+    this.updateUI();
+
+    // keyboard events
+    var self = this;
+
+    document.addEventListener("keydown", function(evt) {
+      if(!self.paused) {
+        self.lastKey = evt.keyCode;
       }
+    });
 
-      if((this.grid.width * this.grid.height) <= this.snake.length() || (this.snake.length() > this.grid.width)) {
-        console.error("Game init failed: the snake is bigger than the grid");
-        this.errorOccured = true;
-        this.stop();
-      } else {
-        this.grid.setFruit();
+    document.addEventListener("keyup", function(evt) {
+      if(!self.paused) {
+        self.lastKey = -1;
       }
+    });
 
-      this.updateUI();
-
-      // keyboard events
-      var self = this;
-
-      document.addEventListener("keydown", function(evt) {
-        if(!self.paused) {
-          self.lastKey = evt.keyCode;
-        }
-      });
-
-      this.intervalCountFPS = window.setInterval(function() {
-          self.currentFPS = self.frame - self.lastFrame;
-          self.lastFrame = self.frame;
-      }, 1000);
+    this.intervalCountFPS = window.setInterval(function() {
+        self.currentFPS = self.frame - self.lastFrame;
+        self.lastFrame = self.frame;
+    }, 1000);
   };
 
   this.start = function() {
@@ -336,7 +395,9 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       this.tick();
     }
 
-    this.loadAssets();
+    if(!this.assetsLoaded) {
+      this.loadAssets();
+    }
   };
 
   this.tick = function() {
@@ -482,36 +543,12 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
   };
 
   this.loadAssets = function() {
-    var assets = ["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png"];
-    var numLoaded = 0;
     var self = this;
 
-    for(var i = 0; i < assets.length; i++) {
-        var image = new Image();
-        image.src = assets[i];
-
-        image.onload = function() {
-          numLoaded++;
-
-          if(numLoaded >= assets.length) {
-            if(!self.assetsLoaded) {
-              self.assetsLoaded = true;
-              self.start();
-            }
-          }
-        };
-
-        image.onerror = function() {
-          numLoaded++;
-
-          if(numLoaded >= assets.length) {
-            if(!self.assetsLoaded) {
-              self.assetsLoaded = true;
-              self.start();
-            }
-          }
-        };
-      }
+    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png"], function() {
+      self.assetsLoaded = true;
+      self.start();
+    });
   };
 
   this.updateUI = function() {
@@ -526,7 +563,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
 
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      ctx.fillStyle = "rgba(44, 62, 80, 0.25)";
+      ctx.fillStyle = "rgba(204, 207, 211, 1)";
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.fillStyle = "#27AE60";
       ctx.fillRect(0, 0, this.canvas.width, 75);
@@ -602,7 +639,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       }
 
       if(this.displayFPS) {
-        this.drawText(ctx, "FPS : " + this.currentFPS + " / Frames : " + this.frame, "rgba(255, 255, 255, 0.5)", 0, (this.canvas.height - 15), "right", 24, "sans-serif");
+        this.drawText(ctx, "FPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed), "rgba(255, 255, 255, 0.5)", 0, (this.canvas.height - 15), "right", 24, "sans-serif");
       }
     }
   };
@@ -631,8 +668,7 @@ Game.prototype.getImageCase = function(position) {
 
 Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
   if(imgSrc != "") {
-    var imageCase = new Image();
-    imageCase.src = imgSrc;
+    var imageCase = this.imageLoader.get(imgSrc);
     ctx.drawImage(imageCase, x, y, width, height);
   }
 }
@@ -925,8 +961,8 @@ function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover)
 }
 
 function gameTest() {
-  var grid = new Grid(20, 20, false, false);
-  var snake = new Snake(RIGHT, 10, grid, PLAYER_IA);
+  var grid = new Grid(10, 10, false, false);
+  var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
   game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true);
   game.start();
 
