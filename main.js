@@ -443,6 +443,15 @@ function Game(grid, snake, speed, outputType, appendTo) {
       if(document.fullscreenElement == self.canvas) {
         self.canvas.width = window.innerWidth;
         self.canvas.height = window.innerHeight;
+
+        window.onresize = function() {
+          if(document.fullscreenElement == self.canvas) {
+            self.canvas.width = window.innerWidth;
+            self.canvas.height = window.innerHeight;
+
+            self.updateUI();
+          }
+        };
       } else {
         self.canvas.width = CANVAS_WIDTH;
         self.canvas.height = CANVAS_HEIGHT;
@@ -536,6 +545,8 @@ function Game(grid, snake, speed, outputType, appendTo) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawText(ctx, "Pause", "white", 0, this.canvas.height / 2, true);
+        var btn = new Button("Test", 5, 5, 100, 100, 24, "sans-serif", "white", "black", "blue");
+        btn.draw(ctx);
       }
     }
   }
@@ -571,17 +582,6 @@ Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
 }
 
 Game.prototype.drawText = function(ctx, text, color, x, y, alignCenter) {
-  var precFillStyle = ctx.fillStyle;
-  ctx.fillStyle = color;
-
-  if(alignCenter) {
-    ctx.fillText(text, (this.canvas.width / 2) - (ctx.measureText(text).width / 2), y);
-  } else {
-    ctx.fillText(text, x, y);
-  }
-}
-
-Game.prototype.drawButton = function(ctx, text, color, x, y, alignCenter) {
   var precFillStyle = ctx.fillStyle;
   ctx.fillStyle = color;
 
@@ -643,18 +643,19 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
     } else {
       var prec = this.snake.get(i - 1);
       var next = this.snake.get(i + 1);
+      var current = this.snake.get(i);
 
-      if(prec.x < posX && next.x > posX || next.x < posX && prec.x > posX) {
+      /* if(prec.x < posX && next.x > posX || next.x < posX && prec.x > posX) {
         imageLoc = "assets/images/body_2.png";
-      } else if(prec.x < posX && next.y > posY || next.x < posX && prec.y > posY) {
+      } else */ if((current.x == 0 && prec.x == this.grid.width - 1 && next.y > current.y) || (current.y == this.grid.height - 1 && prec.y == 0 && next.x < current.x) || ((prec.x > 0 || current.x < this.grid.width - 1) && (prec.x < posX && next.y > posY || next.x < posX && prec.y > posY))) {
         imageLoc = "assets/images/body_angle_1.png";
-      } else if(prec.y < posY && next.y > posY || next.y < posY && prec.y > posY) {
+      } /* else if(prec.y < posY && next.y > posY || next.y < posY && prec.y > posY) {
         imageLoc = "assets/images/body.png";
-      } else if(prec.y < posY && next.x < posX || next.y < posY && prec.x < posX) {
+      } */ else if((current.x == 0 && prec.x == this.grid.width - 1 && next.y < current.y) || (current.y == 0 && prec.y == this.grid.height - 1 && next.x < current.x) || ((prec.x > 0 || current.x < this.grid.width - 1) && (prec.y < posY && next.x < posX || next.y < posY && prec.x < posX))) {
         imageLoc = "assets/images/body_angle_4.png";
-      } else if(prec.x > posX && next.y < posY || next.x > posX && prec.y < posY) {
+      } else if((current.x == this.grid.width - 1 && prec.x == 0 && next.y < current.y) || prec.x > posX && next.y < posY || next.x > posX && prec.y < posY) {
         imageLoc = "assets/images/body_angle_3.png";
-      } else if(prec.y > posY && next.x > posX || next.y > posY && prec.x > posX) {
+      } else if((current.x == this.grid.width - 1 && prec.x == 0 && next.y > current.y) || (current.y == this.grid.height - 1 && prec.y == 0 && next.x > current.x) || prec.y > posY && next.x > posX || next.y > posY && prec.x > posX) {
         imageLoc = "assets/images/body_angle_2.png";
       } else if(prec.y == posY) {
         imageLoc = "assets/images/body_2.png";
@@ -667,10 +668,49 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
   }
 }
 
+function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, color, colorHover) {
+  this.x = x;
+  this.y = y;
+  this.width = width;
+  this.height = height;
+  this.clicked = false;
+  this.hovered = false;
+  this.text = text;
+  this.fontSize = fontSize;
+  this.fontFamily = fontFamily;
+  this.fontColor = fontColor;
+  this.color = color;
+  this.colorHover = colorHover;
+
+  this.draw = function(ctx) {
+    var precFillStyle = ctx.fillStyle;
+    var precFont = ctx.font;
+
+    if(this.hovered) {
+      ctx.fillStyle = this.colorHover;
+    } else {
+      ctx.fillStyle = this.color;
+    }
+
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.font = this.fontSize + "px " + this.fontFamily;
+
+    ctx.fillStyle = this.fontColor;
+
+    var textSize = ctx.measureText(this.text);
+    var textX = this.x + (this.width / 2) - (textSize.width / 2);
+    var textY = this.y + (this.height / 2) - (this.fontSize / 2);
+
+    ctx.fillText(this.text, textX, textY);
+    ctx.fillStyle = precFillStyle;
+    ctx.font = ctx.font;
+  }
+}
+
 function gameTest() {
   var grid = new Grid(20, 20, false, false);
-  var snake = new Snake(RIGHT, 1, grid, PLAYER_HUMAN);
-  game = new Game(grid, snake, 4, OUTPUT_GRAPHICAL, document.getElementById("gameDiv"));
+  var snake = new Snake(RIGHT, 15, grid, PLAYER_IA);
+  game = new Game(grid, snake, 10, OUTPUT_GRAPHICAL, document.getElementById("gameDiv"));
   game.start();
 
   document.getElementById("pauseBtn").onclick = function() {
