@@ -113,7 +113,7 @@ function Grid(width, height, generateWalls, borderWalls) {
   }
 
   this.setFruit = function() {
-    if(this.fruitPos != null) {
+    if(this.fruitPos != null && this.get(this.fruitPos) == FRUIT_VAL) {
       this.set(EMPTY_VAL, this.fruitPos);
     }
 
@@ -705,9 +705,9 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, colo
 }
 
 function gameTest() {
-  var grid = new Grid(20, 20, false, false);
-  var snake = new Snake(RIGHT, 15, grid, PLAYER_IA);
-  game = new Game(grid, snake, 10, OUTPUT_GRAPHICAL, document.getElementById("gameDiv"));
+  var grid = new Grid(20, 20, true, false);
+  var snake = new Snake(RIGHT, 3, grid, PLAYER_IA);
+  game = new Game(grid, snake, 5, OUTPUT_TEXT, document.getElementById("gameDiv"));
   game.start();
 
   document.getElementById("pauseBtn").onclick = function() {
