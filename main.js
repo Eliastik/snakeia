@@ -279,6 +279,9 @@ function Game(grid, snake, speed, outputType, appendTo) {
   this.scoreMax = false;
   this.errorOccured = false;
 
+
+  this.btn = new Button("Test", 5, 5, 200, 200, 24, "sans-serif", "blue", "assets/images/body.png", true);
+
   this.init = function() {
      if(this.outputType == OUTPUT_TEXT) {
         this.textarea = document.createElement("textarea");
@@ -548,32 +551,33 @@ function Game(grid, snake, speed, outputType, appendTo) {
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth);
       } else {
-        this.drawText(ctx, "Chargement des ressources…", "black", 0, this.canvas.height / 2, true);
+        this.drawText(ctx, "Chargement des ressources…", "black", 0, this.canvas.height / 2, true, 32, "sans-serif");
       }
 
       if(this.errorOccured) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Une erreur est survenue !", "red", 0, this.canvas.height / 2, true);
+        this.drawText(ctx, "Une erreur est survenue !", "red", 0, this.canvas.height / 2, true, 32, "sans-serif");
       } else if(this.scoreMax) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Score maximal atteint !", "green", 0, this.canvas.height / 2, true);
+        this.drawText(ctx, "Score maximal atteint !", "green", 0, this.canvas.height / 2, true, 32, "sans-serif");
       } else if(this.gameOver) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Game Over !", "#E74C3C", 0, this.canvas.height / 2, true);
+        this.drawText(ctx, "Game Over !", "#E74C3C", 0, this.canvas.height / 2, true, 32, "sans-serif");
       } else if(this.paused && this.assetsLoaded) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Pause", "white", 0, this.canvas.height / 2, true);
-        var btn = new Button("Test", 5, 5, 100, 100, 24, "sans-serif", "white", "black", "blue");
-        btn.draw(this.canvas);
+        this.drawText(ctx, "Pause", "white", 0, this.canvas.height / 2, true, 32, "sans-serif");
+
+        this.btn.enable();
+        this.btn.draw(this.canvas);
 
         var self = this;
-        btn.addClickAction(this.canvas, function() {
+        this.btn.addClickAction(this.canvas, function() {
           self.start();
-          this.destroy();
+          this.disable();
         });
       }
     }
@@ -609,15 +613,21 @@ Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
   }
 }
 
-Game.prototype.drawText = function(ctx, text, color, x, y, alignCenter) {
+Game.prototype.drawText = function(ctx, text, color, x, y, alignCenter, size, fontFamily) {
   var precFillStyle = ctx.fillStyle;
+  var precFont = ctx.font;
+
   ctx.fillStyle = color;
+  ctx.font = size + "px " + fontFamily;
 
   if(alignCenter) {
     ctx.fillText(text, (this.canvas.width / 2) - (ctx.measureText(text).width / 2), y);
   } else {
     ctx.fillText(text, x, y);
   }
+
+  ctx.fillStyle = precFillStyle;
+  ctx.font = precFont;
 }
 
 Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
@@ -696,7 +706,7 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
   }
 }
 
-function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, color, colorHover) {
+function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, imgSrc, center, color, colorHover) {
   this.x = x;
   this.y = y;
   this.width = width;
@@ -707,18 +717,24 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, colo
   this.fontSize = fontSize;
   this.fontFamily = fontFamily;
   this.fontColor = fontColor;
-  this.color = color;
-  this.colorHover = colorHover;
+  this.color = color || "rgba(0, 0, 0, 0)";
+  this.colorHover = colorHover || "#95a5a6";
   this.triggerClick;
   this.triggerHover;
   this.init = false;
-  this.destroyed = false;
+  this.disabled = false;
+  this.center = center;
+  this.imgSrc = imgSrc;
 
   this.draw = function(canvas) {
-    if(!this.destroyed) {
+    if(!this.disabled) {
       var ctx = canvas.getContext("2d");
       var precFillStyle = ctx.fillStyle;
       var precFont = ctx.font;
+
+      if(this.center) {
+        this.x = (canvas.width / 2) - (this.width / 2);
+      }
 
       if(this.hovered) {
         ctx.fillStyle = this.colorHover;
@@ -729,15 +745,35 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, colo
       ctx.fillRect(this.x, this.y, this.width, this.height);
       ctx.font = this.fontSize + "px " + this.fontFamily;
 
-      ctx.fillStyle = this.fontColor;
+      if(imgSrc != null) {
+        var image = new Image();
+        image.src = this.imgSrc;
 
-      var textSize = ctx.measureText(this.text);
-      var textX = this.x + (this.width / 2) - (textSize.width / 2);
-      var textY = this.y + (this.height / 2) - (this.fontSize / 2);
+        var imgWidth = image.width;
+        var imgHeight = image.height;
 
-      ctx.fillText(this.text, textX, textY);
+        if(image.width > this.width || image.height > this.height) {
+          var aspectRatio = image.width / image.height;
+          imgWidth = Math.floor(this.width / 1.5);
+          imgHeight = Math.floor(imgWidth / aspectRatio);
+        }
+
+        var imgX = this.x + (this.width / 2) - (imgWidth / 2);
+        var imgY = this.y + (this.height / 2) - (imgHeight / 2);
+
+        ctx.drawImage(image, imgX, imgY, imgWidth, imgHeight);
+      } else {
+        ctx.fillStyle = this.fontColor;
+
+        var textSize = ctx.measureText(this.text);
+        var textX = this.x + (this.width / 2) - (textSize.width / 2);
+        var textY = this.y + (this.height / 2) - (this.fontSize / 2);
+
+        ctx.fillText(this.text, textX, textY);
+      }
+
       ctx.fillStyle = precFillStyle;
-      ctx.font = ctx.font;
+      ctx.font = precFont;
 
       if(!this.init) {
         this.addMouseOverAction(canvas, null);
@@ -761,12 +797,12 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, colo
   }
 
   this.addClickAction = function(canvas, trigger) {
-    if(!this.destroyed) {
+    if(!this.disabled) {
       this.triggerClick = trigger;
   		var self = this;
 
       function clickFunction(evt){
-        if(!self.destroyed) {
+        if(!self.disabled) {
           if(self.isInside(self.getMousePos(canvas, evt))) {
             document.body.style.cursor = "";
 
@@ -782,7 +818,7 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, colo
         }
       };
 
-      canvas.addEventListener("mousedown", clickFunction, false);
+      canvas.addEventListener("click", clickFunction, false);
     }
 	};
 
@@ -793,14 +829,14 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, colo
   };
 
   this.addMouseOverAction = function(canvas, trigger) {
-    if(!this.destroyed) {
+    if(!this.disabled) {
       this.triggerHover = trigger;
   		document.body.style.cursor = "";
 
       var self = this;
 
   		function mouseOverFunction(evt) {
-        if(!self.destroyed) {
+        if(!self.disabled) {
     			if(self.isInside(self.getMousePos(canvas, evt))) {
     				document.body.style.cursor = "pointer";
 
@@ -810,7 +846,6 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, colo
 
     				self.hovered = true;
             self.clicked = false;
-            console.log("ok");
     			} else {
             self.hovered = false;
         		document.body.style.cursor = "";
@@ -830,10 +865,12 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, colo
     }
   };
 
-  this.destroy = function() {
-    this.removeClickAction();
-    this.removeHoverAction();
-    this.destroyed = true;
+  this.disable = function() {
+    this.disabled = true;
+  }
+
+  this.enable = function() {
+    this.disabled = false;
   }
 }
 
