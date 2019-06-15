@@ -234,24 +234,26 @@ function Snake(direction, length, grid, player, iaLevel) {
   }
 
   this.ia = function() {
-    var currentPosition = this.getHeadPosition();
-    var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
+    if(this.grid.fruitPos != null) {
+      var currentPosition = this.getHeadPosition();
+      var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
 
-    var grid = new PF.Grid(this.grid.getGraph(currentPosition));
-    var finder = new PF.AStarFinder();
-    var path = finder.findPath(currentPosition.x, currentPosition.y, fruitPos.x, fruitPos.y, grid);
+      var grid = new PF.Grid(this.grid.getGraph(currentPosition));
+      var finder = new PF.AStarFinder();
+      var path = finder.findPath(currentPosition.x, currentPosition.y, fruitPos.x, fruitPos.y, grid);
 
-    if(path.length > 1) {
-      var nextPosition = new Position(path[1][0], path[1][1]);
+      if(path.length > 1) {
+        var nextPosition = new Position(path[1][0], path[1][1]);
 
-      if(nextPosition.x > currentPosition.x) {
-        return KEY_RIGHT;
-      } else if(nextPosition.x < currentPosition.x) {
-        return KEY_LEFT;
-      } else if(nextPosition.y < currentPosition.y) {
-        return KEY_UP;
-      } else if(nextPosition.y > currentPosition.y) {
-        return KEY_BOTTOM;
+        if(nextPosition.x > currentPosition.x) {
+          return KEY_RIGHT;
+        } else if(nextPosition.x < currentPosition.x) {
+          return KEY_LEFT;
+        } else if(nextPosition.y < currentPosition.y) {
+          return KEY_UP;
+        } else if(nextPosition.y > currentPosition.y) {
+          return KEY_BOTTOM;
+        }
       }
     }
   }
@@ -274,33 +276,42 @@ function Game(grid, snake, speed, outputType, appendTo) {
   this.canvasCtx;
   this.assetsLoaded = false;
   this.appendTo = appendTo;
+  this.scoreMax = false;
+  this.errorOccured = false;
 
   this.init = function() {
-    if(this.outputType == OUTPUT_TEXT) {
-      this.textarea = document.createElement("textarea");
-      this.textarea.style.width = this.grid.width * 16.5 + "px";
-      this.textarea.style.height = this.grid.height * 19 + "px";
-      this.appendTo.appendChild(this.textarea);
-      this.assetsLoaded = true;
-    } else if(this.outputType == OUTPUT_GRAPHICAL) {
-      this.canvas = document.createElement("canvas");
-      this.canvas.width = CANVAS_WIDTH;
-      this.canvas.height = CANVAS_HEIGHT;
-      this.canvasCtx = this.canvas.getContext("2d");
-      this.appendTo.appendChild(this.canvas);
-    }
-
-    this.grid.setFruit();
-    this.updateUI();
-
-    // keyboard events
-    var self = this;
-
-    document.addEventListener("keydown", function(evt) {
-      if(!self.paused) {
-        self.lastKey = evt.keyCode;
+     if(this.outputType == OUTPUT_TEXT) {
+        this.textarea = document.createElement("textarea");
+        this.textarea.style.width = this.grid.width * 16.5 + "px";
+        this.textarea.style.height = this.grid.height * 19 + "px";
+        this.appendTo.appendChild(this.textarea);
+        this.assetsLoaded = true;
+      } else if(this.outputType == OUTPUT_GRAPHICAL) {
+        this.canvas = document.createElement("canvas");
+        this.canvas.width = CANVAS_WIDTH;
+        this.canvas.height = CANVAS_HEIGHT;
+        this.canvasCtx = this.canvas.getContext("2d");
+        this.appendTo.appendChild(this.canvas);
       }
-    });
+
+      if((this.grid.width * this.grid.height) <= this.snake.length() || (this.snake.length() > this.grid.width)) {
+        console.error("Game init failed: the snake is bigger than the grid");
+        this.errorOccured = true;
+        this.stop();
+      } else {
+        this.grid.setFruit();
+      }
+
+      this.updateUI();
+
+      // keyboard events
+      var self = this;
+
+      document.addEventListener("keydown", function(evt) {
+        if(!self.paused) {
+          self.lastKey = evt.keyCode;
+        }
+      });
   }
 
   this.start = function() {
@@ -366,7 +377,13 @@ function Game(grid, snake, speed, outputType, appendTo) {
             if(self.grid.get(headSnakePos) == FRUIT_VAL) {
               self.score++;
               self.snake.insert(headSnakePos);
-              self.grid.setFruit();
+
+              if(self.snake.length() >= (self.grid.height * self.grid.width)) {
+                self.scoreMax = true;
+                self.stop();
+              } else {
+                self.grid.setFruit();
+              }
             } else {
               self.snake.insert(headSnakePos);
               self.snake.remove();
@@ -534,7 +551,15 @@ function Game(grid, snake, speed, outputType, appendTo) {
         this.drawText(ctx, "Chargement des ressources…", "black", 0, this.canvas.height / 2, true);
       }
 
-      if(this.gameOver) {
+      if(this.errorOccured) {
+        ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.drawText(ctx, "Une erreur est survenue !", "red", 0, this.canvas.height / 2, true);
+      } else if(this.scoreMax) {
+        ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.drawText(ctx, "Score maximal atteint !", "green", 0, this.canvas.height / 2, true);
+      } else if(this.gameOver) {
         ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawText(ctx, "Game Over !", "#E74C3C", 0, this.canvas.height / 2, true);
@@ -705,9 +730,9 @@ function Button(text, x, y, width, height, fontSize, fontFamily, fontColor, colo
 }
 
 function gameTest() {
-  var grid = new Grid(20, 20, true, false);
-  var snake = new Snake(RIGHT, 3, grid, PLAYER_IA);
-  game = new Game(grid, snake, 5, OUTPUT_TEXT, document.getElementById("gameDiv"));
+  var grid = new Grid(20, 20, false, false);
+  var snake = new Snake(RIGHT, 10, grid, PLAYER_IA);
+  game = new Game(grid, snake, 30, OUTPUT_GRAPHICAL, document.getElementById("gameDiv"));
   game.start();
 
   document.getElementById("pauseBtn").onclick = function() {
