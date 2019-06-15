@@ -98,9 +98,9 @@ function Grid(width, height, generateWalls, borderWalls) {
         var currentVal = this.get(new Position(j, i));
 
         if(!snakePos.equals(new Position(j, i)) && (currentVal == SNAKE_VAL || currentVal == WALL_VAL)) {
-          res[i].push(0);
-        } else {
           res[i].push(1);
+        } else {
+          res[i].push(0);
         }
       }
     }
@@ -236,17 +236,14 @@ function Snake(direction, length, grid, player) {
   this.ia = function() {
     var currentPosition = this.getHeadPosition();
     var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
+    
+    var grid = new PF.Grid(this.grid.getGraph(currentPosition));
+    var finder = new PF.AStarFinder();
+    var path = finder.findPath(currentPosition.x, currentPosition.y, fruitPos.x, fruitPos.y, grid);
 
-    var graph = new Graph(this.grid.getGraph(currentPosition));
-    var start = graph.grid[currentPosition.x][currentPosition.y];
-    var end = graph.grid[fruitPos.x][fruitPos.y];
-    var result = astar.search(graph, start, end);
+    if(path.length > 1) {
+      var nextPosition = new Position(path[1][0], path[1][1]);
 
-    if(result.length > 0) {
-        var nextPosition = new Position(result[0].x, result[0].y);
-    }
-
-    if(result.length > 0) {
       if(nextPosition.x > currentPosition.x) {
         return KEY_RIGHT;
       } else if(nextPosition.x < currentPosition.x) {
