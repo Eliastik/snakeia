@@ -10,6 +10,10 @@ WALL_VAL = 3;
 // Player type
 PLAYER_IA = "PLAYER_IA";
 PLAYER_HUMAN = "PLAYER_HUMAN";
+// IA level
+IA_LEVEL_LOW = "IA_LEVEL_LOW";
+IA_LEVEL_DEFAULT = "IA_LEVEL_DEFAULT";
+IA_LEVEL_HIGH = "IA_LEVEL_HIGH";
 // Output prototype
 OUTPUT_TEXT = "OUTPUT_TEXT";
 OUTPUT_GRAPHICAL = "OUTPUT_GRAPHICAL";
@@ -149,7 +153,7 @@ function Snake(direction, length, grid, player, iaLevel) {
   this.grid = grid;
   this.queue = [];
   this.player = player;
-  this.iaLevel = iaLevel;
+  this.iaLevel = iaLevel || IA_LEVEL_DEFAULT;
 
   this.init = function() {
     var posValidated = false;
@@ -233,7 +237,114 @@ function Snake(direction, length, grid, player, iaLevel) {
       }
   };
 
+  this.getNextPosition = function(oldPos, newDirection) {
+    var position = new Position(oldPos.x, oldPos.y, newDirection);
+
+    switch(newDirection) {
+      case LEFT:
+        position.x--;
+        position.direction = LEFT;
+        break;
+      case UP:
+        position.y--;
+        position.direction = UP;
+        break;
+      case RIGHT:
+        position.x++;
+        position.direction = RIGHT;
+        break;
+      case BOTTOM:
+        position.y++;
+        position.direction = BOTTOM;
+        break;
+      case KEY_LEFT:
+        position.x--;
+        position.direction = LEFT;
+        break;
+      case KEY_UP:
+        position.y--;
+        position.direction = UP;
+        break;
+      case KEY_RIGHT:
+        position.x++;
+        position.direction = RIGHT;
+        break;
+      case KEY_BOTTOM:
+        position.y++;
+        position.direction = BOTTOM;
+        break;
+    }
+
+    if(position.x < 0) {
+      position.x = this.grid.width - 1;
+    } else if(position.x >= this.grid.width) {
+      position.x = 0;
+    }
+
+    if(position.y < 0) {
+      position.y = this.grid.height - 1;
+    } else if(position.y >= this.grid.height) {
+      position.y = 0;
+    }
+
+    return position;
+  }
+
+  this.simpleIA = function() {
+    if(this.grid.fruitPos != null) {
+      var currentPosition = this.getHeadPosition();
+      var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
+      var directionNext = KEY_RIGHT;
+
+      if(fruitPos.x > currentPosition.x) {
+        if(fruitPos.x - currentPosition.x > this.grid.width / 2) {
+          directionNext = KEY_LEFT;
+        } else {
+          directionNext = KEY_RIGHT;
+        }
+      } else if(fruitPos.x < currentPosition.x) {
+        if(currentPosition.x - fruitPos.x > this.grid.width / 2) {
+          directionNext = KEY_RIGHT;
+        } else {
+          directionNext = KEY_LEFT;
+        }
+      } else if(fruitPos.y < currentPosition.y) {
+        if(currentPosition.y - fruitPos.y > this.grid.height / 2) {
+          directionNext = KEY_BOTTOM;
+        } else {
+          directionNext = KEY_UP;
+        }
+      } else if(fruitPos.y > currentPosition.y) {
+        if(fruitPos.y - currentPosition.y > this.grid.height / 2) {
+          directionNext = KEY_UP;
+        } else {
+          directionNext = KEY_BOTTOM;
+        }
+      }
+
+      var nextPosition = this.getNextPosition(currentPosition, directionNext);
+
+      if(this.grid.get(nextPosition) != EMPTY_VAL && this.grid.get(nextPosition) != FRUIT_VAL) {
+        if(this.grid.get(this.getNextPosition(currentPosition, KEY_UP)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_UP)) == FRUIT_VAL) {
+          directionNext = KEY_UP;
+        } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_RIGHT)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_RIGHT)) == FRUIT_VAL) {
+          directionNext = KEY_RIGHT;
+        } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_BOTTOM)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_BOTTOM)) == FRUIT_VAL) {
+          directionNext = KEY_BOTTOM;
+        } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_LEFT)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_LEFT)) == FRUIT_VAL) {
+          directionNext = KEY_LEFT;
+        }
+      }
+
+      return directionNext;
+    }
+  }
+
   this.ia = function() {
+    if(this.iaLevel == IA_LEVEL_LOW) {
+        return this.simpleIA();
+    }
+
     if(this.grid.fruitPos != null) {
       var currentPosition = this.getHeadPosition();
       var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
@@ -254,6 +365,8 @@ function Snake(direction, length, grid, player, iaLevel) {
         } else if(nextPosition.y > currentPosition.y) {
           return KEY_BOTTOM;
         }
+      } else if(this.iaLevel == IA_LEVEL_HIGH) {
+        return this.simpleIA();
       }
     }
   };
@@ -416,37 +529,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
 
         if(self.frame % self.speed == 0) {
           var headSnakePos = self.snake.getHeadPosition();
-          headSnakePos.direction = self.snake.direction;
-
-          switch(self.snake.direction) {
-            case LEFT:
-              headSnakePos.x--;
-              break;
-            case UP:
-              headSnakePos.y--;
-              break;
-            case RIGHT:
-              headSnakePos.x++;
-              break;
-            case BOTTOM:
-              headSnakePos.y++;
-              break;
-            default:
-              headSnakePos.x++;
-              break;
-          }
-
-          if(headSnakePos.x < 0) {
-            headSnakePos.x = self.grid.width - 1;
-          } else if(headSnakePos.x >= self.grid.width) {
-            headSnakePos.x = 0;
-          }
-
-          if(headSnakePos.y < 0) {
-            headSnakePos.y = self.grid.height - 1;
-          } else if(headSnakePos.y >= self.grid.height) {
-            headSnakePos.y = 0;
-          }
+          headSnakePos = self.snake.getNextPosition(headSnakePos, self.snake.direction);
 
           if(self.grid.get(headSnakePos) == SNAKE_VAL || self.grid.get(headSnakePos) == WALL_VAL) {
             self.stop();
@@ -961,8 +1044,8 @@ function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover)
 }
 
 function gameTest() {
-  var grid = new Grid(10, 10, false, false);
-  var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
+  var grid = new Grid(20, 20, false, false);
+  var snake = new Snake(RIGHT, 3, grid, PLAYER_IA, IA_LEVEL_HIGH);
   game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true);
   game.start();
 
