@@ -125,7 +125,6 @@ function Grid(width, height, generateWalls, borderWalls) {
 
     this.fruitPos = randomPos;
     this.set(FRUIT_VAL, randomPos);
-    console.log(randomPos);
   }
 
   this.init();
@@ -145,11 +144,12 @@ Grid.prototype.toString = function() {
   return res;
 }
 
-function Snake(direction, length, grid, player) {
+function Snake(direction, length, grid, player, iaLevel) {
   this.direction = direction;
   this.grid = grid;
   this.queue = [];
   this.player = player;
+  this.iaLevel = iaLevel;
 
   this.init = function() {
     var posValidated = false;
@@ -236,7 +236,7 @@ function Snake(direction, length, grid, player) {
   this.ia = function() {
     var currentPosition = this.getHeadPosition();
     var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
-    
+
     var grid = new PF.Grid(this.grid.getGraph(currentPosition));
     var finder = new PF.AStarFinder();
     var path = finder.findPath(currentPosition.x, currentPosition.y, fruitPos.x, fruitPos.y, grid);
@@ -365,12 +365,12 @@ function Game(grid, snake, speed, outputType, appendTo) {
           } else {
             if(self.grid.get(headSnakePos) == FRUIT_VAL) {
               self.score++;
+              self.snake.insert(headSnakePos);
               self.grid.setFruit();
             } else {
+              self.snake.insert(headSnakePos);
               self.snake.remove();
             }
-
-            self.snake.insert(headSnakePos);
           }
         }
 
