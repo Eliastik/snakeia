@@ -14,7 +14,7 @@ PLAYER_HUMAN = "PLAYER_HUMAN";
 IA_LEVEL_LOW = "IA_LEVEL_LOW";
 IA_LEVEL_DEFAULT = "IA_LEVEL_DEFAULT";
 IA_LEVEL_HIGH = "IA_LEVEL_HIGH";
-// Output prototype
+// Output type
 OUTPUT_TEXT = "OUTPUT_TEXT";
 OUTPUT_GRAPHICAL = "OUTPUT_GRAPHICAL";
 // Canvas size
@@ -30,6 +30,8 @@ KEY_UP = 38;
 KEY_RIGHT = 39;
 KEY_BOTTOM = 40;
 KEY_LEFT = 37;
+// UI
+FONT_FAMILY = "sans-serif";
 
 // return an integer between min (inclusive) and max (inclusive)
 function randRange(min, max) {
@@ -673,7 +675,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.fillStyle = "#27AE60";
       ctx.fillRect(0, 0, this.canvas.width, 75);
-      ctx.font = '32px sans-serif';
+      ctx.font = '32px ' + FONT_FAMILY;
       ctx.fillStyle = "black";
 
       this.btnFullScreen.draw(this.canvas);
@@ -684,7 +686,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
 
       if(this.assetsLoaded) {
         this.drawImage(ctx, "assets/images/fruit.png", 5, 5, 64, 64);
-        ctx.fillText("× " + this.score, 68, 50);
+        this.drawText(ctx, "× " + this.score, "black", 32, FONT_FAMILY, "default", "default", 68, 50);
 
         var totalWidth = caseWidth * this.grid.width;
 
@@ -706,21 +708,21 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth);
       } else {
-        this.drawText(ctx, "Chargement des ressources…", "black", 32, "sans-serif", "center", "center");
+        this.drawMenu(ctx, [], "Chargement des ressources…", "white", 32, FONT_FAMILY, "center");
       }
 
       if(this.errorOccured) {
-        this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Une erreur est survenue !", "red", 32, "sans-serif", "center");
+        this.drawMenu(ctx, [], "Une erreur est survenue !", "red", 32, FONT_FAMILY, "center");
       } else if(this.scoreMax) {
-        this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Score maximal atteint !", "green", 32, "sans-serif", "center");
+        this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Score maximal atteint !", "green", 32, FONT_FAMILY, "center");
       } else if(this.gameOver) {
-          this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Game Over !", "#E74C3C", 32, "sans-serif", "center");
+        this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Game Over !", "#E74C3C", 32, FONT_FAMILY, "center");
 
-          this.btnRetry.addClickAction(this.canvas, function() {
-            self.reset();
-          });
+        this.btnRetry.addClickAction(this.canvas, function() {
+          self.reset();
+        });
       } else if(this.paused && !this.gameOver && this.assetsLoaded) {
-        this.drawMenu(ctx, [this.btnContinue, this.btnRetry, this.btnQuit], "Pause", "white", 32, "sans-serif", "center");
+        this.drawMenu(ctx, [this.btnContinue, this.btnRetry, this.btnQuit], "Pause", "white", 32, FONT_FAMILY, "center");
 
         this.btnContinue.addClickAction(this.canvas, function() {
           self.start();
@@ -743,7 +745,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       }
 
       if(this.displayFPS) {
-        this.drawText(ctx, "FPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed), "rgba(255, 255, 255, 0.5)", 24, "sans-serif", "right", "bottom");
+        this.drawText(ctx, "FPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed), "rgba(255, 255, 255, 0.5)", 24, FONT_FAMILY, "right", "bottom");
       }
     }
   };
@@ -1122,7 +1124,7 @@ function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover,
 
 function gameTest() {
   var grid = new Grid(20, 20, false, false);
-  var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN, IA_LEVEL_HIGH);
+  var snake = new Snake(RIGHT, 5, grid, PLAYER_HUMAN, IA_LEVEL_HIGH);
   game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL);
   game.start();
 }
