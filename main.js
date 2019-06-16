@@ -509,9 +509,11 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
   // Events
   this.reactor = new Reactor();
   this.reactor.registerEvent("onStart");
+  this.reactor.registerEvent("onPause");
+  this.reactor.registerEvent("onContinue");
   this.reactor.registerEvent("onReset");
   this.reactor.registerEvent("onStop");
-  this.reactor.registerEvent("onPause");
+  this.reactor.registerEvent("onExit");
 
   this.init = function() {
     this.imageLoader = new ImageLoader();
@@ -626,6 +628,10 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
     this.reactor.addEventListener("onStart", callback);
   };
 
+  this.onContinue = function(callback) {
+    this.reactor.addEventListener("onContinue", callback);
+  };
+
   this.tick = function() {
     this.updateUI();
     var self = this;
@@ -703,7 +709,12 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
     this.stop();
     this.exited = true;
     this.updateUI();
+    this.reactor.dispatchEvent("onExit");
   }
+
+  this.onExit = function(callback) {
+    this.reactor.addEventListener("onExit", callback);
+  };
 
   this.toggleFullscreen = function() {
     if(this.outputType == OUTPUT_GRAPHICAL) {
@@ -913,6 +924,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
             self.btnContinue.disable();
             self.btnRetry.disable();
             self.btnQuit.disable();
+            self.reactor.dispatchEvent("onContinue");
             self.start();
           });
 
@@ -1386,13 +1398,52 @@ function gameTest() {
   var grid = new Grid(28, 20, false, false);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
   game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
-
   game.start();
 
   var grid2 = new Grid(28, 20, false, false);
   var snake2 = new Snake(RIGHT, 1, grid2, PLAYER_HUMAN);
   game2 = new Game(grid2, snake2, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
   game2.start();
+
+  game.onPause(function() {
+    if(!game2.paused) {
+      game2.pause();
+    }
+  });
+
+  game2.onPause(function() {
+    if(!game.paused) {
+      game.pause();
+    }
+  });
+
+  game.onContinue(function() {
+    if(game2.paused) {
+      game2.start();
+    }
+  });
+
+  game2.onContinue(function() {
+    if(game.paused) {
+      game.start();
+    }
+  });
+
+  game.onExit(function() {
+    if(game2.exited) {
+      console.log("All games exited");
+      game.kill();
+      game2.kill();
+    }
+  });
+
+  game2.onExit(function() {
+    if(game.exited) {
+      console.log("All games exited");
+      game.kill();
+      game2.kill();
+    }
+  });
 }
 
 gameTest();
