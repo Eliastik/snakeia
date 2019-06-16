@@ -526,10 +526,15 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       if(self.lastFrame > 0 && !self.paused) {
         self.currentFPS = self.frame - self.lastFrame;
         self.lastFrame = self.frame;
+      }
+    }, 1000);
+
+    this.adjustSpeed = window.setInterval(function() {
+      if(self.lastFrame > 0 && !self.paused) {
         self.speed = Math.floor(self.initialSpeed * (self.currentFPS / TARGET_FPS));
         self.speed = self.speed < 1 ? 1 : self.speed;
       }
-    }, 1000);
+    }, 50);
   };
 
   this.reset = function() {
@@ -751,11 +756,11 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       }
 
       if(this.countBeforePlay > 0) {
-        this.drawMenu(ctx, [], "" + this.countBeforePlay, "black", 32, FONT_FAMILY, "center", null, 0);
+        this.drawMenu(ctx, [], "" + this.countBeforePlay, "white", 32, FONT_FAMILY, "center", null, 0);
       } else if(this.errorOccured) {
         this.drawMenu(ctx, [], "Une erreur est survenue !", "red", 32, FONT_FAMILY, "center");
       } else if(this.confirmReset && !this.gameOver) {
-        this.drawMenu(ctx, [this.btnYes, this.btnNo], "Êtes-vous sûr de vouloir\nrecommencer la partie ?", "#E74C3C", 32, FONT_FAMILY, "center", null, null, function() {
+        this.drawMenu(ctx, [this.btnNo, this.btnYes], "Êtes-vous sûr de vouloir\nrecommencer la partie ?", "#E74C3C", 32, FONT_FAMILY, "center", null, null, function() {
           self.btnYes.addClickAction(self.canvas, function() {
             self.btnYes.disable();
             self.btnNo.disable();
@@ -1219,7 +1224,7 @@ function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover,
 function gameTest() {
   var grid = new Grid(20, 20, false, false);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH, true);
-  game = new Game(grid, snake, 1, document.getElementById("gameDiv"), true);
+  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true);
   game.start();
 }
 
