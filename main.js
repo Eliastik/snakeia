@@ -473,6 +473,10 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
   this.btnQuit;
   this.btnYes;
   this.btnNo;
+  this.btnTopArrow;
+  this.btnRightArrow;
+  this.btnLeftArrow;
+  this.btnBottomArrow;
 
   this.init = function() {
     this.imageLoader = new ImageLoader();
@@ -489,13 +493,17 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
       this.canvas.height = CANVAS_HEIGHT;
       this.canvasCtx = this.canvas.getContext("2d");
       this.appendTo.appendChild(this.canvas);
-      this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", 64, 64);
-      this.btnPause = new ButtonImage("assets/images/pause.png", 75, 5, "right", 64, 64);
+      this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", null, 64, 64);
+      this.btnPause = new ButtonImage("assets/images/pause.png", 75, 5, "right", null, 64, 64);
       this.btnContinue = new Button("Reprendre", null, null, "center", "#3498db", "#246A99");
       this.btnRetry = new Button("Recommencer la partie", null, null, "center", "#3498db", "#246A99");
       this.btnQuit = new Button("Quitter", null, null, "center", "#3498db", "#246A99");
       this.btnYes = new Button("Oui", null, null, "center", "#3498db", "#246A99");
       this.btnNo = new Button("Non", null, null, "center", "#3498db", "#246A99");
+      this.btnTopArrow = new ButtonImage("assets/images/up.png", 56, 100, "right", "bottom", 64, 64);
+      this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64);
+      this.btnLeftArrow = new ButtonImage("assets/images/left.png", 112, 46, "right", "bottom", 64, 64);
+      this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 56, 0, "right", "bottom", 64, 64);
     }
 
     if((this.grid.width * this.grid.height) <= this.snake.length() || (this.snake.length() > this.grid.width)) {
@@ -508,7 +516,6 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
 
     this.updateUI();
 
-    // keyboard events
     var self = this;
 
     document.addEventListener("keydown", function(evt) {
@@ -691,10 +698,14 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
   this.loadAssets = function() {
     var self = this;
 
-    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png"], function() {
+    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png"], function() {
       self.assetsLoaded = true;
       self.btnFullScreen.loadImage(self.imageLoader);
       self.btnPause.loadImage(self.imageLoader);
+      self.btnTopArrow.loadImage(self.imageLoader);
+      self.btnBottomArrow.loadImage(self.imageLoader);
+      self.btnLeftArrow.loadImage(self.imageLoader);
+      self.btnRightArrow.loadImage(self.imageLoader);
       self.start();
     });
   };
@@ -724,6 +735,18 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
       if(this.enablePause) {
         this.btnPause.draw(this.canvas);
         this.btnPause.disable();
+      }
+
+      if(this.snake.player == PLAYER_HUMAN) {
+        this.btnTopArrow.draw(this.canvas);
+        this.btnBottomArrow.draw(this.canvas);
+        this.btnRightArrow.draw(this.canvas);
+        this.btnLeftArrow.draw(this.canvas);
+
+        this.btnTopArrow.disable();
+        this.btnBottomArrow.disable();
+        this.btnRightArrow.disable();
+        this.btnLeftArrow.disable();
       }
 
       if(this.assetsLoaded) {
@@ -856,13 +879,37 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
         });
       } else if(this.assetsLoaded) {
         this.btnFullScreen.enable();
-        this.btnPause.enable();
 
         this.btnFullScreen.addClickAction(this.canvas, function() {
           self.toggleFullscreen();
         });
 
+        if(this.snake.player == PLAYER_HUMAN) {
+          this.btnTopArrow.enable();
+          this.btnBottomArrow.enable();
+          this.btnLeftArrow.enable();
+          this.btnRightArrow.enable();
+
+          this.btnTopArrow.addClickAction(this.canvas, function() {
+            self.lastKey = KEY_UP;
+          });
+
+          this.btnBottomArrow.addClickAction(this.canvas, function() {
+            self.lastKey = KEY_BOTTOM;
+          });
+
+          this.btnLeftArrow.addClickAction(this.canvas, function() {
+            self.lastKey = KEY_LEFT;
+          });
+
+          this.btnRightArrow.addClickAction(this.canvas, function() {
+            self.lastKey = KEY_RIGHT;
+          });
+        }
+
         if(this.enablePause) {
+          this.btnPause.enable();
+
           this.btnPause.addClickAction(this.canvas, function() {
             self.pause();
           });
@@ -1078,10 +1125,11 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
   }
 };
 
-function Button(text, x, y, alignement, color, colorHover, width, height, fontSize, fontFamily, fontColor, imgSrc, imageLoader) {
+function Button(text, x, y, alignement, color, colorHover, width, height, fontSize, fontFamily, fontColor, imgSrc, imageLoader, verticalAlignement) {
   this.x = x || 0;
-  this.y = y;
+  this.y = y || 0;
   this.initialX = x;
+  this.initialY = y;
   this.width = width || "auto";
   this.height = height || "auto";
   this.clicked = false;
@@ -1099,6 +1147,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.alignement = alignement || "default";
   this.image;
   this.imgSrc = imgSrc;
+  this.verticalAlignement = verticalAlignement || "default";
 
   this.draw = function(canvas) {
     var ctx = canvas.getContext("2d");
@@ -1137,6 +1186,16 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
       this.x =  (canvas.width / 2) - (this.width / 2) - this.initialX;
     } else if(this.alignement == "right") {
       this.x = (canvas.width) - (this.width) - 5 - this.initialX;
+    } else if(this.alignement == "left") {
+      this.x = 5;
+    }
+
+    if(this.verticalAlignement == "bottom") {
+      this.y = (canvas.height) - (this.height) - 5 - this.initialY;
+    } else if(this.verticalAlignement == "center") {
+      this.y = (canvas.height / 2) - (this.height / 2) - this.initialY;
+    } else if(this.verticalAlignement == "top") {
+      this.y = 15;
     }
 
     if(this.hovered) {
@@ -1264,19 +1323,19 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   };
 }
 
-function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover, imageLoader) {
-  return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc, imageLoader);
+function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height, color, colorHover, imageLoader) {
+  return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc, imageLoader, verticalAlignement);
 }
 
 function gameTest() {
   var grid = new Grid(20, 20, false, false);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
-  game = new Game(grid, snake, 10, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
+  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
   game.start();
 
   var grid2 = new Grid(20, 20, false, false);
   var snake2 = new Snake(RIGHT, 1, grid2, PLAYER_HUMAN);
-  game2 = new Game(grid2, snake2, 10, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
+  game2 = new Game(grid2, snake2, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
   game2.start();
 }
 
