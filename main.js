@@ -151,13 +151,14 @@ Grid.prototype.toString = function() {
   return res;
 };
 
-function Snake(direction, length, grid, player, iaLevel) {
+function Snake(direction, length, grid, player, iaLevel, autoRetry) {
   this.direction = direction || RIGHT;
   this.initialDirection = direction || RIGHT;
   this.grid = grid;
   this.queue = [];
   this.player = player || PLAYER_HUMAN;
   this.iaLevel = iaLevel || IA_LEVEL_DEFAULT;
+  this.autoRetry = autoRetry || false;
 
   this.init = function() {
     var posValidated = false;
@@ -746,7 +747,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth);
       } else {
-        this.drawMenu(ctx, [], "Chargement des ressources…", "white", 32, FONT_FAMILY, "center");
+        this.drawMenu(ctx, [], "Chargement des ressources…", "white", 32, FONT_FAMILY, "center", null, 0);
       }
 
       if(this.countBeforePlay > 0) {
@@ -754,52 +755,59 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       } else if(this.errorOccured) {
         this.drawMenu(ctx, [], "Une erreur est survenue !", "red", 32, FONT_FAMILY, "center");
       } else if(this.confirmReset && !this.gameOver) {
-        this.btnYes.addClickAction(this.canvas, function() {
-          self.btnYes.disable();
-          self.btnNo.disable();
-          self.confirmReset = false;
-          self.reset();
-        });
+        this.drawMenu(ctx, [this.btnYes, this.btnNo], "Êtes-vous sûr de vouloir\nrecommencer la partie ?", "#E74C3C", 32, FONT_FAMILY, "center", null, null, function() {
+          self.btnYes.addClickAction(self.canvas, function() {
+            self.btnYes.disable();
+            self.btnNo.disable();
+            self.confirmReset = false;
+            self.reset();
+          });
 
-        this.btnNo.addClickAction(this.canvas, function() {
-          self.btnNo.disable();
-          self.btnYes.disable();
-          self.confirmReset = false;
-          self.updateUI();
+          self.btnNo.addClickAction(self.canvas, function() {
+            self.btnNo.disable();
+            self.btnYes.disable();
+            self.confirmReset = false;
+            self.updateUI();
+          });
         });
-
-        this.drawMenu(ctx, [this.btnYes, this.btnNo], "Êtes-vous sûr de vouloir\nrecommencer la partie ?", "#E74C3C", 32, FONT_FAMILY, "center");
       } else if(this.scoreMax) {
-        this.btnRetry.addClickAction(this.canvas, function() {
-          self.btnRetry.disable();
-          self.reset();
+        this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Score maximal atteint !", "green", 32, FONT_FAMILY, "center", null, null, function() {
+          self.btnRetry.addClickAction(self.canvas, function() {
+            self.btnRetry.disable();
+            self.reset();
+          });
         });
-
-        this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Score maximal atteint !", "green", 32, FONT_FAMILY, "center");
       } else if(this.gameOver) {
-        this.btnRetry.addClickAction(this.canvas, function() {
-          self.btnRetry.disable();
-          self.reset();
-        });
+        this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Game Over !", "#E74C3C", 32, FONT_FAMILY, "center", null, null, function() {
+          self.btnRetry.addClickAction(self.canvas, function() {
+            self.btnRetry.disable();
+            self.reset();
+          });
 
-        this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Game Over !", "#E74C3C", 32, FONT_FAMILY, "center");
+          if(self.snake.autoRetry) {
+            setTimeout(function() {
+              self.btnRetry.disable();
+              self.reset();
+            }, 500);
+          }
+        });
       } else if(this.paused && !this.gameOver && this.assetsLoaded) {
-        this.btnContinue.addClickAction(this.canvas, function() {
-          self.btnContinue.disable();
-          self.btnRetry.disable();
-          self.btnQuit.disable();
-          self.start();
-        });
+        this.drawMenu(ctx, [this.btnContinue, this.btnRetry, this.btnQuit], "Pause", "white", 32, FONT_FAMILY, "center", null, null, function() {
+          self.btnContinue.addClickAction(self.canvas, function() {
+            self.btnContinue.disable();
+            self.btnRetry.disable();
+            self.btnQuit.disable();
+            self.start();
+          });
 
-        this.btnRetry.addClickAction(this.canvas, function() {
-          self.btnRetry.disable();
-          self.btnContinue.disable();
-          self.btnQuit.disable();
-          self.confirmReset = true;
-          self.updateUI();
+          self.btnRetry.addClickAction(self.canvas, function() {
+            self.btnRetry.disable();
+            self.btnContinue.disable();
+            self.btnQuit.disable();
+            self.confirmReset = true;
+            self.updateUI();
+          });
         });
-
-        this.drawMenu(ctx, [this.btnContinue, this.btnRetry, this.btnQuit], "Pause", "white", 32, FONT_FAMILY, "center");
       } else if(this.assetsLoaded) {
         this.btnFullScreen.enable();
         this.btnPause.enable();
@@ -889,7 +897,7 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
   };
 };
 
-Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, delay) {
+Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, delay, func) {
   var self = this;
 
   setTimeout(function() {
@@ -917,6 +925,10 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
       buttons[i].y = startY + heightText + (heightButtons / buttons.length) * i + (i * 5);
       buttons[i].enable();
       buttons[i].draw(self.canvas);
+    }
+
+    if(func != null) {
+      func(true);
     }
   }, delay == null ? 100 : delay);
 };
@@ -1206,8 +1218,8 @@ function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover,
 
 function gameTest() {
   var grid = new Grid(20, 20, false, false);
-  var snake = new Snake(RIGHT, 1, grid, PLAYER_HUMAN, IA_LEVEL_HIGH);
-  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true);
+  var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH, true);
+  game = new Game(grid, snake, 1, document.getElementById("gameDiv"), true);
   game.start();
 }
 
