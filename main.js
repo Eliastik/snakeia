@@ -443,6 +443,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
   this.frame = 0;
   this.paused = true;
   this.gameOver = false;
+  this.confirmReset = false;
   this.lastKey = -1;
   this.textarea;
   this.canvas;
@@ -461,6 +462,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
   this.btnContinue;
   this.btnRetry;
   this.btnQuit;
+  this.btnYes;
+  this.btnNo;
 
   this.init = function() {
     this.imageLoader = new ImageLoader();
@@ -482,6 +485,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       this.btnContinue = new Button("Reprendre", null, null, "center", "#3498db", "#246A99");
       this.btnRetry = new Button("Recommencer la partie", null, null, "center", "#3498db", "#246A99");
       this.btnQuit = new Button("Quitter", null, null, "center", "#3498db", "#246A99");
+      this.btnYes = new Button("Oui", null, null, "center", "#3498db", "#246A99");
+      this.btnNo = new Button("Non", null, null, "center", "#3498db", "#246A99");
     }
 
     if((this.grid.width * this.grid.height) <= this.snake.length() || (this.snake.length() > this.grid.width)) {
@@ -519,6 +524,13 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
     this.snake.reset();
     this.grid.init();
     this.score = 0;
+    this.frame = 0;
+    this.lastFrame = 0;
+    this.currentFPS = 0;
+    this.scoreMax = false;
+    this.errorOccured = false;
+    this.lastKey = -1;
+    this.gameOver = false;
     this.grid.setFruit();
     this.start();
   };
@@ -651,7 +663,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
   this.loadAssets = function() {
     var self = this;
 
-    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png"], function() {
+    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png"], function() {
       self.assetsLoaded = true;
       self.btnFullScreen.loadImage(self.imageLoader);
       self.btnPause.loadImage(self.imageLoader);
@@ -713,23 +725,52 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
 
       if(this.errorOccured) {
         this.drawMenu(ctx, [], "Une erreur est survenue !", "red", 32, FONT_FAMILY, "center");
+      } else if(this.confirmReset) {
+        this.drawMenu(ctx, [this.btnYes, this.btnNo], "Êtes-vous sûr de vouloir\nrecommencer la partie ?", "#E74C3C", 32, FONT_FAMILY, "center");
+
+        this.btnYes.addClickAction(this.canvas, function() {
+          this.disable();
+          self.btnNo.disable();
+          self.confirmReset = false;
+          self.reset();
+        });
+
+        this.btnNo.addClickAction(this.canvas, function() {
+          this.disable();
+          self.btnYes.disable();
+          self.confirmReset = false;
+          self.updateUI();
+        });
       } else if(this.scoreMax) {
         this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Score maximal atteint !", "green", 32, FONT_FAMILY, "center");
+
+        this.btnRetry.addClickAction(this.canvas, function() {
+          this.disable();
+          self.reset();
+        });
       } else if(this.gameOver) {
         this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Game Over !", "#E74C3C", 32, FONT_FAMILY, "center");
 
         this.btnRetry.addClickAction(this.canvas, function() {
+          this.disable();
           self.reset();
         });
       } else if(this.paused && !this.gameOver && this.assetsLoaded) {
         this.drawMenu(ctx, [this.btnContinue, this.btnRetry, this.btnQuit], "Pause", "white", 32, FONT_FAMILY, "center");
 
         this.btnContinue.addClickAction(this.canvas, function() {
+          this.disable();
+          self.btnRetry.disable();
+          self.btnQuit.disable();
           self.start();
         });
 
         this.btnRetry.addClickAction(this.canvas, function() {
-          self.reset();
+          this.disable();
+          self.btnContinue.disable();
+          self.btnQuit.disable();
+          self.confirmReset = true;
+          self.updateUI();
         });
       } else if(this.assetsLoaded) {
         this.btnFullScreen.enable();
@@ -865,19 +906,36 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
     if(i == 0) {
       var direction = this.snake.getHeadPosition().direction;
 
-      switch(direction) {
-        case BOTTOM:
-          imageLoc = "assets/images/snake.png";
-          break;
-        case RIGHT:
-          imageLoc = "assets/images/snake_2.png";
-          break;
-        case UP:
-          imageLoc = "assets/images/snake_3.png";
-          break;
-        case LEFT:
-          imageLoc = "assets/images/snake_4.png";
-          break;
+      if(this.gameOver) {
+        switch(direction) {
+          case BOTTOM:
+            imageLoc = "assets/images/snake_dead.png";
+            break;
+          case RIGHT:
+            imageLoc = "assets/images/snake_dead_2.png";
+            break;
+          case UP:
+            imageLoc = "assets/images/snake_dead_3.png";
+            break;
+          case LEFT:
+            imageLoc = "assets/images/snake_dead_4.png";
+            break;
+        }
+      } else {
+        switch(direction) {
+          case BOTTOM:
+            imageLoc = "assets/images/snake.png";
+            break;
+          case RIGHT:
+            imageLoc = "assets/images/snake_2.png";
+            break;
+          case UP:
+            imageLoc = "assets/images/snake_3.png";
+            break;
+          case LEFT:
+            imageLoc = "assets/images/snake_4.png";
+            break;
+        }
       }
     } else if(i == this.snake.length() - 1) {
       var direction = this.snake.get(i - 1).direction;
@@ -1044,16 +1102,12 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
       function clickFunction(evt){
         if(!self.disabled) {
           if(self.isInside(self.getMousePos(canvas, evt))) {
-            document.body.style.cursor = "";
-
             if(self.triggerClick != null) {
               self.triggerClick();
             }
 
             self.hovered = false;
             self.clicked = true;
-
-            self.draw(canvas);
     			}
         }
       };
@@ -1070,7 +1124,6 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
 
   this.addMouseOverAction = function(canvas, trigger) {
     if(!this.disabled) {
-      document.body.style.cursor = "";
       this.triggerHover = trigger;
 
       var self = this;
@@ -1078,8 +1131,6 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   		function mouseOverFunction(evt) {
         if(!self.disabled) {
     			if(self.isInside(self.getMousePos(canvas, evt))) {
-    				document.body.style.cursor = "pointer";
-
     				if(self.triggerHover != null && !self.disabled) {
               self.triggerHover();
             }
@@ -1088,7 +1139,6 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
             self.clicked = false;
     			} else {
             self.hovered = false;
-            document.body.style.cursor = "";
     			}
 
           self.draw(canvas);
@@ -1123,9 +1173,9 @@ function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover,
 }
 
 function gameTest() {
-  var grid = new Grid(20, 20, false, false);
-  var snake = new Snake(RIGHT, 5, grid, PLAYER_HUMAN, IA_LEVEL_HIGH);
-  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL);
+  var grid = new Grid(16, 12, false, false);
+  var snake = new Snake(RIGHT, 5, grid, PLAYER_IA, IA_LEVEL_HIGH);
+  game = new Game(grid, snake, 2, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL);
   game.start();
 }
 
