@@ -521,8 +521,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
   };
 
   this.reset = function() {
-    this.snake.reset();
     this.grid.init();
+    this.snake.reset();
     this.score = 0;
     this.frame = 0;
     this.lastFrame = 0;
@@ -906,7 +906,7 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
     if(i == 0) {
       var direction = this.snake.getHeadPosition().direction;
 
-      if(this.gameOver) {
+      if(this.gameOver && !this.scoreMax) {
         switch(direction) {
           case BOTTOM:
             imageLoc = "assets/images/snake_dead.png";
@@ -1173,8 +1173,8 @@ function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover,
 }
 
 function gameTest() {
-  var grid = new Grid(16, 12, false, false);
-  var snake = new Snake(RIGHT, 5, grid, PLAYER_IA, IA_LEVEL_HIGH);
+  var grid = new Grid(2, 2, false, false);
+  var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
   game = new Game(grid, snake, 2, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL);
   game.start();
 }
