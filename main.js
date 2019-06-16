@@ -795,7 +795,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
 }
 
 Game.prototype.toString = function() {
-  return this.grid.toString() + "\nScore : " + this.score + (this.displayFPS ? "\nFPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed) : "") + (this.gameOver ? "\nGame Over !" : "") + (!this.gameOver && this.paused ? "\nEn pause" : "");
+  return this.grid.toString() + "\nScore : " + this.score + (this.displayFPS ? "\nFPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed) : "") + (this.gameOver && !this.scoreMax ? "\nGame Over !" : "") + (this.scoreMax ? "\nScore maximal atteint !" : "") + (!this.gameOver && this.paused ? "\nEn pause" : "");
 };
 
 Game.prototype.getImageCase = function(position) {
@@ -1173,9 +1173,9 @@ function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover,
 }
 
 function gameTest() {
-  var grid = new Grid(2, 2, false, false);
-  var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
-  game = new Game(grid, snake, 2, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL);
+  var grid = new Grid(20, 20, false, false);
+  var snake = new Snake(RIGHT, 1, grid, PLAYER_IA);
+  game = new Game(grid, snake, 1, document.getElementById("gameDiv"));
   game.start();
 }
 
