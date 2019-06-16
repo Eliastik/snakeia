@@ -61,7 +61,7 @@ function Position(x, y, direction) {
 
 Position.prototype.equals = function(otherPosition) {
   return this.x == otherPosition.x && this.y == otherPosition.y;
-}
+};
 
 function Grid(width, height, generateWalls, borderWalls) {
   this.width = width;
@@ -146,13 +146,14 @@ Grid.prototype.toString = function() {
   }
 
   return res;
-}
+};
 
 function Snake(direction, length, grid, player, iaLevel) {
-  this.direction = direction;
+  this.direction = direction || RIGHT;
+  this.initialDirection = direction || RIGHT;
   this.grid = grid;
   this.queue = [];
-  this.player = player;
+  this.player = player || PLAYER_HUMAN;
   this.iaLevel = iaLevel || IA_LEVEL_DEFAULT;
 
   this.init = function() {
@@ -186,6 +187,12 @@ function Snake(direction, length, grid, player, iaLevel) {
         this.insert(new Position(posX, startPos.y, this.direction));
     }
   };
+
+  this.reset = function() {
+    this.direction = this.initialDirection;
+    this.queue = [];
+    this.init();
+  }
 
   this.insert = function(position) {
     this.queue.unshift(position);
@@ -288,7 +295,7 @@ function Snake(direction, length, grid, player, iaLevel) {
     }
 
     return position;
-  }
+  };
 
   this.simpleIA = function() {
     if(this.grid.fruitPos != null) {
@@ -338,7 +345,7 @@ function Snake(direction, length, grid, player, iaLevel) {
 
       return directionNext;
     }
-  }
+  };
 
   this.ia = function() {
     if(this.iaLevel == IA_LEVEL_LOW) {
@@ -391,7 +398,7 @@ function ImageLoader() {
     } else {
       return func();
     }
-  }
+  };
 
   this.loadImage = function(src, func) {
     var self = this;
@@ -417,11 +424,11 @@ function ImageLoader() {
 
       self.loadImage(src, func);
     }
-  }
+  };
 
   this.get = function(src) {
     return this.images[src];
-  }
+  };
 }
 
 function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
@@ -450,6 +457,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
   this.btnFullScreen;
   this.btnPause;
   this.btnContinue;
+  this.btnRetry;
+  this.btnQuit;
 
   this.init = function() {
     this.imageLoader = new ImageLoader();
@@ -469,6 +478,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", 64, 64);
       this.btnPause = new ButtonImage("assets/images/pause.png", 75, 5, "right", 64, 64);
       this.btnContinue = new Button("Reprendre", null, null, "center", "#3498db", "#246A99");
+      this.btnRetry = new Button("Recommencer la partie", null, null, "center", "#3498db", "#246A99");
+      this.btnQuit = new Button("Quitter", null, null, "center", "#3498db", "#246A99");
     }
 
     if((this.grid.width * this.grid.height) <= this.snake.length() || (this.snake.length() > this.grid.width)) {
@@ -500,6 +511,14 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
         self.currentFPS = self.frame - self.lastFrame;
         self.lastFrame = self.frame;
     }, 1000);
+  };
+
+  this.reset = function() {
+    this.snake.reset();
+    this.grid.init();
+    this.score = 0;
+    this.grid.setFruit();
+    this.start();
   };
 
   this.start = function() {
@@ -577,52 +596,54 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
   };
 
   this.toggleFullscreen = function() {
-    var full = false;
+    if(this.outputType == OUTPUT_GRAPHICAL) {
+      var full = false;
 
-    if(!document.fullscreenElement) {
-      if(this.canvas.requestFullscreen) {
-        this.canvas.requestFullscreen();
-      } else if(this.canvas.mozRequestFullScreen) {
-        this.canvas.mozRequestFullScreen();
-      } else if(this.canvas.webkitRequestFullscreen) {
-        this.canvas.webkitRequestFullscreen();
-      } else if(this.canvas.msRequestFullscreen) {
-        this.canvas.msRequestFullscreen();
-      }
-    } else {
-      if(document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if(document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if(document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if(document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-    }
-
-    var self = this;
-
-    document.onfullscreenchange = function(event) {
-      if(document.fullscreenElement == self.canvas) {
-        self.canvas.width = window.innerWidth;
-        self.canvas.height = window.innerHeight;
-
-        window.onresize = function() {
-          if(document.fullscreenElement == self.canvas) {
-            self.canvas.width = window.innerWidth;
-            self.canvas.height = window.innerHeight;
-
-            self.updateUI();
-          }
-        };
+      if(!document.fullscreenElement) {
+        if(this.canvas.requestFullscreen) {
+          this.canvas.requestFullscreen();
+        } else if(this.canvas.mozRequestFullScreen) {
+          this.canvas.mozRequestFullScreen();
+        } else if(this.canvas.webkitRequestFullscreen) {
+          this.canvas.webkitRequestFullscreen();
+        } else if(this.canvas.msRequestFullscreen) {
+          this.canvas.msRequestFullscreen();
+        }
       } else {
-        self.canvas.width = CANVAS_WIDTH;
-        self.canvas.height = CANVAS_HEIGHT;
+        if(document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if(document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if(document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if(document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
       }
 
-      self.updateUI();
-    };
+      var self = this;
+
+      document.onfullscreenchange = function(event) {
+        if(document.fullscreenElement == self.canvas) {
+          self.canvas.width = window.innerWidth;
+          self.canvas.height = window.innerHeight;
+
+          window.onresize = function() {
+            if(document.fullscreenElement == self.canvas) {
+              self.canvas.width = window.innerWidth;
+              self.canvas.height = window.innerHeight;
+
+              self.updateUI();
+            }
+          };
+        } else {
+          self.canvas.width = CANVAS_WIDTH;
+          self.canvas.height = CANVAS_HEIGHT;
+        }
+
+        self.updateUI();
+      };
+    }
   };
 
   this.loadAssets = function() {
@@ -630,6 +651,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
 
     this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png"], function() {
       self.assetsLoaded = true;
+      self.btnFullScreen.loadImage(self.imageLoader);
+      self.btnPause.loadImage(self.imageLoader);
       self.start();
     });
   };
@@ -652,7 +675,6 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       ctx.fillRect(0, 0, this.canvas.width, 75);
       ctx.font = '32px sans-serif';
       ctx.fillStyle = "black";
-      ctx.fillText("Score : " + this.score, 15, 50);
 
       this.btnFullScreen.draw(this.canvas);
       this.btnFullScreen.disable();
@@ -661,6 +683,9 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       this.btnPause.disable();
 
       if(this.assetsLoaded) {
+        this.drawImage(ctx, "assets/images/fruit.png", 5, 5, 64, 64);
+        ctx.fillText("× " + this.score, 68, 50);
+
         var totalWidth = caseWidth * this.grid.width;
 
         for(i = 0; i < this.grid.height; i++) {
@@ -681,32 +706,28 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth);
       } else {
-        this.drawText(ctx, "Chargement des ressources…", "black", 0, this.canvas.height / 2, "center", 32, "sans-serif");
+        this.drawText(ctx, "Chargement des ressources…", "black", 32, "sans-serif", "center", "center");
       }
 
       if(this.errorOccured) {
-        ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Une erreur est survenue !", "red", 0, this.canvas.height / 2, "center", 32, "sans-serif");
+        this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Une erreur est survenue !", "red", 32, "sans-serif", "center");
       } else if(this.scoreMax) {
-        ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Score maximal atteint !", "green", 0, this.canvas.height / 2, "center", 32, "sans-serif");
+        this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Score maximal atteint !", "green", 32, "sans-serif", "center");
       } else if(this.gameOver) {
-        ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Game Over !", "#E74C3C", 0, this.canvas.height / 2, "center", 32, "sans-serif");
-      } else if(this.paused && this.assetsLoaded) {
-        ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.drawText(ctx, "Pause", "white", 0, (this.canvas.height / 2) - 32, "center", 32, "sans-serif");
+          this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Game Over !", "#E74C3C", 32, "sans-serif", "center");
 
-        this.btnContinue.y = this.canvas.height / 2;
-        this.btnContinue.enable();
-        this.btnContinue.draw(this.canvas);
+          this.btnRetry.addClickAction(this.canvas, function() {
+            self.reset();
+          });
+      } else if(this.paused && !this.gameOver && this.assetsLoaded) {
+        this.drawMenu(ctx, [this.btnContinue, this.btnRetry, this.btnQuit], "Pause", "white", 32, "sans-serif", "center");
 
         this.btnContinue.addClickAction(this.canvas, function() {
           self.start();
+        });
+
+        this.btnRetry.addClickAction(this.canvas, function() {
+          self.reset();
         });
       } else if(this.assetsLoaded) {
         this.btnFullScreen.enable();
@@ -722,7 +743,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       }
 
       if(this.displayFPS) {
-        this.drawText(ctx, "FPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed), "rgba(255, 255, 255, 0.5)", 0, (this.canvas.height - 15), "right", 24, "sans-serif");
+        this.drawText(ctx, "FPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed), "rgba(255, 255, 255, 0.5)", 24, "sans-serif", "right", "bottom");
       }
     }
   };
@@ -731,8 +752,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
 }
 
 Game.prototype.toString = function() {
-  return this.grid.toString() + "\nScore : " + this.score + "\nFrames : " + this.frame + (this.gameOver ? "\nGame Over !" : "") + (!this.gameOver && this.paused ? "\nEn pause" : "");
-}
+  return this.grid.toString() + "\nScore : " + this.score + (this.displayFPS ? "\nFPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed) : "") + (this.gameOver ? "\nGame Over !" : "") + (!this.gameOver && this.paused ? "\nEn pause" : "");
+};
 
 Game.prototype.getImageCase = function(position) {
   var imageRes = "";
@@ -747,33 +768,83 @@ Game.prototype.getImageCase = function(position) {
   }
 
   return imageRes;
-}
+};
 
 Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
   if(imgSrc != "") {
     var imageCase = this.imageLoader.get(imgSrc);
     ctx.drawImage(imageCase, x, y, width, height);
   }
-}
+};
 
-Game.prototype.drawText = function(ctx, text, color, x, y, alignement, size, fontFamily) {
+Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignement, verticalAlignement, x, y) {
   var precFillStyle = ctx.fillStyle;
   var precFont = ctx.font;
 
   ctx.fillStyle = color;
   ctx.font = size + "px " + fontFamily;
 
-  if(alignement == "center") {
-    ctx.fillText(text, (this.canvas.width / 2) - (ctx.measureText(text).width / 2), y);
-  } else if(alignement == "right") {
-    ctx.fillText(text, (this.canvas.width) - (ctx.measureText(text).width) - 15, y);
-  } else {
-    ctx.fillText(text, x, y);
+  var lines = text.split('\n');
+
+  if(verticalAlignement == "center") {
+    y = (this.canvas.height / 2) - (size * lines.length) / 2;
+  } else if(verticalAlignement == "top") {
+    y = 5;
+  } else if(verticalAlignement == "bottom") {
+    y = (this.canvas.height) - (size * lines.length) / 2;
+  }
+
+  for (var i = 0; i < lines.length; i++) {
+    var currentText = lines[i];
+
+    if(alignement == "center") {
+      ctx.fillText(currentText, (this.canvas.width / 2) - (ctx.measureText(currentText).width / 2), y + (size * i));
+    } else if(alignement == "right") {
+      ctx.fillText(currentText, (this.canvas.width) - (ctx.measureText(currentText).width) - 15, y + (size * i));
+    } else if(alignement == "left") {
+      ctx.fillText(currentText, 5, y + (size * i));
+    } else {
+      ctx.fillText(currentText, x, y + (size * i));
+    }
   }
 
   ctx.fillStyle = precFillStyle;
   ctx.font = precFont;
-}
+
+  return {
+    x: x,
+    y: y,
+    height: size * (lines.length - 1)
+  };
+};
+
+Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x) {
+    ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    var lines = text.split('\n');
+    var heightText = size * lines.length;
+    var heightButtons = 0;
+
+    for(i = 0; i < buttons.length; i++) {
+      if(buttons[i].height == "auto") {
+        heightButtons += buttons[i].fontSize * 1.75 + 5;
+      } else {
+        heightButtons += buttons[i].height + 5;
+      }
+    }
+
+    var totalHeight = heightText + heightButtons;
+    var startY = (this.canvas.height - totalHeight) / 2;
+
+    this.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY);
+
+    for(i = 0; i < buttons.length; i++) {
+      buttons[i].y = startY + heightText + (heightButtons / buttons.length) * i + (i * 5);
+      buttons[i].enable();
+      buttons[i].draw(this.canvas);
+    }
+};
 
 Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
   for(var i = 0; i < this.snake.length(); i++) {
@@ -849,9 +920,9 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
 
     this.drawImage(ctx, imageLoc, caseX, caseY, caseWidth, caseHeight);
   }
-}
+};
 
-function Button(text, x, y, alignement, color, colorHover, width, height, fontSize, fontFamily, fontColor, imgSrc) {
+function Button(text, x, y, alignement, color, colorHover, width, height, fontSize, fontFamily, fontColor, imgSrc, imageLoader) {
   this.x = x || 0;
   this.y = y;
   this.initialX = x;
@@ -870,6 +941,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.init = false;
   this.disabled = false;
   this.alignement = alignement || "default";
+  this.image;
   this.imgSrc = imgSrc;
 
   this.draw = function(canvas) {
@@ -880,12 +952,13 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
     ctx.font = this.fontSize + "px " + this.fontFamily;
     var textSize = ctx.measureText(this.text);
 
-    if(imgSrc != null) {
-      var image = new Image();
-      image.src = this.imgSrc;
+    if(this.imgSrc != null && imageLoader != null) {
+      this.loadImage(imageLoader);
+    }
 
-      var imgWidth = image.width;
-      var imgHeight = image.height;
+    if(this.image != null) {
+      var imgWidth = this.image.width;
+      var imgHeight = this.image.height;
 
       if(this.width == "auto") {
         this.width = imgWidth * 1.25;
@@ -894,7 +967,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
       if(this.height == "auto") {
         this.height = imgHeight * 1.5;
       }
-    } else {
+    } else if(this.text != null) {
       if(this.width == "auto") {
         this.width = textSize.width + 25;
       }
@@ -918,9 +991,9 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
 
     ctx.fillRect(this.x, this.y, this.width, this.height);
 
-    if(imgSrc != null) {
-      if(image.width > this.width || image.height > this.height) {
-        var aspectRatio = image.width / image.height;
+    if(this.image != null) {
+      if(this.image.width > this.width || this.image.height > this.height) {
+        var aspectRatio = this.image.width / this.image.height;
         imgWidth = Math.floor(this.width / 1.25);
         imgHeight = Math.floor(imgWidth / aspectRatio);
       }
@@ -928,8 +1001,8 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
       var imgX = this.x + (this.width / 2) - (imgWidth / 2);
       var imgY = this.y + (this.height / 2) - (imgHeight / 2);
 
-      ctx.drawImage(image, imgX, imgY, imgWidth, imgHeight);
-    } else {
+      ctx.drawImage(this.image, imgX, imgY, imgWidth, imgHeight);
+    } else if(this.text != null) {
       ctx.fillStyle = this.fontColor;
 
       var textX = this.x + (this.width / 2) - (textSize.width / 2);
@@ -955,11 +1028,11 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
       x: event.clientX - rect.left,
       y: event.clientY - rect.top
     };
-  }
+  };
 
   this.isInside = function(pos) {
     return pos.x > this.x && pos.x < this.x + this.width && pos.y < this.y + this.height && pos.y > this.y;
-  }
+  };
 
   this.addClickAction = function(canvas, trigger) {
     if(!this.disabled) {
@@ -1032,39 +1105,26 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
 
   this.disable = function() {
     this.disabled = true;
-  }
+  };
 
   this.enable = function() {
     this.disabled = false;
-  }
+  };
+
+  this.loadImage = function(imageLoader) {
+    this.image = imageLoader.get(this.imgSrc);
+  };
 }
 
-function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover) {
-  return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc);
+function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover, imageLoader) {
+  return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc, imageLoader);
 }
 
 function gameTest() {
   var grid = new Grid(20, 20, false, false);
-  var snake = new Snake(RIGHT, 3, grid, PLAYER_IA, IA_LEVEL_HIGH);
-  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true);
+  var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN, IA_LEVEL_HIGH);
+  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL);
   game.start();
-
-  document.getElementById("pauseBtn").onclick = function() {
-    game.pause();
-  }
-
-  document.getElementById("startBtn").onclick = function() {
-    game.start();
-  }
-
-  document.getElementById("restartBtn").onclick = function() {
-    game.kill();
-    gameTest();
-  }
-
-  document.getElementById("fullscreenBtn").onclick = function() {
-    game.toggleFullscreen();
-  }
 }
 
 gameTest();
