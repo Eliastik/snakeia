@@ -57,6 +57,35 @@ function valToChar(value) {
   }
 }
 
+// Event handlers objects type
+function Event(name){
+  this.name = name;
+  this.callbacks = [];
+}
+
+Event.prototype.registerCallback = function(callback){
+  this.callbacks.push(callback);
+}
+
+function Reactor(){
+  this.events = {};
+}
+
+Reactor.prototype.registerEvent = function(eventName){
+  var event = new Event(eventName);
+  this.events[eventName] = event;
+};
+
+Reactor.prototype.dispatchEvent = function(eventName, eventArgs){
+  this.events[eventName].callbacks.forEach(function(callback){
+    callback(eventArgs);
+  });
+};
+
+Reactor.prototype.addEventListener = function(eventName, callback){
+  this.events[eventName].registerCallback(callback);
+};
+
 function Position(x, y, direction) {
   this.x = x;
   this.y = y;
@@ -477,6 +506,12 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
   this.btnRightArrow;
   this.btnLeftArrow;
   this.btnBottomArrow;
+  // Events
+  this.reactor = new Reactor();
+  this.reactor.registerEvent("onStart");
+  this.reactor.registerEvent("onReset");
+  this.reactor.registerEvent("onStop");
+  this.reactor.registerEvent("onPause");
 
   this.init = function() {
     this.imageLoader = new ImageLoader();
@@ -541,6 +576,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
   };
 
   this.reset = function() {
+    this.reactor.dispatchEvent("onReset");
     this.grid.init();
     this.snake.reset();
     this.score = 0;
@@ -553,6 +589,10 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
     this.gameOver = false;
     this.grid.setFruit();
     this.start();
+  };
+
+  this.onReset = function(callback) {
+    this.reactor.addEventListener("onReset", callback);
   };
 
   this.start = function() {
@@ -569,6 +609,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
           self.paused = false;
           self.lastFrame = self.frame > 0 ? self.frame : 1;
           self.currentFPS = TARGET_FPS;
+          self.reactor.dispatchEvent("onStart");
           self.tick();
         } else {
           self.updateUI();
@@ -579,6 +620,10 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
     if(!this.assetsLoaded) {
       this.loadAssets();
     }
+  };
+
+  this.onStart = function(callback) {
+    this.reactor.addEventListener("onStart", callback);
   };
 
   this.tick = function() {
@@ -627,11 +672,21 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
   this.stop = function() {
     this.paused = true;
     this.gameOver = true;
+    this.reactor.dispatchEvent("onStop");
+  };
+
+  this.onStop = function(callback) {
+    this.reactor.addEventListener("onStop", callback);
   };
 
   this.pause = function() {
     this.paused = true;
     this.updateUI();
+    this.reactor.dispatchEvent("onPause");
+  };
+
+  this.onPause = function(callback) {
+    this.reactor.addEventListener("onPause", callback);
   };
 
   this.kill = function() {
@@ -1328,12 +1383,13 @@ function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height
 }
 
 function gameTest() {
-  var grid = new Grid(20, 20, false, false);
+  var grid = new Grid(28, 20, false, false);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
   game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
+
   game.start();
 
-  var grid2 = new Grid(20, 20, false, false);
+  var grid2 = new Grid(28, 20, false, false);
   var snake2 = new Snake(RIGHT, 1, grid2, PLAYER_HUMAN);
   game2 = new Game(grid2, snake2, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
   game2.start();
