@@ -696,7 +696,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
   };
 
   this.kill = function() {
-    this.stop();
+    this.paused = true;
+    this.gameOver = true;
 
     if(this.outputType == OUTPUT_TEXT) {
       this.appendTo.removeChild(this.textarea);
@@ -1397,7 +1398,7 @@ function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height
 function gameTest() {
   var grid = new Grid(28, 20, false, false);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
-  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
+  game = new Game(grid, snake, 1, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
   game.start();
 
   var grid2 = new Grid(28, 20, false, false);
@@ -1440,6 +1441,22 @@ function gameTest() {
   game2.onExit(function() {
     if(game.exited) {
       console.log("All games exited");
+      game.kill();
+      game2.kill();
+    }
+  });
+
+  game.onStop(function() {
+    if(game2.gameOver) {
+      console.log("All games over");
+      game.kill();
+      game2.kill();
+    }
+  });
+
+  game2.onStop(function() {
+    if(game.gameOver) {
+      console.log("All games over");
       game.kill();
       game2.kill();
     }
