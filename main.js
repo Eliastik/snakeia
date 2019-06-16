@@ -32,6 +32,7 @@ KEY_BOTTOM = 40;
 KEY_LEFT = 37;
 // UI
 FONT_FAMILY = "sans-serif";
+TARGET_FPS = 60;
 
 // return an integer between min (inclusive) and max (inclusive)
 function randRange(min, max) {
@@ -438,6 +439,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
   this.grid = grid;
   this.snake = snake;
   this.speed = speed || 5;
+  this.initialSpeed = speed || 5;
   this.outputType = outputType || OUTPUT_GRAPHICAL;
   this.score = 0;
   this.frame = 0;
@@ -514,9 +516,21 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       }
     });
 
+    window.addEventListener('blur', function() {
+      self.pause();
+    }, false);
+
     this.intervalCountFPS = window.setInterval(function() {
+      if(self.lastFrame > 0 && !self.paused) {
         self.currentFPS = self.frame - self.lastFrame;
         self.lastFrame = self.frame;
+        self.speed = Math.floor(self.initialSpeed * (self.currentFPS / TARGET_FPS));
+        self.speed = self.speed < 1 ? 1 : self.speed;
+      } else if(self.lastFrame <= 0) {
+        self.lastFrame = self.frame;
+      } else {
+        self.currentFPS = TARGET_FPS;
+      }
     }, 1000);
   };
 
@@ -526,7 +540,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
     this.score = 0;
     this.frame = 0;
     this.lastFrame = 0;
-    this.currentFPS = 0;
+    this.currentFPS = TARGET_FPS;
     this.scoreMax = false;
     this.errorOccured = false;
     this.lastKey = -1;
@@ -729,14 +743,14 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
         this.drawMenu(ctx, [this.btnYes, this.btnNo], "Êtes-vous sûr de vouloir\nrecommencer la partie ?", "#E74C3C", 32, FONT_FAMILY, "center");
 
         this.btnYes.addClickAction(this.canvas, function() {
-          this.disable();
+          self.btnYes.disable();
           self.btnNo.disable();
           self.confirmReset = false;
           self.reset();
         });
 
         this.btnNo.addClickAction(this.canvas, function() {
-          this.disable();
+          self.btnNo.disable();
           self.btnYes.disable();
           self.confirmReset = false;
           self.updateUI();
@@ -745,28 +759,28 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
         this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Score maximal atteint !", "green", 32, FONT_FAMILY, "center");
 
         this.btnRetry.addClickAction(this.canvas, function() {
-          this.disable();
+          self.btnRetry.disable();
           self.reset();
         });
       } else if(this.gameOver) {
         this.drawMenu(ctx, [this.btnRetry, this.btnQuit], "Game Over !", "#E74C3C", 32, FONT_FAMILY, "center");
 
         this.btnRetry.addClickAction(this.canvas, function() {
-          this.disable();
+          self.btnRetry.disable();
           self.reset();
         });
       } else if(this.paused && !this.gameOver && this.assetsLoaded) {
         this.drawMenu(ctx, [this.btnContinue, this.btnRetry, this.btnQuit], "Pause", "white", 32, FONT_FAMILY, "center");
 
         this.btnContinue.addClickAction(this.canvas, function() {
-          this.disable();
+          self.btnContinue.disable();
           self.btnRetry.disable();
           self.btnQuit.disable();
           self.start();
         });
 
         this.btnRetry.addClickAction(this.canvas, function() {
-          this.disable();
+          self.btnRetry.disable();
           self.btnContinue.disable();
           self.btnQuit.disable();
           self.confirmReset = true;
@@ -786,7 +800,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType) {
       }
 
       if(this.displayFPS) {
-        this.drawText(ctx, "FPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed), "rgba(255, 255, 255, 0.5)", 24, FONT_FAMILY, "right", "bottom");
+        this.drawText(ctx, "FPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed) + " / Speed : " + this.speed, "rgba(255, 255, 255, 0.5)", 24, FONT_FAMILY, "right", "bottom");
       }
     }
   };
@@ -1174,8 +1188,8 @@ function ButtonImage(imgSrc, x, y, alignement, width, height, color, colorHover,
 
 function gameTest() {
   var grid = new Grid(20, 20, false, false);
-  var snake = new Snake(RIGHT, 1, grid, PLAYER_IA);
-  game = new Game(grid, snake, 1, document.getElementById("gameDiv"));
+  var snake = new Snake(RIGHT, 1, grid, PLAYER_HUMAN, IA_LEVEL_HIGH);
+  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true);
   game.start();
 }
 
