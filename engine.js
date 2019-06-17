@@ -108,10 +108,10 @@ function Grid(width, height, generateWalls, borderWalls) {
   this.init = function() {
     this.grid = new Array(this.height);
 
-    for(i = 0; i < this.height; i++) {
+    for(var i = 0; i < this.height; i++) {
       this.grid[i] = new Array(this.width);
       this.grid[i] = [];
-      for(j = 0; j < this.width; j++) {
+      for(var j = 0; j < this.width; j++) {
         if((borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (generateWalls && Math.random() > 0.90)) {
           this.grid[i][j] = WALL_VAL;
         } else {
@@ -132,9 +132,9 @@ function Grid(width, height, generateWalls, borderWalls) {
   this.getGraph = function(snakePos) {
     var res = [];
 
-    for(i = 0; i < this.height; i++) {
+    for(var i = 0; i < this.height; i++) {
       res.push([]);
-      for(j = 0; j < this.width; j++) {
+      for(var j = 0; j < this.width; j++) {
         var currentVal = this.get(new Position(j, i));
 
         if(!snakePos.equals(new Position(j, i)) && (currentVal == SNAKE_VAL || currentVal == WALL_VAL)) {
@@ -173,8 +173,8 @@ function Grid(width, height, generateWalls, borderWalls) {
 Grid.prototype.toString = function() {
   res = "";
 
-  for(i = 0; i < this.height; i++) {
-    for(j = 0; j < this.width; j++) {
+  for(var i = 0; i < this.height; i++) {
+    for(var j = 0; j < this.width; j++) {
       res += valToChar(this.get(new Position(j, i))) + " ";
     }
 
@@ -201,7 +201,7 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
       posValidated = true;
       startPos = grid.getRandomPosition();
 
-      for(i = length - 1; i >= 0; i--) {
+      for(var i = length - 1; i >= 0; i--) {
         var posX = startPos.x - i;
 
         if(posX < 0) {
@@ -214,7 +214,7 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
       }
     }
 
-    for(i = length - 1; i >= 0; i--) {
+    for(var i = length - 1; i >= 0; i--) {
         var posX = startPos.x - i;
 
         if(posX < 0) {
@@ -845,8 +845,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
 
         var totalWidth = caseWidth * this.grid.width;
 
-        for(i = 0; i < this.grid.height; i++) {
-          for(j = 0; j < this.grid.width; j++) {
+        for(var i = 0; i < this.grid.height; i++) {
+          for(var j = 0; j < this.grid.width; j++) {
             var caseX = Math.floor(j * caseWidth + ((this.canvas.width - totalWidth) / 2));
             var caseY = 75 + i * caseHeight;
 
@@ -1035,7 +1035,7 @@ Game.prototype.toString = function() {
 Game.prototype.getImageCase = function(position) {
   var imageRes = "";
 
-  switch(this.grid.get(new Position(j, i))) {
+  switch(this.grid.get(position)) {
       case WALL_VAL:
         imageRes = "assets/images/wall.png";
         break;
@@ -1107,7 +1107,7 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
     var heightButtons = 0;
 
     if(buttons != null) {
-      for(i = 0; i < buttons.length; i++) {
+      for(var i = 0; i < buttons.length; i++) {
         if(buttons[i].height == "auto") {
           heightButtons += buttons[i].fontSize * 1.75 + 5;
         } else {
@@ -1122,7 +1122,7 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
     self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY);
 
     if(buttons != null) {
-      for(i = 0; i < buttons.length; i++) {
+      for(var i = 0; i < buttons.length; i++) {
         buttons[i].y = startY + heightText + (heightButtons / buttons.length) * i + (i * 5);
         buttons[i].enable();
         buttons[i].draw(self.canvas);
@@ -1446,7 +1446,7 @@ function GameGroup(games) {
   this.init = function() {
     var self = this;
 
-    for(i = 0; i < this.games.length; i++) {
+    for(var i = 0; i < this.games.length; i++) {
       this.games[i].onPause(function(v) {
         return function() {
           self.pauseAll(v);
@@ -1478,7 +1478,7 @@ function GameGroup(games) {
   };
 
   this.startAll = function(game) {
-    for(i = 0; i < this.games.length; i++) {
+    for(var i = 0; i < this.games.length; i++) {
       if(this.games[i].paused && (game == null || i != game)) {
         this.games[i].start();
       }
@@ -1492,7 +1492,7 @@ function GameGroup(games) {
   };
 
   this.pauseAll = function(game) {
-    for(i = 0; i < this.games.length; i++) {
+    for(var i = 0; i < this.games.length; i++) {
       if(!this.games[i].paused && (game == null || i != game)) {
         this.games[i].pause();
       }
@@ -1508,7 +1508,7 @@ function GameGroup(games) {
   this.checkExit = function(game) {
     allExited = true;
 
-    for(i = 0; i < this.games.length; i++) {
+    for(var i = 0; i < this.games.length; i++) {
       if(!this.games[i].exited) {
         allExited = false;
       }
@@ -1528,7 +1528,7 @@ function GameGroup(games) {
   this.checkStop = function(game) {
     allStopped = true;
 
-    for(i = 0; i < this.games.length; i++) {
+    for(var i = 0; i < this.games.length; i++) {
       if(!this.games[i].gameOver) {
         allStopped = false;
       }
@@ -1544,7 +1544,7 @@ function GameGroup(games) {
   };
 
   this.killAll = function() {
-    for(i = 0; i < this.games.length; i++) {
+    for(var i = 0; i < this.games.length; i++) {
       this.games[i].kill();
     }
   };
@@ -1553,13 +1553,13 @@ function GameGroup(games) {
     winners = [];
     maxScore = -1;
 
-    for(i = 0; i < this.games.length; i++) {
+    for(var i = 0; i < this.games.length; i++) {
       if(this.games[i].score > maxScore) {
         maxScore = this.games[i].score;
       }
     }
 
-    for(i = 0; i < this.games.length; i++) {
+    for(var i = 0; i < this.games.length; i++) {
       if(this.games[i].score >= maxScore) {
         winners.push(this.games[i]);
       }
