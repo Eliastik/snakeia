@@ -807,18 +807,6 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
         this.btnPause.disable();
       }
 
-      if(this.snake.player == PLAYER_HUMAN) {
-        this.btnTopArrow.draw(this.canvas);
-        this.btnBottomArrow.draw(this.canvas);
-        this.btnRightArrow.draw(this.canvas);
-        this.btnLeftArrow.draw(this.canvas);
-
-        this.btnTopArrow.disable();
-        this.btnBottomArrow.disable();
-        this.btnRightArrow.disable();
-        this.btnLeftArrow.disable();
-      }
-
       if(this.assetsLoaded) {
         this.drawImage(ctx, "assets/images/fruit.png", 5, 5, 64, 64);
         this.drawText(ctx, "× " + this.score, "black", 32, FONT_FAMILY, "default", "default", 68, 50);
@@ -844,6 +832,18 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth);
       } else {
         this.drawMenu(ctx, [], "Chargement des ressources…", "white", 32, FONT_FAMILY, "center", null, 0);
+      }
+
+      if(this.snake.player == PLAYER_HUMAN) {
+        this.btnTopArrow.draw(this.canvas);
+        this.btnBottomArrow.draw(this.canvas);
+        this.btnRightArrow.draw(this.canvas);
+        this.btnLeftArrow.draw(this.canvas);
+
+        this.btnTopArrow.disable();
+        this.btnBottomArrow.disable();
+        this.btnRightArrow.disable();
+        this.btnLeftArrow.disable();
       }
 
       if(this.exited) {
