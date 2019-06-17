@@ -1,0 +1,31 @@
+{
+  "short_name": "SnakeIA",
+  "name": "SnakeIA",
+  "background_color": "#27ae60",
+  "theme_color": "#27ae60",
+  "display": "standalone",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "128x128"
+    },
+    {
+      "src": "assets/images/icon/icon_512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "assets/images/icon/icon_256.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "assets/images/icon/icon_128.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    }
+  ],
+  "start_url": "index.html?launcher=true"
+}
