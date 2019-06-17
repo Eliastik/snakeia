@@ -32,7 +32,7 @@ KEY_RIGHT = 39;
 KEY_BOTTOM = 40;
 KEY_LEFT = 37;
 // UI
-FONT_FAMILY = "sans-serif";
+FONT_FAMILY = "Delius";
 TARGET_FPS = 60;
 
 // return an integer between min (inclusive) and max (inclusive)
@@ -1204,7 +1204,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.hovered = false;
   this.text = text;
   this.fontSize = fontSize || 24;
-  this.fontFamily = fontFamily || "sans-serif";
+  this.fontFamily = fontFamily || FONT_FAMILY;
   this.fontColor = fontColor || "black";
   this.color = color || "rgba(0, 0, 0, 0)";
   this.colorHover = colorHover || "#95a5a6";
