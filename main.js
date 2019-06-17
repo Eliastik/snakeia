@@ -586,8 +586,13 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
       if(self.lastFrame > 0 && !self.paused) {
         self.currentFPS = self.frame - self.lastFrame;
         self.lastFrame = self.frame;
-        self.speed = Math.floor(self.initialSpeed * (self.currentFPS / TARGET_FPS));
-        self.speed = self.speed < 1 ? 1 : self.speed;
+
+        if(self.currentFPS < TARGET_FPS * 0.90 || self.currentFPS > TARGET_FPS * 1.10) {
+          self.speed = Math.floor(self.initialSpeed * (self.currentFPS / TARGET_FPS));
+          self.speed = self.speed < 1 ? 1 : self.speed;
+        } else {
+          self.speed = self.initialSpeed;
+        }
       }
     }, 1000);
   };
@@ -682,8 +687,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
                 self.grid.setFruit();
               }
 
-              if(self.progressiveSpeed && self.score > 0 && self.score % 25 == 0 && self.initialSpeed > 1) {
-                self.initialSpeed--;
+              if(self.progressiveSpeed && self.score > 0 && self.score % 20 == 0 && self.initialSpeed > 1) {
+                self.initialSpeed = Math.floor(self.initialSpeed / 1.25);
                 self.speed = self.initialSpeed;
               }
             } else {
@@ -1127,11 +1132,6 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
     var posY = position.y;
     var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
     var caseY = 75 + posY * caseHeight;
-    var nextX = Math.floor((posX + 1) * caseWidth + ((this.canvas.width - totalWidth) / 2));
-    var nextY = 75 + (posY + 1) * caseHeight;
-    var frame = (this.frame % this.speed == 0 ? 1 : this.frame % this.speed);
-    var offsetX = Math.floor((nextX - caseX) / frame);
-    var offsetY = Math.floor((nextY - caseY) / frame);
     var imageLoc = "";
 
     if(i == 0) {
@@ -1426,14 +1426,14 @@ function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height
 }
 
 function gameTest() {
-  var grid = new Grid(20, 20, false, false);
+  var grid = new Grid(28, 20, false, false);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
-  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false, true);
+  game = new Game(grid, snake, 10, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, false, false, true);
   game.start();
 
   var grid2 = new Grid(28, 20, false, false);
   var snake2 = new Snake(RIGHT, 1, grid2, PLAYER_HUMAN);
-  game2 = new Game(grid2, snake2, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false, true);
+  game2 = new Game(grid2, snake2, 10, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false, true);
   game2.start();
 
   game.onPause(function() {
