@@ -1433,3 +1433,143 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
 function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height, color, colorHover, imageLoader) {
   return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc, imageLoader, verticalAlignement);
 }
+
+function GameGroup(games) {
+  this.games = games;
+  this.reactor = new Reactor();
+  this.reactor.registerEvent("onStart");
+  this.reactor.registerEvent("onPause");
+  this.reactor.registerEvent("onContinue");
+  this.reactor.registerEvent("onStop");
+  this.reactor.registerEvent("onExit");
+
+  this.init = function() {
+    var self = this;
+
+    for(i = 0; i < this.games.length; i++) {
+      this.games[i].onPause(function(v) {
+        return function() {
+          self.pauseAll(v);
+        };
+      }(i));
+
+      this.games[i].onContinue(function(v) {
+        return function() {
+          self.startAll(v);
+        };
+      }(i));
+
+      this.games[i].onExit(function(v) {
+        return function() {
+          self.checkExit(v);
+        };
+      }(i));
+
+      this.games[i].onStop(function(v) {
+        return function() {
+          self.checkStop(v);
+        };
+      }(i));
+    }
+  };
+
+  this.start = function() {
+    this.startAll(null);
+  };
+
+  this.startAll = function(game) {
+    for(i = 0; i < this.games.length; i++) {
+      if(this.games[i].paused && (game == null || i != game)) {
+        this.games[i].start();
+      }
+    }
+
+    this.reactor.dispatchEvent("onStart");
+  };
+
+  this.onStart = function(callback) {
+    this.reactor.addEventListener("onStart", callback);
+  };
+
+  this.pauseAll = function(game) {
+    for(i = 0; i < this.games.length; i++) {
+      if(!this.games[i].paused && (game == null || i != game)) {
+        this.games[i].pause();
+      }
+    }
+
+    this.reactor.dispatchEvent("onPause");
+  };
+
+  this.onPause = function(callback) {
+    this.reactor.addEventListener("onPause", callback);
+  };
+
+  this.checkExit = function(game) {
+    allExited = true;
+
+    for(i = 0; i < this.games.length; i++) {
+      if(!this.games[i].exited) {
+        allExited = false;
+      }
+    }
+
+    if(allExited) {
+      this.reactor.dispatchEvent("onExit");
+    } else {
+      this.startAll(game);
+    }
+  };
+
+  this.onExit = function(callback) {
+    this.reactor.addEventListener("onExit", callback);
+  };
+
+  this.checkStop = function(game) {
+    allStopped = true;
+
+    for(i = 0; i < this.games.length; i++) {
+      if(!this.games[i].gameOver) {
+        allStopped = false;
+      }
+    }
+
+    if(allStopped) {
+      this.reactor.dispatchEvent("onStop");
+    }
+  };
+
+  this.onStop = function(callback) {
+    this.reactor.addEventListener("onStop", callback);
+  };
+
+  this.killAll = function() {
+    for(i = 0; i < this.games.length; i++) {
+      this.games[i].kill();
+    }
+  };
+
+  this.getWinners = function() {
+    winners = [];
+    maxScore = -1;
+
+    for(i = 0; i < this.games.length; i++) {
+      if(this.games[i].score > maxScore) {
+        maxScore = this.games[i].score;
+      }
+    }
+
+    for(i = 0; i < this.games.length; i++) {
+      if(this.games[i].score >= maxScore) {
+        winners.push(this.games[i]);
+      }
+    }
+
+    return {
+      winners: winners,
+      score: maxScore
+    }
+  };
+
+  this.init();
+}
