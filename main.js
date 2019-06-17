@@ -479,12 +479,13 @@ function ImageLoader() {
   };
 }
 
-function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause, enableRetry) {
+function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause, enableRetry, progressiveSpeed) {
   this.imageLoader;
   this.grid = grid;
   this.snake = snake;
   this.speed = speed || 5;
   this.initialSpeed = speed || 5;
+  this.progressiveSpeed = progressiveSpeed === undefined ? false : progressiveSpeed;
   this.outputType = outputType || OUTPUT_GRAPHICAL;
   this.score = 0;
   this.frame = 0;
@@ -679,6 +680,11 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
                 self.stop();
               } else {
                 self.grid.setFruit();
+              }
+
+              if(self.progressiveSpeed && self.score > 0 && self.score % 25 == 0 && self.initialSpeed > 1) {
+                self.initialSpeed--;
+                self.speed = self.initialSpeed;
               }
             } else {
               self.snake.insert(headSnakePos);
@@ -1422,12 +1428,12 @@ function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height
 function gameTest() {
   var grid = new Grid(20, 20, false, false);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
-  game = new Game(grid, snake, 1, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
+  game = new Game(grid, snake, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false, true);
   game.start();
 
   var grid2 = new Grid(28, 20, false, false);
   var snake2 = new Snake(RIGHT, 1, grid2, PLAYER_HUMAN);
-  game2 = new Game(grid2, snake2, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
+  game2 = new Game(grid2, snake2, 5, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false, true);
   game2.start();
 
   game.onPause(function() {
