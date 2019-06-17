@@ -482,7 +482,7 @@ function ImageLoader() {
   };
 }
 
-function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause, enableRetry, progressiveSpeed) {
+function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType) {
   this.imageLoader;
   this.grid = grid;
   this.snake = snake;
@@ -499,6 +499,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
   this.textarea;
   this.canvas;
   this.canvasCtx;
+  this.canvasWidth = canvasWidth || CANVAS_WIDTH;
+  this.canvasHeight = canvasHeight || CANVAS_HEIGHT;
   this.assetsLoaded = false;
   this.appendTo = appendTo;
   this.scoreMax = false;
@@ -547,8 +549,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
       this.assetsLoaded = true;
     } else if(this.outputType == OUTPUT_GRAPHICAL) {
       this.canvas = document.createElement("canvas");
-      this.canvas.width = CANVAS_WIDTH;
-      this.canvas.height = CANVAS_HEIGHT;
+      this.canvas.width = this.canvasWidth;
+      this.canvas.height = this.canvasHeight;
       this.canvasCtx = this.canvas.getContext("2d");
       this.appendTo.appendChild(this.canvas);
       this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", null, 64, 64);
@@ -790,8 +792,8 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
             }
           };
         } else {
-          self.canvas.width = CANVAS_WIDTH;
-          self.canvas.height = CANVAS_HEIGHT;
+          self.canvas.width = self.canvasWidth;
+          self.canvas.height = self.canvasHeight;
         }
 
         self.updateUI();
@@ -878,7 +880,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
       if(this.errorOccured) {
        this.drawMenu(ctx, [], "Une erreur est survenue !", "red", 32, FONT_FAMILY, "center");
      } else if(this.exited) {
-        this.drawMenu(ctx, [], "Cette partie a été définitivement quittée.\nEn attente de la fin des\nautres parties…", "white", 32, FONT_FAMILY, "center", null, 0);
+        this.drawMenu(ctx, [], "Cette partie a été\ndéfinitivement quittée.\nEn attente de la fin des\nautres parties…", "white", 32, FONT_FAMILY, "center", null, 0);
       } else if(this.getInfos) {
         this.drawMenu(ctx, [this.btnOK], "SnakeIA by Eliastik\nwww.eliastiksofts.com\n\nVersion " + APP_VERSION + " (" + DATE_VERSION + ")", "white", 32, FONT_FAMILY, "center", null, 0, function() {
           self.btnOK.addClickAction(self.canvas, function() {
@@ -1551,6 +1553,7 @@ function GameGroup(games) {
 
   this.getWinners = function() {
     winners = [];
+    index = [];
     maxScore = -1;
 
     for(var i = 0; i < this.games.length; i++) {
@@ -1562,12 +1565,14 @@ function GameGroup(games) {
     for(var i = 0; i < this.games.length; i++) {
       if(this.games[i].score >= maxScore) {
         winners.push(this.games[i]);
+        index.push(i);
       }
     }
 
     return {
       winners: winners,
-      score: maxScore
+      score: maxScore,
+      index: index
     }
   };
 
