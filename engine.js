@@ -34,6 +34,9 @@ KEY_LEFT = 37;
 // UI
 FONT_FAMILY = "Delius";
 TARGET_FPS = 60;
+// Infos
+APP_VERSION = "1.0";
+DATE_VERSION = "17/06/2019";
 
 // return an integer between min (inclusive) and max (inclusive)
 function randRange(min, max) {
@@ -877,7 +880,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
      } else if(this.exited) {
         this.drawMenu(ctx, [], "Cette partie a été définitivement quittée.\nEn attente de la fin des\nautres parties…", "white", 32, FONT_FAMILY, "center", null, 0);
       } else if(this.getInfos) {
-        this.drawMenu(ctx, [this.btnOK], "SnakeIA by Eliastik\nwww.eliastiksofts.com\n\nVersion 1.0", "white", 32, FONT_FAMILY, "center", null, 0, function() {
+        this.drawMenu(ctx, [this.btnOK], "SnakeIA by Eliastik\nwww.eliastiksofts.com\n\nVersion " + APP_VERSION + " (" + DATE_VERSION + ")", "white", 32, FONT_FAMILY, "center", null, 0, function() {
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfos = false;
             self.updateUI();
@@ -910,7 +913,7 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
           });
         });
       } else if(this.scoreMax) {
-        this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], "Score maximal atteint !", "green", 32, FONT_FAMILY, "center", null, null, function() {
+        this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [], "Score maximal atteint !", "green", 32, FONT_FAMILY, "center", null, null, function() {
           self.btnRetry.addClickAction(self.canvas, function() {
             self.reset();
           });

@@ -1,10 +1,10 @@
 function gameTest() {
-  var grid = new Grid(28, 20, false, false);
+  var grid = new Grid(3, 3, false, false);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
   game = new Game(grid, snake, 10, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, false, false, true);
   game.start();
 
-  var grid2 = new Grid(28, 20, false, false);
+  var grid2 = new Grid(3, 3, false, false);
   var snake2 = new Snake(RIGHT, 1, grid2, PLAYER_HUMAN);
   game2 = new Game(grid2, snake2, 10, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false, true);
   game2.start();
