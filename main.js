@@ -331,6 +331,20 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     return position;
   };
 
+  this.getDirectionTo = function(position, otherPosition) {
+    if(this.getNextPosition(position, UP).equals(otherPosition)) {
+      return UP;
+    } else if(this.getNextPosition(position, BOTTOM).equals(otherPosition)) {
+      return BOTTOM;
+    } else if(this.getNextPosition(position, RIGHT).equals(otherPosition)) {
+      return RIGHT;
+    } else if(this.getNextPosition(position, LEFT).equals(otherPosition)) {
+      return LEFT;
+    }
+
+    return -1;
+  }
+
   this.simpleIA = function() {
     if(this.grid.fruitPos != null) {
       var currentPosition = this.getHeadPosition();
@@ -1170,22 +1184,32 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
       var next = this.snake.get(i + 1);
       var current = this.snake.get(i);
 
-      /* if(prec.x < posX && next.x > posX || next.x < posX && prec.x > posX) {
-        imageLoc = "assets/images/body_2.png";
-      } else */ if((current.x == 0 && prec.x == this.grid.width - 1 && next.y > current.y) || (current.y == this.grid.height - 1 && prec.y == 0 && next.x < current.x) || ((prec.x > 0 || current.x < this.grid.width - 1) && (prec.x < posX && next.y > posY || next.x < posX && prec.y > posY))) {
+      var directionToPrec = this.snake.getDirectionTo(current, prec);
+      var directionToNext = this.snake.getDirectionTo(current, next);
+
+      switch(current.direction) {
+        case UP:
+          imageLoc = "assets/images/body.png";
+          break;
+        case BOTTOM:
+          imageLoc = "assets/images/body.png";
+          break;
+        case RIGHT:
+          imageLoc = "assets/images/body_2.png";
+          break;
+        case LEFT:
+          imageLoc = "assets/images/body_2.png";
+          break;
+      }
+
+      if(directionToPrec == LEFT && directionToNext == BOTTOM || directionToPrec == BOTTOM && directionToNext == LEFT) {
         imageLoc = "assets/images/body_angle_1.png";
-      } /* else if(prec.y < posY && next.y > posY || next.y < posY && prec.y > posY) {
-        imageLoc = "assets/images/body.png";
-      } */ else if((current.x == 0 && prec.x == this.grid.width - 1 && next.y < current.y) || (current.y == 0 && prec.y == this.grid.height - 1 && next.x < current.x) || ((prec.x > 0 || current.x < this.grid.width - 1) && (prec.y < posY && next.x < posX || next.y < posY && prec.x < posX))) {
-        imageLoc = "assets/images/body_angle_4.png";
-      } else if((current.x == this.grid.width - 1 && prec.x == 0 && next.y < current.y) || prec.x > posX && next.y < posY || next.x > posX && prec.y < posY) {
-        imageLoc = "assets/images/body_angle_3.png";
-      } else if((current.x == this.grid.width - 1 && prec.x == 0 && next.y > current.y) || (current.y == this.grid.height - 1 && prec.y == 0 && next.x > current.x) || prec.y > posY && next.x > posX || next.y > posY && prec.x > posX) {
+      } else if(directionToPrec == RIGHT && directionToNext == BOTTOM || directionToPrec == BOTTOM && directionToNext == RIGHT) {
         imageLoc = "assets/images/body_angle_2.png";
-      } else if(prec.y == posY) {
-        imageLoc = "assets/images/body_2.png";
-      } else if(prec.x == posX) {
-        imageLoc = "assets/images/body.png";
+      } else if(directionToPrec == UP && directionToNext == RIGHT || directionToPrec == RIGHT && directionToNext == UP) {
+        imageLoc = "assets/images/body_angle_3.png";
+      } else if(directionToPrec == UP && directionToNext == LEFT || directionToPrec == LEFT && directionToNext == UP) {
+        imageLoc = "assets/images/body_angle_4.png";
       }
     }
 
@@ -1396,7 +1420,7 @@ function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height
 }
 
 function gameTest() {
-  var grid = new Grid(28, 20, false, false);
+  var grid = new Grid(20, 20, false, false);
   var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
   game = new Game(grid, snake, 1, document.getElementById("gameDiv"), true, OUTPUT_GRAPHICAL, true, false);
   game.start();
