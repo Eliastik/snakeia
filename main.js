@@ -599,6 +599,9 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
 
   this.start = function() {
     if(this.paused && !this.gameOver && this.assetsLoaded) {
+      this.btnContinue.disable();
+      this.btnRetry.disable();
+      this.btnQuit.disable();
       this.countBeforePlay = 3;
       this.updateUI();
       var self = this;
@@ -922,9 +925,6 @@ function Game(grid, snake, speed, appendTo, displayFPS, outputType, enablePause,
       } else if(this.paused && !this.gameOver && this.assetsLoaded) {
         this.drawMenu(ctx, this.enablePause ? (this.enableRetry ? [this.btnContinue, this.btnRetry, this.btnQuit] : [this.btnContinue, this.btnQuit]) : [this.btnContinue], "Pause", "white", 32, FONT_FAMILY, "center", null, null, function() {
           self.btnContinue.addClickAction(self.canvas, function() {
-            self.btnContinue.disable();
-            self.btnRetry.disable();
-            self.btnQuit.disable();
             self.reactor.dispatchEvent("onContinue");
             self.start();
           });
