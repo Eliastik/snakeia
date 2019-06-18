@@ -74,15 +74,15 @@ function validateSettings() {
   var games = [];
 
   if(selectedMode == IA_SOLO) {
-    var grid = new Grid(20, 20);
+    var grid = new Grid(5, 5, true, true);
     var snake = new Snake(RIGHT, 3, grid, PLAYER_IA, IA_LEVEL_HIGH);
 
-    games.push(new Game(grid, snake, 1, document.getElementById("gameContainer"), true, false, false));
+    games.push(new Game(grid, snake, 1, document.getElementById("gameContainer")));
   } else if(selectedMode == JOUEUR_SOLO) {
     var grid = new Grid(20, 20);
     var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
 
-    games.push(new Game(grid, snake, 5, document.getElementById("gameContainer"), true, false, false));
+    games.push(new Game(grid, snake, 5, document.getElementById("gameContainer")));
   } else if(selectedMode == JOUEUR_VS_IA) {
     var grid = new Grid(20, 20);
     var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
@@ -92,38 +92,42 @@ function validateSettings() {
 
     games.push(new Game(grid, snake, 5, document.getElementById("gameContainer"), true, false, false));
     games.push(new Game(grid2, snake2, 5, document.getElementById("gameContainer"), false, false, false));
+  } else if(selectedMode == IA_VS_IA) {
+    var grid = new Grid(20, 20);
+    var snake = new Snake(RIGHT, 3, grid, PLAYER_IA, IA_LEVEL_HIGH);
+
+    var grid2 = new Grid(20, 20);
+    var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_IA, IA_LEVEL_HIGH);
+
+    games.push(new Game(grid, snake, 5, document.getElementById("gameContainer"), true, false, false));
+    games.push(new Game(grid2, snake2, 5, document.getElementById("gameContainer"), true, false, false));
+  } else if(selectedMode == IA_BATTLE_ROYALE) {
+    for(var i = 0; i < 20; i++) {
+      var grid = new Grid(20, 20);
+      var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
+
+      games.push(new Game(grid, snake, 1, document.getElementById("gameContainer"), true, false, false, 350, 250));
+    }
   }
 
   var group = new GameGroup(games);
   group.start();
 
   group.onStop(function() {
-    group.killAll();
-    displayMenu();
+    if(selectedMode == JOUEUR_VS_IA || selectedMode == IA_VS_IA || selectedMode == IA_BATTLE_ROYALE) {
+      group.killAll();
+      displayMenu();
+    }
+  });
+
+  group.onExit(function() {
+    if(selectedMode == IA_SOLO || selectedMode == JOUEUR_SOLO) {
+      group.killAll();
+      displayMenu();
+    }
   });
 }
 
 document.getElementById("validateSettings").onclick = function() {
   validateSettings();
 };
-
-function gameTest() {
-  var games = [];
-
-  for(var i = 0; i < 2; i++) {
-    var grid = new Grid(20, 20);
-    var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
-
-    games.push(new Game(grid, snake, 1, document.getElementById("gameDiv"), true, false, false, 400, 300));
-  }
-
-  var group = new GameGroup(games);
-  group.start();
-
-  group.onStop(function() {
-    // group.killAll();
-    console.log(group.getWinners());
-  });
-}
-
-// gameTest();

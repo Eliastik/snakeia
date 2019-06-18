@@ -185,6 +185,32 @@ function Grid(width, height, generateWalls, borderWalls) {
     this.set(FRUIT_VAL, randomPos);
   };
 
+  this.getTotalWalls = function() {
+    var tot = 0;
+
+    for(var i = 0; i < this.height; i++) {
+      for(var j = 0; j < this.width; j++) {
+        if(this.get(new Position(j, i)) == WALL_VAL) {
+          tot++;
+        }
+      }
+    }
+
+    return tot;
+  };
+
+  this.getWallsOnLine = function(line) {
+    var tot = 0;
+
+    for(var j = 0; j < this.width; j++) {
+      if(this.get(new Position(j, line)) == WALL_VAL) {
+        tot++;
+      }
+    }
+
+    return tot;
+  };
+
   this.init();
 }
 
@@ -205,6 +231,7 @@ Grid.prototype.toString = function() {
 function Snake(direction, length, grid, player, iaLevel, autoRetry) {
   this.direction = direction || RIGHT;
   this.initialDirection = direction || RIGHT;
+  this.errorInit = false;
   this.grid = grid;
   this.queue = [];
   this.player = player || PLAYER_HUMAN;
@@ -212,6 +239,19 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
   this.autoRetry = autoRetry === undefined ? false : autoRetry;
 
   this.init = function() {
+    var spaceLineAvailable = 0;
+
+    for(var i = 0; i < grid.height; i++) {
+      if(length <= grid.width - grid.getWallsOnLine(i)) {
+        spaceLineAvailable++;
+      }
+    }
+
+    if(spaceLineAvailable <= 0) {
+      this.errorInit = true;
+      return;
+    }
+
     var posValidated = false;
     var startPos;
 
@@ -586,7 +626,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 56, 0, "right", "bottom", 64, 64);
     }
 
-    if((this.grid.width * this.grid.height) <= this.snake.length() || (this.snake.length() > this.grid.width)) {
+    if((this.grid.width * this.grid.height - this.grid.getTotalWalls()) <= this.snake.length() || this.snake.errorInit) {
       console.error("Game init failed: the snake is bigger than the grid");
       this.errorOccured = true;
       this.stop();
@@ -728,7 +768,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               self.score++;
               self.snake.insert(headSnakePos);
 
-              if(self.snake.length() >= (self.grid.height * self.grid.width)) {
+              if(self.snake.length() >= (self.grid.height * self.grid.width - self.grid.getTotalWalls())) {
                 self.scoreMax = true;
                 self.stop();
               } else {
@@ -913,11 +953,16 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       this.disableAllButtons();
 
-      if(this.errorOccured) {
-       this.drawMenu(ctx, [], "Une erreur est survenue !", "red", 32, FONT_FAMILY, "center");
-     } else if(this.exited) {
+      if(this.exited) {
         this.drawMenu(ctx, [], "Cette partie a été\ndéfinitivement quittée.\nEn attente de la fin des\nautres parties…", "white", 32, FONT_FAMILY, "center", null, 0);
-      } else if(this.getInfos) {
+      } else if(this.errorOccured) {
+       this.drawMenu(ctx, [this.btnQuit], "Une erreur est survenue !", "red", 32, FONT_FAMILY, "center", null, 0, function() {
+         self.btnQuit.addClickAction(self.canvas, function() {
+           self.confirmExit = false;
+           self.exit();
+         });
+       });
+     } else if(this.getInfos) {
         this.drawMenu(ctx, [this.btnOK], "SnakeIA by Eliastik\nwww.eliastiksofts.com\n\nVersion " + APP_VERSION + " (" + DATE_VERSION + ")", "white", 32, FONT_FAMILY, "center", null, 0, function() {
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfos = false;
