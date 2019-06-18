@@ -1,0 +1,47 @@
+@font-face {
+  font-family: "Delius";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Delius-Regular'), url("../fonts/delius-regular.ttf") format("truetype"), url("../fonts/delius-regular.woff") format("woff");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+canvas {
+  margin: 8px;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #dfe4ea;
+}
+
+.principal {
+  width: 100%;
+  max-width: 95%;
+  padding: 15px;
+  margin: auto;
+}
+
+.menu-buttons {
+  width: 100%;
+  max-width: 200px;
+  margin: auto;
+}
+
+#settings {
+  display: none;
+}
+
+.btn {
+  border-radius: 0 !important;
+}

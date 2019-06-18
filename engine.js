@@ -594,8 +594,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.grid.setFruit();
     }
 
-    this.updateUI();
-
     var self = this;
 
     document.addEventListener("keydown", function(evt) {
@@ -623,6 +621,27 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         }
       }
     }, 1000);
+
+    window.addEventListener("resize", function() {
+      self.autoResizeCanvas();
+    }, true);
+
+    this.autoResizeCanvas();
+  };
+
+  this.autoResizeCanvas = function() {
+    if(!document.fullscreenElement) {
+      if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
+        var ratio = this.canvasWidth / this.canvasHeight;
+        this.canvas.width = document.documentElement.clientWidth * 0.85;
+        this.canvas.height = this.canvas.width / ratio;
+      } else {
+        this.canvas.width = this.canvasWidth;
+        this.canvas.height = this.canvasHeight;
+      }
+
+      this.updateUI();
+    }
   };
 
   this.reset = function() {
@@ -801,17 +820,16 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           self.canvas.width = window.innerWidth;
           self.canvas.height = window.innerHeight;
 
-          window.onresize = function() {
+          window.addEventListener("resize", function() {
             if(document.fullscreenElement == self.canvas) {
               self.canvas.width = window.innerWidth;
               self.canvas.height = window.innerHeight;
 
               self.updateUI();
             }
-          };
+          }, true);
         } else {
-          self.canvas.width = self.canvasWidth;
-          self.canvas.height = self.canvasHeight;
+          self.autoResizeCanvas();
         }
 
         self.updateUI();
