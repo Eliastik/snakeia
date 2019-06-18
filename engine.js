@@ -128,7 +128,7 @@ function Grid(width, height, generateWalls, borderWalls) {
 
     for(var i = 0; i < this.height; i++) {
       this.grid[i] = new Array(this.width);
-      
+
       for(var j = 0; j < this.width; j++) {
         if((borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (generateWalls && Math.random() > 0.90)) {
           this.grid[i][j] = WALL_VAL;
@@ -148,17 +148,18 @@ function Grid(width, height, generateWalls, borderWalls) {
   };
 
   this.getGraph = function(snakePos) {
-    var res = [];
+    var res = new Array(this.height);
 
     for(var i = 0; i < this.height; i++) {
-      res.push([]);
+      res[i] = new Array(this.width);
+
       for(var j = 0; j < this.width; j++) {
         var currentVal = this.get(new Position(j, i));
 
         if(!snakePos.equals(new Position(j, i)) && (currentVal == SNAKE_VAL || currentVal == WALL_VAL)) {
-          res[i].push(1);
+          res[i][j] = 1;
         } else {
-          res[i].push(0);
+          res[i][j] = 0;
         }
       }
     }
