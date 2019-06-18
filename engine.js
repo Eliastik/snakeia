@@ -128,7 +128,7 @@ function Grid(width, height, generateWalls, borderWalls) {
 
     for(var i = 0; i < this.height; i++) {
       this.grid[i] = new Array(this.width);
-      this.grid[i] = [];
+      
       for(var j = 0; j < this.width; j++) {
         if((borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (generateWalls && Math.random() > 0.90)) {
           this.grid[i][j] = WALL_VAL;
