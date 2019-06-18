@@ -18,6 +18,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 * Utilise la bibliothèque logicielle [PathFinding.js](https://github.com/qiao/PathFinding.js/) sous licence [MIT](https://opensource.org/licenses/mit-license.php)
 * Utilise des éléments graphiques venant de [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728) et [Snake](https://www.flaticon.com/free-icon/snake_194210) (modifié)
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
+* Utilise le framework CSS [Bootstrap 4](https://getbootstrap.com/) et le thème [Flat UI](https://designmodo.github.io/Flat-UI/)
 
 ## Journal des changements
 

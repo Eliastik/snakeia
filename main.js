@@ -24,9 +24,17 @@ IA_VS_IA = "IA_VS_IA";
 IA_BATTLE_ROYALE = "IA_BATTLE_ROYALE";
 
 var selectedMode = IA_SOLO;
+var showDebugInfo = false;
 
 function selectMode(mode) {
   selectedMode = mode;
+
+  if(selectedMode == JOUEUR_SOLO) {
+    document.getElementById("iaSettings").style.display = "none";
+  } else {
+    document.getElementById("iaSettings").style.display = "block";
+  }
+
   displaySettings();
 }
 
@@ -66,68 +74,97 @@ document.getElementById("backToMenu").onclick = function() {
   displayMenu();
 };
 
+document.getElementById("gameSpeed").onchange = function() {
+  if(document.getElementById("gameSpeed").value == "custom") {
+    document.getElementById("customSpeedSettings").style.display = "block";
+  } else {
+    document.getElementById("customSpeedSettings").style.display = "none";
+  }
+}
+
 function validateSettings() {
   document.getElementById("settings").style.display = "none";
   document.getElementById("menu").style.display = "none";
   document.getElementById("gameContainer").style.display = "block";
 
-  var games = [];
+  var heightGrid = document.getElementById("heightGrid").value;
+  var widthGrid = document.getElementById("widthGrid").value;
+  var borderWalls = document.getElementById("borderWalls").checked;
+  var generateWalls = document.getElementById("generateWalls").checked;
+  var speed = document.getElementById("gameSpeed").value;
+  var progressiveSpeed = document.getElementById("progressiveSpeed").checked;
+  var customSpeed = document.getElementById("customSpeed").value;
+  var iaLevel = document.getElementById("iaLevel").value;
+  var autoRetry = document.getElementById("autoRetry").checked;
 
-  if(selectedMode == IA_SOLO) {
-    var grid = new Grid(5, 5, true, true);
-    var snake = new Snake(RIGHT, 3, grid, PLAYER_IA, IA_LEVEL_HIGH);
+  var formValidated = true;
 
-    games.push(new Game(grid, snake, 1, document.getElementById("gameContainer")));
-  } else if(selectedMode == JOUEUR_SOLO) {
-    var grid = new Grid(20, 20);
-    var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
+  console.log(heightGrid, widthGrid, borderWalls, generateWalls, speed, progressiveSpeed, iaLevel, autoRetry);
 
-    games.push(new Game(grid, snake, 5, document.getElementById("gameContainer")));
-  } else if(selectedMode == JOUEUR_VS_IA) {
-    var grid = new Grid(20, 20);
-    var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
+  if(formValidated) {
+    var games = [];
 
-    var grid2 = new Grid(20, 20);
-    var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_IA, IA_LEVEL_HIGH);
+    if(selectedMode == IA_SOLO) {
+      var grid = new Grid(5, 5, true, true);
+      var snake = new Snake(RIGHT, 3, grid, PLAYER_IA, IA_LEVEL_HIGH);
 
-    games.push(new Game(grid, snake, 5, document.getElementById("gameContainer"), true, false, false));
-    games.push(new Game(grid2, snake2, 5, document.getElementById("gameContainer"), false, false, false));
-  } else if(selectedMode == IA_VS_IA) {
-    var grid = new Grid(20, 20);
-    var snake = new Snake(RIGHT, 3, grid, PLAYER_IA, IA_LEVEL_HIGH);
-
-    var grid2 = new Grid(20, 20);
-    var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_IA, IA_LEVEL_HIGH);
-
-    games.push(new Game(grid, snake, 5, document.getElementById("gameContainer"), true, false, false));
-    games.push(new Game(grid2, snake2, 5, document.getElementById("gameContainer"), true, false, false));
-  } else if(selectedMode == IA_BATTLE_ROYALE) {
-    for(var i = 0; i < 20; i++) {
+      games.push(new Game(grid, snake, 1, document.getElementById("gameContainer")));
+    } else if(selectedMode == JOUEUR_SOLO) {
       var grid = new Grid(20, 20);
-      var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
+      var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
 
-      games.push(new Game(grid, snake, 1, document.getElementById("gameContainer"), true, false, false, 350, 250));
+      games.push(new Game(grid, snake, 5, document.getElementById("gameContainer")));
+    } else if(selectedMode == JOUEUR_VS_IA) {
+      var grid = new Grid(20, 20);
+      var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
+
+      var grid2 = new Grid(20, 20);
+      var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_IA, IA_LEVEL_HIGH);
+
+      games.push(new Game(grid, snake, 5, document.getElementById("gameContainer"), true, false, false));
+      games.push(new Game(grid2, snake2, 5, document.getElementById("gameContainer"), false, false, false));
+    } else if(selectedMode == IA_VS_IA) {
+      var grid = new Grid(20, 20);
+      var snake = new Snake(RIGHT, 3, grid, PLAYER_IA, IA_LEVEL_HIGH);
+
+      var grid2 = new Grid(20, 20);
+      var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_IA, IA_LEVEL_HIGH);
+
+      games.push(new Game(grid, snake, 5, document.getElementById("gameContainer"), true, false, false));
+      games.push(new Game(grid2, snake2, 5, document.getElementById("gameContainer"), true, false, false));
+    } else if(selectedMode == IA_BATTLE_ROYALE) {
+      for(var i = 0; i < 20; i++) {
+        var grid = new Grid(20, 20);
+        var snake = new Snake(RIGHT, 1, grid, PLAYER_IA, IA_LEVEL_HIGH);
+
+        games.push(new Game(grid, snake, 1, document.getElementById("gameContainer"), true, false, false, 350, 250));
+      }
     }
+
+    var group = new GameGroup(games);
+    group.start();
+
+    group.onStop(function() {
+      if(selectedMode == JOUEUR_VS_IA || selectedMode == IA_VS_IA || selectedMode == IA_BATTLE_ROYALE) {
+        group.killAll();
+        displayMenu();
+      }
+    });
+
+    group.onExit(function() {
+      if(selectedMode == IA_SOLO || selectedMode == JOUEUR_SOLO) {
+        group.killAll();
+        displayMenu();
+      }
+    });
   }
-
-  var group = new GameGroup(games);
-  group.start();
-
-  group.onStop(function() {
-    if(selectedMode == JOUEUR_VS_IA || selectedMode == IA_VS_IA || selectedMode == IA_BATTLE_ROYALE) {
-      group.killAll();
-      displayMenu();
-    }
-  });
-
-  group.onExit(function() {
-    if(selectedMode == IA_SOLO || selectedMode == JOUEUR_SOLO) {
-      group.killAll();
-      displayMenu();
-    }
-  });
 }
 
 document.getElementById("validateSettings").onclick = function() {
   validateSettings();
 };
+
+function enableDebugMode() {
+  showDebugInfo = true;
+  console.log("Mode de debug activé");
+}

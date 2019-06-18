@@ -22,7 +22,7 @@ body {
   align-items: center;
   padding-top: 40px;
   padding-bottom: 40px;
-  background-color: #dfe4ea;
+  background-color: #ECF0F1;
 }
 
 .principal {
@@ -38,10 +38,36 @@ body {
   margin: auto;
 }
 
-#settings {
+#settings, #customSpeedSettings {
   display: none;
+}
+
+#formSettings {
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+}
+
+input {
+  text-align: center;
 }
 
 .btn {
   border-radius: 0 !important;
+}
+
+fieldset {
+  margin-bottom: 0 !important;
+}
+
+label {
+  line-height: 1.75;
+}
+
+.custom-checkbox {
+  margin-top: 8px;
+}
+
+small, .small {
+  line-height: 1.5;
 }
