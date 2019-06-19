@@ -101,6 +101,7 @@ function resetForm(resetValues) {
   document.getElementById("invalidIALevel").style.display = "none";
   document.getElementById("numberIA").classList.remove("is-invalid");
   document.getElementById("invalidIANumber").style.display = "none";
+  document.getElementById("gameStatus").innerHTML = "";
 
   if(resetValues) {
     document.getElementById("heightGrid").value = 20;
@@ -253,8 +254,8 @@ function validateSettings() {
       var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
       var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_IA, iaLevel, autoRetry);
 
-      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed));
-      games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed));
+      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
+      games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
     } else if(selectedMode == IA_BATTLE_ROYALE) {
       for(var i = 0; i < numberIA; i++) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
@@ -277,16 +278,35 @@ function validateSettings() {
 
     group.onStop(function() {
       if(selectedMode == JOUEUR_VS_IA || selectedMode == IA_VS_IA || selectedMode == IA_BATTLE_ROYALE) {
+        var winners = group.getWinners();
+
+        if(selectedMode == JOUEUR_VS_IA) {
+          if(winners.index[0] == 0) {
+            document.getElementById("gameStatus").innerHTML = "Bravo, vous avez gagné !";
+          } else if(winners.index[0] == 1) {
+            document.getElementById("gameStatus").innerHTML = "Dommage, l'IA vous a battu avec un score supérieur !";
+          } else if(winners.index.length == 2) {
+            document.getElementById("gameStatus").innerHTML = "Vous avez fini ex-aequo avec l'IA !";
+          }
+        } else if(selectedMode == IA_VS_IA) {
+          if(winners.index.length <= 1) {
+            document.getElementById("gameStatus").innerHTML = "L'IA n°" + (winners.index[0] + 1) + " a gagné !";
+          } else if(winners.index.length == 2) {
+            document.getElementById("gameStatus").innerHTML = "Les deux IA ont fini ex-aequo !";
+          }
+        }
+      }
+    });
+
+    group.onExit(function() {
+      if(selectedMode == IA_SOLO || selectedMode == JOUEUR_SOLO || selectedMode == IA_VS_IA) {
         group.killAll();
         displayMenu();
       }
     });
 
-    group.onExit(function() {
-      if(selectedMode == IA_SOLO || selectedMode == JOUEUR_SOLO) {
-        group.killAll();
-        displayMenu();
-      }
+    group.onReset(function() {
+      document.getElementById("gameStatus").innerHTML = "";
     });
   }
 }

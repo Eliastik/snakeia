@@ -574,6 +574,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.exited = false;
   this.confirmExit = false;
   this.getInfos = false;
+  this.isReseted = true;
   this.timeoutDisplayMenu;
   // Buttons
   this.btnFullScreen;
@@ -699,6 +700,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.reset = function() {
+    this.isReseted = true;
     this.reactor.dispatchEvent("onReset");
     this.clearIntervalCountFPS();
     this.grid.init();
@@ -735,6 +737,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         if(self.countBeforePlay <= 0) {
           clearInterval(intervalPlay);
           self.paused = false;
+          self.isReseted = false;
           self.lastFrame = self.frame > 0 ? self.frame : 1;
           self.currentFPS = TARGET_FPS;
           self.setIntervalCountFPS();
@@ -1545,6 +1548,7 @@ function GameGroup(games) {
   this.reactor.registerEvent("onPause");
   this.reactor.registerEvent("onContinue");
   this.reactor.registerEvent("onStop");
+  this.reactor.registerEvent("onReset");
   this.reactor.registerEvent("onExit");
 
   this.init = function() {
@@ -1572,6 +1576,12 @@ function GameGroup(games) {
       this.games[i].onStop(function(v) {
         return function() {
           self.checkStop(v);
+        };
+      }(i));
+
+      this.games[i].onReset(function(v) {
+        return function() {
+          self.resetAll(v);
         };
       }(i));
     }
@@ -1607,6 +1617,20 @@ function GameGroup(games) {
 
   this.onPause = function(callback) {
     this.reactor.addEventListener("onPause", callback);
+  };
+
+  this.resetAll = function(game) {
+    for(var i = 0; i < this.games.length; i++) {
+      if(!this.games[i].isReseted && (game == null || i != game)) {
+        this.games[i].reset();
+      }
+    }
+
+    this.reactor.dispatchEvent("onReset");
+  };
+
+  this.onReset = function(callback) {
+    this.reactor.addEventListener("onReset", callback);
   };
 
   this.checkExit = function(game) {
