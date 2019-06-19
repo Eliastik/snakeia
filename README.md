@@ -1,15 +1,47 @@
-﻿# SnakeIA
+<img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/assets/images/logo/logo.png" width="300" alt="SnakeIA" />
+<img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/screenshot.png" width="640" alt="Screenshot" />
 
-Une version du Snake dotée d'une intelligence artificielle. Cette version est dotée de nombreux modes de jeu. Vous pouvez notamment jouer contre l'IA, ou la laisser jouer seule. Un mode Battle Royale est également disponible, ce mode voit s'affronter 20 IA ! De nombreux paramétrages sont disponibles pour varier les parties.
+# English
+
+A Snake version with an artificial intelligence. This version has many game modes. You can play against the AI, or let it play alone. A Battle Royale mode is also available, this mode sees between 1 and 100 AI fight! Many settings are available to vary the games.
+
+Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) and object oriented.
+
+Note: this game is not yet translated in english, but it will be soon!
+
+* Online version of this game: [www.eliastiksofts.com/snakeia/demo](http://www.eliastiksofts.com/snakeia/demo/)
+* Github repository: [https://github.com/Eliastik/snakeia](https://github.com/Eliastik/snakeia)
+
+## About this game
+
+* Version: 1.0
+* Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
+* License: GNU GPLv3 (see LICENCE.txt file)
+
+### Credits
+
+* Uses the library [PathFinding.js](https://github.com/qiao/PathFinding.js/) under [MIT](https://opensource.org/licenses/mit-license.php) license
+* Uses graphic elements from [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728) and [Snake](https://www.flaticon.com/free-icon/snake_194210) (changed)
+* Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
+* Uses the CSS framework [Bootstrap 4](https://getbootstrap.com/) and the theme [Flat UI](https://designmodo.github.io/Flat-UI/)
+
+## Changelog
+
+* Version 1.0:
+    - Initial version
+
+# Français
+
+Une version du Snake dotée d'une intelligence artificielle. Cette version est dotée de nombreux modes de jeu. Vous pouvez notamment jouer contre l'IA, ou la laisser jouer seule. Un mode Battle Royale est également disponible, ce mode voit s'affronter entre 1 et 100 IA ! De nombreux paramétrages sont disponibles pour varier les parties.
 
 Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScript) et en orienté objet.
 
-* Version en ligne de ce programme : [www.eliastiksofts.com/snakeia/demo](http://www.eliastiksofts.com/snakeia/demo/)
+* Version en ligne de ce jeu : [www.eliastiksofts.com/snakeia/demo](http://www.eliastiksofts.com/snakeia/demo/)
 * Dépôt Github : [https://github.com/Eliastik/snakeia](https://github.com/Eliastik/snakeia)
 
-## À propos du programme
+## À propos du jeu
 
-* Version du programme : 1.0
+* Version du jeu : 1.0
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
