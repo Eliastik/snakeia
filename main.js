@@ -119,7 +119,7 @@ function validateSettings() {
 
   var formValidated = true;
 
-  if(heightGrid.trim() == "" || isNaN(heightGrid) || heightGrid < 4 || heightGrid > 100) {
+  if(heightGrid.trim() == "" || isNaN(heightGrid) || heightGrid < 5 || heightGrid > 100) {
     formValidated = false;
     document.getElementById("heightGrid").classList.add("is-invalid");
     document.getElementById("invalidHeight").style.display = "block";
@@ -127,7 +127,7 @@ function validateSettings() {
     heightGrid = parseInt(heightGrid);
   }
 
-  if(widthGrid.trim() == "" || isNaN(widthGrid) || widthGrid < 4 || widthGrid > 100) {
+  if(widthGrid.trim() == "" || isNaN(widthGrid) || widthGrid < 5 || widthGrid > 100) {
     formValidated = false;
     document.getElementById("widthGrid").classList.add("is-invalid");
     document.getElementById("invalidWidth").style.display = "block";
