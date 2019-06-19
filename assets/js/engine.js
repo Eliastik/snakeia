@@ -324,21 +324,21 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
   };
 
   this.moveTo = function(direction) {
-      if(direction == KEY_LEFT && this.direction != RIGHT && this.direction != LEFT) {
-        this.direction = LEFT;
-      }
+    if(direction == KEY_LEFT && this.direction != RIGHT && this.direction != LEFT) {
+      this.direction = LEFT;
+    }
 
-      if(direction == KEY_UP && this.direction != BOTTOM && this.direction != UP) {
-        this.direction = UP;
-      }
+    if(direction == KEY_UP && this.direction != BOTTOM && this.direction != UP) {
+      this.direction = UP;
+    }
 
-      if(direction == KEY_RIGHT && this.direction != LEFT && this.direction != RIGHT) {
-        this.direction = RIGHT;
-      }
+    if(direction == KEY_RIGHT && this.direction != LEFT && this.direction != RIGHT) {
+      this.direction = RIGHT;
+    }
 
-      if(direction == KEY_BOTTOM && this.direction != UP && this.direction != BOTTOM) {
-        this.direction = BOTTOM;
-      }
+    if(direction == KEY_BOTTOM && this.direction != UP && this.direction != BOTTOM) {
+      this.direction = BOTTOM;
+    }
   };
 
   this.getNextPosition = function(oldPos, newDirection) {
@@ -800,8 +800,9 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
                 self.grid.setFruit();
               }
 
-              if(self.progressiveSpeed && self.score > 0 && self.score % 20 == 0 && self.initialSpeed > 1) {
-                self.initialSpeed = Math.floor(self.initialSpeed / 1.25);
+              if(self.progressiveSpeed && self.score > 0 && self.initialSpeed > 1) {
+                self.initialSpeed = Math.ceil(((-self.initialSpeedUntouched / 100) * self.score) + self.initialSpeedUntouched);
+                self.initialSpeed = self.initialSpeed < 1 ? 1 : self.initialSpeed;
                 self.speed = self.initialSpeed;
               }
             } else {
@@ -940,7 +941,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.fillStyle = "#27AE60";
       ctx.fillRect(0, 0, this.canvas.width, 75);
-      ctx.font = '32px ' + FONT_FAMILY;
+      ctx.font = "32px " + FONT_FAMILY;
       ctx.fillStyle = "black";
 
       this.btnFullScreen.draw(this.canvas);
