@@ -38,7 +38,7 @@ body {
   margin: auto;
 }
 
-#settings, #customSpeedSettings {
+#settings, #customSpeedSettings, #numberIASettings {
   display: none;
 }
 

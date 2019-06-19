@@ -71,12 +71,18 @@
                 <div class="form-row">
                   <div class="col-sm-5 col-5">
                     <input type="number" id="heightGrid" class="form-control" min="4" max="100" placeholder="Hauteur" value="20">
+                    <div class="invalid-feedback" id="invalidHeight">
+                      Cette valeur doit être comprise entre 4 et 100
+                    </div>
                   </div>
                   <div class="col-sm-2 col-2">
                     ×
                   </div>
                   <div class="col-sm-5 col-5">
                     <input type="number" id="widthGrid" class="form-control" min="4" max="100" placeholder="Largeur" value="20">
+                    <div class="invalid-feedback" id="invalidWidth">
+                      Cette valeur doit être comprise entre 4 et 100
+                    </div>
                   </div>
                 </div>
               </div>
@@ -112,6 +118,9 @@
                   <option value="25">25 – Extrêmement lente</option>
                   <option value="custom">Vitesse personnalisée…</option>
                 </select>
+                <div class="invalid-feedback" id="invalidSpeed">
+                  Cette valeur doit être au moins égale ou supérieure à 1
+                </div>
                 <div class="custom-control custom-checkbox">
                   <input type="checkbox" class="custom-control-input" id="progressiveSpeed">
                   <label class="custom-control-label" for="progressiveSpeed">Augmenter la vitesse progressivement</label>
@@ -124,6 +133,9 @@
               <label for="customSpeed" class="col-sm-4 col-form-label">Vitesse personnalisée :</label>
               <div class="col-sm-8">
                 <input type="number" id="customSpeed" class="form-control" min="1" placeholder="Largeur" value="5">
+                <div class="invalid-feedback" id="invalidCustomSpeed">
+                  Cette valeur doit être au moins égale ou supérieure à 1
+                </div>
                 <small id="customSpeedHelp" class="form-text text-muted">Au plus le nombre est élevé, au plus la vitesse du jeu sera lente, et inversement</small>
               </div>
             </div>
@@ -137,9 +149,23 @@
                   <option value="normal" selected>Normal</option>
                   <option value="high">Élevé</option>
                 </select>
+                <div class="invalid-feedback" id="invalidIALevel">
+                  Cette valeur est invalide
+                </div>
                 <div class="custom-control custom-checkbox">
                   <input type="checkbox" class="custom-control-input" id="autoRetry">
-                  <label class="custom-control-label" for="autoRetry">Faire que l'IA recommence sa partie après un Game Over</label>
+                  <label class="custom-control-label" for="autoRetry">Faire que l'IA recommence auto sa partie après un Game Over</label>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="form-group" id="numberIASettings">
+            <div class="form-group row">
+              <label for="numberIA" class="col-sm-4 col-form-label">Nombre d'IA :</label>
+              <div class="col-sm-8">
+                <input type="number" id="numberIA" class="form-control" min="1" max="100" placeholder="Largeur" value="20">
+                <div class="invalid-feedback" id="invalidIANumber">
+                  Cette valeur doit être comprise entre 1 et 100
                 </div>
               </div>
             </div>
