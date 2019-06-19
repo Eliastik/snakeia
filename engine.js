@@ -574,6 +574,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.exited = false;
   this.confirmExit = false;
   this.getInfos = false;
+  this.timeoutDisplayMenu;
   // Buttons
   this.btnFullScreen;
   this.btnPause;
@@ -1199,7 +1200,9 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
 Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, delay, func) {
   var self = this;
 
-  setTimeout(function() {
+  clearTimeout(this.timeoutDisplayMenu);
+
+  this.timeoutDisplayMenu = setTimeout(function() {
     ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
     ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
 
