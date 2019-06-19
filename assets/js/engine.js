@@ -683,18 +683,22 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     var self = this;
 
     this.intervalCountFPS = window.setInterval(function() {
-      if(self.lastFrame > 0 && !self.paused) {
-        self.currentFPS = self.frame - self.lastFrame;
-        self.lastFrame = self.frame;
-
-        if(self.currentFPS < TARGET_FPS * 0.90 || self.currentFPS > TARGET_FPS * 1.10) {
-          self.speed = Math.floor(self.initialSpeed * (self.currentFPS / TARGET_FPS));
-          self.speed = self.speed < 1 ? 1 : self.speed;
-        } else {
-          self.speed = self.initialSpeed;
-        }
-      }
+      self.countFPS();
     }, 1000);
+  };
+
+  this.countFPS = function() {
+    if(this.lastFrame > 0 && !this.paused) {
+      this.currentFPS = this.frame - this.lastFrame;
+      this.lastFrame = this.frame;
+
+      if(this.currentFPS < TARGET_FPS * 0.90 || this.currentFPS > TARGET_FPS * 1.10) {
+        this.speed = Math.floor(this.initialSpeed * (this.currentFPS / TARGET_FPS));
+        this.speed = this.speed < 1 ? 1 : this.speed;
+      } else {
+        this.speed = this.initialSpeed;
+      }
+    }
   };
 
   this.clearIntervalCountFPS = function() {
@@ -803,7 +807,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               if(self.progressiveSpeed && self.score > 0 && self.initialSpeed > 1) {
                 self.initialSpeed = Math.ceil(((-self.initialSpeedUntouched / 100) * self.score) + self.initialSpeedUntouched);
                 self.initialSpeed = self.initialSpeed < 1 ? 1 : self.initialSpeed;
-                self.speed = self.initialSpeed;
               }
             } else {
               self.snake.insert(headSnakePos);
