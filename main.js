@@ -172,7 +172,7 @@ function validateSettings() {
     }
   }
 
-  if(selectedMode == IA_BATTLE_ROYALE && (numberIA.trim() == "" || isNaN(numberIA) || numberIA < 1 || numberIA > 100)) {
+  if(selectedMode == IA_BATTLE_ROYALE && (numberIA.trim() == "" || isNaN(numberIA) || numberIA < 2 || numberIA > 100)) {
     formValidated = false;
     document.getElementById("numberIA").classList.add("is-invalid");
     document.getElementById("invalidIANumber").style.display = "block";
