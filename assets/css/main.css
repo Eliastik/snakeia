@@ -38,11 +38,11 @@ body {
   margin: auto;
 }
 
-#settings, #customSpeedSettings, #numberIASettings, #gameContainer {
+#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable {
   display: none;
 }
 
-#formSettings {
+#formSettings, #updateAvailable {
   width: 100%;
   max-width: 500px;
   margin: auto;
@@ -70,4 +70,8 @@ label {
 
 small, .small {
   line-height: 1.5;
+}
+
+.vmiddle a {
+  vertical-align: middle;
 }

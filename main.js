@@ -22,9 +22,70 @@ JOUEUR_SOLO = "JOUEUR_SOLO";
 JOUEUR_VS_IA = "JOUEUR_VS_IA";
 IA_VS_IA = "IA_VS_IA";
 IA_BATTLE_ROYALE = "IA_BATTLE_ROYALE";
+UPDATER_URI = "http://eliastiksofts.com/snakeia/update.php?updateCallback=updateCallback";
 
 var selectedMode = IA_SOLO;
 var showDebugInfo = false;
+
+document.getElementById("versionTxt").innerHTML = APP_VERSION;
+document.getElementById("appVersion").innerHTML = APP_VERSION;
+document.getElementById("dateTxt").innerHTML = DATE_VERSION;
+
+String.prototype.strcmp = function(str) {
+    return ((this == str) ? 0 : ((this > str) ? 1 : -1));
+};
+
+function checkUpdate() {
+  var script = document.createElement("script");
+  script.src = UPDATER_URI;
+
+  document.getElementsByTagName('head')[0].appendChild(script);
+}
+
+function updateCallback(data) {
+  if(typeof(data) !== "undefined" && data !== null && typeof(data.version) !== "undefined" && data.version !== null) {
+    var newVersionTest = APP_VERSION.strcmp(data.version);
+
+    if(newVersionTest < 0) {
+      document.getElementById("updateAvailable").style.display = "block";
+      document.getElementById("appUpdateVersion").textContent = data.version;
+
+      var appUpdateDate = "date inconnue";
+
+      if(typeof(data.date) !== "undefined" && data.date !== null) {
+          var appUpdateDate = data.date;
+      }
+
+      document.getElementById("appUpdateDate").textContent = appUpdateDate;
+
+      var downloadURL = "http://eliastiksofts.com/snakeia/downloads/index.php";
+
+      if(typeof(data.url) !== "undefined" && data.url !== null) {
+          var downloadURL = data.url;
+      }
+
+      document.getElementById("appDownloadLink").onclick = function() {
+          window.open(downloadURL, '_blank');
+      };
+
+      document.getElementById("appDownloadURLGet").onclick = function() {
+          prompt("Adresse URL menant au téléchargement :", downloadURL);
+      };
+
+      var changes = "Aucun changement renseigné.";
+
+      if(typeof(data.changes) !== "undefined" && data.changes !== null) {
+          var changes = data.changes;
+      }
+
+      document.getElementById("appUpdateChanges").onclick = function() {
+          alert("Changements de la nouvelle version :\n" + changes);
+      };
+    }
+  }
+}
+
+checkUpdate();
 
 function selectMode(mode) {
   selectedMode = mode;

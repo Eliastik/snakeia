@@ -32,6 +32,14 @@
     <div class="principal">
       <div id="menu">
         <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
+        <div class="row mt-4" id="updateAvailable">
+            <div class="col">
+                <div class="alert alert-info">
+                    <strong><i class="fas fa-fw fa-info-circle"></i> Une mise à jour de l'application est disponible (version <span id="appUpdateVersion">?</span> datant du <span id="appUpdateDate">?</span>). Vous disposez actuellement de la version <span id="appVersion">?</span>.</strong>
+                    <div class="vmiddle"><a href="#" class="btn btn-sm btn-primary" id="appDownloadLink"><span class="fui-export"></span> Télécharger la mise à jour</a> &nbsp; <a href="#" id="appDownloadURLGet" title="Obtenir l'adresse URL du téléchargement"><span class="fui-link"></span></a> &nbsp; <a href="#" id="appUpdateChanges" title="Obtenir la liste des changements"><span class="fui-info-circle"></span></a></div>
+                </div>
+            </div>
+        </div>
         <h1 class="h3 mb-3 font-weight-normal">Sélectionnez un mode de jeu :</h1>
         <div class="menu-buttons">
           <div class="row mb-2">
@@ -60,6 +68,9 @@
             </div>
           </div>
         </div>
+        <p class="m-0"><small>Version <span id="versionTxt"></span> (<span id="dateTxt"></span>) – By <a href="http://www.eliastiksofts.com" target="_blank">Eliastik</a></small></p>
+        <p class="m-0"><small><a href="http://www.eliastiksofts.com/snakeia" target="_blank">Plus d'infos</a> – <a href="README.md" target="_blank">Fichier Lisez-moi</a></small></p>
+        <p class="m-0" id="updateTxt"></p>
       </div>
       <div id="settings">
         <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
@@ -137,7 +148,7 @@
                 <div class="invalid-feedback" id="invalidCustomSpeed">
                   Cette valeur doit être au moins égale ou supérieure à 1
                 </div>
-                <small id="customSpeedHelp" class="form-text text-muted">Au plus le nombre est élevé, au plus la vitesse du jeu est lente, et inversement</small>
+                <small id="customSpeedHelp" class="form-text text-muted">Plus le nombre est élevé, plus la vitesse du jeu est lente, et inversement</small>
               </div>
             </div>
           </fieldset>
