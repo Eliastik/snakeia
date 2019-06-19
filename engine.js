@@ -756,6 +756,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     if(!this.assetsLoaded) {
       this.loadAssets();
+      this.updateUI();
     }
   };
 
@@ -972,7 +973,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth);
       } else {
-        this.drawMenu(ctx, [], "Chargement des ressources…", "white", 32, FONT_FAMILY, "center", null, 0);
+        this.drawMenu(ctx, [], "Chargement\ndes ressources…", "white", 32, FONT_FAMILY, "center", null, 1);
       }
 
       if(this.snake.player == PLAYER_HUMAN) {
@@ -1012,7 +1013,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             self.updateUI();
           });
         });
-      } else if(this.countBeforePlay > 0) {
+      } else if(this.assetsLoaded && this.countBeforePlay > 0) {
         this.drawMenu(ctx, [], "" + this.countBeforePlay, "white", 32, FONT_FAMILY, "center", null, 0);
       } else if(this.confirmReset && !this.gameOver) {
         this.drawMenu(ctx, [this.btnNo, this.btnYes], "Êtes-vous sûr de vouloir\nrecommencer la partie ?", "#E74C3C", 32, FONT_FAMILY, "center", null, null, function() {
