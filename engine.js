@@ -21,6 +21,7 @@ window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequest
 document.fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
 document.onfullscreenchange = document.onfullscreenchange || document.onwebkitfullscreenchange || document.onwebkitfullscreenchange || document.MSFullscreenChange;
 document.exitFullscreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen;
+screen.orientation = screen.msOrientation || screen.mozOrientation || screen.orientation;
 // Case type
 EMPTY_VAL = 0;
 SNAKE_VAL = 1;
@@ -894,6 +895,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               self.updateUI();
             }
           }, true);
+
+          if(screen.orientation.lock != undefined) {
+            screen.orientation.lock("landscape");
+          }
         } else {
           self.autoResizeCanvas();
         }
