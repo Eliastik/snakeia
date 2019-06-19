@@ -86,7 +86,7 @@ document.getElementById("gameSpeed").onchange = function() {
   } else {
     document.getElementById("customSpeedSettings").style.display = "none";
   }
-}
+};
 
 function resetForm(resetValue) {
   document.getElementById("invalidHeight").style.display = "none";
@@ -185,6 +185,28 @@ function validateSettings() {
     document.getElementById("menu").style.display = "none";
     document.getElementById("gameContainer").style.display = "block";
 
+    var titleGame = "";
+
+    switch(selectedMode) {
+      case IA_SOLO:
+        titleGame = "IA solo";
+        break;
+      case JOUEUR_SOLO:
+        titleGame = "Joueur solo";
+        break;
+      case JOUEUR_VS_IA:
+        titleGame = "Joueur VS IA";
+        break;
+      case IA_VS_IA:
+        titleGame = "IA VS IA";
+        break;
+      case IA_BATTLE_ROYALE:
+        titleGame = "IA Battle Royale";
+        break;
+    }
+
+    document.getElementById("titleGame").innerHTML = "Mode de jeu actuel : " + titleGame;
+
     var games = [];
 
     if(selectedMode == IA_SOLO) {
@@ -226,6 +248,13 @@ function validateSettings() {
 
     var group = new GameGroup(games);
     group.start();
+
+    document.getElementById("backToMenuGame").onclick = function() {
+      if(confirm("Êtes-vous sûr de vouloir retourner au menu ? Cela quittera toutes les parties actuelles.")) {
+        group.killAll();
+        displayMenu();
+      }
+    };
 
     group.onStop(function() {
       if(selectedMode == JOUEUR_VS_IA || selectedMode == IA_VS_IA || selectedMode == IA_BATTLE_ROYALE) {

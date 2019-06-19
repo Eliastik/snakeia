@@ -38,7 +38,7 @@ body {
   margin: auto;
 }
 
-#settings, #customSpeedSettings, #numberIASettings {
+#settings, #customSpeedSettings, #numberIASettings, #gameContainer {
   display: none;
 }
 
