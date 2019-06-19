@@ -547,6 +547,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.snake = snake;
   this.speed = speed || 5;
   this.initialSpeed = speed || 5;
+  this.initialSpeedUntouched = speed || 5;
   this.progressiveSpeed = progressiveSpeed === undefined ? false : progressiveSpeed;
   this.outputType = outputType || OUTPUT_GRAPHICAL;
   this.score = 0;
@@ -714,6 +715,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     this.errorOccured = false;
     this.lastKey = -1;
     this.gameOver = false;
+    this.initialSpeed = this.initialSpeedUntouched;
+    this.speed = this.initialSpeedUntouched;
     this.grid.setFruit();
     this.start();
   };
