@@ -88,7 +88,7 @@ document.getElementById("gameSpeed").onchange = function() {
   }
 };
 
-function resetForm(resetValue) {
+function resetForm(resetValues) {
   document.getElementById("invalidHeight").style.display = "none";
   document.getElementById("invalidWidth").style.display = "none";
   document.getElementById("heightGrid").classList.remove("is-invalid");
@@ -101,7 +101,25 @@ function resetForm(resetValue) {
   document.getElementById("invalidIALevel").style.display = "none";
   document.getElementById("numberIA").classList.remove("is-invalid");
   document.getElementById("invalidIANumber").style.display = "none";
+
+  if(resetValues) {
+    document.getElementById("heightGrid").value = 20;
+    document.getElementById("widthGrid").value = 20;
+    document.getElementById("borderWalls").checked = false;
+    document.getElementById("generateWalls").checked = false;
+    document.getElementById("gameSpeed").value = 5;
+    document.getElementById("progressiveSpeed").checked = false;
+    document.getElementById("customSpeed").value = 5;
+    document.getElementById("customSpeedSettings").style.display = "none";
+    document.getElementById("iaLevel").value = "normal";
+    document.getElementById("autoRetry").checked = false;
+    document.getElementById("numberIA").value = 20;
+  }
 }
+
+document.getElementById("resetSettings").onclick = function() {
+  resetForm(true);
+};
 
 function validateSettings() {
   resetForm(false);
