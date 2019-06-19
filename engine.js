@@ -643,25 +643,13 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       }
     });
 
+    this.setIntervalCountFPS();
+
     window.addEventListener('blur', function() {
       if(!self.paused) {
         self.pause();
       }
     }, false);
-
-    this.intervalCountFPS = window.setInterval(function() {
-      if(self.lastFrame > 0 && !self.paused) {
-        self.currentFPS = self.frame - self.lastFrame;
-        self.lastFrame = self.frame;
-
-        if(self.currentFPS < TARGET_FPS * 0.90 || self.currentFPS > TARGET_FPS * 1.10) {
-          self.speed = Math.floor(self.initialSpeed * (self.currentFPS / TARGET_FPS));
-          self.speed = self.speed < 1 ? 1 : self.speed;
-        } else {
-          self.speed = self.initialSpeed;
-        }
-      }
-    }, 1000);
 
     window.addEventListener("resize", function() {
       self.autoResizeCanvas();
@@ -685,8 +673,33 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     }
   };
 
+  this.setIntervalCountFPS = function() {
+    this.clearIntervalCountFPS();
+
+    var self = this;
+
+    this.intervalCountFPS = window.setInterval(function() {
+      if(self.lastFrame > 0 && !self.paused) {
+        self.currentFPS = self.frame - self.lastFrame;
+        self.lastFrame = self.frame;
+
+        if(self.currentFPS < TARGET_FPS * 0.90 || self.currentFPS > TARGET_FPS * 1.10) {
+          self.speed = Math.floor(self.initialSpeed * (self.currentFPS / TARGET_FPS));
+          self.speed = self.speed < 1 ? 1 : self.speed;
+        } else {
+          self.speed = self.initialSpeed;
+        }
+      }
+    }, 1000);
+  };
+
+  this.clearIntervalCountFPS = function() {
+    clearInterval(this.intervalCountFPS);
+  };
+
   this.reset = function() {
     this.reactor.dispatchEvent("onReset");
+    this.clearIntervalCountFPS();
     this.grid.init();
     this.snake.reset();
     this.score = 0;
@@ -723,8 +736,9 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           self.paused = false;
           self.lastFrame = self.frame > 0 ? self.frame : 1;
           self.currentFPS = TARGET_FPS;
-          self.reactor.dispatchEvent("onStart");
+          self.setIntervalCountFPS();
           self.tick();
+          self.reactor.dispatchEvent("onStart");
         } else {
           self.updateUI();
         }
@@ -795,6 +809,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.stop = function() {
     this.paused = true;
     this.gameOver = true;
+    this.clearIntervalCountFPS();
     this.reactor.dispatchEvent("onStop");
   };
 
@@ -804,6 +819,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
   this.pause = function() {
     this.paused = true;
+    this.clearIntervalCountFPS();
     this.updateUI();
     this.reactor.dispatchEvent("onPause");
   };
@@ -815,6 +831,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.kill = function() {
     this.paused = true;
     this.gameOver = true;
+    this.clearIntervalCountFPS();
 
     if(this.outputType == OUTPUT_TEXT) {
       this.appendTo.removeChild(this.textarea);
