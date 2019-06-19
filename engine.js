@@ -700,6 +700,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.reset = function() {
+    this.paused = true;
     this.isReseted = true;
     this.reactor.dispatchEvent("onReset");
     this.clearIntervalCountFPS();

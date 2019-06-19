@@ -35,6 +35,12 @@ function selectMode(mode) {
     document.getElementById("iaSettings").style.display = "block";
   }
 
+  if(selectedMode == IA_SOLO) {
+    document.getElementById("autoRetrySettings").style.display = "block";
+  } else {
+    document.getElementById("autoRetrySettings").style.display = "none";
+  }
+
   if(selectedMode == IA_BATTLE_ROYALE) {
     document.getElementById("numberIASettings").style.display = "block";
   } else {
@@ -199,6 +205,10 @@ function validateSettings() {
     numberIA = parseInt(numberIA);
   }
 
+  if(selectedMode != IA_SOLO) {
+    autoRetry = false;
+  }
+
   if(formValidated) {
     document.getElementById("settings").style.display = "none";
     document.getElementById("menu").style.display = "none";
@@ -273,6 +283,7 @@ function validateSettings() {
       if(confirm("Êtes-vous sûr de vouloir retourner au menu ? Cela quittera toutes les parties actuelles.")) {
         group.killAll();
         displayMenu();
+        group = null;
       }
     };
 
@@ -289,10 +300,28 @@ function validateSettings() {
             document.getElementById("gameStatus").innerHTML = "Vous avez fini ex-aequo avec l'IA !";
           }
         } else if(selectedMode == IA_VS_IA) {
-          if(winners.index.length <= 1) {
+          if(winners.index.length == 1) {
             document.getElementById("gameStatus").innerHTML = "L'IA n°" + (winners.index[0] + 1) + " a gagné !";
           } else if(winners.index.length == 2) {
             document.getElementById("gameStatus").innerHTML = "Les deux IA ont fini ex-aequo !";
+          }
+        } else if(selectedMode == IA_BATTLE_ROYALE) {
+          if(winners.index.length == 1) {
+            document.getElementById("gameStatus").innerHTML = "L'IA n°" + (winners.index[0] + 1) + " a gagné avec un score de " + winners.score + " !";
+          } else if(winners.index.length > 1) {
+            document.getElementById("gameStatus").innerHTML = "Les IA ";
+
+            for(var i = 0; i < winners.index.length; i++) {
+              document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " n°" + (winners.index[i] + 1);
+
+              if((i + 1) < winners.index.length - 1) {
+                document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + ", ";
+              } else if((i + 1) == winners.index.length - 1) {
+                document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " et ";
+              }
+            }
+
+            document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " ont gagné avec un score de " + winners.score + " !";
           }
         }
       }
