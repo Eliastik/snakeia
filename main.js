@@ -247,6 +247,7 @@ function validateSettings() {
     }
 
     var group = new GameGroup(games);
+    group.setDisplayFPS(showDebugInfo ? true : false);
     group.start();
 
     document.getElementById("backToMenuGame").onclick = function() {

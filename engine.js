@@ -1650,6 +1650,12 @@ function GameGroup(games) {
     }
   };
 
+  this.setDisplayFPS = function(value) {
+    for(var i = 0; i < this.games.length; i++) {
+      this.games[i].displayFPS = value;
+    }
+  };
+
   this.getWinners = function() {
     winners = [];
     index = [];
