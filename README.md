@@ -3,7 +3,7 @@
 
 # English
 
-A Snake version with an artificial intelligence. This version has many game modes. You can play against the AI, or let it play alone. A Battle Royale mode is also available, this mode sees between 1 and 100 AI fight! Many settings are available to vary the games.
+A Snake version with an artificial intelligence. This version has many game modes. You can play against the AI, or let it play alone. A Battle Royale mode is also available, this mode sees between 2 and 100 AI fight! Many settings are available to vary the games.
 
 Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) and object oriented.
 
@@ -32,7 +32,7 @@ Note: this game is not yet translated in english, but it will be soon!
 
 # Français
 
-Une version du Snake dotée d'une intelligence artificielle. Cette version est dotée de nombreux modes de jeu. Vous pouvez notamment jouer contre l'IA, ou la laisser jouer seule. Un mode Battle Royale est également disponible, ce mode voit s'affronter entre 1 et 100 IA ! De nombreux paramétrages sont disponibles pour varier les parties.
+Une version du Snake dotée d'une intelligence artificielle. Cette version est dotée de nombreux modes de jeu. Vous pouvez notamment jouer contre l'IA, ou la laisser jouer seule. Un mode Battle Royale est également disponible, ce mode voit s'affronter entre 2 et 100 IA ! De nombreux paramétrages sont disponibles pour varier les parties.
 
 Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScript) et en orienté objet.
 
