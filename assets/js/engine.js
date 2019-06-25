@@ -629,6 +629,30 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64);
       this.btnLeftArrow = new ButtonImage("assets/images/left.png", 112, 46, "right", "bottom", 64, 64);
       this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 56, 0, "right", "bottom", 64, 64);
+
+      this.btnFullScreen.addClickAction(this.canvas, function() {
+        self.toggleFullscreen();
+      });
+
+      this.btnPause.addClickAction(this.canvas, function() {
+        self.pause();
+      });
+
+      this.btnTopArrow.addClickAction(this.canvas, function() {
+        self.lastKey = KEY_UP;
+      });
+
+      this.btnBottomArrow.addClickAction(this.canvas, function() {
+        self.lastKey = KEY_BOTTOM;
+      });
+
+      this.btnLeftArrow.addClickAction(this.canvas, function() {
+        self.lastKey = KEY_LEFT;
+      });
+
+      this.btnRightArrow.addClickAction(this.canvas, function() {
+        self.lastKey = KEY_RIGHT;
+      });
     }
 
     if((this.grid.width * this.grid.height - this.grid.getTotalWalls()) <= this.snake.length() || this.snake.errorInit) {
@@ -1084,39 +1108,15 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       } else if(this.assetsLoaded) {
         this.btnFullScreen.enable();
 
-        this.btnFullScreen.addClickAction(this.canvas, function() {
-          self.toggleFullscreen();
-        });
-
         if(this.snake.player == PLAYER_HUMAN) {
           this.btnTopArrow.enable();
           this.btnBottomArrow.enable();
           this.btnLeftArrow.enable();
           this.btnRightArrow.enable();
-
-          this.btnTopArrow.addClickAction(this.canvas, function() {
-            self.lastKey = KEY_UP;
-          });
-
-          this.btnBottomArrow.addClickAction(this.canvas, function() {
-            self.lastKey = KEY_BOTTOM;
-          });
-
-          this.btnLeftArrow.addClickAction(this.canvas, function() {
-            self.lastKey = KEY_LEFT;
-          });
-
-          this.btnRightArrow.addClickAction(this.canvas, function() {
-            self.lastKey = KEY_RIGHT;
-          });
         }
 
         if(this.enablePause) {
           this.btnPause.enable();
-
-          this.btnPause.addClickAction(this.canvas, function() {
-            self.pause();
-          });
         }
       }
 
