@@ -353,12 +353,12 @@ function validateSettings() {
         var winners = group.getWinners();
 
         if(selectedMode == JOUEUR_VS_IA) {
-          if(winners.index[0] == 0) {
+          if(winners.index.length == 2) {
+            document.getElementById("gameStatus").innerHTML = "Vous avez fini ex-aequo avec l'IA !";
+          } else if(winners.index[0] == 0) {
             document.getElementById("gameStatus").innerHTML = "Bravo, vous avez gagné !";
           } else if(winners.index[0] == 1) {
             document.getElementById("gameStatus").innerHTML = "Dommage, l'IA vous a battu avec un score supérieur !";
-          } else if(winners.index.length == 2) {
-            document.getElementById("gameStatus").innerHTML = "Vous avez fini ex-aequo avec l'IA !";
           }
         } else if(selectedMode == IA_VS_IA) {
           if(winners.index.length == 1) {
