@@ -415,13 +415,15 @@ function enableDebugMode() {
 
 // Localization
 function listTranslations(languages) {
-  document.getElementById("languageSelect").innerHTML = "";
+  if(languages != null) {
+    document.getElementById("languageSelect").innerHTML = "";
 
-  for(var i = 0; i < languages.length; i++) {
-    document.getElementById("languageSelect").innerHTML = document.getElementById("languageSelect").innerHTML + '<option data-i18n="lang.' + languages[i] + '" value="'+ languages[i] +'"></option>';
+    for(var i = 0; i < languages.length; i++) {
+      document.getElementById("languageSelect").innerHTML = document.getElementById("languageSelect").innerHTML + '<option data-i18n="lang.' + languages[i] + '" value="'+ languages[i] +'"></option>';
+    }
+
+    document.getElementById("languageSelect").value = i18next.language.substr(0, 2);
   }
-
-  document.getElementById("languageSelect").value = i18next.language.substr(0, 2);
 }
 
 function translateContent() {
@@ -451,4 +453,6 @@ document.getElementById("languageSelect").onchange = function() {
   });
 };
 
-translateContent();
+i18next.store.on('added', function(lng, ns) {
+  translateContent();
+});

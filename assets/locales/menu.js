@@ -16,88 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-// English
-i18next.addResourceBundle("en", "translation", {
-  "lang": {
-    "fr": "Français",
-    "en": "English"
-  },
-  "update": {
-    "updateAvailable": "An update of the application is available",
-    "version": "Version",
-    "of": "of",
-    "current": "You currently have the version",
-    "versionDate": "{{date, MM/DD/YYYY}}",
-    "download": "Download the update",
-    "getURL": "Get the URL of the download",
-    "getChanges": "Get the list of changes",
-    "URLToDownload": "Download URL:",
-    "noChanges": "No change indicated.",
-    "changes": "Changes in the new version:"
-  },
-  "menu": {
-    "selectGame": "Select a game mode:",
-    "iaSoloBtn": "Solo IA",
-    "joueurSolo": "Solo player",
-    "joueurVsIa": "Player VS IA",
-    "iaVsIa": "IA VS IA",
-    "iaBattleRoyale": "Battle Royale IA",
-    "version": "Version",
-    "versionDate": "{{date, MM/DD/YYYY}}",
-    "by": "By",
-    "infos": "More informations",
-    "readme": "Readme file",
-    "source": "Download the source",
-    "language": "Language:"
-  },
-  "settings": {
-    "title": "Game settings:",
-    "gridSize": "Grid size:",
-    "placeholderHeight": "Height",
-    "placeholderWidth": "Width",
-    "invalidHeight": "This value must be between 5 and 100",
-    "invalidWidth": "This value must be between 5 and 100",
-    "options": "Others options:",
-    "borderWalls": "Surround the grid with walls",
-    "generateWalls": "Generate walls at random positions",
-    "speed": "Speed:",
-    "speedSelect": {
-      "1": "1 – Fastest",
-      "3": "3 – Fast",
-      "5": "5 – Medium",
-      "8": "8 – Normal",
-      "10": "10 – Quite slow",
-      "15": "15 – Slow",
-      "20": "20 – Very slow",
-      "25": "25 – Extremely slow",
-      "custom": "Custom speed…"
-    },
-    "invalidSpeed": "This value must be at least equal to or greater than 1",
-    "progressiveSpeed": "Increase the speed progressively",
-    "customSpeed": "Custom speed:",
-    "placeholderCustomSpeed": "Enter the speed…",
-    "invalidCustomSpeed": "This value must be at least equal to or greater than 1",
-    "customSpeedHelp": "The higher the number, the slower the game speed, and inversely",
-    "iaLevel": "AI level:",
-    "iaLevelSelect": {
-      "low": "Low",
-      "normal": "Normal",
-      "high": "High"
-    },
-    "invalidIALevel": "This value is invalid",
-    "autoRetry": "Make the AI restart its game after a Game Over",
-    "numberIA": "Number of AI:",
-    "placeholderNumberIA": "Enter the number…",
-    "invalidIANumber": "This value must be between 2 and 100",
-    "validate": "Validate",
-    "reset": "Reset",
-    "backToMenu": "Back to the menu"
-  },
-  "game": {
-    "backToMenu": "Back to the menu"
-  }
-}, true, true);
-
 // French
 i18next.addResourceBundle("fr", "translation", {
   "lang": {
@@ -177,5 +95,87 @@ i18next.addResourceBundle("fr", "translation", {
   },
   "game": {
     "backToMenu": "Retour au menu"
+  }
+}, true, true);
+
+// English
+i18next.addResourceBundle("en", "translation", {
+  "lang": {
+    "fr": "Français",
+    "en": "English"
+  },
+  "update": {
+    "updateAvailable": "An update of the application is available",
+    "version": "Version",
+    "of": "of",
+    "current": "You currently have the version",
+    "versionDate": "{{date, MM/DD/YYYY}}",
+    "download": "Download the update",
+    "getURL": "Get the URL of the download",
+    "getChanges": "Get the list of changes",
+    "URLToDownload": "Download URL:",
+    "noChanges": "No change indicated.",
+    "changes": "Changes in the new version:"
+  },
+  "menu": {
+    "selectGame": "Select a game mode:",
+    "iaSoloBtn": "Solo IA",
+    "joueurSolo": "Solo player",
+    "joueurVsIa": "Player VS IA",
+    "iaVsIa": "IA VS IA",
+    "iaBattleRoyale": "Battle Royale IA",
+    "version": "Version",
+    "versionDate": "{{date, MM/DD/YYYY}}",
+    "by": "By",
+    "infos": "More informations",
+    "readme": "Readme file",
+    "source": "Download the source",
+    "language": "Language:"
+  },
+  "settings": {
+    "title": "Game settings:",
+    "gridSize": "Grid size:",
+    "placeholderHeight": "Height",
+    "placeholderWidth": "Width",
+    "invalidHeight": "This value must be between 5 and 100",
+    "invalidWidth": "This value must be between 5 and 100",
+    "options": "Others options:",
+    "borderWalls": "Surround the grid with walls",
+    "generateWalls": "Generate walls at random positions",
+    "speed": "Speed:",
+    "speedSelect": {
+      "1": "1 – Fastest",
+      "3": "3 – Fast",
+      "5": "5 – Medium",
+      "8": "8 – Normal",
+      "10": "10 – Quite slow",
+      "15": "15 – Slow",
+      "20": "20 – Very slow",
+      "25": "25 – Extremely slow",
+      "custom": "Custom speed…"
+    },
+    "invalidSpeed": "This value must be at least equal to or greater than 1",
+    "progressiveSpeed": "Increase the speed progressively",
+    "customSpeed": "Custom speed:",
+    "placeholderCustomSpeed": "Enter the speed…",
+    "invalidCustomSpeed": "This value must be at least equal to or greater than 1",
+    "customSpeedHelp": "The higher the number, the slower the game speed, and inversely",
+    "iaLevel": "AI level:",
+    "iaLevelSelect": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High"
+    },
+    "invalidIALevel": "This value is invalid",
+    "autoRetry": "Make the AI restart its game after a Game Over",
+    "numberIA": "Number of AI:",
+    "placeholderNumberIA": "Enter the number…",
+    "invalidIANumber": "This value must be between 2 and 100",
+    "validate": "Validate",
+    "reset": "Reset",
+    "backToMenu": "Back to the menu"
+  },
+  "game": {
+    "backToMenu": "Back to the menu"
   }
 }, true, true);
