@@ -30,6 +30,7 @@ var showDebugInfo = false;
 document.getElementById("versionTxt").innerHTML = APP_VERSION;
 document.getElementById("appVersion").innerHTML = APP_VERSION;
 document.getElementById("dateTxt").innerHTML = DATE_VERSION;
+document.getElementById("appUpdateDate").innerHTML = DATE_VERSION;
 
 String.prototype.strcmp = function(str) {
     return ((this == str) ? 0 : ((this > str) ? 1 : -1));
@@ -50,7 +51,7 @@ function updateCallback(data) {
       document.getElementById("updateAvailable").style.display = "block";
       document.getElementById("appUpdateVersion").textContent = data.version;
 
-      var appUpdateDate = "date inconnue";
+      var appUpdateDate = DATE_VERSION;
 
       if(typeof(data.date) !== "undefined" && data.date !== null) {
           var appUpdateDate = data.date;
@@ -69,18 +70,20 @@ function updateCallback(data) {
       };
 
       document.getElementById("appDownloadURLGet").onclick = function() {
-          prompt("Adresse URL menant au téléchargement :", downloadURL);
+          prompt(window.i18next.t("update.URLToDownload"), downloadURL);
       };
 
-      var changes = "Aucun changement renseigné.";
+      var changes = window.i18next.t("update.noChanges");
 
       if(typeof(data.changes) !== "undefined" && data.changes !== null) {
           var changes = data.changes;
       }
 
       document.getElementById("appUpdateChanges").onclick = function() {
-          alert("Changements de la nouvelle version :\n" + changes);
+          alert(window.i18next.t("update.changes") + "\n" + changes);
       };
+
+      translateContent();
     }
   }
 }

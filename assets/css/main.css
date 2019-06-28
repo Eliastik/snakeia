@@ -62,7 +62,7 @@ body {
    margin: auto;
  }
 
-#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable {
+#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate {
   display: none;
 }
 

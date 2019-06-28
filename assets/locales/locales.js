@@ -24,6 +24,19 @@ i18next.use(window.i18nextBrowserLanguageDetector).init({
           "fr": "Français",
           "en": "English"
         },
+        "update": {
+          "updateAvailable": "An update of the application is available",
+          "version": "Version",
+          "of": "of",
+          "current": "You currently have the version",
+          "versionDate": "{{date, MM/DD/YYYY}}",
+          "download": "Download the update",
+          "getURL": "Get the URL of the download",
+          "getChanges": "Get the list of changes",
+          "URLToDownload": "Download URL:",
+          "noChanges": "No change indicated.",
+          "changes": "Changes in the new version:"
+        },
         "menu": {
           "selectGame": "Select a game mode:",
           "iaSoloBtn": "Solo IA",
@@ -81,6 +94,9 @@ i18next.use(window.i18nextBrowserLanguageDetector).init({
           "validate": "Validate",
           "reset": "Reset",
           "backToMenu": "Back to the menu"
+        },
+        "game": {
+          "backToMenu": "Back to the menu"
         }
       }
     },
@@ -89,6 +105,19 @@ i18next.use(window.i18nextBrowserLanguageDetector).init({
         "lang": {
           "fr": "Français",
           "en": "English"
+        },
+        "update": {
+          "updateAvailable": "Une mise à jour de l'application est disponible",
+          "version": "Version",
+          "of": "du",
+          "current": "Vous disposez actuellement de la version",
+          "versionDate": "{{date, DD/MM/YYYY}}",
+          "download": "Télécharger la mise à jour",
+          "getURL": "Obtenir l'adresse URL du téléchargement",
+          "getChanges": "Obtenir la liste des changements",
+          "URLToDownload": "Adresse URL menant au téléchargement :",
+          "noChanges": "Aucun changement renseigné.",
+          "changes": "Changements de la nouvelle version :"
         },
         "menu": {
           "selectGame": "Sélectionnez un mode de jeu :",
@@ -147,6 +176,9 @@ i18next.use(window.i18nextBrowserLanguageDetector).init({
           "validate": "Valider",
           "reset": "Réinitialiser",
           "backToMenu": "Retour au menu"
+        },
+        "game": {
+          "backToMenu": "Retour au menu"
         }
       }
     }
@@ -187,6 +219,11 @@ function translateContent() {
   document.getElementById("widthGrid").placeholder = window.i18next.t("settings.placeholderWidth");
   document.getElementById("customSpeed").placeholder = window.i18next.t("settings.placeholderCustomSpeed");
   document.getElementById("numberIA").placeholder = window.i18next.t("settings.placeholderNumberIA");
+
+  document.getElementById("appDownloadURLGet").title = window.i18next.t("update.getURL");
+  document.getElementById("appUpdateChanges").title = window.i18next.t("update.getChanges");
+
+  document.getElementById("appUpdateDateLocalized").innerHTML = window.i18next.t("update.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(document.getElementById("appUpdateDate").innerHTML)) });
 }
 
 document.getElementById("languageSelect").onchange = function() {
