@@ -56,6 +56,12 @@ body {
   margin: auto;
 }
 
+ .language {
+   width: 100%;
+   max-width: 350px;
+   margin: auto;
+ }
+
 #settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable {
   display: none;
 }

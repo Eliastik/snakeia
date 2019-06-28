@@ -25,7 +25,19 @@ i18next.use(window.i18nextBrowserLanguageDetector).init({
           "en": "English"
         },
         "menu": {
-          "selectGame": "Select a game mode:"
+          "selectGame": "Select a game mode:",
+          "iaSoloBtn": "Solo IA",
+          "joueurSolo": "Solo player",
+          "joueurVsIa": "Player VS IA",
+          "iaVsIa": "IA VS IA",
+          "iaBattleRoyale": "Battle Royale IA",
+          "version": "Version",
+          "versionDate": "{{date, MM/DD/YYYY}}",
+          "par": "By",
+          "infos": "More informations",
+          "readme": "Readme file",
+          "source": "Download the source",
+          "language": "Language:"
         }
       }
     },
@@ -36,7 +48,19 @@ i18next.use(window.i18nextBrowserLanguageDetector).init({
           "en": "English"
         },
         "menu": {
-          "selectGame": "Sélectionnez un mode de jeu :"
+          "selectGame": "Sélectionnez un mode de jeu :",
+          "iaSoloBtn": "IA solo",
+          "joueurSolo": "Joueur solo",
+          "joueurVsIa": "Joueur VS IA",
+          "iaVsIa": "IA VS IA",
+          "iaBattleRoyale": "IA Battle Royale",
+          "version": "Version",
+          "versionDate": "{{date, DD/MM/YYYY}}",
+          "par": "Par",
+          "infos": "Plus d'infos",
+          "readme": "Fichier Lisez-moi",
+          "source": "Télécharger la source",
+          "language": "Langue :"
         }
       }
     }
@@ -70,6 +94,8 @@ function translateContent() {
   i18nList.forEach(function(v) {
     v.innerHTML = window.i18next.t(v.dataset.i18n);
   });
+
+  document.getElementById("dateTxt").innerHTML = window.i18next.t("menu.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)) });
 }
 
 document.getElementById("languageSelect").onchange = function() {

@@ -44,33 +44,41 @@
         <div class="menu-buttons">
           <div class="row mb-2">
             <div class="col text-center">
-              <button class="btn btn-lg btn-info btn-block" id="iaSoloBtn">IA solo</button>
+              <button class="btn btn-lg btn-info btn-block" id="iaSoloBtn" data-i18n="menu.iaSoloBtn">IA solo</button>
             </div>
           </div>
           <div class="row mb-2">
             <div class="col text-center">
-              <button class="btn btn-lg btn-info btn-block" id="joueurSolo">Joueur solo</button>
+              <button class="btn btn-lg btn-info btn-block" id="joueurSolo" data-i18n="menu.joueurSolo">Joueur solo</button>
             </div>
           </div>
           <div class="row mb-2">
             <div class="col text-center">
-              <button class="btn btn-lg btn-info btn-block" id="joueurVsIa">Joueur VS IA</button>
+              <button class="btn btn-lg btn-info btn-block" id="joueurVsIa" data-i18n="menu.joueurVsIa">Joueur VS IA</button>
             </div>
           </div>
           <div class="row mb-2">
             <div class="col text-center">
-              <button class="btn btn-lg btn-info btn-block" id="iaVsIa">IA VS IA</button>
+              <button class="btn btn-lg btn-info btn-block" id="iaVsIa" data-i18n="menu.iaVsIa">IA VS IA</button>
             </div>
           </div>
           <div class="row mb-2">
             <div class="col text-center">
-              <button class="btn btn-lg btn-info btn-block" id="iaBattleRoyale">IA Battle Royale</button>
+              <button class="btn btn-lg btn-info btn-block" id="iaBattleRoyale" data-i18n="menu.iaBattleRoyale">IA Battle Royale</button>
             </div>
           </div>
         </div>
-        <p class="m-0"><small>Version <span id="versionTxt"></span> (<span id="dateTxt"></span>) – By <a href="http://www.eliastiksofts.com" target="_blank">Eliastik</a></small></p>
-        <p class="m-0"><small><a href="http://www.eliastiksofts.com/snakeia" target="_blank">Plus d'infos</a> – <a href="README.md" target="_blank">Fichier Lisez-moi</a> – <a href="http://www.eliastiksofts.com/snakeia/downloads" target="_blank">Télécharger la source</a></small></p>
-        <div><select id="languageSelect" class="form-control" rows="10"></select></div>
+        <p class="m-0"><small><span data-i18n="menu.version">Version</span> <span id="versionTxt"></span> (<span id="dateTxt"></span>) – <span data-i18n="menu.par">Par</span> <a href="http://www.eliastiksofts.com" target="_blank">Eliastik</a></small></p>
+        <p class="m-0"><small><a href="http://www.eliastiksofts.com/snakeia" target="_blank" data-i18n="menu.infos">Plus d'infos</a> – <a href="README.md" target="_blank" data-i18n="menu.readme">Fichier Lisez-moi</a> – <a href="http://www.eliastiksofts.com/snakeia/downloads" target="_blank" data-i18n="menu.source">Télécharger la source</a></small></p>
+        <div class="language">
+          <hr />
+          <div class="form-group row">
+            <label for="languageSelect" class="col-sm-4 col-form-label" data-i18n="menu.language">Langue :</label>
+            <div class="col-sm-8">
+              <select id="languageSelect" class="form-control" rows="10"></select>
+            </div>
+          </div>
+        </div>
       </div>
       <div id="settings">
         <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
@@ -208,9 +216,9 @@
     </div>
     <script type="text/javascript" src="assets/js/i18next.min.js"></script>
     <script type="text/javascript" src="assets/js/i18nextBrowserLanguageDetector.min.js"></script>
-    <script type="text/javascript" src="assets/locales/locales.js"></script>
     <script type="text/javascript" src="assets/js/pathfinding.min.js"></script>
     <script type="text/javascript" src="assets/js/engine.js"></script>
     <script type="text/javascript" src="assets/js/main.js"></script>
+    <script type="text/javascript" src="assets/locales/locales.js"></script>
   </body>
 </html>

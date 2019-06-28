@@ -55,7 +55,7 @@ FONT_FAMILY = "Delius";
 TARGET_FPS = 60;
 // Infos
 APP_VERSION = "1.0";
-DATE_VERSION = "19/06/2019";
+DATE_VERSION = "2019-06-19";
 
 // return an integer between min (inclusive) and max (inclusive)
 function randRange(min, max) {
