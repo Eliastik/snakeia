@@ -412,3 +412,43 @@ function enableDebugMode() {
   showDebugInfo = true;
   console.log("Mode de debug activé");
 }
+
+// Localization
+function listTranslations(languages) {
+  document.getElementById("languageSelect").innerHTML = "";
+
+  for(var i = 0; i < languages.length; i++) {
+    document.getElementById("languageSelect").innerHTML = document.getElementById("languageSelect").innerHTML + '<option data-i18n="lang.' + languages[i] + '" value="'+ languages[i] +'"></option>';
+  }
+
+  document.getElementById("languageSelect").value = i18next.language.substr(0, 2);
+}
+
+function translateContent() {
+  listTranslations(i18next.languages);
+
+  var i18nList = document.querySelectorAll("[data-i18n]");
+  i18nList.forEach(function(v) {
+    v.innerHTML = window.i18next.t(v.dataset.i18n);
+  });
+
+  document.getElementById("dateTxt").innerHTML = window.i18next.t("menu.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)) });
+
+  document.getElementById("heightGrid").placeholder = window.i18next.t("settings.placeholderHeight");
+  document.getElementById("widthGrid").placeholder = window.i18next.t("settings.placeholderWidth");
+  document.getElementById("customSpeed").placeholder = window.i18next.t("settings.placeholderCustomSpeed");
+  document.getElementById("numberIA").placeholder = window.i18next.t("settings.placeholderNumberIA");
+
+  document.getElementById("appDownloadURLGet").title = window.i18next.t("update.getURL");
+  document.getElementById("appUpdateChanges").title = window.i18next.t("update.getChanges");
+
+  document.getElementById("appUpdateDateLocalized").innerHTML = window.i18next.t("update.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(document.getElementById("appUpdateDate").innerHTML)) });
+}
+
+document.getElementById("languageSelect").onchange = function() {
+  i18next.changeLanguage(document.getElementById("languageSelect").value, function(err, t) {
+    translateContent();
+  });
+};
+
+translateContent();
