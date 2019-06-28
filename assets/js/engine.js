@@ -546,9 +546,9 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.imageLoader;
   this.grid = grid;
   this.snake = snake;
-  this.speed = speed || 5;
-  this.initialSpeed = speed || 5;
-  this.initialSpeedUntouched = speed || 5;
+  this.speed = speed || 8;
+  this.initialSpeed = speed || 8;
+  this.initialSpeedUntouched = speed || 8;
   this.progressiveSpeed = progressiveSpeed === undefined ? false : progressiveSpeed;
   this.outputType = outputType || OUTPUT_GRAPHICAL;
   this.score = 0;
