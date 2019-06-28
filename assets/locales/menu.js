@@ -94,7 +94,19 @@ i18next.addResourceBundle("fr", "translation", {
     "backToMenu": "Retour au menu"
   },
   "game": {
-    "backToMenu": "Retour au menu"
+    "backToMenu": "Retour au menu",
+    "currentMode": "Mode de jeu actuel :",
+    "confirmQuit": "Êtes-vous sûr de vouloir retourner au menu ?",
+    "equalityPlayerVSAI": "Vous avez fini ex-aequo avec l'IA !",
+    "winPlayerVSAI": "Bravo, vous avez gagné !",
+    "losePlayerVSAI": "Dommage, l'IA vous a battu avec un score supérieur !",
+    "oneWinnerAIVSAI": "L'IA n°{{numWinner}} a gagné !",
+    "equalityAIVSAI": "Les deux IA ont fini ex-aequo !",
+    "oneWinnerBattleRoyale": "L'IA n°{{numWinner}} a gagné avec un score de {{score}} !",
+    "winnersBattleRoyale": "Les IA",
+    "winnersNumBattleRoyale": "n°{{numWinner}}",
+    "andWinnersBattleRoyale": "et",
+    "winScoreBattleRoyale": "ont gagné avec un score de {{score}} !"
   }
 }, true, true);
 
@@ -119,11 +131,11 @@ i18next.addResourceBundle("en", "translation", {
   },
   "menu": {
     "selectGame": "Select a game mode:",
-    "iaSoloBtn": "Solo IA",
+    "iaSoloBtn": "Solo AI",
     "joueurSolo": "Solo player",
-    "joueurVsIa": "Player VS IA",
-    "iaVsIa": "IA VS IA",
-    "iaBattleRoyale": "Battle Royale IA",
+    "joueurVsIa": "Player VS AI",
+    "iaVsIa": "AI VS AI",
+    "iaBattleRoyale": "Battle Royale AI",
     "version": "Version",
     "versionDate": "{{date, MM/DD/YYYY}}",
     "by": "By",
@@ -176,6 +188,18 @@ i18next.addResourceBundle("en", "translation", {
     "backToMenu": "Back to the menu"
   },
   "game": {
-    "backToMenu": "Back to the menu"
+    "backToMenu": "Back to the menu",
+    "currentMode": "Current game mode:",
+    "confirmQuit": "Are you sure you want to go back to the menu?",
+    "equalityPlayerVSAI": "You finished tied with AI!",
+    "winPlayerVSAI": "Congratulations, you won!",
+    "losePlayerVSAI": "Too bad, the AI ​​beat you with a higher score!",
+    "oneWinnerAIVSAI": "The AI n°{{numWinner}} won!",
+    "equalityAIVSAI": "The two AIs finished tied!",
+    "oneWinnerBattleRoyale": "The AI n°{{numWinner}} won with a score of {{score}}!",
+    "winnersBattleRoyale": "The AIs",
+    "winnersNumBattleRoyale": "n°{{numWinner}}",
+    "andWinnersBattleRoyale": "and",
+    "winScoreBattleRoyale": "won with a score of {{score}}!"
   }
 }, true, true);

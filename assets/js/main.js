@@ -33,7 +33,7 @@ document.getElementById("dateTxt").innerHTML = DATE_VERSION;
 document.getElementById("appUpdateDate").innerHTML = DATE_VERSION;
 
 String.prototype.strcmp = function(str) {
-    return ((this == str) ? 0 : ((this > str) ? 1 : -1));
+  return ((this == str) ? 0 : ((this > str) ? 1 : -1));
 };
 
 function checkUpdate() {
@@ -282,23 +282,23 @@ function validateSettings() {
 
     switch(selectedMode) {
       case IA_SOLO:
-        titleGame = "IA solo";
+        titleGame = window.i18next.t("menu.iaSoloBtn");
         break;
       case JOUEUR_SOLO:
-        titleGame = "Joueur solo";
+        titleGame = window.i18next.t("menu.joueurSolo");
         break;
       case JOUEUR_VS_IA:
-        titleGame = "Joueur VS IA";
+        titleGame = window.i18next.t("menu.joueurVsIa");
         break;
       case IA_VS_IA:
-        titleGame = "IA VS IA";
+        titleGame = window.i18next.t("menu.iaVsIa");
         break;
       case IA_BATTLE_ROYALE:
-        titleGame = "IA Battle Royale";
+        titleGame = window.i18next.t("menu.iaBattleRoyale");
         break;
     }
 
-    document.getElementById("titleGame").innerHTML = "Mode de jeu actuel : " + titleGame;
+    document.getElementById("titleGame").innerHTML = window.i18next.t("game.currentMode") + " " + titleGame;
 
     var games = [];
 
@@ -344,7 +344,7 @@ function validateSettings() {
     group.start();
 
     document.getElementById("backToMenuGame").onclick = function() {
-      if(confirm("Êtes-vous sûr de vouloir retourner au menu ? Cela quittera toutes les parties actuelles.")) {
+      if(confirm(window.i18next.t("game.confirmQuit"))) {
         group.killAll();
         displayMenu();
         group = null;
@@ -357,35 +357,35 @@ function validateSettings() {
 
         if(selectedMode == JOUEUR_VS_IA) {
           if(winners.index.length == 2) {
-            document.getElementById("gameStatus").innerHTML = "Vous avez fini ex-aequo avec l'IA !";
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.equalityPlayerVSAI");
           } else if(winners.index[0] == 0) {
-            document.getElementById("gameStatus").innerHTML = "Bravo, vous avez gagné !";
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.winPlayerVSAI");
           } else if(winners.index[0] == 1) {
-            document.getElementById("gameStatus").innerHTML = "Dommage, l'IA vous a battu avec un score supérieur !";
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.losePlayerVSAI");
           }
         } else if(selectedMode == IA_VS_IA) {
           if(winners.index.length == 1) {
-            document.getElementById("gameStatus").innerHTML = "L'IA n°" + (winners.index[0] + 1) + " a gagné !";
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.oneWinnerAIVSAI", { numWinner: winners.index[0] + 1 });
           } else if(winners.index.length == 2) {
-            document.getElementById("gameStatus").innerHTML = "Les deux IA ont fini ex-aequo !";
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.equalityAIVSAI");
           }
         } else if(selectedMode == IA_BATTLE_ROYALE) {
           if(winners.index.length == 1) {
-            document.getElementById("gameStatus").innerHTML = "L'IA n°" + (winners.index[0] + 1) + " a gagné avec un score de " + winners.score + " !";
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.oneWinnerBattleRoyale", { numWinner: winners.index[0] + 1, score: winners.score });
           } else if(winners.index.length > 1) {
-            document.getElementById("gameStatus").innerHTML = "Les IA ";
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.winnersBattleRoyale") + " ";
 
             for(var i = 0; i < winners.index.length; i++) {
-              document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " n°" + (winners.index[i] + 1);
+              document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: winners.index[i] + 1 });
 
               if((i + 1) < winners.index.length - 1) {
                 document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + ", ";
               } else if((i + 1) == winners.index.length - 1) {
-                document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " et ";
+                document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.andWinnersBattleRoyale") + " ";
               }
             }
 
-            document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " ont gagné avec un score de " + winners.score + " !";
+            document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.winScoreBattleRoyale", { score: winners.score });
           }
         }
       }
