@@ -40,7 +40,7 @@
                 </div>
             </div>
         </div>
-        <h1 class="h3 mb-3 font-weight-normal">Sélectionnez un mode de jeu :</h1>
+        <h1 class="h3 mb-3 font-weight-normal" data-i18n="menu.selectGame">Sélectionnez un mode de jeu :</h1>
         <div class="menu-buttons">
           <div class="row mb-2">
             <div class="col text-center">
@@ -70,7 +70,7 @@
         </div>
         <p class="m-0"><small>Version <span id="versionTxt"></span> (<span id="dateTxt"></span>) – By <a href="http://www.eliastiksofts.com" target="_blank">Eliastik</a></small></p>
         <p class="m-0"><small><a href="http://www.eliastiksofts.com/snakeia" target="_blank">Plus d'infos</a> – <a href="README.md" target="_blank">Fichier Lisez-moi</a> – <a href="http://www.eliastiksofts.com/snakeia/downloads" target="_blank">Télécharger la source</a></small></p>
-        <p class="m-0" id="updateTxt"></p>
+        <div><select id="languageSelect" class="form-control" rows="10"></select></div>
       </div>
       <div id="settings">
         <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
@@ -206,6 +206,9 @@
         </div>
       </div>
     </div>
+    <script type="text/javascript" src="assets/js/i18next.min.js"></script>
+    <script type="text/javascript" src="assets/js/i18nextBrowserLanguageDetector.min.js"></script>
+    <script type="text/javascript" src="assets/locales/locales.js"></script>
     <script type="text/javascript" src="assets/js/pathfinding.min.js"></script>
     <script type="text/javascript" src="assets/js/engine.js"></script>
     <script type="text/javascript" src="assets/js/main.js"></script>
