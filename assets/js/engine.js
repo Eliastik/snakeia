@@ -969,6 +969,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       if(this.canvas.width <= CANVAS_WIDTH / 2) {
         this.fontSize /= 1.5;
+      } else if(this.canvas.width >= CANVAS_WIDTH * 1.5) {
+        this.fontSize *= 1.25;
       }
 
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
