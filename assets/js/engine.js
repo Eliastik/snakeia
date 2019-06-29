@@ -1230,38 +1230,19 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
 };
 
 Game.prototype.wrapText = function(text, limit) {
-  var newLineStr = "\n";
-  var done = false;
-  var res = "";
+  if(text.length > limit) {
+    var p = limit;
 
-  function testWhite(x) {
-    var white = new RegExp(/^\s$/);
-    return white.test(x.charAt(0));
+    for(; p > 0 && text[p] != " "; p--);
+
+    if(p > 0) {
+      var left = text.substring(0, p);
+      var right = text.substring(p + 1);
+      return left + "\n" + this.wrapText(right, limit);
+    }
   }
 
-  do {
-    found = false;
-
-    for(var i = limit - 1; i >= 0; i--) {
-      if(testWhite(text.charAt(i))) {
-        res = res + [text.slice(0, i), newLineStr].join('');
-        text = text.slice(i + 1);
-        found = true;
-        break;
-      }
-    }
-
-    if(!found) {
-      res += [text.slice(0, limit), newLineStr].join('');
-      text = text.slice(limit);
-    }
-
-    if(text.length < limit) {
-      done = true;
-    }
-  } while(!done);
-
-  return res + text;
+  return text;
 };
 
 Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, delay, wrap, func) {
