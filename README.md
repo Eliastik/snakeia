@@ -7,27 +7,34 @@ A Snake version with an artificial intelligence. This version has many game mode
 
 Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) and object oriented.
 
-Note: this game is not yet translated in english, but it will be soon!
-
 * Online version of this game: [www.eliastiksofts.com/snakeia/demo](http://www.eliastiksofts.com/snakeia/demo/)
 * Github repository: [https://github.com/Eliastik/snakeia](https://github.com/Eliastik/snakeia)
 
 ## About this game
 
-* Version: 1.0
+* Version: 1.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
 ### Credits
 
 * Uses the library [PathFinding.js](https://github.com/qiao/PathFinding.js/) under [MIT](https://opensource.org/licenses/mit-license.php) license
+* Uses the library [i18next](https://github.com/i18next/i18next) (with the module [i18next-browser-languageDetector](https://github.com/i18next/i18next-browser-languageDetector)) under [MIT](https://opensource.org/licenses/mit-license.php) license for the translation engine
 * Uses graphic elements from [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728) and [Snake](https://www.flaticon.com/free-icon/snake_194210) (changed)
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 * Uses the CSS framework [Bootstrap 4](https://getbootstrap.com/) and the theme [Flat UI](https://designmodo.github.io/Flat-UI/)
 
 ## Changelog
 
-* Version 1.0:
+* Version 1.1 (6/30/2019):
+  - Integration of the i18next translation engine and translation of the application into English;
+  - Various improvements and bug fixes:
+    - The menus and texts automatically adapt to the width of the game space and the screen resolution (automatic reduction/increase of text size and buttons, automatic line jump);
+    - Optimization of the display of the control buttons for the player (arrows), this improves performance;
+    - The default speed is now 8;
+    - Other minor bug fixes and texts fixes.
+
+* Version 1.0 (6/19/2019):
     - Initial version
 
 # Français
@@ -41,21 +48,35 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ## À propos du jeu
 
-* Version du jeu : 1.0
+* Version du jeu : 1.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
 ### Crédits
 
 * Utilise la bibliothèque logicielle [PathFinding.js](https://github.com/qiao/PathFinding.js/) sous licence [MIT](https://opensource.org/licenses/mit-license.php)
+* Utilise la bibliothèque logicielle [i18next](https://github.com/i18next/i18next) (avec le module [i18next-browser-languageDetector](https://github.com/i18next/i18next-browser-languageDetector)) sous licence [MIT](https://opensource.org/licenses/mit-license.php) pour le moteur de traduction
 * Utilise des éléments graphiques venant de [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728) et [Snake](https://www.flaticon.com/free-icon/snake_194210) (modifié)
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 * Utilise le framework CSS [Bootstrap 4](https://getbootstrap.com/) et le thème [Flat UI](https://designmodo.github.io/Flat-UI/)
 
 ## Journal des changements
 
-* Version 1.0 :
+* Version 1.1 (30/06/2019) :
+  - Intégration du moteur de traduction i18next et traduction de l'application en anglais ;
+  - Améliorations diverses et corrections de bugs :
+    - Les menus et les textes s'adaptent automatiquement à la largeur de l'espace du jeu et à la résolution de l'écran (réduction/augmentation automatique de la taille du texte et des boutons, saut automatique de ligne) ;
+    - Optimisation de l'affichage des boutons de contrôle pour le joueur (flèches), cela améliore les performances ;
+    - La vitesse par défaut est désormais 8 ;
+    - Autres corrections mineures de bugs et des textes.
+
+* Version 1.0 (19/06/2019) :
     - Version initiale
+
+## TO-DO list
+
+* Amélioration de l'IA (prévoir les coups à l'avance et choisir la direction en fonction d'un score calculé par cette prévision, en plus du choix des algorithmes actuels, algorithme récursif nécessaire (donner une limite pour éviter les boucles infinies))
+* Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
 
 ## Déclaration de licence
 
