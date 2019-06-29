@@ -967,7 +967,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
       this.fontSize = FONT_SIZE;
 
-      if(this.canvas.height <= CANVAS_HEIGHT / 2) {
+      if(this.canvas.width <= CANVAS_WIDTH / 2) {
         this.fontSize /= 1.5;
       }
 
