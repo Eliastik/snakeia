@@ -128,7 +128,7 @@ i18next.addResourceBundle("en", "translation", {
     "getURL": "Get the URL of the download",
     "getChanges": "Get the list of changes",
     "URLToDownload": "Download URL:",
-    "noChanges": "No change indicated.",
+    "noChanges": "No change filled.",
     "changes": "Changes in the new version:"
   },
   "menu": {
