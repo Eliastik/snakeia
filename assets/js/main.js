@@ -410,7 +410,7 @@ document.getElementById("validateSettings").onclick = function() {
 
 function enableDebugMode() {
   showDebugInfo = true;
-  console.log("Mode de debug activé");
+  console.log(window.i18next.t("debugModeEnabled"));
 }
 
 // Localization

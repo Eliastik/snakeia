@@ -19,6 +19,7 @@
  // French
  i18next.addResourceBundle("fr", "translation", {
    "engine": {
+     "score": "Score",
      "initFailed": "Échec de l'initialisation du jeu : le Snake est plus grand que la grille",
      "continue": "Reprendre",
      "reset": "Recommencer la partie",
@@ -34,13 +35,25 @@
      "resetConfirm": "Êtes-vous sûr de vouloir recommencer la partie ?",
      "scoreMax": "Score maximal atteint !",
      "gameOver": "Game Over !",
-     "pause": "Pause"
+     "pause": "Pause",
+     "aboutScreen": {
+       "title": "SnakeIA par Eliastik",
+       "versionAndDate": "Version {{version}} ({{date, DD/MM/YYYY}})"
+     },
+     "debug": {
+       "fps": "IPS",
+       "frames": "Images",
+       "ticks": "Tours",
+       "speed": "Vit.",
+       "paused": "En pause"
+     }
    }
 }, true, false);
 
 // English
 i18next.addResourceBundle("en", "translation", {
   "engine": {
+    "score": "Score",
     "initFailed": "Game init failed: the Snake is bigger than the grid",
     "continue": "Continue",
     "reset": "Reset the game",
@@ -53,6 +66,20 @@ i18next.addResourceBundle("en", "translation", {
     "exited": "This game has been definitively exited. Waiting for the end of the other games…",
     "error": "An error has occurred!",
     "exitConfirm": "Are you sure that you want to exit the game?",
-    "resetConfirm": "Are you sure that you want to reset the game?"
+    "resetConfirm": "Are you sure that you want to reset the game?",
+    "scoreMax": "Maximum score reached!",
+    "gameOver": "Game Over!",
+    "pause": "Pause",
+    "aboutScreen": {
+      "title": "SnakeIA by Eliastik",
+      "versionAndDate": "Version {{version}} ({{date, MM/DD/YYYY}})"
+    },
+    "debug": {
+      "fps": "FPS",
+      "frames": "Frames",
+      "ticks": "Ticks",
+      "speed": "Speed",
+      "paused": "Paused"
+    }
   }
 }, true, false);

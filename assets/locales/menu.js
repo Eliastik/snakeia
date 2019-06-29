@@ -18,6 +18,7 @@
  */
 // French
 i18next.addResourceBundle("fr", "translation", {
+  "debugModeEnabled": "Mode de debug activé",
   "lang": {
     "fr": "Français",
     "en": "English"
@@ -112,6 +113,7 @@ i18next.addResourceBundle("fr", "translation", {
 
 // English
 i18next.addResourceBundle("en", "translation", {
+  "debugModeEnabled": "Debug mode enabled",
   "lang": {
     "fr": "Français",
     "en": "English"

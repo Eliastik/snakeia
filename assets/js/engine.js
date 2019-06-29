@@ -872,6 +872,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.kill = function() {
     this.paused = true;
     this.gameOver = true;
+    this.snake.autoRetry = false;
     this.clearIntervalCountFPS();
 
     if(this.outputType == OUTPUT_TEXT) {
@@ -1033,7 +1034,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
          });
        });
      } else if(this.getInfos) {
-        this.drawMenu(ctx, [this.btnOK], "SnakeIA by Eliastik\nwww.eliastiksofts.com\n\nVersion " + APP_VERSION + " (" + DATE_VERSION + ")", "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+        this.drawMenu(ctx, [this.btnOK], window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)) }), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfos = false;
             self.updateUI();
@@ -1131,7 +1132,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       }
 
       if(this.displayFPS) {
-        this.drawText(ctx, "FPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed) + " / Speed : " + this.speed, "rgba(255, 255, 255, 0.5)", 24, FONT_FAMILY, "right", "bottom");
+        this.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, FONT_FAMILY, "right", "bottom");
       }
     }
   };
@@ -1154,11 +1155,15 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnLeftArrow.disable();
   };
 
+  this.getDebugText = function() {
+    return window.i18next.t("engine.debug.fps") + " : " + this.currentFPS + " / " + window.i18next.t("engine.debug.frames") + " : " + this.frame + " / " + window.i18next.t("engine.debug.ticks") + " : " + Math.floor(this.frame / this.speed) + " / " + window.i18next.t("engine.debug.speed") + " : " + this.speed;
+  };
+
   this.init();
 }
 
 Game.prototype.toString = function() {
-  return this.grid.toString() + "\nScore : " + this.score + (this.displayFPS ? "\nFPS : " + this.currentFPS + " / Frames : " + this.frame + " / Ticks : " + Math.floor(this.frame / this.speed) + " / Speed : " + this.speed : "") + (this.gameOver && !this.scoreMax ? "\nGame Over !" : "") + (this.scoreMax ? "\nScore maximal atteint !" : "") + (!this.gameOver && this.paused ? "\nEn pause" : "");
+  return this.grid.toString() + "\n" + window.i18next.t("engine.score") + " : " + this.score + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + window.i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + window.i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + window.i18next.t("engine.debug.paused") : "");
 };
 
 Game.prototype.getImageCase = function(position) {
