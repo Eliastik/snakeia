@@ -1034,7 +1034,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
          });
        });
      } else if(this.getInfos) {
-        this.drawMenu(ctx, [this.btnOK], window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)) }), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+        this.drawMenu(ctx, [this.btnOK], window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfos = false;
             self.updateUI();
