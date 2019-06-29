@@ -1278,8 +1278,8 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
 
     if(buttons != null) {
       for(var i = 0; i < buttons.length; i++) {
-        if(buttons[i].height == "auto") {
-          heightButtons += buttons[i].fontSize * 1.75 + 5;
+        if(buttons[i].autoHeight) {
+          heightButtons += buttons[i].getFontSize(ctx) * 1.75 + 5;
         } else {
           heightButtons += buttons[i].height + 5;
         }
@@ -1433,7 +1433,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
     var ctx = canvas.getContext("2d");
     var precFillStyle = ctx.fillStyle;
     var precFont = ctx.font;
-    this.fontSize = Math.floor(parseInt(ctx.font.match(/\d+/), 10) / 1.25);
+    this.fontSize = this.getFontSize(ctx);
 
     ctx.font = this.fontSize + "px " + this.fontFamily;
     var textSize = ctx.measureText(this.text);
@@ -1515,6 +1515,10 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
     }
 
     this.init = true;
+  };
+
+  this.getFontSize = function(ctx) {
+    return Math.floor(parseInt(ctx.font.match(/\d+/), 10) / 1.25);
   };
 
   this.getMousePos = function(canvas, event) {
