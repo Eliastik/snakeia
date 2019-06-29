@@ -52,6 +52,7 @@ KEY_BOTTOM = 40;
 KEY_LEFT = 37;
 // UI
 FONT_FAMILY = "Delius";
+FONT_SIZE = 32;
 TARGET_FPS = 60;
 // Infos
 APP_VERSION = "1.0";
@@ -562,6 +563,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.canvasCtx;
   this.canvasWidth = canvasWidth || CANVAS_WIDTH;
   this.canvasHeight = canvasHeight || CANVAS_HEIGHT;
+  this.fontSize = FONT_SIZE
   this.assetsLoaded = false;
   this.appendTo = appendTo;
   this.scoreMax = false;
@@ -618,13 +620,13 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.appendTo.appendChild(this.canvas);
       this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", null, 64, 64);
       this.btnPause = new ButtonImage("assets/images/pause.png", 75, 5, "right", null, 64, 64);
-      this.btnContinue = new Button("Reprendre", null, null, "center", "#3498db", "#246A99");
-      this.btnRetry = new Button("Recommencer la partie", null, null, "center", "#3498db", "#246A99");
-      this.btnQuit = new Button("Quitter", null, null, "center", "#3498db", "#246A99");
-      this.btnYes = new Button("Oui", null, null, "center", "#3498db", "#246A99");
-      this.btnNo = new Button("Non", null, null, "center", "#3498db", "#246A99");
-      this.btnOK = new Button("OK", null, null, "center", "#3498db", "#246A99");
-      this.btnAbout = new Button("À propos…", null, null, "center", "#3498db", "#246A99");
+      this.btnContinue = new Button(window.i18next.t("engine.continue"), null, null, "center", "#3498db", "#246A99");
+      this.btnRetry = new Button(window.i18next.t("engine.reset"), null, null, "center", "#3498db", "#246A99");
+      this.btnQuit = new Button(window.i18next.t("engine.exit"), null, null, "center", "#3498db", "#246A99");
+      this.btnYes = new Button(window.i18next.t("engine.yes"), null, null, "center", "#3498db", "#246A99");
+      this.btnNo = new Button(window.i18next.t("engine.no"), null, null, "center", "#3498db", "#246A99");
+      this.btnOK = new Button(window.i18next.t("engine.ok"), null, null, "center", "#3498db", "#246A99");
+      this.btnAbout = new Button(window.i18next.t("engine.about"), null, null, "center", "#3498db", "#246A99");
       this.btnTopArrow = new ButtonImage("assets/images/up.png", 56, 100, "right", "bottom", 64, 64);
       this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64);
       this.btnLeftArrow = new ButtonImage("assets/images/left.png", 112, 46, "right", "bottom", 64, 64);
@@ -656,7 +658,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     }
 
     if((this.grid.width * this.grid.height - this.grid.getTotalWalls()) <= this.snake.length() || this.snake.errorInit) {
-      console.error("Game init failed: the snake is bigger than the grid");
+      console.error(window.i18next.t("engine.initFailed"));
       this.errorOccured = true;
       this.stop();
     } else {
@@ -673,7 +675,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     this.setIntervalCountFPS();
 
-    window.addEventListener('blur', function() {
+    window.addEventListener("blur", function() {
       if(!self.paused) {
         self.pause();
       }
@@ -732,6 +734,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.reset = function() {
     this.paused = true;
     this.isReseted = true;
+    this.exited = false;
     this.reactor.dispatchEvent("onReset");
     this.clearIntervalCountFPS();
     this.grid.init();
@@ -962,13 +965,18 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       var caseWidth = Math.floor(this.canvas.width / this.grid.width);
       caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
       caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
+      this.fontSize = FONT_SIZE;
+
+      if(this.canvas.height <= CANVAS_HEIGHT / 2) {
+        this.fontSize /= 1.5;
+      }
 
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.fillStyle = "rgba(204, 207, 211, 1)";
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.fillStyle = "#27AE60";
       ctx.fillRect(0, 0, this.canvas.width, 75);
-      ctx.font = "32px " + FONT_FAMILY;
+      ctx.font = this.fontSize + "px " + FONT_FAMILY;
       ctx.fillStyle = "black";
 
       this.btnFullScreen.draw(this.canvas);
@@ -979,7 +987,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       if(this.assetsLoaded) {
         this.drawImage(ctx, "assets/images/fruit.png", 5, 5, 64, 64);
-        this.drawText(ctx, "× " + this.score, "black", 32, FONT_FAMILY, "default", "default", 68, 50);
+        this.drawText(ctx, "× " + this.score, "black", FONT_SIZE, FONT_FAMILY, "default", "default", 68, 50);
 
         var totalWidth = caseWidth * this.grid.width;
 
@@ -1001,7 +1009,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth);
       } else {
-        this.drawMenu(ctx, [], "Chargement\ndes ressources…", "white", 32, FONT_FAMILY, "center", null, 1);
+        this.drawMenu(ctx, [], window.i18next.t("engine.loading"), "white", this.fontSize, FONT_FAMILY, "center", null, 1, true);
       }
 
       if(this.snake.player == PLAYER_HUMAN) {
@@ -1014,23 +1022,23 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.disableAllButtons();
 
       if(this.exited) {
-        this.drawMenu(ctx, [], "Cette partie a été\ndéfinitivement quittée.\nEn attente de la fin des\nautres parties…", "white", 32, FONT_FAMILY, "center", null, 0);
+        this.drawMenu(ctx, [], window.i18next.t("engine.exited"), "white", this.fontSize, FONT_FAMILY, "center", null, 0, true);
       } else if(this.errorOccured) {
-       this.drawMenu(ctx, [this.btnQuit], "Une erreur est survenue !", "red", 32, FONT_FAMILY, "center", null, 0, function() {
+       this.drawMenu(ctx, [this.btnQuit], window.i18next.t("engine.error"), "red", this.fontSize, FONT_FAMILY, "center", null, 0, true, function() {
          self.btnQuit.addClickAction(self.canvas, function() {
            self.confirmExit = false;
            self.exit();
          });
        });
      } else if(this.getInfos) {
-        this.drawMenu(ctx, [this.btnOK], "SnakeIA by Eliastik\nwww.eliastiksofts.com\n\nVersion " + APP_VERSION + " (" + DATE_VERSION + ")", "white", 32, FONT_FAMILY, "center", null, 0, function() {
+        this.drawMenu(ctx, [this.btnOK], "SnakeIA by Eliastik\nwww.eliastiksofts.com\n\nVersion " + APP_VERSION + " (" + DATE_VERSION + ")", "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfos = false;
             self.updateUI();
           });
         });
       } else if(this.confirmExit) {
-        this.drawMenu(ctx, [this.btnNo, this.btnYes], "Êtes-vous sûr de vouloir\nquitter la partie ?", "#E74C3C", 32, FONT_FAMILY, "center", null, null, function() {
+        this.drawMenu(ctx, [this.btnNo, this.btnYes], window.i18next.t("engine.exitConfirm"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, true, function() {
           self.btnYes.addClickAction(self.canvas, function() {
             self.confirmExit = false;
             self.exit();
@@ -1042,9 +1050,9 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           });
         });
       } else if(this.assetsLoaded && this.countBeforePlay > 0) {
-        this.drawMenu(ctx, [], "" + this.countBeforePlay, "white", 32, FONT_FAMILY, "center", null, 0);
+        this.drawMenu(ctx, [], "" + this.countBeforePlay, "white", this.fontSize, FONT_FAMILY, "center", null, 0, false);
       } else if(this.confirmReset && !this.gameOver) {
-        this.drawMenu(ctx, [this.btnNo, this.btnYes], "Êtes-vous sûr de vouloir\nrecommencer la partie ?", "#E74C3C", 32, FONT_FAMILY, "center", null, null, function() {
+        this.drawMenu(ctx, [this.btnNo, this.btnYes], window.i18next.t("engine.resetConfirm"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, true, function() {
           self.btnYes.addClickAction(self.canvas, function() {
             self.confirmReset = false;
             self.reset();
@@ -1056,7 +1064,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           });
         });
       } else if(this.scoreMax) {
-        this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [], "Score maximal atteint !", "green", 32, FONT_FAMILY, "center", null, null, function() {
+        this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.scoreMax"), "green", this.fontSize, FONT_FAMILY, "center", null, null, true, function() {
           self.btnRetry.addClickAction(self.canvas, function() {
             self.reset();
           });
@@ -1067,7 +1075,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           });
         });
       } else if(this.gameOver) {
-        this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [], "Game Over !", "#E74C3C", 32, FONT_FAMILY, "center", null, null, function() {
+        this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, false, function() {
           if(self.snake.autoRetry) {
             setTimeout(function() {
               self.reset();
@@ -1084,7 +1092,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           }
         });
       } else if(this.paused && !this.gameOver && this.assetsLoaded) {
-        this.drawMenu(ctx, this.enablePause ? (this.enableRetry ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], "Pause", "white", 32, FONT_FAMILY, "center", null, null, function() {
+        this.drawMenu(ctx, this.enablePause ? (this.enableRetry ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], window.i18next.t("engine.pause"), "white", this.fontSize, FONT_FAMILY, "center", null, null, false, function() {
           self.btnContinue.addClickAction(self.canvas, function() {
             self.reactor.dispatchEvent("onContinue");
             self.start();
@@ -1183,7 +1191,7 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
   var lines = text.split('\n');
 
   if(verticalAlignement == "center") {
-    y = (this.canvas.height / 2) - (size * lines.length) / 2;
+    y = (this.canvas.height / 2) - (size * lines.length / 2);
   } else if(verticalAlignement == "top") {
     y = 5;
   } else if(verticalAlignement == "bottom") {
@@ -1210,11 +1218,46 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
   return {
     x: x,
     y: y,
-    height: size * (lines.length - 1)
+    height: size * lines.length
   };
 };
 
-Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, delay, func) {
+Game.prototype.wrapText = function(text, limit) {
+  var newLineStr = "\n";
+  var done = false;
+  var res = "";
+
+  function testWhite(x) {
+    var white = new RegExp(/^\s$/);
+    return white.test(x.charAt(0));
+  }
+
+  do {
+    found = false;
+
+    for(var i = limit - 1; i >= 0; i--) {
+      if(testWhite(text.charAt(i))) {
+        res = res + [text.slice(0, i), newLineStr].join('');
+        text = text.slice(i + 1);
+        found = true;
+        break;
+      }
+    }
+
+    if(!found) {
+      res += [text.slice(0, limit), newLineStr].join('');
+      text = text.slice(limit);
+    }
+
+    if(text.length < limit) {
+      done = true;
+    }
+  } while(!done);
+
+  return res + text;
+};
+
+Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, delay, wrap, func) {
   var self = this;
 
   clearTimeout(this.timeoutDisplayMenu);
@@ -1222,6 +1265,12 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
   this.timeoutDisplayMenu = setTimeout(function() {
     ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
     ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
+
+    if(wrap) {
+      var sizeCar = ctx.measureText("A").width;
+      var nbCarLine = Math.round(self.canvas.width / sizeCar);
+      text = self.wrapText(text, nbCarLine);
+    }
 
     var lines = text.split('\n');
     var heightText = size * lines.length;
@@ -1238,7 +1287,7 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
     }
 
     var totalHeight = heightText + heightButtons;
-    var startY = (self.canvas.height - totalHeight) / 2;
+    var startY = self.canvas.height / 2 - totalHeight / 2 + 16;
 
     self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY);
 
@@ -1361,10 +1410,12 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.initialY = y;
   this.width = width || "auto";
   this.height = height || "auto";
+  this.autoWidth = (this.width == "auto" ? true : false);
+  this.autoHeight = (this.height == "auto" ? true : false);
   this.clicked = false;
   this.hovered = false;
   this.text = text;
-  this.fontSize = fontSize || 24;
+  this.fontSize = fontSize || Math.floor(FONT_SIZE / 1.25);
   this.fontFamily = fontFamily || FONT_FAMILY;
   this.fontColor = fontColor || "black";
   this.color = color || "rgba(0, 0, 0, 0)";
@@ -1382,6 +1433,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
     var ctx = canvas.getContext("2d");
     var precFillStyle = ctx.fillStyle;
     var precFont = ctx.font;
+    this.fontSize = Math.floor(parseInt(ctx.font.match(/\d+/), 10) / 1.25);
 
     ctx.font = this.fontSize + "px " + this.fontFamily;
     var textSize = ctx.measureText(this.text);
@@ -1394,19 +1446,19 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
       var imgWidth = this.image.width;
       var imgHeight = this.image.height;
 
-      if(this.width == "auto") {
+      if(this.autoWidth) {
         this.width = imgWidth * 1.25;
       }
 
-      if(this.height == "auto") {
+      if(this.autoHeight) {
         this.height = imgHeight * 1.5;
       }
     } else if(this.text != null) {
-      if(this.width == "auto") {
+      if(this.autoWidth) {
         this.width = textSize.width + 25;
       }
 
-      if(this.height == "auto") {
+      if(this.autoHeight) {
         this.height = this.fontSize * 1.75;
       }
     }

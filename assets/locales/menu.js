@@ -108,7 +108,7 @@ i18next.addResourceBundle("fr", "translation", {
     "andWinnersBattleRoyale": "et",
     "winScoreBattleRoyale": "ont gagné avec un score de {{score}} !"
   }
-}, true, true);
+}, true, false);
 
 // English
 i18next.addResourceBundle("en", "translation", {
@@ -190,7 +190,7 @@ i18next.addResourceBundle("en", "translation", {
   "game": {
     "backToMenu": "Back to the menu",
     "currentMode": "Current game mode:",
-    "confirmQuit": "Are you sure you want to go back to the menu?",
+    "confirmQuit": "Are you sure that you want to go back to the menu?",
     "equalityPlayerVSAI": "You finished tied with AI!",
     "winPlayerVSAI": "Congratulations, you won!",
     "losePlayerVSAI": "Too bad, the AI ​​beat you with a higher score!",
@@ -202,4 +202,4 @@ i18next.addResourceBundle("en", "translation", {
     "andWinnersBattleRoyale": "and",
     "winScoreBattleRoyale": "won with a score of {{score}}!"
   }
-}, true, true);
+}, true, false);

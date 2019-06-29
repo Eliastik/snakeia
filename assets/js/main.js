@@ -22,7 +22,7 @@ JOUEUR_SOLO = "JOUEUR_SOLO";
 JOUEUR_VS_IA = "JOUEUR_VS_IA";
 IA_VS_IA = "IA_VS_IA";
 IA_BATTLE_ROYALE = "IA_BATTLE_ROYALE";
-UPDATER_URI = "https://eliastiksofts.com/snakeia/update.php?updateCallback=updateCallback";
+UPDATER_URI = "https://eliastiksofts.com/snakeia/update.php";
 
 var selectedMode = IA_SOLO;
 var showDebugInfo = false;
