@@ -80,32 +80,59 @@ function valToChar(value) {
   }
 }
 
+// Clone an object
+function clone(obj) {
+  var copy;
+
+  if (null == obj || "object" != typeof obj) return obj;
+
+  if(obj instanceof Array) {
+    copy = [];
+
+    for(var i = 0, len = obj.length; i < len; i++) {
+      copy[i] = clone(obj[i]);
+    }
+
+    return copy;
+  }
+
+  if(obj instanceof Object) {
+    copy = {};
+
+    for(var attr in obj) {
+      if(obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+    }
+
+    return copy;
+  }
+}
+
 // Event handlers objects type
-function Event(name){
+function Event(name) {
   this.name = name;
   this.callbacks = [];
 }
 
-Event.prototype.registerCallback = function(callback){
+Event.prototype.registerCallback = function(callback) {
   this.callbacks.push(callback);
-}
+};
 
 function Reactor(){
   this.events = {};
 }
 
-Reactor.prototype.registerEvent = function(eventName){
+Reactor.prototype.registerEvent = function(eventName) {
   var event = new Event(eventName);
   this.events[eventName] = event;
 };
 
-Reactor.prototype.dispatchEvent = function(eventName, eventArgs){
-  this.events[eventName].callbacks.forEach(function(callback){
+Reactor.prototype.dispatchEvent = function(eventName, eventArgs) {
+  this.events[eventName].callbacks.forEach(function(callback) {
     callback(eventArgs);
   });
 };
 
-Reactor.prototype.addEventListener = function(eventName, callback){
+Reactor.prototype.addEventListener = function(eventName, callback) {
   this.events[eventName].registerCallback(callback);
 };
 
@@ -276,13 +303,13 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     }
 
     for(var i = length - 1; i >= 0; i--) {
-        var posX = startPos.x - i;
+      var posX = startPos.x - i;
 
-        if(posX < 0) {
-          posX = this.grid.width - -posX;
-        }
+      if(posX < 0) {
+        posX = this.grid.width - -posX;
+      }
 
-        this.insert(new Position(posX, startPos.y, this.direction));
+      this.insert(new Position(posX, startPos.y, this.direction));
     }
   };
 
@@ -290,7 +317,7 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     this.direction = this.initialDirection;
     this.queue = [];
     this.init();
-  }
+  };
 
   this.insert = function(position) {
     this.queue.unshift(position);
@@ -407,7 +434,56 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     }
 
     return -1;
-  }
+  };
+
+  this.simulateGameTick = function(snake, direction) {
+    var direction = direction || snake.ia(false);
+
+    snake.moveTo(direction);
+
+    var headSnakePos = snake.getHeadPosition();
+    headSnakePos = snake.getNextPosition(headSnakePos, snake.direction);
+
+    if(snake.grid.get(headSnakePos) == SNAKE_VAL || snake.grid.get(headSnakePos) == WALL_VAL) {
+      return 0;
+    } else {
+      if(snake.grid.get(headSnakePos) == FRUIT_VAL) {
+        snake.insert(headSnakePos);
+
+        if(snake.length() >= (snake.grid.height * snake.grid.width - snake.grid.getTotalWalls())) {
+          return 0;
+        }
+      } else {
+        snake.insert(headSnakePos);
+        snake.remove();
+      }
+    }
+
+    return 1;
+  };
+
+  this.iterateIA = function(direction, nb) {
+    var queueCopy = clone(this.queue);
+    var gridCopy = clone(this.grid);
+    var snake = new Snake(direction, 3, gridCopy, this.player, this.iaLevel, false);
+    snake.queue = queueCopy;
+    snake.grid = gridCopy;
+
+    var res = 0;
+    var simul = this.simulateGameTick(snake, direction);
+
+    for(var i = 0; i < nb; i++) {
+      if(simul == 0) {
+        break;
+      }
+
+      res++;
+
+      simul = this.simulateGameTick(snake);
+    }
+
+    return res;
+  };
 
   this.simpleIA = function() {
     if(this.grid.fruitPos != null) {
@@ -459,35 +535,73 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     }
   };
 
-  this.ia = function() {
+  this.ia = function(bestFind) {
+    var bestFind = bestFind === undefined ? false : bestFind;
+    var res = KEY_RIGHT;
+
     if(this.iaLevel == IA_LEVEL_LOW) {
-        return this.simpleIA();
-    }
+        res = this.simpleIA();
+    } else {
+      if(this.grid.fruitPos != null) {
+        var currentPosition = this.getHeadPosition();
+        var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
 
-    if(this.grid.fruitPos != null) {
-      var currentPosition = this.getHeadPosition();
-      var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
+        var grid = new PF.Grid(this.grid.getGraph(currentPosition));
+        var finder = new PF.AStarFinder();
+        var path = finder.findPath(currentPosition.x, currentPosition.y, fruitPos.x, fruitPos.y, grid);
 
-      var grid = new PF.Grid(this.grid.getGraph(currentPosition));
-      var finder = new PF.AStarFinder();
-      var path = finder.findPath(currentPosition.x, currentPosition.y, fruitPos.x, fruitPos.y, grid);
+        if(path.length > 1) {
+          var nextPosition = new Position(path[1][0], path[1][1]);
 
-      if(path.length > 1) {
-        var nextPosition = new Position(path[1][0], path[1][1]);
-
-        if(nextPosition.x > currentPosition.x) {
-          return KEY_RIGHT;
-        } else if(nextPosition.x < currentPosition.x) {
-          return KEY_LEFT;
-        } else if(nextPosition.y < currentPosition.y) {
-          return KEY_UP;
-        } else if(nextPosition.y > currentPosition.y) {
-          return KEY_BOTTOM;
+          if(nextPosition.x > currentPosition.x) {
+            res = KEY_RIGHT;
+          } else if(nextPosition.x < currentPosition.x) {
+            res = KEY_LEFT;
+          } else if(nextPosition.y < currentPosition.y) {
+            res = KEY_UP;
+          } else if(nextPosition.y > currentPosition.y) {
+            res = KEY_BOTTOM;
+          }
+        } else if(this.iaLevel == IA_LEVEL_HIGH) {
+          res = this.simpleIA();
         }
-      } else if(this.iaLevel == IA_LEVEL_HIGH) {
-        return this.simpleIA();
+
+        if(bestFind) {
+          res = this.bestFindIA(res);
+        }
       }
     }
+
+    return res;
+  };
+
+  this.bestFindIA = function(directionPrec) {
+    var scoreRight = this.iterateIA(KEY_RIGHT, 50);
+    var scoreLeft = this.iterateIA(KEY_LEFT, 50);
+    var scoreUp = this.iterateIA(KEY_UP, 50);
+    var scoreBottom = this.iterateIA(KEY_BOTTOM, 50);
+
+    console.log(directionPrec, scoreRight, scoreLeft, scoreUp, scoreBottom);
+
+    if(directionPrec == KEY_RIGHT) {
+      if(scoreLeft > scoreRight) return KEY_LEFT;
+      if(scoreUp > scoreRight) return KEY_UP;
+      if(scoreBottom > scoreRight) return KEY_BOTTOM;
+    } else if(directionPrec == KEY_LEFT) {
+      if(scoreRight > scoreLeft) return KEY_RIGHT;
+      if(scoreUp > scoreLeft) return KEY_UP;
+      if(scoreBottom > scoreLeft) return KEY_BOTTOM;
+    } else if(directionPrec == KEY_UP) {
+      if(scoreRight > scoreUp) return KEY_RIGHT;
+      if(scoreLeft > scoreUp) return KEY_LEFT;
+      if(scoreBottom > scoreUp) return KEY_BOTTOM;
+    } else if(directionPrec == KEY_BOTTOM) {
+      if(scoreRight > scoreBottom) return KEY_RIGHT;
+      if(scoreLeft > scoreBottom) return KEY_LEFT;
+      if(scoreUp > scoreBottom) return KEY_UP;
+    }
+
+    return directionPrec;
   };
 
   this.init();
@@ -813,7 +927,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           if(self.snake.player == PLAYER_HUMAN) {
             self.snake.moveTo(self.lastKey);
           } else if(self.snake.player == PLAYER_IA) {
-            self.snake.moveTo(self.snake.ia());
+            self.snake.moveTo(self.snake.ia(true));
           }
 
           var headSnakePos = self.snake.getHeadPosition();
