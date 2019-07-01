@@ -240,7 +240,7 @@ function validateSettings() {
     speed = parseInt(customSpeed);
   }
 
-  if(selectedMode != JOUEUR_SOLO && (iaLevel != "low" && iaLevel != "normal" && iaLevel != "high")) {
+  if(selectedMode != JOUEUR_SOLO && (iaLevel != "low" && iaLevel != "normal" && iaLevel != "high" && iaLevel != "ultra")) {
     formValidated = false;
     document.getElementById("iaLevel").classList.add("is-invalid");
     document.getElementById("invalidIALevel").style.display = "block";
@@ -254,6 +254,9 @@ function validateSettings() {
         break;
       case "high":
         iaLevel = IA_LEVEL_HIGH;
+        break;
+      case "ultra":
+        iaLevel = IA_LEVEL_ULTRA;
         break;
       default:
         iaLevel = IA_LEVEL_DEFAULT;

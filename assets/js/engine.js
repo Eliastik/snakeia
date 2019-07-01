@@ -34,6 +34,7 @@ PLAYER_HUMAN = "PLAYER_HUMAN";
 IA_LEVEL_LOW = "IA_LEVEL_LOW";
 IA_LEVEL_DEFAULT = "IA_LEVEL_DEFAULT";
 IA_LEVEL_HIGH = "IA_LEVEL_HIGH";
+IA_LEVEL_ULTRA = "IA_LEVEL_ULTRA";
 // Output type
 OUTPUT_TEXT = "OUTPUT_TEXT";
 OUTPUT_GRAPHICAL = "OUTPUT_GRAPHICAL";
@@ -449,10 +450,7 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     } else {
       if(snake.grid.get(headSnakePos) == FRUIT_VAL) {
         snake.insert(headSnakePos);
-
-        if(snake.length() >= (snake.grid.height * snake.grid.width - snake.grid.getTotalWalls())) {
-          return 0;
-        }
+        return 2;
       } else {
         snake.insert(headSnakePos);
         snake.remove();
@@ -474,7 +472,10 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
 
     for(var i = 0; i < nb; i++) {
       if(simul == 0) {
+        res = -1;
         break;
+      } else if(simul == 2) {
+        res += 2;
       }
 
       res++;
@@ -562,11 +563,11 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
           } else if(nextPosition.y > currentPosition.y) {
             res = KEY_BOTTOM;
           }
-        } else if(this.iaLevel == IA_LEVEL_HIGH) {
+        } else if(this.iaLevel == IA_LEVEL_HIGH || this.iaLevel == IA_LEVEL_ULTRA) {
           res = this.simpleIA();
         }
 
-        if(bestFind) {
+        if(bestFind && this.iaLevel == IA_LEVEL_ULTRA) {
           res = this.bestFindIA(res);
         }
       }
@@ -581,24 +582,22 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     var scoreUp = this.iterateIA(KEY_UP, 50);
     var scoreBottom = this.iterateIA(KEY_BOTTOM, 50);
 
-    console.log(directionPrec, scoreRight, scoreLeft, scoreUp, scoreBottom);
-
     if(directionPrec == KEY_RIGHT) {
-      if(scoreLeft > scoreRight) return KEY_LEFT;
+      if(scoreLeft > scoreRight && this.direction != RIGHT) return KEY_LEFT;
       if(scoreUp > scoreRight) return KEY_UP;
       if(scoreBottom > scoreRight) return KEY_BOTTOM;
     } else if(directionPrec == KEY_LEFT) {
-      if(scoreRight > scoreLeft) return KEY_RIGHT;
+      if(scoreRight > scoreLeft && this.direction != LEFT) return KEY_RIGHT;
       if(scoreUp > scoreLeft) return KEY_UP;
       if(scoreBottom > scoreLeft) return KEY_BOTTOM;
     } else if(directionPrec == KEY_UP) {
       if(scoreRight > scoreUp) return KEY_RIGHT;
       if(scoreLeft > scoreUp) return KEY_LEFT;
-      if(scoreBottom > scoreUp) return KEY_BOTTOM;
+      if(scoreBottom > scoreUp && this.direction != UP) return KEY_BOTTOM;
     } else if(directionPrec == KEY_BOTTOM) {
       if(scoreRight > scoreBottom) return KEY_RIGHT;
       if(scoreLeft > scoreBottom) return KEY_LEFT;
-      if(scoreUp > scoreBottom) return KEY_UP;
+      if(scoreUp > scoreBottom && this.direction != BOTTOM) return KEY_UP;
     }
 
     return directionPrec;

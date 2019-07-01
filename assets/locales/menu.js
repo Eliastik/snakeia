@@ -83,7 +83,8 @@ i18next.addResourceBundle("fr", "translation", {
     "iaLevelSelect": {
       "low": "Faible",
       "normal": "Normal",
-      "high": "Élevé"
+      "high": "Élevé",
+      "ultra": "Ultra (bêta)"
     },
     "invalidIALevel": "Cette valeur est invalide",
     "autoRetry": "Faire que l'IA recommence auto sa partie après un Game Over",
@@ -178,7 +179,8 @@ i18next.addResourceBundle("en", "translation", {
     "iaLevelSelect": {
       "low": "Low",
       "normal": "Normal",
-      "high": "High"
+      "high": "High",
+      "ultra": "Ultra (beta)"
     },
     "invalidIALevel": "This value is invalid",
     "autoRetry": "Make the AI restart its game after a Game Over",
