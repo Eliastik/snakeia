@@ -453,6 +453,6 @@ document.getElementById("languageSelect").onchange = function() {
   });
 };
 
-i18next.store.on('added', function(lng, ns) {
+window.addEventListener("load", function() {
   translateContent();
 });

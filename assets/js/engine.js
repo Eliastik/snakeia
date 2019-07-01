@@ -480,7 +480,7 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
         } else if(nextPosition.x < currentPosition.x) {
           return KEY_LEFT;
         } else if(nextPosition.y < currentPosition.y) {
-          return KEY_UP;displayFPS === undefined ? false : displayFPS
+          return KEY_UP;
         } else if(nextPosition.y > currentPosition.y) {
           return KEY_BOTTOM;
         }
