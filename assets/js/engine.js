@@ -496,6 +496,7 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
 function ImageLoader() {
   this.images = {};
   this.triedLoading = 0;
+  this.hasError = false;
 
   this.load = function(img, func) {
     var self = this;
@@ -530,6 +531,7 @@ function ImageLoader() {
       if(self.triedLoading >= 5) {
         self.triedLoading = 0;
         self.images[src] = image;
+        self.hasError = true;
 
         return func(true);
       }
@@ -945,14 +947,19 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     var self = this;
 
     this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png"], function() {
-      self.assetsLoaded = true;
-      self.btnFullScreen.loadImage(self.imageLoader);
-      self.btnPause.loadImage(self.imageLoader);
-      self.btnTopArrow.loadImage(self.imageLoader);
-      self.btnBottomArrow.loadImage(self.imageLoader);
-      self.btnLeftArrow.loadImage(self.imageLoader);
-      self.btnRightArrow.loadImage(self.imageLoader);
-      self.start();
+      if(self.imageLoader.hasError == true) {
+        self.errorOccured = true;
+        self.updateUI();
+      } else {
+        self.assetsLoaded = true;
+        self.btnFullScreen.loadImage(self.imageLoader);
+        self.btnPause.loadImage(self.imageLoader);
+        self.btnTopArrow.loadImage(self.imageLoader);
+        self.btnBottomArrow.loadImage(self.imageLoader);
+        self.btnLeftArrow.loadImage(self.imageLoader);
+        self.btnRightArrow.loadImage(self.imageLoader);
+        self.start();
+      }
     });
   };
 
@@ -1027,7 +1034,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       if(this.exited) {
         this.drawMenu(ctx, [], window.i18next.t("engine.exited"), "white", this.fontSize, FONT_FAMILY, "center", null, 0, true);
       } else if(this.errorOccured) {
-       this.drawMenu(ctx, [this.btnQuit], window.i18next.t("engine.error"), "red", this.fontSize, FONT_FAMILY, "center", null, 0, true, function() {
+       this.drawMenu(ctx, [this.btnQuit], this.imageLoader.hasError ? window.i18next.t("engine.errorLoading") : window.i18next.t("engine.error"), "red", this.fontSize, FONT_FAMILY, "center", null, 0, true, function() {
          self.btnQuit.addClickAction(self.canvas, function() {
            self.confirmExit = false;
            self.exit();
