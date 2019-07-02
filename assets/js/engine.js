@@ -114,6 +114,36 @@ function Position(x, y, direction) {
   this.x = x;
   this.y = y;
   this.direction = direction;
+
+  this.convertToKeyDirection = function() {
+    switch(this.direction) {
+      case UP:
+        return KEY_UP;
+      case RIGHT:
+        return KEY_RIGHT;
+      case LEFT:
+        return KEY_LEFT;
+      case BOTTOM:
+        return KEY_BOTTOM;
+      default:
+        return this.direction;
+    }
+  };
+
+  this.convertToSimpleDirection = function() {
+    switch(this.direction) {
+      case KEY_UP:
+        return UP;
+      case KEY_RIGHT:
+        return RIGHT;
+      case KEY_LEFT:
+        return LEFT;
+      case KEY_BOTTOM:
+        return BOTTOM;
+      default:
+        return this.direction;
+    }
+  };
 }
 
 Position.prototype.equals = function(otherPosition) {
@@ -505,14 +535,30 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
       var nextPosition = this.getNextPosition(currentPosition, directionNext);
 
       if(this.grid.get(nextPosition) != EMPTY_VAL && this.grid.get(nextPosition) != FRUIT_VAL) {
-        if(this.grid.get(this.getNextPosition(currentPosition, KEY_UP)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_UP)) == FRUIT_VAL) {
-          directionNext = KEY_UP;
-        } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_RIGHT)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_RIGHT)) == FRUIT_VAL) {
-          directionNext = KEY_RIGHT;
-        } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_BOTTOM)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_BOTTOM)) == FRUIT_VAL) {
-          directionNext = KEY_BOTTOM;
-        } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_LEFT)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_LEFT)) == FRUIT_VAL) {
-          directionNext = KEY_LEFT;
+        var currentDirection = this.direction;
+        var firstDifferentDirection = null;
+
+        for(var i = 1; i < this.queue.length; i++) {
+          if(this.get(i).direction != currentDirection) {
+            firstDifferentDirection = this.get(i).direction;
+            break;
+          }
+        }
+
+        nextPosition = this.getNextPosition(currentPosition, firstDifferentDirection);
+
+        if(this.grid.get(nextPosition) != EMPTY_VAL && this.grid.get(nextPosition) != FRUIT_VAL) {
+          if(this.grid.get(this.getNextPosition(currentPosition, KEY_UP)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_UP)) == FRUIT_VAL) {
+            directionNext = KEY_UP;
+          } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_RIGHT)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_RIGHT)) == FRUIT_VAL) {
+            directionNext = KEY_RIGHT;
+          } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_BOTTOM)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_BOTTOM)) == FRUIT_VAL) {
+            directionNext = KEY_BOTTOM;
+          } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_LEFT)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_LEFT)) == FRUIT_VAL) {
+            directionNext = KEY_LEFT;
+          }
+        } else {
+          directionNext = nextPosition.convertToKeyDirection();
         }
       }
 
@@ -560,7 +606,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     switch(this.aiLevel) {
       case AI_LEVEL_LOW:
         return window.i18next.t("engine.aiLevelList.low");
-      case AI_LEVEL_NORMAL:
+      case AI_LEVEL_DEFAULT:
         return window.i18next.t("engine.aiLevelList.normal");
       case AI_LEVEL_HIGH:
         return window.i18next.t("engine.aiLevelList.high");
