@@ -230,11 +230,11 @@ function Grid(width, height, generateWalls, borderWalls) {
     return tot;
   };
 
-  this.getWallsOnLine = function(line) {
+  this.getOnLine = function(type, line) {
     var tot = 0;
 
     for(var j = 0; j < this.width; j++) {
-      if(this.get(new Position(j, line)) == WALL_VAL) {
+      if(this.get(new Position(j, line)) == type) {
         tot++;
       }
     }
@@ -273,7 +273,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     var spaceLineAvailable = 0;
 
     for(var i = 0; i < grid.height; i++) {
-      if(length <= grid.width - grid.getWallsOnLine(i)) {
+      if(length <= grid.width - grid.getOnLine(WALL_VAL, i) - grid.getOnLine(FRUIT_VAL, i)) {
         spaceLineAvailable++;
       }
     }
@@ -297,7 +297,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
           posX = this.grid.width - -posX;
         }
 
-        if(grid.get(new Position(posX, startPos.y)) == WALL_VAL) {
+        if(grid.get(new Position(posX, startPos.y)) == WALL_VAL || grid.get(new Position(posX, startPos.y)) == FRUIT_VAL) {
           posValidated = false;
         }
       }
@@ -1229,7 +1229,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           });
         });
       } else if(this.gameOver) {
-        this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, false, function() {
+        this.drawMenu(ctx, this.enableRetry && !this.snake.autoRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, false, function() {
           if(self.snake.autoRetry) {
             setTimeout(function() {
               self.reset();
