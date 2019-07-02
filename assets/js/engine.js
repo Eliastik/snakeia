@@ -28,13 +28,13 @@ SNAKE_VAL = 1;
 FRUIT_VAL = 2;
 WALL_VAL = 3;
 // Player type
-PLAYER_IA = "PLAYER_IA";
+PLAYER_AI = "PLAYER_AI";
 PLAYER_HUMAN = "PLAYER_HUMAN";
-// IA level
-IA_LEVEL_LOW = "IA_LEVEL_LOW";
-IA_LEVEL_DEFAULT = "IA_LEVEL_DEFAULT";
-IA_LEVEL_HIGH = "IA_LEVEL_HIGH";
-IA_LEVEL_ULTRA = "IA_LEVEL_ULTRA";
+// AI level
+AI_LEVEL_LOW = "AI_LEVEL_LOW";
+AI_LEVEL_DEFAULT = "AI_LEVEL_DEFAULT";
+AI_LEVEL_HIGH = "AI_LEVEL_HIGH";
+AI_LEVEL_ULTRA = "AI_LEVEL_ULTRA";
 // Output type
 OUTPUT_TEXT = "OUTPUT_TEXT";
 OUTPUT_GRAPHICAL = "OUTPUT_GRAPHICAL";
@@ -259,14 +259,14 @@ Grid.prototype.toString = function() {
   return res;
 };
 
-function Snake(direction, length, grid, player, iaLevel, autoRetry) {
+function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.direction = direction || RIGHT;
   this.initialDirection = direction || RIGHT;
   this.errorInit = false;
   this.grid = grid;
   this.queue = [];
   this.player = player || PLAYER_HUMAN;
-  this.iaLevel = iaLevel || IA_LEVEL_DEFAULT;
+  this.aiLevel = aiLevel || AI_LEVEL_DEFAULT;
   this.autoRetry = autoRetry === undefined ? false : autoRetry;
 
   this.init = function() {
@@ -438,7 +438,7 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
   };
 
   this.simulateGameTick = function(snake, direction) {
-    var direction = direction || snake.ia(false);
+    var direction = direction || snake.ai(false);
 
     snake.moveTo(direction);
 
@@ -460,10 +460,10 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     return 1;
   };
 
-  this.iterateIA = function(direction, nb) {
+  this.iterateAI = function(direction, nb) {
     var queueCopy = clone(this.queue);
     var gridCopy = clone(this.grid);
-    var snake = new Snake(direction, 3, gridCopy, this.player, this.iaLevel, false);
+    var snake = new Snake(direction, 3, gridCopy, this.player, this.aiLevel, false);
     snake.queue = queueCopy;
     snake.grid = gridCopy;
 
@@ -486,7 +486,7 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     return res;
   };
 
-  this.simpleIA = function() {
+  this.simpleAI = function() {
     if(this.grid.fruitPos != null) {
       var currentPosition = this.getHeadPosition();
       var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
@@ -536,12 +536,12 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     }
   };
 
-  this.ia = function(bestFind) {
+  this.ai = function(bestFind) {
     var bestFind = bestFind === undefined ? false : bestFind;
     var res = KEY_RIGHT;
 
-    if(this.iaLevel == IA_LEVEL_LOW) {
-        res = this.simpleIA();
+    if(this.aiLevel == AI_LEVEL_LOW) {
+        res = this.simpleAI();
     } else {
       if(this.grid.fruitPos != null) {
         var currentPosition = this.getHeadPosition();
@@ -563,12 +563,12 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
           } else if(nextPosition.y > currentPosition.y) {
             res = KEY_BOTTOM;
           }
-        } else if(this.iaLevel == IA_LEVEL_HIGH || this.iaLevel == IA_LEVEL_ULTRA) {
-          res = this.simpleIA();
+        } else if(this.aiLevel == AI_LEVEL_HIGH || this.aiLevel == AI_LEVEL_ULTRA) {
+          res = this.simpleAI();
         }
 
-        if(bestFind && this.iaLevel == IA_LEVEL_ULTRA) {
-          res = this.bestFindIA(res);
+        if(bestFind && this.aiLevel == AI_LEVEL_ULTRA) {
+          res = this.bestFindAI(res);
         }
       }
     }
@@ -576,11 +576,11 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     return res;
   };
 
-  this.bestFindIA = function(directionPrec) {
-    var scoreRight = this.iterateIA(KEY_RIGHT, 50);
-    var scoreLeft = this.iterateIA(KEY_LEFT, 50);
-    var scoreUp = this.iterateIA(KEY_UP, 50);
-    var scoreBottom = this.iterateIA(KEY_BOTTOM, 50);
+  this.bestFindAI = function(directionPrec) {
+    var scoreRight = this.iterateAI(KEY_RIGHT, 50);
+    var scoreLeft = this.iterateAI(KEY_LEFT, 50);
+    var scoreUp = this.iterateAI(KEY_UP, 50);
+    var scoreBottom = this.iterateAI(KEY_BOTTOM, 50);
 
     if(directionPrec == KEY_RIGHT) {
       if(scoreLeft > scoreRight && this.direction != RIGHT) return KEY_LEFT;
@@ -601,6 +601,21 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
     }
 
     return directionPrec;
+  };
+
+  this.getAILevelText = function() {
+    switch(this.aiLevel) {
+      case "low":
+        return window.i18next.t("engine.aiLevelList.low");
+      case "normal":
+        return window.i18next.t("engine.aiLevelList.normal");
+      case "high":
+        return window.i18next.t("engine.aiLevelList.high");
+      case "ultra":
+        return window.i18next.t("engine.aiLevelList.ultra");
+      default:
+        return window.i18next.t("engine.aiLevelList.normal");
+    }
   };
 
   this.init();
@@ -660,18 +675,30 @@ function ImageLoader() {
 
 function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType) {
   this.imageLoader;
+  this.assetsLoaded = false;
   this.grid = grid;
   this.snake = snake;
   this.speed = speed || 8;
   this.initialSpeed = speed || 8;
   this.initialSpeedUntouched = speed || 8;
+  this.enablePause = enablePause === undefined ? true : enablePause;
+  this.enableRetry = enableRetry === undefined ? true : enableRetry;
   this.progressiveSpeed = progressiveSpeed === undefined ? false : progressiveSpeed;
   this.outputType = outputType || OUTPUT_GRAPHICAL;
   this.score = 0;
   this.frame = 0;
+  this.lastFrame = 0;
+  this.currentFPS = 0;
   this.paused = true;
+  this.exited = false;
   this.gameOver = false;
+  this.isReseted = true;
+  this.scoreMax = false;
+  this.errorOccured = false;
   this.confirmReset = false;
+  this.confirmExit = false;
+  this.getInfos = false;
+  this.getInfosGame = false;
   this.lastKey = -1;
   this.textarea;
   this.canvas;
@@ -679,21 +706,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.canvasWidth = canvasWidth || CANVAS_WIDTH;
   this.canvasHeight = canvasHeight || CANVAS_HEIGHT;
   this.fontSize = FONT_SIZE
-  this.assetsLoaded = false;
   this.appendTo = appendTo;
-  this.scoreMax = false;
-  this.errorOccured = false;
   this.displayFPS = displayFPS === undefined ? false : displayFPS;
-  this.lastFrame = 0;
-  this.currentFPS = 0;
   this.intervalCountFPS;
   this.countBeforePlay = 3;
-  this.enablePause = enablePause === undefined ? true : enablePause;
-  this.enableRetry = enableRetry === undefined ? true : enableRetry;
-  this.exited = false;
-  this.confirmExit = false;
-  this.getInfos = false;
-  this.isReseted = true;
   this.timeoutDisplayMenu;
   // Buttons
   this.btnFullScreen;
@@ -705,6 +721,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.btnNo;
   this.btnOK;
   this.btnAbout;
+  this.btnInfosGame;
   this.btnTopArrow;
   this.btnRightArrow;
   this.btnLeftArrow;
@@ -742,6 +759,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnNo = new Button(window.i18next.t("engine.no"), null, null, "center", "#3498db", "#246A99");
       this.btnOK = new Button(window.i18next.t("engine.ok"), null, null, "center", "#3498db", "#246A99");
       this.btnAbout = new Button(window.i18next.t("engine.about"), null, null, "center", "#3498db", "#246A99");
+      this.btnInfosGame = new Button(window.i18next.t("engine.infosGame"), null, null, "center", "#3498db", "#246A99");
       this.btnTopArrow = new ButtonImage("assets/images/up.png", 56, 100, "right", "bottom", 64, 64);
       this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64);
       this.btnLeftArrow = new ButtonImage("assets/images/left.png", 112, 46, "right", "bottom", 64, 64);
@@ -876,6 +894,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     if(this.paused && !this.gameOver && this.assetsLoaded && !this.scoreMax) {
       this.disableAllButtons();
       this.getInfos = false;
+      this.getInfosGame = false;
       this.confirmExit = false;
       this.confirmReset = false;
       this.countBeforePlay = 3;
@@ -925,8 +944,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         if(self.frame % self.speed == 0) {
           if(self.snake.player == PLAYER_HUMAN) {
             self.snake.moveTo(self.lastKey);
-          } else if(self.snake.player == PLAYER_IA) {
-            self.snake.moveTo(self.snake.ia(true));
+          } else if(self.snake.player == PLAYER_AI) {
+            self.snake.moveTo(self.snake.ai(true));
           }
 
           var headSnakePos = self.snake.getHeadPosition();
@@ -1153,8 +1172,20 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
            self.exit();
          });
        });
-     } else if(this.getInfos) {
-        this.drawMenu(ctx, [this.btnOK], window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+     } else if(this.getInfosGame) {
+        this.drawMenu(ctx, [this.btnOK], window.i18next.t("engine.player") + " " + (this.snake.player == PLAYER_HUMAN ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) + (this.snake.player == PLAYER_AI ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.snake.getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+          self.btnOK.addClickAction(self.canvas, function() {
+            self.getInfosGame = false;
+            self.updateUI();
+          });
+        });
+      }  else if(this.getInfos) {
+        this.drawMenu(ctx, [this.btnInfosGame, this.btnOK], window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+          self.btnInfosGame.addClickAction(self.canvas, function() {
+            self.getInfosGame = true;
+            self.updateUI();
+          });
+
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfos = false;
             self.updateUI();
@@ -1266,6 +1297,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnOK.disable();
       this.btnOK.disable();
       this.btnAbout.disable();
+      this.btnInfosGame.disable();
       this.btnFullScreen.disable();
       this.btnPause.disable();
 

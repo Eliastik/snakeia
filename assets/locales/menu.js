@@ -73,20 +73,20 @@ i18next.addResourceBundle("fr", "translation", {
       "25": "25 – Extrêmement lente",
       "custom": "Vitesse personnalisée…"
     },
-    "invalidSpeed": "Cette valeur doit être au moins égale ou supérieure à 1",
+    "invalidSpeed": "Cette valeur doit être comprise entre 1 et 100",
     "progressiveSpeed": "Augmenter la vitesse progressivement",
     "customSpeed": "Vitesse personnalisée :",
     "placeholderCustomSpeed": "Entrez la vitesse…",
-    "invalidCustomSpeed": "Cette valeur doit être au moins égale ou supérieure à 1",
+    "invalidCustomSpeed": "Cette valeur doit être comprise entre 1 et 100",
     "customSpeedHelp": "Plus le nombre est élevé, plus la vitesse du jeu est lente, et inversement",
-    "iaLevel": "Niveau de l'IA :",
-    "iaLevelSelect": {
+    "aiLevel": "Niveau de l'IA :",
+    "aiLevelSelect": {
       "low": "Faible",
       "normal": "Normal",
       "high": "Élevé",
       "ultra": "Ultra (bêta)"
     },
-    "invalidIALevel": "Cette valeur est invalide",
+    "invalidaiLevel": "Cette valeur est invalide",
     "autoRetry": "Faire que l'IA recommence auto sa partie après un Game Over",
     "numberIA": "Nombre d'IA :",
     "placeholderNumberIA": "Entrez le nombre…",
@@ -169,20 +169,20 @@ i18next.addResourceBundle("en", "translation", {
       "25": "25 – Extremely slow",
       "custom": "Custom speed…"
     },
-    "invalidSpeed": "This value must be at least equal to or greater than 1",
+    "invalidSpeed": "This value must be between 1 and 100",
     "progressiveSpeed": "Increase the speed progressively",
     "customSpeed": "Custom speed:",
     "placeholderCustomSpeed": "Enter the speed…",
-    "invalidCustomSpeed": "This value must be at least equal to or greater than 1",
+    "invalidCustomSpeed": "This value must be between 1 and 100",
     "customSpeedHelp": "The higher the number, the slower the game speed, and inversely",
-    "iaLevel": "AI level:",
-    "iaLevelSelect": {
+    "aiLevel": "AI level:",
+    "aiLevelSelect": {
       "low": "Low",
       "normal": "Normal",
       "high": "High",
       "ultra": "Ultra (beta)"
     },
-    "invalidIALevel": "This value is invalid",
+    "invalidaiLevel": "This value is invalid",
     "autoRetry": "Make the AI restart its game after a Game Over",
     "numberIA": "Number of AI:",
     "placeholderNumberIA": "Enter the number…",
