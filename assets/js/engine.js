@@ -451,7 +451,9 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     return 1;
   };
 
-  this.copy = function(snake) {
+  this.copy = function() {
+    var snake = new Snake(direction, 3, new Grid(this.grid.width, this.grid.height, false, false), this.player, this.aiLevel, false);
+
     for(var i = 0; i < snake.grid.height; i++) {
       for(var j = 0; j < snake.grid.width; j++) {
         snake.grid.set(this.grid.get(new Position(j, i)), new Position(j, i));
@@ -466,38 +468,6 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     }
 
     return snake;
-  };
-
-  this.iterateAI = function(direction, nb) {
-    var snakeTmp = new Snake(direction, 3, new Grid(this.grid.width, this.grid.height, false, false), this.player, this.aiLevel, false);
-    snakeTmp = this.copy(snakeTmp);
-
-    var res = 0;
-    var fruitFound = false;
-    var countFruit = 0;
-    var simul = this.simulateGameTick(snakeTmp, direction);
-
-    for(var i = 1; i <= nb; i++) {
-      if(simul == 0) {
-        res -= (nb - i);
-        break;
-      } else if(simul == 2 && !fruitFound) {
-        res += Math.round((nb - i) / 1.25);
-        fruitFound = true;
-      }
-
-      res++;
-
-      if(fruitFound) {
-        countFruit++;
-
-        if(countFruit > Math.round(nb / 5)) break;
-      }
-
-      simul = this.simulateGameTick(snakeTmp);
-    }
-
-    return res;
   };
 
   this.simpleAI = function() {
@@ -580,41 +550,10 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
         } else if(this.aiLevel == AI_LEVEL_HIGH || this.aiLevel == AI_LEVEL_ULTRA) {
           res = this.simpleAI();
         }
-
-        if(bestFind && this.aiLevel == AI_LEVEL_ULTRA) {
-          res = this.bestFindAI(res);
-        }
       }
     }
 
     return res;
-  };
-
-  this.bestFindAI = function(directionPrec) {
-    var scoreRight = this.iterateAI(KEY_RIGHT, 50);
-    var scoreLeft = this.iterateAI(KEY_LEFT, 50);
-    var scoreUp = this.iterateAI(KEY_UP, 50);
-    var scoreBottom = this.iterateAI(KEY_BOTTOM, 50);
-
-    if(directionPrec == KEY_RIGHT) {
-      if(scoreLeft > scoreRight && this.direction != RIGHT) return KEY_LEFT;
-      if(scoreUp > scoreRight) return KEY_UP;
-      if(scoreBottom > scoreRight) return KEY_BOTTOM;
-    } else if(directionPrec == KEY_LEFT) {
-      if(scoreRight > scoreLeft && this.direction != LEFT) return KEY_RIGHT;
-      if(scoreUp > scoreLeft) return KEY_UP;
-      if(scoreBottom > scoreLeft) return KEY_BOTTOM;
-    } else if(directionPrec == KEY_UP) {
-      if(scoreRight > scoreUp) return KEY_RIGHT;
-      if(scoreLeft > scoreUp) return KEY_LEFT;
-      if(scoreBottom > scoreUp && this.direction != UP) return KEY_BOTTOM;
-    } else if(directionPrec == KEY_BOTTOM) {
-      if(scoreRight > scoreBottom) return KEY_RIGHT;
-      if(scoreLeft > scoreBottom) return KEY_LEFT;
-      if(scoreUp > scoreBottom && this.direction != BOTTOM) return KEY_UP;
-    }
-
-    return directionPrec;
   };
 
   this.getAILevelText = function() {

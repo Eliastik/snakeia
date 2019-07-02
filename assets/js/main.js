@@ -240,7 +240,7 @@ function validateSettings() {
     speed = parseInt(customSpeed);
   }
 
-  if(selectedMode != JOUEUR_SOLO && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high" && aiLevel != "ultra")) {
+  if(selectedMode != JOUEUR_SOLO && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high")) {
     formValidated = false;
     document.getElementById("aiLevel").classList.add("is-invalid");
     document.getElementById("invalidaiLevel").style.display = "block";

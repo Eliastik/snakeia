@@ -75,7 +75,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ## TO-DO list
 
-* Amélioration de l'IA (prévoir les coups à l'avance et choisir la direction en fonction d'un score calculé par cette prévision, en plus du choix des algorithmes actuels, algorithme récursif nécessaire (donner une limite pour éviter les boucles infinies))
+* Améliorer l'IA (essais effectués)
 * Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
 
 ## Déclaration de licence
