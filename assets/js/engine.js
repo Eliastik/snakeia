@@ -619,13 +619,13 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
 
   this.getAILevelText = function() {
     switch(this.aiLevel) {
-      case "low":
+      case AI_LEVEL_LOW:
         return window.i18next.t("engine.aiLevelList.low");
-      case "normal":
+      case AI_LEVEL_NORMAL:
         return window.i18next.t("engine.aiLevelList.normal");
-      case "high":
+      case AI_LEVEL_HIGH:
         return window.i18next.t("engine.aiLevelList.high");
-      case "ultra":
+      case AI_LEVEL_ULTRA:
         return window.i18next.t("engine.aiLevelList.ultra");
       default:
         return window.i18next.t("engine.aiLevelList.normal");
