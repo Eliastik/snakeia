@@ -81,33 +81,6 @@ function valToChar(value) {
   }
 }
 
-// Clone an object
-function clone(obj) {
-  var copy;
-
-  if (null == obj || "object" != typeof obj) return obj;
-
-  if(obj instanceof Array) {
-    copy = [];
-
-    for(var i = 0, len = obj.length; i < len; i++) {
-      copy[i] = clone(obj[i]);
-    }
-
-    return copy;
-  }
-
-  if(obj instanceof Object) {
-    copy = {};
-
-    for(var attr in obj) {
-      if(obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
-    }
-
-    return copy;
-  }
-}
-
 // Event handlers objects type
 function Event(name) {
   this.name = name;
@@ -242,10 +215,24 @@ function Grid(width, height, generateWalls, borderWalls) {
     return tot;
   };
 
+  this.toString = function() {
+    res = "";
+
+    for(var i = 0; i < this.height; i++) {
+      for(var j = 0; j < this.width; j++) {
+        res += valToChar(this.get(new Position(j, i))) + " ";
+      }
+
+      res += "\n";
+    }
+
+    return res;
+  };
+
   this.init();
 }
 
-Grid.prototype.toString = function() {
+/* Grid.prototype.toString = function() {
   res = "";
 
   for(var i = 0; i < this.height; i++) {
@@ -257,7 +244,7 @@ Grid.prototype.toString = function() {
   }
 
   return res;
-};
+}; */
 
 function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.direction = direction || RIGHT;
@@ -438,8 +425,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   };
 
   this.simulateGameTick = function(snake, direction) {
-    var direction = direction || snake.ai(false);
-
+    var direction = direction === undefined ? snake.ai(false) : direction;
     snake.moveTo(direction);
 
     var headSnakePos = snake.getHeadPosition();
@@ -450,6 +436,11 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     } else {
       if(snake.grid.get(headSnakePos) == FRUIT_VAL) {
         snake.insert(headSnakePos);
+
+        if(snake.length() < (snake.grid.height * snake.grid.width - snake.grid.getTotalWalls())) {
+          snake.grid.setFruit();
+        }
+
         return 2;
       } else {
         snake.insert(headSnakePos);
@@ -460,27 +451,50 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     return 1;
   };
 
+  this.copy = function(snake) {
+    for(var i = 0; i < snake.grid.height; i++) {
+      for(var j = 0; j < snake.grid.width; j++) {
+        snake.grid.set(this.grid.get(new Position(j, i)), new Position(j, i));
+      }
+    }
+
+    snake.queue = [];
+
+    for(var i = 0; i < this.queue.length; i++) {
+      var elem = this.queue[i];
+      snake.queue.push(new Position(elem.x, elem.y, elem.direction));
+    }
+
+    return snake;
+  };
+
   this.iterateAI = function(direction, nb) {
-    var queueCopy = clone(this.queue);
-    var gridCopy = clone(this.grid);
-    var snake = new Snake(direction, 3, gridCopy, this.player, this.aiLevel, false);
-    snake.queue = queueCopy;
-    snake.grid = gridCopy;
+    var snakeTmp = new Snake(direction, 3, new Grid(this.grid.width, this.grid.height, false, false), this.player, this.aiLevel, false);
+    snakeTmp = this.copy(snakeTmp);
 
     var res = 0;
-    var simul = this.simulateGameTick(snake, direction);
+    var fruitFound = false;
+    var countFruit = 0;
+    var simul = this.simulateGameTick(snakeTmp, direction);
 
-    for(var i = 0; i < nb; i++) {
+    for(var i = 1; i <= nb; i++) {
       if(simul == 0) {
-        res -= Math.round(nb / 10) * 2;
+        res -= (nb - i);
         break;
-      } else if(simul == 2) {
-        res += Math.round(nb / 10);
+      } else if(simul == 2 && !fruitFound) {
+        res += Math.round((nb - i) / 1.25);
+        fruitFound = true;
       }
 
       res++;
 
-      simul = this.simulateGameTick(snake);
+      if(fruitFound) {
+        countFruit++;
+
+        if(countFruit > Math.round(nb / 5)) break;
+      }
+
+      simul = this.simulateGameTick(snakeTmp);
     }
 
     return res;
