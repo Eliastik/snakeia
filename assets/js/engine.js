@@ -472,10 +472,10 @@ function Snake(direction, length, grid, player, iaLevel, autoRetry) {
 
     for(var i = 0; i < nb; i++) {
       if(simul == 0) {
-        res = -1;
+        res -= Math.round(nb / 10) * 2;
         break;
       } else if(simul == 2) {
-        res += 2;
+        res += Math.round(nb / 10);
       }
 
       res++;
