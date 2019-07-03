@@ -163,10 +163,40 @@ function Grid(width, height, generateWalls, borderWalls) {
       this.grid[i] = new Array(this.width);
 
       for(var j = 0; j < this.width; j++) {
-        if((borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (generateWalls && Math.random() > 0.90)) {
+        if((borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (generateWalls && Math.random() > 0.65)) {
           this.grid[i][j] = WALL_VAL;
         } else {
           this.grid[i][j] = EMPTY_VAL;
+        }
+      }
+    }
+
+    if(generateWalls) {
+      this.fixWalls(borderWalls);
+    }
+  };
+
+  this.fixWalls = function(borderWalls) {
+    if(borderWalls) {
+      var startY = 1; var endY = this.height - 1;
+      var startX = 1; var endX = this.width - 1;
+    } else {
+      var startY = 0; var endY = this.height;
+      var startX = 0; var endX = this.width;
+    }
+
+    for(var i = startY; i < endY; i++) {
+      for(var j = startX; j < endX; j++) {
+        var currentPos = new Position(i, j);
+        var upperCase = this.getNextPosition(currentPos, UP);
+        var upperLeftCase = this.getNextPosition(upperCase, LEFT);
+        var upperRightCase = this.getNextPosition(upperCase, RIGHT);
+        var downCase = this.getNextPosition(currentPos, BOTTOM);
+        var downLeftCase = this.getNextPosition(downCase, LEFT);
+        var downRightCase = this.getNextPosition(downCase, RIGHT);
+
+        if(this.get(upperLeftCase) == WALL_VAL || this.get(upperRightCase) == WALL_VAL || this.get(downLeftCase) == WALL_VAL || this.get(downRightCase) == WALL_VAL) {
+          this.set(EMPTY_VAL, currentPos);
         }
       }
     }
@@ -245,18 +275,71 @@ function Grid(width, height, generateWalls, borderWalls) {
     return tot;
   };
 
-  this.toString = function() {
-    res = "";
+  this.getNextPosition = function(oldPos, newDirection) {
+    var position = new Position(oldPos.x, oldPos.y, newDirection);
 
-    for(var i = 0; i < this.height; i++) {
-      for(var j = 0; j < this.width; j++) {
-        res += valToChar(this.get(new Position(j, i))) + " ";
-      }
-
-      res += "\n";
+    switch(newDirection) {
+      case LEFT:
+        position.x--;
+        position.direction = LEFT;
+        break;
+      case UP:
+        position.y--;
+        position.direction = UP;
+        break;
+      case RIGHT:
+        position.x++;
+        position.direction = RIGHT;
+        break;
+      case BOTTOM:
+        position.y++;
+        position.direction = BOTTOM;
+        break;
+      case KEY_LEFT:
+        position.x--;
+        position.direction = LEFT;
+        break;
+      case KEY_UP:
+        position.y--;
+        position.direction = UP;
+        break;
+      case KEY_RIGHT:
+        position.x++;
+        position.direction = RIGHT;
+        break;
+      case KEY_BOTTOM:
+        position.y++;
+        position.direction = BOTTOM;
+        break;
     }
 
-    return res;
+    if(position.x < 0) {
+      position.x = this.width - 1;
+    } else if(position.x >= this.width) {
+      position.x = 0;
+    }
+
+    if(position.y < 0) {
+      position.y = this.height - 1;
+    } else if(position.y >= this.height) {
+      position.y = 0;
+    }
+
+    return position;
+  };
+
+  this.getDirectionTo = function(position, otherPosition) {
+    if(this.getNextPosition(position, UP).equals(otherPosition)) {
+      return UP;
+    } else if(this.getNextPosition(position, BOTTOM).equals(otherPosition)) {
+      return BOTTOM;
+    } else if(this.getNextPosition(position, RIGHT).equals(otherPosition)) {
+      return RIGHT;
+    } else if(this.getNextPosition(position, LEFT).equals(otherPosition)) {
+      return LEFT;
+    }
+
+    return -1;
   };
 
   this.init();
@@ -388,70 +471,11 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   };
 
   this.getNextPosition = function(oldPos, newDirection) {
-    var position = new Position(oldPos.x, oldPos.y, newDirection);
-
-    switch(newDirection) {
-      case LEFT:
-        position.x--;
-        position.direction = LEFT;
-        break;
-      case UP:
-        position.y--;
-        position.direction = UP;
-        break;
-      case RIGHT:
-        position.x++;
-        position.direction = RIGHT;
-        break;
-      case BOTTOM:
-        position.y++;
-        position.direction = BOTTOM;
-        break;
-      case KEY_LEFT:
-        position.x--;
-        position.direction = LEFT;
-        break;
-      case KEY_UP:
-        position.y--;
-        position.direction = UP;
-        break;
-      case KEY_RIGHT:
-        position.x++;
-        position.direction = RIGHT;
-        break;
-      case KEY_BOTTOM:
-        position.y++;
-        position.direction = BOTTOM;
-        break;
-    }
-
-    if(position.x < 0) {
-      position.x = this.grid.width - 1;
-    } else if(position.x >= this.grid.width) {
-      position.x = 0;
-    }
-
-    if(position.y < 0) {
-      position.y = this.grid.height - 1;
-    } else if(position.y >= this.grid.height) {
-      position.y = 0;
-    }
-
-    return position;
+    return this.grid.getNextPosition(oldPos, newDirection);
   };
 
   this.getDirectionTo = function(position, otherPosition) {
-    if(this.getNextPosition(position, UP).equals(otherPosition)) {
-      return UP;
-    } else if(this.getNextPosition(position, BOTTOM).equals(otherPosition)) {
-      return BOTTOM;
-    } else if(this.getNextPosition(position, RIGHT).equals(otherPosition)) {
-      return RIGHT;
-    } else if(this.getNextPosition(position, LEFT).equals(otherPosition)) {
-      return LEFT;
-    }
-
-    return -1;
+    return this.grid.getDirectionTo(position, otherPosition);
   };
 
   this.simulateGameTick = function(snake, direction) {
