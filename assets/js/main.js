@@ -419,6 +419,7 @@ function enableDebugMode() {
 // Localization
 function listTranslations(languages) {
   if(languages != null) {
+    document.getElementById("languageSelect").disabled = true;
     document.getElementById("languageSelect").innerHTML = "";
 
     for(var i = 0; i < languages.length; i++) {
@@ -426,6 +427,7 @@ function listTranslations(languages) {
     }
 
     document.getElementById("languageSelect").value = i18next.language.substr(0, 2);
+    document.getElementById("languageSelect").disabled = false;
   }
 }
 
