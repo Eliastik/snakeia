@@ -189,7 +189,7 @@ function Grid(width, height, generateWalls, borderWalls) {
       for(var j = 0; j < this.width; j++) {
         var currentVal = this.get(new Position(j, i));
 
-        if(!snakePos.equals(new Position(j, i)) && (currentVal == SNAKE_VAL || currentVal == WALL_VAL)) {
+        if(currentVal == SNAKE_VAL || currentVal == WALL_VAL) {
           res[i][j] = 1;
         } else {
           res[i][j] = 0;
@@ -262,7 +262,7 @@ function Grid(width, height, generateWalls, borderWalls) {
   this.init();
 }
 
-/* Grid.prototype.toString = function() {
+Grid.prototype.toString = function() {
   res = "";
 
   for(var i = 0; i < this.height; i++) {
@@ -274,7 +274,7 @@ function Grid(width, height, generateWalls, borderWalls) {
   }
 
   return res;
-}; */
+};
 
 function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.direction = direction || RIGHT;
@@ -577,22 +577,19 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
         var currentPosition = this.getHeadPosition();
         var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
 
-        var grid = new PF.Grid(this.grid.getGraph(currentPosition));
-        var finder = new PF.AStarFinder();
-        var path = finder.findPath(currentPosition.x, currentPosition.y, fruitPos.x, fruitPos.y, grid);
+        var grid = this.grid.getGraph(currentPosition);
+        var graph = new Lowlight.Astar.Configuration(grid, {
+          order: "yx",
+          torus: (this.aiLevel == AI_LEVEL_HIGH || this.aiLevel == AI_LEVEL_ULTRA) ? true : false,
+          diagonals: false,
+          cutting: false,
+          cost(a, b) { return b == 1 ? null : 1 }
+        });
+        var path = graph.path({x: currentPosition.x, y: currentPosition.y}, {x: fruitPos.x, y: fruitPos.y});
 
         if(path.length > 1) {
-          var nextPosition = new Position(path[1][0], path[1][1]);
-
-          if(nextPosition.x > currentPosition.x) {
-            res = KEY_RIGHT;
-          } else if(nextPosition.x < currentPosition.x) {
-            res = KEY_LEFT;
-          } else if(nextPosition.y < currentPosition.y) {
-            res = KEY_UP;
-          } else if(nextPosition.y > currentPosition.y) {
-            res = KEY_BOTTOM;
-          }
+          var nextPosition = new Position(path[1].x, path[1].y);
+          res = new Position(null, null, this.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
         } else if(this.aiLevel == AI_LEVEL_HIGH || this.aiLevel == AI_LEVEL_ULTRA) {
           res = this.simpleAI();
         }

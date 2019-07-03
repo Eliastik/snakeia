@@ -18,7 +18,7 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 
 ### Credits
 
-* Uses the library [PathFinding.js](https://github.com/qiao/PathFinding.js/) under [MIT](https://opensource.org/licenses/mit-license.php) license
+* Uses the library [Lowlight.Astar](https://github.com/lowlighter/astar) under [MIT](https://opensource.org/licenses/mit-license.php) license
 * Uses the library [i18next](https://github.com/i18next/i18next) (with the module [i18next-browser-languageDetector](https://github.com/i18next/i18next-browser-languageDetector)) under [MIT](https://opensource.org/licenses/mit-license.php) license for the translation engine
 * Uses graphic elements from [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728) and [Snake](https://www.flaticon.com/free-icon/snake_194210) (changed)
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
@@ -54,7 +54,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ### Crédits
 
-* Utilise la bibliothèque logicielle [PathFinding.js](https://github.com/qiao/PathFinding.js/) sous licence [MIT](https://opensource.org/licenses/mit-license.php)
+* Utilise la bibliothèque logicielle [Lowlight.Astar](https://github.com/lowlighter/astar) sous licence [MIT](https://opensource.org/licenses/mit-license.php)
 * Utilise la bibliothèque logicielle [i18next](https://github.com/i18next/i18next) (avec le module [i18next-browser-languageDetector](https://github.com/i18next/i18next-browser-languageDetector)) sous licence [MIT](https://opensource.org/licenses/mit-license.php) pour le moteur de traduction
 * Utilise des éléments graphiques venant de [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728) et [Snake](https://www.flaticon.com/free-icon/snake_194210) (modifié)
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
