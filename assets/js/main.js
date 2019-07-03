@@ -459,5 +459,7 @@ document.getElementById("languageSelect").onchange = function() {
 };
 
 window.addEventListener("load", function() {
-  translateContent();
+  setTimeout(function() {
+    translateContent();
+  }, 250);
 });
