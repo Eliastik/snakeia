@@ -217,9 +217,9 @@ function Grid(width, height, generateWalls, borderWalls) {
       res[i] = new Array(this.width);
 
       for(var j = 0; j < this.width; j++) {
-        var currentVal = this.get(new Position(j, i));
+        var currentPos = new Position(j, i);
 
-        if(currentVal == SNAKE_VAL || currentVal == WALL_VAL) {
+        if(this.isDeadPosition(currentPos)) {
           res[i][j] = 1;
         } else {
           res[i][j] = 0;
@@ -249,20 +249,6 @@ function Grid(width, height, generateWalls, borderWalls) {
     this.set(FRUIT_VAL, randomPos);
   };
 
-  this.getTotalWalls = function() {
-    var tot = 0;
-
-    for(var i = 0; i < this.height; i++) {
-      for(var j = 0; j < this.width; j++) {
-        if(this.get(new Position(j, i)) == WALL_VAL) {
-          tot++;
-        }
-      }
-    }
-
-    return tot;
-  };
-
   this.getOnLine = function(type, line) {
     var tot = 0;
 
@@ -270,6 +256,16 @@ function Grid(width, height, generateWalls, borderWalls) {
       if(this.get(new Position(j, line)) == type) {
         tot++;
       }
+    }
+
+    return tot;
+  };
+
+  this.getTotalWalls = function() {
+    var tot = 0;
+
+    for(var i = 0; i < this.height; i++) {
+      tot += this.getOnLine(WALL_VAL, i);
     }
 
     return tot;
@@ -340,6 +336,10 @@ function Grid(width, height, generateWalls, borderWalls) {
     }
 
     return -1;
+  };
+
+  this.isDeadPosition = function(position) {
+    return this.get(position) == SNAKE_VAL || this.get(position) == WALL_VAL;
   };
 
   this.init();
@@ -452,6 +452,10 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     return this.get(this.length() - 1);
   };
 
+  this.hasMaxScore = function() {
+    return this.length() >= (this.grid.height * this.grid.width - this.grid.getTotalWalls());
+  };
+
   this.moveTo = function(direction) {
     if(direction == KEY_LEFT && this.direction != RIGHT && this.direction != LEFT) {
       this.direction = LEFT;
@@ -485,7 +489,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     var headSnakePos = snake.getHeadPosition();
     headSnakePos = snake.getNextPosition(headSnakePos, snake.direction);
 
-    if(snake.grid.get(headSnakePos) == SNAKE_VAL || snake.grid.get(headSnakePos) == WALL_VAL) {
+    if(snake.grid.isDeadPosition(headSnakePos)) {
       return 0;
     } else {
       if(snake.grid.get(headSnakePos) == FRUIT_VAL) {
@@ -558,7 +562,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
 
       var nextPosition = this.getNextPosition(currentPosition, directionNext);
 
-      if(this.grid.get(nextPosition) != EMPTY_VAL && this.grid.get(nextPosition) != FRUIT_VAL) {
+      if(this.grid.isDeadPosition(nextPosition)) {
         var currentDirection = this.direction;
         var firstDifferentDirection = null;
 
@@ -571,14 +575,14 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
 
         nextPosition = this.getNextPosition(currentPosition, firstDifferentDirection);
 
-        if(this.grid.get(nextPosition) != EMPTY_VAL && this.grid.get(nextPosition) != FRUIT_VAL) {
-          if(this.grid.get(this.getNextPosition(currentPosition, KEY_UP)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_UP)) == FRUIT_VAL) {
+        if(this.grid.isDeadPosition(nextPosition)) {
+          if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_UP))) {
             directionNext = KEY_UP;
-          } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_RIGHT)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_RIGHT)) == FRUIT_VAL) {
+          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_RIGHT))) {
             directionNext = KEY_RIGHT;
-          } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_BOTTOM)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_BOTTOM)) == FRUIT_VAL) {
+          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_BOTTOM))) {
             directionNext = KEY_BOTTOM;
-          } else if(this.grid.get(this.getNextPosition(currentPosition, KEY_LEFT)) == EMPTY_VAL || this.grid.get(this.getNextPosition(currentPosition, KEY_LEFT)) == FRUIT_VAL) {
+          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_LEFT))) {
             directionNext = KEY_LEFT;
           }
         } else {
@@ -971,14 +975,14 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           var headSnakePos = self.snake.getHeadPosition();
           headSnakePos = self.snake.getNextPosition(headSnakePos, self.snake.direction);
 
-          if(self.grid.get(headSnakePos) == SNAKE_VAL || self.grid.get(headSnakePos) == WALL_VAL) {
+          if(self.grid.isDeadPosition(headSnakePos)) {
             self.stop();
           } else {
             if(self.grid.get(headSnakePos) == FRUIT_VAL) {
               self.score++;
               self.snake.insert(headSnakePos);
 
-              if(self.snake.length() >= (self.grid.height * self.grid.width - self.grid.getTotalWalls())) {
+              if(self.snake.hasMaxScore()) {
                 self.scoreMax = true;
                 self.stop();
               } else {
