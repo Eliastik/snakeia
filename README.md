@@ -12,7 +12,7 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 
 ## About this game
 
-* Version: 1.1
+* Version: 1.2
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -25,6 +25,16 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 * Uses the CSS framework [Bootstrap 4](https://getbootstrap.com/) and the theme [Flat UI](https://designmodo.github.io/Flat-UI/)
 
 ## Changelog
+
+* Version 1.2 (7/3/2019):
+  - Migration to the Lowlight.Astar software library, which supports torus-shaped grids, which improves AI performance;
+  - Correction and improvement of the performances of the AI ​​in low level mode;
+  - Fixed the generation of walls at random positions: dead ends are now detected and removed;
+  - Fixed a bug with the translation engine during the initial loading of the page: in some cases, the page was not translated and the language menu did not load;
+  - Support for resource loading errors: an error message is displayed in this case;
+  - A Current game infos menu is available in the Pause menu > About…;
+  - The minimum speed allowed is now 100;
+  - Simplifications of the code.
 
 * Version 1.1 (6/30/2019):
   - Integration of the i18next translation engine and translation of the application into English;
@@ -48,7 +58,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ## À propos du jeu
 
-* Version du jeu : 1.1
+* Version du jeu : 1.2
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -61,6 +71,16 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 * Utilise le framework CSS [Bootstrap 4](https://getbootstrap.com/) et le thème [Flat UI](https://designmodo.github.io/Flat-UI/)
 
 ## Journal des changements
+
+* Version 1.2 (03/07/2019) :
+  - Migration vers la bibliothèque logicielle Lowlight.Astar, qui supporte les grilles en forme de tore, ce qui améliore les performances de l'IA ;
+  - Correction et amélioration des performances de l'IA en mode faible ;
+  - Correction de la génération des murs à des positions aléatoires : les impasses sont désormais détectées et supprimées ;
+  - Correction d'un bug avec le moteur de traduction lors du chargement initial de la page : dans certains cas, la page ne se traduisait pas et le menu des langues ne se chargeait pas ;
+  - Prise en charge des erreurs de chargement des ressources : un message d'erreur est affiché dans ce cas ;
+  - Un menu Info partie est disponible dans le menu Pause > À propos… ;
+  - La vitesse minimale autorisée est désormais de 100 ;
+  - Simplifications du code.
 
 * Version 1.1 (30/06/2019) :
   - Intégration du moteur de traduction i18next et traduction de l'application en anglais ;
@@ -75,7 +95,12 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ## TO-DO list
 
-* Améliorer l'IA (essais effectués)
+### À faire :
+
+* Améliorer l'IA pour l'empêcher de se bloquer (difficile, essais effectués) - niveau Ultra
+
+### Fait :
+
 * Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
 
 ## Déclaration de licence
