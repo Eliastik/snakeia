@@ -2027,11 +2027,15 @@ function GameGroup(games) {
       }
     }
 
+    var idx = 0;
+
     for(var i = 0; i < this.games.length; i++) {
       for(var j = 0; j < this.games[i].snakes.length; j++) {
+        idx++;
+
         if(this.games[i].snakes[j].score >= maxScore) {
           winners.push(this.games[i].snakes[j]);
-          index.push(i);
+          index.push(idx);
         }
       }
     }
