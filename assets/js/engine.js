@@ -850,12 +850,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     var startHue = randRange(1, 180);
 
     for(var i = 0; i < this.snakes.length; i++) {
-      if(this.snakes[i].errorInit) {
-        console.error(window.i18next.t("engine.initFailed"));
-        this.errorOccured = true;
-        this.stop();
-      }
-
       startHue = addHue(startHue, (startHue / this.snakes.length) * (i + 1));
       this.snakes[i].color = startHue;
     }
@@ -961,6 +955,14 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.start = function() {
+    for(var i = 0; i < this.snakes.length; i++) {
+      if(this.snakes[i].errorInit) {
+        console.error(window.i18next.t("engine.initFailed"));
+        this.errorOccured = true;
+        this.stop();
+      }
+    }
+
     if(this.paused && !this.gameOver && this.assetsLoaded && !this.scoreMax) {
       this.disableAllButtons();
       this.getInfos = false;
