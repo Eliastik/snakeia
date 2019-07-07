@@ -259,7 +259,11 @@ function Grid(width, height, generateWalls, borderWalls) {
 
       this.fruitPos = randomPos;
       this.set(FRUIT_VAL, randomPos);
+    } else {
+      return false;
     }
+
+    return true;
   };
 
   this.getOnLine = function(type, line) {
@@ -526,7 +530,10 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     } else {
       if(snake.grid.get(headSnakePos) == FRUIT_VAL) {
         snake.insert(headSnakePos);
-        snake.grid.setFruit();
+
+        if(!snake.grid.setFruit()) {
+          return 0;
+        }
 
         return 2;
       } else {
