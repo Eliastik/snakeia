@@ -855,10 +855,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.snakes = [this.snakes];
     }
 
-    var startHue = randRange(1, 180);
+    var startHue = randRange(0, 360);
 
     for(var i = 0; i < this.snakes.length; i++) {
-      startHue = addHue(startHue, (startHue / this.snakes.length) * (i + 1));
+      startHue = addHue(startHue, Math.round(360 / this.snakes.length));
       this.snakes[i].color = startHue;
     }
 
@@ -1483,9 +1483,11 @@ Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
 Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignement, verticalAlignement, x, y) {
   var precFillStyle = ctx.fillStyle;
   var precFont = ctx.font;
+  var precFilter = ctx.filter;
 
   ctx.fillStyle = color;
   ctx.font = size + "px " + fontFamily;
+  ctx.filter = "none";
 
   var lines = text.split('\n');
 
@@ -1513,6 +1515,7 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
 
   ctx.fillStyle = precFillStyle;
   ctx.font = precFont;
+  ctx.filter = precFilter;
 
   return {
     x: x,
@@ -1691,7 +1694,32 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       this.drawImage(ctx, imageLoc, caseX, caseY, caseWidth, caseHeight);
     }
 
+    if(this.snakes.length > 1) {
+      this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight);
+    }
+
     ctx.filter = "none";
+  }
+};
+
+Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight) {
+  var numPlayer = 0;
+  var numAI = 0;
+
+  for(var i = 0; i < this.snakes.length; i++) {
+    if(this.snakes[i].player == PLAYER_HUMAN) {
+      numPlayer++;
+    } else {
+      numAI++;
+    }
+
+    var position = this.snakes[i].get(0);
+    var posX = position.x;
+    var posY = position.y;
+    var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
+    var caseY = 75 + posY * caseHeight;
+
+    this.drawText(ctx, (this.snakes[i].player == PLAYER_HUMAN ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgba(255, 255, 255, 0.75)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX + 2, caseY - Math.round(caseHeight / 1.75));
   }
 };
 

@@ -54,6 +54,8 @@
      "gameOver": "Game Over !",
      "gameFinished": "Partie terminée !",
      "pause": "Pause",
+     "playerMin": "J",
+     "aiMin": "IA",
      "aboutScreen": {
        "title": "SnakeIA par Eliastik",
        "versionAndDate": "Version {{version}} ({{date, DD/MM/YYYY}})"
@@ -106,6 +108,8 @@ i18next.addResourceBundle("en", "translation", {
     "gameFinished": "Game finished!",
     "gameOver": "Game Over!",
     "pause": "Pause",
+    "playerMin": "P",
+    "aiMin": "AI",
     "aboutScreen": {
       "title": "SnakeIA by Eliastik",
       "versionAndDate": "Version {{version}} ({{date, MM/DD/YYYY}})"
