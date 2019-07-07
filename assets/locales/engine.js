@@ -20,6 +20,7 @@
  i18next.addResourceBundle("fr", "translation", {
    "engine": {
      "score": "Score",
+     "num": "n°",
      "initFailed": "Échec de l'initialisation du jeu : le Snake est plus grand que la grille",
      "continue": "Reprendre",
      "reset": "Recommencer la partie",
@@ -71,6 +72,7 @@
 i18next.addResourceBundle("en", "translation", {
   "engine": {
     "score": "Score",
+    "num": "n°",
     "initFailed": "Game init failed: the Snake is bigger than the grid",
     "continue": "Continue",
     "reset": "Reset the game",

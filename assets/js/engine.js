@@ -745,6 +745,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.enableRetry = enableRetry === undefined ? true : enableRetry;
   this.progressiveSpeed = progressiveSpeed === undefined ? false : progressiveSpeed;
   this.outputType = outputType || OUTPUT_GRAPHICAL;
+  this.numFruit = 1;
   this.frame = 0;
   this.lastFrame = 0;
   this.currentFPS = 0;
@@ -867,7 +868,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     document.addEventListener("keydown", function(evt) {
       if(!self.paused) {
-        self.lastKey = evt.keyCode;
+        if(evt.keyCode == 13) {
+          self.pause();
+        } else {
+          self.lastKey = evt.keyCode;
+        }
       }
     });
 
@@ -943,6 +948,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.snakes[i].reset();
     }
 
+    this.numFruit = 1;
     this.frame = 0;
     this.lastFrame = 0;
     this.currentFPS = TARGET_FPS;
@@ -1043,6 +1049,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
                     self.scoreMax = true;
                     self.snakes[i].scoreMax = true;
                   } else {
+                    self.numFruit++;
                     self.grid.setFruit();
                   }
 
@@ -1235,6 +1242,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
         if(this.snakes.length <= 1) {
           this.drawText(ctx, "× " + this.snakes[0].score, "black", FONT_SIZE, FONT_FAMILY, "default", "default", 68, 50);
+        } else {
+          this.drawText(ctx, window.i18next.t("engine.num") + this.numFruit, "black", FONT_SIZE, FONT_FAMILY, "default", "default", 68, 50);
         }
 
         var totalWidth = caseWidth * this.grid.width;
