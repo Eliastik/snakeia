@@ -82,6 +82,16 @@ function valToChar(value) {
   }
 }
 
+function addHue(hue, add) {
+  var res = hue + add;
+
+  if(res > 360) {
+    res = (res - 360);
+  }
+
+  return res;
+}
+
 // Event handlers objects type
 function Event(name) {
   this.name = name;
@@ -837,12 +847,17 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.snakes = [this.snakes];
     }
 
+    var startHue = randRange(1, 180);
+
     for(var i = 0; i < this.snakes.length; i++) {
       if(this.snakes[i].errorInit) {
         console.error(window.i18next.t("engine.initFailed"));
         this.errorOccured = true;
         this.stop();
       }
+
+      startHue = addHue(startHue, (startHue / this.snakes.length) * (i + 1));
+      this.snakes[i].color = startHue;
     }
 
     this.grid.setFruit();
@@ -1429,16 +1444,10 @@ Game.prototype.getImageCase = function(position) {
   return imageRes;
 };
 
-Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height, hue, defaultHue) {
+Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
   if(imgSrc != "") {
     var imageCase = this.imageLoader.get(imgSrc);
-
-    if(hue != undefined && defaultHue != undefined) {
-      ctx.filter = "hue-rotate(" + ((hue - defaultHue) | 0) + "deg)";
-    }
-
     ctx.drawImage(imageCase, x, y, width, height);
-    ctx.filter = "hue-rotate(0deg)";
   }
 };
 
@@ -1549,6 +1558,10 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
 
 Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
   for(var j = 0; j < this.snakes.length; j++) {
+    if(this.snakes[j].color != undefined) {
+      ctx.filter = "hue-rotate(" + this.snakes[j].color + "deg)";
+    }
+
     for(var i = 0; i < this.snakes[j].length(); i++) {
       var position = this.snakes[j].get(i);
       var posX = position.x;
@@ -1644,6 +1657,8 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
 
       this.drawImage(ctx, imageLoc, caseX, caseY, caseWidth, caseHeight);
     }
+
+    ctx.filter = "none";
   }
 };
 
