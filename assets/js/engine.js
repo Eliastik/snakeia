@@ -365,6 +365,7 @@ Grid.prototype.toString = function() {
 function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.direction = direction || RIGHT;
   this.initialDirection = direction || RIGHT;
+  this.initialLength = length;
   this.errorInit = false;
   this.grid = grid;
   this.queue = [];
@@ -379,9 +380,20 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.init = function() {
     var spaceLineAvailable = 0;
 
-    for(var i = 0; i < grid.height; i++) {
-      if(this.grid.getOnLine(EMPTY_VAL, i) >= 3) {
-        spaceLineAvailable++;
+    for(var i = 0; i < this.grid.height; i++) {
+      var emptyOnLine = 0;
+
+      for(var j = 0; j < this.grid.width; j++) {
+        if(this.grid.get(new Position(j, i)) == EMPTY_VAL) {
+          emptyOnLine++;
+        } else {
+          emptyOnLine = 0;
+        }
+
+        if(emptyOnLine >= this.initialLength) {
+          spaceLineAvailable++;
+          break;
+        }
       }
     }
 
@@ -395,22 +407,22 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
 
     while(!posValidated) {
       posValidated = true;
-      startPos = grid.getRandomPosition();
+      startPos = this.grid.getRandomPosition();
 
-      for(var i = length - 1; i >= 0; i--) {
+      for(var i = this.initialLength - 1; i >= 0; i--) {
         var posX = startPos.x - i;
 
         if(posX < 0) {
           posX = this.grid.width - -posX;
         }
 
-        if(grid.get(new Position(posX, startPos.y)) != EMPTY_VAL) {
+        if(this.grid.get(new Position(posX, startPos.y)) != EMPTY_VAL) {
           posValidated = false;
         }
       }
     }
 
-    for(var i = length - 1; i >= 0; i--) {
+    for(var i = this.initialLength - 1; i >= 0; i--) {
       var posX = startPos.x - i;
 
       if(posX < 0) {
@@ -826,7 +838,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     }
 
     for(var i = 0; i < this.snakes.length; i++) {
-      if(this.grid.getTotal(EMPTY_VAL) <= 0 || this.snakes[i].errorInit) {
+      if(this.snakes[i].errorInit) {
         console.error(window.i18next.t("engine.initFailed"));
         this.errorOccured = true;
         this.stop();
@@ -1189,7 +1201,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         this.btnPause.draw(this.canvas);
       }
 
-      if(this.assetsLoaded) {
+      if(this.assetsLoaded && !this.errorOccured) {
         this.drawImage(ctx, "assets/images/fruit.png", 5, 5, 64, 64);
 
         if(this.snakes.length <= 1) {
@@ -1215,7 +1227,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         }
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth);
-      } else {
+      } else if(!this.assetsLoaded) {
         this.drawMenu(ctx, [], window.i18next.t("engine.loading"), "white", this.fontSize, FONT_FAMILY, "center", null, 1, true);
       }
 
