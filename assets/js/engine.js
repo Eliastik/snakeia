@@ -55,6 +55,7 @@ KEY_LEFT = 37;
 FONT_FAMILY = "Delius";
 FONT_SIZE = 32;
 TARGET_FPS = 60;
+IMAGE_HUE = 75;
 // Infos
 APP_VERSION = "1.2";
 DATE_VERSION = "2019-07-03";
@@ -239,14 +240,16 @@ function Grid(width, height, generateWalls, borderWalls) {
       this.set(EMPTY_VAL, this.fruitPos);
     }
 
-    var randomPos = this.getRandomPosition();
+    if(this.getTotal(EMPTY_VAL) > 0) {
+      var randomPos = this.getRandomPosition();
 
-    while(this.get(randomPos) != EMPTY_VAL) {
-      randomPos = this.getRandomPosition();
+      while(this.get(randomPos) != EMPTY_VAL) {
+        randomPos = this.getRandomPosition();
+      }
+
+      this.fruitPos = randomPos;
+      this.set(FRUIT_VAL, randomPos);
     }
-
-    this.fruitPos = randomPos;
-    this.set(FRUIT_VAL, randomPos);
   };
 
   this.getOnLine = function(type, line) {
@@ -261,11 +264,11 @@ function Grid(width, height, generateWalls, borderWalls) {
     return tot;
   };
 
-  this.getTotalWalls = function() {
+  this.getTotal = function(type) {
     var tot = 0;
 
     for(var i = 0; i < this.height; i++) {
-      tot += this.getOnLine(WALL_VAL, i);
+      tot += this.getOnLine(type, i);
     }
 
     return tot;
@@ -368,12 +371,16 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.player = player || PLAYER_HUMAN;
   this.aiLevel = aiLevel || AI_LEVEL_DEFAULT;
   this.autoRetry = autoRetry === undefined ? false : autoRetry;
+  this.score = 0;
+  this.gameOver = false;
+  this.scoreMax = false;
+  this.color;
 
   this.init = function() {
     var spaceLineAvailable = 0;
 
     for(var i = 0; i < grid.height; i++) {
-      if(length <= grid.width - grid.getOnLine(WALL_VAL, i) - grid.getOnLine(FRUIT_VAL, i)) {
+      if(this.grid.getOnLine(EMPTY_VAL, i) >= 3) {
         spaceLineAvailable++;
       }
     }
@@ -397,7 +404,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
           posX = this.grid.width - -posX;
         }
 
-        if(grid.get(new Position(posX, startPos.y)) == WALL_VAL || grid.get(new Position(posX, startPos.y)) == FRUIT_VAL) {
+        if(grid.get(new Position(posX, startPos.y)) != EMPTY_VAL) {
           posValidated = false;
         }
       }
@@ -417,6 +424,9 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.reset = function() {
     this.direction = this.initialDirection;
     this.queue = [];
+    this.score = 0;
+    this.gameOver = false;
+    this.scoreMax = false;
     this.init();
   };
 
@@ -453,7 +463,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   };
 
   this.hasMaxScore = function() {
-    return this.length() >= (this.grid.height * this.grid.width - this.grid.getTotalWalls());
+    return this.grid.getTotal(EMPTY_VAL) <= 0;
   };
 
   this.moveTo = function(direction) {
@@ -494,10 +504,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     } else {
       if(snake.grid.get(headSnakePos) == FRUIT_VAL) {
         snake.insert(headSnakePos);
-
-        if(snake.length() < (snake.grid.height * snake.grid.width - snake.grid.getTotalWalls())) {
-          snake.grid.setFruit();
-        }
+        snake.grid.setFruit();
 
         return 2;
       } else {
@@ -701,7 +708,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.imageLoader;
   this.assetsLoaded = false;
   this.grid = grid;
-  this.snake = snake;
+  this.snakes = snake;
   this.speed = speed || 8;
   this.initialSpeed = speed || 8;
   this.initialSpeedUntouched = speed || 8;
@@ -709,15 +716,15 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.enableRetry = enableRetry === undefined ? true : enableRetry;
   this.progressiveSpeed = progressiveSpeed === undefined ? false : progressiveSpeed;
   this.outputType = outputType || OUTPUT_GRAPHICAL;
-  this.score = 0;
   this.frame = 0;
   this.lastFrame = 0;
   this.currentFPS = 0;
   this.paused = true;
   this.exited = false;
   this.gameOver = false;
-  this.isReseted = true;
+  this.gameFinished = false;
   this.scoreMax = false;
+  this.isReseted = true;
   this.errorOccured = false;
   this.confirmReset = false;
   this.confirmExit = false;
@@ -765,7 +772,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     if(this.outputType == OUTPUT_TEXT) {
       this.textarea = document.createElement("textarea");
       this.textarea.style.width = this.grid.width * 16.5 + "px";
-      this.textarea.style.height = this.grid.height * 19 + "px";
+      this.textarea.style.height = this.grid.height * 16 + 100 + "px";
       this.appendTo.appendChild(this.textarea);
       this.assetsLoaded = true;
     } else if(this.outputType == OUTPUT_GRAPHICAL) {
@@ -814,13 +821,19 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       });
     }
 
-    if((this.grid.width * this.grid.height - this.grid.getTotalWalls()) <= this.snake.length() || this.snake.errorInit) {
-      console.error(window.i18next.t("engine.initFailed"));
-      this.errorOccured = true;
-      this.stop();
-    } else {
-      this.grid.setFruit();
+    if(!Array.isArray(this.snakes)) {
+      this.snakes = [this.snakes];
     }
+
+    for(var i = 0; i < this.snakes.length; i++) {
+      if(this.grid.getTotal(EMPTY_VAL) <= 0 || this.snakes[i].errorInit) {
+        console.error(window.i18next.t("engine.initFailed"));
+        this.errorOccured = true;
+        this.stop();
+      }
+    }
+
+    this.grid.setFruit();
 
     var self = this;
 
@@ -846,17 +859,19 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.autoResizeCanvas = function() {
-    if(!document.fullscreenElement) {
-      if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
-        var ratio = this.canvasWidth / this.canvasHeight;
-        this.canvas.width = document.documentElement.clientWidth * 0.85;
-        this.canvas.height = this.canvas.width / ratio;
-      } else {
-        this.canvas.width = this.canvasWidth;
-        this.canvas.height = this.canvasHeight;
-      }
+    if(this.outputType == OUTPUT_GRAPHICAL) {
+      if(!document.fullscreenElement) {
+        if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
+          var ratio = this.canvasWidth / this.canvasHeight;
+          this.canvas.width = document.documentElement.clientWidth * 0.85;
+          this.canvas.height = this.canvas.width / ratio;
+        } else {
+          this.canvas.width = this.canvasWidth;
+          this.canvas.height = this.canvasHeight;
+        }
 
-      this.updateUI();
+        this.updateUI();
+      }
     }
   };
 
@@ -895,8 +910,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     this.reactor.dispatchEvent("onReset");
     this.clearIntervalCountFPS();
     this.grid.init();
-    this.snake.reset();
-    this.score = 0;
+
+    for(var i = 0; i < this.snakes.length; i++) {
+      this.snakes[i].reset();
+    }
+
     this.frame = 0;
     this.lastFrame = 0;
     this.currentFPS = TARGET_FPS;
@@ -904,6 +922,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     this.errorOccured = false;
     this.lastKey = -1;
     this.gameOver = false;
+    this.gameFinished = false;
     this.initialSpeed = this.initialSpeedUntouched;
     this.speed = this.initialSpeedUntouched;
     this.grid.setFruit();
@@ -966,36 +985,51 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         self.frame++;
 
         if(self.frame % self.speed == 0) {
-          if(self.snake.player == PLAYER_HUMAN) {
-            self.snake.moveTo(self.lastKey);
-          } else if(self.snake.player == PLAYER_AI) {
-            self.snake.moveTo(self.snake.ai(true));
-          }
+          for(var i = 0; i < self.snakes.length; i++) {
+            if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
+              if(self.snakes[i].player == PLAYER_HUMAN) {
+                self.snakes[i].moveTo(self.lastKey);
+              } else if(self.snakes[i].player == PLAYER_AI) {
+                self.snakes[i].moveTo(self.snakes[i].ai(true));
+              }
 
-          var headSnakePos = self.snake.getHeadPosition();
-          headSnakePos = self.snake.getNextPosition(headSnakePos, self.snake.direction);
+              var headSnakePos = self.snakes[i].getHeadPosition();
+              headSnakePos = self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction);
 
-          if(self.grid.isDeadPosition(headSnakePos)) {
-            self.stop();
-          } else {
-            if(self.grid.get(headSnakePos) == FRUIT_VAL) {
-              self.score++;
-              self.snake.insert(headSnakePos);
-
-              if(self.snake.hasMaxScore()) {
-                self.scoreMax = true;
-                self.stop();
+              if(self.grid.isDeadPosition(headSnakePos)) {
+                self.snakes[i].gameOver = true;
               } else {
-                self.grid.setFruit();
-              }
+                if(self.grid.get(headSnakePos) == FRUIT_VAL) {
+                  self.snakes[i].score++;
+                  self.snakes[i].insert(headSnakePos);
 
-              if(self.progressiveSpeed && self.score > 0 && self.initialSpeed > 1) {
-                self.initialSpeed = Math.ceil(((-self.initialSpeedUntouched / 100) * self.score) + self.initialSpeedUntouched);
-                self.initialSpeed = self.initialSpeed < 1 ? 1 : self.initialSpeed;
+                  if(self.snakes[i].hasMaxScore()) {
+                    self.scoreMax = true;
+                    self.snakes[i].scoreMax = true;
+                  } else {
+                    self.grid.setFruit();
+                  }
+
+                  if(self.snakes.length <= 1 && self.progressiveSpeed && self.snakes[i].score > 0 && self.initialSpeed > 1) {
+                    self.initialSpeed = Math.ceil(((-self.initialSpeedUntouched / 100) * self.snakes[i].score) + self.initialSpeedUntouched);
+                    self.initialSpeed = self.initialSpeed < 1 ? 1 : self.initialSpeed;
+                  }
+                } else {
+                  self.snakes[i].insert(headSnakePos);
+                  self.snakes[i].remove();
+                }
               }
-            } else {
-              self.snake.insert(headSnakePos);
-              self.snake.remove();
+            }
+
+            var nbOver = 0;
+
+            for(var j = 0; j < self.snakes.length; j++) {
+              (self.snakes[j].gameOver || self.snakes[j].scoreMax) && nbOver++;
+            }
+
+            if(nbOver >= self.snakes.length) {
+              self.stop();
+              self.gameFinished = true;
             }
           }
         }
@@ -1030,7 +1064,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.kill = function() {
     this.paused = true;
     this.gameOver = true;
-    this.snake.autoRetry = false;
+
+    for(var i = 0; i < this.snakes.length; i++) {
+      this.snakes[i].autoRetry = false;
+    }
+
     this.clearIntervalCountFPS();
 
     if(this.outputType == OUTPUT_TEXT) {
@@ -1153,7 +1191,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       if(this.assetsLoaded) {
         this.drawImage(ctx, "assets/images/fruit.png", 5, 5, 64, 64);
-        this.drawText(ctx, "× " + this.score, "black", FONT_SIZE, FONT_FAMILY, "default", "default", 68, 50);
+
+        if(this.snakes.length <= 1) {
+          this.drawText(ctx, "× " + this.snakes[0].score, "black", FONT_SIZE, FONT_FAMILY, "default", "default", 68, 50);
+        }
 
         var totalWidth = caseWidth * this.grid.width;
 
@@ -1178,11 +1219,14 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         this.drawMenu(ctx, [], window.i18next.t("engine.loading"), "white", this.fontSize, FONT_FAMILY, "center", null, 1, true);
       }
 
-      if(this.snake.player == PLAYER_HUMAN) {
-        this.btnTopArrow.draw(this.canvas);
-        this.btnBottomArrow.draw(this.canvas);
-        this.btnRightArrow.draw(this.canvas);
-        this.btnLeftArrow.draw(this.canvas);
+      for(var i = 0; i < this.snakes.length; i++) {
+        if(this.snakes[i].player == PLAYER_HUMAN) {
+          this.btnTopArrow.draw(this.canvas);
+          this.btnBottomArrow.draw(this.canvas);
+          this.btnRightArrow.draw(this.canvas);
+          this.btnLeftArrow.draw(this.canvas);
+          break;
+        }
       }
 
       this.disableAllButtons();
@@ -1196,15 +1240,15 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
            self.exit();
          });
        });
-     } else if(this.getInfosGame) {
-        this.drawMenu(ctx, [this.btnOK], window.i18next.t("engine.player") + " " + (this.snake.player == PLAYER_HUMAN ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) + (this.snake.player == PLAYER_AI ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.snake.getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+     } else if(this.getInfosGame && this.snakes.length <= 1) {
+        this.drawMenu(ctx, [this.btnOK], window.i18next.t("engine.player") + " " + (this.snakes[0].player == PLAYER_HUMAN ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) + (this.snakes[0].player == PLAYER_AI ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.snakes[0].getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfosGame = false;
             self.updateUI();
           });
         });
       }  else if(this.getInfos) {
-        this.drawMenu(ctx, [this.btnInfosGame, this.btnOK], window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+        this.drawMenu(ctx, (this.snakes.length <= 1 ? [this.btnInfosGame, this.btnOK] : [this.btnOK]), window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
           self.btnInfosGame.addClickAction(self.canvas, function() {
             self.getInfosGame = true;
             self.updateUI();
@@ -1241,7 +1285,18 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             self.updateUI();
           });
         });
-      } else if(this.scoreMax) {
+      } else if(this.gameFinished && this.snakes.length > 1) {
+        this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], window.i18next.t("engine.gameFinished"), "white", this.fontSize, FONT_FAMILY, "center", null, null, true, function() {
+          self.btnRetry.addClickAction(self.canvas, function() {
+            self.reset();
+          });
+
+          self.btnQuit.addClickAction(self.canvas, function() {
+            self.confirmExit = true;
+            self.updateUI();
+          });
+        });
+      } else if(this.scoreMax && this.snakes.length <= 1) {
         this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.scoreMax"), "green", this.fontSize, FONT_FAMILY, "center", null, null, true, function() {
           self.btnRetry.addClickAction(self.canvas, function() {
             self.reset();
@@ -1252,9 +1307,9 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             self.updateUI();
           });
         });
-      } else if(this.gameOver) {
-        this.drawMenu(ctx, this.enableRetry && !this.snake.autoRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, false, function() {
-          if(self.snake.autoRetry) {
+      } else if(this.gameOver && this.snakes.length <= 1) {
+        this.drawMenu(ctx, this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, false, function() {
+          if(self.snakes[0].autoRetry) {
             setTimeout(function() {
               self.reset();
             }, 500);
@@ -1294,11 +1349,14 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       } else if(this.assetsLoaded) {
         this.btnFullScreen.enable();
 
-        if(this.snake.player == PLAYER_HUMAN) {
-          this.btnTopArrow.enable();
-          this.btnBottomArrow.enable();
-          this.btnLeftArrow.enable();
-          this.btnRightArrow.enable();
+        for(var i = 0; i < this.snakes.length; i++) {
+          if(this.snakes[i].player == PLAYER_HUMAN) {
+            this.btnTopArrow.enable();
+            this.btnBottomArrow.enable();
+            this.btnLeftArrow.enable();
+            this.btnRightArrow.enable();
+            break;
+          }
         }
 
         if(this.enablePause) {
@@ -1313,6 +1371,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.disableAllButtons = function() {
+    if(this.outputType == OUTPUT_GRAPHICAL) {
       this.btnContinue.disable();
       this.btnRetry.disable();
       this.btnQuit.disable();
@@ -1329,6 +1388,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnBottomArrow.disable();
       this.btnRightArrow.disable();
       this.btnLeftArrow.disable();
+    }
   };
 
   this.getDebugText = function() {
@@ -1339,7 +1399,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 }
 
 Game.prototype.toString = function() {
-  return this.grid.toString() + "\n" + window.i18next.t("engine.score") + " : " + this.score + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + window.i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + window.i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + window.i18next.t("engine.debug.paused") : "");
+  return this.grid.toString() + "\n" + (this.snakes.length <= 1 ? window.i18next.t("engine.score") + " : " + this.score[0] : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + window.i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + window.i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + window.i18next.t("engine.debug.paused") : "");
 };
 
 Game.prototype.getImageCase = function(position) {
@@ -1357,10 +1417,16 @@ Game.prototype.getImageCase = function(position) {
   return imageRes;
 };
 
-Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
+Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height, hue, defaultHue) {
   if(imgSrc != "") {
     var imageCase = this.imageLoader.get(imgSrc);
+
+    if(hue != undefined && defaultHue != undefined) {
+      ctx.filter = "hue-rotate(" + ((hue - defaultHue) | 0) + "deg)";
+    }
+
     ctx.drawImage(imageCase, x, y, width, height);
+    ctx.filter = "hue-rotate(0deg)";
   }
 };
 
@@ -1470,100 +1536,102 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
 };
 
 Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth) {
-  for(var i = 0; i < this.snake.length(); i++) {
-    var position = this.snake.get(i);
-    var posX = position.x;
-    var posY = position.y;
-    var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
-    var caseY = 75 + posY * caseHeight;
-    var imageLoc = "";
+  for(var j = 0; j < this.snakes.length; j++) {
+    for(var i = 0; i < this.snakes[j].length(); i++) {
+      var position = this.snakes[j].get(i);
+      var posX = position.x;
+      var posY = position.y;
+      var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
+      var caseY = 75 + posY * caseHeight;
+      var imageLoc = "";
 
-    if(i == 0) {
-      var direction = this.snake.getHeadPosition().direction;
+      if(i == 0) {
+        var direction = this.snakes[j].getHeadPosition().direction;
 
-      if(this.gameOver && !this.scoreMax) {
+        if(this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
+          switch(direction) {
+            case BOTTOM:
+              imageLoc = "assets/images/snake_dead.png";
+              break;
+            case RIGHT:
+              imageLoc = "assets/images/snake_dead_2.png";
+              break;
+            case UP:
+              imageLoc = "assets/images/snake_dead_3.png";
+              break;
+            case LEFT:
+              imageLoc = "assets/images/snake_dead_4.png";
+              break;
+          }
+        } else {
+          switch(direction) {
+            case BOTTOM:
+              imageLoc = "assets/images/snake.png";
+              break;
+            case RIGHT:
+              imageLoc = "assets/images/snake_2.png";
+              break;
+            case UP:
+              imageLoc = "assets/images/snake_3.png";
+              break;
+            case LEFT:
+              imageLoc = "assets/images/snake_4.png";
+              break;
+          }
+        }
+      } else if(i == this.snakes[j].length() - 1) {
+        var direction = this.snakes[j].get(i - 1).direction;
+
         switch(direction) {
           case BOTTOM:
-            imageLoc = "assets/images/snake_dead.png";
+            imageLoc = "assets/images/body_end.png";
             break;
           case RIGHT:
-            imageLoc = "assets/images/snake_dead_2.png";
+            imageLoc = "assets/images/body_2_end.png";
             break;
           case UP:
-            imageLoc = "assets/images/snake_dead_3.png";
+            imageLoc = "assets/images/body_3_end.png";
             break;
           case LEFT:
-            imageLoc = "assets/images/snake_dead_4.png";
+            imageLoc = "assets/images/body_4_end.png";
             break;
         }
       } else {
-        switch(direction) {
+        var prec = this.snakes[j].get(i - 1);
+        var next = this.snakes[j].get(i + 1);
+        var current = this.snakes[j].get(i);
+
+        var directionToPrec = this.snakes[j].getDirectionTo(current, prec);
+        var directionToNext = this.snakes[j].getDirectionTo(current, next);
+
+        switch(current.direction) {
+          case UP:
+            imageLoc = "assets/images/body.png";
+            break;
           case BOTTOM:
-            imageLoc = "assets/images/snake.png";
+            imageLoc = "assets/images/body.png";
             break;
           case RIGHT:
-            imageLoc = "assets/images/snake_2.png";
-            break;
-          case UP:
-            imageLoc = "assets/images/snake_3.png";
+            imageLoc = "assets/images/body_2.png";
             break;
           case LEFT:
-            imageLoc = "assets/images/snake_4.png";
+            imageLoc = "assets/images/body_2.png";
             break;
         }
-      }
-    } else if(i == this.snake.length() - 1) {
-      var direction = this.snake.get(i - 1).direction;
 
-      switch(direction) {
-        case BOTTOM:
-          imageLoc = "assets/images/body_end.png";
-          break;
-        case RIGHT:
-          imageLoc = "assets/images/body_2_end.png";
-          break;
-        case UP:
-          imageLoc = "assets/images/body_3_end.png";
-          break;
-        case LEFT:
-          imageLoc = "assets/images/body_4_end.png";
-          break;
-      }
-    } else {
-      var prec = this.snake.get(i - 1);
-      var next = this.snake.get(i + 1);
-      var current = this.snake.get(i);
-
-      var directionToPrec = this.snake.getDirectionTo(current, prec);
-      var directionToNext = this.snake.getDirectionTo(current, next);
-
-      switch(current.direction) {
-        case UP:
-          imageLoc = "assets/images/body.png";
-          break;
-        case BOTTOM:
-          imageLoc = "assets/images/body.png";
-          break;
-        case RIGHT:
-          imageLoc = "assets/images/body_2.png";
-          break;
-        case LEFT:
-          imageLoc = "assets/images/body_2.png";
-          break;
+        if(directionToPrec == LEFT && directionToNext == BOTTOM || directionToPrec == BOTTOM && directionToNext == LEFT) {
+          imageLoc = "assets/images/body_angle_1.png";
+        } else if(directionToPrec == RIGHT && directionToNext == BOTTOM || directionToPrec == BOTTOM && directionToNext == RIGHT) {
+          imageLoc = "assets/images/body_angle_2.png";
+        } else if(directionToPrec == UP && directionToNext == RIGHT || directionToPrec == RIGHT && directionToNext == UP) {
+          imageLoc = "assets/images/body_angle_3.png";
+        } else if(directionToPrec == UP && directionToNext == LEFT || directionToPrec == LEFT && directionToNext == UP) {
+          imageLoc = "assets/images/body_angle_4.png";
+        }
       }
 
-      if(directionToPrec == LEFT && directionToNext == BOTTOM || directionToPrec == BOTTOM && directionToNext == LEFT) {
-        imageLoc = "assets/images/body_angle_1.png";
-      } else if(directionToPrec == RIGHT && directionToNext == BOTTOM || directionToPrec == BOTTOM && directionToNext == RIGHT) {
-        imageLoc = "assets/images/body_angle_2.png";
-      } else if(directionToPrec == UP && directionToNext == RIGHT || directionToPrec == RIGHT && directionToNext == UP) {
-        imageLoc = "assets/images/body_angle_3.png";
-      } else if(directionToPrec == UP && directionToNext == LEFT || directionToPrec == LEFT && directionToNext == UP) {
-        imageLoc = "assets/images/body_angle_4.png";
-      }
+      this.drawImage(ctx, imageLoc, caseX, caseY, caseWidth, caseHeight);
     }
-
-    this.drawImage(ctx, imageLoc, caseX, caseY, caseWidth, caseHeight);
   }
 };
 
@@ -1923,15 +1991,19 @@ function GameGroup(games) {
     maxScore = -1;
 
     for(var i = 0; i < this.games.length; i++) {
-      if(this.games[i].score > maxScore) {
-        maxScore = this.games[i].score;
+      for(var j = 0; j < this.games[i].snakes.length; j++) {
+        if(this.games[i].snakes[j].score > maxScore) {
+          maxScore = this.games[i].snakes[j].score;
+        }
       }
     }
 
     for(var i = 0; i < this.games.length; i++) {
-      if(this.games[i].score >= maxScore) {
-        winners.push(this.games[i]);
-        index.push(i);
+      for(var j = 0; j < this.games[i].snakes.length; j++) {
+        if(this.games[i].snakes[j].score >= maxScore) {
+          winners.push(this.games[i].snakes[j]);
+          index.push(i);
+        }
       }
     }
 

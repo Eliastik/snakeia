@@ -51,6 +51,7 @@
      "resetConfirm": "Êtes-vous sûr de vouloir recommencer la partie ?",
      "scoreMax": "Score maximal atteint !",
      "gameOver": "Game Over !",
+     "gameFinished": "Partie terminée !",
      "pause": "Pause",
      "aboutScreen": {
        "title": "SnakeIA par Eliastik",
@@ -100,6 +101,7 @@ i18next.addResourceBundle("en", "translation", {
     "exitConfirm": "Are you sure that you want to exit the game?",
     "resetConfirm": "Are you sure that you want to reset the game?",
     "scoreMax": "Maximum score reached!",
+    "gameFinished": "Game finished!",
     "gameOver": "Game Over!",
     "pause": "Pause",
     "aboutScreen": {

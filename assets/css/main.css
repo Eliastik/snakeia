@@ -99,3 +99,9 @@ small, .small {
 .vmiddle a {
   vertical-align: middle;
 }
+
+textarea {
+  font-family: monospace;
+  font-size: 8pt;
+  line-height: 16px;
+}

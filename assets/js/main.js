@@ -319,27 +319,37 @@ function validateSettings() {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
       var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
 
-      var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-      var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
+      // var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+      var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
-      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed));
-      games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed));
+      games.push(new Game(grid, [snake2, snake], speed, document.getElementById("gameContainer"), true, false, progressiveSpeed));
+      // games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed));
     } else if(selectedMode == IA_VS_IA) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
       var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
-      var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-      var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
+      // var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+      var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
-      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
-      games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
+      games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
+      // games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
     } else if(selectedMode == IA_BATTLE_ROYALE) {
-      for(var i = 0; i < numberIA; i++) {
+      /* for(var i = 0; i < numberIA; i++) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
         var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250));
+      } */
+        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+        var snakes = [];
+
+      for(var i = 0; i < numberIA; i++) {
+        var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+
+        snakes.push(snake);
       }
+
+      games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250));
     }
 
     var group = new GameGroup(games);
