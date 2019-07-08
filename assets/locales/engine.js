@@ -66,7 +66,21 @@
        "ticks": "Tours",
        "speed": "Vit.",
        "paused": "En pause"
-     }
+     },
+     "colors": {
+       "white": "Blanc",
+       "gray": "Gris",
+       "black": "Noir",
+       "red": "Rouge",
+       "brown": "Marron",
+       "orange": "Orange",
+       "yellow": "Jaune",
+       "green": "Vert",
+       "blue": "Bleu",
+       "purple": "Mauve",
+       "pink": "Rose"
+     },
+     "colorPlayer": "Vous êtes le Snake\nen {{color}}"
    }
 }, true, false);
 
@@ -120,6 +134,20 @@ i18next.addResourceBundle("en", "translation", {
       "ticks": "Ticks",
       "speed": "Speed",
       "paused": "Paused"
-    }
+    },
+    "colors": {
+      "white": "White",
+      "gray": "Gray",
+      "black": "Black",
+      "red": "Red",
+      "brown": "Brown",
+      "orange": "Orange",
+      "yellow": "Yellow",
+      "green": "Green",
+      "blue": "Blue",
+      "purple": "Purple",
+      "pink": "Pink"
+    },
+    "colorPlayer": "You are the Snake\nin {{color}}"
   }
 }, true, false);

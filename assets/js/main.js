@@ -322,7 +322,7 @@ function validateSettings() {
       // var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
       var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
-      games.push(new Game(grid, [snake2, snake], speed, document.getElementById("gameContainer"), true, false, progressiveSpeed));
+      games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
       // games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed));
     } else if(selectedMode == IA_VS_IA) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);

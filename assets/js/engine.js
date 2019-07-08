@@ -55,7 +55,9 @@ KEY_LEFT = 37;
 FONT_FAMILY = "Delius";
 FONT_SIZE = 32;
 TARGET_FPS = 60;
-IMAGE_HUE = 75;
+IMAGE_SNAKE_HUE = 75;
+IMAGE_SNAKE_SATURATION = 74;
+IMAGE_SNAKE_VALUE = 77;
 // Infos
 APP_VERSION = "1.2";
 DATE_VERSION = "2019-07-03";
@@ -82,14 +84,62 @@ function valToChar(value) {
   }
 }
 
+// Color functions
 function addHue(hue, add) {
   var res = hue + add;
 
   if(res > 360) {
     res = (res - 360);
+  } else if(res < 0) {
+    res = (360 + res);
   }
 
   return res;
+}
+
+function hsvToRgb(h, s, v) {
+  var r, g, b, i, f, p, q, t;
+
+  i = Math.floor(h * 6);
+  f = h * 6 - i;
+  p = v * (1 - s);
+  q = v * (1 - f * s);
+  t = v * (1 - (1 - f) * s);
+
+  switch(i % 6) {
+    case 0: r = v, g = t, b = p; break;
+    case 1: r = q, g = v, b = p; break;
+    case 2: r = p, g = v, b = t; break;
+    case 3: r = p, g = q, b = v; break;
+    case 4: r = t, g = p, b = v; break;
+    case 5: r = v, g = p, b = q; break;
+  }
+
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function hslToName(h, s, l) {
+  if(s <= 10 && l >= 90) {
+    return window.i18next.t("engine.colors.white");
+  } else if((s <= 10 && l <= 70) || s === 0) {
+    return window.i18next.t("engine.colors.gray");
+  } else if(l <= 15) {
+    return window.i18next.t("engine.colors.black");
+  } else if((h >= 0 && h <= 15) || h >= 346) {
+    return window.i18next.t("engine.colors.red");
+  } else if(h >= 16 && h <= 35) {
+    return window.i18next.t("engine.colors.orange");
+  } else if(h >= 36 && h <= 54) {
+    return window.i18next.t("engine.colors.yellow");
+  } else if(h >= 55 && h <= 165) {
+    return window.i18next.t("engine.colors.green");
+  } else if(h >= 166 && h <= 260) {
+    return window.i18next.t("engine.colors.blue");
+  } else if(h >= 261 && h <= 290) {
+    return window.i18next.t("engine.colors.purple");
+  } else if(h >= 291 && h <= 345) {
+    return window.i18next.t("engine.colors.pink");
+  }
 }
 
 // Event handlers objects type
@@ -858,7 +908,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     var startHue = randRange(0, 360);
 
     for(var i = 0; i < this.snakes.length; i++) {
-      startHue = addHue(startHue, Math.round(360 / this.snakes.length));
+      startHue = addHue(startHue, Math.round(360 / (this.snakes.length)));
       this.snakes[i].color = startHue;
     }
 
@@ -934,6 +984,34 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
   this.clearIntervalCountFPS = function() {
     clearInterval(this.intervalCountFPS);
+  };
+
+  this.getNBPlayer = function(type) {
+    var numPlayer = 0;
+
+    for(var i = 0; i < this.snakes.length; i++) {
+      if(this.snakes[i].player == type) {
+        numPlayer++;
+      }
+    }
+
+    return numPlayer;
+  };
+
+  this.getPlayer = function(num, type) {
+    var numPlayer = 0;
+
+    for(var i = 0; i < this.snakes.length; i++) {
+      if(this.snakes[i].player == type) {
+        numPlayer++;
+      }
+
+      if(numPlayer == num) {
+        return this.snakes[i];
+      }
+    }
+
+    return null;
   };
 
   this.reset = function() {
@@ -1323,7 +1401,15 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             });
           });
         } else if(this.assetsLoaded && this.countBeforePlay > 0) {
-          this.drawMenu(ctx, [], "" + this.countBeforePlay, "white", this.fontSize, FONT_FAMILY, "center", null, 0, false);
+          if(this.snakes.length > 1 && this.getNBPlayer(PLAYER_HUMAN) <= 1 && this.getPlayer(1, PLAYER_HUMAN) != null) {
+            var playerHuman = this.getPlayer(1, PLAYER_HUMAN);
+            var colorName = hslToName(addHue(IMAGE_SNAKE_HUE, playerHuman.color), IMAGE_SNAKE_SATURATION, IMAGE_SNAKE_VALUE);
+            var colorRgb = hsvToRgb(addHue(IMAGE_SNAKE_HUE, playerHuman.color) / 360, IMAGE_SNAKE_SATURATION / 100, IMAGE_SNAKE_VALUE / 100);
+
+            this.drawMenu(ctx, [], "" + this.countBeforePlay + "\n" + window.i18next.t("engine.colorPlayer", { color: colorName }), ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"], this.fontSize, FONT_FAMILY, "center", null, 0, false);
+          } else {
+            this.drawMenu(ctx, [], "" + this.countBeforePlay, "white", this.fontSize, FONT_FAMILY, "center", null, 0, false);
+          }
         } else if(this.confirmReset && !this.gameOver) {
           this.drawMenu(ctx, [this.btnNo, this.btnYes], window.i18next.t("engine.resetConfirm"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, true, function() {
             self.btnYes.addClickAction(self.canvas, function() {
@@ -1485,7 +1571,10 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
   var precFont = ctx.font;
   var precFilter = ctx.filter;
 
-  ctx.fillStyle = color;
+  if(!Array.isArray(color)) {
+    ctx.fillStyle = color;
+  }
+
   ctx.font = size + "px " + fontFamily;
   ctx.filter = "none";
 
@@ -1501,6 +1590,16 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
 
   for (var i = 0; i < lines.length; i++) {
     var currentText = lines[i];
+
+    if(Array.isArray(color)) {
+      var colorIndex = i;
+
+      if(colorIndex > color.length - 1) {
+        colorIndex = color.length - 1;
+      }
+
+      ctx.fillStyle = color[colorIndex];
+    }
 
     if(alignement == "center") {
       ctx.fillText(currentText, (this.canvas.width / 2) - (ctx.measureText(currentText).width / 2), y + (size * i));
