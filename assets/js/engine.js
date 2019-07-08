@@ -824,43 +824,50 @@ function ImageLoader() {
 }
 
 function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType) {
+  // Assets loader
   this.imageLoader;
   this.assetsLoaded = false;
+  // Game settings
   this.grid = grid;
   this.snakes = snake;
   this.speed = speed || 8;
   this.initialSpeed = speed || 8;
   this.initialSpeedUntouched = speed || 8;
+  this.appendTo = appendTo;
   this.enablePause = enablePause === undefined ? true : enablePause;
   this.enableRetry = enableRetry === undefined ? true : enableRetry;
   this.progressiveSpeed = progressiveSpeed === undefined ? false : progressiveSpeed;
+  this.displayFPS = displayFPS === undefined ? false : displayFPS;
   this.outputType = outputType || OUTPUT_GRAPHICAL;
+  this.countBeforePlay = 3;
+  // Game state variables
+  this.lastKey = -1;
   this.numFruit = 1;
   this.frame = 0;
   this.lastFrame = 0;
   this.currentFPS = 0;
   this.paused = true;
-  this.exited = false;
   this.gameOver = false;
+  this.exited = false;
   this.gameFinished = false;
   this.scoreMax = false;
   this.isReseted = true;
   this.errorOccured = false;
+  // Menus state variables
   this.confirmReset = false;
   this.confirmExit = false;
   this.getInfos = false;
   this.getInfosGame = false;
-  this.lastKey = -1;
+  // DOM elements and others settings
   this.textarea;
   this.canvas;
   this.canvasCtx;
   this.canvasWidth = canvasWidth || CANVAS_WIDTH;
   this.canvasHeight = canvasHeight || CANVAS_HEIGHT;
   this.fontSize = FONT_SIZE
-  this.appendTo = appendTo;
-  this.displayFPS = displayFPS === undefined ? false : displayFPS;
+  // Intervals and timeouts
   this.intervalCountFPS;
-  this.countBeforePlay = 3;
+  this.intervalPlay;
   this.timeoutDisplayMenu;
   // Buttons
   this.btnFullScreen;
@@ -1060,6 +1067,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     this.exited = false;
     this.reactor.dispatchEvent("onReset");
     this.clearIntervalCountFPS();
+    this.clearIntervalPlay();
     this.grid.init();
 
     for(var i = 0; i < this.snakes.length; i++) {
@@ -1102,13 +1110,14 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.confirmReset = false;
       this.countBeforePlay = 3;
       this.updateUI();
+      this.clearIntervalPlay();
       var self = this;
 
-      var intervalPlay = setInterval(function() {
+      this.intervalPlay = setInterval(function() {
         self.countBeforePlay--;
 
         if(self.countBeforePlay <= 0) {
-          clearInterval(intervalPlay);
+          self.clearIntervalPlay();
           self.paused = false;
           self.isReseted = false;
           self.lastFrame = self.frame > 0 ? self.frame : 1;
@@ -1126,6 +1135,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.loadAssets();
       this.updateUI();
     }
+  };
+
+  this.clearIntervalPlay = function() {
+    clearInterval(this.intervalPlay);
   };
 
   this.onStart = function(callback) {
@@ -1204,6 +1217,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     this.paused = true;
     this.gameOver = true;
     this.clearIntervalCountFPS();
+    this.clearIntervalPlay();
     this.reactor.dispatchEvent("onStop");
   };
 
@@ -1214,6 +1228,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.pause = function() {
     this.paused = true;
     this.clearIntervalCountFPS();
+    this.clearIntervalPlay();
     this.updateUI();
     this.reactor.dispatchEvent("onPause");
   };
@@ -1231,6 +1246,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     }
 
     this.clearIntervalCountFPS();
+    this.clearIntervalPlay();
 
     if(this.outputType == OUTPUT_TEXT) {
       this.appendTo.removeChild(this.textarea);
