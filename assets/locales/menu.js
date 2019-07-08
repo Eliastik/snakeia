@@ -61,6 +61,7 @@ i18next.addResourceBundle("fr", "translation", {
     "options": "Autres options :",
     "borderWalls": "Entourer la grille de murs",
     "generateWalls": "Générer des murs à des positions aléatoires",
+    "sameGrid": "Partie sur la même grille",
     "speed": "Vitesse du jeu :",
     "speedSelect": {
       "1": "1 – La plus rapide",
@@ -158,6 +159,7 @@ i18next.addResourceBundle("en", "translation", {
     "options": "Others options:",
     "borderWalls": "Surround the grid with walls",
     "generateWalls": "Generate walls at random positions",
+    "sameGrid": "Game on the same grid",
     "speed": "Speed:",
     "speedSelect": {
       "1": "1 – Fastest",
