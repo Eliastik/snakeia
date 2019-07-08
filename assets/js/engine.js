@@ -1409,15 +1409,15 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
              self.exit();
            });
          });
-       } else if(this.getInfosGame && this.snakes.length <= 1) {
-          this.drawMenu(ctx, [this.btnOK], window.i18next.t("engine.player") + " " + (this.snakes[0].player == PLAYER_HUMAN ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) + (this.snakes[0].player == PLAYER_AI ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.snakes[0].getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+       } else if(this.getInfosGame) {
+          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + (this.snakes[0].player == PLAYER_HUMAN ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
             self.btnOK.addClickAction(self.canvas, function() {
               self.getInfosGame = false;
               self.updateUI();
             });
           });
         }  else if(this.getInfos) {
-          this.drawMenu(ctx, (this.snakes.length <= 1 ? [this.btnInfosGame, this.btnOK] : [this.btnOK]), window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+          this.drawMenu(ctx, [this.btnInfosGame, this.btnOK], window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
             self.btnInfosGame.addClickAction(self.canvas, function() {
               self.getInfosGame = true;
               self.updateUI();
@@ -2229,12 +2229,12 @@ function GameGroup(games) {
 
     for(var i = 0; i < this.games.length; i++) {
       for(var j = 0; j < this.games[i].snakes.length; j++) {
-        idx++;
-
         if(this.games[i].snakes[j].score >= maxScore) {
           winners.push(this.games[i].snakes[j]);
           index.push(idx);
         }
+
+        idx++;
       }
     }
 
