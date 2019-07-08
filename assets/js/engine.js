@@ -57,7 +57,7 @@ FONT_FAMILY = "Delius";
 FONT_SIZE = 32;
 TARGET_FPS = 60;
 IMAGE_SNAKE_HUE = 75;
-IMAGE_SNAKE_SATURATION = 74;
+IMAGE_SNAKE_SATURATION = 50;
 IMAGE_SNAKE_VALUE = 77;
 // Infos
 APP_VERSION = "1.2";
@@ -126,19 +126,19 @@ function hslToName(h, s, l) {
     return window.i18next.t("engine.colors.gray");
   } else if(l <= 15) {
     return window.i18next.t("engine.colors.black");
-  } else if((h >= 0 && h <= 15) || h >= 346) {
+  } else if((h >= 0 && h <= 6) || h >= 350) {
     return window.i18next.t("engine.colors.red");
-  } else if(h >= 16 && h <= 35) {
+  } else if(h >= 7 && h <= 42) {
     return window.i18next.t("engine.colors.orange");
-  } else if(h >= 36 && h <= 54) {
+  } else if(h >= 43 && h <= 70) {
     return window.i18next.t("engine.colors.yellow");
-  } else if(h >= 55 && h <= 165) {
+  } else if(h >= 71 && h <= 156) {
     return window.i18next.t("engine.colors.green");
-  } else if(h >= 166 && h <= 260) {
+  } else if(h >= 157 && h <= 221) {
     return window.i18next.t("engine.colors.blue");
-  } else if(h >= 261 && h <= 290) {
+  } else if(h >= 222 && h <= 290) {
     return window.i18next.t("engine.colors.purple");
-  } else if(h >= 291 && h <= 345) {
+  } else if(h >= 291 && h <= 349) {
     return window.i18next.t("engine.colors.pink");
   }
 }
@@ -153,7 +153,7 @@ Event.prototype.registerCallback = function(callback) {
   this.callbacks.push(callback);
 };
 
-function Reactor(){
+function Reactor() {
   this.events = {};
 }
 
