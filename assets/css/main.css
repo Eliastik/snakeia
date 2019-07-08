@@ -62,7 +62,7 @@ body {
    margin: auto;
  }
 
-#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv {
+#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame {
   display: none;
 }
 
@@ -94,6 +94,10 @@ label {
 
 small, .small {
   line-height: 1.5;
+}
+
+.medium {
+  font-size: 89%;
 }
 
 .vmiddle a {

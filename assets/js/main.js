@@ -146,7 +146,18 @@ function displaySettings() {
   document.getElementById("settings").style.display = "block";
   checkSameGrid();
   checkGameSpeed();
+  checkFailSettings();
 }
+
+function displayMenu() {
+  document.getElementById("settings").style.display = "none";
+  document.getElementById("gameContainer").style.display = "none";
+  document.getElementById("menu").style.display = "block";
+}
+
+document.getElementById("backToMenu").onclick = function() {
+  displayMenu();
+};
 
 function checkSameGrid() {
   if(document.getElementById("sameGrid").checked && (selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE)) {
@@ -172,18 +183,94 @@ function checkGameSpeed() {
   }
 }
 
-document.getElementById("gameSpeed").onchange = function() {
-  checkGameSpeed();
-};
+function gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, numberPlayers) {
+  var heightGrid = parseInt(heightGrid);
+  var widthGrid = parseInt(widthGrid);
 
-function displayMenu() {
-  document.getElementById("settings").style.display = "none";
-  document.getElementById("gameContainer").style.display = "none";
-  document.getElementById("menu").style.display = "block";
+  var numberEmptyCases = heightGrid * widthGrid;
+
+  if(borderWalls) {
+    numberEmptyCases -= ((widthGrid + heightGrid) * 2);
+  }
+
+  if(generateWalls) {
+    if(borderWalls) {
+      numberEmptyCases -= ((heightGrid * widthGrid) * 0.1);
+    } else {
+      numberEmptyCases -= ((heightGrid * widthGrid) * 0.1675);
+    }
+  }
+
+  var neededCases = numberPlayers * 3;
+
+  if(numberEmptyCases > neededCases) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
-document.getElementById("backToMenu").onclick = function() {
-  displayMenu();
+function checkFailSettings() {
+  document.getElementById("possibleFailInitGame").style.display = "none";
+
+  if(validateSettings(true)) {
+    var heightGrid = document.getElementById("heightGrid").value;
+    var widthGrid = document.getElementById("widthGrid").value;
+    var borderWalls = document.getElementById("borderWalls").checked;
+    var generateWalls = document.getElementById("generateWalls").checked;
+    var sameGrid = document.getElementById("sameGrid").checked;
+    var numberIA = document.getElementById("numberIA").value;
+    var battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
+
+    var numberPlayers = 1;
+
+    if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI) {
+      if(sameGrid) {
+        numberPlayers = 2;
+      }
+    } else if(selectedMode == BATTLE_ROYALE) {
+      if(sameGrid) {
+        if(battleAgainstAIs) {
+          numberPlayers = parseInt(numberIA) + 1;
+        } else {
+          numberPlayers = numberIA;
+        }
+      }
+    }
+
+    if(gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, numberPlayers)) {
+      document.getElementById("possibleFailInitGame").style.display = "block";
+    }
+  }
+}
+
+document.getElementById("heightGrid").onchange = function() {
+  checkFailSettings();
+};
+
+document.getElementById("widthGrid").onchange = function() {
+  checkFailSettings();
+};
+
+document.getElementById("borderWalls").onchange = function() {
+  checkFailSettings();
+};
+
+document.getElementById("generateWalls").onchange = function() {
+  checkFailSettings();
+};
+
+document.getElementById("sameGrid").onchange = function() {
+  checkGameSpeed();
+  checkFailSettings();
+};
+
+document.getElementById("numberIA").onchange = function() {
+  checkFailSettings();
+};
+
+document.getElementById("battleAgainstAIs").onchange = function() {
+  checkFailSettings();
 };
 
 function resetForm(resetValues) {
@@ -219,14 +306,17 @@ function resetForm(resetValues) {
 
   checkSameGrid();
   checkGameSpeed();
+  checkFailSettings();
 }
 
 document.getElementById("resetSettings").onclick = function() {
   resetForm(true);
 };
 
-function validateSettings() {
-  resetForm(false);
+function validateSettings(returnValidation) {
+  if(!returnValidation) {
+    resetForm(false);
+  }
 
   var heightGrid = document.getElementById("heightGrid").value;
   var widthGrid = document.getElementById("widthGrid").value;
@@ -245,40 +335,55 @@ function validateSettings() {
 
   if(heightGrid.trim() == "" || isNaN(heightGrid) || heightGrid < 5 || heightGrid > 100) {
     formValidated = false;
-    document.getElementById("heightGrid").classList.add("is-invalid");
-    document.getElementById("invalidHeight").style.display = "block";
+
+    if(!returnValidation) {
+      document.getElementById("heightGrid").classList.add("is-invalid");
+      document.getElementById("invalidHeight").style.display = "block";
+    }
   } else {
     heightGrid = parseInt(heightGrid);
   }
 
   if(widthGrid.trim() == "" || isNaN(widthGrid) || widthGrid < 5 || widthGrid > 100) {
     formValidated = false;
-    document.getElementById("widthGrid").classList.add("is-invalid");
-    document.getElementById("invalidWidth").style.display = "block";
+
+    if(!returnValidation) {
+      document.getElementById("widthGrid").classList.add("is-invalid");
+      document.getElementById("invalidWidth").style.display = "block";
+    }
   } else {
     widthGrid = parseInt(widthGrid);
   }
 
   if(speed != "custom" && (speed.trim() == "" || isNaN(speed) || speed < 1 || speed > 100)) {
     formValidated = false;
-    document.getElementById("gameSpeed").classList.add("is-invalid");
-    document.getElementById("invalidSpeed").style.display = "block";
+
+    if(!returnValidation) {
+      document.getElementById("gameSpeed").classList.add("is-invalid");
+      document.getElementById("invalidSpeed").style.display = "block";
+    }
   } else if(speed != "custom") {
     speed = parseInt(speed);
   }
 
   if(speed == "custom" && (customSpeed.trim() == "" || isNaN(customSpeed) || customSpeed < 1 || customSpeed > 100)) {
     formValidated = false;
-    document.getElementById("customSpeed").classList.add("is-invalid");
-    document.getElementById("invalidCustomSpeed").style.display = "block";
+
+    if(!returnValidation) {
+      document.getElementById("customSpeed").classList.add("is-invalid");
+      document.getElementById("invalidCustomSpeed").style.display = "block";
+    }
   } else if(speed == "custom") {
     speed = parseInt(customSpeed);
   }
 
   if(selectedMode != SOLO_PLAYER && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high" && aiLevel != "random")) {
     formValidated = false;
-    document.getElementById("aiLevel").classList.add("is-invalid");
-    document.getElementById("invalidaiLevel").style.display = "block";
+
+    if(!returnValidation) {
+      document.getElementById("aiLevel").classList.add("is-invalid");
+      document.getElementById("invalidaiLevel").style.display = "block";
+    }
   } else if(selectedMode != SOLO_PLAYER) {
     switch(aiLevel) {
       case "random":
@@ -304,14 +409,21 @@ function validateSettings() {
 
   if(selectedMode == BATTLE_ROYALE && (numberIA.trim() == "" || isNaN(numberIA) || numberIA < 2 || numberIA > 100)) {
     formValidated = false;
-    document.getElementById("numberIA").classList.add("is-invalid");
-    document.getElementById("invalidIANumber").style.display = "block";
+
+    if(!returnValidation) {
+      document.getElementById("numberIA").classList.add("is-invalid");
+      document.getElementById("invalidIANumber").style.display = "block";
+    }
   } else if(selectedMode == BATTLE_ROYALE) {
     numberIA = parseInt(numberIA);
   }
 
   if(selectedMode != SOLO_AI) {
     autoRetry = false;
+  }
+
+  if(returnValidation) {
+    return formValidated;
   }
 
   if(formValidated) {

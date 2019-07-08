@@ -36,7 +36,7 @@
             <div class="col">
                 <div class="alert alert-info">
                     <strong><i class="fas fa-fw fa-info-circle"></i> <span data-i18n="update.updateAvailable">Une mise à jour de l'application est disponible</span> (<span data-i18n="update.version">version</span> <span id="appUpdateVersion">?</span> <span data-i18n="update.of">du</span> <span id="appUpdateDate">?</span><span id="appUpdateDateLocalized">?</span>). <span data-i18n="update.current">Vous disposez actuellement de la version</span> <span id="appVersion">?</span>.</strong>
-                    <div class="vmiddle"><a href="#" class="btn btn-sm btn-primary" id="appDownloadLink"><span class="fui-export"></span> <span data-i18n="update.download">Télécharger la mise à jour</span></a> &nbsp; <a href="#" id="appDownloadURLGet" title="Obtenir l'adresse URL du téléchargement"><span class="fui-link"></span></a> &nbsp; <a href="#" id="appUpdateChanges" title="Obtenir la liste des changements"><span class="fui-info-circle"></span></a></div>
+                    <div class="vmiddle"><a href="#" class="btn btn-sm btn-primary" id="appDownloadLink"><span class="fui-export"></span>&nbsp; <span data-i18n="update.download">Télécharger la mise à jour</span></a> &nbsp; <a href="#" id="appDownloadURLGet" title="Obtenir l'adresse URL du téléchargement"><span class="fui-link"></span></a> &nbsp; <a href="#" id="appUpdateChanges" title="Obtenir la liste des changements"><span class="fui-info-circle"></span></a></div>
                 </div>
             </div>
         </div>
@@ -205,16 +205,25 @@
               </div>
             </div>
           </fieldset>
+          <fieldset class="form-group" id="possibleFailInitGame">
+            <div class="form-group row">
+              <div class="col text-center">
+                <div class="alert alert-danger medium">
+                  <span class="fui-cross-circle"></span>&nbsp; <span data-i18n="settings.possibleFailInitGame">Il est possible que l'initialisation de la partie échoue avec vos paramètres car il n'y aura pas assez d'espace pour placer tous les Snake. Dans ce cas, un message « Une erreur est survenue » peut s'afficher. Essayez avec d'autres paramètres.</span>
+                </div>
+              </div>
+            </div>
+          </fieldset>
         </form>
         <div class="row">
           <div class="col text-center">
-            <button class="btn btn-lg btn-success" id="validateSettings"><span class="fui-check"></span> <span data-i18n="settings.validate">Valider</span></button>
-            <button class="btn btn-lg btn-default" id="resetSettings"><span class="fui-trash"></span> <span data-i18n="settings.reset">Réinitialiser</span></button>
+            <button class="btn btn-lg btn-success" id="validateSettings"><span class="fui-check"></span>&nbsp; <span data-i18n="settings.validate">Valider</span></button>
+            <button class="btn btn-lg btn-default" id="resetSettings"><span class="fui-trash"></span>&nbsp; <span data-i18n="settings.reset">Réinitialiser</span></button>
           </div>
         </div>
         <div class="row mt-2">
           <div class="col text-center">
-            <button class="btn btn-lg btn-danger" id="backToMenu"><span class="fui-cross"></span> <span data-i18n="settings.backToMenu">Retour au menu</span></button>
+            <button class="btn btn-lg btn-danger" id="backToMenu"><span class="fui-cross"></span>&nbsp; <span data-i18n="settings.backToMenu">Retour au menu</span></button>
           </div>
         </div>
       </div>
@@ -224,7 +233,7 @@
             <img src="assets/images/logo/logo.png" width="200px" alt="Logo" />
             <h1 id="titleGame" class="h3 mb-3 font-weight-normal"></h1>
             <p id="gameStatus" class="h4 mb-3 font-weight-normal text-primary"></p>
-            <button class="btn btn-lg btn-inverse" id="backToMenuGame"><span class="fui-cross"></span> <span data-i18n="game.backToMenu">Retour au menu</span></button>
+            <button class="btn btn-lg btn-inverse" id="backToMenuGame"><span class="fui-cross"></span>&nbsp; <span data-i18n="game.backToMenu">Retour au menu</span></button>
           </div>
         </div>
       </div>

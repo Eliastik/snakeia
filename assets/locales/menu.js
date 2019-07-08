@@ -53,6 +53,7 @@ i18next.addResourceBundle("fr", "translation", {
   },
   "settings": {
     "title": "Paramètres de la partie :",
+    "possibleFailInitGame": "Il est possible que l'initialisation de la partie échoue avec vos paramètres car il n'y aura pas assez d'espace pour placer tous les Snake. Dans ce cas, un message « Une erreur est survenue » peut s'afficher. Essayez avec d'autres paramètres.",
     "gridSize": "Taille de la grille :",
     "placeholderHeight": "Hauteur",
     "placeholderWidth": "Largeur",
@@ -152,6 +153,7 @@ i18next.addResourceBundle("en", "translation", {
   },
   "settings": {
     "title": "Game settings:",
+    "possibleFailInitGame": "It's possible that the initialization of the game fails with your settings because there will not be enough space to place all Snake. In this case, a message \"An error has occurred\" may be displayed. Try with other settings.",
     "gridSize": "Grid size:",
     "placeholderHeight": "Height",
     "placeholderWidth": "Width",
