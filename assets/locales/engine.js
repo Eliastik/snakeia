@@ -36,6 +36,7 @@
      "playerAI": "IA",
      "aiLevel": "Niveau de l'IA :",
      "aiLevelList": {
+       "random": "Au hasard",
        "low": "Faible",
        "normal": "Normal",
        "high": "Élevé",
@@ -104,6 +105,7 @@ i18next.addResourceBundle("en", "translation", {
     "playerAI": "AI",
     "aiLevel": "AI level:",
     "aiLevelList": {
+      "random": "Random",
       "low": "Low",
       "normal": "Normal",
       "high": "High",

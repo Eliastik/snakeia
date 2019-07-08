@@ -31,6 +31,7 @@ WALL_VAL = 3;
 PLAYER_AI = "PLAYER_AI";
 PLAYER_HUMAN = "PLAYER_HUMAN";
 // AI level
+AI_LEVEL_RANDOM = "AI_LEVEL_RANDOM";
 AI_LEVEL_LOW = "AI_LEVEL_LOW";
 AI_LEVEL_DEFAULT = "AI_LEVEL_DEFAULT";
 AI_LEVEL_HIGH = "AI_LEVEL_HIGH";
@@ -614,6 +615,41 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     return snake;
   };
 
+  this.randomAI = function() {
+    var currentPosition = this.getHeadPosition();
+    var top = this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_UP));
+    var left = this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_LEFT));
+    var bottom = this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_BOTTOM));
+    var right = this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_RIGHT));
+
+    if(top && left && bottom && right) {
+      return KEY_UP;
+    } else {
+      var direction = null;
+
+      while(direction == null || this.grid.isDeadPosition(this.getNextPosition(currentPosition, direction))) {
+        var r = randRange(1, 4);
+
+        switch(r) {
+          case 1:
+            direction = KEY_UP;
+            break;
+          case 2:
+            direction = KEY_LEFT;
+            break;
+          case 3:
+            direction = KEY_BOTTOM;
+            break;
+          case 4:
+            direction = KEY_RIGHT;
+            break;
+        }
+      }
+
+      return direction;
+    }
+  };
+
   this.simpleAI = function() {
     if(this.grid.fruitPos != null) {
       var currentPosition = this.getHeadPosition();
@@ -684,7 +720,9 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     var bestFind = bestFind === undefined ? false : bestFind;
     var res = KEY_RIGHT;
 
-    if(this.aiLevel == AI_LEVEL_LOW) {
+    if(this.aiLevel == AI_LEVEL_RANDOM) {
+      res = this.randomAI();
+    } else if(this.aiLevel == AI_LEVEL_LOW) {
         res = this.simpleAI();
     } else {
       if(this.grid.fruitPos != null) {
@@ -715,6 +753,8 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
 
   this.getAILevelText = function() {
     switch(this.aiLevel) {
+      case AI_LEVEL_RANDOM:
+        return window.i18next.t("engine.aiLevelList.random");
       case AI_LEVEL_LOW:
         return window.i18next.t("engine.aiLevelList.low");
       case AI_LEVEL_DEFAULT:

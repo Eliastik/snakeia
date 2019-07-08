@@ -240,12 +240,15 @@ function validateSettings() {
     speed = parseInt(customSpeed);
   }
 
-  if(selectedMode != JOUEUR_SOLO && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high")) {
+  if(selectedMode != JOUEUR_SOLO && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high" && aiLevel != "random")) {
     formValidated = false;
     document.getElementById("aiLevel").classList.add("is-invalid");
     document.getElementById("invalidaiLevel").style.display = "block";
   } else if(selectedMode != JOUEUR_SOLO) {
     switch(aiLevel) {
+      case "random":
+        aiLevel = AI_LEVEL_RANDOM;
+        break;
       case "low":
         aiLevel = AI_LEVEL_LOW;
         break;

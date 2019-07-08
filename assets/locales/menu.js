@@ -81,6 +81,7 @@ i18next.addResourceBundle("fr", "translation", {
     "customSpeedHelp": "Plus le nombre est élevé, plus la vitesse du jeu est lente, et inversement",
     "aiLevel": "Niveau de l'IA :",
     "aiLevelSelect": {
+      "random": "Au hasard",
       "low": "Faible",
       "normal": "Normal",
       "high": "Élevé",
@@ -177,6 +178,7 @@ i18next.addResourceBundle("en", "translation", {
     "customSpeedHelp": "The higher the number, the slower the game speed, and inversely",
     "aiLevel": "AI level:",
     "aiLevelSelect": {
+      "random": "Random",
       "low": "Low",
       "normal": "Normal",
       "high": "High",
