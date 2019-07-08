@@ -44,27 +44,27 @@
         <div class="menu-buttons">
           <div class="row mb-2">
             <div class="col text-center">
-              <button class="btn btn-lg btn-info btn-block" id="iaSoloBtn" data-i18n="menu.iaSoloBtn">IA solo</button>
+              <button class="btn btn-lg btn-info btn-block" id="soloAi" data-i18n="menu.soloAi">IA solo</button>
             </div>
           </div>
           <div class="row mb-2">
             <div class="col text-center">
-              <button class="btn btn-lg btn-info btn-block" id="joueurSolo" data-i18n="menu.joueurSolo">Joueur solo</button>
+              <button class="btn btn-lg btn-info btn-block" id="soloPlayer" data-i18n="menu.soloPlayer">Joueur solo</button>
             </div>
           </div>
           <div class="row mb-2">
             <div class="col text-center">
-              <button class="btn btn-lg btn-info btn-block" id="joueurVsIa" data-i18n="menu.joueurVsIa">Joueur VS IA</button>
+              <button class="btn btn-lg btn-info btn-block" id="playerVsAi" data-i18n="menu.playerVsAi">Joueur VS IA</button>
             </div>
           </div>
           <div class="row mb-2">
             <div class="col text-center">
-              <button class="btn btn-lg btn-info btn-block" id="iaVsIa" data-i18n="menu.iaVsIa">IA VS IA</button>
+              <button class="btn btn-lg btn-info btn-block" id="aiVsAi" data-i18n="menu.aiVsAi">IA VS IA</button>
             </div>
           </div>
           <div class="row mb-2">
             <div class="col text-center">
-              <button class="btn btn-lg btn-info btn-block" id="iaBattleRoyale" data-i18n="menu.iaBattleRoyale">IA Battle Royale</button>
+              <button class="btn btn-lg btn-info btn-block" id="battleRoyale" data-i18n="menu.battleRoyale">Battle Royale</button>
             </div>
           </div>
         </div>
@@ -195,6 +195,12 @@
                 <input type="number" id="numberIA" class="form-control" min="2" max="100" placeholder="Entrez le nombre…" value="20">
                 <div class="invalid-feedback" id="invalidIANumber" data-i18n="settings.invalidIANumber">
                   Cette valeur doit être comprise entre 2 et 100
+                </div>
+              </div>
+              <div class="col">
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="battleAgainstAIs">
+                  <label class="custom-control-label" for="battleAgainstAIs" data-i18n="settings.battleAgainstAIs">Jouer contre les IA</label>
                 </div>
               </div>
             </div>

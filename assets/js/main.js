@@ -17,14 +17,14 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 // Modes :
-IA_SOLO = "IA_SOLO";
-JOUEUR_SOLO = "JOUEUR_SOLO";
-JOUEUR_VS_IA = "JOUEUR_VS_IA";
-IA_VS_IA = "IA_VS_IA";
-IA_BATTLE_ROYALE = "IA_BATTLE_ROYALE";
+SOLO_AI = "SOLO_AI";
+SOLO_PLAYER = "SOLO_PLAYER";
+PLAYER_VS_AI = "PLAYER_VS_AI";
+AI_VS_AI = "AI_VS_AI";
+BATTLE_ROYALE = "BATTLE_ROYALE";
 UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update.php";
 
-var selectedMode = IA_SOLO;
+var selectedMode = SOLO_AI;
 var showDebugInfo = false;
 
 document.getElementById("versionTxt").innerHTML = APP_VERSION;
@@ -93,25 +93,25 @@ checkUpdate();
 function selectMode(mode) {
   selectedMode = mode;
 
-  if(selectedMode == JOUEUR_SOLO) {
+  if(selectedMode == SOLO_PLAYER) {
     document.getElementById("iaSettings").style.display = "none";
   } else {
     document.getElementById("iaSettings").style.display = "block";
   }
 
-  if(selectedMode == IA_SOLO) {
+  if(selectedMode == SOLO_AI) {
     document.getElementById("autoRetrySettings").style.display = "block";
   } else {
     document.getElementById("autoRetrySettings").style.display = "none";
   }
 
-  if(selectedMode == IA_BATTLE_ROYALE) {
+  if(selectedMode == BATTLE_ROYALE) {
     document.getElementById("numberIASettings").style.display = "block";
   } else {
     document.getElementById("numberIASettings").style.display = "none";
   }
 
-  if(selectedMode == JOUEUR_VS_IA || selectedMode == IA_VS_IA || selectedMode == IA_BATTLE_ROYALE) {
+  if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE) {
     document.getElementById("sameGridDiv").style.display = "block";
   } else {
     document.getElementById("sameGridDiv").style.display = "none";
@@ -120,24 +120,24 @@ function selectMode(mode) {
   displaySettings();
 }
 
-document.getElementById("iaSoloBtn").onclick = function() {
-  selectMode(IA_SOLO);
+document.getElementById("soloAi").onclick = function() {
+  selectMode(SOLO_AI);
 };
 
-document.getElementById("joueurSolo").onclick = function() {
-  selectMode(JOUEUR_SOLO);
+document.getElementById("soloPlayer").onclick = function() {
+  selectMode(SOLO_PLAYER);
 };
 
-document.getElementById("joueurVsIa").onclick = function() {
-  selectMode(JOUEUR_VS_IA);
+document.getElementById("playerVsAi").onclick = function() {
+  selectMode(PLAYER_VS_AI);
 };
 
-document.getElementById("iaVsIa").onclick = function() {
-  selectMode(IA_VS_IA);
+document.getElementById("aiVsAi").onclick = function() {
+  selectMode(AI_VS_AI);
 };
 
-document.getElementById("iaBattleRoyale").onclick = function() {
-  selectMode(IA_BATTLE_ROYALE);
+document.getElementById("battleRoyale").onclick = function() {
+  selectMode(BATTLE_ROYALE);
 };
 
 function displaySettings() {
@@ -149,7 +149,7 @@ function displaySettings() {
 }
 
 function checkSameGrid() {
-  if(document.getElementById("sameGrid").checked && (selectedMode == JOUEUR_VS_IA || selectedMode == IA_VS_IA || selectedMode == IA_BATTLE_ROYALE)) {
+  if(document.getElementById("sameGrid").checked && (selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE)) {
     document.getElementById("progressiveSpeed").checked = false;
     document.getElementById("progressiveSpeed").disabled = true;
     document.getElementById("autoRetry").checked = false;
@@ -207,13 +207,14 @@ function resetForm(resetValues) {
     document.getElementById("borderWalls").checked = false;
     document.getElementById("generateWalls").checked = false;
     document.getElementById("sameGrid").checked = true;
-    document.getElementById("gameSpeed").value = 5;
+    document.getElementById("gameSpeed").value = 8;
     document.getElementById("progressiveSpeed").checked = false;
-    document.getElementById("customSpeed").value = 5;
+    document.getElementById("customSpeed").value = 8;
     document.getElementById("customSpeedSettings").style.display = "none";
     document.getElementById("aiLevel").value = "normal";
     document.getElementById("autoRetry").checked = false;
     document.getElementById("numberIA").value = 20;
+    document.getElementById("battleAgainstAIs").checked = false;
   }
 
   checkSameGrid();
@@ -238,6 +239,7 @@ function validateSettings() {
   var aiLevel = document.getElementById("aiLevel").value;
   var autoRetry = document.getElementById("autoRetry").checked;
   var numberIA = document.getElementById("numberIA").value;
+  var battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
 
   var formValidated = true;
 
@@ -273,11 +275,11 @@ function validateSettings() {
     speed = parseInt(customSpeed);
   }
 
-  if(selectedMode != JOUEUR_SOLO && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high" && aiLevel != "random")) {
+  if(selectedMode != SOLO_PLAYER && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high" && aiLevel != "random")) {
     formValidated = false;
     document.getElementById("aiLevel").classList.add("is-invalid");
     document.getElementById("invalidaiLevel").style.display = "block";
-  } else if(selectedMode != JOUEUR_SOLO) {
+  } else if(selectedMode != SOLO_PLAYER) {
     switch(aiLevel) {
       case "random":
         aiLevel = AI_LEVEL_RANDOM;
@@ -300,15 +302,15 @@ function validateSettings() {
     }
   }
 
-  if(selectedMode == IA_BATTLE_ROYALE && (numberIA.trim() == "" || isNaN(numberIA) || numberIA < 2 || numberIA > 100)) {
+  if(selectedMode == BATTLE_ROYALE && (numberIA.trim() == "" || isNaN(numberIA) || numberIA < 2 || numberIA > 100)) {
     formValidated = false;
     document.getElementById("numberIA").classList.add("is-invalid");
     document.getElementById("invalidIANumber").style.display = "block";
-  } else if(selectedMode == IA_BATTLE_ROYALE) {
+  } else if(selectedMode == BATTLE_ROYALE) {
     numberIA = parseInt(numberIA);
   }
 
-  if(selectedMode != IA_SOLO) {
+  if(selectedMode != SOLO_AI) {
     autoRetry = false;
   }
 
@@ -320,20 +322,20 @@ function validateSettings() {
     var titleGame = "";
 
     switch(selectedMode) {
-      case IA_SOLO:
-        titleGame = window.i18next.t("menu.iaSoloBtn");
+      case SOLO_AI:
+        titleGame = window.i18next.t("menu.soloAi");
         break;
-      case JOUEUR_SOLO:
-        titleGame = window.i18next.t("menu.joueurSolo");
+      case SOLO_PLAYER:
+        titleGame = window.i18next.t("menu.soloPlayer");
         break;
-      case JOUEUR_VS_IA:
-        titleGame = window.i18next.t("menu.joueurVsIa");
+      case PLAYER_VS_AI:
+        titleGame = window.i18next.t("menu.playerVsAi");
         break;
-      case IA_VS_IA:
-        titleGame = window.i18next.t("menu.iaVsIa");
+      case AI_VS_AI:
+        titleGame = window.i18next.t("menu.aiVsAi");
         break;
-      case IA_BATTLE_ROYALE:
-        titleGame = window.i18next.t("menu.iaBattleRoyale");
+      case BATTLE_ROYALE:
+        titleGame = window.i18next.t("menu.battleRoyale");
         break;
     }
 
@@ -341,17 +343,17 @@ function validateSettings() {
 
     var games = [];
 
-    if(selectedMode == IA_SOLO) {
+    if(selectedMode == SOLO_AI) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
       var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
       games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
-    } else if(selectedMode == JOUEUR_SOLO) {
+    } else if(selectedMode == SOLO_PLAYER) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
       var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
 
       games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
-    } else if(selectedMode == JOUEUR_VS_IA) {
+    } else if(selectedMode == PLAYER_VS_AI) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
       var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
 
@@ -365,7 +367,7 @@ function validateSettings() {
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed));
         games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed));
       }
-    } else if(selectedMode == IA_VS_IA) {
+    } else if(selectedMode == AI_VS_AI) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
       var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
@@ -379,10 +381,14 @@ function validateSettings() {
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
         games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
       }
-    } else if(selectedMode == IA_BATTLE_ROYALE) {
+    } else if(selectedMode == BATTLE_ROYALE) {
       if(sameGrid) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
         var snakes = [];
+
+        if(battleAgainstAIs) {
+          snakes.push(new Snake(RIGHT, 3, grid, PLAYER_HUMAN, aiLevel, autoRetry));
+        }
 
         for(var i = 0; i < numberIA; i++) {
           snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry));
@@ -390,6 +396,13 @@ function validateSettings() {
 
         games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed));
       } else {
+        if(battleAgainstAIs) {
+          var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+          var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN, aiLevel, autoRetry);
+
+          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250));
+        }
+
         for(var i = 0; i < numberIA; i++) {
           var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
           var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
@@ -412,10 +425,10 @@ function validateSettings() {
     };
 
     group.onStop(function() {
-      if(selectedMode == JOUEUR_VS_IA || selectedMode == IA_VS_IA || selectedMode == IA_BATTLE_ROYALE) {
+      if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE) {
         var winners = group.getWinners();
 
-        if(selectedMode == JOUEUR_VS_IA) {
+        if(selectedMode == PLAYER_VS_AI) {
           if(winners.index.length == 2) {
             document.getElementById("gameStatus").innerHTML = window.i18next.t("game.equalityPlayerVSAI");
           } else if(winners.index[0] == 0) {
@@ -423,13 +436,13 @@ function validateSettings() {
           } else if(winners.index[0] == 1) {
             document.getElementById("gameStatus").innerHTML = window.i18next.t("game.losePlayerVSAI");
           }
-        } else if(selectedMode == IA_VS_IA) {
+        } else if(selectedMode == AI_VS_AI) {
           if(winners.index.length == 1) {
             document.getElementById("gameStatus").innerHTML = window.i18next.t("game.oneWinnerAIVSAI", { numWinner: winners.index[0] + 1 });
           } else if(winners.index.length == 2) {
             document.getElementById("gameStatus").innerHTML = window.i18next.t("game.equalityAIVSAI");
           }
-        } else if(selectedMode == IA_BATTLE_ROYALE) {
+        } else if(selectedMode == BATTLE_ROYALE) {
           if(winners.index.length == 1) {
             document.getElementById("gameStatus").innerHTML = window.i18next.t("game.oneWinnerBattleRoyale", { numWinner: winners.index[0] + 1, score: winners.score });
           } else if(winners.index.length > 1) {
@@ -452,7 +465,7 @@ function validateSettings() {
     });
 
     group.onExit(function() {
-      if(selectedMode == IA_SOLO || selectedMode == JOUEUR_SOLO || selectedMode == IA_VS_IA || (selectedMode == JOUEUR_VS_IA && sameGrid) || (selectedMode == IA_BATTLE_ROYALE && sameGrid)) {
+      if(selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER || selectedMode == AI_VS_AI || (selectedMode == PLAYER_VS_AI && sameGrid) || (selectedMode == BATTLE_ROYALE && sameGrid)) {
         group.killAll();
         displayMenu();
       }
