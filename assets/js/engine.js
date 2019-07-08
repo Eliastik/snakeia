@@ -249,7 +249,7 @@ function Grid(width, height, generateWalls, borderWalls) {
 
     for(var i = startY; i < endY; i++) {
       for(var j = startX; j < endX; j++) {
-        var currentPos = new Position(i, j);
+        var currentPos = new Position(j, i);
         var upperCase = this.getNextPosition(currentPos, UP);
         var upperLeftCase = this.getNextPosition(upperCase, LEFT);
         var upperRightCase = this.getNextPosition(upperCase, RIGHT);
@@ -2225,16 +2225,18 @@ function GameGroup(games) {
       }
     }
 
-    var idx = 0;
+    if(maxScore > 0) {
+      var idx = 0;
 
-    for(var i = 0; i < this.games.length; i++) {
-      for(var j = 0; j < this.games[i].snakes.length; j++) {
-        if(this.games[i].snakes[j].score >= maxScore) {
-          winners.push(this.games[i].snakes[j]);
-          index.push(idx);
+      for(var i = 0; i < this.games.length; i++) {
+        for(var j = 0; j < this.games[i].snakes.length; j++) {
+          if(this.games[i].snakes[j].score >= maxScore) {
+            winners.push(this.games[i].snakes[j]);
+            index.push(idx);
+          }
+
+          idx++;
         }
-
-        idx++;
       }
     }
 
