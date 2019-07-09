@@ -1932,7 +1932,7 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
     var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
     var caseY = 75 + posY * caseHeight;
 
-    this.drawText(ctx, (this.snakes[i].player == PLAYER_HUMAN ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgba(255, 255, 255, 0.75)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX + 2, caseY - Math.round(caseHeight / 1.75));
+    this.drawText(ctx, (this.snakes[i].player == PLAYER_HUMAN ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX + 2, caseY - Math.round(caseHeight / 1.75));
   }
 };
 
@@ -1950,7 +1950,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.text = text;
   this.fontSize = fontSize || Math.floor(FONT_SIZE / 1.25);
   this.fontFamily = fontFamily || FONT_FAMILY;
-  this.fontColor = fontColor || "black";
+  this.fontColor = fontColor || "white";
   this.color = color || "rgba(0, 0, 0, 0)";
   this.colorHover = colorHover || "#95a5a6";
   this.triggerClick;
@@ -2022,9 +2022,16 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
     ctx.fillRect(Math.round(this.x), Math.round(this.y), Math.round(this.width), Math.round(this.height));
 
     if(this.selected) {
-      ctx.strokeStyle = "#f39c12";
+      var initialStrokeStyle = ctx.strokeStyle;
+      var initialLineWidth = ctx.lineWidth;
+
+      ctx.strokeStyle = "#a2cdd8";
+      ctx.lineWidth = 3;
 
       ctx.strokeRect(Math.round(this.x), Math.round(this.y), Math.round(this.width), Math.round(this.height));
+
+      ctx.strokeStyle = initialStrokeStyle;
+      ctx.lineWidth = initialLineWidth;
     }
 
     if(this.image != null) {
