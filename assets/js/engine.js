@@ -52,6 +52,7 @@ KEY_UP = 38;
 KEY_RIGHT = 39;
 KEY_BOTTOM = 40;
 KEY_LEFT = 37;
+KEY_ENTER = 13;
 // UI
 FONT_FAMILY = "Delius";
 FONT_SIZE = 32;
@@ -842,6 +843,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.countBeforePlay = 3;
   // Game state variables
   this.lastKey = -1;
+  this.lastKeyMenu = -1;
+  this.selectedButton = 0;
   this.numFruit = 1;
   this.frame = 0;
   this.lastFrame = 0;
@@ -865,10 +868,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.canvasWidth = canvasWidth || CANVAS_WIDTH;
   this.canvasHeight = canvasHeight || CANVAS_HEIGHT;
   this.fontSize = FONT_SIZE
-  // Intervals and timeouts
+  // Intervals, timeouts, frames
   this.intervalCountFPS;
   this.intervalPlay;
-  this.timeoutDisplayMenu;
+  this.frameGlobal;
+  this.frameDisplayMenu;
   // Buttons
   this.btnFullScreen;
   this.btnPause;
@@ -965,11 +969,14 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     document.addEventListener("keydown", function(evt) {
       if(!self.paused) {
-        if(evt.keyCode == 13) {
+        if(evt.keyCode == KEY_ENTER) {
           self.pause();
         } else {
           self.lastKey = evt.keyCode;
         }
+      } else {
+        self.lastKeyMenu = evt.keyCode;
+        self.updateUI();
       }
     });
 
@@ -1153,7 +1160,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     this.updateUI();
     var self = this;
 
-    window.requestAnimationFrame(function() {
+    this.frameGlobal = window.requestAnimationFrame(function() {
       if(!self.paused) {
         self.frame++;
 
@@ -1400,7 +1407,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, renderBlur);
       } else if(!this.assetsLoaded && !renderBlur) {
-        this.drawMenu(ctx, [], window.i18next.t("engine.loading"), "white", this.fontSize, FONT_FAMILY, "center", null, 1, true);
+        this.drawMenu(ctx, [], window.i18next.t("engine.loading"), "white", this.fontSize, FONT_FAMILY, "center", null, true);
       }
 
       for(var i = 0; i < this.snakes.length; i++) {
@@ -1417,23 +1424,23 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       if(!renderBlur) {
         if(this.exited) {
-          this.drawMenu(ctx, [], window.i18next.t("engine.exited"), "white", this.fontSize, FONT_FAMILY, "center", null, 0, true);
+          this.drawMenu(ctx, [], window.i18next.t("engine.exited"), "white", this.fontSize, FONT_FAMILY, "center", null, true);
         } else if(this.errorOccured) {
-         this.drawMenu(ctx, [this.btnQuit], this.imageLoader.hasError ? window.i18next.t("engine.errorLoading") : window.i18next.t("engine.error"), "red", this.fontSize, FONT_FAMILY, "center", null, 0, true, function() {
+         this.drawMenu(ctx, [this.btnQuit], this.imageLoader.hasError ? window.i18next.t("engine.errorLoading") : window.i18next.t("engine.error"), "red", this.fontSize, FONT_FAMILY, "center", null, true, function() {
            self.btnQuit.addClickAction(self.canvas, function() {
              self.confirmExit = false;
              self.exit();
            });
          });
        } else if(this.getInfosGame) {
-          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + (this.snakes[0].player == PLAYER_HUMAN ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + (this.snakes[0].player == PLAYER_HUMAN ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
             self.btnOK.addClickAction(self.canvas, function() {
               self.getInfosGame = false;
               self.updateUI();
             });
           });
         }  else if(this.getInfos) {
-          this.drawMenu(ctx, [this.btnInfosGame, this.btnOK], window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, FONT_FAMILY, "center", null, 0, false, function() {
+          this.drawMenu(ctx, [this.btnInfosGame, this.btnOK], window.i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + window.i18next.t("engine.aboutScreen.versionAndDate", { version: APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
             self.btnInfosGame.addClickAction(self.canvas, function() {
               self.getInfosGame = true;
               self.updateUI();
@@ -1445,7 +1452,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             });
           });
         } else if(this.confirmExit) {
-          this.drawMenu(ctx, [this.btnNo, this.btnYes], window.i18next.t("engine.exitConfirm"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, true, function() {
+          this.drawMenu(ctx, [this.btnNo, this.btnYes], window.i18next.t("engine.exitConfirm"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, true, function() {
             self.btnYes.addClickAction(self.canvas, function() {
               self.confirmExit = false;
               self.exit();
@@ -1462,12 +1469,12 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             var colorName = hslToName(addHue(IMAGE_SNAKE_HUE, playerHuman.color), IMAGE_SNAKE_SATURATION, IMAGE_SNAKE_VALUE);
             var colorRgb = hsvToRgb(addHue(IMAGE_SNAKE_HUE, playerHuman.color) / 360, IMAGE_SNAKE_SATURATION / 100, IMAGE_SNAKE_VALUE / 100);
 
-            this.drawMenu(ctx, [], "" + this.countBeforePlay + "\n" + window.i18next.t("engine.colorPlayer", { color: colorName }), ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"], this.fontSize, FONT_FAMILY, "center", null, 0, false);
+            this.drawMenu(ctx, [], "" + this.countBeforePlay + "\n" + window.i18next.t("engine.colorPlayer", { color: colorName }), ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"], this.fontSize, FONT_FAMILY, "center", null, false);
           } else {
-            this.drawMenu(ctx, [], "" + this.countBeforePlay, "white", this.fontSize, FONT_FAMILY, "center", null, 0, false);
+            this.drawMenu(ctx, [], "" + this.countBeforePlay, "white", this.fontSize, FONT_FAMILY, "center", null, false);
           }
         } else if(this.confirmReset && !this.gameOver) {
-          this.drawMenu(ctx, [this.btnNo, this.btnYes], window.i18next.t("engine.resetConfirm"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, true, function() {
+          this.drawMenu(ctx, [this.btnNo, this.btnYes], window.i18next.t("engine.resetConfirm"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, true, function() {
             self.btnYes.addClickAction(self.canvas, function() {
               self.confirmReset = false;
               self.reset();
@@ -1479,7 +1486,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             });
           });
         } else if(this.gameFinished && this.snakes.length > 1) {
-          this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], window.i18next.t("engine.gameFinished"), "white", this.fontSize, FONT_FAMILY, "center", null, null, true, function() {
+          this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], window.i18next.t("engine.gameFinished"), "white", this.fontSize, FONT_FAMILY, "center", null, true, function() {
             self.btnRetry.addClickAction(self.canvas, function() {
               self.reset();
             });
@@ -1490,7 +1497,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             });
           });
         } else if(this.scoreMax && this.snakes.length <= 1) {
-          this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.scoreMax"), "green", this.fontSize, FONT_FAMILY, "center", null, null, true, function() {
+          this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.scoreMax"), "green", this.fontSize, FONT_FAMILY, "center", null, true, function() {
             self.btnRetry.addClickAction(self.canvas, function() {
               self.reset();
             });
@@ -1501,7 +1508,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             });
           });
         } else if(this.gameOver && this.snakes.length <= 1) {
-          this.drawMenu(ctx, this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, null, false, function() {
+          this.drawMenu(ctx, this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, false, function() {
             if(self.snakes[0].autoRetry) {
               setTimeout(function() {
                 self.reset();
@@ -1518,7 +1525,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             }
           });
         } else if(this.paused && !this.gameOver && this.assetsLoaded) {
-          this.drawMenu(ctx, this.enablePause ? (this.enableRetry ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], window.i18next.t("engine.pause"), "white", this.fontSize, FONT_FAMILY, "center", null, null, false, function() {
+          this.drawMenu(ctx, this.enablePause ? (this.enableRetry ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], window.i18next.t("engine.pause"), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
             self.btnContinue.addClickAction(self.canvas, function() {
               self.reactor.dispatchEvent("onContinue");
               self.start();
@@ -1695,12 +1702,12 @@ Game.prototype.wrapText = function(text, limit) {
   return text;
 };
 
-Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, delay, wrap, func) {
+Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, wrap, func) {
   var self = this;
 
-  clearTimeout(this.timeoutDisplayMenu);
+  window.cancelAnimationFrame(this.frameDisplayMenu);
 
-  this.timeoutDisplayMenu = setTimeout(function() {
+  this.frameDisplayMenu = window.requestAnimationFrame(function() {
     ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
     ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
 
@@ -1715,6 +1722,18 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
     var heightButtons = 0;
 
     if(buttons != null) {
+      if(self.lastKeyMenu == KEY_UP) {
+        self.selectedButton--;
+      } else if(self.lastKeyMenu == KEY_BOTTOM) {
+        self.selectedButton++;
+      }
+
+      if(self.selectedButton >= buttons.length) {
+        self.selectedButton = 0;
+      } else if(self.selectedButton < 0) {
+        self.selectedButton = buttons.length - 1;
+      }
+
       for(var i = 0; i < buttons.length; i++) {
         if(buttons[i].autoHeight) {
           heightButtons += buttons[i].getFontSize(ctx) * 1.75 + 5;
@@ -1732,15 +1751,29 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
     if(buttons != null) {
       for(var i = 0; i < buttons.length; i++) {
         buttons[i].y = startY + heightText + (heightButtons / buttons.length) * i + (i * 5);
+
+        if(self.selectedButton == i) {
+          buttons[i].selected = true;
+        } else {
+          buttons[i].selected = false;
+        }
+
         buttons[i].enable();
         buttons[i].draw(self.canvas);
+
+        if(self.selectedButton == i && self.lastKeyMenu == KEY_ENTER && buttons[i].triggerClick != null && !buttons[i].disabled) {
+          buttons[i].triggerClick();
+          break;
+        }
       }
     }
 
     if(func != null) {
       func(true);
     }
-  }, delay == null ? 100 : delay);
+
+    self.lastKeyMenu = -1;
+  });
 };
 
 Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur) {
@@ -1903,6 +1936,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.image;
   this.imgSrc = imgSrc;
   this.verticalAlignement = verticalAlignement || "default";
+  this.selected = false;
 
   this.draw = function(canvas) {
     var ctx = canvas.getContext("2d");
@@ -1960,7 +1994,13 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
       ctx.fillStyle = this.color;
     }
 
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.fillRect(Math.round(this.x), Math.round(this.y), Math.round(this.width), Math.round(this.height));
+
+    if(this.selected) {
+      ctx.strokeStyle = "#f39c12";
+
+      ctx.strokeRect(Math.round(this.x), Math.round(this.y), Math.round(this.width), Math.round(this.height));
+    }
 
     if(this.image != null) {
       if(this.image.width > this.width || this.image.height > this.height) {
@@ -1979,7 +2019,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
       var textX = this.x + (this.width / 2) - (textSize.width / 2);
       var textY = this.y + (this.height) - (this.fontSize / 2);
 
-      ctx.fillText(this.text, textX, textY);
+      ctx.fillText(this.text, Math.round(textX), Math.round(textY));
     }
 
     ctx.fillStyle = precFillStyle;
