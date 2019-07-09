@@ -841,22 +841,24 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.displayFPS = displayFPS === undefined ? false : displayFPS;
   this.outputType = outputType || OUTPUT_GRAPHICAL;
   this.countBeforePlay = 3;
-  // Game state variables
+  // Game variables
   this.lastKey = -1;
-  this.lastKeyMenu = -1;
-  this.selectedButton = 0;
   this.numFruit = 1;
   this.frame = 0;
   this.lastFrame = 0;
   this.currentFPS = 0;
+  // Game state variables
   this.paused = true;
-  this.gameOver = false;
   this.exited = false;
-  this.gameFinished = false;
-  this.scoreMax = false;
+  this.killed = false;
   this.isReseted = true;
+  this.gameOver = false;
+  this.gameFinished = false; // only used if 2 and more snakes
+  this.scoreMax = false;
   this.errorOccured = false;
   // Menus state variables
+  this.lastKeyMenu = -1;
+  this.selectedButton = 0;
   this.confirmReset = false;
   this.confirmExit = false;
   this.getInfos = false;
@@ -969,7 +971,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     document.addEventListener("keydown", function(evt) {
       if(!self.paused) {
-        if(evt.keyCode == KEY_ENTER) {
+        if(evt.keyCode == KEY_ENTER && self.outputType == OUTPUT_GRAPHICAL) {
           self.pause();
         } else {
           self.lastKey = evt.keyCode;
@@ -996,7 +998,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.autoResizeCanvas = function() {
-    if(this.outputType == OUTPUT_GRAPHICAL) {
+    if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
       if(!document.fullscreenElement) {
         if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
           var ratio = this.canvasWidth / this.canvasHeight;
@@ -1109,7 +1111,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       }
     }
 
-    if(this.paused && !this.gameOver && this.assetsLoaded && !this.scoreMax) {
+    if(this.paused && !this.gameOver && !this.killed && this.assetsLoaded && !this.scoreMax) {
       this.disableAllButtons();
       this.getInfos = false;
       this.getInfosGame = false;
@@ -1154,6 +1156,63 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
   this.onContinue = function(callback) {
     this.reactor.addEventListener("onContinue", callback);
+  };this.stop = function() {
+    this.paused = true;
+    this.gameOver = true;
+    this.clearIntervalCountFPS();
+    this.clearIntervalPlay();
+    this.reactor.dispatchEvent("onStop");
+  };
+
+  this.onStop = function(callback) {
+    this.reactor.addEventListener("onStop", callback);
+  };
+
+  this.pause = function() {
+    this.paused = true;
+    this.clearIntervalCountFPS();
+    this.clearIntervalPlay();
+    this.updateUI();
+    this.reactor.dispatchEvent("onPause");
+  };
+
+  this.onPause = function(callback) {
+    this.reactor.addEventListener("onPause", callback);
+  };
+
+  this.kill = function() {
+    this.paused = true;
+    this.gameOver = true;
+    this.killed = true;
+
+    for(var i = 0; i < this.snakes.length; i++) {
+      this.snakes[i].autoRetry = false;
+    }
+
+    this.clearIntervalCountFPS();
+    this.clearIntervalPlay();
+    window.cancelAnimationFrame(this.frameGlobal);
+    window.cancelAnimationFrame(this.frameDisplayMenu);
+
+    if(this.outputType == OUTPUT_TEXT) {
+      this.appendTo.removeChild(this.textarea);
+      this.textarea = null;
+    } else if(this.outputType == OUTPUT_GRAPHICAL) {
+      this.appendTo.removeChild(this.canvas);
+      this.canvas = null;
+      this.canvasCtx = null;
+    }
+  };
+
+  this.exit = function() {
+    this.stop();
+    this.exited = true;
+    this.updateUI();
+    this.reactor.dispatchEvent("onExit");
+  }
+
+  this.onExit = function(callback) {
+    this.reactor.addEventListener("onExit", callback);
   };
 
   this.tick = function() {
@@ -1161,7 +1220,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     var self = this;
 
     this.frameGlobal = window.requestAnimationFrame(function() {
-      if(!self.paused) {
+      if(!self.paused && !self.killed) {
         self.frame++;
 
         if(self.frame % self.speed == 0) {
@@ -1220,61 +1279,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     });
   };
 
-  this.stop = function() {
-    this.paused = true;
-    this.gameOver = true;
-    this.clearIntervalCountFPS();
-    this.clearIntervalPlay();
-    this.reactor.dispatchEvent("onStop");
-  };
-
-  this.onStop = function(callback) {
-    this.reactor.addEventListener("onStop", callback);
-  };
-
-  this.pause = function() {
-    this.paused = true;
-    this.clearIntervalCountFPS();
-    this.clearIntervalPlay();
-    this.updateUI();
-    this.reactor.dispatchEvent("onPause");
-  };
-
-  this.onPause = function(callback) {
-    this.reactor.addEventListener("onPause", callback);
-  };
-
-  this.kill = function() {
-    this.paused = true;
-    this.gameOver = true;
-
-    for(var i = 0; i < this.snakes.length; i++) {
-      this.snakes[i].autoRetry = false;
-    }
-
-    this.clearIntervalCountFPS();
-    this.clearIntervalPlay();
-
-    if(this.outputType == OUTPUT_TEXT) {
-      this.appendTo.removeChild(this.textarea);
-    } else if(this.outputType == OUTPUT_GRAPHICAL) {
-      this.appendTo.removeChild(this.canvas);
-    }
-  };
-
-  this.exit = function() {
-    this.stop();
-    this.exited = true;
-    this.updateUI();
-    this.reactor.dispatchEvent("onExit");
-  }
-
-  this.onExit = function(callback) {
-    this.reactor.addEventListener("onExit", callback);
-  };
-
   this.toggleFullscreen = function() {
-    if(this.outputType == OUTPUT_GRAPHICAL) {
+    if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
       var full = false;
 
       if(!document.fullscreenElement) {
@@ -1342,9 +1348,9 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.updateUI = function(renderBlur) {
-    if(this.outputType == OUTPUT_TEXT) {
+    if(this.outputType == OUTPUT_TEXT && !this.killed) {
       this.textarea.innerHTML = this.toString();
-    } else if(this.outputType == OUTPUT_GRAPHICAL) {
+    } else if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
       var self = this;
       var ctx = this.canvasCtx;
       var renderBlur = renderBlur === undefined ? false : renderBlur;
@@ -1623,7 +1629,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 }
 
 Game.prototype.toString = function() {
-  return this.grid.toString() + "\n" + (this.snakes.length <= 1 ? window.i18next.t("engine.score") + " : " + this.score[0] : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + window.i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + window.i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + window.i18next.t("engine.debug.paused") : "");
+  return this.grid.toString() + "\n" + (this.snakes.length <= 1 ? window.i18next.t("engine.score") + " : " + this.snakes[0].score : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + window.i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + window.i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + window.i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
 };
 
 Game.prototype.getImageCase = function(position) {
