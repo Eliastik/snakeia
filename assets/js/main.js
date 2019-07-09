@@ -203,7 +203,7 @@ function gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, nu
 
   var neededCases = numberPlayers * 3;
 
-  if(numberEmptyCases > neededCases) {
+  if(numberEmptyCases >= neededCases) {
     return false;
   } else {
     return true;
