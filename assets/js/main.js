@@ -190,7 +190,7 @@ function gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, nu
   var numberEmptyCases = heightGrid * widthGrid;
 
   if(borderWalls) {
-    numberEmptyCases -= ((widthGrid + heightGrid) * 2);
+    numberEmptyCases -= (((widthGrid + heightGrid) * 2) - 4);
   }
 
   if(generateWalls) {

@@ -1618,7 +1618,7 @@ Game.prototype.getImageCase = function(position) {
 Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
   if(imgSrc != "") {
     var imageCase = this.imageLoader.get(imgSrc);
-    ctx.drawImage(imageCase, x, y, width, height);
+    ctx.drawImage(imageCase, Math.round(x), Math.round(y), Math.round(width), Math.round(height));
   }
 };
 
@@ -1972,7 +1972,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
       var imgX = this.x + (this.width / 2) - (imgWidth / 2);
       var imgY = this.y + (this.height / 2) - (imgHeight / 2);
 
-      ctx.drawImage(this.image, imgX, imgY, imgWidth, imgHeight);
+      ctx.drawImage(this.image, Math.round(imgX), Math.round(imgY), Math.round(imgWidth), Math.round(imgHeight));
     } else if(this.text != null) {
       ctx.fillStyle = this.fontColor;
 
