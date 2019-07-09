@@ -67,6 +67,12 @@
               <button class="btn btn-lg btn-info btn-block" id="battleRoyale" data-i18n="menu.battleRoyale">Battle Royale</button>
             </div>
           </div>
+          <hr />
+          <div class="row mb-2">
+            <div class="col text-center">
+              <button class="btn btn-lg btn-warning btn-block" id="levelsSoloPlayer" data-i18n="menu.levelsSoloPlayer">Niveaux (joueur solo)</button>
+            </div>
+          </div>
         </div>
         <p class="m-0"><small><span data-i18n="menu.version">Version</span> <span id="versionTxt"></span> (<span id="dateTxt"></span>) – <span data-i18n="menu.by">Par</span> <a href="http://www.eliastiksofts.com" target="_blank">Eliastik</a></small></p>
         <p class="m-0"><small><a href="http://www.eliastiksofts.com/snakeia" target="_blank" data-i18n="menu.infos">Plus d'infos</a> – <a href="README.md" target="_blank" data-i18n="menu.readme">Fichier Lisez-moi</a> – <a href="http://www.eliastiksofts.com/snakeia/downloads" target="_blank" data-i18n="menu.source">Télécharger la source</a></small></p>
@@ -228,12 +234,14 @@
         </div>
       </div>
       <div id="gameContainer">
-        <div class="row mb-3">
+        <div class="row">
           <div class="col">
             <img src="assets/images/logo/logo.png" width="200px" alt="Logo" />
-            <h1 id="titleGame" class="h3 mb-3 font-weight-normal"></h1>
-            <p id="gameStatus" class="h4 mb-3 font-weight-normal text-primary"></p>
-            <button class="btn btn-lg btn-inverse" id="backToMenuGame"><span class="fui-cross"></span>&nbsp; <span data-i18n="game.backToMenu">Retour au menu</span></button>
+            <h1 id="titleGame" class="h3 mb-3 mt-3 font-weight-normal"></h1>
+            <button class="btn btn-lg btn-inverse mb-3" id="backToMenuGame"><span class="fui-cross"></span>&nbsp; <span data-i18n="game.backToMenu">Retour au menu</span></button>
+            <p id="gameOrder" class="h6 font-weight-normal text-info"></p>
+            <p id="gameStatus" class="h6 font-weight-normal text-primary"></p>
+            <p id="gameStatusError" class="h6 mb-2 font-weight-normal text-danger"></p>
           </div>
         </div>
       </div>

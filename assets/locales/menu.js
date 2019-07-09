@@ -43,6 +43,7 @@ i18next.addResourceBundle("fr", "translation", {
     "playerVsAi": "Joueur VS IA",
     "aiVsAi": "IA VS IA",
     "battleRoyale": "Battle Royale",
+    "levelsSoloPlayer": "Niveaux (joueur solo)",
     "version": "Version",
     "versionDate": "{{date, DD/MM/YYYY}}",
     "by": "Par",
@@ -113,6 +114,15 @@ i18next.addResourceBundle("fr", "translation", {
     "winnersNumBattleRoyale": "n°{{numWinner}}",
     "andWinnersBattleRoyale": "et",
     "winScoreBattleRoyale": "ont gagné avec un score de {{score}} !"
+  },
+  "levels": {
+    "goalAchieved": "Objectif atteint ! Vous pouvez passer au prochain niveau.",
+    "goalNotAchieved": "Objectif raté ! Essayez à nouveau.",
+    "level": "Niveau",
+    "reachScore": "Atteignez au moins le score de {{value}} pour passer ce niveau !",
+    "reachScoreTime": "Atteignez le score de {{value}} en moins de {{time}} secondes !",
+    "reachMaxScore": "Atteignez le score maximal pour cette grille pour passer ce niveau !",
+    "multiBestScore": "Terminez cette partie en obtenant un meilleur score que les IA pour passer ce niveau !"
   }
 }, true, false);
 
@@ -143,6 +153,7 @@ i18next.addResourceBundle("en", "translation", {
     "playerVsAi": "Player VS AI",
     "aiVsAi": "AI VS AI",
     "battleRoyale": "Battle Royale",
+    "levelsSoloPlayer": "Levels (solo player)",
     "version": "Version",
     "versionDate": "{{date, MM/DD/YYYY}}",
     "by": "By",
@@ -213,5 +224,9 @@ i18next.addResourceBundle("en", "translation", {
     "winnersNumBattleRoyale": "n°{{numWinner}}",
     "andWinnersBattleRoyale": "and",
     "winScoreBattleRoyale": "won with a score of {{score}}!"
+  },
+  "levels": {
+    "goalAchieved": "Goal achieved! You can move to the next level.",
+    "level": "Level"
   }
 }, true, false);

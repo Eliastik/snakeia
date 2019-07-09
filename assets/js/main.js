@@ -22,7 +22,32 @@ SOLO_PLAYER = "SOLO_PLAYER";
 PLAYER_VS_AI = "PLAYER_VS_AI";
 AI_VS_AI = "AI_VS_AI";
 BATTLE_ROYALE = "BATTLE_ROYALE";
+// Others settings :
 UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update.php";
+// Levels types :
+LEVEL_REACH_SCORE = "LEVEL_REACH_SCORE";
+LEVEL_REACH_MAX_SCORE = "LEVEL_REACH_MAX_SCORE";
+LEVEL_MULTI_BEST_SCORE = "LEVEL_MULTI_BEST_SCORE";
+LEVEL_REACH_SCORE_ON_TIME = "LEVEL_REACH_SCORE_ON_TIME";
+DEFAULT_LEVEL = "DEFAULT_LEVEL";
+DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
+// Default levels :
+// Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA], type: levelType(see below), typeValue: levelTypeValue(score, time, ...) }
+DEFAULT_LEVELS_SOLO_PLAYER = {
+  1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20 },
+  2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20 },
+  3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20 },
+  4: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 60] },
+  5: { settings: [5, 5, true, false, true, 15, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null },
+  6: { settings: [20, 20, true, false, true, 15, false, null, 2], type: LEVEL_MULTI_BEST_SCORE, typeValue: null }
+};
+SOLO_PLAYER_SAVE = "snakeia_solo_player_";
+DEFAULT_LEVELS_SOLO_AI = "";
+SOLO_AI_SAVE = "snakeia_solo_ai_";
+// Downloadable levels :
+DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLevels.php?player={{player}}&ver={{appVersion}}";
+SOLO_PLAYER_DOWNLOAD_LEVELS_TO = "snakeia_solo_player_downloadedLevels";
+SOLO_AI_DOWNLOAD_LEVELS_TO = "snakeia_solo_ai_downloadedLevels";
 
 var selectedMode = SOLO_AI;
 var showDebugInfo = false;
@@ -36,6 +61,12 @@ String.prototype.strcmp = function(str) {
   return ((this == str) ? 0 : ((this > str) ? 1 : -1));
 };
 
+function enableDebugMode() {
+  showDebugInfo = true;
+  console.log(window.i18next.t("debugModeEnabled"));
+}
+
+// Updates
 function checkUpdate() {
   var script = document.createElement("script");
   script.src = UPDATER_URI;
@@ -90,6 +121,7 @@ function updateCallback(data) {
 
 checkUpdate();
 
+// Simple modes
 function selectMode(mode) {
   selectedMode = mode;
 
@@ -287,6 +319,8 @@ function resetForm(resetValues) {
   document.getElementById("numberIA").classList.remove("is-invalid");
   document.getElementById("invalidIANumber").style.display = "none";
   document.getElementById("gameStatus").innerHTML = "";
+  document.getElementById("gameOrder").innerHTML = "";
+  document.getElementById("gameStatusError").innerHTML = "";
 
   if(resetValues) {
     document.getElementById("heightGrid").value = 20;
@@ -585,6 +619,8 @@ function validateSettings(returnValidation) {
 
     group.onReset(function() {
       document.getElementById("gameStatus").innerHTML = "";
+      document.getElementById("gameOrder").innerHTML = "";
+      document.getElementById("gameStatusError").innerHTML = "";
     });
   }
 }
@@ -593,9 +629,265 @@ document.getElementById("validateSettings").onclick = function() {
   validateSettings();
 };
 
-function enableDebugMode() {
-  showDebugInfo = true;
-  console.log(window.i18next.t("debugModeEnabled"));
+// Levels
+function getTitleSave(player, type) {
+  if(type == DEFAULT_LEVEL) {
+    if(player == PLAYER_HUMAN) {
+      var save = SOLO_PLAYER_SAVE + "defautLevelsSave";
+    } else if(player == PLAYER_AI) {
+      var save = SOLO_AI_SAVE + "defautLevelsSave";
+    }
+  } else if(type == DOWNLOADED_LEVEL) {
+    if(player == PLAYER_HUMAN) {
+      var save = SOLO_PLAYER_SAVE + "downloadedLevelsSave";
+    } else if(player == PLAYER_AI) {
+      var save = SOLO_AI_SAVE + "downloadedLevelsSave";
+    }
+  }
+
+  return save;
+}
+
+function getSave(player, type) {
+  if(localStorage.getItem(getTitleSave(player, type)) == null) {
+    initSaveLevel(player, type);
+  }
+
+  return JSON.parse(localStorage.getItem(getTitleSave(player, type)));
+}
+
+function getLevel(level, player, type) {
+  var save = getSave(player, type);
+
+  if(save == null) {
+    return false;
+  }
+
+  return getSave(player, type)[level];
+}
+
+function setLevel(value, level, player, type) {
+    var save = getTitleSave(player, type);
+    var item = getSave(player, type);
+
+    if(item != null) {
+      item[level] = value;
+      localStorage.setItem(save, JSON.stringify(item));
+
+      return true;
+    }
+
+    return false;
+}
+
+function initSaveLevel(player, type) {
+  if(typeof(Storage) !== "undefined") {
+    var save = getTitleSave(player, type);
+    var item = localStorage.getItem(save);
+
+    if(item == null) {
+      localStorage.setItem(save, JSON.stringify({ version: APP_VERSION }));
+      setLevel([false, 0], 1, player, type);
+    }
+
+    return false;
+  } else {
+    return false;
+  }
+}
+
+function canPlay(level, player, type) {
+  var res = true;
+
+  for(var i = 1; i <= level; i++) {
+    if(!getLevel(i, player, type) && i != 1) {
+      res = false;
+    }
+  }
+
+  return res;
+}
+
+function levelCompatible(levelType) {
+  if(levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME) {
+    return false;
+  }
+
+  return true;
+}
+
+function playLevel(level, player, type) {
+  if(type == DEFAULT_LEVEL) {
+    if(player == PLAYER_HUMAN) {
+      var levels = DEFAULT_LEVELS_SOLO_PLAYER;
+    } else if(player == PLAYER_AI) {
+      var levels = DEFAULT_LEVELS_SOLO_AI;
+    } else {
+      return false;
+    }
+  }
+
+  if(levels[level] != null) {
+    var levelSelected = levels[level];
+    var levelSettings = levelSelected["settings"];
+    var levelType = levelSelected["type"];
+    var levelTypeValue = levelSelected["typeValue"];
+
+    if(!levelCompatible(levelType)) {
+      return false;
+    }
+
+    var heightGrid = levelSettings[0];
+    var widthGrid = levelSettings[1];
+    var borderWalls = levelSettings[2];
+    var generateWalls = levelSettings[3];
+    var sameGrid = levelSettings[4];
+    var speed = levelSettings[5];
+    var progressiveSpeed = levelSettings[6];
+    var aiLevel = levelSettings[7];
+    var numberIA = levelSettings[8];
+
+    var games = [];
+
+    var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+
+    if(player == PLAYER_AI) {
+      var playerSnake = new Snake(RIGHT, 3, grid, player, AI_LEVEL_HIGH);
+    } else if(player == PLAYER_HUMAN) {
+      var playerSnake = new Snake(RIGHT, 3, grid, player);
+    }
+
+    if(sameGrid) {
+      var snakes = [playerSnake];
+
+      for(var i = 0; i < numberIA; i++) {
+        snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel));
+      }
+
+      var playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed);
+      games.push(playerGame);
+    } else {
+      var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250);
+      games.push(playerGame);
+
+      for(var i = 0; i < numberIA; i++) {
+        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+        var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+
+        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250));
+      }
+    }
+
+    document.getElementById("settings").style.display = "none";
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("gameContainer").style.display = "block";
+
+    document.getElementById("titleGame").innerHTML = window.i18next.t("levels.level") + " " + level;
+
+    var group = new GameGroup(games);
+    group.setDisplayFPS(showDebugInfo ? true : false);
+    group.start();
+
+    var timeout;
+
+    document.getElementById("backToMenuGame").onclick = function() {
+      if(confirm(window.i18next.t("game.confirmQuit"))) {
+        clearTimeout(timeout);
+        group.killAll();
+        displayMenu();
+        group = null;
+      }
+    };
+
+    function initGoal() {
+      if(levelType == LEVEL_REACH_SCORE) {
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachScore", { value: levelTypeValue });
+
+        playerGame.onScoreIncreased(function() {
+          if(playerSnake.score >= levelTypeValue) {
+            setLevel([true, playerSnake.score], level, player, type);
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
+          }
+        });
+
+        playerGame.onStop(function() {
+          if(playerSnake.score < levelTypeValue) {
+            document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
+          }
+        });
+      } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], time: levelTypeValue[1] });
+        var start = new Date().getTime();
+
+        playerGame.onStart(function() {
+          clearTimeout(timeout);
+          timeOut = setTimeout(function() {
+            group.stopAll(false);
+            document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
+          }, levelTypeValue[1] * 1000 - 1);
+        });
+
+        playerGame.onScoreIncreased(function() {
+          if(playerSnake.score >= levelTypeValue[0]) {
+            clearTimeout(timeout);
+            var stop = new Date().getTime();
+            group.stopAll(true);
+            setLevel([true, (stop - start) / 1000], level, player, type);
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
+          }
+        });
+      } else if(levelType == LEVEL_REACH_MAX_SCORE) {
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachMaxScore");
+
+        playerGame.onStop(function() {
+          if(playerGame.scoreMax) {
+            setLevel([true, playerSnake.score], level, player, type);
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
+          } else {
+            document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
+          }
+        });
+      } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.multiBestScore");
+
+        group.onStop(function() {
+          var winners = group.getWinners();
+          var won = false;
+
+          for(var i = 0; i < winners.index.length; i++) {
+            if(winners.index == 0) {
+              setLevel([true, playerSnake.score], level, player, type);
+              document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
+              won = true;
+            }
+          }
+
+          if(!won) {
+            document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
+          }
+        });
+      }
+    }
+
+    initGoal();
+
+    group.onExit(function() {
+      if(selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER || selectedMode == AI_VS_AI || (selectedMode == PLAYER_VS_AI && sameGrid) || (selectedMode == BATTLE_ROYALE && sameGrid)) {
+        clearTimeout(timeout);
+        group.killAll();
+        displayMenu();
+      }
+    });
+
+    group.onReset(function() {
+      document.getElementById("gameStatus").innerHTML = "";
+      document.getElementById("gameOrder").innerHTML = "";
+      document.getElementById("gameStatusError").innerHTML = "";
+      initGoal();
+    });
+  } else {
+    return false;
+  }
 }
 
 // Localization

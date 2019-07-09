@@ -898,6 +898,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.reactor.registerEvent("onReset");
   this.reactor.registerEvent("onStop");
   this.reactor.registerEvent("onExit");
+  this.reactor.registerEvent("onScoreIncreased");
 
   this.init = function() {
     this.imageLoader = new ImageLoader();
@@ -1240,6 +1241,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               } else {
                 if(self.grid.get(headSnakePos) == FRUIT_VAL) {
                   self.snakes[i].score++;
+                  self.reactor.dispatchEvent("onScoreIncreased");
                   self.snakes[i].insert(headSnakePos);
 
                   if(self.snakes[i].hasMaxScore()) {
@@ -1269,7 +1271,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
             if(nbOver >= self.snakes.length) {
               self.stop();
-              self.gameFinished = true;
+              
+              if(self.snakes.length > 1) {
+                self.gameFinished = true;
+              }
             }
           }
         }
@@ -1277,6 +1282,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         self.tick();
       }
     });
+  };
+
+  this.onScoreIncreased = function(callback) {
+    this.reactor.addEventListener("onScoreIncreased", callback);
   };
 
   this.toggleFullscreen = function() {
@@ -1499,7 +1508,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               self.updateUI();
             });
           });
-        } else if(this.gameFinished && this.snakes.length > 1) {
+        } else if(this.gameFinished) {
           this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], window.i18next.t("engine.gameFinished"), "white", this.fontSize, FONT_FAMILY, "center", null, true, function() {
             self.btnRetry.addClickAction(self.canvas, function() {
               self.selectedButton = 0;
@@ -2167,6 +2176,7 @@ function GameGroup(games) {
   this.reactor.registerEvent("onStop");
   this.reactor.registerEvent("onReset");
   this.reactor.registerEvent("onExit");
+  this.reactor.registerEvent("onScoreIncreased");
 
   this.init = function() {
     var self = this;
@@ -2286,6 +2296,18 @@ function GameGroup(games) {
 
   this.onStop = function(callback) {
     this.reactor.addEventListener("onStop", callback);
+  };
+
+  this.stopAll = function(finished) {
+    for(var i = 0; i < this.games.length; i++) {
+      this.games[i].stop();
+
+      if(finished) {
+        this.games[i].gameFinished = true;
+      }
+
+      this.games[i].updateUI();
+    }
   };
 
   this.killAll = function() {
