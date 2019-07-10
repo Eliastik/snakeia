@@ -24,7 +24,7 @@ i18next.addResourceBundle("fr", "translation", {
     "en": "English"
   },
   "update": {
-    "updateAvailable": "Une mise à jour de l'application est disponible",
+    "updateAvailable": "Une mise à jour du jeu est disponible",
     "version": "Version",
     "of": "du",
     "current": "Vous disposez actuellement de la version",
@@ -121,13 +121,14 @@ i18next.addResourceBundle("fr", "translation", {
     "titleAI": "Niveaux (IA solo)",
     "emptyList": "Aucun niveau trouvé…",
     "disabledLevel": "Niveau bloqué. Terminez les niveaux précédents pour le débloquer.",
+    "notCompatible": "Ce niveau n'est pas compatible avec cette version du jeu. Mettez-le à jour.",
     "goalAchieved": "Objectif atteint ! Vous pouvez passer au prochain niveau.",
     "goalNotAchieved": "Objectif raté ! Essayez à nouveau.",
     "level": "Niveau",
     "reachScore": "Atteignez au moins le score de {{value}} pour passer ce niveau !",
     "reachScoreTime": "Atteignez le score de {{value}} en moins de {{time}} secondes !",
     "reachMaxScore": "Atteignez le score maximal pour cette grille pour passer ce niveau !",
-    "multiBestScore": "Terminez cette partie en obtenant un meilleur score que les IA pour passer ce niveau !"
+    "multiBestScore": "Terminez cette partie en obtenant un meilleur score que le ou les adversaires pour passer ce niveau !"
   }
 }, true, false);
 
@@ -139,7 +140,7 @@ i18next.addResourceBundle("en", "translation", {
     "en": "English"
   },
   "update": {
-    "updateAvailable": "An update of the application is available",
+    "updateAvailable": "An update of the game is available",
     "version": "Version",
     "of": "of",
     "current": "You currently have the version",
@@ -159,6 +160,7 @@ i18next.addResourceBundle("en", "translation", {
     "aiVsAi": "AI VS AI",
     "battleRoyale": "Battle Royale",
     "levelsSoloPlayer": "Levels (solo player)",
+    "levelsSoloAI": "Levels (solo AI)",
     "version": "Version",
     "versionDate": "{{date, MM/DD/YYYY}}",
     "by": "By",
@@ -231,7 +233,17 @@ i18next.addResourceBundle("en", "translation", {
     "winScoreBattleRoyale": "won with a score of {{score}}!"
   },
   "levels": {
+    "titlePlayer": "Levels (solo player)",
+    "titleAI": "Levels (solo AI)",
+    "emptyList": "No level found…",
+    "disabledLevel": "Level locked. Complete the previous levels to unlock it.",
+    "notCompatible": "This level is not compatible with this version of the game. Update it.",
     "goalAchieved": "Goal achieved! You can move to the next level.",
-    "level": "Level"
+    "goalNotAchieved": "Objective missed! Try again.",
+    "level": "Level",
+    "reachScore": "Reach at least the score of {{value}} to pass this level!",
+    "reachScoreTime": "Reach the score of {{value}} in less than {{time}} seconds!",
+    "reachMaxScore": "Reach the maximum score for this grid to pass this level!",
+    "multiBestScore": "Finish this game by getting a better score than the opponent(s) to pass this level!"
   }
 }, true, false);

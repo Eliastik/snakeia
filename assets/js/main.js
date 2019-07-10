@@ -687,13 +687,13 @@ function getSave(player, type) {
   return JSON.parse(localStorage.getItem(getTitleSave(player, type)));
 }
 
-function getLevel(level, player, type) {
+function getLevelSave(level, player, type) {
   var save = getSave(player, type);
 
   return getSave(player, type)[level];
 }
 
-function setLevel(value, level, player, type) {
+function setLevelSave(value, level, player, type) {
     var save = getTitleSave(player, type);
     var item = getSave(player, type);
 
@@ -714,7 +714,7 @@ function initSaveLevel(player, type) {
 
     if(item == null) {
       localStorage.setItem(save, JSON.stringify({ version: APP_VERSION }));
-      setLevel([false, 0], 1, player, type);
+      setLevelSave([false, 0], 1, player, type);
     }
 
     return false;
@@ -723,13 +723,30 @@ function initSaveLevel(player, type) {
   }
 }
 
+function getLevels(player, type) {
+  if(type == DEFAULT_LEVEL) {
+    if(player == PLAYER_HUMAN) {
+      return DEFAULT_LEVELS_SOLO_PLAYER;
+    } else if(player == PLAYER_AI) {
+      return DEFAULT_LEVELS_SOLO_AI;
+    }
+  }
+
+  return null;
+}
+
 function canPlay(level, player, type) {
   var res = true;
+  var levels = getLevels(player, type);
+
+  if(levels == null) {
+    return false;
+  }
 
   for(var i = 1; i < level; i++) {
-    var save = getLevel(i, player, type);
+    var save = getLevelSave(i, player, type);
 
-    if(save == null || !save[0]) {
+    if(save == null || (!save[0] && levelCompatible(levels[i]["type"], levels[i]["version"]))) {
       res = false;
     }
   }
@@ -738,7 +755,7 @@ function canPlay(level, player, type) {
 }
 
 function levelCompatible(levelType, version) {
-  if((levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME) || version.strcmp(APP_VERSION) > 0) {
+  if((levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME) || APP_VERSION.strcmp(version) < 0) {
     return false;
   }
 
@@ -746,14 +763,10 @@ function levelCompatible(levelType, version) {
 }
 
 function playLevel(level, player, type) {
-  if(type == DEFAULT_LEVEL) {
-    if(player == PLAYER_HUMAN) {
-      var levels = DEFAULT_LEVELS_SOLO_PLAYER;
-    } else if(player == PLAYER_AI) {
-      var levels = DEFAULT_LEVELS_SOLO_AI;
-    } else {
-      return false;
-    }
+  var levels = getLevels(player, type);
+
+  if(levels == null) {
+    return false;
   }
 
   if(levels[level] != null) {
@@ -764,11 +777,12 @@ function playLevel(level, player, type) {
     var levelVersion = levelSelected["version"];
 
     if(!levelCompatible(levelType, levelVersion)) {
-      alert("Ce niveau n'est pas compatible avec cette version du jeu. Mettez-le à jour.");
+      alert(window.i18next.t("levels.notCompatible"));
       return false;
     }
 
     if(!canPlay(level, player, type)) {
+      alert(window.i18next.t("levels.disabledLevel"));
       return false;
     }
 
@@ -845,7 +859,7 @@ function playLevel(level, player, type) {
 
         playerGame.onScoreIncreased(function() {
           if(playerSnake.score >= levelTypeValue) {
-            setLevel([true, playerSnake.score], level, player, type);
+            setLevelSave([true, playerSnake.score], level, player, type);
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
           }
         });
@@ -876,7 +890,7 @@ function playLevel(level, player, type) {
             clearTimeout(timeout);
             var stop = new Date().getTime();
             group.stopAll(true);
-            setLevel([true, (stop - start) / 1000], level, player, type);
+            setLevelSave([true, (stop - start) / 1000], level, player, type);
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
           }
         });
@@ -885,7 +899,7 @@ function playLevel(level, player, type) {
 
         playerGame.onStop(function() {
           if(playerGame.scoreMax) {
-            setLevel([true, playerSnake.score], level, player, type);
+            setLevelSave([true, playerSnake.score], level, player, type);
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
           } else {
             document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
@@ -900,7 +914,7 @@ function playLevel(level, player, type) {
 
           for(var i = 0; i < winners.index.length; i++) {
             if(winners.index == 0) {
-              setLevel([true, playerSnake.score], level, player, type);
+              setLevelSave([true, playerSnake.score], level, player, type);
               document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
               won = true;
             }
@@ -935,14 +949,10 @@ function playLevel(level, player, type) {
 }
 
 function getListLevel(player, type) {
-  if(type == DEFAULT_LEVEL) {
-    if(player == PLAYER_HUMAN) {
-      var levels = DEFAULT_LEVELS_SOLO_PLAYER;
-    } else if(player == PLAYER_AI) {
-      var levels = DEFAULT_LEVELS_SOLO_AI;
-    } else {
-      return false;
-    }
+  var levels = getLevels(player, type);
+
+  if(levels == null) {
+    return false;
   }
 
   var res = '<div class="row mb-2 mx-auto">';
@@ -951,10 +961,12 @@ function getListLevel(player, type) {
 
   for(var key in levels) {
     if(levels.hasOwnProperty(key)) {
-      if(levelCompatible(levels[key]["type"], levels[key]["version"]) && canPlay(key, player, type)) {
-        var button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
-      } else {
+      if(!canPlay(key, player, type)) {
         var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled title="' + window.i18next.t("levels.disabledLevel") + '">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+      } else if(!levelCompatible(levels[key]["type"], levels[key]["version"])) {
+        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled title="' + window.i18next.t("levels.notCompatible") + '">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+      } else {
+        var button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
       }
 
       if(index % 2 == 0) {
