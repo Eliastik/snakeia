@@ -64,26 +64,9 @@ IMAGE_SNAKE_VALUE = 77;
 APP_VERSION = "1.2";
 DATE_VERSION = "2019-07-03";
 
-// return an integer between min (inclusive) and max (inclusive)
+// Return an integer between min (inclusive) and max (inclusive)
 function randRange(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function valToChar(value) {
-  switch(value) {
-    case EMPTY_VAL:
-      return "-";
-      break;
-    case SNAKE_VAL:
-      return "o";
-      break;
-    case FRUIT_VAL:
-      return "x";
-      break;
-    case WALL_VAL:
-      return "#";
-      break;
-  }
 }
 
 // Color functions
@@ -273,6 +256,23 @@ function Grid(width, height, generateWalls, borderWalls) {
     return this.grid[position.y][position.x];
   };
 
+  this.valToChar = function(value) {
+    switch(value) {
+      case EMPTY_VAL:
+        return "-";
+        break;
+      case SNAKE_VAL:
+        return "o";
+        break;
+      case FRUIT_VAL:
+        return "x";
+        break;
+      case WALL_VAL:
+        return "#";
+        break;
+    }
+  };
+
   this.getGraph = function(snakePos) {
     var res = new Array(this.height);
 
@@ -419,7 +419,7 @@ Grid.prototype.toString = function() {
 
   for(var i = 0; i < this.height; i++) {
     for(var j = 0; j < this.width; j++) {
-      res += valToChar(this.get(new Position(j, i))) + " ";
+      res += this.valToChar(this.get(new Position(j, i))) + " ";
     }
 
     res += "\n";
