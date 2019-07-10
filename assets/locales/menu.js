@@ -44,6 +44,7 @@ i18next.addResourceBundle("fr", "translation", {
     "aiVsAi": "IA VS IA",
     "battleRoyale": "Battle Royale",
     "levelsSoloPlayer": "Niveaux (joueur solo)",
+    "levelsSoloAI": "Niveaux (IA solo)",
     "version": "Version",
     "versionDate": "{{date, DD/MM/YYYY}}",
     "by": "Par",
@@ -116,6 +117,10 @@ i18next.addResourceBundle("fr", "translation", {
     "winScoreBattleRoyale": "ont gagné avec un score de {{score}} !"
   },
   "levels": {
+    "titlePlayer": "Niveaux (joueur solo)",
+    "titleAI": "Niveaux (IA solo)",
+    "emptyList": "Aucun niveau trouvé…",
+    "disabledLevel": "Niveau bloqué. Terminez les niveaux précédents pour le débloquer.",
     "goalAchieved": "Objectif atteint ! Vous pouvez passer au prochain niveau.",
     "goalNotAchieved": "Objectif raté ! Essayez à nouveau.",
     "level": "Niveau",

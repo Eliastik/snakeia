@@ -62,13 +62,19 @@ body {
    margin: auto;
  }
 
-#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame {
+#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer {
   display: none;
 }
 
 #formSettings, #updateAvailable {
   width: 100%;
   max-width: 500px;
+  margin: auto;
+}
+
+#levelListDefault, #levelListDownload {
+  width: 100%;
+  max-width: 450px;
   margin: auto;
 }
 
@@ -108,4 +114,9 @@ textarea {
   font-family: monospace;
   font-size: 8pt;
   line-height: 16px;
+}
+
+.btn-block-85 {
+  display: block;
+  width: 85%;
 }

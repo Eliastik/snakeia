@@ -73,6 +73,11 @@
               <button class="btn btn-lg btn-warning btn-block" id="levelsSoloPlayer" data-i18n="menu.levelsSoloPlayer">Niveaux (joueur solo)</button>
             </div>
           </div>
+          <div class="row mb-2">
+            <div class="col text-center">
+              <button class="btn btn-lg btn-warning btn-block" id="levelsSoloAI" data-i18n="menu.levelsSoloAI">Niveaux (IA solo)</button>
+            </div>
+          </div>
         </div>
         <p class="m-0"><small><span data-i18n="menu.version">Version</span> <span id="versionTxt"></span> (<span id="dateTxt"></span>) – <span data-i18n="menu.by">Par</span> <a href="http://www.eliastiksofts.com" target="_blank">Eliastik</a></small></p>
         <p class="m-0"><small><a href="http://www.eliastiksofts.com/snakeia" target="_blank" data-i18n="menu.infos">Plus d'infos</a> – <a href="README.md" target="_blank" data-i18n="menu.readme">Fichier Lisez-moi</a> – <a href="http://www.eliastiksofts.com/snakeia/downloads" target="_blank" data-i18n="menu.source">Télécharger la source</a></small></p>
@@ -230,6 +235,19 @@
         <div class="row mt-2">
           <div class="col text-center">
             <button class="btn btn-lg btn-danger" id="backToMenu"><span class="fui-cross"></span>&nbsp; <span data-i18n="settings.backToMenu">Retour au menu</span></button>
+          </div>
+        </div>
+      </div>
+      <div id="levelContainer">
+        <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
+        <h1 class="h3 mb-3 font-weight-normal" id="titleLevelList"></h1>
+        <div id="levelListDefault"></div>
+        <div id="levelListDownload">
+          <hr />
+        </div>
+        <div class="row mt-2">
+          <div class="col text-center">
+            <button class="btn btn-lg btn-danger" id="backToMenuLevelList"><span class="fui-cross"></span>&nbsp; <span data-i18n="settings.backToMenu">Retour au menu</span></button>
           </div>
         </div>
       </div>

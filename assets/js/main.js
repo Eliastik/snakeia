@@ -32,17 +32,18 @@ LEVEL_REACH_SCORE_ON_TIME = "LEVEL_REACH_SCORE_ON_TIME";
 DEFAULT_LEVEL = "DEFAULT_LEVEL";
 DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
 // Default levels :
-// Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA], type: levelType(see below), typeValue: levelTypeValue(score, time, ...) }
+// Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA], type: levelType(see below), typeValue: levelTypeValue(score, time, ...), version: (version min to play the level) }
 DEFAULT_LEVELS_SOLO_PLAYER = {
-  1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20 },
-  2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20 },
-  3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20 },
-  4: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 60] },
-  5: { settings: [5, 5, true, false, true, 15, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null },
-  6: { settings: [20, 20, true, false, true, 15, false, null, 2], type: LEVEL_MULTI_BEST_SCORE, typeValue: null }
+  1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
+  2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
+  3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
+  4: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 60], version: APP_VERSION },
+  5: { settings: [5, 5, true, false, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
+  6: { settings: [5, 5, false, true, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
+  7: { settings: [20, 20, true, false, true, 15, false, null, 2], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: APP_VERSION }
 };
 SOLO_PLAYER_SAVE = "snakeia_solo_player_";
-DEFAULT_LEVELS_SOLO_AI = "";
+DEFAULT_LEVELS_SOLO_AI = DEFAULT_LEVELS_SOLO_PLAYER;
 SOLO_AI_SAVE = "snakeia_solo_ai_";
 // Downloadable levels :
 DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLevels.php?player={{player}}&ver={{appVersion}}";
@@ -174,6 +175,7 @@ document.getElementById("battleRoyale").onclick = function() {
 
 function displaySettings() {
   document.getElementById("menu").style.display = "none";
+  document.getElementById("levelContainer").style.display = "none";
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("settings").style.display = "block";
   checkSameGrid();
@@ -183,12 +185,40 @@ function displaySettings() {
 
 function displayMenu() {
   document.getElementById("settings").style.display = "none";
+  document.getElementById("levelContainer").style.display = "none";
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("menu").style.display = "block";
 }
 
 document.getElementById("backToMenu").onclick = function() {
   displayMenu();
+};
+
+document.getElementById("backToMenuLevelList").onclick = function() {
+  displayMenu();
+};
+
+function displayLevelList(player) {
+  document.getElementById("settings").style.display = "none";
+  document.getElementById("levelContainer").style.display = "block";
+  document.getElementById("gameContainer").style.display = "none";
+  document.getElementById("menu").style.display = "none";
+
+  if(player == PLAYER_HUMAN) {
+    document.getElementById("titleLevelList").innerHTML = window.i18next.t("levels.titlePlayer");
+    document.getElementById("levelListDefault").innerHTML = getListLevel(PLAYER_HUMAN, DEFAULT_LEVEL);
+  } else if(player == PLAYER_AI) {
+    document.getElementById("titleLevelList").innerHTML = window.i18next.t("levels.titleAI");
+    document.getElementById("levelListDefault").innerHTML = getListLevel(PLAYER_AI, DEFAULT_LEVEL);
+  }
+}
+
+document.getElementById("levelsSoloPlayer").onclick = function() {
+  displayLevelList(PLAYER_HUMAN);
+};
+
+document.getElementById("levelsSoloAI").onclick = function() {
+  displayLevelList(PLAYER_AI);
 };
 
 function checkSameGrid() {
@@ -463,6 +493,7 @@ function validateSettings(returnValidation) {
   if(formValidated) {
     document.getElementById("settings").style.display = "none";
     document.getElementById("menu").style.display = "none";
+    document.getElementById("levelContainer").style.display = "none";
     document.getElementById("gameContainer").style.display = "block";
 
     var titleGame = "";
@@ -659,10 +690,6 @@ function getSave(player, type) {
 function getLevel(level, player, type) {
   var save = getSave(player, type);
 
-  if(save == null) {
-    return false;
-  }
-
   return getSave(player, type)[level];
 }
 
@@ -699,8 +726,10 @@ function initSaveLevel(player, type) {
 function canPlay(level, player, type) {
   var res = true;
 
-  for(var i = 1; i <= level; i++) {
-    if(!getLevel(i, player, type) && i != 1) {
+  for(var i = 1; i < level; i++) {
+    var save = getLevel(i, player, type);
+
+    if(save == null || !save[0]) {
       res = false;
     }
   }
@@ -708,8 +737,8 @@ function canPlay(level, player, type) {
   return res;
 }
 
-function levelCompatible(levelType) {
-  if(levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME) {
+function levelCompatible(levelType, version) {
+  if((levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME) || version.strcmp(APP_VERSION) > 0) {
     return false;
   }
 
@@ -732,8 +761,14 @@ function playLevel(level, player, type) {
     var levelSettings = levelSelected["settings"];
     var levelType = levelSelected["type"];
     var levelTypeValue = levelSelected["typeValue"];
+    var levelVersion = levelSelected["version"];
 
-    if(!levelCompatible(levelType)) {
+    if(!levelCompatible(levelType, levelVersion)) {
+      alert("Ce niveau n'est pas compatible avec cette version du jeu. Mettez-le à jour.");
+      return false;
+    }
+
+    if(!canPlay(level, player, type)) {
       return false;
     }
 
@@ -780,7 +815,12 @@ function playLevel(level, player, type) {
 
     document.getElementById("settings").style.display = "none";
     document.getElementById("menu").style.display = "none";
+    document.getElementById("levelContainer").style.display = "none";
     document.getElementById("gameContainer").style.display = "block";
+
+    document.getElementById("gameStatus").innerHTML = "";
+    document.getElementById("gameOrder").innerHTML = "";
+    document.getElementById("gameStatusError").innerHTML = "";
 
     document.getElementById("titleGame").innerHTML = window.i18next.t("levels.level") + " " + level;
 
@@ -794,7 +834,7 @@ function playLevel(level, player, type) {
       if(confirm(window.i18next.t("game.confirmQuit"))) {
         clearTimeout(timeout);
         group.killAll();
-        displayMenu();
+        displayLevelList(player);
         group = null;
       }
     };
@@ -825,6 +865,10 @@ function playLevel(level, player, type) {
             group.stopAll(false);
             document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
           }, levelTypeValue[1] * 1000 - 1);
+        });
+
+        playerGame.onStop(function() {
+          clearTimeout(timeout);
         });
 
         playerGame.onScoreIncreased(function() {
@@ -875,7 +919,7 @@ function playLevel(level, player, type) {
       if(selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER || selectedMode == AI_VS_AI || (selectedMode == PLAYER_VS_AI && sameGrid) || (selectedMode == BATTLE_ROYALE && sameGrid)) {
         clearTimeout(timeout);
         group.killAll();
-        displayMenu();
+        displayLevelList(player);
       }
     });
 
@@ -888,6 +932,52 @@ function playLevel(level, player, type) {
   } else {
     return false;
   }
+}
+
+function getListLevel(player, type) {
+  if(type == DEFAULT_LEVEL) {
+    if(player == PLAYER_HUMAN) {
+      var levels = DEFAULT_LEVELS_SOLO_PLAYER;
+    } else if(player == PLAYER_AI) {
+      var levels = DEFAULT_LEVELS_SOLO_AI;
+    } else {
+      return false;
+    }
+  }
+
+  var res = '<div class="row mb-2 mx-auto">';
+  var index = 1;
+  var empty = true;
+
+  for(var key in levels) {
+    if(levels.hasOwnProperty(key)) {
+      if(levelCompatible(levels[key]["type"], levels[key]["version"]) && canPlay(key, player, type)) {
+        var button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+      } else {
+        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled title="' + window.i18next.t("levels.disabledLevel") + '">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+      }
+
+      if(index % 2 == 0) {
+        res += '<div class="col pl-0 justify-content-center">' + button + '</div></div><div class="row mb-2 mx-auto">';
+      } else {
+        res += '<div class="col pr-0 justify-content-center">' + button + '</div>';
+      }
+
+      empty = false;
+    }
+
+    index++;
+  }
+
+  if(empty) {
+    return "<strong>" + window.i18next.t("levels.emptyList") + "</strong>";
+  }
+
+  if(index % 2 == 0) {
+    res += '<div class="col pr-0 justify-content-center"></div>';
+  }
+
+  return res + "</div>";
 }
 
 // Localization
