@@ -36,11 +36,16 @@ DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
 DEFAULT_LEVELS_SOLO_PLAYER = {
   1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
   2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
-  3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
+  3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 10, version: APP_VERSION },
   4: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 60], version: APP_VERSION },
-  5: { settings: [5, 5, true, false, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
-  6: { settings: [5, 5, false, true, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
-  7: { settings: [20, 20, true, false, true, 15, false, null, 2], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: APP_VERSION }
+  5: { settings: [10, 10, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
+  6: { settings: [10, 10, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
+  7: { settings: [15, 15, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
+  8: { settings: [15, 15, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 45], version: APP_VERSION },
+  9: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 35, version: APP_VERSION },
+  10: { settings: [15, 15, false, false, false, null, false, null, 1], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: APP_VERSION },
+  19: { settings: [5, 5, true, false, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
+  20: { settings: [5, 5, false, true, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
 };
 SOLO_PLAYER_SAVE = "snakeia_solo_player_";
 DEFAULT_LEVELS_SOLO_AI = DEFAULT_LEVELS_SOLO_PLAYER;
@@ -355,6 +360,7 @@ function resetForm(resetValues) {
   document.getElementById("invalidaiLevel").style.display = "none";
   document.getElementById("numberIA").classList.remove("is-invalid");
   document.getElementById("invalidIANumber").style.display = "none";
+  document.getElementById("resultLevels").innerHTML = "";
   document.getElementById("gameStatus").innerHTML = "";
   document.getElementById("gameOrder").innerHTML = "";
   document.getElementById("gameStatusError").innerHTML = "";
@@ -656,6 +662,7 @@ function validateSettings(returnValidation) {
     });
 
     group.onReset(function() {
+      document.getElementById("resultLevels").innerHTML = "";
       document.getElementById("gameStatus").innerHTML = "";
       document.getElementById("gameOrder").innerHTML = "";
       document.getElementById("gameStatusError").innerHTML = "";
@@ -789,6 +796,34 @@ function levelCompatible(levelType, version) {
   return true;
 }
 
+function printResultLevel(level, player, levelType, type) {
+  var val = "";
+  var resultLevel = getLevelSave(level, player, type);
+
+  if(resultLevel == null) {
+    return false;
+  }
+
+  var resultLevel = resultLevel[1];
+
+  if(resultLevel <= 0) {
+    return false;
+  }
+
+  if(levelType == LEVEL_REACH_SCORE) {
+    val = window.i18next.t("levels.bestScore", { count: resultLevel });
+  } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
+    val = window.i18next.t("levels.bestTime", { count: Math.floor(resultLevel) });
+  } else if(levelType == LEVEL_REACH_MAX_SCORE) {
+    val = window.i18next.t("levels.bestScore", { count: resultLevel });
+  } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
+    val = window.i18next.t("levels.bestScore", { count: resultLevel });
+  }
+
+  document.getElementById("resultLevels").innerHTML = val;
+  return true;
+}
+
 function playLevel(level, player, type) {
   var levels = getLevels(player, type);
 
@@ -843,14 +878,27 @@ function playLevel(level, player, type) {
       var playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed);
       games.push(playerGame);
     } else {
-      var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250);
+      if(numberIA + 1 <= 2) {
+        var width = null;
+        var height = null;
+      } else {
+        var width = 350;
+        var height = 250;
+      }
+
+      if(numberIA <= 0) {
+        var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height);
+      } else {
+        var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, width, height);
+      }
+
       games.push(playerGame);
 
       for(var i = 0; i < numberIA; i++) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-        var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+        var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, false);
 
-        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250));
+        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, width, height));
       }
     }
 
@@ -859,21 +907,23 @@ function playLevel(level, player, type) {
     document.getElementById("levelContainer").style.display = "none";
     document.getElementById("gameContainer").style.display = "block";
 
+    document.getElementById("resultLevels").innerHTML = "";
     document.getElementById("gameStatus").innerHTML = "";
     document.getElementById("gameOrder").innerHTML = "";
     document.getElementById("gameStatusError").innerHTML = "";
 
     document.getElementById("titleGame").innerHTML = window.i18next.t("levels.level") + " " + level;
+    printResultLevel(level, player, levelType, type);
 
     var group = new GameGroup(games);
     group.setDisplayFPS(showDebugInfo ? true : false);
     group.start();
 
-    var timeout;
+    var timeoutLevelTime;
 
     document.getElementById("backToMenuGame").onclick = function() {
       if(confirm(window.i18next.t("game.confirmQuit"))) {
-        clearTimeout(timeout);
+        clearTimeout(timeoutLevelTime);
         group.killAll();
         displayLevelList(player);
         group = null;
@@ -887,6 +937,7 @@ function playLevel(level, player, type) {
         playerGame.onScoreIncreased(function() {
           if(playerSnake.score >= levelTypeValue) {
             setLevelSave([true, playerSnake.score], level, player, type);
+            printResultLevel(level, player, levelType, type);
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
           }
         });
@@ -897,27 +948,29 @@ function playLevel(level, player, type) {
           }
         });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
-        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], time: levelTypeValue[1] });
-        var start = new Date().getTime();
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
+        var start;
 
         playerGame.onStart(function() {
-          clearTimeout(timeout);
-          timeOut = setTimeout(function() {
+          clearTimeout(timeoutLevelTime);
+          start = new Date().getTime();
+          timeoutLevelTime = setTimeout(function() {
             group.stopAll(false);
             document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
           }, levelTypeValue[1] * 1000 - 1);
         });
 
         playerGame.onStop(function() {
-          clearTimeout(timeout);
+          clearTimeout(timeoutLevelTime);
         });
 
         playerGame.onScoreIncreased(function() {
           if(playerSnake.score >= levelTypeValue[0]) {
-            clearTimeout(timeout);
+            clearTimeout(timeoutLevelTime);
             var stop = new Date().getTime();
             group.stopAll(true);
             setLevelSave([true, (stop - start) / 1000], level, player, type);
+            printResultLevel(level, player, levelType, type);
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
           }
         });
@@ -927,6 +980,7 @@ function playLevel(level, player, type) {
         playerGame.onStop(function() {
           if(playerGame.scoreMax) {
             setLevelSave([true, playerSnake.score], level, player, type);
+            printResultLevel(level, player, levelType, type);
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
           } else {
             document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
@@ -942,6 +996,7 @@ function playLevel(level, player, type) {
           for(var i = 0; i < winners.index.length; i++) {
             if(winners.index == 0) {
               setLevelSave([true, playerSnake.score], level, player, type);
+              printResultLevel(level, player, levelType, type);
               document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
               won = true;
             }
@@ -958,13 +1013,14 @@ function playLevel(level, player, type) {
 
     group.onExit(function() {
       if(selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER || selectedMode == AI_VS_AI || (selectedMode == PLAYER_VS_AI && sameGrid) || (selectedMode == BATTLE_ROYALE && sameGrid)) {
-        clearTimeout(timeout);
+        clearTimeout(timeoutLevelTime);
         group.killAll();
         displayLevelList(player);
       }
     });
 
     group.onReset(function() {
+      document.getElementById("resultLevels").innerHTML = "";
       document.getElementById("gameStatus").innerHTML = "";
       document.getElementById("gameOrder").innerHTML = "";
       document.getElementById("gameStatusError").innerHTML = "";

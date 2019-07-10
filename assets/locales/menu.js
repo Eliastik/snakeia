@@ -134,9 +134,13 @@ i18next.addResourceBundle("fr", "translation", {
     "goalNotAchieved": "Objectif raté ! Essayez à nouveau.",
     "level": "Niveau",
     "reachScore": "Atteignez au moins le score de {{value}} pour passer ce niveau !",
-    "reachScoreTime": "Atteignez le score de {{value}} en moins de {{time}} secondes !",
+    "reachScoreTime": "Atteignez le score de {{value}} en moins de {{count}} seconde !",
+    "reachScoreTime_plural": "Atteignez le score de {{value}} en moins de {{count}} secondes !",
     "reachMaxScore": "Atteignez le score maximal pour cette grille pour passer ce niveau !",
-    "multiBestScore": "Terminez cette partie en obtenant un meilleur score que le ou les adversaires pour passer ce niveau !"
+    "multiBestScore": "Terminez cette partie en obtenant un meilleur score que le ou les adversaires pour passer ce niveau !",
+    "bestScore": "Meilleur score : {{count}}",
+    "bestTime": "Meilleur temps : {{count}} seconde",
+    "bestTime_plural": "Meilleur temps : {{count}} secondes"
   }
 }, true, false);
 
@@ -258,8 +262,12 @@ i18next.addResourceBundle("en", "translation", {
     "goalNotAchieved": "Objective missed! Try again.",
     "level": "Level",
     "reachScore": "Reach at least the score of {{value}} to pass this level!",
-    "reachScoreTime": "Reach the score of {{value}} in less than {{time}} seconds!",
+    "reachScoreTime": "Reach the score of {{value}} in less than {{count}} second!",
+    "reachScoreTime_plural": "Reach the score of {{value}} in less than {{count}} seconds!",
     "reachMaxScore": "Reach the maximum score for this grid to pass this level!",
-    "multiBestScore": "Finish this game by getting a better score than the opponent(s) to pass this level!"
+    "multiBestScore": "Finish this game by getting a better score than the opponent(s) to pass this level!",
+    "bestScore": "Best score: {{score}}",
+    "bestTime": "Best time: {{count}} second",
+    "bestTime_plural": "Best time: {{count}} seconds"
   }
 }, true, false);
