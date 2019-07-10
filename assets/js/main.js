@@ -58,6 +58,7 @@ document.getElementById("appVersion").innerHTML = APP_VERSION;
 document.getElementById("dateTxt").innerHTML = DATE_VERSION;
 document.getElementById("appUpdateDate").innerHTML = DATE_VERSION;
 
+// Libs
 String.prototype.strcmp = function(str) {
   return ((this == str) ? 0 : ((this > str) ? 1 : -1));
 };
@@ -687,10 +688,16 @@ function getTitleSave(player, type) {
 
 function getSave(player, type) {
   if(localStorage.getItem(getTitleSave(player, type)) == null) {
-    initSaveLevel(player, type);
+    initSaveLevel(player, type, false);
   }
 
-  return JSON.parse(localStorage.getItem(getTitleSave(player, type)));
+  try {
+    var res = JSON.parse(localStorage.getItem(getTitleSave(player, type)));
+    return res;
+  } catch(e) {
+    initSaveLevel(player, type, true);
+    return getSave(player, type);
+  }
 }
 
 function getLevelSave(level, player, type) {
@@ -713,12 +720,12 @@ function setLevelSave(value, level, player, type) {
     return false;
 }
 
-function initSaveLevel(player, type) {
+function initSaveLevel(player, type, force) {
   if(typeof(Storage) !== "undefined") {
     var save = getTitleSave(player, type);
     var item = localStorage.getItem(save);
 
-    if(item == null) {
+    if(item == null || force) {
       localStorage.setItem(save, JSON.stringify({ version: APP_VERSION }));
       setLevelSave([false, 0], 1, player, type);
     }
@@ -738,9 +745,17 @@ function getLevels(player, type) {
     }
   } else if(type == DOWNLOADED_LEVEL) {
     if(player == PLAYER_HUMAN) {
-      return localStorage.getItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO);
+      try {
+        return JSON.parse(localStorage.getItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO));
+      } catch(e) {
+        return null;
+      }
     } else if(player == PLAYER_AI) {
-      return localStorage.getItem(SOLO_AI_DOWNLOAD_LEVELS_TO);
+      try {
+        return JSON.parse(localStorage.getItem(SOLO_AI_DOWNLOAD_LEVELS_TO));
+      } catch(e) {
+        return null;
+      }
     }
   }
 
@@ -976,18 +991,47 @@ function downloadLevels(player, button) {
   var script = document.createElement("script");
   script.src = url;
 
-  document.getElementsByTagName('head')[0].appendChild(script);
+  var canceled = false;
+
+  window["callbackDownloadLevels"] = function(player, data) {
+    if(!canceled) {
+      if(player == PLAYER_HUMAN) {
+        localStorage.setItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
+      } else if(player == PLAYER_AI) {
+        localStorage.setItem(SOLO_AI_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
+      }
+
+      displayLevelList(player);
+    }
+
+    document.getElementById("levelDownloading").innerHTML = "";
+    document.getElementById("btnDeblockDiv").innerHTML = "";
+  };
+
   button.disabled = true;
+  var buttonDeblock = document.createElement("button");
+  buttonDeblock.classList = "btn btn-lg btn-warning";
+  buttonDeblock.innerHTML = window.i18next.t("levels.buttonDeblock");
+
+  document.getElementById("levelDownloading").innerHTML = '<strong>' + window.i18next.t("levels.downloading") + '</strong>';
+  document.getElementById("btnDeblockDiv").innerHTML = "";
+
+  document.getElementsByTagName('head')[0].appendChild(script);
+
+  buttonDeblock.onclick = function() {
+    canceled = true;
+    deblockButton(button, script, "callbackDownloadLevels");
+  };
+
+  document.getElementById("btnDeblockDiv").appendChild(buttonDeblock);
 }
 
-function callbackDownloadLevels(player, data) {
-  if(player == PLAYER_HUMAN) {
-    localStorage.setItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
-  } else if(player == PLAYER_AI) {
-    localStorage.setItem(SOLO_AI_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
-  }
-
-  getListLevel(player, DOWNLOADED_LEVEL);
+function deblockButton(button, script, callbackName) {
+  button.disabled = false;
+  script.src = null;
+  document.getElementById("levelDownloading").innerHTML = "";
+  document.getElementById("btnDeblockDiv").innerHTML = "";
+  document.getElementsByTagName('head')[0].removeChild(script);
 }
 
 function getListLevel(player, type) {

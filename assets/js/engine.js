@@ -1157,7 +1157,9 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
   this.onContinue = function(callback) {
     this.reactor.addEventListener("onContinue", callback);
-  };this.stop = function() {
+  };
+
+  this.stop = function() {
     this.paused = true;
     this.gameOver = true;
     this.clearIntervalCountFPS();
@@ -1271,7 +1273,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
             if(nbOver >= self.snakes.length) {
               self.stop();
-              
+
               if(self.snakes.length > 1) {
                 self.gameFinished = true;
               }
@@ -1311,27 +1313,31 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       var self = this;
 
       document.onfullscreenchange = function(event) {
-        if(document.fullscreenElement == self.canvas) {
-          self.canvas.width = window.innerWidth;
-          self.canvas.height = window.innerHeight;
+        if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
+          if(document.fullscreenElement == self.canvas) {
+            self.canvas.width = window.innerWidth;
+            self.canvas.height = window.innerHeight;
 
-          window.addEventListener("resize", function() {
-            if(document.fullscreenElement == self.canvas) {
-              self.canvas.width = window.innerWidth;
-              self.canvas.height = window.innerHeight;
+            window.addEventListener("resize", function() {
+              if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
+                if(document.fullscreenElement == self.canvas) {
+                  self.canvas.width = window.innerWidth;
+                  self.canvas.height = window.innerHeight;
 
-              self.updateUI();
+                  self.updateUI();
+                }
+              }
+            }, true);
+
+            if(screen.orientation.lock != undefined) {
+              screen.orientation.lock("landscape");
             }
-          }, true);
-
-          if(screen.orientation.lock != undefined) {
-            screen.orientation.lock("landscape");
+          } else {
+            self.autoResizeCanvas();
           }
-        } else {
-          self.autoResizeCanvas();
-        }
 
-        self.updateUI();
+          self.updateUI();
+        }
       };
     }
   };
