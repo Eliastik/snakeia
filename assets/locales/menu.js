@@ -117,9 +117,15 @@ i18next.addResourceBundle("fr", "translation", {
     "winScoreBattleRoyale": "ont gagné avec un score de {{score}} !"
   },
   "levels": {
+    "default": "Niveaux par défaut",
+    "downloaded": "Niveaux téléchargés",
     "titlePlayer": "Niveaux (joueur solo)",
     "titleAI": "Niveaux (IA solo)",
     "emptyList": "Aucun niveau trouvé…",
+    "download": "Télécharger des niveaux",
+    "downloadLink": "Les niveaux seront téléchargés depuis {{url}}",
+    "editDownloadURL": "Modifier l'URL de téléchargement",
+    "editDownloadURLPrompt": "Entrez l'URL de téléchargement des niveaux.\n* Variables disponibles :\n{player} - type de joueur (humain, IA)\n{appVersion} - version de l'application.\n\nLa modification de ce paramètre peut faire planter le jeu ou vous exposer à des problèmes de sécurité. Ne la modifiez que si vous savez ce que vous faites. Ce paramètre n'est pas persistant et sera effacé si vous rechargez l'application.",
     "disabledLevel": "Niveau bloqué. Terminez les niveaux précédents pour le débloquer.",
     "notCompatible": "Ce niveau n'est pas compatible avec cette version du jeu. Mettez-le à jour.",
     "goalAchieved": "Objectif atteint ! Vous pouvez passer au prochain niveau.",
@@ -233,9 +239,15 @@ i18next.addResourceBundle("en", "translation", {
     "winScoreBattleRoyale": "won with a score of {{score}}!"
   },
   "levels": {
+    "default": "Default levels",
+    "downloaded": "Downloaded levels",
     "titlePlayer": "Levels (solo player)",
     "titleAI": "Levels (solo AI)",
     "emptyList": "No level found…",
+    "download": "Download levels",
+    "downloadLink": "The levels will be downloaded from {{url}}",
+    "editDownloadURL": "Edit the download URL",
+    "editDownloadURLPrompt": "Enter the download URL of the levels.\n* Available variables:\n{player} - player type (human, AI)\n{appVersion} - version of the application.\n\nChanging this setting may cause the game to crash or expose you to security issues. Only change it if you know what you are doing. This setting is not persistent and will be erased if you reload the application.",
     "disabledLevel": "Level locked. Complete the previous levels to unlock it.",
     "notCompatible": "This level is not compatible with this version of the game. Update it.",
     "goalAchieved": "Goal achieved! You can move to the next level.",

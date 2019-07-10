@@ -46,7 +46,7 @@ SOLO_PLAYER_SAVE = "snakeia_solo_player_";
 DEFAULT_LEVELS_SOLO_AI = DEFAULT_LEVELS_SOLO_PLAYER;
 SOLO_AI_SAVE = "snakeia_solo_ai_";
 // Downloadable levels :
-DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLevels.php?player={{player}}&ver={{appVersion}}";
+DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLevels.php?player={player}&ver={appVersion}";
 SOLO_PLAYER_DOWNLOAD_LEVELS_TO = "snakeia_solo_player_downloadedLevels";
 SOLO_AI_DOWNLOAD_LEVELS_TO = "snakeia_solo_ai_downloadedLevels";
 
@@ -207,9 +207,15 @@ function displayLevelList(player) {
   if(player == PLAYER_HUMAN) {
     document.getElementById("titleLevelList").innerHTML = window.i18next.t("levels.titlePlayer");
     document.getElementById("levelListDefault").innerHTML = getListLevel(PLAYER_HUMAN, DEFAULT_LEVEL);
+    document.getElementById("levelListDownloadAI").style.display = "none";
+    document.getElementById("levelListDownloadPlayer").style.display = "block";
+    document.getElementById("levelListDownloadPlayer").innerHTML = getListLevel(PLAYER_HUMAN, DOWNLOADED_LEVEL);
   } else if(player == PLAYER_AI) {
     document.getElementById("titleLevelList").innerHTML = window.i18next.t("levels.titleAI");
     document.getElementById("levelListDefault").innerHTML = getListLevel(PLAYER_AI, DEFAULT_LEVEL);
+    document.getElementById("levelListDownloadAI").style.display = "block";
+    document.getElementById("levelListDownloadPlayer").style.display = "none";
+    document.getElementById("levelListDownloadAI").innerHTML = getListLevel(PLAYER_AI, DOWNLOADED_LEVEL);
   }
 }
 
@@ -730,6 +736,12 @@ function getLevels(player, type) {
     } else if(player == PLAYER_AI) {
       return DEFAULT_LEVELS_SOLO_AI;
     }
+  } else if(type == DOWNLOADED_LEVEL) {
+    if(player == PLAYER_HUMAN) {
+      return localStorage.getItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO);
+    } else if(player == PLAYER_AI) {
+      return localStorage.getItem(SOLO_AI_DOWNLOAD_LEVELS_TO);
+    }
   }
 
   return null;
@@ -948,14 +960,49 @@ function playLevel(level, player, type) {
   }
 }
 
-function getListLevel(player, type) {
-  var levels = getLevels(player, type);
+function editDownloadURL() {
+  var value = window.prompt(window.i18next.t("levels.editDownloadURLPrompt"), DOWNLOAD_DEFAULT_URI);
 
-  if(levels == null) {
-    return false;
+  if(value != null) {
+    DOWNLOAD_DEFAULT_URI = value;
+  }
+}
+
+function downloadLevels(player, button) {
+  var url = DOWNLOAD_DEFAULT_URI;
+  url = url.replace("{player}", player);
+  url = url.replace("{appVersion}", APP_VERSION);
+
+  var script = document.createElement("script");
+  script.src = url;
+
+  document.getElementsByTagName('head')[0].appendChild(script);
+  button.disabled = true;
+}
+
+function callbackDownloadLevels(player, data) {
+  if(player == PLAYER_HUMAN) {
+    localStorage.setItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
+  } else if(player == PLAYER_AI) {
+    localStorage.setItem(SOLO_AI_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
   }
 
-  var res = '<div class="row mb-2 mx-auto">';
+  getListLevel(player, DOWNLOADED_LEVEL);
+}
+
+function getListLevel(player, type) {
+  var levels = getLevels(player, type);
+  var res = "";
+
+  if(type == DOWNLOADED_LEVEL) {
+    res += '<div class="row mb-3"><div class="col text-center"><button class="btn btn-lg btn-warning" onclick="downloadLevels(' + player + ', this);"><span class="fui-plus-circle"></span>&nbsp; ' + window.i18next.t("levels.download") + '</button><br /><a href="#null" onclick="editDownloadURL();" class="small"><span class="fui-new"></span>&nbsp; ' + window.i18next.t("levels.editDownloadURL") + '</a></div></div>';
+  }
+
+  if(levels == null) {
+    return res + "<strong>" + window.i18next.t("levels.emptyList") + "</strong>";
+  }
+
+  res += '<div class="row mb-2 mx-auto">';
   var index = 1;
   var empty = true;
 
