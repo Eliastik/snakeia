@@ -38,7 +38,7 @@ DEFAULT_LEVELS_SOLO_PLAYER = {
   2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
   3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 15, version: APP_VERSION },
   4: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 60], version: APP_VERSION },
-  5: { settings: [10, 10, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
+  5: { settings: [10, 10, true, false, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
   6: { settings: [15, 15, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
   7: { settings: [15, 15, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 45], version: APP_VERSION },
   8: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 35, version: APP_VERSION },
@@ -51,9 +51,9 @@ DEFAULT_LEVELS_SOLO_PLAYER = {
   15: { settings: [15, 15, false, false, true, null, false, null, 1], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: APP_VERSION },
   16: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 75, version: APP_VERSION },
   17: { settings: [15, 15, true, false, true, 15, false, null, 2], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: APP_VERSION },
-  18: { settings: [20, 20, false, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 40, version: APP_VERSION },
-  19: { settings: [5, 5, true, false, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
-  20: { settings: [5, 5, false, true, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
+  18: { settings: [5, 5, true, false, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
+  19: { settings: [5, 5, false, true, true, 10, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 10, version: APP_VERSION },
+  20: { settings: [20, 20, false, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: APP_VERSION }
 };
 SOLO_PLAYER_SAVE = "snakeia_solo_player_";
 DEFAULT_LEVELS_SOLO_AI = DEFAULT_LEVELS_SOLO_PLAYER;
@@ -299,6 +299,8 @@ function displayLevelList(player) {
   document.getElementById("levelContainer").style.display = "block";
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("menu").style.display = "none";
+  document.getElementById("levelDownloading").innerHTML = "";
+  document.getElementById("btnDeblockDiv").innerHTML = "";
 
   if(player == PLAYER_HUMAN) {
     document.getElementById("titleLevelList").innerHTML = window.i18next.t("levels.titlePlayer");
@@ -806,8 +808,21 @@ function getLevelSave(level, player, type) {
 function setLevelSave(value, level, player, type) {
     var save = getTitleSave(player, type);
     var item = getSave(player, type);
+    var levels = getLevels(player, type);
 
     if(item != null) {
+      if(Array.isArray(value) && value.length >= 2 && Array.isArray(item[level]) && item[level].length >= 2 && item[level][0] == true) {
+        if(levels[level]["type"] != LEVEL_REACH_SCORE_ON_TIME) {
+          if(value[1] < item[level][1]) {
+            value[1] = item[level][1];
+          }
+        } else {
+          if(value[1] > item[level][1]) {
+            value[1] = item[level][1];
+          }
+        }
+      }
+
       item[level] = value;
       storageGlobal.setItem(save, JSON.stringify(item));
 
@@ -903,7 +918,7 @@ function printResultLevel(level, player, levelType, type) {
   if(levelType == LEVEL_REACH_SCORE) {
     val = window.i18next.t("levels.bestScore", { count: resultLevel });
   } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
-    val = window.i18next.t("levels.bestTime", { count: Math.floor(resultLevel) });
+    val = window.i18next.t("levels.bestTime", { count: Math.round(resultLevel) });
   } else if(levelType == LEVEL_REACH_MAX_SCORE) {
     val = window.i18next.t("levels.bestScore", { count: resultLevel });
   } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
@@ -976,12 +991,7 @@ function playLevel(level, player, type) {
         var height = 250;
       }
 
-      if(numberIA <= 0) {
-        var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height);
-      } else {
-        var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, width, height);
-      }
-
+      var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height);
       games.push(playerGame);
 
       for(var i = 0; i < numberIA; i++) {
@@ -1046,7 +1056,7 @@ function playLevel(level, player, type) {
           clearTimeout(timeoutLevelTime);
           start = new Date().getTime();
           timeoutLevelTime = setTimeout(function() {
-            group.stopAll(false);
+            group.stopAll(true);
             document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
           }, levelTypeValue[1] * 1000 - 1);
         });
@@ -1078,7 +1088,7 @@ function playLevel(level, player, type) {
           }
         });
       } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
-        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.multiBestScore");
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.multiBestScore", { count: numberIA });
 
         group.onStop(function() {
           var winners = group.getWinners();
@@ -1193,7 +1203,6 @@ function getListLevel(player, type) {
     return res + "<strong>" + window.i18next.t("levels.emptyList") + "</strong>";
   }
 
-  res += '<div class="row mb-2 mx-auto">';
   var index = 1;
   var empty = true;
 
@@ -1205,6 +1214,10 @@ function getListLevel(player, type) {
         var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled title="' + window.i18next.t("levels.notCompatible") + '">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
       } else {
         var button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+      }
+
+      if(index == 1) {
+        res += '<div class="row mb-2 mx-auto">';
       }
 
       if(index % 2 == 0) {
@@ -1220,7 +1233,7 @@ function getListLevel(player, type) {
   }
 
   if(empty) {
-    return "<strong>" + window.i18next.t("levels.emptyList") + "</strong>";
+    return res + "<strong>" + window.i18next.t("levels.emptyList") + "</strong>";
   }
 
   if(index % 2 == 0) {

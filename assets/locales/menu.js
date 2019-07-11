@@ -137,7 +137,8 @@ i18next.addResourceBundle("fr", "translation", {
     "reachScoreTime": "Atteignez le score de {{value}} en moins de {{count}} seconde !",
     "reachScoreTime_plural": "Atteignez le score de {{value}} en moins de {{count}} secondes !",
     "reachMaxScore": "Atteignez le score maximal pour cette grille pour passer ce niveau !",
-    "multiBestScore": "Terminez cette partie en obtenant un meilleur score que le ou les adversaires pour passer ce niveau !",
+    "multiBestScore": "Terminez cette partie en obtenant un meilleur score que l'adversaire pour passer ce niveau !",
+    "multiBestScore_plural": "Terminez cette partie en obtenant un meilleur score que les adversaires pour passer ce niveau !",
     "bestScore": "Meilleur score : {{count}}",
     "bestTime": "Meilleur temps : {{count}} seconde",
     "bestTime_plural": "Meilleur temps : {{count}} secondes"
@@ -265,7 +266,8 @@ i18next.addResourceBundle("en", "translation", {
     "reachScoreTime": "Reach the score of {{value}} in less than {{count}} second!",
     "reachScoreTime_plural": "Reach the score of {{value}} in less than {{count}} seconds!",
     "reachMaxScore": "Reach the maximum score for this grid to pass this level!",
-    "multiBestScore": "Finish this game by getting a better score than the opponent(s) to pass this level!",
+    "multiBestScore": "Finish this game by getting a better score than the opponent to pass this level!",
+    "multiBestScore_plural": "Finish this game by getting a better score than the opponents to pass this level!",
     "bestScore": "Best score: {{count}}",
     "bestTime": "Best time: {{count}} second",
     "bestTime_plural": "Best time: {{count}} seconds"
