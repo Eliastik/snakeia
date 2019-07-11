@@ -76,6 +76,88 @@ String.prototype.strcmp = function(str) {
   return ((this == str) ? 0 : ((this > str) ? 1 : -1));
 };
 
+if(!String.prototype.trim) {
+  String.prototype.trim = function () {
+    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+  };
+}
+
+// https://github.com/MichalZalecki/storage-factory
+function storageFactory(storage) {
+  var inMemoryStorage = {};
+
+  try {
+    var storage = storage || window.localStorage;
+  } catch(e) {
+    var storage = null;
+  }
+
+  function isSupported() {
+    try {
+      var testKey = "__some_random_key_you_are_not_going_to_use__";
+      storage.setItem(testKey, testKey);
+      storage.removeItem(testKey);
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  this.clear = function() {
+    if(isSupported()) {
+      storage.clear();
+    } else {
+      inMemoryStorage = {};
+    }
+  }
+
+  this.getItem = function(name) {
+    if(isSupported()) {
+      return storage.getItem(name);
+    }
+
+    if(inMemoryStorage.hasOwnProperty(name)) {
+      return inMemoryStorage[name];
+    }
+
+    return null;
+  }
+
+  this.key = function(index) {
+    if(isSupported()) {
+      return storage.key(index);
+    } else {
+      return Object.keys(inMemoryStorage)[index] || null;
+    }
+  }
+
+  this.removeItem = function(name) {
+    if(isSupported()) {
+      storage.removeItem(name);
+    } else {
+      delete inMemoryStorage[name];
+    }
+  }
+
+  this.setItem = function(name, value) {
+    if(isSupported()) {
+      storage.setItem(name, value);
+    } else {
+      inMemoryStorage[name] = String(value);
+    }
+  }
+
+  this.length = function() {
+    if(isSupported()) {
+      return storage.length;
+    } else {
+      return Object.keys(inMemoryStorage).length;
+    }
+  }
+}
+
+var storageGlobal = new storageFactory();
+
 function enableDebugMode() {
   showDebugInfo = true;
   console.log(window.i18next.t("debugModeEnabled"));
@@ -702,12 +784,12 @@ function getTitleSave(player, type) {
 }
 
 function getSave(player, type) {
-  if(localStorage.getItem(getTitleSave(player, type)) == null) {
+  if(storageGlobal.getItem(getTitleSave(player, type)) == null) {
     initSaveLevel(player, type, false);
   }
 
   try {
-    var res = JSON.parse(localStorage.getItem(getTitleSave(player, type)));
+    var res = JSON.parse(storageGlobal.getItem(getTitleSave(player, type)));
     return res;
   } catch(e) {
     initSaveLevel(player, type, true);
@@ -727,7 +809,7 @@ function setLevelSave(value, level, player, type) {
 
     if(item != null) {
       item[level] = value;
-      localStorage.setItem(save, JSON.stringify(item));
+      storageGlobal.setItem(save, JSON.stringify(item));
 
       return true;
     }
@@ -738,10 +820,10 @@ function setLevelSave(value, level, player, type) {
 function initSaveLevel(player, type, force) {
   if(typeof(Storage) !== "undefined") {
     var save = getTitleSave(player, type);
-    var item = localStorage.getItem(save);
+    var item = storageGlobal.getItem(save);
 
     if(item == null || force) {
-      localStorage.setItem(save, JSON.stringify({ version: APP_VERSION }));
+      storageGlobal.setItem(save, JSON.stringify({ version: APP_VERSION }));
       setLevelSave([false, 0], 1, player, type);
     }
 
@@ -761,13 +843,13 @@ function getLevels(player, type) {
   } else if(type == DOWNLOADED_LEVEL) {
     if(player == PLAYER_HUMAN) {
       try {
-        return JSON.parse(localStorage.getItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO));
+        return JSON.parse(storageGlobal.getItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO));
       } catch(e) {
         return null;
       }
     } else if(player == PLAYER_AI) {
       try {
-        return JSON.parse(localStorage.getItem(SOLO_AI_DOWNLOAD_LEVELS_TO));
+        return JSON.parse(storageGlobal.getItem(SOLO_AI_DOWNLOAD_LEVELS_TO));
       } catch(e) {
         return null;
       }
@@ -1061,9 +1143,9 @@ function downloadLevels(player, button) {
   window["callbackDownloadLevels"] = function(player, data) {
     if(!canceled) {
       if(player == PLAYER_HUMAN) {
-        localStorage.setItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
+        storageGlobal.setItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
       } else if(player == PLAYER_AI) {
-        localStorage.setItem(SOLO_AI_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
+        storageGlobal.setItem(SOLO_AI_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
       }
 
       displayLevelList(player);
