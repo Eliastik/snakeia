@@ -22,7 +22,7 @@ SOLO_PLAYER = "SOLO_PLAYER";
 PLAYER_VS_AI = "PLAYER_VS_AI";
 AI_VS_AI = "AI_VS_AI";
 BATTLE_ROYALE = "BATTLE_ROYALE";
-// Others settings :
+// Updater :
 UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update.php";
 // Levels types :
 LEVEL_REACH_SCORE = "LEVEL_REACH_SCORE";
@@ -36,14 +36,22 @@ DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
 DEFAULT_LEVELS_SOLO_PLAYER = {
   1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
   2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
-  3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 10, version: APP_VERSION },
+  3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 15, version: APP_VERSION },
   4: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 60], version: APP_VERSION },
-  5: { settings: [10, 10, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
-  6: { settings: [10, 10, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
-  7: { settings: [15, 15, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
-  8: { settings: [15, 15, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 45], version: APP_VERSION },
-  9: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 35, version: APP_VERSION },
-  10: { settings: [15, 15, false, false, false, null, false, null, 1], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: APP_VERSION },
+  5: { settings: [10, 10, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
+  6: { settings: [15, 15, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
+  7: { settings: [15, 15, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 45], version: APP_VERSION },
+  8: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 35, version: APP_VERSION },
+  9: { settings: [15, 15, false, false, false, null, false, null, 1], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: APP_VERSION },
+  10: { settings: [10, 10, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [10, 15], version: APP_VERSION },
+  11: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: APP_VERSION },
+  12: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: APP_VERSION },
+  13: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: APP_VERSION },
+  14: { settings: [20, 20, true, false, true, 5, true, null, 0], type: LEVEL_REACH_SCORE, typeValue: 30, version: APP_VERSION },
+  15: { settings: [15, 15, false, false, true, null, false, null, 1], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: APP_VERSION },
+  16: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 75, version: APP_VERSION },
+  17: { settings: [15, 15, true, false, true, 15, false, null, 2], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: APP_VERSION },
+  18: { settings: [20, 20, false, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 40, version: APP_VERSION },
   19: { settings: [5, 5, true, false, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
   20: { settings: [5, 5, false, true, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
 };
@@ -73,7 +81,7 @@ function enableDebugMode() {
   console.log(window.i18next.t("debugModeEnabled"));
 }
 
-// Updates
+// Updater
 function checkUpdate() {
   var script = document.createElement("script");
   script.src = UPDATER_URI;
@@ -913,7 +921,6 @@ function playLevel(level, player, type) {
     document.getElementById("gameStatusError").innerHTML = "";
 
     document.getElementById("titleGame").innerHTML = window.i18next.t("levels.level") + " " + level;
-    printResultLevel(level, player, levelType, type);
 
     var group = new GameGroup(games);
     group.setDisplayFPS(showDebugInfo ? true : false);
@@ -931,6 +938,8 @@ function playLevel(level, player, type) {
     };
 
     function initGoal() {
+      printResultLevel(level, player, levelType, type);
+
       if(levelType == LEVEL_REACH_SCORE) {
         document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachScore", { value: levelTypeValue });
 
