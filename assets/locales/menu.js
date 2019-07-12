@@ -141,7 +141,9 @@ i18next.addResourceBundle("fr", "translation", {
     "multiBestScore_plural": "Terminez cette partie en obtenant un meilleur score que les adversaires pour passer ce niveau !",
     "bestScore": "Meilleur score : {{count}}",
     "bestTime": "Meilleur temps : {{count}} seconde",
-    "bestTime_plural": "Meilleur temps : {{count}} secondes"
+    "bestTime_plural": "Meilleur temps : {{count}} secondes",
+    "timerRemaining": "Il reste {{count}} seconde",
+    "timerRemaining_plural": "Il reste {{count}} secondes"
   }
 }, true, false);
 
@@ -260,7 +262,7 @@ i18next.addResourceBundle("en", "translation", {
     "disabledLevel": "Level locked. Complete the previous levels to unlock it.",
     "notCompatible": "This level is not compatible with this version of the game. Update it.",
     "goalAchieved": "Goal achieved! You can move to the next level.",
-    "goalNotAchieved": "Objective missed! Try again.",
+    "goalNotAchieved": "Goal missed! Try again.",
     "level": "Level",
     "reachScore": "Reach at least the score of {{value}} to pass this level!",
     "reachScoreTime": "Reach the score of {{value}} in less than {{count}} second!",
@@ -270,6 +272,8 @@ i18next.addResourceBundle("en", "translation", {
     "multiBestScore_plural": "Finish this game by getting a better score than the opponents to pass this level!",
     "bestScore": "Best score: {{count}}",
     "bestTime": "Best time: {{count}} second",
-    "bestTime_plural": "Best time: {{count}} seconds"
+    "bestTime_plural": "Best time: {{count}} seconds",
+    "timerRemaining": "{{count}} second left",
+    "timerRemaining_plural": "{{count}} seconds left"
   }
 }, true, false);

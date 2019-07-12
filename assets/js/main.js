@@ -158,6 +158,46 @@ function storageFactory(storage) {
 
 var storageGlobal = new storageFactory();
 
+function Timer(callback, delay, timerInterval) {
+  var timerId, start, remaining = delay;
+
+  this.pause = function() {
+    window.clearTimeout(timerId);
+    timerInterval != null && timerInterval.stop != null && timerInterval.stop();
+    remaining -= Date.now() - start;
+  };
+
+  this.resume = function() {
+    start = Date.now();
+    window.clearTimeout(timerId);
+    timerInterval != null && timerInterval.stop != null && timerInterval.stop();
+    timerId = window.setTimeout(callback, remaining);
+    timerInterval != null && timerInterval.start != null && timerInterval.start();
+  };
+
+  this.reset = function() {
+    window.clearTimeout(timerId);
+    timerInterval != null && timerInterval.stop != null && timerInterval.stop();
+    remaining = delay;
+  };
+
+  this.getTime = function() {
+    return remaining - (Date.now() - start);
+  };
+}
+
+function TimerInterval(callback) {
+  this.interval;
+
+  this.start = function() {
+    this.interval = setInterval(callback, 1000);
+  };
+
+  this.stop = function() {
+    clearInterval(this.interval);
+  };
+}
+
 function enableDebugMode() {
   showDebugInfo = true;
   console.log(window.i18next.t("debugModeEnabled"));
@@ -1018,11 +1058,11 @@ function playLevel(level, player, type) {
     group.setDisplayFPS(showDebugInfo ? true : false);
     group.start();
 
-    var timeoutLevelTime;
+    var levelTimer = new Timer(null, 0);
 
     document.getElementById("backToMenuGame").onclick = function() {
       if(confirm(window.i18next.t("game.confirmQuit"))) {
-        clearTimeout(timeoutLevelTime);
+        levelTimer.pause();
         group.killAll();
         displayLevelList(player);
         group = null;
@@ -1030,11 +1070,7 @@ function playLevel(level, player, type) {
     };
 
     function initGoal() {
-      printResultLevel(level, player, levelType, type);
-
       if(levelType == LEVEL_REACH_SCORE) {
-        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachScore", { value: levelTypeValue });
-
         playerGame.onScoreIncreased(function() {
           if(playerSnake.score >= levelTypeValue) {
             setLevelSave([true, playerSnake.score], level, player, type);
@@ -1049,35 +1085,41 @@ function playLevel(level, player, type) {
           }
         });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
-        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
-        var start;
+        levelTimer = new Timer(function() {
+          group.stopAll(true);
+          document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
+          document.getElementById("gameStatus").innerHTML = "";
+        }, levelTypeValue[1] * 1000 - 1, new TimerInterval(function() {
+          document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: Math.round(levelTimer.getTime() / 1000) });
+        }));
 
         playerGame.onStart(function() {
-          clearTimeout(timeoutLevelTime);
-          start = new Date().getTime();
-          timeoutLevelTime = setTimeout(function() {
-            group.stopAll(true);
-            document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
-          }, levelTypeValue[1] * 1000 - 1);
+          levelTimer.resume();
+        });
+
+        playerGame.onPause(function() {
+          levelTimer.pause();
+        });
+
+        playerGame.onReset(function() {
+          levelTimer.reset();
         });
 
         playerGame.onStop(function() {
-          clearTimeout(timeoutLevelTime);
+          levelTimer.pause();
         });
 
         playerGame.onScoreIncreased(function() {
           if(playerSnake.score >= levelTypeValue[0]) {
-            clearTimeout(timeoutLevelTime);
-            var stop = new Date().getTime();
+            var stop = (levelTypeValue[1] * 1000) - levelTimer.getTime();
+            levelTimer.reset();
             group.stopAll(true);
-            setLevelSave([true, (stop - start) / 1000], level, player, type);
+            setLevelSave([true, stop / 1000], level, player, type);
             printResultLevel(level, player, levelType, type);
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
           }
         });
       } else if(levelType == LEVEL_REACH_MAX_SCORE) {
-        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachMaxScore");
-
         playerGame.onStop(function() {
           if(playerGame.scoreMax) {
             setLevelSave([true, playerSnake.score], level, player, type);
@@ -1088,8 +1130,6 @@ function playLevel(level, player, type) {
           }
         });
       } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
-        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.multiBestScore", { count: numberIA });
-
         group.onStop(function() {
           var winners = group.getWinners();
           var won = false;
@@ -1110,11 +1150,27 @@ function playLevel(level, player, type) {
       }
     }
 
+    function displayInfosGoal() {
+      printResultLevel(level, player, levelType, type);
+
+      if(levelType == LEVEL_REACH_SCORE) {
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachScore", { value: levelTypeValue });
+      } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
+        document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: levelTypeValue[1] });
+      } else if(levelType == LEVEL_REACH_MAX_SCORE) {
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachMaxScore");
+      } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.multiBestScore", { count: numberIA });
+      }
+    }
+
     initGoal();
+    displayInfosGoal();
 
     group.onExit(function() {
       if(selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER || selectedMode == AI_VS_AI || (selectedMode == PLAYER_VS_AI && sameGrid) || (selectedMode == BATTLE_ROYALE && sameGrid)) {
-        clearTimeout(timeoutLevelTime);
+        levelTimer.pause();
         group.killAll();
         displayLevelList(player);
       }
@@ -1125,7 +1181,7 @@ function playLevel(level, player, type) {
       document.getElementById("gameStatus").innerHTML = "";
       document.getElementById("gameOrder").innerHTML = "";
       document.getElementById("gameStatusError").innerHTML = "";
-      initGoal();
+      displayInfosGoal();
     });
   } else {
     return false;
