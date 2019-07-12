@@ -113,7 +113,8 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ### À faire :
 
-* Améliorer l'IA pour l'empêcher de se bloquer (difficile, essais effectués) - niveau Ultra
+* Idée type de niveau : atteindre le score avant les adversaires
+* Améliorer l'IA pour l'empêcher de se bloquer (essais effectués) - niveau Ultra
 
 ### Fait :
 
