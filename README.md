@@ -1,9 +1,9 @@
 <img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/assets/images/logo/logo.png" width="300" alt="SnakeIA" />
-<img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/screenshot.png" width="640" alt="Screenshot" />
+<p><img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/screenshot.png" width="400" alt="Screenshot" /> <img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/screenshot2.png" width="400" alt="Screenshot" /></p>
 
 # English
 
-A Snake version with an artificial intelligence. This version has many game modes. You can play against the AI, or let it play alone. A Battle Royale mode is also available, this mode sees between 2 and 100 AI fight! Many settings are available to vary the games.
+A Snake version with an artificial intelligence. This version has many game modes. You can play against the AI, or let it play alone. A Battle Royale mode is also available, this mode sees between 2 and 100 AI fight! Many settings are available to vary the games. A Levels mode (for the player and the AI) is also available, it's a series of level with a particular goal to achieve (get a minimum score, get a score in time, …). Downloadable levels are available.
 
 Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) and object oriented.
 
@@ -12,7 +12,7 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 
 ## About this game
 
-* Version: 1.2
+* Version: 1.3
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -25,6 +25,14 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 * Uses the CSS framework [Bootstrap 4](https://getbootstrap.com/) and the theme [Flat UI](https://designmodo.github.io/Flat-UI/)
 
 ## Changelog
+
+* Version 1.3 (7/12/2019):
+  - Possibility for several players to play on the same grid! This mode supports a hundred players (a human player and a hundred AI) on the same grid! Players are differentiated according to their color. Their name and score are displayed above each one;
+  - Introduction of Levels game mode (for AI and player);
+  - Generation of a random color for each Snake at each new game;
+  - The menus are navigable with the keyboard, it's also possible to pause the game by pressing the Enter key;
+  - Bug fixes and adjustments (see commits on Github);
+  - Added a level of AI "Random" (random movements of the AI).
 
 * Version 1.2 (7/3/2019):
   - Migration to the Lowlight.Astar software library, which supports torus-shaped grids, which improves AI performance;
@@ -49,7 +57,7 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 
 # Français
 
-Une version du Snake dotée d'une intelligence artificielle. Cette version est dotée de nombreux modes de jeu. Vous pouvez notamment jouer contre l'IA, ou la laisser jouer seule. Un mode Battle Royale est également disponible, ce mode voit s'affronter entre 2 et 100 IA ! De nombreux paramétrages sont disponibles pour varier les parties.
+Une version du Snake dotée d'une intelligence artificielle. Cette version est dotée de nombreux modes de jeu. Vous pouvez notamment jouer contre l'IA, ou la laisser jouer seule. Un mode Battle Royale est également disponible, ce mode voit s'affronter entre 2 et 100 IA ! De nombreux paramétrages sont disponibles pour varier les parties. Un mode Niveaux (pour le joueur et l'IA) est également disponible, il s'agit d'un série de niveau dotés d'un objectif particulier à accomplir (obtenir un score minimal, obtenir un score en un certain temps, …). Des niveaux téléchargeables sont disponibles.
 
 Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScript) et en orienté objet.
 
@@ -58,7 +66,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ## À propos du jeu
 
-* Version du jeu : 1.2
+* Version du jeu : 1.3
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -71,6 +79,14 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 * Utilise le framework CSS [Bootstrap 4](https://getbootstrap.com/) et le thème [Flat UI](https://designmodo.github.io/Flat-UI/)
 
 ## Journal des changements
+
+* Version 1.3 (12/07/2019) :
+  - Possibilité pour plusieurs joueurs de jouer sur la même grille de jeu ! Ce mode supporte une centaine de joueurs (un joueur humain et une centaine d'IA) sur la même grille ! Les joueurs sont différentiés en fonction de leur couleur. Leur nom ainsi que leur score est affiché au dessus de chacun d'eux ;
+  - Introduction du mode de jeu Niveaux (pour l'IA et le joueur) ;
+  - Génération d'une couleur aléatoire pour chaque Snake à chaque nouvelle partie ;
+  - Les menus sont navigables au clavier, il est également possible de mettre en pause le jeu en appuyant sur la touche Entrer ;
+  - Corrections de bugs et ajustements (voir les commits sur Github) ;
+  - Ajout d'un niveau d'IA "Au hasard" (mouvements aléatoires de l'IA).
 
 * Version 1.2 (03/07/2019) :
   - Migration vers la bibliothèque logicielle Lowlight.Astar, qui supporte les grilles en forme de tore, ce qui améliore les performances de l'IA ;
