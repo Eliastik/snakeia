@@ -113,11 +113,11 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ### À faire :
 
-* Idée type de niveau : atteindre le score avant les adversaires
 * Améliorer l'IA pour l'empêcher de se bloquer (essais effectués) - niveau Ultra
 
 ### Fait :
 
+* Idée type de niveau : atteindre le score avant les adversaires
 * Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
 
 ## Déclaration de licence

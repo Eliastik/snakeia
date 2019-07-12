@@ -2217,6 +2217,12 @@ function GameGroup(games) {
           self.resetAll(v);
         };
       }(i));
+
+      this.games[i].onScoreIncreased(function(v) {
+        return function() {
+          self.checkOnScoreIncreased(v);
+        };
+      }(i));
     }
   };
 
@@ -2320,6 +2326,14 @@ function GameGroup(games) {
     for(var i = 0; i < this.games.length; i++) {
       this.games[i].kill();
     }
+  };
+
+  this.checkOnScoreIncreased = function() {
+    this.reactor.dispatchEvent("onScoreIncreased");
+  };
+
+  this.onScoreIncreased = function(callback) {
+    this.reactor.addEventListener("onScoreIncreased", callback);
   };
 
   this.setDisplayFPS = function(value) {

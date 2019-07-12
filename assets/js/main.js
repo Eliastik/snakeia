@@ -28,6 +28,7 @@ UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update.php";
 LEVEL_REACH_SCORE = "LEVEL_REACH_SCORE";
 LEVEL_REACH_MAX_SCORE = "LEVEL_REACH_MAX_SCORE";
 LEVEL_MULTI_BEST_SCORE = "LEVEL_MULTI_BEST_SCORE";
+LEVEL_MULTI_REACH_SCORE_FIRST = "LEVEL_MULTI_REACH_SCORE_FIRST";
 LEVEL_REACH_SCORE_ON_TIME = "LEVEL_REACH_SCORE_ON_TIME";
 DEFAULT_LEVEL = "DEFAULT_LEVEL";
 DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
@@ -860,7 +861,7 @@ function setLevelSave(value, level, player, type) {
 
     if(item != null) {
       if(Array.isArray(value) && value.length >= 2 && Array.isArray(item[level]) && item[level].length >= 2 && item[level][0] == true) {
-        if(levels[level]["type"] != LEVEL_REACH_SCORE_ON_TIME) {
+        if(levels[level]["type"] != LEVEL_REACH_SCORE_ON_TIME && levels[level]["type"] != LEVEL_MULTI_REACH_SCORE_FIRST) {
           if(value[1] < item[level][1]) {
             value[1] = item[level][1];
           }
@@ -942,7 +943,7 @@ function canPlay(level, player, type) {
 }
 
 function levelCompatible(levelType, version) {
-  if((levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME) || APP_VERSION.strcmp(version) < 0) {
+  if((levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME && levelType != LEVEL_MULTI_REACH_SCORE_FIRST) || APP_VERSION.strcmp(version) < 0) {
     return false;
   }
 
@@ -971,6 +972,8 @@ function printResultLevel(level, player, levelType, type) {
     val = window.i18next.t("levels.bestScore", { count: resultLevel });
   } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
     val = window.i18next.t("levels.bestScore", { count: resultLevel });
+  } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
+    val = window.i18next.t("levels.bestTime", { count: Math.round(resultLevel) });
   }
 
   document.getElementById("resultLevels").innerHTML = val;
@@ -1155,6 +1158,46 @@ function playLevel(level, player, type) {
             document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
           }
         });
+      } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
+        var time = 0;
+        var timerInterval = new TimerInterval(function() {
+          time++;
+        });
+
+        playerGame.onStart(function() {
+          timerInterval.start();
+        });
+
+        playerGame.onPause(function() {
+          timerInterval.stop();
+        });
+
+        playerGame.onReset(function() {
+          time = 0;
+          timerInterval.stop();
+        });
+
+        playerGame.onStop(function() {
+          timerInterval.stop();
+        });
+
+        group.onScoreIncreased(function() {
+          for(var i = 0; i < group.games.length; i++) {
+            for(var j = 0; j < group.games[i].snakes.length; j++) {
+              if(group.games[i].snakes[j].score >= levelTypeValue) {
+                if(group.games[i].snakes[j] == playerSnake) {
+                  group.stopAll(true);
+                  setLevelSave([true, time], level, player, type);
+                  printResultLevel(level, player, levelType, type);
+                  document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
+                } else {
+                  group.stopAll(true);
+                  document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
+                }
+              }
+            }
+          }
+        });
       }
     }
 
@@ -1170,6 +1213,8 @@ function playLevel(level, player, type) {
         document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.reachMaxScore");
       } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
         document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.multiBestScore", { count: numberIA });
+      } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
+        document.getElementById("gameOrder").innerHTML = window.i18next.t("levels.multiReachScoreFirst", { value: levelTypeValue, count: numberIA });
       }
     }
 
