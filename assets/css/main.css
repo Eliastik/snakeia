@@ -62,7 +62,7 @@ body {
    margin: auto;
  }
 
-#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer, #levelListDownloadPlayer, #levelListDownloadAI {
+#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer, #levelListDownloadPlayer, #levelListDownloadAI, #localstorageDisabled {
   display: none;
 }
 
@@ -72,7 +72,7 @@ body {
   margin: auto;
 }
 
-#levelListDefault, #levelListDownload, #levelDownload {
+#levelListDefault, #levelListDownload, #levelDownload, #localstorageDisabled {
   width: 100%;
   max-width: 450px;
   margin: auto;

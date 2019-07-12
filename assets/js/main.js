@@ -103,6 +103,10 @@ function storageFactory(storage) {
     }
   }
 
+  this.isSupported = function() {
+    return isSupported();
+  };
+
   this.clear = function() {
     if(isSupported()) {
       storage.clear();
@@ -157,6 +161,10 @@ function storageFactory(storage) {
 }
 
 var storageGlobal = new storageFactory();
+
+if(!storageGlobal.isSupported()) {
+  document.getElementById("localstorageDisabled").style.display = "block";
+}
 
 function Timer(callback, delay, timerInterval) {
   var timerId, start, remaining = delay;
