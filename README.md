@@ -115,12 +115,15 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 * Correction vitesse démarrage partie si fps > 60
 * Améliorer l'IA pour l'empêcher de se bloquer (essais effectués) - niveau Ultra
-* hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible
 
 ### Fait :
 
 * Idée type de niveau : atteindre le score avant les adversaires
 * Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
+
+### Problèmes :
+
+* hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible
 
 ## Déclaration de licence
 

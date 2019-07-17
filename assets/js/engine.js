@@ -17,9 +17,17 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 // Constants
-window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-document.fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-document.onfullscreenchange = document.onfullscreenchange || document.onwebkitfullscreenchange || document.onwebkitfullscreenchange || document.MSFullscreenChange;
+window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.oRequestAnimationFrame;
+window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame || window.msCancelAnimationFrame || window.oCancelAnimationFrame || window.mozCancelRequestAnimationFrame || window.webkitCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame;
+
+if(typeof(document.fullscreenElement) === "undefined") {
+  Object.defineProperty(document, "fullscreenElement", {
+    get: function() {
+      return document.mozFullScreenElement || document.msFullscreenElement || document.webkitFullscreenElement || document.oFullscreenElement;
+    }
+  });
+}
+
 document.exitFullscreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen;
 screen.orientation = screen.msOrientation || screen.mozOrientation || screen.orientation;
 // Case type
@@ -1305,6 +1313,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           this.canvas.webkitRequestFullscreen();
         } else if(this.canvas.msRequestFullscreen) {
           this.canvas.msRequestFullscreen();
+        } else if(this.canvas.oRequestFullscreen) {
+          this.canvas.oRequestFullscreen();
         }
       } else {
         if(document.exitFullscreen) {
@@ -1314,7 +1324,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       var self = this;
 
-      document.onfullscreenchange = function(event) {
+      var onfullscreenchange = function(event) {
         if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
           if(document.fullscreenElement == self.canvas) {
             self.canvas.width = window.innerWidth;
@@ -1331,7 +1341,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               }
             }, true);
 
-            if(screen.orientation.lock != undefined) {
+            if(typeof(screen.orientation) !== "undefined") {
               screen.orientation.lock("landscape");
             }
           } else {
@@ -1341,6 +1351,18 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           self.updateUI();
         }
       };
+
+      if(typeof(document.onfullscreenchange) !== "undefined") {
+        document.onfullscreenchange = onfullscreenchange;
+      } else if(typeof(document.onmsfullscreenchange) !== "undefined") {
+        document.onmsfullscreenchange = onfullscreenchange;
+      } else if(typeof(document.onmozfullscreenchange) !== "undefined") {
+        document.onmozfullscreenchange = onfullscreenchange;
+      } else if(typeof(document.onwebkitfullscreenchange) !== "undefined") {
+        document.onwebkitfullscreenchange = onfullscreenchange;
+      } else if(typeof(document.onokitfullscreenchange) !== "undefined") {
+        document.onofullscreenchange = onfullscreenchange;
+      }
     }
   };
 
