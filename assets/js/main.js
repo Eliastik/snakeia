@@ -1371,9 +1371,10 @@ function translateContent() {
   listTranslations(i18next.languages);
 
   var i18nList = document.querySelectorAll("[data-i18n]");
-  i18nList.forEach(function(v) {
-    v.innerHTML = window.i18next.t(v.dataset.i18n);
-  });
+
+  for(var i = 0, l = i18nList.length; i < l; i++) {
+    i18nList[i].innerHTML = window.i18next.t(i18nList[i].dataset.i18n);
+  }
 
   document.getElementById("dateTxt").innerHTML = window.i18next.t("menu.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)) });
 

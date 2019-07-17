@@ -62,7 +62,7 @@ IMAGE_SNAKE_SATURATION = 50;
 IMAGE_SNAKE_VALUE = 77;
 // Infos
 APP_VERSION = "1.3";
-DATE_VERSION = "2019-07-12";
+DATE_VERSION = "07/12/2019";
 
 // Return an integer between min (inclusive) and max (inclusive)
 function randRange(min, max) {
@@ -147,9 +147,11 @@ Reactor.prototype.registerEvent = function(eventName) {
 };
 
 Reactor.prototype.dispatchEvent = function(eventName, eventArgs) {
-  this.events[eventName].callbacks.forEach(function(callback) {
-    callback(eventArgs);
-  });
+  var callbacks = this.events[eventName].callbacks;
+
+  for(var i = 0, l = callbacks.length; i < l; i++) {
+    callbacks[i](eventArgs);
+  }
 };
 
 Reactor.prototype.addEventListener = function(eventName, callback) {
