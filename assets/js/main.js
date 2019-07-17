@@ -398,6 +398,10 @@ function checkGameSpeed() {
   }
 }
 
+document.getElementById("gameSpeed").onchange = function() {
+  checkGameSpeed();
+};
+
 function gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, numberPlayers) {
   var heightGrid = parseInt(heightGrid);
   var widthGrid = parseInt(widthGrid);
@@ -416,7 +420,7 @@ function gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, nu
     }
   }
 
-  var neededCases = numberPlayers * 3;
+  var neededCases = numberPlayers * 4;
 
   if(numberEmptyCases >= neededCases) {
     return false;
