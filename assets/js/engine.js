@@ -1021,6 +1021,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         }
 
         this.updateUI();
+      } else if(document.fullscreenElement == this.canvas) {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+
+        this.updateUI();
       }
     }
   };
@@ -1326,29 +1331,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       var onfullscreenchange = function(event) {
         if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
-          if(document.fullscreenElement == self.canvas) {
-            self.canvas.width = window.innerWidth;
-            self.canvas.height = window.innerHeight;
+          self.autoResizeCanvas();
 
-            window.addEventListener("resize", function() {
-              if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
-                if(document.fullscreenElement == self.canvas) {
-                  self.canvas.width = window.innerWidth;
-                  self.canvas.height = window.innerHeight;
-
-                  self.updateUI();
-                }
-              }
-            }, true);
-
-            if(typeof(screen.orientation) !== "undefined") {
-              screen.orientation.lock("landscape");
-            }
-          } else {
-            self.autoResizeCanvas();
+          if(document.fullscreenElement == self.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
+            screen.orientation.lock("landscape");
           }
-
-          self.updateUI();
         }
       };
 
@@ -1363,6 +1350,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       } else if(typeof(document.onokitfullscreenchange) !== "undefined") {
         document.onofullscreenchange = onfullscreenchange;
       }
+
+      onfullscreenchange();
     }
   };
 
