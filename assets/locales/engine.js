@@ -81,7 +81,8 @@
        "purple": "Mauve",
        "pink": "Rose"
      },
-     "colorPlayer": "Vous êtes le Snake\nen {{color}}"
+     "colorPlayer": "Vous êtes le Snake\nen {{color}}",
+     "ready": "Prêt ?"
    }
 }, true, false);
 
@@ -150,6 +151,7 @@ i18next.addResourceBundle("en", "translation", {
       "purple": "Purple",
       "pink": "Pink"
     },
-    "colorPlayer": "You are the Snake\nin {{color}}"
+    "colorPlayer": "You are the Snake\nin {{color}}",
+    "ready": "Ready?"
   }
 }, true, false);

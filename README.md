@@ -113,11 +113,11 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ### À faire :
 
-* Correction vitesse démarrage partie si fps > 60
 * Améliorer l'IA pour l'empêcher de se bloquer (essais effectués) - niveau Ultra
 
 ### Fait :
 
+* Correction vitesse démarrage partie si fps > 60
 * Idée type de niveau : atteindre le score avant les adversaires
 * Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
 
