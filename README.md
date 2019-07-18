@@ -12,7 +12,7 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 
 ## About this game
 
-* Version: 1.3
+* Version: 1.3.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -25,6 +25,11 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 * Uses the CSS framework [Bootstrap 4](https://getbootstrap.com/) and the theme [Flat UI](https://designmodo.github.io/Flat-UI/)
 
 ## Changelog
+
+* Version 1.3.1 (7/18/2019):
+  - Correction of the speed at the start of the game if the frame rate is greater or less than 60;
+  - Added a new type of level: reach a given score before the opponents (no level exploits it for the moment);
+  - Fixed others bugs and fixed compatibility with Microsoft Edge and Safari.
 
 * Version 1.3 (7/12/2019):
   - Possibility for several players to play on the same grid! This mode supports a hundred players (a human player and a hundred AI) on the same grid! Players are differentiated according to their color. Their name and score are displayed above each one;
@@ -66,7 +71,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ## À propos du jeu
 
-* Version du jeu : 1.3
+* Version du jeu : 1.3.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -79,6 +84,11 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 * Utilise le framework CSS [Bootstrap 4](https://getbootstrap.com/) et le thème [Flat UI](https://designmodo.github.io/Flat-UI/)
 
 ## Journal des changements
+
+* Version 1.3.1 (18/07/2019) :
+  - Correction de la vitesse au démarrage du jeu si le taux d'images par seconde est supérieur ou inférieur à 60 ;
+  - Ajout d'un nouveau type de niveau : atteindre un score donné avant les adversaires (aucun niveau ne l'exploite pour l'instant) ;
+  - Corrections d'autres bugs et de la compatibilité avec Microsoft Edge et Safari.
 
 * Version 1.3 (12/07/2019) :
   - Possibilité pour plusieurs joueurs de jouer sur la même grille de jeu ! Ce mode supporte une centaine de joueurs (un joueur humain et une centaine d'IA) sur la même grille ! Les joueurs sont différentiés en fonction de leur couleur. Leur nom ainsi que leur score est affiché au dessus de chacun d'eux ;

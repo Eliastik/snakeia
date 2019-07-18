@@ -69,8 +69,8 @@ IMAGE_SNAKE_HUE = 75;
 IMAGE_SNAKE_SATURATION = 50;
 IMAGE_SNAKE_VALUE = 77;
 // Infos
-APP_VERSION = "1.3";
-DATE_VERSION = "07/12/2019";
+APP_VERSION = "1.3.1";
+DATE_VERSION = "07/18/2019";
 
 // Return an integer between min (inclusive) and max (inclusive)
 function randRange(min, max) {
