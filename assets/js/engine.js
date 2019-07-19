@@ -867,6 +867,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.scoreMax = false;
   this.errorOccured = false;
   // Menus state variables
+  this.enableKeyMenu = false;
   this.lastKeyMenu = -1;
   this.selectedButton = 0;
   this.confirmReset = false;
@@ -987,7 +988,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         } else {
           self.lastKey = evt.keyCode;
         }
-      } else if(self.countBeforePlay <= -1) {
+      } else if(self.countBeforePlay <= -1 && self.enableKeyMenu) {
         self.lastKeyMenu = evt.keyCode;
         self.updateUI();
       }
@@ -2233,6 +2234,10 @@ function GameGroup(games) {
     var self = this;
 
     for(var i = 0; i < this.games.length; i++) {
+      if(i == 0) {
+        self.games[i].enableKeyMenu = true;
+      }
+      
       this.games[i].onPause(function(v) {
         return function() {
           self.pauseAll(v);
