@@ -1250,6 +1250,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.tick = function() {
+    if(!document.hasFocus() && !this.paused) {
+      this.pause();
+    }
+
     this.updateUI();
     var self = this;
 
