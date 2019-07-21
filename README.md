@@ -124,6 +124,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 ### À faire :
 
 * Améliorer l'IA pour l'empêcher de se bloquer (essais effectués) - niveau Ultra
+* Performances lorsque plusieurs Snake sur une seule grille (dû aux textes affichés au dessus de chaque)
 
 ### Fait :
 
