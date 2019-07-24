@@ -38,6 +38,7 @@ WALL_VAL = 3;
 // Player type
 PLAYER_AI = "PLAYER_AI";
 PLAYER_HUMAN = "PLAYER_HUMAN";
+PLAYER_HYBRID_HUMAN_AI = "PLAYER_HYBRID_HUMAN_AI";
 // AI level
 AI_LEVEL_RANDOM = "AI_LEVEL_RANDOM";
 AI_LEVEL_LOW = "AI_LEVEL_LOW";
@@ -506,6 +507,10 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
       }
 
       this.insert(new Position(posX, startPos.y, this.direction));
+    }
+
+    if(this.player == PLAYER_HYBRID_HUMAN_AI) {
+      this.aiLevel = AI_LEVEL_HIGH;
     }
   };
 
@@ -1264,13 +1269,19 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         if(self.frame % self.speed == 0) {
           for(var i = 0; i < self.snakes.length; i++) {
             if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
-              if(self.snakes[i].player == PLAYER_HUMAN) {
+              if(self.snakes[i].player == PLAYER_HUMAN || self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
                 self.snakes[i].moveTo(self.lastKey);
               } else if(self.snakes[i].player == PLAYER_AI) {
                 self.snakes[i].moveTo(self.snakes[i].ai(true));
               }
 
               var headSnakePos = self.snakes[i].getHeadPosition();
+
+              if(self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI && self.grid.isDeadPosition(self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction))) {
+                self.snakes[i].moveTo(self.snakes[i].ai(true));
+                self.lastKey = -1;
+              }
+
               headSnakePos = self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction);
 
               if(self.grid.isDeadPosition(headSnakePos)) {
@@ -1465,7 +1476,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       }
 
       for(var i = 0; i < this.snakes.length; i++) {
-        if(this.snakes[i].player == PLAYER_HUMAN) {
+        if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
           this.btnTopArrow.draw(this.canvas);
           this.btnBottomArrow.draw(this.canvas);
           this.btnRightArrow.draw(this.canvas);
@@ -1488,7 +1499,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
            });
          });
        } else if(this.getInfosGame) {
-          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + (this.snakes[0].player == PLAYER_HUMAN ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
+          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + (this.snakes[0].player == PLAYER_HUMAN  || this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
             self.btnOK.addClickAction(self.canvas, function() {
               self.getInfosGame = false;
               self.selectedButton = 0;
@@ -1524,8 +1535,13 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             });
           });
         } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
-          if(this.snakes.length > 1 && this.getNBPlayer(PLAYER_HUMAN) <= 1 && this.getPlayer(1, PLAYER_HUMAN) != null) {
-            var playerHuman = this.getPlayer(1, PLAYER_HUMAN);
+          if((this.snakes.length > 1 && this.getNBPlayer(PLAYER_HUMAN) <= 1 && this.getPlayer(1, PLAYER_HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, PLAYER_HYBRID_HUMAN_AI) != null)) {
+            if(this.getPlayer(1, PLAYER_HUMAN) != null) {
+              var playerHuman = this.getPlayer(1, PLAYER_HUMAN);
+            } else {
+              var playerHuman = this.getPlayer(1, PLAYER_HYBRID_HUMAN_AI);
+            }
+
             var colorName = hslToName(addHue(IMAGE_SNAKE_HUE, playerHuman.color), IMAGE_SNAKE_SATURATION, IMAGE_SNAKE_VALUE);
             var colorRgb = hsvToRgb(addHue(IMAGE_SNAKE_HUE, playerHuman.color) / 360, IMAGE_SNAKE_SATURATION / 100, IMAGE_SNAKE_VALUE / 100);
 
@@ -1631,7 +1647,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           this.btnFullScreen.enable();
 
           for(var i = 0; i < this.snakes.length; i++) {
-            if(this.snakes[i].player == PLAYER_HUMAN) {
+            if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
               this.btnTopArrow.enable();
               this.btnBottomArrow.enable();
               this.btnLeftArrow.enable();
@@ -1985,7 +2001,7 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
   var numAI = 0;
 
   for(var i = 0; i < this.snakes.length; i++) {
-    if(this.snakes[i].player == PLAYER_HUMAN) {
+    if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
       numPlayer++;
     } else {
       numAI++;
@@ -1997,7 +2013,7 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
     var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
     var caseY = 75 + posY * caseHeight;
 
-    this.drawText(ctx, (this.snakes[i].player == PLAYER_HUMAN ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX + 2, caseY - Math.round(caseHeight / 1.75));
+    this.drawText(ctx, (this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX + 2, caseY - Math.round(caseHeight / 1.75));
   }
 };
 
@@ -2241,7 +2257,7 @@ function GameGroup(games) {
       if(i == 0) {
         self.games[i].enableKeyMenu = true;
       }
-      
+
       this.games[i].onPause(function(v) {
         return function() {
           self.pauseAll(v);
