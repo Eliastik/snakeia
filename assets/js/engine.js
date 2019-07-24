@@ -971,18 +971,31 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       });
     }
 
-    if(!Array.isArray(this.snakes)) {
+    if(this.snakes == null || this.snakes == undefined) {
+      this.errorOccured = true;
+      this.snakes = [];
+    } else if(!Array.isArray(this.snakes)) {
       this.snakes = [this.snakes];
+    } else if(Array.isArray(this.snakes) && this.snakes.length <= 0) {
+      this.errorOccured = true;
     }
 
     var startHue = randRange(0, 360);
 
     for(var i = 0; i < this.snakes.length; i++) {
-      startHue = addHue(startHue, Math.round(360 / (this.snakes.length)));
-      this.snakes[i].color = startHue;
+      if(this.snakes[i] instanceof Snake == false) {
+        this.errorOccured = true;
+      } else {
+        startHue = addHue(startHue, Math.round(360 / (this.snakes.length)));
+        this.snakes[i].color = startHue;
+      }
     }
 
-    this.grid.setFruit();
+    if(this.grid instanceof Grid == false) {
+      this.errorOccured = true;
+    } else {
+      this.grid.setFruit();
+    }
 
     var self = this;
 
@@ -1125,44 +1138,48 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.start = function() {
-    for(var i = 0; i < this.snakes.length; i++) {
-      if(this.snakes[i].errorInit) {
-        console.error(window.i18next.t("engine.initFailed"));
-        this.errorOccured = true;
-        this.stop();
-      }
-    }
-
-    if(this.paused && !this.gameOver && !this.killed && this.assetsLoaded && !this.scoreMax) {
-      this.disableAllButtons();
-      this.getInfos = false;
-      this.getInfosGame = false;
-      this.confirmExit = false;
-      this.confirmReset = false;
-      this.countBeforePlay = 3;
-      this.updateUI();
-      this.clearIntervalPlay();
-      var self = this;
-
-      this.intervalPlay = setInterval(function() {
-        self.countBeforePlay--;
-
-        if(self.countBeforePlay <= 0) {
-          if(self.countBeforePlay <= -1) {
-            self.clearIntervalPlay();
-            self.paused = false;
-            self.isReseted = false;
-            self.tick();
-            self.reactor.dispatchEvent("onStart");
-          } else if(self.countBeforePlay >= 0) {
-            self.lastFrame = self.frame > 0 ? self.frame : 1;
-            self.testFrameRate();
-            self.setIntervalCountFPS();
-          }
-        } else {
-          self.updateUI();
+    if(!this.errorOccured) {
+      for(var i = 0; i < this.snakes.length; i++) {
+        if(this.snakes[i].errorInit) {
+          console.error(window.i18next.t("engine.initFailed"));
+          this.errorOccured = true;
+          this.stop();
         }
-      }, 1000);
+      }
+
+      if(this.paused && !this.gameOver && !this.killed && this.assetsLoaded && !this.scoreMax) {
+        this.disableAllButtons();
+        this.getInfos = false;
+        this.getInfosGame = false;
+        this.confirmExit = false;
+        this.confirmReset = false;
+        this.countBeforePlay = 3;
+        this.updateUI();
+        this.clearIntervalPlay();
+        var self = this;
+
+        this.intervalPlay = setInterval(function() {
+          self.countBeforePlay--;
+
+          if(self.countBeforePlay <= 0) {
+            if(self.countBeforePlay <= -1) {
+              self.clearIntervalPlay();
+              self.paused = false;
+              self.isReseted = false;
+              self.tick();
+              self.reactor.dispatchEvent("onStart");
+            } else if(self.countBeforePlay >= 0) {
+              self.lastFrame = self.frame > 0 ? self.frame : 1;
+              self.testFrameRate();
+              self.setIntervalCountFPS();
+            }
+          } else {
+            self.updateUI();
+          }
+        }, 1000);
+      }
+    } else {
+      this.updateUI();
     }
 
     if(!this.assetsLoaded) {
@@ -1268,6 +1285,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
         if(self.frame % self.speed == 0) {
           for(var i = 0; i < self.snakes.length; i++) {
+            var initialDirection = self.snakes[i].direction;
+
             if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
               if(self.snakes[i].player == PLAYER_HUMAN || self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
                 self.snakes[i].moveTo(self.lastKey);
@@ -1278,6 +1297,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               var headSnakePos = self.snakes[i].getHeadPosition();
 
               if(self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI && self.grid.isDeadPosition(self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction))) {
+                self.snakes[i].direction = initialDirection;
                 self.snakes[i].moveTo(self.snakes[i].ai(true));
                 self.lastKey = -1;
               }
@@ -1413,10 +1433,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       var self = this;
       var ctx = this.canvasCtx;
       var renderBlur = renderBlur === undefined ? false : renderBlur;
-      var caseHeight = Math.floor((this.canvas.height - 75) / this.grid.height);
-      var caseWidth = Math.floor(this.canvas.width / this.grid.width);
-      caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
-      caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
       this.fontSize = FONT_SIZE;
 
       if(this.canvas.width <= CANVAS_WIDTH / 2) {
@@ -1444,6 +1460,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       }
 
       if(this.assetsLoaded && !this.errorOccured) {
+        var caseHeight = Math.floor((this.canvas.height - 75) / this.grid.height);
+        var caseWidth = Math.floor(this.canvas.width / this.grid.width);
+        caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
+        caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
+
         this.drawImage(ctx, "assets/images/fruit.png", 5, 5, 64, 64);
 
         if(this.snakes.length <= 1) {
@@ -1499,7 +1520,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
            });
          });
        } else if(this.getInfosGame) {
-          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + (this.snakes[0].player == PLAYER_HUMAN  || this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
+          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + ((this.snakes[0].player == PLAYER_HUMAN  || this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + ((this.snakes.length <= 1 && this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI) ? "\n" + window.i18next.t("engine.assistAI") : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
             self.btnOK.addClickAction(self.canvas, function() {
               self.getInfosGame = false;
               self.selectedButton = 0;
@@ -2013,7 +2034,7 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
     var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
     var caseY = 75 + posY * caseHeight;
 
-    this.drawText(ctx, (this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX + 2, caseY - Math.round(caseHeight / 1.75));
+    this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX + 2, caseY - Math.round(caseHeight / 1.75));
   }
 };
 

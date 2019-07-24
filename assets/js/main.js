@@ -386,7 +386,7 @@ function checkSameGrid() {
   }
 }
 
-document.getElementById("sameGrid").onchange = function() {
+document.getElementById("sameGrid").onclick = function() {
   checkSameGrid();
 };
 
@@ -779,21 +779,36 @@ function validateSettings(returnValidation) {
           }
         } else if(selectedMode == BATTLE_ROYALE) {
           if(winners.index.length == 1) {
-            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.oneWinnerBattleRoyale", { numWinner: winners.index[0] + 1, score: winners.score });
+            if(battleAgainstAIs && winners.index[0] == 0) {
+              document.getElementById("gameStatus").innerHTML = window.i18next.t("game.playerWinnerBattleRoyale", { score: winners.score });
+            } else {
+              document.getElementById("gameStatus").innerHTML = window.i18next.t("game.oneWinnerBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[0] : winners.index[0] + 1), score: winners.score });
+            }
+          } else if(battleAgainstAIs && winners.index.length == 2 && winners.index[0] == 0) {
+            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.winnerAIBattleRoyale") + " " + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: winners.index[1] }) + " " + window.i18next.t("game.andPlayerWinnersBattleRoyale") + " " + window.i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
           } else if(winners.index.length > 1) {
+            var playerWinnerBattleRoyale = false;
             document.getElementById("gameStatus").innerHTML = window.i18next.t("game.winnersBattleRoyale") + " ";
 
             for(var i = 0; i < winners.index.length; i++) {
-              document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: winners.index[i] + 1 });
+              if(battleAgainstAIs && winners.index[i] == 0) {
+                var playerWinnerBattleRoyale = true;
+              } else {
+                document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[i] : winners.index[i] + 1) });
 
-              if((i + 1) < winners.index.length - 1) {
-                document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + ", ";
-              } else if((i + 1) == winners.index.length - 1) {
-                document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.andWinnersBattleRoyale") + " ";
+                if((i + 1) < winners.index.length - 1) {
+                  document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + ", ";
+                } else if((i + 1) == winners.index.length - 1) {
+                  document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.andWinnersBattleRoyale") + " ";
+                }
               }
             }
 
-            document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.winScoreBattleRoyale", { score: winners.score });
+            if(battleAgainstAIs && playerWinnerBattleRoyale) {
+              document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.andPlayerWinnersBattleRoyale") + " " + window.i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
+            } else {
+              document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.winScoreBattleRoyale", { score: winners.score });
+            }
           }
         }
       }

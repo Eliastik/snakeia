@@ -112,9 +112,13 @@ i18next.addResourceBundle("fr", "translation", {
     "equalityAIVSAI": "Les deux IA ont fini ex-aequo !",
     "oneWinnerBattleRoyale": "L'IA n°{{numWinner}} a gagné avec un score de {{score}} !",
     "winnersBattleRoyale": "Les IA",
+    "winnerAIBattleRoyale": "L'IA",
     "winnersNumBattleRoyale": "n°{{numWinner}}",
     "andWinnersBattleRoyale": "et",
-    "winScoreBattleRoyale": "ont gagné avec un score de {{score}} !"
+    "andPlayerWinnersBattleRoyale": "ainsi que vous",
+    "winScoreBattleRoyale": "ont gagné avec un score de {{score}} !",
+    "winPlayerScoreBattleRoyale": "avez gagné avec un score de {{score}} !",
+    "playerWinnerBattleRoyale": "Vous avez gagné avec un score de {{score}} !"
   },
   "levels": {
     "default": "Niveaux par défaut",
@@ -246,9 +250,13 @@ i18next.addResourceBundle("en", "translation", {
     "equalityAIVSAI": "The two AIs finished tied!",
     "oneWinnerBattleRoyale": "The AI n°{{numWinner}} won with a score of {{score}}!",
     "winnersBattleRoyale": "The AIs",
+    "winnerAIBattleRoyale": "The AI",
     "winnersNumBattleRoyale": "n°{{numWinner}}",
     "andWinnersBattleRoyale": "and",
-    "winScoreBattleRoyale": "won with a score of {{score}}!"
+    "andPlayerWinnersBattleRoyale": "as well as you",
+    "winScoreBattleRoyale": "won with a score of {{score}}!",
+    "winPlayerScoreBattleRoyale": "won with a score of {{score}}!",
+    "playerWinnerBattleRoyale": "You won with a score of {{score}}!"
   },
   "levels": {
     "default": "Default levels",

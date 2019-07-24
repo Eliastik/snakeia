@@ -82,7 +82,8 @@
        "pink": "Rose"
      },
      "colorPlayer": "Vous êtes le Snake\nen {{color}}",
-     "ready": "Prêt ?"
+     "ready": "Prêt ?",
+     "assistAI": "Assistant IA"
    }
 }, true, false);
 
@@ -152,6 +153,7 @@ i18next.addResourceBundle("en", "translation", {
       "pink": "Pink"
     },
     "colorPlayer": "You are the Snake\nin {{color}}",
-    "ready": "Ready?"
+    "ready": "Ready?",
+    "assistAI": "AI assistant"
   }
 }, true, false);
