@@ -1436,3 +1436,8 @@ window.addEventListener("load", function() {
     translateContent();
   }, 250);
 });
+
+// Installable app
+if("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
