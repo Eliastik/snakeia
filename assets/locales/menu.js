@@ -83,6 +83,9 @@ i18next.addResourceBundle("fr", "translation", {
     "placeholderCustomSpeed": "Entrez la vitesse…",
     "invalidCustomSpeed": "Cette valeur doit être comprise entre 1 et 100",
     "customSpeedHelp": "Plus le nombre est élevé, plus la vitesse du jeu est lente, et inversement",
+    "playerSettings": "Options du joueur :",
+    "aiAssistant": "Activer l'assistant IA",
+    "aiAssistantInfos": "En activant cette option, une IA tentera de corriger votre trajectoire si vous êtes sur le point de vous écraser sur un obstacle. Réduit la difficulté du jeu.",
     "aiLevel": "Niveau de l'IA :",
     "aiLevelSelect": {
       "random": "Au hasard",
@@ -221,6 +224,9 @@ i18next.addResourceBundle("en", "translation", {
     "placeholderCustomSpeed": "Enter the speed…",
     "invalidCustomSpeed": "This value must be between 1 and 100",
     "customSpeedHelp": "The higher the number, the slower the game speed, and inversely",
+    "playerSettings": "Player options:",
+    "aiAssistant": "Enable the AI assistant",
+    "aiAssistantInfos": "By enabling this option, an AI ​​will try to correct your trajectory if you are about to crash into an obstacle. Reduces the difficulty of the game.",
     "aiLevel": "AI level:",
     "aiLevelSelect": {
       "random": "Random",

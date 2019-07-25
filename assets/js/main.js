@@ -325,6 +325,7 @@ function displaySettings() {
   document.getElementById("settings").style.display = "block";
   checkSameGrid();
   checkGameSpeed();
+  checkPlayer();
   checkFailSettings();
 }
 
@@ -386,10 +387,6 @@ function checkSameGrid() {
   }
 }
 
-document.getElementById("sameGrid").onclick = function() {
-  checkSameGrid();
-};
-
 function checkGameSpeed() {
   if(document.getElementById("gameSpeed").value == "custom") {
     document.getElementById("customSpeedSettings").style.display = "block";
@@ -401,6 +398,14 @@ function checkGameSpeed() {
 document.getElementById("gameSpeed").onchange = function() {
   checkGameSpeed();
 };
+
+function checkPlayer() {
+  if(selectedMode == SOLO_PLAYER || selectedMode == PLAYER_VS_AI || (selectedMode == BATTLE_ROYALE && document.getElementById("battleAgainstAIs").checked)) {
+    document.getElementById("playerSettings").style.display = "block";
+  } else {
+    document.getElementById("playerSettings").style.display = "none";
+  }
+}
 
 function gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, numberPlayers) {
   var heightGrid = parseInt(heightGrid);
@@ -420,7 +425,7 @@ function gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, nu
     }
   }
 
-  var neededCases = numberPlayers * 4;
+  var neededCases = numberPlayers * 5;
 
   if(numberEmptyCases >= neededCases) {
     return false;
@@ -480,6 +485,7 @@ document.getElementById("generateWalls").onchange = function() {
 };
 
 document.getElementById("sameGrid").onchange = function() {
+  checkSameGrid();
   checkGameSpeed();
   checkFailSettings();
 };
@@ -489,6 +495,7 @@ document.getElementById("numberIA").onchange = function() {
 };
 
 document.getElementById("battleAgainstAIs").onchange = function() {
+  checkPlayer();
   checkFailSettings();
 };
 
@@ -524,10 +531,12 @@ function resetForm(resetValues) {
     document.getElementById("autoRetry").checked = false;
     document.getElementById("numberIA").value = 20;
     document.getElementById("battleAgainstAIs").checked = false;
+    document.getElementById("aiAssistant").checked = false;
   }
 
   checkSameGrid();
   checkGameSpeed();
+  checkPlayer();
   checkFailSettings();
 }
 
@@ -552,6 +561,12 @@ function validateSettings(returnValidation) {
   var autoRetry = document.getElementById("autoRetry").checked;
   var numberIA = document.getElementById("numberIA").value;
   var battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
+
+  if(document.getElementById("aiAssistant").checked) {
+    var playerHumanType = PLAYER_HYBRID_HUMAN_AI;
+  } else {
+    var playerHumanType = PLAYER_HUMAN;
+  }
 
   var formValidated = true;
 
@@ -685,12 +700,12 @@ function validateSettings(returnValidation) {
       games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
     } else if(selectedMode == SOLO_PLAYER) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-      var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
+      var snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
       games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
     } else if(selectedMode == PLAYER_VS_AI) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-      var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN);
+      var snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
       if(sameGrid) {
         var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
@@ -722,7 +737,7 @@ function validateSettings(returnValidation) {
         var snakes = [];
 
         if(battleAgainstAIs) {
-          snakes.push(new Snake(RIGHT, 3, grid, PLAYER_HUMAN, aiLevel, autoRetry));
+          snakes.push(new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry));
         }
 
         for(var i = 0; i < numberIA; i++) {
@@ -733,7 +748,7 @@ function validateSettings(returnValidation) {
       } else {
         if(battleAgainstAIs) {
           var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-          var snake = new Snake(RIGHT, 3, grid, PLAYER_HUMAN, aiLevel, autoRetry);
+          var snake = new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry);
 
           games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250));
         }
@@ -1406,6 +1421,8 @@ function translateContent() {
   document.getElementById("appUpdateChanges").title = window.i18next.t("update.getChanges");
 
   document.getElementById("appUpdateDateLocalized").innerHTML = window.i18next.t("update.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(document.getElementById("appUpdateDate").innerHTML)) });
+
+  document.getElementById("aiAssistantInfos").setAttribute("aria-label", window.i18next.t("settings.aiAssistantInfos"));
 }
 
 document.getElementById("languageSelect").onchange = function() {

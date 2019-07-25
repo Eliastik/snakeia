@@ -68,13 +68,17 @@ body {
    margin: auto;
  }
 
+ .verySmall {
+   font-size: 75%;
+ }
+
 #settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer, #levelListDownloadPlayer, #levelListDownloadAI, #localstorageDisabled {
   display: none;
 }
 
 #formSettings, #updateAvailable {
   width: 100%;
-  max-width: 500px;
+  max-width: 525px;
   margin: auto;
 }
 

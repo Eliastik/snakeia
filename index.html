@@ -24,6 +24,7 @@
     <!--[if IE]><link rel="shortcut icon" type="image/x-icon" href="favicon.ico" /><![endif]-->
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/flat-ui.min.css" rel="stylesheet">
+    <link href="assets/css/balloon.min.css" rel="stylesheet">
     <link href="assets/css/main.css" rel="stylesheet">
     <link href="manifest.json" rel="manifest">
     <title>SnakeIA</title>
@@ -118,29 +119,6 @@
                 </div>
               </div>
             </div>
-            <div class="form-group row">
-              <label class="col-sm-4 col-form-label" data-i18n="settings.options">Autres options :</label>
-              <div class="col-sm-8">
-                <div class="form-row">
-                  <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="borderWalls">
-                    <label class="custom-control-label" for="borderWalls" data-i18n="settings.borderWalls">Entourer la grille de murs</label>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="generateWalls">
-                    <label class="custom-control-label" for="generateWalls" data-i18n="settings.generateWalls">Générer des murs à des positions aléatoires</label>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="custom-control custom-checkbox" id="sameGridDiv">
-                    <input type="checkbox" class="custom-control-input" id="sameGrid" checked>
-                    <label class="custom-control-label" for="sameGrid" data-i18n="settings.sameGrid">Partie sur la même grille</label>
-                  </div>
-                </div>
-              </div>
-            </div>
           </fieldset>
           <fieldset class="form-group" id="gameSettings">
             <div class="form-group row">
@@ -176,6 +154,44 @@
                   Cette valeur doit être au moins égale ou supérieure à 1
                 </div>
                 <small id="customSpeedHelp" class="form-text text-muted" data-i18n="settings.customSpeedHelp">Plus le nombre est élevé, plus la vitesse du jeu est lente, et inversement</small>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="form-group" id="optionsGridSettings">
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label" data-i18n="settings.options">Autres options :</label>
+              <div class="col-sm-8">
+                <div class="form-row">
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="borderWalls">
+                    <label class="custom-control-label" for="borderWalls" data-i18n="settings.borderWalls">Entourer la grille de murs</label>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="generateWalls">
+                    <label class="custom-control-label" for="generateWalls" data-i18n="settings.generateWalls">Générer des murs à des positions aléatoires</label>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="custom-control custom-checkbox" id="sameGridDiv">
+                    <input type="checkbox" class="custom-control-input" id="sameGrid" checked>
+                    <label class="custom-control-label" for="sameGrid" data-i18n="settings.sameGrid">Partie sur la même grille</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="form-group" id="playerSettings">
+            <div class="form-group row">
+              <label class="col-sm-4 col-form-label" data-i18n="settings.playerSettings">Options du joueur :</label>
+              <div class="col-sm-8">
+                <div class="form-row">
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="aiAssistant">
+                    <label class="custom-control-label" for="aiAssistant" data-i18n="settings.aiAssistant">Activer l'assistant IA</label>&nbsp; <a id="aiAssistantInfos" aria-label="" data-balloon-length="large" data-balloon-pos="down"><span class="fui-question-circle"></span></a>
+                  </div>
+                </div>
               </div>
             </div>
           </fieldset>
