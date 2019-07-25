@@ -12,7 +12,7 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 
 ## About this game
 
-* Version: 1.3.2
+* Version: 1.3.2.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -26,6 +26,10 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 
 ## Changelog
+
+* Version 1.3.2.1 (7/25/2019):
+  - Additions to use the game in offline mode and to be offered installation on compatible platforms;
+  - Other corrections.
 
 * Version 1.3.2 (7/25/2019):
   - Added the AI assistant for the player. By enabling this option, an AI ​​will try to correct your trajectory if you are about to crash into an obstacle. Reduces the difficulty of the game ;
@@ -76,7 +80,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ## À propos du jeu
 
-* Version du jeu : 1.3.2
+* Version du jeu : 1.3.2.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -90,6 +94,10 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 
 ## Journal des changements
+
+* Version 1.3.2.1 (25/07/2019) :
+  - Ajout permettant d'utiliser le jeu en mode hors-ligne et de se voir proposer l'installation sur les plateformes compatibles ;
+  - Autres corrections.
 
 * Version 1.3.2 (25/07/2019) :
   - Ajout de l'assistant IA pour le joueur. En activant cette option, une IA tentera de corriger votre trajectoire si vous êtes sur le point de vous écraser sur un obstacle. Réduit la difficulté du jeu ;

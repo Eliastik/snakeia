@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-const CACHE = 'snake-ia-v1.3.2';
+const CACHE = 'snake-ia-v1.3.2.1';
 const RUNTIME = 'runtime-' + CACHE;
 
 const CACHE_URLS = [

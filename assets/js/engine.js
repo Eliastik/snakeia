@@ -70,7 +70,7 @@ IMAGE_SNAKE_HUE = 75;
 IMAGE_SNAKE_SATURATION = 50;
 IMAGE_SNAKE_VALUE = 77;
 // Infos
-APP_VERSION = "1.3.2";
+APP_VERSION = "1.3.2.1";
 DATE_VERSION = "07/25/2019";
 
 // Return an integer between min (inclusive) and max (inclusive)
