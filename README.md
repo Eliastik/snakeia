@@ -12,7 +12,7 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 
 ## About this game
 
-* Version: 1.3.1
+* Version: 1.3.2
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -26,6 +26,10 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 
 ## Changelog
+
+* Version 1.3.2 (7/25/2019):
+  - Added the AI assistant for the player. By enabling this option, an AI ​​will try to correct your trajectory if you are about to crash into an obstacle. Reduces the difficulty of the game ;
+  - Bug fixes and others adjustments.
 
 * Version 1.3.1 (7/18/2019):
   - Correction of the speed at the start of the game if the frame rate is greater or less than 60;
@@ -72,7 +76,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ## À propos du jeu
 
-* Version du jeu : 1.3.1
+* Version du jeu : 1.3.2
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -86,6 +90,10 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 
 ## Journal des changements
+
+* Version 1.3.2 (25/07/2019) :
+  - Ajout de l'assistant IA pour le joueur. En activant cette option, une IA tentera de corriger votre trajectoire si vous êtes sur le point de vous écraser sur un obstacle. Réduit la difficulté du jeu ;
+  - Corrections de bugs et autres ajustements.
 
 * Version 1.3.1 (18/07/2019) :
   - Correction de la vitesse au démarrage du jeu si le taux d'images par seconde est supérieur ou inférieur à 60 ;
@@ -126,7 +134,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 ### À faire :
 
 * Améliorer l'IA pour l'empêcher de se bloquer (essais effectués) - niveau Ultra
-* Performances lorsque plusieurs Snake sur une seule grille (dû aux textes affichés au dessus de chaque)
+* Performances lorsque plusieurs Snake sur une seule grille (dû ~~aux textes affichés au dessus de chaque~~ aux algorithmes d'IA)
 
 ### Fait :
 

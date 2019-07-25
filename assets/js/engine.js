@@ -70,8 +70,8 @@ IMAGE_SNAKE_HUE = 75;
 IMAGE_SNAKE_SATURATION = 50;
 IMAGE_SNAKE_VALUE = 77;
 // Infos
-APP_VERSION = "1.3.1";
-DATE_VERSION = "07/18/2019";
+APP_VERSION = "1.3.2";
+DATE_VERSION = "07/25/2019";
 
 // Return an integer between min (inclusive) and max (inclusive)
 function randRange(min, max) {
@@ -1520,7 +1520,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
            });
          });
        } else if(this.getInfosGame) {
-          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + ((this.snakes[0].player == PLAYER_HUMAN  || this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + ((this.snakes.length <= 1 && this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI) ? "\n" + window.i18next.t("engine.assistAI") : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
+          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + ((this.snakes[0].player == PLAYER_HUMAN  || this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : "") + (this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI ? "\n" + window.i18next.t("engine.assistAI") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
             self.btnOK.addClickAction(self.canvas, function() {
               self.getInfosGame = false;
               self.selectedButton = 0;
