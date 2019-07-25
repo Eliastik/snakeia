@@ -1352,19 +1352,19 @@ function getListLevel(player, type) {
   for(var key in levels) {
     if(levels.hasOwnProperty(key)) {
       if(!canPlay(key, player, type)) {
-        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled title="' + window.i18next.t("levels.disabledLevel") + '">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + window.i18next.t("levels.disabledLevel") + '" data-balloon-length="fit" data-balloon-pos="up">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
       } else if(!levelCompatible(levels[key]["type"], levels[key]["version"])) {
-        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled title="' + window.i18next.t("levels.notCompatible") + '">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + window.i18next.t("levels.notCompatible") + '" data-balloon-length="fit" data-balloon-pos="up">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
       } else {
         var button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
       }
 
       if(index == 1) {
-        res += '<div class="row mb-2 mx-auto">';
+        res += '<div class="row mb-2">';
       }
 
       if(index % 2 == 0) {
-        res += '<div class="col pl-0 justify-content-center">' + button + '</div></div><div class="row mb-2 mx-auto">';
+        res += '<div class="col pl-0 justify-content-center">' + button + '</div></div><div class="row mb-2">';
       } else {
         res += '<div class="col pr-0 justify-content-center">' + button + '</div>';
       }
@@ -1417,8 +1417,8 @@ function translateContent() {
   document.getElementById("customSpeed").placeholder = window.i18next.t("settings.placeholderCustomSpeed");
   document.getElementById("numberIA").placeholder = window.i18next.t("settings.placeholderNumberIA");
 
-  document.getElementById("appDownloadURLGet").title = window.i18next.t("update.getURL");
-  document.getElementById("appUpdateChanges").title = window.i18next.t("update.getChanges");
+  document.getElementById("appDownloadURLGet").setAttribute("aria-label", window.i18next.t("update.getURL"));
+  document.getElementById("appUpdateChanges").setAttribute("aria-label", window.i18next.t("update.getChanges"));
 
   document.getElementById("appUpdateDateLocalized").innerHTML = window.i18next.t("update.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(document.getElementById("appUpdateDate").innerHTML)) });
 

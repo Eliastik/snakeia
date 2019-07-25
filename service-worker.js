@@ -16,8 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-const CACHE = 'snake-ia-v1.3.2.1';
-const RUNTIME = 'runtime-' + CACHE;
+const CACHE_BASENAME = 'snake-ia';
+const CACHE_VER = '-v1.3.2.1';
+const CACHE = CACHE_BASENAME + CACHE_VER;
 
 const CACHE_URLS = [
   "index.html",
@@ -80,35 +81,34 @@ self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CACHE_URLS)).then(self.skipWaiting()));
 });
 
-self.addEventListener('activate', event => {
-  const currentCaches = [CACHE, RUNTIME];
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.filter(function(cacheName) {
+          if(cacheName.startsWith(CACHE_BASENAME)) {
+            var cacheVer = cacheName.replace(CACHE_BASENAME, "");
 
-  event.waitUntil(caches.keys().then(cacheNames => {
-      return cacheNames.filter(cacheName => !currentCaches.includes(cacheName));
-    }).then(cachesToDelete => {
-      return Promise.all(cachesToDelete.map(cacheToDelete => {
-        return caches.delete(cacheToDelete);
-      }));
-    }).then(() => self.clients.claim())
+            if(cacheVer != CACHE_VER) {
+              return true;
+            }
+          }
+
+          return false;
+        }).map(function(cacheName) {
+          return caches.delete(cacheName);
+        })
+      );
+    })
   );
 });
 
 self.addEventListener('fetch', event => {
-  if(event.request.url.startsWith(self.location.origin)) {
-    event.respondWith(
-      caches.match(event.request).then(cachedResponse => {
-        if(cachedResponse) {
-          return cachedResponse;
-        }
-
-        return caches.open(RUNTIME).then(cache => {
-          return fetch(event.request).then(response => {
-            return cache.put(event.request, response.clone()).then(() => {
-              return response;
-            });
-          });
-        });
-      })
-    );
-  }
+  event.respondWith(
+    caches.open(CACHE).then(function(cache) {
+      return cache.match(event.request).then(function(response) {
+        return response || fetch(event.request);
+      });
+    })
+  );
 });

@@ -130,3 +130,11 @@ textarea {
   display: block;
   width: 85%;
 }
+
+[aria-label]:after {
+  font-family: "Delius" !important;
+}
+
+:root {
+  --balloon-font-size: 14px;
+}
