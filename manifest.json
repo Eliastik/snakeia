@@ -4,7 +4,7 @@
   "background_color": "#27ae60",
   "theme_color": "#27ae60",
   "display": "standalone",
-  "orientation": "landscape",
+  "orientation": "any",
   "icons": [
     {
       "src": "assets/images/icon/icon_192.png",
