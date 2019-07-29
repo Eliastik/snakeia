@@ -800,20 +800,30 @@ function ImageLoader() {
   this.images = {};
   this.triedLoading = 0;
   this.hasError = false;
+  this.nbImagesToLoad = 0;
+  this.firstImage = true;
 
   var self = this;
 
-  this.load = function(img, func) {
+  this.load = function(img, func, game) {
+    if(this.firstImage) {
+      this.nbImagesToLoad = img.length;
+      this.firstImage = false;
+    }
 
     if(img.length > 0) {
       this.loadImage(img[0], function(result) {
         if(result == true) {
           img.shift();
-          self.load(img, func);
+          self.load(img, func, game);
         }
       });
     } else {
       return func();
+    }
+
+    if(game != undefined && game != null && game instanceof Game) {
+      game.updateUI();
     }
   };
 
@@ -1448,7 +1458,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         self.btnRightArrow.loadImage(self.imageLoader);
         self.start();
       }
-    });
+    }, this);
   };
 
   this.updateUI = function(renderBlur) {
@@ -1517,7 +1527,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, renderBlur);
       } else if(!this.assetsLoaded && !renderBlur) {
-        this.drawMenu(ctx, [], window.i18next.t("engine.loading"), "white", this.fontSize, FONT_FAMILY, "center", null, true);
+        var percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
+        this.drawMenu(ctx, [], window.i18next.t("engine.loading") + "\n" + percentLoaded + " %", "white", this.fontSize, FONT_FAMILY, "center", null, true);
       }
 
       for(var i = 0; i < this.snakes.length; i++) {
