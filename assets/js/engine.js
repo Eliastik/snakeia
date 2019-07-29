@@ -1826,7 +1826,7 @@ Game.prototype.drawImageData = function(ctx, imageData, x, y, width, height) {
   }
 };
 
-Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignement, verticalAlignement, x, y, wrap) {
+Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignement, verticalAlignement, x, y, wrap, bold) {
   var precFillStyle = ctx.fillStyle;
   var precFont = ctx.font;
   var precFilter = ctx.filter;
@@ -1835,7 +1835,7 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
     ctx.fillStyle = color;
   }
 
-  ctx.font = size + "px " + fontFamily;
+  ctx.font = (bold ? "bold " : "") + size + "px " + fontFamily;
   ctx.filter = "none";
 
   if(wrap) {
@@ -2165,7 +2165,7 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
     var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
     var caseY = 75 + posY * caseHeight;
 
-    this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX + 2, caseY - Math.round(caseHeight / 1.75));
+    this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
   }
 };
 
