@@ -69,6 +69,7 @@ TARGET_FPS = 60;
 IMAGE_SNAKE_HUE = 75;
 IMAGE_SNAKE_SATURATION = 50;
 IMAGE_SNAKE_VALUE = 77;
+CAR_TO_PRERENDER = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "×"];
 // Infos
 APP_VERSION = "1.3.2.1";
 DATE_VERSION = "07/25/2019";
@@ -886,7 +887,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.canvasCtx;
   this.canvasWidth = canvasWidth || CANVAS_WIDTH;
   this.canvasHeight = canvasHeight || CANVAS_HEIGHT;
-  this.fontSize = FONT_SIZE
+  this.fontSize = FONT_SIZE;
+  this.preRenderedFont = {};
   // Intervals, timeouts, frames
   this.intervalCountFPS;
   this.intervalPlay;
@@ -1432,6 +1434,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         self.btnBottomArrow.loadImage(self.imageLoader);
         self.btnLeftArrow.loadImage(self.imageLoader);
         self.btnRightArrow.loadImage(self.imageLoader);
+        self.preRenderFont(CAR_TO_PRERENDER, FONT_SIZE, "white", FONT_FAMILY);
         self.start();
       }
     });
@@ -1766,6 +1769,27 @@ Game.prototype.toString = function() {
   return this.grid.toString() + "\n" + (this.snakes.length <= 1 ? window.i18next.t("engine.score") + " : " + this.snakes[0].score : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + window.i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + window.i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + window.i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
 };
 
+Game.prototype.preRenderFont = function(cars, size, color, fontFamily) {
+  cars.push("?"); cars.push(" "); cars.push("A");
+
+  for(var i = 0; i < cars.length; i++) {
+    var canvasTmp = document.createElement("canvas");
+    var ctxTmp = canvasTmp.getContext("2d");
+    ctxTmp.font = size + "px " + fontFamily;
+    var width = ctxTmp.measureText(cars[i]).width;
+
+    canvasTmp.width = width;
+    canvasTmp.height = size + (size / 6);
+
+    ctxTmp.font = size + "px " + fontFamily;
+    ctxTmp.fillStyle = color;
+    ctxTmp.textBaseline = "top";
+    ctxTmp.fillText(cars[i], 0, 0);
+
+    this.preRenderedFont[cars[i]] = canvasTmp;
+  }
+};
+
 Game.prototype.getImageCase = function(position) {
   var imageRes = "";
 
@@ -1785,6 +1809,12 @@ Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
   if(imgSrc != "") {
     var imageCase = this.imageLoader.get(imgSrc);
     ctx.drawImage(imageCase, Math.round(x), Math.round(y), Math.round(width), Math.round(height));
+  }
+};
+
+Game.prototype.drawImageData = function(ctx, imageData, x, y, width, height) {
+  if(imageData != "") {
+    ctx.drawImage(imageData, Math.round(x), Math.round(y), Math.round(width), Math.round(height));
   }
 };
 
@@ -1814,7 +1844,7 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
     y = (this.canvas.height) - (size * lines.length) / 2 - size / 5;
   }
 
-  for (var i = 0; i < lines.length; i++) {
+  for(var i = 0; i < lines.length; i++) {
     var currentText = lines[i];
 
     if(Array.isArray(color)) {
@@ -1849,6 +1879,40 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
   };
 };
 
+Game.prototype.drawTextBitmap = function(ctx, bitmapFontSet, text, size, x, y, wrap) {
+  if(wrap) {
+    var testCar = bitmapFontSet["A"];
+    text = this.wrapTextLines(ctx, text, testCar.width * (size / testCar.height));
+  }
+
+  var lines = text.split('\n');
+  var currentY = y;
+
+  for(var i = 0; i < lines.length; i++) {
+    var currentText = lines[i];
+    var currentX = x;
+
+    for(var j = 0; j < currentText.length; j++) {
+      var currentCar = currentText.charAt(j);
+
+      if(bitmapFontSet[currentCar] == undefined || bitmapFontSet[currentCar] == null) {
+        var currentCarBitmap = bitmapFontSet["?"];
+      } else {
+        var currentCarBitmap = bitmapFontSet[currentCar];
+      }
+
+      var widthBitmap = currentCarBitmap.width * (size / currentCarBitmap.height);
+
+      this.drawImageData(ctx, currentCarBitmap, currentX, currentY, widthBitmap, size);
+      currentX += widthBitmap;
+    }
+
+    if(currentText.length > 0) {
+      currentY += size;
+    }
+  }
+};
+
 Game.prototype.wrapText = function(text, limit) {
   if(text.length > limit) {
     var p = limit;
@@ -1865,10 +1929,10 @@ Game.prototype.wrapText = function(text, limit) {
   return text;
 };
 
-Game.prototype.wrapTextLines = function(ctx, text) {
+Game.prototype.wrapTextLines = function(ctx, text, size) {
   var lines = text.split('\n');
   var newText = "";
-  var sizeCar = ctx.measureText("A").width;
+  var sizeCar = size || ctx.measureText("A").width;
   var nbCarLine = Math.round(this.canvas.width / sizeCar);
 
   for(var i = 0; i < lines.length; i++) {
@@ -2064,12 +2128,10 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       this.drawImage(ctx, imageLoc, caseX, caseY, caseWidth, caseHeight);
     }
 
-    if(this.snakes.length > 1) {
-      this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight);
-    }
-
     ctx.filter = "none";
   }
+
+  this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight);
 };
 
 Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight) {
@@ -2089,7 +2151,7 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
     var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
     var caseY = 75 + posY * caseHeight;
 
-    this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX + 2, caseY - Math.round(caseHeight / 1.75));
+    this.drawTextBitmap(ctx, this.preRenderedFont, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, Math.round(caseHeight / 2), caseX + 2, caseY - Math.round(caseHeight) + 2, false);
   }
 };
 
