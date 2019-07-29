@@ -1723,7 +1723,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       }
 
       if(this.displayFPS) {
-        this.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, FONT_FAMILY, "right", "bottom");
+        this.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, FONT_FAMILY, "right", "bottom", null, null, true);
       }
 
       if(renderBlur) {
@@ -1788,7 +1788,7 @@ Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
   }
 };
 
-Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignement, verticalAlignement, x, y) {
+Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignement, verticalAlignement, x, y, wrap) {
   var precFillStyle = ctx.fillStyle;
   var precFont = ctx.font;
   var precFilter = ctx.filter;
@@ -1800,6 +1800,10 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
   ctx.font = size + "px " + fontFamily;
   ctx.filter = "none";
 
+  if(wrap) {
+    text = this.wrapTextLines(ctx, text);
+  }
+
   var lines = text.split('\n');
 
   if(verticalAlignement == "center") {
@@ -1807,7 +1811,7 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
   } else if(verticalAlignement == "top") {
     y = 5;
   } else if(verticalAlignement == "bottom") {
-    y = (this.canvas.height) - (size * lines.length) / 2;
+    y = (this.canvas.height) - (size * lines.length) / 2 - size / 5;
   }
 
   for (var i = 0; i < lines.length; i++) {
@@ -1824,13 +1828,13 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
     }
 
     if(alignement == "center") {
-      ctx.fillText(currentText, (this.canvas.width / 2) - (ctx.measureText(currentText).width / 2), y + (size * i));
+      ctx.fillText(currentText, Math.round((this.canvas.width / 2) - (ctx.measureText(currentText).width / 2)), Math.round(y + (size * i)));
     } else if(alignement == "right") {
-      ctx.fillText(currentText, (this.canvas.width) - (ctx.measureText(currentText).width) - 15, y + (size * i));
+      ctx.fillText(currentText, Math.round((this.canvas.width) - (ctx.measureText(currentText).width) - 15), Math.round(y + (size * i)));
     } else if(alignement == "left") {
-      ctx.fillText(currentText, 5, y + (size * i));
+      ctx.fillText(currentText, 5, Math.round(y + (size * i)));
     } else {
-      ctx.fillText(currentText, x, y + (size * i));
+      ctx.fillText(currentText, Math.round(x), Math.round(y + (size * i)));
     }
   }
 
@@ -1861,6 +1865,23 @@ Game.prototype.wrapText = function(text, limit) {
   return text;
 };
 
+Game.prototype.wrapTextLines = function(ctx, text) {
+  var lines = text.split('\n');
+  var newText = "";
+  var sizeCar = ctx.measureText("A").width;
+  var nbCarLine = Math.round(this.canvas.width / sizeCar);
+
+  for(var i = 0; i < lines.length; i++) {
+    newText += this.wrapText(lines[i], nbCarLine);
+
+    if(i < lines.length - 1) {
+      newText += "\n";
+    }
+  }
+
+  return newText;
+};
+
 Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, wrap, func, disableAnimationFrame) {
   var self = this;
   var disableAnimationFrame = disableAnimationFrame == undefined ? false : disableAnimationFrame;
@@ -1873,15 +1894,8 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
     ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
     ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
 
-    if(wrap) {
-      var sizeCar = ctx.measureText("A").width;
-      var nbCarLine = Math.round(self.canvas.width / sizeCar);
-      text = self.wrapText(text, nbCarLine);
-    }
-
-    var lines = text.split('\n');
-    var heightText = size * lines.length;
     var heightButtons = 0;
+    var heightText = size * self.wrapTextLines(ctx, text).split("\n").length;
 
     if(buttons != null) {
       if(self.lastKeyMenu == KEY_UP) {
@@ -1908,7 +1922,7 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
     var totalHeight = heightText + heightButtons;
     var startY = self.canvas.height / 2 - totalHeight / 2 + 16;
 
-    self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY);
+    self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY, true).height;
 
     if(buttons != null) {
       for(var i = 0; i < buttons.length; i++) {
