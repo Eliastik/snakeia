@@ -762,6 +762,8 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
         } else if(this.aiLevel == AI_LEVEL_HIGH || this.aiLevel == AI_LEVEL_ULTRA) {
           res = this.simpleAI();
         }
+
+        grid, graph, path = null;
       }
     }
 
@@ -785,6 +787,12 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     }
   };
 
+  this.kill = function() {
+    this.autoRetry = false;
+    this.grid = null;
+    this.queue = null;
+  };
+
   this.init();
 }
 
@@ -793,8 +801,9 @@ function ImageLoader() {
   this.triedLoading = 0;
   this.hasError = false;
 
+  var self = this;
+
   this.load = function(img, func) {
-    var self = this;
 
     if(img.length > 0) {
       this.loadImage(img[0], function(result) {
@@ -809,7 +818,6 @@ function ImageLoader() {
   };
 
   this.loadImage = function(src, func) {
-    var self = this;
     this.triedLoading++;
 
     var image = new Image();
@@ -837,6 +845,10 @@ function ImageLoader() {
 
   this.get = function(src) {
     return this.images[src];
+  };
+
+  this.clear = function() {
+    this.images = null;
   };
 }
 
@@ -921,6 +933,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.reactor.registerEvent("onExit");
   this.reactor.registerEvent("onScoreIncreased");
 
+  var self = this;
+
   this.init = function() {
     this.imageLoader = new ImageLoader();
 
@@ -1004,8 +1018,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.grid.setFruit();
     }
 
-    var self = this;
-
     document.addEventListener("keydown", function(evt) {
       if(!self.paused) {
         if(evt.keyCode == KEY_ENTER && self.outputType == OUTPUT_GRAPHICAL) {
@@ -1058,8 +1070,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
   this.setIntervalCountFPS = function() {
     this.clearIntervalCountFPS();
-
-    var self = this;
 
     this.intervalCountFPS = window.setInterval(function() {
       self.countFPS();
@@ -1163,7 +1173,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         this.countBeforePlay = 3;
         this.updateUI();
         this.clearIntervalPlay();
-        var self = this;
 
         this.intervalPlay = setInterval(function() {
           self.countBeforePlay--;
@@ -1198,7 +1207,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.testFrameRate = function() {
     if(this.countBeforePlay >= 0) {
       this.updateUI();
-      var self = this;
 
       this.frameGlobal = window.requestAnimationFrame(function() {
         self.frame++;
@@ -1249,21 +1257,28 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     this.killed = true;
 
     for(var i = 0; i < this.snakes.length; i++) {
-      this.snakes[i].autoRetry = false;
+      this.snakes[i].kill();
+      this.snakes[i] = null;
     }
 
     this.clearIntervalCountFPS();
     this.clearIntervalPlay();
     window.cancelAnimationFrame(this.frameGlobal);
     window.cancelAnimationFrame(this.frameDisplayMenu);
+    this.frameGlobal, this.frameDisplayMenu = null;
+
+    this.grid = null;
+    this.snakes = null;
 
     if(this.outputType == OUTPUT_TEXT) {
       this.appendTo.removeChild(this.textarea);
       this.textarea = null;
     } else if(this.outputType == OUTPUT_GRAPHICAL) {
+      this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.appendTo.removeChild(this.canvas);
       this.canvas = null;
       this.canvasCtx = null;
+      this.imageLoader.clear();
     }
   };
 
@@ -1284,7 +1299,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     }
 
     this.updateUI();
-    var self = this;
 
     this.frameGlobal = window.requestAnimationFrame(function() {
       if(!self.paused && !self.killed) {
@@ -1385,8 +1399,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         }
       }
 
-      var self = this;
-
       var onfullscreenchange = function(event) {
         if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
           if(document.fullscreenElement == self.canvas) {
@@ -1420,8 +1432,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.loadAssets = function() {
-    var self = this;
-
     this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png"], function() {
       if(self.imageLoader.hasError == true) {
         self.errorOccured = true;
@@ -1443,7 +1453,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     if(this.outputType == OUTPUT_TEXT && !this.killed) {
       this.textarea.innerHTML = this.toString();
     } else if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
-      var self = this;
       var ctx = this.canvasCtx;
       var renderBlur = renderBlur === undefined ? false : renderBlur;
       this.fontSize = FONT_SIZE;
@@ -2187,6 +2196,8 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.verticalAlignement = verticalAlignement || "default";
   this.selected = false;
 
+  var self = this;
+
   this.draw = function(canvas) {
     var ctx = canvas.getContext("2d");
     var precFillStyle = ctx.fillStyle;
@@ -2308,9 +2319,8 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.addClickAction = function(canvas, trigger) {
     if(!this.disabled) {
       this.triggerClick = trigger;
-      var self = this;
 
-      function clickFunction(evt){
+      function clickFunction(evt) {
         if(!self.disabled) {
           if(self.isInside(self.getMousePos(canvas, evt))) {
             if(self.triggerClick != null) {
@@ -2336,7 +2346,6 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.addMouseOverAction = function(canvas, trigger) {
     if(!this.disabled) {
       this.triggerHover = trigger;
-      var self = this;
 
       function mouseOverFunction(evt) {
         if(!self.disabled) {
@@ -2393,9 +2402,9 @@ function GameGroup(games) {
   this.reactor.registerEvent("onExit");
   this.reactor.registerEvent("onScoreIncreased");
 
-  this.init = function() {
-    var self = this;
+  var self = this;
 
+  this.init = function() {
     for(var i = 0; i < this.games.length; i++) {
       if(i == 0) {
         self.games[i].enableKeyMenu = true;
