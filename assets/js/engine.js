@@ -888,7 +888,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.canvasWidth = canvasWidth || CANVAS_WIDTH;
   this.canvasHeight = canvasHeight || CANVAS_HEIGHT;
   this.fontSize = FONT_SIZE;
-  this.preRenderedFont = {};
+  this.preRenderedFont;
   // Intervals, timeouts, frames
   this.intervalCountFPS;
   this.intervalPlay;
@@ -1434,7 +1434,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         self.btnBottomArrow.loadImage(self.imageLoader);
         self.btnLeftArrow.loadImage(self.imageLoader);
         self.btnRightArrow.loadImage(self.imageLoader);
-        self.preRenderFont(CAR_TO_PRERENDER, FONT_SIZE, "white", FONT_FAMILY);
         self.start();
       }
     });
@@ -1880,6 +1879,12 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
 };
 
 Game.prototype.drawTextBitmap = function(ctx, bitmapFontSet, text, size, x, y, wrap) {
+  if(bitmapFontSet == undefined || bitmapFontSet == null) {
+    this.preRenderedFont = {};
+    this.preRenderFont(CAR_TO_PRERENDER, FONT_SIZE * 2, "white", FONT_FAMILY);
+    bitmapFontSet = this.preRenderedFont;
+  }
+
   if(wrap) {
     var testCar = bitmapFontSet["A"];
     text = this.wrapTextLines(ctx, text, testCar.width * (size / testCar.height));
@@ -2151,7 +2156,7 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
     var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
     var caseY = 75 + posY * caseHeight;
 
-    this.drawTextBitmap(ctx, this.preRenderedFont, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, Math.round(caseHeight / 2), caseX + 2, caseY - Math.round(caseHeight) + 2, false);
+    this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX + 2, caseY - Math.round(caseHeight / 1.75));
   }
 };
 
