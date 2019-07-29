@@ -923,6 +923,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.btnBottomArrow;
   this.btnExitFullScreen;
   this.btnEnterFullScreen;
+  // Notification
+  this.notificationMessage;
   // Events
   this.reactor = new Reactor();
   this.reactor.registerEvent("onStart");
@@ -1528,6 +1530,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         }
       }
 
+      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
+        this.notificationMessage.draw(this.canvas);
+      }
+
       this.disableAllButtons();
 
       if(!renderBlur) {
@@ -1730,6 +1736,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           if(this.enablePause) {
             this.btnPause.enable();
           }
+
+          if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
+            this.notificationMessage.enableCloseButton();
+          }
         }
       }
 
@@ -1758,6 +1768,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnPause.disable();
       this.btnExitFullScreen.disable();
       this.btnEnterFullScreen.disable();
+
+      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
+        this.notificationMessage.disableCloseButton();
+      }
 
       this.btnTopArrow.disable();
       this.btnBottomArrow.disable();
@@ -2389,6 +2403,119 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
 
 function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height, color, colorHover, imageLoader) {
   return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc, imageLoader, verticalAlignement);
+}
+
+function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily) {
+  this.text = text;
+  this.textColor = textColor || "white";
+  this.backgroundColor = backgroundColor || "rgba(46, 204, 113, 0.75)";
+  this.delayBeforeClosing = delayBeforeClosing || 5; // second
+  this.fontSize = fontSize || Math.floor(FONT_SIZE / 1.25);
+  this.fontFamily = fontFamily || FONT_FAMILY;
+  this.animationDelay = animationDelay || 500;
+  this.timeLastFrame = 0;
+  this.animationTime = 0;
+  this.init = false;
+  this.closed = false;
+  this.closing = false;
+  this.closeButton = new Button("×", null, null, "right");
+
+  var self = this;
+
+  this.draw = function(canvas, drawTextFunction) {
+    if(!this.init) {
+      this.timeLastFrame = Date.now();
+
+      this.closeButton.addClickAction(canvas, function() {
+        self.close();
+      });
+    }
+
+    var offsetTime = Date.now() - this.timeLastFrame;
+    this.timeLastFrame = Date.now();
+
+    if(this.animationTime >= this.delayBeforeClosing * 1000 && !this.closing && !this.closed) {
+      this.close();
+    }
+
+    var ctx = canvas.getContext("2d");
+    var precFillStyle = ctx.fillStyle;
+    var precFont = ctx.font;
+    this.fontSize = this.getFontSize(ctx);
+
+    var width = canvas.width;
+    var height = this.fontSize * 2;
+
+    var offsetY = this.animationTime / this.animationDelay;
+
+    if(!this.closing) {
+      this.animationTime += offsetTime;
+    } else {
+      this.animationTime -= offsetTime;
+    }
+
+    if(this.animationTime < 0) {
+      this.closed = true;
+      this.closing = false;
+    }
+
+    if(!this.closed) {
+      var offsetY = this.animationTime / this.animationDelay;
+      var y = canvas.height - (height * (offsetY <= 1 ? offsetY : 1));
+
+      ctx.fillStyle = this.backgroundColor;
+      ctx.font = this.fontSize + "px " + this.fontFamily;
+      var textSize = ctx.measureText(this.text);
+
+      ctx.fillRect(0, y, width, height);
+
+      if(this.text != null) {
+        ctx.fillStyle = this.textColor;
+
+        var textX = (width / 2) - (textSize.width / 2);
+        var textY = y + height - (this.fontSize / 2) - 2;
+
+        ctx.fillText(this.text, Math.round(textX), Math.round(textY));
+      }
+
+      this.closeButton.y = y + 5;
+      this.closeButton.draw(canvas);
+
+      ctx.fillStyle = precFillStyle;
+      ctx.font = precFont;
+    } else {
+      this.closeButton.disable();
+    }
+
+    this.init = true;
+  };
+
+  this.close = function() {
+    if(!this.closing) {
+      this.closing = true;
+      this.animationTime = this.animationDelay;
+    }
+  };
+
+  this.open = function() {
+    this.timeLastFrame = 0;
+    this.animationTime = 0;
+    this.init = false;
+    this.closed = false;
+    this.closing = false;
+  };
+
+  this.disableCloseButton = function() {
+    this.closeButton.disable();
+  };
+
+  this.enableCloseButton = function() {
+    this.closeButton.enable();
+  };
+
+  this.getFontSize = function(ctx) {
+    return Math.floor(parseInt(ctx.font.match(/\d+/), 10) / 1.25);
+  };
 }
 
 function GameGroup(games) {
