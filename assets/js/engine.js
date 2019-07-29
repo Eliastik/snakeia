@@ -816,6 +816,8 @@ function ImageLoader() {
         if(result == true) {
           img.shift();
           self.load(img, func, game);
+        } else {
+          return func();
         }
       });
     } else {
@@ -846,10 +848,12 @@ function ImageLoader() {
         self.images[src] = image;
         self.hasError = true;
 
-        return func(true);
+        return func(false);
       }
 
-      self.loadImage(src, func);
+      setTimeout(function() {
+        self.loadImage(src, func);
+      }, 250);
     }
   };
 
