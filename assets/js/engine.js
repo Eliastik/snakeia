@@ -908,6 +908,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.btnLeftArrow;
   this.btnBottomArrow;
   this.btnExitFullScreen;
+  this.btnEnterFullScreen;
   // Events
   this.reactor = new Reactor();
   this.reactor.registerEvent("onStart");
@@ -948,6 +949,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnLeftArrow = new ButtonImage("assets/images/left.png", 112, 46, "right", "bottom", 64, 64);
       this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 56, 0, "right", "bottom", 64, 64);
       this.btnExitFullScreen = new Button(window.i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99");
+      this.btnEnterFullScreen = new Button(window.i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99");
 
       this.btnFullScreen.addClickAction(this.canvas, function() {
         self.toggleFullscreen();
@@ -1580,15 +1582,31 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             var colorRgb = hsvToRgb(addHue(IMAGE_SNAKE_HUE, playerHuman.color) / 360, IMAGE_SNAKE_SATURATION / 100, IMAGE_SNAKE_VALUE / 100);
 
             if(this.countBeforePlay > 0) {
-              this.drawMenu(ctx, [], "" + this.countBeforePlay + "\n" + window.i18next.t("engine.colorPlayer", { color: colorName }), ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"], this.fontSize, FONT_FAMILY, "center", null, false);
+              this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + "\n" + window.i18next.t("engine.colorPlayer", { color: colorName }), ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"], this.fontSize, FONT_FAMILY, "center", null, false, function() {
+                self.btnEnterFullScreen.addClickAction(self.canvas, function() {
+                  self.toggleFullscreen();
+                });
+              });
             } else {
-              this.drawMenu(ctx, [], window.i18next.t("engine.ready") + "\n" + window.i18next.t("engine.colorPlayer", { color: colorName }), ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"], this.fontSize, FONT_FAMILY, "center", null, false, null, true);
+              this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], window.i18next.t("engine.ready") + "\n" + window.i18next.t("engine.colorPlayer", { color: colorName }), ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"], this.fontSize, FONT_FAMILY, "center", null, false, function() {
+                self.btnEnterFullScreen.addClickAction(self.canvas, function() {
+                  self.toggleFullscreen();
+                });
+              }, true);
             }
           } else {
             if(this.countBeforePlay > 0) {
-              this.drawMenu(ctx, [], "" + this.countBeforePlay, "white", this.fontSize, FONT_FAMILY, "center", null, false);
+              this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay, "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
+                self.btnEnterFullScreen.addClickAction(self.canvas, function() {
+                  self.toggleFullscreen();
+                });
+              });
             } else {
-              this.drawMenu(ctx, [], window.i18next.t("engine.ready"), "white", this.fontSize, FONT_FAMILY, "center", null, false, null, true);
+              this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], window.i18next.t("engine.ready"), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
+                self.btnEnterFullScreen.addClickAction(self.canvas, function() {
+                  self.toggleFullscreen();
+                });
+              }, true);
             }
           }
         } else if(this.confirmReset && !this.gameOver) {
@@ -1728,6 +1746,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnFullScreen.disable();
       this.btnPause.disable();
       this.btnExitFullScreen.disable();
+      this.btnEnterFullScreen.disable();
 
       this.btnTopArrow.disable();
       this.btnBottomArrow.disable();

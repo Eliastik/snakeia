@@ -84,7 +84,8 @@
      "colorPlayer": "Vous êtes le Snake\nen {{color}}",
      "ready": "Prêt ?",
      "assistAI": "Assistant IA",
-     "exitFullScreen": "Quitter plein-écran"
+     "exitFullScreen": "Quitter plein-écran",
+     "enterFullScreen": "Mode plein-écran"
    }
 }, true, false);
 
@@ -156,6 +157,7 @@ i18next.addResourceBundle("en", "translation", {
     "colorPlayer": "You are the Snake\nin {{color}}",
     "ready": "Ready?",
     "assistAI": "AI assistant",
-    "exitFullScreen": "Exit fullscreen"
+    "exitFullScreen": "Exit fullscreen",
+    "enterFullScreen": "Fullscreen mode"
   }
 }, true, false);
