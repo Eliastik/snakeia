@@ -871,6 +871,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.gameFinished = false; // only used if 2 and more snakes
   this.scoreMax = false;
   this.errorOccured = false;
+  this.fullscreen = false;
   // Menus state variables
   this.enableKeyMenu = false;
   this.lastKeyMenu = -1;
@@ -906,6 +907,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.btnRightArrow;
   this.btnLeftArrow;
   this.btnBottomArrow;
+  this.btnExitFullScreen;
   // Events
   this.reactor = new Reactor();
   this.reactor.registerEvent("onStart");
@@ -945,6 +947,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64);
       this.btnLeftArrow = new ButtonImage("assets/images/left.png", 112, 46, "right", "bottom", 64, 64);
       this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 56, 0, "right", "bottom", 64, 64);
+      this.btnExitFullScreen = new Button(window.i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99");
 
       this.btnFullScreen.addClickAction(this.canvas, function() {
         self.toggleFullscreen();
@@ -1382,6 +1385,12 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       var onfullscreenchange = function(event) {
         if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
+          if(document.fullscreenElement == self.canvas) {
+            self.fullscreen = true;
+          } else {
+            self.fullscreen = false;
+          }
+
           self.autoResizeCanvas();
 
           if(document.fullscreenElement == self.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
@@ -1510,7 +1519,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       if(!renderBlur) {
         if(this.exited) {
-          this.drawMenu(ctx, [], window.i18next.t("engine.exited"), "white", this.fontSize, FONT_FAMILY, "center", null, true);
+          this.drawMenu(ctx, this.fullscreen ? [this.btnExitFullScreen] : [], window.i18next.t("engine.exited"), "white", this.fontSize, FONT_FAMILY, "center", null, true, function() {
+            self.btnExitFullScreen.addClickAction(self.canvas, function() {
+              self.toggleFullscreen();
+            });
+          });
         } else if(this.errorOccured) {
          this.drawMenu(ctx, [this.btnQuit], this.imageLoader.hasError ? window.i18next.t("engine.errorLoading") : window.i18next.t("engine.error"), "red", this.fontSize, FONT_FAMILY, "center", null, true, function() {
            self.btnQuit.addClickAction(self.canvas, function() {
@@ -1606,7 +1619,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             });
           });
         } else if(this.scoreMax && this.snakes.length <= 1) {
-          this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.scoreMax"), "green", this.fontSize, FONT_FAMILY, "center", null, true, function() {
+          this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), window.i18next.t("engine.scoreMax"), "green", this.fontSize, FONT_FAMILY, "center", null, true, function() {
             self.btnRetry.addClickAction(self.canvas, function() {
               self.selectedButton = 0;
               self.reset();
@@ -1617,9 +1630,13 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               self.selectedButton = 0;
               self.updateUI();
             });
+
+            self.btnExitFullScreen.addClickAction(self.canvas, function() {
+              self.toggleFullscreen();
+            });
           });
         } else if(this.gameOver && this.snakes.length <= 1) {
-          this.drawMenu(ctx, this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : [], window.i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, false, function() {
+          this.drawMenu(ctx, this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), window.i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, FONT_FAMILY, "center", null, false, function() {
             if(self.snakes[0].autoRetry) {
               setTimeout(function() {
                 self.selectedButton = 0;
@@ -1635,6 +1652,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
                 self.confirmExit = true;
                 self.selectedButton = 0;
                 self.updateUI();
+              });
+
+              self.btnExitFullScreen.addClickAction(self.canvas, function() {
+                self.toggleFullscreen();
               });
             }
           });
@@ -1706,6 +1727,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnInfosGame.disable();
       this.btnFullScreen.disable();
       this.btnPause.disable();
+      this.btnExitFullScreen.disable();
 
       this.btnTopArrow.disable();
       this.btnBottomArrow.disable();
