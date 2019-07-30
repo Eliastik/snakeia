@@ -77,12 +77,6 @@ String.prototype.strcmp = function(str) {
   return ((this == str) ? 0 : ((this > str) ? 1 : -1));
 };
 
-if(!String.prototype.trim) {
-  String.prototype.trim = function () {
-    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-  };
-}
-
 // https://github.com/MichalZalecki/storage-factory
 function storageFactory(storage) {
   var inMemoryStorage = {};
