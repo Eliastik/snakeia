@@ -1570,8 +1570,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, renderBlur);
 
         if(this.timerToDisplay != undefined && this.timerToDisplay != null && this.timerToDisplay >= 0) {
-          this.drawImage(ctx, "assets/images/clock.png", 18, this.headerHeight + 10, 48, 48);
-          this.drawText(ctx, "" + this.timerToDisplay, "rgba(0, 0, 0, 0.5)", FONT_SIZE, FONT_FAMILY, "default", "default", 76, this.headerHeight + 46);
+          this.drawImage(ctx, "assets/images/clock.png", this.headerHeight * 0.24, this.headerHeight + 10, this.headerHeight * 0.64, this.headerHeight * 0.64);
+          this.drawText(ctx, "" + this.timerToDisplay, "rgba(0, 0, 0, 0.5)", FONT_SIZE, FONT_FAMILY, "default", "default", this.headerHeight, this.headerHeight + this.headerHeight * 0.613);
         }
       } else if(!this.assetsLoaded && !renderBlur) {
         var percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
