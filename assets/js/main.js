@@ -1144,6 +1144,22 @@ function playLevel(level, player, type) {
           }
         });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
+        playerGame.onStart(function() {
+          levelTimer.resume();
+        });
+
+        playerGame.onPause(function() {
+          levelTimer.pause();
+        });
+
+        playerGame.onReset(function() {
+          levelTimer.reset();
+        });
+
+        playerGame.onStop(function() {
+          levelTimer.pause();
+        });
+
         levelTimer = new Timer(function() {
           playerGame.setTimeToDisplay(0);
 
@@ -1160,22 +1176,6 @@ function playLevel(level, player, type) {
           document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: seconds });
           playerGame.setTimeToDisplay(seconds);
         }));
-
-        playerGame.onStart(function() {
-          levelTimer.resume();
-        });
-
-        playerGame.onPause(function() {
-          levelTimer.pause();
-        });
-
-        playerGame.onReset(function() {
-          levelTimer.reset();
-        });
-
-        playerGame.onStop(function() {
-          levelTimer.pause();
-        });
 
         playerGame.onScoreIncreased(function() {
           if(playerSnake.score >= levelTypeValue[0]) {

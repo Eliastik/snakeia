@@ -65,6 +65,7 @@ KEY_ENTER = 13;
 // UI
 FONT_FAMILY = "Delius";
 FONT_SIZE = 32;
+HEADER_HEIGHT_DEFAULT = 75;
 TARGET_FPS = 60;
 IMAGE_SNAKE_HUE = 75;
 IMAGE_SNAKE_SATURATION = 50;
@@ -924,13 +925,14 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.canvasWidth = canvasWidth || CANVAS_WIDTH;
   this.canvasHeight = canvasHeight || CANVAS_HEIGHT;
   this.fontSize = FONT_SIZE;
+  this.headerHeight = HEADER_HEIGHT_DEFAULT;
+  this.timerToDisplay;
   this.preRenderedFont;
   // Intervals, timeouts, frames
   this.intervalCountFPS;
   this.intervalPlay;
   this.frameGlobal;
   this.frameDisplayMenu;
-  this.timerToDisplay;
   // Buttons
   this.btnFullScreen;
   this.btnPause;
@@ -978,7 +980,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.canvasCtx = this.canvas.getContext("2d");
       this.appendTo.appendChild(this.canvas);
       this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", null, 64, 64);
-      this.btnPause = new ButtonImage("assets/images/pause.png", 75, 5, "right", null, 64, 64);
+      this.btnPause = new ButtonImage("assets/images/pause.png", null, 5, null, null, 64, 64);
       this.btnContinue = new Button(window.i18next.t("engine.continue"), null, null, "center", "#3498db", "#246A99");
       this.btnRetry = new Button(window.i18next.t("engine.reset"), null, null, "center", "#3498db", "#246A99");
       this.btnQuit = new Button(window.i18next.t("engine.exit"), null, null, "center", "#3498db", "#246A99");
@@ -1486,12 +1488,20 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       var ctx = this.canvasCtx;
       var renderBlur = renderBlur === undefined ? false : renderBlur;
       this.fontSize = FONT_SIZE;
+      this.headerHeight = HEADER_HEIGHT_DEFAULT;
 
-      if(this.canvas.width <= CANVAS_WIDTH / 2) {
-        this.fontSize /= 1.5;
+      if(this.canvas.width <= CANVAS_WIDTH / 1.25) {
+        this.fontSize /= 1.25;
+        this.headerHeight = HEADER_HEIGHT_DEFAULT / 1.25;
       } else if(this.canvas.width >= CANVAS_WIDTH * 1.5) {
         this.fontSize *= 1.25;
+        this.headerHeight = HEADER_HEIGHT_DEFAULT * 1.25;
       }
+
+      this.btnPause.width = this.headerHeight * 0.85;
+      this.btnPause.y = (this.headerHeight / 2) - (this.btnPause.height / 2);
+      this.btnFullScreen.width = this.headerHeight * 0.85;
+      this.btnFullScreen.y = (this.headerHeight / 2) - (this.btnFullScreen.height / 2);
 
       if(renderBlur) {
         ctx.filter = "blur(5px)";
@@ -1501,28 +1511,29 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       ctx.fillStyle = "rgba(204, 207, 211, 1)";
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.fillStyle = "#27AE60";
-      ctx.fillRect(0, 0, this.canvas.width, 75);
+      ctx.fillRect(0, 0, this.canvas.width, this.headerHeight);
       ctx.font = this.fontSize + "px " + FONT_FAMILY;
       ctx.fillStyle = "black";
 
       this.btnFullScreen.draw(this);
 
       if(this.enablePause) {
+        this.btnPause.x = this.btnFullScreen.x - this.btnPause.width - 10;
         this.btnPause.draw(this);
       }
 
       if(this.assetsLoaded && !this.errorOccured) {
-        var caseHeight = Math.floor((this.canvas.height - 75) / this.grid.height);
+        var caseHeight = Math.floor((this.canvas.height - this.headerHeight) / this.grid.height);
         var caseWidth = Math.floor(this.canvas.width / this.grid.width);
         caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
         caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
 
-        this.drawImage(ctx, "assets/images/fruit.png", 5, 5, 64, 64);
+        this.drawImage(ctx, "assets/images/fruit.png", 5, 5, this.headerHeight * 0.85, this.headerHeight * 0.85);
 
         if(this.snakes.length <= 1) {
-          this.drawText(ctx, "× " + this.snakes[0].score, "black", FONT_SIZE, FONT_FAMILY, "default", "default", 68, 50);
+          this.drawText(ctx, "× " + this.snakes[0].score, "black", this.headerHeight * 0.43, FONT_FAMILY, "default", "default", this.headerHeight * 0.9, this.headerHeight * 0.67);
         } else {
-          this.drawText(ctx, window.i18next.t("engine.num") + this.numFruit, "black", FONT_SIZE, FONT_FAMILY, "default", "default", 68, 50);
+          this.drawText(ctx, window.i18next.t("engine.num") + this.numFruit, "black", this.headerHeight * 0.43, FONT_FAMILY, "default", "default", this.headerHeight * 0.9, this.headerHeight * 0.67);
         }
 
         var totalWidth = caseWidth * this.grid.width;
@@ -1530,7 +1541,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         for(var i = 0; i < this.grid.height; i++) {
           for(var j = 0; j < this.grid.width; j++) {
             var caseX = Math.floor(j * caseWidth + ((this.canvas.width - totalWidth) / 2));
-            var caseY = 75 + i * caseHeight;
+            var caseY = this.headerHeight + i * caseHeight;
 
             if((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
               ctx.fillStyle = "rgba(127, 140, 141, 0.75)";
@@ -1546,8 +1557,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, renderBlur);
 
         if(this.timerToDisplay != undefined && this.timerToDisplay != null && this.timerToDisplay >= 0) {
-          this.drawImage(ctx, "assets/images/clock.png", 18, 80, 48, 48);
-          this.drawText(ctx, "" + this.timerToDisplay, "rgba(0, 0, 0, 0.5)", FONT_SIZE, FONT_FAMILY, "default", "default", 76, 116);
+          this.drawImage(ctx, "assets/images/clock.png", 18, this.headerHeight + 10, 48, 48);
+          this.drawText(ctx, "" + this.timerToDisplay, "rgba(0, 0, 0, 0.5)", FONT_SIZE, FONT_FAMILY, "default", "default", 76, this.headerHeight + 46);
         }
       } else if(!this.assetsLoaded && !renderBlur) {
         var percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
@@ -2124,7 +2135,7 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       var posX = position.x;
       var posY = position.y;
       var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
-      var caseY = 75 + posY * caseHeight;
+      var caseY = this.headerHeight + posY * caseHeight;
       var imageLoc = "";
 
       if(i == 0) {
@@ -2238,7 +2249,7 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
     var posX = position.x;
     var posY = position.y;
     var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
-    var caseY = 75 + posY * caseHeight;
+    var caseY = this.headerHeight + posY * caseHeight;
 
     this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
   }
