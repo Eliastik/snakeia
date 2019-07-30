@@ -1107,6 +1107,7 @@ function playLevel(level, player, type) {
     var notifErrorColor = "rgba(231, 76, 60, 0.5)";
     var notifInfosColor = "rgba(52, 152, 219, 0.5)";
     var notifInfo;
+    var textToDisplayGoal;
 
     document.getElementById("backToMenuGame").onclick = function() {
       if(confirm(window.i18next.t("game.confirmQuit"))) {
@@ -1292,24 +1293,21 @@ function playLevel(level, player, type) {
 
     function displayInfosGoal() {
       document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
-      var textToDisplay;
 
       if(levelType == LEVEL_REACH_SCORE) {
-        textToDisplay = window.i18next.t("levels.reachScore", { value: levelTypeValue });
+        textToDisplayGoal = window.i18next.t("levels.reachScore", { value: levelTypeValue });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
-        textToDisplay = window.i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
+        textToDisplayGoal = window.i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
         document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: levelTypeValue[1] });
       } else if(levelType == LEVEL_REACH_MAX_SCORE) {
-        textToDisplay = window.i18next.t("levels.reachMaxScore");
+        textToDisplayGoal = window.i18next.t("levels.reachMaxScore");
       } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
-        textToDisplay = window.i18next.t("levels.multiBestScore", { count: numberIA });
+        textToDisplayGoal = window.i18next.t("levels.multiBestScore", { count: numberIA });
       } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
-        textToDisplay = window.i18next.t("levels.multiReachScoreFirst", { value: levelTypeValue, count: numberIA });
+        textToDisplayGoal = window.i18next.t("levels.multiReachScoreFirst", { value: levelTypeValue, count: numberIA });
       }
 
-      document.getElementById("gameOrder").innerHTML = textToDisplay;
-      notifInfo = new NotificationMessage(textToDisplay, null, notifInfosColor, 7);
-      playerGame.setNotification(notifInfo);
+      document.getElementById("gameOrder").innerHTML = textToDisplayGoal;
     }
 
     initGoal();
@@ -1330,6 +1328,11 @@ function playLevel(level, player, type) {
       document.getElementById("gameStatusError").innerHTML = "";
       notificationEndDisplayed = false;
       displayInfosGoal();
+    });
+
+    playerGame.onStart(function() {
+      notifInfo = new NotificationMessage(textToDisplayGoal, null, notifInfosColor, 10);
+      playerGame.setNotification(notifInfo);
     });
   } else {
     return false;

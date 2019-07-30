@@ -1285,6 +1285,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     this.grid = null;
     this.snakes = null;
+    this.preRenderedFont = null;
 
     if(this.outputType == OUTPUT_TEXT) {
       this.appendTo.removeChild(this.textarea);
@@ -1448,7 +1449,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.loadAssets = function() {
-    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png"], function() {
+    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png"], function() {
       if(self.imageLoader.hasError == true) {
         self.errorOccured = true;
         self.updateUI();
@@ -1491,10 +1492,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       ctx.font = this.fontSize + "px " + FONT_FAMILY;
       ctx.fillStyle = "black";
 
-      this.btnFullScreen.draw(this.canvas);
+      this.btnFullScreen.draw(this);
 
       if(this.enablePause) {
-        this.btnPause.draw(this.canvas);
+        this.btnPause.draw(this);
       }
 
       if(this.assetsLoaded && !this.errorOccured) {
@@ -1541,10 +1542,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       for(var i = 0; i < this.snakes.length; i++) {
         if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
-          this.btnTopArrow.draw(this.canvas);
-          this.btnBottomArrow.draw(this.canvas);
-          this.btnRightArrow.draw(this.canvas);
-          this.btnLeftArrow.draw(this.canvas);
+          this.btnTopArrow.draw(this);
+          this.btnBottomArrow.draw(this);
+          this.btnRightArrow.draw(this);
+          this.btnLeftArrow.draw(this);
           break;
         }
       }
@@ -2056,7 +2057,7 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
         }
 
         buttons[i].enable();
-        buttons[i].draw(self.canvas);
+        buttons[i].draw(self);
 
         if(self.selectedButton == i && self.lastKeyMenu == KEY_ENTER && buttons[i].triggerClick != null && !buttons[i].disabled) {
           buttons[i].triggerClick();
@@ -2243,7 +2244,8 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
 
   var self = this;
 
-  this.draw = function(canvas) {
+  this.draw = function(game) {
+    var canvas = game.canvas;
     var ctx = canvas.getContext("2d");
     var precFillStyle = ctx.fillStyle;
     var precFont = ctx.font;
@@ -2268,12 +2270,15 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
         this.height = imgHeight * 1.5;
       }
     } else if(this.text != null) {
+      var textWrapped = game.wrapTextLines(ctx, text, null, this.fontSize);
+      var heightText = textWrapped["height"];
+
       if(this.autoWidth) {
         this.width = textSize.width + 25;
       }
 
       if(this.autoHeight) {
-        this.height = this.fontSize * 1.75;
+        this.height = heightText + this.fontSize / 1.5;
       }
     }
 
@@ -2329,16 +2334,16 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
       ctx.fillStyle = this.fontColor;
 
       var textX = this.x + (this.width / 2) - (textSize.width / 2);
-      var textY = this.y + (this.height) - (this.fontSize / 2);
+      var textY = this.y + this.fontSize + this.fontSize / 5;
 
-      ctx.fillText(this.text, Math.round(textX), Math.round(textY));
+      game.drawText(ctx, this.text, this.fontColor, this.fontSize, this.fontFamily, (this.alignement == "center" ? "center" : "default"), "default", Math.round(textX), Math.round(textY), true);
     }
 
     ctx.fillStyle = precFillStyle;
     ctx.font = precFont;
 
     if(!this.init) {
-      this.addMouseOverAction(canvas, null);
+      this.addMouseOverAction(game, null);
     }
 
     this.init = true;
@@ -2388,13 +2393,13 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
     }
   };
 
-  this.addMouseOverAction = function(canvas, trigger) {
+  this.addMouseOverAction = function(game, trigger) {
     if(!this.disabled) {
       this.triggerHover = trigger;
 
       function mouseOverFunction(evt) {
         if(!self.disabled) {
-          if(self.isInside(self.getMousePos(canvas, evt))) {
+          if(self.isInside(self.getMousePos(game.canvas, evt))) {
             if(self.triggerHover != null && !self.disabled) {
               self.triggerHover();
             }
@@ -2405,11 +2410,11 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
             self.hovered = false;
           }
 
-          self.draw(canvas);
+          self.draw(game);
         }
       };
 
-      canvas.addEventListener("mousemove", mouseOverFunction, false);
+      game.canvas.addEventListener("mousemove", mouseOverFunction, false);
     }
   };
 
@@ -2438,7 +2443,7 @@ function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height
 
 function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily) {
   this.text = text;
-  this.textColor = textColor || "rgba(255, 255, 255, 0.5)";
+  this.textColor = textColor || "rgba(255, 255, 255, 0.75)";
   this.backgroundColor = backgroundColor || "rgba(46, 204, 113, 0.5)";
   this.delayBeforeClosing = delayBeforeClosing || 5; // second
   this.fontSize = fontSize || Math.floor(FONT_SIZE / 1.25);
@@ -2449,7 +2454,7 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
   this.init = false;
   this.closed = false;
   this.closing = false;
-  this.closeButton = new Button("×", null, null, "right", null, null, 24, 24);
+  this.closeButton;
 
   var self = this;
 
@@ -2460,6 +2465,7 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
       if(!this.init) {
         this.timeLastFrame = Date.now();
 
+        this.closeButton = new ButtonImage("assets/images/close.png", null, 5, "right", null, 24, 24, null, null, game.imageLoader);
         this.closeButton.addClickAction(canvas, function() {
           self.close();
         });
@@ -2503,7 +2509,7 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
         game.drawText(ctx, this.text, this.textColor, this.fontSize, this.fontFamily, "center", "default", null, y + this.fontSize, true);
 
         this.closeButton.y = y + 5;
-        this.closeButton.draw(canvas);
+        this.closeButton.draw(game);
       } else {
         this.closeButton.disable();
       }
