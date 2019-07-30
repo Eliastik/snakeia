@@ -1140,6 +1140,22 @@ function playLevel(level, player, type) {
           }
         });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
+        levelTimer = new Timer(function() {
+          playerGame.setTimeToDisplay(0);
+
+          if(!notificationEndDisplayed) {
+            playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 1));
+            notificationEndDisplayed = true;
+          }
+
+          group.stopAll(true);
+          document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
+          document.getElementById("gameStatus").innerHTML = "";
+        }, levelTypeValue[1] * 1000 - 1, new TimerInterval(function() {
+          document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: Math.round(levelTimer.getTime() / 1000) });
+          playerGame.setTimeToDisplay(Math.round(levelTimer.getTime() / 1000));
+        }));
+
         playerGame.onStart(function() {
           levelTimer.resume();
         });
@@ -1155,23 +1171,6 @@ function playLevel(level, player, type) {
         playerGame.onStop(function() {
           levelTimer.pause();
         });
-
-        levelTimer = new Timer(function() {
-          playerGame.setTimeToDisplay(0);
-
-          if(!notificationEndDisplayed) {
-            playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 1));
-            notificationEndDisplayed = true;
-          }
-
-          group.stopAll(true);
-          document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
-          document.getElementById("gameStatus").innerHTML = "";
-        }, levelTypeValue[1] * 1000 - 1, new TimerInterval(function() {
-          var seconds = Math.round(levelTimer.getTime() / 1000);
-          document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: seconds });
-          playerGame.setTimeToDisplay(seconds);
-        }));
 
         playerGame.onScoreIncreased(function() {
           if(playerSnake.score >= levelTypeValue[0]) {

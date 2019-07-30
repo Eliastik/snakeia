@@ -1216,8 +1216,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               self.clearIntervalPlay();
               self.paused = false;
               self.isReseted = false;
-              self.tick();
               self.reactor.dispatchEvent("onStart");
+              self.tick();
             } else if(self.countBeforePlay >= 0) {
               self.lastFrame = self.frame > 0 ? self.frame : 1;
               self.testFrameRate();
