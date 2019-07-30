@@ -1546,7 +1546,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       }
 
       if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
-        this.notificationMessage.draw(this.canvas);
+        this.notificationMessage.draw(this);
       }
 
       this.disableAllButtons();
@@ -2029,7 +2029,7 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
     var totalHeight = heightText + heightButtons;
     var startY = self.canvas.height / 2 - totalHeight / 2 + 16;
 
-    self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY, true).height;
+    self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY, true);
 
     if(buttons != null) {
       for(var i = 0; i < buttons.length; i++) {
@@ -2433,76 +2433,66 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
   this.init = false;
   this.closed = false;
   this.closing = false;
-  this.closeButton = new Button("×", null, null, "right");
+  this.closeButton = new Button("×", null, null, "right", null, null, 24, 24);
 
   var self = this;
 
-  this.draw = function(canvas, drawTextFunction) {
-    if(!this.init) {
-      this.timeLastFrame = Date.now();
+  this.draw = function(game) {
+    if(this.text != null) {
+      var canvas = game.canvas;
 
-      this.closeButton.addClickAction(canvas, function() {
-        self.close();
-      });
-    }
+      if(!this.init) {
+        this.timeLastFrame = Date.now();
 
-    var offsetTime = Date.now() - this.timeLastFrame;
-    this.timeLastFrame = Date.now();
-
-    if(this.animationTime >= this.delayBeforeClosing * 1000 && !this.closing && !this.closed) {
-      this.close();
-    }
-
-    var ctx = canvas.getContext("2d");
-    var precFillStyle = ctx.fillStyle;
-    var precFont = ctx.font;
-    this.fontSize = this.getFontSize(ctx);
-
-    var width = canvas.width;
-    var height = this.fontSize * 2;
-
-    var offsetY = this.animationTime / this.animationDelay;
-
-    if(!this.closing) {
-      this.animationTime += offsetTime;
-    } else {
-      this.animationTime -= offsetTime;
-    }
-
-    if(this.animationTime < 0) {
-      this.closed = true;
-      this.closing = false;
-    }
-
-    if(!this.closed) {
-      var offsetY = this.animationTime / this.animationDelay;
-      var y = canvas.height - (height * (offsetY <= 1 ? offsetY : 1));
-
-      ctx.fillStyle = this.backgroundColor;
-      ctx.font = this.fontSize + "px " + this.fontFamily;
-      var textSize = ctx.measureText(this.text);
-
-      ctx.fillRect(0, y, width, height);
-
-      if(this.text != null) {
-        ctx.fillStyle = this.textColor;
-
-        var textX = (width / 2) - (textSize.width / 2);
-        var textY = y + height - (this.fontSize / 2) - 2;
-
-        ctx.fillText(this.text, Math.round(textX), Math.round(textY));
+        this.closeButton.addClickAction(canvas, function() {
+          self.close();
+        });
       }
 
-      this.closeButton.y = y + 5;
-      this.closeButton.draw(canvas);
+      var offsetTime = Date.now() - this.timeLastFrame;
+      this.timeLastFrame = Date.now();
 
-      ctx.fillStyle = precFillStyle;
-      ctx.font = precFont;
-    } else {
-      this.closeButton.disable();
+      if(this.animationTime >= this.delayBeforeClosing * 1000 && !this.closing && !this.closed) {
+        this.close();
+      }
+
+      var ctx = canvas.getContext("2d");
+      this.fontSize = this.getFontSize(ctx);
+      var heightText = this.fontSize * game.wrapTextLines(ctx, text).split("\n").length;
+
+      var height = heightText + this.fontSize / 2;
+      var width = canvas.width;
+
+      var offsetY = this.animationTime / this.animationDelay;
+
+      if(!this.closing) {
+        this.animationTime += offsetTime;
+      } else {
+        this.animationTime -= offsetTime;
+      }
+
+      if(this.animationTime < 0) {
+        this.closed = true;
+        this.closing = false;
+      }
+
+      if(!this.closed) {
+        var offsetY = this.animationTime / this.animationDelay;
+        var y = canvas.height - (height * (offsetY <= 1 ? offsetY : 1));
+
+        ctx.fillStyle = this.backgroundColor;
+        ctx.fillRect(0, y, width, height);
+
+        game.drawText(ctx, this.text, this.textColor, this.fontSize, this.fontFamily, "center", "default", null, y + this.fontSize, true);
+
+        this.closeButton.y = y + 5;
+        this.closeButton.draw(canvas);
+      } else {
+        this.closeButton.disable();
+      }
+
+      this.init = true;
     }
-
-    this.init = true;
   };
 
   this.close = function() {
