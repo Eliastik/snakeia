@@ -1851,6 +1851,12 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     this.timerToDisplay = time;
   };
 
+  this.setBestScore = function(score) {
+    if(score != undefined && score != null && score.trim() != "") {
+      this.bestScoreToDisplay = score;
+    }
+  };
+
   this.getDebugText = function() {
     return window.i18next.t("engine.debug.fps") + " : " + this.currentFPS + " / " + window.i18next.t("engine.debug.frames") + " : " + this.frame + " / " + window.i18next.t("engine.debug.ticks") + " : " + Math.floor(this.frame / this.speed) + " / " + window.i18next.t("engine.debug.speed") + " : " + this.speed;
   };

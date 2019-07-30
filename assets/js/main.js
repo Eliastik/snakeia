@@ -984,7 +984,7 @@ function levelCompatible(levelType, version) {
   return true;
 }
 
-function printResultLevel(level, player, levelType, type) {
+function printResultLevel(level, player, levelType, type, shortVersion) {
   var val = "";
   var resultLevel = getLevelSave(level, player, type);
 
@@ -998,16 +998,18 @@ function printResultLevel(level, player, levelType, type) {
     return "";
   }
 
-  if(levelType == LEVEL_REACH_SCORE) {
-    val = window.i18next.t("levels.bestScore", { count: resultLevel });
-  } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
-    val = window.i18next.t("levels.bestTime", { count: Math.round(resultLevel) });
-  } else if(levelType == LEVEL_REACH_MAX_SCORE) {
-    val = window.i18next.t("levels.bestScore", { count: resultLevel });
-  } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
-    val = window.i18next.t("levels.bestScore", { count: resultLevel });
-  } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
-    val = window.i18next.t("levels.bestTime", { count: Math.round(resultLevel) });
+  if(shortVersion) {
+    if(levelType == LEVEL_REACH_SCORE || levelType == LEVEL_REACH_MAX_SCORE || levelType == LEVEL_MULTI_BEST_SCORE) {
+      val = window.i18next.t("levels.bestScoreShort", { count: resultLevel });
+    } else if(levelType == LEVEL_REACH_SCORE_ON_TIME || levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
+      val = window.i18next.t("levels.bestTimeShort", { count: Math.round(resultLevel) });
+    }
+  } else {
+    if(levelType == LEVEL_REACH_SCORE || levelType == LEVEL_REACH_MAX_SCORE || levelType == LEVEL_MULTI_BEST_SCORE) {
+      val = window.i18next.t("levels.bestScore", { count: resultLevel });
+    } else if(levelType == LEVEL_REACH_SCORE_ON_TIME || levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
+      val = window.i18next.t("levels.bestTime", { count: Math.round(resultLevel) });
+    }
   }
 
   return val;
@@ -1123,7 +1125,7 @@ function playLevel(level, player, type) {
         playerGame.onScoreIncreased(function() {
           if(playerSnake.score >= levelTypeValue) {
             setLevelSave([true, playerSnake.score], level, player, type);
-            document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
+            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
 
             if(!notificationEndDisplayed) {
@@ -1183,7 +1185,7 @@ function playLevel(level, player, type) {
             levelTimer.reset();
             group.stopAll(true);
             setLevelSave([true, stop / 1000], level, player, type);
-            document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
+            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
 
             if(!notificationEndDisplayed) {
@@ -1196,7 +1198,7 @@ function playLevel(level, player, type) {
         playerGame.onStop(function() {
           if(playerGame.scoreMax) {
             setLevelSave([true, playerSnake.score], level, player, type);
-            document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
+            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
 
             if(!notificationEndDisplayed) {
@@ -1220,7 +1222,7 @@ function playLevel(level, player, type) {
           for(var i = 0; i < winners.index.length; i++) {
             if(winners.index == 0) {
               setLevelSave([true, playerSnake.score], level, player, type);
-              document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
+              playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
               document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
 
               if(!notificationEndDisplayed) {
@@ -1271,7 +1273,7 @@ function playLevel(level, player, type) {
                 if(group.games[i].snakes[j] == playerSnake) {
                   group.stopAll(true);
                   setLevelSave([true, time], level, player, type);
-                  document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
+                  playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
                   document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
 
                   if(!notificationEndDisplayed) {
@@ -1295,7 +1297,7 @@ function playLevel(level, player, type) {
     }
 
     function displayInfosGoal() {
-      document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
+      playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
       if(levelType == LEVEL_REACH_SCORE) {
         textToDisplayGoal = window.i18next.t("levels.reachScore", { value: levelTypeValue });

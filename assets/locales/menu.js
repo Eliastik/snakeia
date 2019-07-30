@@ -151,6 +151,9 @@ i18next.addResourceBundle("fr", "translation", {
     "bestScore": "Meilleur score : {{count}}",
     "bestTime": "Meilleur temps : {{count}} seconde",
     "bestTime_plural": "Meilleur temps : {{count}} secondes",
+    "bestScoreShort": "× {{count}}",
+    "bestTimeShort": "{{count}} seconde",
+    "bestTimeShort_plural": "{{count}} secondes",
     "timerRemaining": "Il reste {{count}} seconde",
     "timerRemaining_plural": "Il reste {{count}} secondes",
     "localstorageDisabled": "Les cookies sont désactivés sur votre navigateur. Vous perdrez votre progression au prochain rechargement de la page. Activez-les puis rechargez la page pour éviter cela."
@@ -294,6 +297,9 @@ i18next.addResourceBundle("en", "translation", {
     "bestTime_plural": "Best time: {{count}} seconds",
     "timerRemaining": "{{count}} second left",
     "timerRemaining_plural": "{{count}} seconds left",
+    "bestScoreShort": "× {{count}}",
+    "bestTimeShort": "{{count}} second",
+    "bestTimeShort_plural": "{{count}} seconds",
     "localstorageDisabled": "Cookies are disabled on your browser. You will lose your progress the next time you reload the page. Activate them and reload the page to avoid this."
   }
 }, true, false);
