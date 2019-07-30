@@ -74,7 +74,9 @@ const CACHE_URLS = [
   "assets/images/up.png",
   "assets/images/left.png",
   "assets/images/right.png",
-  "assets/images/bottom.png"
+  "assets/images/trophy.png",
+  "assets/images/clock.png",
+  "assets/images/close.png"
 ];
 
 self.addEventListener('install', event => {

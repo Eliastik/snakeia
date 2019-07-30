@@ -1145,17 +1145,20 @@ function playLevel(level, player, type) {
         });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
         levelTimer = new Timer(function() {
-          group.stopAll(true);
-          document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
+          playerGame.setTimeToDisplay(0);
 
           if(!notificationEndDisplayed) {
             playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 1));
             notificationEndDisplayed = true;
           }
 
+          group.stopAll(true);
+          document.getElementById("gameStatusError").innerHTML = window.i18next.t("levels.goalNotAchieved");
           document.getElementById("gameStatus").innerHTML = "";
         }, levelTypeValue[1] * 1000 - 1, new TimerInterval(function() {
-          document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: Math.round(levelTimer.getTime() / 1000) });
+          var seconds = Math.round(levelTimer.getTime() / 1000);
+          document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: seconds });
+          playerGame.setTimeToDisplay(seconds);
         }));
 
         playerGame.onStart(function() {
@@ -1299,6 +1302,7 @@ function playLevel(level, player, type) {
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
         textToDisplayGoal = window.i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
         document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: levelTypeValue[1] });
+        playerGame.setTimeToDisplay(levelTypeValue[1]);
       } else if(levelType == LEVEL_REACH_MAX_SCORE) {
         textToDisplayGoal = window.i18next.t("levels.reachMaxScore");
       } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
@@ -1331,8 +1335,10 @@ function playLevel(level, player, type) {
     });
 
     playerGame.onStart(function() {
-      notifInfo = new NotificationMessage(textToDisplayGoal, null, notifInfosColor, 10);
-      playerGame.setNotification(notifInfo);
+      if(!notificationEndDisplayed) {
+        notifInfo = new NotificationMessage(textToDisplayGoal, null, notifInfosColor, 10);
+        playerGame.setNotification(notifInfo);
+      }
     });
   } else {
     return false;

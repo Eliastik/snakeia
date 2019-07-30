@@ -817,6 +817,7 @@ function ImageLoader() {
           img.shift();
           self.load(img, func, game);
         } else {
+          self.hasError = true;
           return func();
         }
       });
@@ -836,18 +837,23 @@ function ImageLoader() {
     image.src = src;
 
     image.onload = function() {
-      self.images[src] = image;
-      self.triedLoading = 0;
+      if(self.images != null) {
+        self.images[src] = image;
+      } else {
+        return func(false);
+      }
 
+      self.triedLoading = 0;
       return func(true);
     };
 
     image.onerror = function() {
       if(self.triedLoading >= 5) {
-        self.triedLoading = 0;
-        self.images[src] = image;
-        self.hasError = true;
+        if(self.images != null) {
+          self.images[src] = image;
+        }
 
+        self.triedLoading = 0;
         return func(false);
       }
 
@@ -858,7 +864,11 @@ function ImageLoader() {
   };
 
   this.get = function(src) {
-    return this.images[src];
+    if(this.images != null) {
+      return this.images[src];
+    } else {
+      return null;
+    }
   };
 
   this.clear = function() {
@@ -920,6 +930,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.intervalPlay;
   this.frameGlobal;
   this.frameDisplayMenu;
+  this.timerToDisplay;
   // Buttons
   this.btnFullScreen;
   this.btnPause;
@@ -976,10 +987,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnOK = new Button(window.i18next.t("engine.ok"), null, null, "center", "#3498db", "#246A99");
       this.btnAbout = new Button(window.i18next.t("engine.about"), null, null, "center", "#3498db", "#246A99");
       this.btnInfosGame = new Button(window.i18next.t("engine.infosGame"), null, null, "center", "#3498db", "#246A99");
-      this.btnTopArrow = new ButtonImage("assets/images/up.png", 56, 100, "right", "bottom", 64, 64);
-      this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64);
-      this.btnLeftArrow = new ButtonImage("assets/images/left.png", 112, 46, "right", "bottom", 64, 64);
-      this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 56, 0, "right", "bottom", 64, 64);
+      this.btnTopArrow = new ButtonImage("assets/images/up.png", 56, 100, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
+      this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
+      this.btnLeftArrow = new ButtonImage("assets/images/left.png", 112, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
+      this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 56, 0, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
       this.btnExitFullScreen = new Button(window.i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99");
       this.btnEnterFullScreen = new Button(window.i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99");
 
@@ -1073,14 +1084,12 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           this.canvas.width = this.canvasWidth;
           this.canvas.height = this.canvasHeight;
         }
-
-        this.updateUI();
       } else if(document.fullscreenElement == this.canvas) {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
-
-        this.updateUI();
       }
+
+      this.updateUI();
     }
   };
 
@@ -1449,21 +1458,25 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.loadAssets = function() {
-    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png"], function() {
-      if(self.imageLoader.hasError == true) {
-        self.errorOccured = true;
-        self.updateUI();
-      } else {
-        self.assetsLoaded = true;
-        self.btnFullScreen.loadImage(self.imageLoader);
-        self.btnPause.loadImage(self.imageLoader);
-        self.btnTopArrow.loadImage(self.imageLoader);
-        self.btnBottomArrow.loadImage(self.imageLoader);
-        self.btnLeftArrow.loadImage(self.imageLoader);
-        self.btnRightArrow.loadImage(self.imageLoader);
-        self.start();
-      }
-    }, this);
+    if(!this.errorOccured) {
+      this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/clock.png"], function() {
+        if(self.imageLoader.hasError == true) {
+          self.errorOccured = true;
+          self.updateUI();
+        } else {
+          self.assetsLoaded = true;
+          self.btnFullScreen.loadImage(self.imageLoader);
+          self.btnPause.loadImage(self.imageLoader);
+          self.btnTopArrow.loadImage(self.imageLoader);
+          self.btnBottomArrow.loadImage(self.imageLoader);
+          self.btnLeftArrow.loadImage(self.imageLoader);
+          self.btnRightArrow.loadImage(self.imageLoader);
+          self.start();
+        }
+      }, this);
+    } else {
+      this.updateUI();
+    }
   };
 
   this.updateUI = function(renderBlur) {
@@ -1531,9 +1544,14 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         }
 
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, renderBlur);
+
+        if(this.timerToDisplay != undefined && this.timerToDisplay != null && this.timerToDisplay >= 0) {
+          this.drawImage(ctx, "assets/images/clock.png", 18, 80, 48, 48);
+          this.drawText(ctx, "" + this.timerToDisplay, "rgba(0, 0, 0, 0.5)", FONT_SIZE, FONT_FAMILY, "default", "default", 76, 116);
+        }
       } else if(!this.assetsLoaded && !renderBlur) {
         var percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
-        this.drawMenu(ctx, [], window.i18next.t("engine.loading") + "\n" + percentLoaded + " %", "white", this.fontSize, FONT_FAMILY, "center", null, true);
+        this.drawMenu(ctx, [], window.i18next.t("engine.loading") + "\n" + percentLoaded + "%", "white", this.fontSize, FONT_FAMILY, "center", null, true);
       }
 
       if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
@@ -1803,6 +1821,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     this.notificationMessage = notification;
     this.updateUI();
+  };
+
+  this.setTimeToDisplay = function(time) {
+    this.timerToDisplay = time;
   };
 
   this.getDebugText = function() {
@@ -2425,7 +2447,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
     }
   };
 
-  this.removeHoverAction = function(trigger) {
+  this.removeHoverAction = function() {
     if(self.triggerHover != null)  {
       self.triggerHover = null;
     }
@@ -2472,7 +2494,7 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
       if(!this.init) {
         this.timeLastFrame = Date.now();
 
-        this.closeButton = new ButtonImage("assets/images/close.png", null, 5, "right", null, 24, 24, null, null, game.imageLoader);
+        this.closeButton = new ButtonImage("assets/images/close.png", null, 5, "right", null, 32, 32, null, null, game.imageLoader);
         this.closeButton.addClickAction(canvas, function() {
           self.close();
         });
