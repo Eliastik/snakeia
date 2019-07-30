@@ -989,13 +989,13 @@ function printResultLevel(level, player, levelType, type) {
   var resultLevel = getLevelSave(level, player, type);
 
   if(resultLevel == null) {
-    return false;
+    return "";
   }
 
   var resultLevel = resultLevel[1];
 
   if(resultLevel <= 0) {
-    return false;
+    return "";
   }
 
   if(levelType == LEVEL_REACH_SCORE) {
@@ -1010,8 +1010,7 @@ function printResultLevel(level, player, levelType, type) {
     val = window.i18next.t("levels.bestTime", { count: Math.round(resultLevel) });
   }
 
-  document.getElementById("resultLevels").innerHTML = val;
-  return true;
+  return val;
 }
 
 function playLevel(level, player, type) {
@@ -1123,7 +1122,7 @@ function playLevel(level, player, type) {
         playerGame.onScoreIncreased(function() {
           if(playerSnake.score >= levelTypeValue) {
             setLevelSave([true, playerSnake.score], level, player, type);
-            printResultLevel(level, player, levelType, type);
+            document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
 
             if(!notificationEndDisplayed) {
@@ -1180,7 +1179,7 @@ function playLevel(level, player, type) {
             levelTimer.reset();
             group.stopAll(true);
             setLevelSave([true, stop / 1000], level, player, type);
-            printResultLevel(level, player, levelType, type);
+            document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
 
             if(!notificationEndDisplayed) {
@@ -1193,7 +1192,7 @@ function playLevel(level, player, type) {
         playerGame.onStop(function() {
           if(playerGame.scoreMax) {
             setLevelSave([true, playerSnake.score], level, player, type);
-            printResultLevel(level, player, levelType, type);
+            document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
             document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
 
             if(!notificationEndDisplayed) {
@@ -1217,7 +1216,7 @@ function playLevel(level, player, type) {
           for(var i = 0; i < winners.index.length; i++) {
             if(winners.index == 0) {
               setLevelSave([true, playerSnake.score], level, player, type);
-              printResultLevel(level, player, levelType, type);
+              document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
               document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
 
               if(!notificationEndDisplayed) {
@@ -1268,7 +1267,7 @@ function playLevel(level, player, type) {
                 if(group.games[i].snakes[j] == playerSnake) {
                   group.stopAll(true);
                   setLevelSave([true, time], level, player, type);
-                  printResultLevel(level, player, levelType, type);
+                  document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
                   document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.goalAchieved");
 
                   if(!notificationEndDisplayed) {
@@ -1292,7 +1291,7 @@ function playLevel(level, player, type) {
     }
 
     function displayInfosGoal() {
-      printResultLevel(level, player, levelType, type);
+      document.getElementById("resultLevels").innerHTML = printResultLevel(level, player, levelType, type);
       var textToDisplay;
 
       if(levelType == LEVEL_REACH_SCORE) {
@@ -1418,7 +1417,9 @@ function getListLevel(player, type) {
       } else if(!levelCompatible(levels[key]["type"], levels[key]["version"])) {
         var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + window.i18next.t("levels.notCompatible") + '" data-balloon-length="fit" data-balloon-pos="up">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
       } else {
-        var button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+        var resultLevel = printResultLevel(key, player, levels[key]["type"], type);
+
+        var button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');" ' + (resultLevel.trim() != "" ? 'aria-label="' + printResultLevel(key, player, levels[key]["type"], type) + '" data-balloon-length="fit" data-balloon-pos="up"' : '') + '>' + window.i18next.t("levels.level") + ' ' + index + '</button>';
       }
 
       if(index == 1) {
