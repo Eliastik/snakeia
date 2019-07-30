@@ -1499,8 +1499,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       }
 
       this.btnPause.width = this.headerHeight * 0.85;
+      this.btnPause.height = this.btnPause.width;
       this.btnPause.y = (this.headerHeight / 2) - (this.btnPause.height / 2);
       this.btnFullScreen.width = this.headerHeight * 0.85;
+      this.btnFullScreen.height = this.btnFullScreen.width;
       this.btnFullScreen.y = (this.headerHeight / 2) - (this.btnFullScreen.height / 2);
 
       if(renderBlur) {
