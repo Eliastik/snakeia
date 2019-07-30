@@ -1868,7 +1868,7 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
   ctx.filter = "none";
 
   if(wrap) {
-    text = this.wrapTextLines(ctx, text);
+    text = this.wrapTextLines(ctx, text)["text"];
   }
 
   var lines = text.split('\n');
@@ -1925,7 +1925,7 @@ Game.prototype.drawTextBitmap = function(ctx, bitmapFontSet, text, size, x, y, w
 
   if(wrap) {
     var testCar = bitmapFontSet["A"];
-    text = this.wrapTextLines(ctx, text, testCar.width * (size / testCar.height));
+    text = this.wrapTextLines(ctx, text, testCar.width * (size / testCar.height), size)["text"];
   }
 
   var lines = text.split('\n');
@@ -1972,21 +1972,30 @@ Game.prototype.wrapText = function(text, limit) {
   return text;
 };
 
-Game.prototype.wrapTextLines = function(ctx, text, size) {
-  var lines = text.split('\n');
+Game.prototype.wrapTextLines = function(ctx, text, width, fontSize) {
+  var lines = text.split("\n");
   var newText = "";
-  var sizeCar = size || ctx.measureText("A").width;
-  var nbCarLine = Math.round(this.canvas.width / sizeCar);
+  var widthCar = width || ctx.measureText("A").width;
+  var nbCarLine = Math.round(this.canvas.width / widthCar);
+  var heightTotal = 0;
 
   for(var i = 0; i < lines.length; i++) {
-    newText += this.wrapText(lines[i], nbCarLine);
+    var lineWrap = this.wrapText(lines[i], nbCarLine);
+    newText += lineWrap;
 
     if(i < lines.length - 1) {
       newText += "\n";
     }
+
+    for(var j = 0; j < lineWrap.split("\n").length; j++) {
+      heightTotal += parseFloat(fontSize);
+    }
   }
 
-  return newText;
+  return {
+    text: newText,
+    height: heightTotal
+  };
 };
 
 Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, wrap, func, disableAnimationFrame) {
@@ -2001,8 +2010,8 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
     ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
     ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
 
+    var heightText = self.wrapTextLines(ctx, text, null, size)["height"];
     var heightButtons = 0;
-    var heightText = size * self.wrapTextLines(ctx, text).split("\n").length;
 
     if(buttons != null) {
       if(self.lastKeyMenu == KEY_UP) {
@@ -2457,8 +2466,9 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
       }
 
       var ctx = canvas.getContext("2d");
-      this.fontSize = this.getFontSize(ctx);
-      var heightText = this.fontSize * game.wrapTextLines(ctx, text).split("\n").length;
+      this.fontSize = this.getFontSize(ctx) * 1.25;
+
+      var heightText = game.wrapTextLines(ctx, text, null, this.fontSize)["height"];
 
       var height = heightText + this.fontSize / 2;
       var width = canvas.width;
