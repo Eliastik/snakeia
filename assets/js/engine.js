@@ -1797,6 +1797,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   };
 
   this.setNotification = function(notification) {
+    if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
+      this.notificationMessage.close();
+    }
+
     this.notificationMessage = notification;
     this.updateUI();
   };
@@ -2034,7 +2038,7 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
 
       for(var i = 0; i < buttons.length; i++) {
         if(buttons[i].autoHeight) {
-          heightButtons += buttons[i].getFontSize(ctx) * 1.75 + 5;
+          heightButtons += self.wrapTextLines(ctx, buttons[i].text, null, buttons[i].getFontSize(ctx))["height"] + 8;
         } else {
           heightButtons += buttons[i].height + 5;
         }
@@ -2043,12 +2047,13 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
 
     var totalHeight = heightText + heightButtons;
     var startY = self.canvas.height / 2 - totalHeight / 2 + 16;
+    var currentY = startY + heightText;
 
     self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY, true);
 
     if(buttons != null) {
       for(var i = 0; i < buttons.length; i++) {
-        buttons[i].y = startY + heightText + (heightButtons / buttons.length) * i + (i * 5);
+        buttons[i].y = currentY;
 
         if(self.selectedButton == i) {
           buttons[i].selected = true;
@@ -2063,6 +2068,8 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
           buttons[i].triggerClick();
           break;
         }
+
+        currentY += buttons[i].height + 8;
       }
     }
 
@@ -2520,6 +2527,7 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
 
   this.close = function() {
     if(!this.closing) {
+      this.closeButton.disable();
       this.closing = true;
       this.animationTime = this.animationDelay;
     }
