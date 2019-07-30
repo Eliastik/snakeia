@@ -1535,6 +1535,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         this.drawMenu(ctx, [], window.i18next.t("engine.loading") + "\n" + percentLoaded + " %", "white", this.fontSize, FONT_FAMILY, "center", null, true);
       }
 
+      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
+        this.notificationMessage.draw(this);
+      }
+
       for(var i = 0; i < this.snakes.length; i++) {
         if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
           this.btnTopArrow.draw(this.canvas);
@@ -1543,10 +1547,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
           this.btnLeftArrow.draw(this.canvas);
           break;
         }
-      }
-
-      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
-        this.notificationMessage.draw(this);
       }
 
       this.disableAllButtons();
@@ -1793,6 +1793,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnRightArrow.disable();
       this.btnLeftArrow.disable();
     }
+  };
+
+  this.setNotification = function(notification) {
+    this.notificationMessage = notification;
+    this.updateUI();
   };
 
   this.getDebugText = function() {
@@ -2183,7 +2188,9 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
     ctx.filter = "none";
   }
 
-  this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight);
+  if(this.snakes.length > 1) {
+    this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight);
+  }
 };
 
 Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight) {
@@ -2431,8 +2438,8 @@ function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height
 
 function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily) {
   this.text = text;
-  this.textColor = textColor || "white";
-  this.backgroundColor = backgroundColor || "rgba(46, 204, 113, 0.75)";
+  this.textColor = textColor || "rgba(255, 255, 255, 0.5)";
+  this.backgroundColor = backgroundColor || "rgba(46, 204, 113, 0.5)";
   this.delayBeforeClosing = delayBeforeClosing || 5; // second
   this.fontSize = fontSize || Math.floor(FONT_SIZE / 1.25);
   this.fontFamily = fontFamily || FONT_FAMILY;
