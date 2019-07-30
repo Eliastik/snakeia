@@ -927,6 +927,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.fontSize = FONT_SIZE;
   this.headerHeight = HEADER_HEIGHT_DEFAULT;
   this.timerToDisplay;
+  this.bestScoreToDisplay;
   this.preRenderedFont;
   // Intervals, timeouts, frames
   this.intervalCountFPS;
@@ -1486,6 +1487,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.textarea.innerHTML = this.toString();
     } else if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
       var ctx = this.canvasCtx;
+      var displayBestScore = false;
       var renderBlur = renderBlur === undefined ? false : renderBlur;
       this.fontSize = FONT_SIZE;
       this.headerHeight = HEADER_HEIGHT_DEFAULT;
@@ -1530,12 +1532,21 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
         caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
 
-        this.drawImage(ctx, "assets/images/fruit.png", 5, 5, this.headerHeight * 0.85, this.headerHeight * 0.85);
+        if(this.bestScoreToDisplay != undefined && this.bestScoreToDisplay != null) {
+          displayBestScore = true;
+        }
+
+        this.drawImage(ctx, "assets/images/fruit.png", 5, 5, this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1), this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1));
 
         if(this.snakes.length <= 1) {
-          this.drawText(ctx, "× " + this.snakes[0].score, "black", this.headerHeight * 0.43, FONT_FAMILY, "default", "default", this.headerHeight * 0.9, this.headerHeight * 0.67);
+          this.drawText(ctx, "× " + this.snakes[0].score, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
         } else {
-          this.drawText(ctx, window.i18next.t("engine.num") + this.numFruit, "black", this.headerHeight * 0.43, FONT_FAMILY, "default", "default", this.headerHeight * 0.9, this.headerHeight * 0.67);
+          this.drawText(ctx, window.i18next.t("engine.num") + this.numFruit, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
+        }
+
+        if(displayBestScore) {
+          this.drawImage(ctx, "assets/images/trophy.png", 5, 8 + this.headerHeight * 0.425, this.headerHeight * 0.425, this.headerHeight * 0.425);
+          this.drawText(ctx, this.bestScoreToDisplay, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.425 + this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
         }
 
         var totalWidth = caseWidth * this.grid.width;
