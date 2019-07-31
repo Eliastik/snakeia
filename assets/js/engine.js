@@ -807,7 +807,7 @@ function ImageLoader() {
   this.images = {};
   this.triedLoading = 0;
   this.hasError = false;
-  this.nbImagesToLoad = 0;
+  this.nbImagesToLoad = 1;
   this.firstImage = true;
 
   var self = this;
@@ -2575,8 +2575,9 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
 
         this.closeButton.y = y + 5;
         this.closeButton.draw(game);
+        this.disableCloseButton();
       } else {
-        this.closeButton.disable();
+        this.disableCloseButton();
       }
 
       this.init = true;
@@ -2584,8 +2585,9 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
   };
 
   this.close = function() {
+    this.disableCloseButton();
+
     if(!this.closing) {
-      this.closeButton.disable();
       this.closing = true;
       this.animationTime = this.animationDelay;
     }
