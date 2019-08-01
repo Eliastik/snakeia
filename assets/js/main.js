@@ -760,6 +760,8 @@ function validateSettings(returnValidation) {
     group.setDisplayFPS(showDebugInfo ? true : false);
     group.start();
 
+    group.games[0].canvas.scrollIntoView();
+
     document.getElementById("backToMenuGame").onclick = function() {
       if(confirm(window.i18next.t("game.confirmQuit"))) {
         group.killAll();
@@ -1097,6 +1099,8 @@ function playLevel(level, player, type) {
     var group = new GameGroup(games);
     group.setDisplayFPS(showDebugInfo ? true : false);
     group.start();
+
+    document.getElementById("gameOrder").scrollIntoView();
 
     var levelTimer = new Timer(null, 0);
     var notificationEndDisplayed = false;
