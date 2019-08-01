@@ -41,6 +41,8 @@ EMPTY_VAL = 0;
 SNAKE_VAL = 1;
 FRUIT_VAL = 2;
 WALL_VAL = 3;
+SNAKE_DEAD_VAL = 4;
+SURROUNDED_VAL = 5;
 // Player type
 PLAYER_AI = "PLAYER_AI";
 PLAYER_HUMAN = "PLAYER_HUMAN";
@@ -180,6 +182,10 @@ function Position(x, y, direction) {
   this.y = y;
   this.direction = direction;
 
+  this.copy = function() {
+    return new Position(this.x, this.y, this.direction);
+  };
+
   this.convertToKeyDirection = function() {
     switch(this.direction) {
       case UP:
@@ -215,9 +221,21 @@ Position.prototype.equals = function(otherPosition) {
   return this.x == otherPosition.x && this.y == otherPosition.y;
 };
 
+Position.prototype.indexIn = function(array) {
+  for(var i = 0; i < array.length; i++) {
+    if(this.equals(array[i])) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 function Grid(width, height, generateWalls, borderWalls) {
   this.width = width;
   this.height = height;
+  this.generateWalls = generateWalls;
+  this.borderWalls = borderWalls;
   this.grid;
   this.fruitPos;
 
@@ -228,7 +246,7 @@ function Grid(width, height, generateWalls, borderWalls) {
       this.grid[i] = new Array(this.width);
 
       for(var j = 0; j < this.width; j++) {
-        if((borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (generateWalls && Math.random() > 0.65)) {
+        if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && Math.random() > 0.65)) {
           this.grid[i][j] = WALL_VAL;
         } else {
           this.grid[i][j] = EMPTY_VAL;
@@ -236,8 +254,8 @@ function Grid(width, height, generateWalls, borderWalls) {
       }
     }
 
-    if(generateWalls) {
-      this.fixWalls(borderWalls);
+    if(this.generateWalls) {
+      this.fixWalls(this.borderWalls);
     }
   };
 
@@ -283,11 +301,17 @@ function Grid(width, height, generateWalls, borderWalls) {
       case SNAKE_VAL:
         return "o";
         break;
+      case SNAKE_DEAD_VAL:
+        return "O";
+        break;
       case FRUIT_VAL:
         return "x";
         break;
       case WALL_VAL:
         return "#";
+        break;
+      case SURROUNDED_VAL:
+        return "/";
         break;
     }
   };
@@ -324,7 +348,15 @@ function Grid(width, height, generateWalls, borderWalls) {
     if(this.getTotal(EMPTY_VAL) > 0) {
       var randomPos = this.getRandomPosition();
 
-      while(this.get(randomPos) != EMPTY_VAL) {
+      while(this.get(randomPos) != EMPTY_VAL || this.isCaseSurrounded(randomPos, false)) {
+        if(this.isCaseSurrounded(randomPos, false)) {
+          this.isCaseSurrounded(randomPos, true);
+        }
+
+        if(this.getTotal(EMPTY_VAL) <= 0) {
+          return false;
+        }
+
         randomPos = this.getRandomPosition();
       }
 
@@ -335,6 +367,91 @@ function Grid(width, height, generateWalls, borderWalls) {
     }
 
     return true;
+  };
+
+  this.getGraphSurrounded = function() {
+    var res = new Array(this.height);
+
+    for(var i = 0; i < this.height; i++) {
+      res[i] = new Array(this.width);
+
+      for(var j = 0; j < this.width; j++) {
+        var currentPos = new Position(j, i);
+
+        if(this.get(currentPos) == EMPTY_VAL || this.get(currentPos) == SNAKE_VAL || (this.borderWalls && (i == 1 || i == this.height - 2 || j == 1 || j == this.width - 2))) {
+          res[i][j] = 0;
+        } else {
+          res[i][j] = 1;
+        }
+      }
+    }
+
+    return res;
+  };
+
+  this.isCaseSurrounded = function(position, fill) {
+    if(position == null || position == undefined) {
+      return false;
+    }
+
+    var fill = fill === undefined ? false : fill;
+    var upGridReached = false;
+    var bottomGridReached = false;
+    var leftGridReached = false;
+    var rightGridReached = false;
+
+    var checkList = [position];
+    var complete = [];
+    var graph = this.getGraphSurrounded();
+
+    if(this.borderWalls) {
+      var startY = 1; var endY = this.height - 2;
+      var startX = 1; var endX = this.width - 2;
+    } else {
+      var startY = 0; var endY = this.height - 1;
+      var startX = 0; var endX = this.width - 1;
+    }
+
+    while(checkList.length > 0) {
+      var currentPosition = checkList[0];
+      checkList.shift();
+
+      var directions = [this.getNextPosition(currentPosition, UP), this.getNextPosition(currentPosition, BOTTOM), this.getNextPosition(currentPosition, LEFT), this.getNextPosition(currentPosition, RIGHT)]; // UP, DOWN, LEFT, RIGHT
+
+      for(var i = 0; i < directions.length; i++) {
+        if(directions[i].x == startX) {
+          leftGridReached = true;
+        } else if(directions[i].x == endX) {
+          rightGridReached = true;
+        } else if(directions[i].y == startY) {
+          upGridReached = true;
+        } else if(directions[i].y == endY) {
+          bottomGridReached = true;
+        }
+
+        var alreadyCompleted = false;
+
+        if(directions[i].indexIn(complete) > -1 || directions[i].indexIn(checkList) > -1) {
+          alreadyCompleted = true;
+        }
+
+        if(!alreadyCompleted && graph[directions[i].y][directions[i].x] == 0) {
+          checkList.push(directions[i]);
+
+          if(fill && this.get(directions[i]) == EMPTY_VAL) {
+            this.set(SURROUNDED_VAL, directions[i]);
+          }
+        }
+      }
+
+      complete.push(currentPosition);
+    }
+
+    if(upGridReached && bottomGridReached && leftGridReached && rightGridReached) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
   this.getOnLine = function(type, line) {
@@ -427,7 +544,7 @@ function Grid(width, height, generateWalls, borderWalls) {
   };
 
   this.isDeadPosition = function(position) {
-    return this.get(position) == SNAKE_VAL || this.get(position) == WALL_VAL;
+    return this.get(position) == SNAKE_VAL || this.get(position) == WALL_VAL || this.get(position) == SNAKE_DEAD_VAL;
   };
 
   this.init();
@@ -546,7 +663,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   };
 
   this.get = function(index) {
-    return new Position(this.queue[index].x, this.queue[index].y, this.queue[index].direction);
+    return this.queue[index].copy();
   };
 
   this.set = function(index, position) {
@@ -565,6 +682,20 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
 
   this.hasMaxScore = function() {
     return this.grid.getTotal(EMPTY_VAL) <= 0;
+  };
+
+  this.setGameOver = function() {
+    this.gameOver = true;
+
+    for(var i = 0; i < this.length(); i++) {
+      this.grid.set(SNAKE_DEAD_VAL, this.get(i));
+    }
+  };
+
+  this.kill = function() {
+    this.autoRetry = false;
+    this.grid = null;
+    this.queue = null;
   };
 
   this.moveTo = function(direction) {
@@ -632,8 +763,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     snake.queue = [];
 
     for(var i = 0; i < this.queue.length; i++) {
-      var elem = this.queue[i];
-      snake.queue.push(new Position(elem.x, elem.y, elem.direction));
+      snake.queue.push(elem.copy());
     }
 
     return snake;
@@ -677,7 +807,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.simpleAI = function() {
     if(this.grid.fruitPos != null) {
       var currentPosition = this.getHeadPosition();
-      var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
+      var fruitPos = this.grid.fruitPos.copy();
       var directionNext = KEY_RIGHT;
 
       if(fruitPos.x > currentPosition.x) {
@@ -751,7 +881,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     } else {
       if(this.grid.fruitPos != null) {
         var currentPosition = this.getHeadPosition();
-        var fruitPos = new Position(this.grid.fruitPos.x, this.grid.fruitPos.y);
+        var fruitPos = this.grid.fruitPos.copy();
 
         var grid = this.grid.getGraph(currentPosition);
         var graph = new Lowlight.Astar.Configuration(grid, {
@@ -792,12 +922,6 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
       default:
         return window.i18next.t("engine.aiLevelList.normal");
     }
-  };
-
-  this.kill = function() {
-    this.autoRetry = false;
-    this.grid = null;
-    this.queue = null;
   };
 
   this.init();
@@ -1361,7 +1485,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               headSnakePos = self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction);
 
               if(self.grid.isDeadPosition(headSnakePos)) {
-                self.snakes[i].gameOver = true;
+                self.snakes[i].setGameOver();
               } else {
                 if(self.grid.get(headSnakePos) == FRUIT_VAL) {
                   self.snakes[i].score++;
