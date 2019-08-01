@@ -1092,10 +1092,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnOK = new Button(window.i18next.t("engine.ok"), null, null, "center", "#3498db", "#246A99");
       this.btnAbout = new Button(window.i18next.t("engine.about"), null, null, "center", "#3498db", "#246A99");
       this.btnInfosGame = new Button(window.i18next.t("engine.infosGame"), null, null, "center", "#3498db", "#246A99");
-      this.btnTopArrow = new ButtonImage("assets/images/up.png", 56, 100, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
+      this.btnTopArrow = new ButtonImage("assets/images/up.png", 64, 92, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
       this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
-      this.btnLeftArrow = new ButtonImage("assets/images/left.png", 112, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
-      this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 56, 0, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
+      this.btnLeftArrow = new ButtonImage("assets/images/left.png", 128, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
+      this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 64, 0, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)");
       this.btnExitFullScreen = new Button(window.i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99");
       this.btnEnterFullScreen = new Button(window.i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99");
 
