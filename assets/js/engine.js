@@ -125,7 +125,7 @@ function hsvToRgb(h, s, v) {
 function hslToName(h, s, l) {
   if(s <= 10 && l >= 90) {
     return window.i18next.t("engine.colors.white");
-  } else if((s <= 10 && l <= 70) || s === 0) {
+  } else if((s <= 10 && l <= 70) || s == 0) {
     return window.i18next.t("engine.colors.gray");
   } else if(l <= 15) {
     return window.i18next.t("engine.colors.black");
@@ -232,10 +232,10 @@ Position.prototype.indexIn = function(array) {
 }
 
 function Grid(width, height, generateWalls, borderWalls) {
-  this.width = width;
-  this.height = height;
-  this.generateWalls = generateWalls;
-  this.borderWalls = borderWalls;
+  this.width = width == undefined ? 20 : width;
+  this.height = height == undefined ? 20 : height;
+  this.generateWalls = generateWalls == undefined ? false : generateWalls;
+  this.borderWalls = borderWalls == undefined ? false : borderWalls;
   this.grid;
   this.fruitPos;
 
@@ -365,12 +365,13 @@ function Grid(width, height, generateWalls, borderWalls) {
     return true;
   };
 
-  this.isCaseSurrounded = function(position, fill, foundVals, forbiddenVals) {
+  this.isCaseSurrounded = function(position, fill, foundVals, forbiddenVals, returnCount) {
     if(position == null || position == undefined) {
       return false;
     }
 
-    var fill = fill === undefined ? false : fill;
+    var fill = fill == undefined ? false : fill;
+    var returnCount = returnCount == undefined ? false : returnCount;
 
     var checkList = [position];
     var complete = [];
@@ -403,6 +404,10 @@ function Grid(width, height, generateWalls, borderWalls) {
       }
 
       complete.push(currentPosition);
+    }
+
+    if(returnCount) {
+      return found;
     }
 
     if(found > 0) {
@@ -537,15 +542,15 @@ Grid.prototype.toString = function() {
 };
 
 function Snake(direction, length, grid, player, aiLevel, autoRetry) {
-  this.direction = direction || RIGHT;
-  this.initialDirection = direction || RIGHT;
-  this.initialLength = length;
+  this.direction = direction == undefined ? RIGHT : direction;
+  this.initialDirection = direction == undefined ? RIGHT : direction;
+  this.initialLength = length == undefined ? 3 : length;
   this.errorInit = false;
   this.grid = grid;
   this.queue = [];
-  this.player = player || PLAYER_HUMAN;
-  this.aiLevel = aiLevel || AI_LEVEL_DEFAULT;
-  this.autoRetry = autoRetry === undefined ? false : autoRetry;
+  this.player = player == undefined ? PLAYER_HUMAN : player;
+  this.aiLevel = aiLevel == undefined ? AI_LEVEL_DEFAULT : aiLevel;
+  this.autoRetry = autoRetry == undefined ? false : autoRetry;
   this.score = 0;
   this.gameOver = false;
   this.scoreMax = false;
@@ -697,7 +702,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   };
 
   this.simulateGameTick = function(snake, direction) {
-    var direction = direction === undefined ? snake.ai(false) : direction;
+    var direction = direction == undefined ? snake.ai(false) : direction;
     snake.moveTo(direction);
 
     var headSnakePos = snake.getHeadPosition();
@@ -843,7 +848,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   };
 
   this.ai = function(bestFind) {
-    var bestFind = bestFind === undefined ? false : bestFind;
+    var bestFind = bestFind == undefined ? false : bestFind;
     var res = KEY_RIGHT;
 
     if(this.aiLevel == AI_LEVEL_RANDOM) {
@@ -986,15 +991,15 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   // Game settings
   this.grid = grid;
   this.snakes = snake;
-  this.speed = speed || 8;
-  this.initialSpeed = speed || 8;
-  this.initialSpeedUntouched = speed || 8;
+  this.speed = speed == undefined ? 8 : speed;
+  this.initialSpeed = speed == undefined ? 8 : speed;
+  this.initialSpeedUntouched = speed == undefined ? 8 : speed;
   this.appendTo = appendTo;
-  this.enablePause = enablePause === undefined ? true : enablePause;
-  this.enableRetry = enableRetry === undefined ? true : enableRetry;
-  this.progressiveSpeed = progressiveSpeed === undefined ? false : progressiveSpeed;
-  this.displayFPS = displayFPS === undefined ? false : displayFPS;
-  this.outputType = outputType || OUTPUT_GRAPHICAL;
+  this.enablePause = enablePause == undefined ? true : enablePause;
+  this.enableRetry = enableRetry == undefined ? true : enableRetry;
+  this.progressiveSpeed = progressiveSpeed == undefined ? false : progressiveSpeed;
+  this.displayFPS = displayFPS == undefined ? false : displayFPS;
+  this.outputType = outputType == undefined ? OUTPUT_GRAPHICAL : outputType;
   this.countBeforePlay = 3;
   // Game variables
   this.lastKey = -1;
@@ -1024,8 +1029,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.textarea;
   this.canvas;
   this.canvasCtx;
-  this.canvasWidth = canvasWidth || CANVAS_WIDTH;
-  this.canvasHeight = canvasHeight || CANVAS_HEIGHT;
+  this.canvasWidth = canvasWidth == undefined ? CANVAS_WIDTH : canvasWidth;
+  this.canvasHeight = canvasHeight == undefined ? CANVAS_HEIGHT : canvasHeight;
   this.fontSize = FONT_SIZE;
   this.headerHeight = HEADER_HEIGHT_DEFAULT;
   this.timerToDisplay;
@@ -1599,7 +1604,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     } else if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
       var ctx = this.canvasCtx;
       var displayBestScore = false;
-      var renderBlur = renderBlur === undefined ? false : renderBlur;
+      var renderBlur = renderBlur == undefined ? false : renderBlur;
       this.fontSize = FONT_SIZE;
       this.headerHeight = HEADER_HEIGHT_DEFAULT;
 
