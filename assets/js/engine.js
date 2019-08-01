@@ -1689,7 +1689,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         this.drawMenu(ctx, [], window.i18next.t("engine.loading") + "\n" + percentLoaded + "%", "white", this.fontSize, FONT_FAMILY, "center", null, true);
       }
 
-      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
+      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
         this.notificationMessage.draw(this);
       }
 
@@ -1906,8 +1906,12 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             this.btnPause.enable();
           }
 
-          if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
+          if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
             this.notificationMessage.enableCloseButton();
+          }
+
+          if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {
+            this.notificationMessage.draw(this);
           }
         }
       }
@@ -1938,7 +1942,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.btnExitFullScreen.disable();
       this.btnEnterFullScreen.disable();
 
-      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
+      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
         this.notificationMessage.disableCloseButton();
       }
 
@@ -2214,6 +2218,8 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
 
     self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY, true);
 
+    var buttonEntered = false;
+
     if(buttons != null) {
       for(var i = 0; i < buttons.length; i++) {
         buttons[i].y = currentY;
@@ -2228,12 +2234,17 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
         buttons[i].draw(self);
 
         if(self.selectedButton == i && self.lastKeyMenu == KEY_ENTER && buttons[i].triggerClick != null && !buttons[i].disabled) {
+          buttonEntered = true;
           buttons[i].triggerClick();
           break;
         }
 
         currentY += buttons[i].height + 8;
       }
+    }
+
+    if(self.notificationMessage != undefined && self.notificationMessage != null && self.notificationMessage instanceof NotificationMessage && self.notificationMessage.foreGround && !buttonEntered) {
+      self.notificationMessage.draw(self);
     }
 
     if(func != null) {
@@ -2611,7 +2622,7 @@ function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height
   return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc, imageLoader, verticalAlignement);
 }
 
-function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily) {
+function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround) {
   this.text = text;
   this.textColor = textColor == undefined ? "rgba(255, 255, 255, 0.75)" : textColor;
   this.backgroundColor = backgroundColor == undefined ? "rgba(46, 204, 113, 0.5)" : backgroundColor;
@@ -2619,6 +2630,7 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
   this.fontSize = fontSize == undefined ? Math.floor(FONT_SIZE / 1.25) : fontSize;
   this.fontFamily = fontFamily == undefined ? FONT_FAMILY : fontFamily;
   this.animationDelay = animationDelay == undefined ? 500 : animationDelay;
+  this.foreGround = foreGround == undefined ? false : foreGround;
   this.timeLastFrame = 0;
   this.animationTime = 0;
   this.init = false;
@@ -2679,7 +2691,11 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
         game.drawText(ctx, this.text, this.textColor, this.fontSize, this.fontFamily, "center", "default", null, y + this.fontSize, true);
 
         this.closeButton.y = y + 5;
-        this.closeButton.draw(game);
+
+        if(!this.foreGround) {
+          this.closeButton.draw(game);
+        }
+
         this.disableCloseButton();
       } else {
         this.disableCloseButton();
@@ -2719,7 +2735,7 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
   };
 
   this.copy = function() {
-    return new NotificationMessage(this.text, this.textColor, this.backgroundColor, this.delayBeforeClosing, this.animationDelay, this.fontSize, this.fontFamily);
+    return new NotificationMessage(this.text, this.textColor, this.backgroundColor, this.delayBeforeClosing, this.animationDelay, this.fontSize, this.fontFamily, this.foreGround);
   };
 
   this.getFontSize = function(ctx) {

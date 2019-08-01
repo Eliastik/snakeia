@@ -827,7 +827,7 @@ function validateSettings(returnValidation) {
         }
 
         document.getElementById("gameOrder").innerHTML = resultMessage;
-        group.setNotification(new NotificationMessage(resultMessage, null, "rgba(52, 152, 219, 0.5)", 15, 0));
+        group.setNotification(new NotificationMessage(resultMessage, null, "rgba(52, 152, 219, 0.5)", 15, 0, null, null, true));
       }
     });
 
@@ -1143,7 +1143,7 @@ function playLevel(level, player, type) {
         playerGame.onStop(function() {
           if(playerSnake.score < levelTypeValue) {
             if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 1));
+              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 0, null, null, true));
               notificationEndDisplayed = true;
             }
           }
@@ -1153,7 +1153,7 @@ function playLevel(level, player, type) {
           playerGame.setTimeToDisplay(0);
 
           if(!notificationEndDisplayed) {
-            playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 1));
+            playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 0, null, null, true));
             notificationEndDisplayed = true;
           }
 
@@ -1188,7 +1188,7 @@ function playLevel(level, player, type) {
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, 1));
+              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, 0, null, null, true));
               notificationEndDisplayed = true;
             }
           }
@@ -1200,12 +1200,12 @@ function playLevel(level, player, type) {
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, 1));
+              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, 0, null, null, true));
               notificationEndDisplayed = true;
             }
           } else {
             if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 1));
+              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 0, null, null, true));
               notificationEndDisplayed = true;
             }
           }
@@ -1222,14 +1222,14 @@ function playLevel(level, player, type) {
               playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
               if(!notificationEndDisplayed) {
-                playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, 1));
+                playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, 0, null, null, true));
                 notificationEndDisplayed = true;
               }
             }
           }
 
           if(!won && !notificationEndDisplayed) {
-            playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 1));
+            playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 0, null, null, true));
             notificationEndDisplayed = true;
           }
         });
@@ -1267,14 +1267,14 @@ function playLevel(level, player, type) {
                   playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
                   if(!notificationEndDisplayed) {
-                    playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, 1));
+                    playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, 0, null, null, true));
                     notificationEndDisplayed = true;
                   }
                 } else {
                   group.stopAll(true);
 
                   if(!notificationEndDisplayed) {
-                    playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 1));
+                    playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 0, null, null, true));
                     notificationEndDisplayed = true;
                   }
                 }
