@@ -760,7 +760,9 @@ function validateSettings(returnValidation) {
     group.setDisplayFPS(showDebugInfo ? true : false);
     group.start();
 
-    group.games[0].canvas.scrollIntoView();
+    if(group.games[0].canvas != undefined) {
+      group.games[0].canvas.scrollIntoView();
+    }
 
     document.getElementById("backToMenuGame").onclick = function() {
       if(confirm(window.i18next.t("game.confirmQuit"))) {
@@ -772,56 +774,60 @@ function validateSettings(returnValidation) {
 
     group.onStop(function() {
       if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE) {
+        var resultMessage = "";
         var winners = group.getWinners();
 
         if(selectedMode == PLAYER_VS_AI) {
           if(winners.index.length == 2) {
-            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.equalityPlayerVSAI");
+            resultMessage = window.i18next.t("game.equalityPlayerVSAI");
           } else if(winners.index[0] == 0) {
-            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.winPlayerVSAI");
+            resultMessage = window.i18next.t("game.winPlayerVSAI");
           } else if(winners.index[0] == 1) {
-            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.losePlayerVSAI");
+            resultMessage = window.i18next.t("game.losePlayerVSAI");
           }
         } else if(selectedMode == AI_VS_AI) {
           if(winners.index.length == 1) {
-            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.oneWinnerAIVSAI", { numWinner: winners.index[0] + 1 });
+            resultMessage = window.i18next.t("game.oneWinnerAIVSAI", { numWinner: winners.index[0] + 1 });
           } else if(winners.index.length == 2) {
-            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.equalityAIVSAI");
+            resultMessage = window.i18next.t("game.equalityAIVSAI");
           }
         } else if(selectedMode == BATTLE_ROYALE) {
           if(winners.index.length == 1) {
             if(battleAgainstAIs && winners.index[0] == 0) {
-              document.getElementById("gameStatus").innerHTML = window.i18next.t("game.playerWinnerBattleRoyale", { score: winners.score });
+              resultMessage = window.i18next.t("game.playerWinnerBattleRoyale", { score: winners.score });
             } else {
-              document.getElementById("gameStatus").innerHTML = window.i18next.t("game.oneWinnerBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[0] : winners.index[0] + 1), score: winners.score });
+              resultMessage = window.i18next.t("game.oneWinnerBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[0] : winners.index[0] + 1), score: winners.score });
             }
           } else if(battleAgainstAIs && winners.index.length == 2 && winners.index[0] == 0) {
-            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.winnerAIBattleRoyale") + " " + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: winners.index[1] }) + " " + window.i18next.t("game.andPlayerWinnersBattleRoyale") + " " + window.i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
+            resultMessage = window.i18next.t("game.winnerAIBattleRoyale") + " " + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: winners.index[1] }) + " " + window.i18next.t("game.andPlayerWinnersBattleRoyale") + " " + window.i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
           } else if(winners.index.length > 1) {
             var playerWinnerBattleRoyale = false;
-            document.getElementById("gameStatus").innerHTML = window.i18next.t("game.winnersBattleRoyale") + " ";
+            resultMessage = window.i18next.t("game.winnersBattleRoyale") + " ";
 
             for(var i = 0; i < winners.index.length; i++) {
               if(battleAgainstAIs && winners.index[i] == 0) {
                 var playerWinnerBattleRoyale = true;
               } else {
-                document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[i] : winners.index[i] + 1) });
+                resultMessage = resultMessage + " " + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[i] : winners.index[i] + 1) });
 
                 if((i + 1) < winners.index.length - 1) {
-                  document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + ", ";
+                  resultMessage = resultMessage + ", ";
                 } else if((i + 1) == winners.index.length - 1) {
-                  document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.andWinnersBattleRoyale") + " ";
+                  resultMessage = resultMessage + " " + window.i18next.t("game.andWinnersBattleRoyale") + " ";
                 }
               }
             }
 
             if(battleAgainstAIs && playerWinnerBattleRoyale) {
-              document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.andPlayerWinnersBattleRoyale") + " " + window.i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
+              resultMessage = resultMessage + " " + window.i18next.t("game.andPlayerWinnersBattleRoyale") + " " + window.i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
             } else {
-              document.getElementById("gameStatus").innerHTML = document.getElementById("gameStatus").innerHTML + " " + window.i18next.t("game.winScoreBattleRoyale", { score: winners.score });
+              resultMessage = resultMessage + " " + window.i18next.t("game.winScoreBattleRoyale", { score: winners.score });
             }
           }
         }
+
+        document.getElementById("gameOrder").innerHTML = resultMessage;
+        group.setNotification(new NotificationMessage(resultMessage, null, "rgba(52, 152, 219, 0.5)", 15, 0));
       }
     });
 
@@ -837,6 +843,7 @@ function validateSettings(returnValidation) {
       document.getElementById("gameStatus").innerHTML = "";
       document.getElementById("gameOrder").innerHTML = "";
       document.getElementById("gameStatusError").innerHTML = "";
+      group.closeNotification();
     });
   }
 }

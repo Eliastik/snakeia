@@ -2609,12 +2609,12 @@ function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height
 
 function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily) {
   this.text = text;
-  this.textColor = textColor || "rgba(255, 255, 255, 0.75)";
-  this.backgroundColor = backgroundColor || "rgba(46, 204, 113, 0.5)";
-  this.delayBeforeClosing = delayBeforeClosing || 5; // second
-  this.fontSize = fontSize || Math.floor(FONT_SIZE / 1.25);
-  this.fontFamily = fontFamily || FONT_FAMILY;
-  this.animationDelay = animationDelay || 500;
+  this.textColor = textColor == undefined ? "rgba(255, 255, 255, 0.75)" : textColor;
+  this.backgroundColor = backgroundColor == undefined ? "rgba(46, 204, 113, 0.5)" : backgroundColor;
+  this.delayBeforeClosing = delayBeforeClosing == undefined ? 5 : delayBeforeClosing; // second
+  this.fontSize = fontSize == undefined ? Math.floor(FONT_SIZE / 1.25) : fontSize;
+  this.fontFamily = fontFamily == undefined ? FONT_FAMILY : fontFamily;
+  this.animationDelay = animationDelay == undefined ? 500 : animationDelay;
   this.timeLastFrame = 0;
   this.animationTime = 0;
   this.init = false;
@@ -2703,11 +2703,19 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
   };
 
   this.disableCloseButton = function() {
-    this.closeButton.disable();
+    if(this.closeButton != undefined && this.closeButton != null && this.closeButton instanceof Button) {
+      this.closeButton.disable();
+    }
   };
 
   this.enableCloseButton = function() {
-    this.closeButton.enable();
+    if(this.closeButton != undefined && this.closeButton != null && this.closeButton instanceof Button) {
+      this.closeButton.enable();
+    }
+  };
+
+  this.copy = function() {
+    return new NotificationMessage(this.text, this.textColor, this.backgroundColor, this.delayBeforeClosing, this.animationDelay, this.fontSize, this.fontFamily);
   };
 
   this.getFontSize = function(ctx) {
@@ -2716,7 +2724,7 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
 }
 
 function GameGroup(games) {
-  this.games = games;
+  this.games = games == undefined ? [] : games;
   this.reactor = new Reactor();
   this.reactor.registerEvent("onStart");
   this.reactor.registerEvent("onPause");
@@ -2885,6 +2893,18 @@ function GameGroup(games) {
   this.setDisplayFPS = function(value) {
     for(var i = 0; i < this.games.length; i++) {
       this.games[i].displayFPS = value;
+    }
+  };
+
+  this.setNotification = function(notification) {
+    for(var i = 0; i < this.games.length; i++) {
+      this.games[i].setNotification(notification.copy());
+    }
+  };
+
+  this.closeNotification = function() {
+    for(var i = 0; i < this.games.length; i++) {
+      this.games[i].setNotification(null);
     }
   };
 
