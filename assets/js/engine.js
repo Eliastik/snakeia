@@ -348,11 +348,7 @@ function Grid(width, height, generateWalls, borderWalls) {
     if(this.getTotal(EMPTY_VAL) > 0) {
       var randomPos = this.getRandomPosition();
 
-      while(this.get(randomPos) != EMPTY_VAL || this.isCaseSurrounded(randomPos, false)) {
-        if(this.isCaseSurrounded(randomPos, false)) {
-          this.isCaseSurrounded(randomPos, true);
-        }
-
+      while(this.get(randomPos) != EMPTY_VAL || this.isFruitSurrounded(randomPos, true)) {
         if(this.getTotal(EMPTY_VAL) <= 0) {
           return false;
         }
@@ -369,48 +365,16 @@ function Grid(width, height, generateWalls, borderWalls) {
     return true;
   };
 
-  this.getGraphSurrounded = function() {
-    var res = new Array(this.height);
-
-    for(var i = 0; i < this.height; i++) {
-      res[i] = new Array(this.width);
-
-      for(var j = 0; j < this.width; j++) {
-        var currentPos = new Position(j, i);
-
-        if(this.get(currentPos) == EMPTY_VAL || this.get(currentPos) == SNAKE_VAL || (this.borderWalls && (i == 1 || i == this.height - 2 || j == 1 || j == this.width - 2))) {
-          res[i][j] = 0;
-        } else {
-          res[i][j] = 1;
-        }
-      }
-    }
-
-    return res;
-  };
-
-  this.isCaseSurrounded = function(position, fill) {
+  this.isCaseSurrounded = function(position, fill, foundVals, forbiddenVals) {
     if(position == null || position == undefined) {
       return false;
     }
 
     var fill = fill === undefined ? false : fill;
-    var upGridReached = false;
-    var bottomGridReached = false;
-    var leftGridReached = false;
-    var rightGridReached = false;
 
     var checkList = [position];
     var complete = [];
-    var graph = this.getGraphSurrounded();
-
-    if(this.borderWalls) {
-      var startY = 1; var endY = this.height - 2;
-      var startX = 1; var endX = this.width - 2;
-    } else {
-      var startY = 0; var endY = this.height - 1;
-      var startX = 0; var endX = this.width - 1;
-    }
+    var found = 0;
 
     while(checkList.length > 0) {
       var currentPosition = checkList[0];
@@ -419,24 +383,18 @@ function Grid(width, height, generateWalls, borderWalls) {
       var directions = [this.getNextPosition(currentPosition, UP), this.getNextPosition(currentPosition, BOTTOM), this.getNextPosition(currentPosition, LEFT), this.getNextPosition(currentPosition, RIGHT)]; // UP, DOWN, LEFT, RIGHT
 
       for(var i = 0; i < directions.length; i++) {
-        if(directions[i].x == startX) {
-          leftGridReached = true;
-        } else if(directions[i].x == endX) {
-          rightGridReached = true;
-        } else if(directions[i].y == startY) {
-          upGridReached = true;
-        } else if(directions[i].y == endY) {
-          bottomGridReached = true;
-        }
-
         var alreadyCompleted = false;
 
         if(directions[i].indexIn(complete) > -1 || directions[i].indexIn(checkList) > -1) {
           alreadyCompleted = true;
         }
 
-        if(!alreadyCompleted && graph[directions[i].y][directions[i].x] == 0) {
+        if(!alreadyCompleted && (forbiddenVals.indexOf(this.get(directions[i])) > -1)) {
           checkList.push(directions[i]);
+
+          if(foundVals.indexOf(this.get(directions[i])) > -1) {
+            found++;
+          }
 
           if(fill && this.get(directions[i]) == EMPTY_VAL) {
             this.set(SURROUNDED_VAL, directions[i]);
@@ -447,11 +405,25 @@ function Grid(width, height, generateWalls, borderWalls) {
       complete.push(currentPosition);
     }
 
-    if(upGridReached && bottomGridReached && leftGridReached && rightGridReached) {
+    if(found > 0) {
       return false;
     } else {
+      if(fill && (this.get(position) == EMPTY_VAL || this.get(position) == FRUIT_VAL)) {
+        this.set(SURROUNDED_VAL, position);
+      }
+
       return true;
     }
+  };
+
+  this.isFruitSurrounded = function(position, fill) {
+    var surrounded = this.isCaseSurrounded(position, false, [SNAKE_VAL], [EMPTY_VAL, SNAKE_VAL]);
+
+    if(surrounded && fill) {
+      this.isCaseSurrounded(position, true, [SNAKE_VAL], [EMPTY_VAL, SNAKE_VAL]);
+    }
+
+    return surrounded;
   };
 
   this.getOnLine = function(type, line) {
@@ -1466,6 +1438,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         if(self.frame % self.speed == 0) {
           for(var i = 0; i < self.snakes.length; i++) {
             var initialDirection = self.snakes[i].direction;
+            var setFruitError = false;
 
             if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
               if(self.snakes[i].player == PLAYER_HUMAN || self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
@@ -1492,12 +1465,12 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
                   self.reactor.dispatchEvent("onScoreIncreased");
                   self.snakes[i].insert(headSnakePos);
 
-                  if(self.snakes[i].hasMaxScore()) {
+                  if(self.snakes[i].hasMaxScore() && self.snakes.length <= 1) {
                     self.scoreMax = true;
                     self.snakes[i].scoreMax = true;
                   } else {
                     self.numFruit++;
-                    self.grid.setFruit();
+                    var setFruitError = !self.grid.setFruit();
                   }
 
                   if(self.snakes.length <= 1 && self.progressiveSpeed && self.snakes[i].score > 0 && self.initialSpeed > 1) {
@@ -1517,7 +1490,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               (self.snakes[j].gameOver || self.snakes[j].scoreMax) && nbOver++;
             }
 
-            if(nbOver >= self.snakes.length) {
+            if(!self.scoreMax && self.grid.isFruitSurrounded(self.grid.fruitPos, true)) {
+              var setFruitError = !self.grid.setFruit();
+            }
+
+            if(nbOver >= self.snakes.length || setFruitError) {
               self.stop();
 
               if(self.snakes.length > 1) {
@@ -1842,7 +1819,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             });
           });
         } else if(this.scoreMax && this.snakes.length <= 1) {
-          this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), window.i18next.t("engine.scoreMax"), "green", this.fontSize, FONT_FAMILY, "center", null, true, function() {
+          this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), window.i18next.t("engine.scoreMax"), "#2ecc71", this.fontSize, FONT_FAMILY, "center", null, true, function() {
             self.btnRetry.addClickAction(self.canvas, function() {
               self.selectedButton = 0;
               self.reset();
