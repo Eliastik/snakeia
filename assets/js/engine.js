@@ -1151,15 +1151,19 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     }
 
     document.addEventListener("keydown", function(evt) {
-      if(!self.paused) {
-        if(evt.keyCode == KEY_ENTER && self.outputType == OUTPUT_GRAPHICAL) {
-          self.pause();
-        } else {
-          self.lastKey = evt.keyCode;
+      if(!self.killed) {
+        if(!self.paused) {
+          if(evt.keyCode == KEY_ENTER && self.outputType == OUTPUT_GRAPHICAL) {
+            self.pause();
+          } else {
+            self.lastKey = evt.keyCode;
+          }
+        } else if(self.countBeforePlay <= -1 && self.enableKeyMenu) {
+          self.lastKeyMenu = evt.keyCode;
+          self.updateUI();
         }
-      } else if(self.countBeforePlay <= -1 && self.enableKeyMenu) {
-        self.lastKeyMenu = evt.keyCode;
-        self.updateUI();
+
+        evt.preventDefault();
       }
     });
 
