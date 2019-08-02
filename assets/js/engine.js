@@ -80,8 +80,8 @@ IMAGE_SNAKE_SATURATION = 50;
 IMAGE_SNAKE_VALUE = 77;
 CAR_TO_PRERENDER = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "×"];
 // Infos
-APP_VERSION = "1.3.2.1";
-DATE_VERSION = "07/25/2019";
+APP_VERSION = "1.4";
+DATE_VERSION = "08/02/2019";
 
 // Return an integer between min (inclusive) and max (inclusive)
 function randRange(min, max) {
@@ -314,6 +314,21 @@ function Grid(width, height, generateWalls, borderWalls) {
         return "/";
         break;
     }
+  };
+
+  this.getImageCase = function(position) {
+    var imageRes = "";
+
+    switch(this.get(position)) {
+        case WALL_VAL:
+          imageRes = "assets/images/wall.png";
+          break;
+        case FRUIT_VAL:
+          imageRes = "assets/images/fruit.png";
+          break;
+    }
+
+    return imageRes;
   };
 
   this.getGraph = function(snakePos) {
@@ -1679,7 +1694,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             }
 
             ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
-            this.drawImage(ctx, this.getImageCase(new Position(j, i)), caseX, caseY, caseWidth, caseHeight);
+            this.drawImage(ctx, this.grid.getImageCase(new Position(j, i)), caseX, caseY, caseWidth, caseHeight);
           }
         }
 
@@ -2007,21 +2022,6 @@ Game.prototype.preRenderFont = function(cars, size, color, fontFamily) {
 
     this.preRenderedFont[cars[i]] = canvasTmp;
   }
-};
-
-Game.prototype.getImageCase = function(position) {
-  var imageRes = "";
-
-  switch(this.grid.get(position)) {
-      case WALL_VAL:
-        imageRes = "assets/images/wall.png";
-        break;
-      case FRUIT_VAL:
-        imageRes = "assets/images/fruit.png";
-        break;
-  }
-
-  return imageRes;
 };
 
 Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {

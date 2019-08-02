@@ -12,7 +12,7 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 
 ## About this game
 
-* Version: 1.3.2.1
+* Version: 1.4
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -26,6 +26,25 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 
 ## Changelog
+
+* Version 1.4 (8/2/2019):
+  - The game now detects if the apple is blocked by obstacles (walls, dead Snake) and inaccessible then avoids to put the apple in these places or changes its position;
+  - Many improvements of the game interface:
+    - The top banner and its elements resize automatically according to the size of the screen;
+    - All game infos (winners, level goal, level won/failed messages) are displayed at the bottom of the game interface as notifications;
+    - Display of the best score/time directly in the game interface in Levels mode;
+    - Display of the remaining time for the levels involving a counter;
+    - Buttons resize automatically if necessary;
+    - Improved text display (automatic line wrap, etc.);
+    - Display of the percentage of loading of the resources;
+    - The page now scrolls to the game interface when starting a game;
+    - Displaying a full-screen mode button while displaying the counter before the start of a game;
+    - Display of a button Exit full-screen when possible and necessary;
+    - The game prevents scrolling of the page with the arrows of the keyboard during a game;
+    - Others minors adjustments of the interface.
+  - Fixed a bug that reduced the performance and fluidity of the game during a game involving multiple players (human or AI) due to the display of text above the Snake;
+  - Improved processing of resource loading errors;
+  - Other bugfixes and adjustments.
 
 * Version 1.3.2.1 (7/25/2019):
   - Additions to use the game in offline mode and to be offered installation on compatible platforms;
@@ -80,7 +99,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ## À propos du jeu
 
-* Version du jeu : 1.3.2.1
+* Version du jeu : 1.4
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -94,6 +113,25 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 
 ## Journal des changements
+
+* Version 1.4 (02/08/2019) :
+  - Le jeu détecte désormais si la pomme est bloquée par des obstacles (murs, Snake ayant perdu) et si elle est inaccessible et évite de poser la pomme à ces endroits ou change sa position ;
+  - Nombreuses améliorations de l'interface du jeu :
+    - Le bandeau du haut et ses éléments se redimensionnent automatiquement selon la taille de l'écran ;
+    - Toutes les infos du jeu (gagnants, consignes des niveaux, messages de niveau réussi/échoué) sont affichées en bas de l'interface du jeu sous forme de notifications ;
+    - Affichage du meilleur score/temps directement dans l'interface du jeu en mode Niveaux ;
+    - Affichage du temps restant pour les niveaux impliquant un compteur ;
+    - Les boutons se redimensionnent automatiquement si nécessaire ;
+    - Amélioration de l'affichage du texte (saut automatique de ligne, etc.) ;
+    - Affichage du pourcentage de chargement des ressources ;
+    - La page défile désormais vers l'interface du jeu lors du démarrage d'une partie ;
+    - Affichage d'un bouton Mode plein-écran lors de l'affichage du compteur avant le début d'une partie ;
+    - Affichage d'un bouton Quitter plein-écran lorsque possible et nécessaire ;
+    - Le jeu empêche le défilement de la page avec les flèches du clavier en cours de partie ;
+    - Autres ajustements mineurs de l'interface.
+  - Correction d'un bug qui réduisait les performances et la fluidité du jeu lors d'une partie impliquant plusieurs joueurs (humains ou IA) dû à l'affichage du texte au dessus des Snake ;
+  - Amélioration de la gestion des erreurs de chargement des ressources ;
+  - Autres corrections de bugs et ajustements.
 
 * Version 1.3.2.1 (25/07/2019) :
   - Ajout permettant d'utiliser le jeu en mode hors-ligne et de se voir proposer l'installation sur les plateformes compatibles ;
@@ -142,7 +180,6 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 ### À faire :
 
 * Améliorer l'IA pour l'empêcher de se bloquer (essais effectués) - niveau Ultra
-* Performances lorsque plusieurs Snake sur une seule grille (aux algorithmes d'IA -> nombreuses IA)
 
 ### Fait :
 
@@ -154,6 +191,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 ### Problèmes :
 
 * hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible
+* Performances lorsque plusieurs Snake sur une seule grille (aux algorithmes d'IA -> nombreuses IA)
 
 ## Déclaration de licence
 
