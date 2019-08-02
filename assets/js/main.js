@@ -1151,6 +1151,7 @@ function playLevel(level, player, type) {
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
         levelTimer = new Timer(function() {
           playerGame.setTimeToDisplay(0);
+          document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: 0 });
 
           if(!notificationEndDisplayed) {
             playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 0, null, null, true));

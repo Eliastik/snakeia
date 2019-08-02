@@ -62,15 +62,15 @@ body {
   margin: auto;
 }
 
- .language {
-   width: 100%;
-   max-width: 350px;
-   margin: auto;
- }
+.language {
+  width: 100%;
+  max-width: 350px;
+  margin: auto;
+}
 
- .verySmall {
-   font-size: 75%;
- }
+.verySmall {
+  font-size: 75%;
+}
 
 #settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer, #levelListDownloadPlayer, #levelListDownloadAI, #localstorageDisabled {
   display: none;

@@ -1121,6 +1121,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
       this.btnFullScreen.addClickAction(this.canvas, function() {
         self.toggleFullscreen();
+        self.pause();
       });
 
       this.btnPause.addClickAction(this.canvas, function() {
@@ -2563,10 +2564,9 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
               self.triggerClick();
             }
 
-            self.hovered = true;
+            self.hovered = false;
             self.clicked = true;
           } else {
-            self.hovered = false;
             self.clicked = false;
           }
         }
@@ -2615,8 +2615,6 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
 
   this.disable = function() {
     this.disabled = true;
-    this.hovered = false;
-    this.clicked = false;
   };
 
   this.enable = function() {
