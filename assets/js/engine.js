@@ -1463,6 +1463,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         if(self.frame % self.speed == 0) {
           for(var i = 0; i < self.snakes.length; i++) {
             var initialDirection = self.snakes[i].direction;
+            var setFruit = false;
             var setFruitError = false;
 
             if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
@@ -1495,7 +1496,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
                     self.snakes[i].scoreMax = true;
                   } else {
                     self.numFruit++;
-                    var setFruitError = !self.grid.setFruit();
+                    var setFruit = true;
                   }
 
                   if(self.snakes.length <= 1 && self.progressiveSpeed && self.snakes[i].score > 0 && self.initialSpeed > 1) {
@@ -1509,22 +1510,26 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
               }
             }
 
-            var nbOver = 0;
-
-            for(var j = 0; j < self.snakes.length; j++) {
-              (self.snakes[j].gameOver || self.snakes[j].scoreMax) && nbOver++;
-            }
-
-            if(!self.scoreMax && self.grid.isFruitSurrounded(self.grid.fruitPos, true)) {
+            if(!self.scoreMax && setFruit) {
               var setFruitError = !self.grid.setFruit();
             }
+          }
 
-            if(nbOver >= self.snakes.length || setFruitError) {
-              self.stop();
+          if(!self.scoreMax && !setFruitError && self.grid.isFruitSurrounded(self.grid.fruitPos, true)) {
+            var setFruitError = !self.grid.setFruit();
+          }
 
-              if(self.snakes.length > 1) {
-                self.gameFinished = true;
-              }
+          var nbOver = 0;
+
+          for(var j = 0; j < self.snakes.length; j++) {
+            (self.snakes[j].gameOver || self.snakes[j].scoreMax) && nbOver++;
+          }
+
+          if(nbOver >= self.snakes.length || setFruitError) {
+            self.stop();
+
+            if(self.snakes.length > 1) {
+              self.gameFinished = true;
             }
           }
         }
