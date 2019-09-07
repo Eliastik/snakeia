@@ -808,7 +808,7 @@ function validateSettings(returnValidation) {
               if(battleAgainstAIs && winners.index[i] == 0) {
                 var playerWinnerBattleRoyale = true;
               } else {
-                resultMessage = resultMessage + " " + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[i] : winners.index[i] + 1) });
+                resultMessage = resultMessage + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[i] : winners.index[i] + 1) });
 
                 if((i + 1) < winners.index.length - 1) {
                   resultMessage = resultMessage + ", ";
