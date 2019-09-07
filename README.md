@@ -12,7 +12,7 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 
 ## About this game
 
-* Version: 1.4
+* Version: 1.4.0.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -26,6 +26,12 @@ Game programmed in pure JavaScript (no JQuery or other JavaScript frameworks) an
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 
 ## Changelog
+
+* Version 1.4.0.1 (9/7/2019) :
+  - Fixed a problem affecting performance;
+  - The game is paused when full-screen mode is enabled or exited;
+  - Updated software libraries;
+  - Others minors fixes.
 
 * Version 1.4 (8/2/2019):
   - The game now detects if the apple is blocked by obstacles (walls, dead Snake) and inaccessible then avoids to put the apple in these places or changes its position;
@@ -99,7 +105,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ## À propos du jeu
 
-* Version du jeu : 1.4
+* Version du jeu : 1.4.0.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -113,6 +119,12 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 
 ## Journal des changements
+
+* Version 1.4.0.1 (07/09/2019) :
+  - Correction d'un problème affectant les performances ;
+  - Le jeu se met en pause lors de la mise en plein-écran ou lorsque le mode plein-écran est quitté ;
+  - Bibliothèques logicielles mises à jour ;
+  - Autres corrections mineures.
 
 * Version 1.4 (02/08/2019) :
   - Le jeu détecte désormais si la pomme est bloquée par des obstacles (murs, Snake ayant perdu) et si elle est inaccessible et évite de poser la pomme à ces endroits ou change sa position ;
@@ -179,11 +191,13 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ### À faire :
 
-* Améliorer l'IA pour l'empêcher de se bloquer (essais effectués) -> plus long chemin si bloqué
+* Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
+* Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
+* (Architecture client-serveur)
 
 ### Fait :
 
-* Performances lorsque plusieurs Snake sur une seule grille (problème affichage texte drawSnakeInfos corrigé)
+* Performances lorsque plusieurs Snake sur une seule grille (problème affichage texte drawSnakeInfos et aussi la fonction isCaseSurrounded de la classe Grid corrigés)
 * Correction vitesse démarrage partie si fps > 60
 * Idée type de niveau : atteindre le score avant les adversaires
 * Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
@@ -191,7 +205,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 ### Problèmes :
 
 * hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible
-* Performances lorsque plusieurs Snake sur une seule grille (aux algorithmes d'IA -> nombreuses IA et aussi la fonction isCaseSurrounded de la classe Grid (corrigé))
+* (Performances lorsque plusieurs Snake sur une seule grille (aux algorithmes d'IA -> nombreuses IA))
 
 ## Déclaration de licence
 

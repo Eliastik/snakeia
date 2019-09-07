@@ -80,8 +80,8 @@ IMAGE_SNAKE_SATURATION = 50;
 IMAGE_SNAKE_VALUE = 77;
 CAR_TO_PRERENDER = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "×"];
 // Infos
-APP_VERSION = "1.4";
-DATE_VERSION = "08/02/2019";
+APP_VERSION = "1.4.0.1";
+DATE_VERSION = "09/07/2019";
 
 // Return an integer between min (inclusive) and max (inclusive)
 function randRange(min, max) {
@@ -1313,7 +1313,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     if(!this.errorOccured) {
       for(var i = 0; i < this.snakes.length; i++) {
         if(this.snakes[i].errorInit) {
-          console.error(window.i18next.t("engine.initFailed"));
           this.errorOccured = true;
           this.stop();
         }

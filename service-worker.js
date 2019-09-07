@@ -17,7 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 const CACHE_BASENAME = 'snake-ia';
-const CACHE_VER = '-v1.4';
+const CACHE_VER = '-v1.4.0.1';
 const CACHE = CACHE_BASENAME + CACHE_VER;
 
 const CACHE_URLS = [
