@@ -179,7 +179,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 
 ### À faire :
 
-* Améliorer l'IA pour l'empêcher de se bloquer (essais effectués) - niveau Ultra
+* Améliorer l'IA pour l'empêcher de se bloquer (essais effectués) -> plus long chemin si bloqué
 
 ### Fait :
 
@@ -191,7 +191,7 @@ Jeu programmé en JavaScript pur (pas de JQuery ni d'autres frameworks JavaScrip
 ### Problèmes :
 
 * hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible
-* Performances lorsque plusieurs Snake sur une seule grille (aux algorithmes d'IA -> nombreuses IA et aussi la fonction isCaseSurrounded de la classe Grid)
+* Performances lorsque plusieurs Snake sur une seule grille (aux algorithmes d'IA -> nombreuses IA et aussi la fonction isCaseSurrounded de la classe Grid (corrigé))
 
 ## Déclaration de licence
 
