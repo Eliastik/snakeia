@@ -2299,8 +2299,8 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       var imageLoc = "";
 
       if((i == 0 || i == this.snakes[j].length() - 1) && !this.snakes[j].gameOver) {
-        var offsetX = -(caseWidth / (offsetImage + 1));
-        var offsetY = -(caseHeight / (offsetImage + 1));
+        var offsetX = (caseWidth * (this.offsetFrame / this.speed));
+        var offsetY = (caseHeight * (this.offsetFrame / this.speed));
         var currentPosition = position;
 
         if(i == this.snakes[j].length() - 1) {
@@ -2309,16 +2309,16 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
 
         switch(currentPosition.direction) {
           case UP:
-            caseY -= offsetY;
+            caseY -= offsetY - caseHeight;
             break;
           case BOTTOM:
-            caseY += offsetY;
+            caseY += offsetY - caseHeight;
             break;
           case RIGHT:
-            caseX += offsetX;
+            caseX += offsetX - caseWidth;
             break;
           case LEFT:
-            caseX -= offsetX;
+            caseX -= offsetX - caseWidth;
             break;
         }
       }
@@ -2471,21 +2471,21 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
     var caseY = this.headerHeight + posY * caseHeight;
 
     if(!this.snakes[i].gameOver) {
-      var offsetX = -(caseWidth / (offsetImage + 1));
-      var offsetY = -(caseHeight / (offsetImage + 1));
+      var offsetX = (caseWidth * (this.offsetFrame / this.speed));
+      var offsetY = (caseHeight * (this.offsetFrame / this.speed));
 
       switch(position.direction) {
         case UP:
-          caseY -= offsetY;
+          caseY -= offsetY - caseHeight;
           break;
         case BOTTOM:
-          caseY += offsetY;
+          caseY += offsetY - caseHeight;
           break;
         case RIGHT:
-          caseX += offsetX;
+          caseX += offsetX - caseWidth;
           break;
         case LEFT:
-          caseX -= offsetX;
+          caseX -= offsetX - caseWidth;
           break;
       }
     }
