@@ -1020,7 +1020,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.lastKey = -1;
   this.numFruit = 1;
   this.frame = 0;
-  this.offsetFrame = 0;
+  this.offsetFrame = this.speed;
   this.lastFrame = 0;
   this.currentFPS = 0;
   // Game state variables
@@ -1293,7 +1293,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     this.numFruit = 1;
     this.frame = 0;
-    this.offsetFrame = 0;
     this.lastFrame = 0;
     this.currentFPS = TARGET_FPS;
     this.scoreMax = false;
@@ -1303,6 +1302,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     this.gameFinished = false;
     this.initialSpeed = this.initialSpeedUntouched;
     this.speed = this.initialSpeedUntouched;
+    this.offsetFrame = this.speed;
     this.grid.setFruit();
     this.start();
   };
@@ -2299,8 +2299,8 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       var imageLoc = "";
 
       if((i == 0 || i == this.snakes[j].length() - 1) && !this.snakes[j].gameOver) {
-        var offsetX = (caseWidth * (this.offsetFrame / this.speed));
-        var offsetY = (caseHeight * (this.offsetFrame / this.speed));
+        var offsetX = (caseWidth * (this.offsetFrame / this.speed)) - caseWidth;
+        var offsetY = (caseHeight * (this.offsetFrame / this.speed)) - caseHeight;
         var currentPosition = position;
 
         if(i == this.snakes[j].length() - 1) {
@@ -2309,16 +2309,16 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
 
         switch(currentPosition.direction) {
           case UP:
-            caseY -= offsetY - caseHeight;
+            caseY -= offsetY;
             break;
           case BOTTOM:
-            caseY += offsetY - caseHeight;
+            caseY += offsetY;
             break;
           case RIGHT:
-            caseX += offsetX - caseWidth;
+            caseX += offsetX;
             break;
           case LEFT:
-            caseX -= offsetX - caseWidth;
+            caseX -= offsetX;
             break;
         }
       }
@@ -2363,22 +2363,22 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
         switch(direction) {
           case BOTTOM:
             imageLoc = "assets/images/body_end.png";
-            this.drawImage(ctx, "assets/images/body.png", caseX, caseY + caseHeight, caseWidth, caseHeight - (caseY - initialCaseY));
+            //this.drawImage(ctx, "assets/images/body.png", caseX, caseY + caseHeight, caseWidth, caseHeight - (caseY - initialCaseY));
             break;
           case RIGHT:
             imageLoc = "assets/images/body_2_end.png";
-            this.drawImage(ctx, "assets/images/body_2.png", caseX + caseWidth, caseY, caseWidth - (caseX - initialCaseX), caseHeight);
+            //this.drawImage(ctx, "assets/images/body_2.png", caseX + caseWidth, caseY, caseWidth - (caseX - initialCaseX), caseHeight);
             break;
           case UP:
             imageLoc = "assets/images/body_3_end.png";
-            this.drawImage(ctx, "assets/images/body.png", caseX, caseY - caseHeight, caseWidth, caseHeight + (caseY - initialCaseY));
+            //this.drawImage(ctx, "assets/images/body.png", caseX, caseY - caseHeight, caseWidth, caseHeight + (caseY - initialCaseY));
             break;
           case LEFT:
             imageLoc = "assets/images/body_4_end.png";
-            this.drawImage(ctx, "assets/images/body_2.png", caseX - caseWidth, caseY, caseWidth + (caseX - initialCaseX), caseHeight);
+            //this.drawImage(ctx, "assets/images/body_2.png", caseX - caseWidth, caseY, caseWidth + (caseX - initialCaseX), caseHeight);
             break;
         }
-      } else {
+      } else if(!(!this.snakes[j].gameOver && i == 1)) {
         var prec = this.snakes[j].get(i - 1);
         var next = this.snakes[j].get(i + 1);
         var current = this.snakes[j].get(i);
