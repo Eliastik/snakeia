@@ -2043,7 +2043,6 @@ Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
 
 Game.prototype.drawImageData = function(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight) {
   if(imageData != "") {
-    console.log(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight);
     ctx.drawImage(imageData, Math.round(sx), Math.round(sy), Math.round(sWidth), Math.round(sHeight), Math.round(x), Math.round(y), Math.round(width), Math.round(height));
   }
 };
@@ -2278,7 +2277,6 @@ Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, 
 };
 
 Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur) {
-  var offsetImage = this.offsetFrame % this.speed;
   var canvasTmp = document.createElement("canvas");
   canvasTmp.width = this.canvas.width;
   canvasTmp.height = this.canvas.height;
@@ -2304,8 +2302,11 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       var imageLoc = "";
 
       if((i == 0 || i == this.snakes[j].length() - 1) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
-        var offsetX = (caseWidth * (this.offsetFrame / this.speed)) - caseWidth;
-        var offsetY = (caseHeight * (this.offsetFrame / this.speed)) - caseHeight;
+        var offset = this.offsetFrame / this.speed;
+        var offset = (offset > 1 ? 1 : offset);
+        var offsetX = (caseWidth * offset) - caseWidth;
+        var offsetY = (caseHeight * offset) - caseHeight;
+
         var currentPosition = position;
 
         if(i == this.snakes[j].length() - 1) {
