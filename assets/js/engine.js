@@ -2385,6 +2385,35 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
   }
 };
 
+Game.prototype.drawArrow = function(ctx, fromx, fromy, tox, toy) {
+  var lineCap = ctx.lineCap;
+  var lineWidth = ctx.lineWidth;
+  var strokeStyle = ctx.strokeStyle;
+  var filter = ctx.filter;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = "#FF0000";
+  ctx.filter = "";
+
+  ctx.beginPath();
+  var headlen = 20;
+  var dx = tox - fromx;
+  var dy = toy - fromy;
+  var angle = Math.atan2(dy, dx);
+  ctx.moveTo(fromx, fromy);
+  ctx.lineTo(tox, toy);
+  ctx.moveTo(tox, toy);
+  ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+  ctx.moveTo(tox, toy);
+  ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+  ctx.stroke();
+
+  ctx.lineCap = lineCap;
+  ctx.lineWidth = lineWidth;
+  ctx.strokeStyle = strokeStyle;
+  ctx.filter = filter;
+};
+
 Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight) {
   var numPlayer = 0;
   var numAI = 0;
@@ -2403,6 +2432,10 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
     var caseY = this.headerHeight + posY * caseHeight;
 
     this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
+
+    if(this.snakes[i].player == PLAYER_HUMAN && this.countBeforePlay >= 0 && i == 0 && this.snakes.length > 2) {
+      this.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
+    }
   }
 };
 
