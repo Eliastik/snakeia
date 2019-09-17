@@ -2034,16 +2034,35 @@ Game.prototype.preRenderFont = function(cars, size, color, fontFamily) {
   }
 };
 
-Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height) {
-  if(imgSrc != "") {
-    var imageCase = this.imageLoader.get(imgSrc);
-    ctx.drawImage(imageCase, Math.round(x), Math.round(y), Math.round(width), Math.round(height));
-  }
+Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow) {
+  this.drawImageWrapper(ctx, this.imageLoader.get(imgSrc), x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow);
 };
 
-Game.prototype.drawImageData = function(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight) {
-  if(imageData != "") {
-    ctx.drawImage(imageData, Math.round(sx), Math.round(sy), Math.round(sWidth), Math.round(sHeight), Math.round(x), Math.round(y), Math.round(width), Math.round(height));
+Game.prototype.drawImageData = function(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow) {
+  this.drawImageWrapper(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow);
+};
+
+Game.prototype.drawImageWrapper = function(ctx, image, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow) {
+  var x = (x == undefined || isNaN(x)) ? null : Math.round(x);
+  var y = (y == undefined || isNaN(y)) ? null : Math.round(y);
+  var width = (width == undefined || isNaN(width)) ? null : Math.round(width);
+  var height = (height == undefined || isNaN(height)) ? null : Math.round(height);
+  var sx = (sx == undefined || isNaN(sx)) ? null : Math.round(sx);
+  var sy = (sy == undefined || isNaN(sy)) ? null : Math.round(sy);
+  var sWidth = (sWidth == undefined || isNaN(sWidth)) ? null : Math.round(sWidth);
+  var sHeight = (sHeight == undefined || isNaN(sHeight)) ? null : Math.round(sHeight);
+  var eraseBelow = eraseBelow == undefined ? false : eraseBelow;
+
+  if(eraseBelow) {
+    ctx.clearRect(x, y, width, height);
+  }
+
+  if(ctx != undefined && image != undefined) {
+    if(sx != undefined && sy != undefined && sWidth != undefined && sHeight != undefined) {
+      ctx.drawImage(image, sx, sy, sWidth, sHeight, x, y, width, height);
+    } else {
+      ctx.drawImage(image, x, y, width, height);
+    }
   }
 };
 
@@ -2283,6 +2302,8 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
   var ctxTmp = canvasTmp.getContext("2d");
 
   for(var j = 0; j < this.snakes.length; j++) {
+    ctxTmp.clearRect(0, 0, canvasTmp.width, canvasTmp.height);
+
     if(this.snakes[j].color != undefined) {
       ctxTmp.filter = "hue-rotate(" + this.snakes[j].color + "deg)";
     }
@@ -2369,22 +2390,22 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
         switch(direction) {
           case BOTTOM:
             imageLoc = "assets/images/body_end.png";
-            this.drawImage(ctxTmp, "assets/images/body.png", caseX, caseY + caseHeight, caseWidth, caseHeight - (caseY - initialCaseY));
+            this.drawImage(ctxTmp, "assets/images/body.png", caseX, caseY + caseHeight, caseWidth, caseHeight);
             break;
           case RIGHT:
             imageLoc = "assets/images/body_2_end.png";
-            this.drawImage(ctxTmp, "assets/images/body_2.png", caseX + caseWidth, caseY, caseWidth - (caseX - initialCaseX), caseHeight);
+            this.drawImage(ctxTmp, "assets/images/body_2.png", caseX + caseWidth, caseY, caseWidth, caseHeight);
             break;
           case UP:
             imageLoc = "assets/images/body_3_end.png";
-            this.drawImage(ctxTmp, "assets/images/body.png", caseX, caseY - caseHeight, caseWidth, caseHeight + (caseY - initialCaseY));
+            this.drawImage(ctxTmp, "assets/images/body.png", caseX, caseY - caseHeight, caseWidth, caseHeight);
             break;
           case LEFT:
             imageLoc = "assets/images/body_4_end.png";
-            this.drawImage(ctxTmp, "assets/images/body_2.png", caseX - caseWidth, caseY, caseWidth + (caseX - initialCaseX), caseHeight);
+            this.drawImage(ctxTmp, "assets/images/body_2.png", caseX - caseWidth, caseY, caseWidth, caseHeight);
             break;
         }
-      } else/* if(!(!this.snakes[j].gameOver && !this.snakes[j].scoreMax && i == 1)) */ {
+      } else {
         var prec = this.snakes[j].get(i - 1);
         var next = this.snakes[j].get(i + 1);
         var current = this.snakes[j].get(i);
@@ -2418,13 +2439,12 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
         }
       }
 
-      this.drawImage(ctxTmp, imageLoc, caseX, caseY, caseWidth, caseHeight);
+      this.drawImage(ctxTmp, imageLoc, caseX, caseY, caseWidth, caseHeight, null, null, null, null, true);
     }
 
+    this.drawImageData(ctx, canvasTmp, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height);
     ctxTmp.filter = "none";
   }
-
-  this.drawImageData(ctx, canvasTmp, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height);
 
   if(this.snakes.length > 1) {
     this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight);
@@ -2479,21 +2499,23 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
     var caseY = this.headerHeight + posY * caseHeight;
 
     if(!this.snakes[i].gameOver) {
-      var offsetX = (caseWidth * (this.offsetFrame / this.speed));
-      var offsetY = (caseHeight * (this.offsetFrame / this.speed));
+      var offset = this.offsetFrame / this.speed;
+      var offset = (offset > 1 ? 1 : offset);
+      var offsetX = (caseWidth * offset) - caseWidth;
+      var offsetY = (caseHeight * offset) - caseHeight;
 
       switch(position.direction) {
         case UP:
-          caseY -= offsetY - caseHeight;
+          caseY -= offsetY;
           break;
         case BOTTOM:
-          caseY += offsetY - caseHeight;
+          caseY += offsetY;
           break;
         case RIGHT:
-          caseX += offsetX - caseWidth;
+          caseX += offsetX;
           break;
         case LEFT:
-          caseX -= offsetX - caseWidth;
+          caseX -= offsetX;
           break;
       }
     }
