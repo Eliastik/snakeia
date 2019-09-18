@@ -2034,15 +2034,15 @@ Game.prototype.preRenderFont = function(cars, size, color, fontFamily) {
   }
 };
 
-Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow) {
-  this.drawImageWrapper(ctx, this.imageLoader.get(imgSrc), x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow);
+Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
+  this.drawImageWrapper(ctx, this.imageLoader.get(imgSrc), x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees);
 };
 
-Game.prototype.drawImageData = function(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow) {
-  this.drawImageWrapper(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow);
+Game.prototype.drawImageData = function(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
+  this.drawImageWrapper(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees);
 };
 
-Game.prototype.drawImageWrapper = function(ctx, image, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow) {
+Game.prototype.drawImageWrapper = function(ctx, image, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
   var x = (x == undefined || isNaN(x)) ? null : Math.round(x);
   var y = (y == undefined || isNaN(y)) ? null : Math.round(y);
   var width = (width == undefined || isNaN(width)) ? null : Math.round(width);
@@ -2052,6 +2052,15 @@ Game.prototype.drawImageWrapper = function(ctx, image, x, y, width, height, sx, 
   var sWidth = (sWidth == undefined || isNaN(sWidth)) ? null : Math.round(sWidth);
   var sHeight = (sHeight == undefined || isNaN(sHeight)) ? null : Math.round(sHeight);
   var eraseBelow = eraseBelow == undefined ? false : eraseBelow;
+  var degrees = (degrees == undefined || isNaN(degrees)) ? null : degrees;
+
+  if(degrees != undefined) {
+    ctx.save();
+    ctx.translate(x + width / 2, y + height / 2);
+    ctx.rotate(degrees * Math.PI / 180);
+    x = -(width / 2);
+    y = -(height / 2);
+  }
 
   if(eraseBelow) {
     ctx.clearRect(x, y, width, height);
@@ -2063,6 +2072,10 @@ Game.prototype.drawImageWrapper = function(ctx, image, x, y, width, height, sx, 
     } else {
       ctx.drawImage(image, x, y, width, height);
     }
+  }
+
+  if(degrees != undefined) {
+    ctx.restore();
   }
 };
 
@@ -2318,8 +2331,6 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       var posY = position.y;
       var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
       var caseY = this.headerHeight + posY * caseHeight;
-      var initialCaseX = caseX;
-      var initialCaseY = caseY;
       var imageLoc = "";
 
       if((i == 0 || i == this.snakes[j].length() - 1) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
