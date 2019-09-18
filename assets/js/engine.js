@@ -64,6 +64,10 @@ UP = 0;
 RIGHT = 1;
 BOTTOM = 2;
 LEFT = 3;
+ANGLE_1 = 4;
+ANGLE_2 = 5;
+ANGLE_3 = 6;
+ANGLE_4 = 7;
 // Keys
 KEY_UP = 38;
 KEY_RIGHT = 39;
@@ -2331,6 +2335,7 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       var posY = position.y;
       var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
       var caseY = this.headerHeight + posY * caseHeight;
+      var angle = 0;
       var imageLoc = "";
 
       if((i == 0 || i == this.snakes[j].length() - 1) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
@@ -2450,7 +2455,7 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
         }
       }
 
-      this.drawImage(ctxTmp, imageLoc, caseX, caseY, caseWidth, caseHeight, null, null, null, null, true);
+      this.drawImage(ctxTmp, imageLoc, caseX, caseY, caseWidth, caseHeight, null, null, null, null, true, angle);
     }
 
     this.drawImageData(ctx, canvasTmp, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height);
@@ -2492,7 +2497,6 @@ Game.prototype.drawArrow = function(ctx, fromx, fromy, tox, toy) {
 };
 
 Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight) {
-  var offsetImage = this.offsetFrame % this.speed;
   var numPlayer = 0;
   var numAI = 0;
 
@@ -2533,7 +2537,7 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
 
     this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
 
-    if(this.snakes[i].player == PLAYER_HUMAN && this.countBeforePlay >= 0 && i == 0 && this.snakes.length > 2) {
+    if(this.snakes[i].player == PLAYER_HUMAN && this.countBeforePlay >= 0 && this.snakes.length > 2) {
       this.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
     }
   }
