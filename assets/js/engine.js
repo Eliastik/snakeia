@@ -1229,14 +1229,21 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     document.addEventListener("keydown", function(evt) {
       if(!self.killed) {
+        var keyCode = evt.keyCode;
+
+        if(keyCode == 90 || keyCode == 87) keyCode = KEY_UP; // W or Z
+        if(keyCode == 65 || keyCode == 81) keyCode = KEY_LEFT; // A or Q
+        if(keyCode == 83) keyCode = KEY_BOTTOM; // S
+        if(keyCode == 68) keyCode = KEY_RIGHT; // D
+
         if(!self.paused) {
           if(evt.keyCode == KEY_ENTER && self.outputType == OUTPUT_GRAPHICAL) {
             self.pause();
           } else {
-            self.lastKey = evt.keyCode;
+            self.lastKey = keyCode;
           }
         } else if(self.countBeforePlay <= -1 && self.enableKeyMenu) {
-          self.lastKeyMenu = evt.keyCode;
+          self.lastKeyMenu = keyCode;
           self.updateUI();
         }
 
