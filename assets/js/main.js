@@ -1103,7 +1103,7 @@ function playLevel(level, player, type) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
         var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, false);
 
-        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, width, height));
+        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, width, height));
       }
     }
 
