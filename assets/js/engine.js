@@ -150,6 +150,24 @@ function hslToName(h, s, l) {
   }
 }
 
+function isFilterHueAvailable() {
+  var canvas = document.createElement("canvas");
+  canvas.width = 5;
+  canvas.height = 5;
+  var ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#FF0000";
+  ctx.filter = "hue-rotate(90deg)";
+  ctx.fillRect(0, 0, 5, 5);
+  var color = ctx.getImageData(0, 0, 1, 1).data;
+
+  if(color[0] == 255 && color[1] == 0 && color[2] == 0) {
+    return false;
+  }
+
+  return true;
+}
+
 // Event handlers objects type
 function Event(name) {
   this.name = name;
@@ -1835,13 +1853,13 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             var colorRgb = hsvToRgb(addHue(IMAGE_SNAKE_HUE, playerHuman.color) / 360, IMAGE_SNAKE_SATURATION / 100, IMAGE_SNAKE_VALUE / 100);
 
             if(this.countBeforePlay > 0) {
-              this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + "\n" + window.i18next.t("engine.colorPlayer", { color: colorName }), ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"], this.fontSize, FONT_FAMILY, "center", null, false, function() {
+              this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + "\n" + (isFilterHueAvailable() ? window.i18next.t("engine.colorPlayer", { color: colorName }) : window.i18next.t("engine.arrowPlayer")), (isFilterHueAvailable() ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, FONT_FAMILY, "center", null, false, function() {
                 self.btnEnterFullScreen.addClickAction(self.canvas, function() {
                   self.toggleFullscreen();
                 });
               });
             } else {
-              this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], window.i18next.t("engine.ready") + "\n" + window.i18next.t("engine.colorPlayer", { color: colorName }), ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"], this.fontSize, FONT_FAMILY, "center", null, false, function() {
+              this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], window.i18next.t("engine.ready") + "\n" + (isFilterHueAvailable() ? window.i18next.t("engine.colorPlayer", { color: colorName }) : window.i18next.t("engine.arrowPlayer")), (isFilterHueAvailable() ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, FONT_FAMILY, "center", null, false, function() {
                 self.btnEnterFullScreen.addClickAction(self.canvas, function() {
                   self.toggleFullscreen();
                 });
@@ -2584,7 +2602,7 @@ Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight)
 
     this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
 
-    if((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) && this.countBeforePlay >= 0 && this.snakes.length > 2) {
+    if((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) && this.countBeforePlay >= 0 && ((isFilterHueAvailable() && this.snakes.length > 2) || (!isFilterHueAvailable() && this.snakes.length > 1))) {
       this.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
     }
   }

@@ -82,6 +82,7 @@
        "pink": "Rose"
      },
      "colorPlayer": "Vous êtes le Snake\nen {{color}}",
+     "arrowPlayer": "Vous êtes le Snake\nindiqué par la\nflèche",
      "ready": "Prêt ?",
      "assistAI": "Assistant IA",
      "exitFullScreen": "Quitter plein-écran",
@@ -155,6 +156,7 @@ i18next.addResourceBundle("en", "translation", {
       "pink": "Pink"
     },
     "colorPlayer": "You are the Snake\nin {{color}}",
+    "arrowPlayer": "You are the Snake\npointed by the\narrow",
     "ready": "Ready?",
     "assistAI": "AI assistant",
     "exitFullScreen": "Exit fullscreen",

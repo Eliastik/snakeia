@@ -202,10 +202,10 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Correction vitesse démarrage partie si fps > 60
 * Idée type de niveau : atteindre le score avant les adversaires
 * Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
+* hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible (workaround trouvé avec le Snake pointé par la flèche + détection et texte différent)
 
 ### Problèmes :
 
-* hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible
 * (Performances lorsque plusieurs Snake sur une seule grille (aux algorithmes d'IA -> nombreuses IA))
 
 ## Déclaration de licence
