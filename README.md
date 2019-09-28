@@ -194,7 +194,6 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
 * Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
 * Afficher difficulté niveaux
-* Animations
 * (Architecture client-serveur)
 
 ### Fait :
@@ -204,6 +203,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Idée type de niveau : atteindre le score avant les adversaires
 * Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
 * hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible (workaround trouvé avec le Snake pointé par la flèche + détection et texte différent)
+* Animations
 
 ### Problèmes :
 

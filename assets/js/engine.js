@@ -2450,18 +2450,18 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
         if((i == 0 || i == -1) && (graphicDirection == ANGLE_1 || graphicDirection == ANGLE_2 || graphicDirection == ANGLE_3 || graphicDirection == ANGLE_4)) {
           if(i == 0) {
             angle = -90;
-          } else {
-            angle = 0;
           }
 
           if(i == 0) {
             angle += -128.073 * Math.pow(offset, 2) + 222.332 * offset - 5.47066;
-          } else {
+          } else if(i == -1) {
             angle += 126.896 * Math.pow(offset, 2) + -33.6471 * offset + 1.65942;
           }
 
-          if((i == 0 && ((graphicDirection == ANGLE_4 && direction == UP) || (graphicDirection == ANGLE_1 && direction == LEFT) || (graphicDirection == ANGLE_2 && direction == BOTTOM) || (graphicDirection == ANGLE_3 && direction == RIGHT))) || i == -1) {
+          if(i == 0 && ((graphicDirection == ANGLE_4 && direction == UP) || (graphicDirection == ANGLE_1 && direction == LEFT) || (graphicDirection == ANGLE_2 && direction == BOTTOM) || (graphicDirection == ANGLE_3 && direction == RIGHT))) {
             angle = -angle;
+          } else if(i == -1 && ((graphicDirection == ANGLE_4 && direction == RIGHT) || (graphicDirection == ANGLE_3 && direction == BOTTOM) || (graphicDirection == ANGLE_1 && direction == UP) || (graphicDirection == ANGLE_2 && direction == LEFT))) {
+            angle = - angle;
           }
 
           eraseBelow = false;
