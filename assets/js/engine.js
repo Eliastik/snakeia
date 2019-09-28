@@ -406,17 +406,15 @@ function Grid(width, height, generateWalls, borderWalls) {
     return true;
   };
 
-  this.isCaseSurrounded = function(position, fill, foundVals, forbiddenVals, returnCount) {
+  this.isCaseSurrounded = function(position, fill, foundVals, forbiddenVals) {
     if(position == null || position == undefined) {
       return false;
     }
 
     var fill = fill == undefined ? false : fill;
-    var returnCount = returnCount == undefined ? false : returnCount;
 
     var checkList = [position];
     var complete = [];
-    var found = 0;
 
     while(checkList.length > 0) {
       var currentPosition = checkList[0];
@@ -435,7 +433,7 @@ function Grid(width, height, generateWalls, borderWalls) {
           checkList.push(directions[i]);
 
           if(foundVals.indexOf(this.get(directions[i])) > -1) {
-            found++;
+            return false;
           }
 
           if(fill && this.get(directions[i]) == EMPTY_VAL) {
@@ -447,19 +445,11 @@ function Grid(width, height, generateWalls, borderWalls) {
       complete.push(currentPosition);
     }
 
-    if(returnCount) {
-      return found;
+    if(fill && (this.get(position) == EMPTY_VAL || this.get(position) == FRUIT_VAL)) {
+      this.set(SURROUNDED_VAL, position);
     }
 
-    if(found > 0) {
-      return false;
-    } else {
-      if(fill && (this.get(position) == EMPTY_VAL || this.get(position) == FRUIT_VAL)) {
-        this.set(SURROUNDED_VAL, position);
-      }
-
-      return true;
-    }
+    return true;
   };
 
   this.isFruitSurrounded = function(position, fill) {
@@ -3203,7 +3193,7 @@ function GameGroup(games) {
       }
     }
 
-    if(maxScore > 0) {
+    if(maxScore >= 0) {
       var idx = 0;
 
       for(var i = 0; i < this.games.length; i++) {

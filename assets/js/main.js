@@ -826,8 +826,10 @@ function validateSettings(returnValidation) {
           }
         }
 
-        document.getElementById("gameOrder").innerHTML = resultMessage;
-        group.setNotification(new NotificationMessage(resultMessage, null, "rgba(52, 152, 219, 0.5)", 15, 0, null, null, true));
+        if(resultMessage.trim() != "") {
+          document.getElementById("gameOrder").innerHTML = resultMessage;
+          group.setNotification(new NotificationMessage(resultMessage, null, "rgba(52, 152, 219, 0.5)", 15, 0, null, null, true));
+        }
       }
     });
 
