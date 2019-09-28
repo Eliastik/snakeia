@@ -735,7 +735,7 @@ function validateSettings(returnValidation) {
         }
 
         for(var i = 0; i < numberIA; i++) {
-          snakes.push(new Snake(RIGHT, 1, grid, PLAYER_AI, aiLevel, autoRetry));
+          snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry));
         }
 
         games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));

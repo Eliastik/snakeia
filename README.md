@@ -193,6 +193,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 * Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
 * Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
+* Afficher difficulté niveaux
 * Animations
 * (Architecture client-serveur)
 

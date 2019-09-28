@@ -2415,8 +2415,8 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       if(i == 0) {
         direction = this.snakes[j].getHeadPosition().direction;
       } else if(i == -1) {
-        if(!this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
-          direction = this.snakes[j].lastTail.direction;
+        if(!this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
+          direction = this.snakes[j].getTailPosition().direction;
         } else {
           direction = this.snakes[j].get(this.snakes[j].length() - 2).direction;
         }
@@ -2425,7 +2425,7 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       }
 
       // Animation
-      if((i == 0 || i == -1) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
+      if((i == 0 || i == -1) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
         var offset = this.offsetFrame / this.speed; // percentage of the animation
         var offset = (offset > 1 ? 1 : offset);
         var offsetX = (caseWidth * offset) - caseWidth;
@@ -2433,21 +2433,34 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
 
         var currentPosition = position;
 
-        if(this.snakes[j].length() > 1) {
-          var graphicDirection = this.snakes[j].getGraphicDirection(1);
-        } else {
-          var graphicDirection = this.snakes[j].getGraphicDirection(0);
+        if(i == 0) {
+          if(this.snakes[j].length() > 1) {
+            var graphicDirection = this.snakes[j].getGraphicDirection(1);
+          } else {
+            var graphicDirection = this.snakes[j].getGraphicDirection(0);
+          }
+        } else if(i == -1) {
+          var graphicDirection = this.snakes[j].getGraphicDirectionFor(this.snakes[j].getTailPosition(), this.snakes[j].lastTail, this.snakes[j].get(this.snakes[j].length() - 2));
         }
 
-        if(i == this.snakes[j].length() - 1 && this.snakes[j].length() > 1) {
-          currentPosition = this.snakes[j].get(i - 1);
+        if(i == -1 && this.snakes[j].length() > 1) {
+          currentPosition = this.snakes[j].get(this.snakes[j].length() - 1);
         }
 
         if((i == 0 || i == -1) && (graphicDirection == ANGLE_1 || graphicDirection == ANGLE_2 || graphicDirection == ANGLE_3 || graphicDirection == ANGLE_4)) {
-          angle = -90;
-          angle += -128.073*Math.pow(offset,2)+222.332*offset-5.47066;
+          if(i == 0) {
+            angle = -90;
+          } else {
+            angle = 0;
+          }
 
-          if((graphicDirection == ANGLE_4 && direction == UP) || (graphicDirection == ANGLE_1 && direction == LEFT) || (graphicDirection == ANGLE_2 && direction == BOTTOM) || (graphicDirection == ANGLE_3 && direction == RIGHT)) {
+          if(i == 0) {
+            angle += -128.073 * Math.pow(offset, 2) + 222.332 * offset - 5.47066;
+          } else {
+            angle += 126.896 * Math.pow(offset, 2) + -33.6471 * offset + 1.65942;
+          }
+
+          if((i == 0 && ((graphicDirection == ANGLE_4 && direction == UP) || (graphicDirection == ANGLE_1 && direction == LEFT) || (graphicDirection == ANGLE_2 && direction == BOTTOM) || (graphicDirection == ANGLE_3 && direction == RIGHT))) || i == -1) {
             angle = -angle;
           }
 
