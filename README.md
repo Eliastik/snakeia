@@ -12,7 +12,7 @@ Game written in pure JavaScript and object oriented.
 
 ## About this game
 
-* Version: 1.4.0.1
+* Version: 1.4.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -26,6 +26,12 @@ Game written in pure JavaScript and object oriented.
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 
 ## Changelog
+
+* Version 1.4.1 (9/29/2019) :
+  - The movement of the Snakes is now animated;
+  - The player's Snake is indicated by an arrow in a game with several AI opponents;
+  - The game can now be played with the ZQSD/WASD keys;
+  - Bug fixes, performance improvements and others adjustments.
 
 * Version 1.4.0.1 (9/7/2019) :
   - Fixed a problem affecting performance;
@@ -105,7 +111,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## À propos du jeu
 
-* Version du jeu : 1.4.0.1
+* Version du jeu : 1.4.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -119,6 +125,12 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 
 ## Journal des changements
+
+* Version 1.4.1 (29/09/2019) :
+  - Le déplacement des Snake est désormais animé, rendant le jeu plus fluide ;
+  - Le Snake du joueur est désigné par une flèche lors d'une partie avec plusieurs adversaires IA ;
+  - Le jeu peut désormais se jouer avec les touches ZQSD/WASD ;
+  - Correction de bugs, amélioration des performances et autres ajustements.
 
 * Version 1.4.0.1 (07/09/2019) :
   - Correction d'un problème affectant les performances ;
@@ -194,6 +206,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
 * Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
 * Afficher difficulté niveaux
+* Nouveau type niveau avec le contrôle de plusieurs Snake joueurs (prit correctement en compte par le jeu)
 * (Architecture client-serveur)
 
 ### Fait :
