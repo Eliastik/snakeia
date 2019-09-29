@@ -1020,22 +1020,6 @@ function printResultLevel(level, player, levelType, type, shortVersion) {
   return val;
 }
 
-function getBonusValue(level, player, type) {
-    var levels = getLevels(player, type);
-
-    if(levels != null && levels[level] != null) {
-      var levelSelected = levels[level];
-      var levelType = levelSelected["type"];
-      var levelTypeValue = levelSelected["typeValue"];
-
-      if(levelType == LEVEL_REACH_SCORE) {
-        return levelTypeValue * 1.75;
-      }
-    } else {
-      return -1;
-    }
-}
-
 function playLevel(level, player, type) {
   var levels = getLevels(player, type);
 
