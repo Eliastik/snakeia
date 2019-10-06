@@ -430,7 +430,7 @@ function Grid(width, height, generateWalls, borderWalls, maze) {
     return imageRes;
   };
 
-  this.getGraph = function(snakePos) {
+  this.getGraph = function(ignoreSnakePos) {
     var res = new Array(this.height);
 
     for(var i = 0; i < this.height; i++) {
@@ -439,7 +439,9 @@ function Grid(width, height, generateWalls, borderWalls, maze) {
       for(var j = 0; j < this.width; j++) {
         var currentPos = new Position(j, i);
 
-        if(this.isDeadPosition(currentPos)) {
+        if(ignoreSnakePos && this.get(currentPos) == SNAKE_VAL) {
+          res[i][j] = 0;
+        } else if(this.isDeadPosition(currentPos)) {
           res[i][j] = 1;
         } else {
           res[i][j] = 0;
@@ -462,7 +464,7 @@ function Grid(width, height, generateWalls, borderWalls, maze) {
     if(this.getTotal(EMPTY_VAL) > 0) {
       var randomPos = this.getRandomPosition();
 
-      while(this.get(randomPos) != EMPTY_VAL || this.isFruitSurrounded(randomPos, true)) {
+      while(this.get(randomPos) != EMPTY_VAL || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos))) {
         if(this.getTotal(EMPTY_VAL) <= 0) {
           return false;
         }
@@ -477,6 +479,24 @@ function Grid(width, height, generateWalls, borderWalls, maze) {
     }
 
     return true;
+  };
+
+  this.testFruitMaze = function(position) {
+    var grid = this.getGraph(true);
+    var graph = new Lowlight.Astar.Configuration(grid, {
+      order: "yx",
+      torus: true,
+      diagonals: false,
+      cutting: false,
+      cost(a, b) { return b == 1 ? null : 1 }
+    });
+    var path = graph.path({x: this.mazeFirstPosition.x, y: this.mazeFirstPosition.y}, {x: position.x, y: position.y});
+
+    if(path.length < this.getTotal(EMPTY_VAL) / 2) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
   this.isCaseSurrounded = function(position, fill, foundVals, forbiddenVals) {
@@ -1073,7 +1093,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
         var currentPosition = this.getHeadPosition();
         var fruitPos = this.grid.fruitPos.copy();
 
-        var grid = this.grid.getGraph(currentPosition);
+        var grid = this.grid.getGraph(false);
         var graph = new Lowlight.Astar.Configuration(grid, {
           order: "yx",
           torus: (this.aiLevel == AI_LEVEL_HIGH || this.aiLevel == AI_LEVEL_ULTRA) ? true : false,
