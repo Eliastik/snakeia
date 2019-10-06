@@ -922,8 +922,6 @@ function getSave(player, type) {
 }
 
 function getLevelSave(level, player, type) {
-  var save = getSave(player, type);
-
   return getSave(player, type)[level];
 }
 
@@ -1464,7 +1462,7 @@ function downloadLevels(player, button) {
   document.getElementById("btnDeblockDiv").appendChild(buttonDeblock);
 }
 
-function deblockButton(button, script, callbackName) {
+function deblockButton(button, script) {
   button.disabled = false;
   script.src = null;
   document.getElementById("levelDownloading").innerHTML = "";

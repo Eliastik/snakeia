@@ -481,7 +481,7 @@ function Grid(width, height, generateWalls, borderWalls, maze) {
     return true;
   };
 
-  this.testFruitMaze = function(position) {
+  this.testFruitMaze = function(position) { // Maze mode: avoid putting the fruit too close to the Snake
     var grid = this.getGraph(true);
     var graph = new Lowlight.Astar.Configuration(grid, {
       order: "yx",
@@ -492,7 +492,7 @@ function Grid(width, height, generateWalls, borderWalls, maze) {
     });
     var path = graph.path({x: this.mazeFirstPosition.x, y: this.mazeFirstPosition.y}, {x: position.x, y: position.y});
 
-    if(path.length < this.getTotal(EMPTY_VAL) / 2) {
+    if(path.length < Math.ceil(this.getTotal(EMPTY_VAL) / 4)) {
       return false;
     } else {
       return true;
@@ -1388,7 +1388,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     if(this.grid instanceof Grid == false) {
       this.errorOccured = true;
-    } else {
+    } else if(!this.errorOccured) {
       this.grid.setFruit();
     }
 
@@ -1527,6 +1527,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     this.lastKey = -1;
     this.gameOver = false;
     this.gameFinished = false;
+    this.gameMazeWin = false;
     this.initialSpeed = this.initialSpeedUntouched;
     this.speed = this.initialSpeedUntouched;
     this.offsetFrame = this.speed;
@@ -1786,8 +1787,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
   this.toggleFullscreen = function() {
     if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
-      var full = false;
-
       if(!document.fullscreenElement) {
         if(this.canvas.requestFullscreen) {
           this.canvas.requestFullscreen();
@@ -2996,7 +2995,7 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
     }
   };
 
-  this.removeClickAction = function(trigger) {
+  this.removeClickAction = function() {
     if(self.triggerClick != null)  {
       self.triggerClick = null;
     }
@@ -3294,7 +3293,7 @@ function GameGroup(games) {
     this.reactor.addEventListener("onExit", callback);
   };
 
-  this.checkStop = function(game) {
+  this.checkStop = function() {
     allStopped = true;
 
     for(var i = 0; i < this.games.length; i++) {
