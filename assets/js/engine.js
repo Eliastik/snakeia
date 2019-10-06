@@ -751,14 +751,16 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
       positionsToAdd = [];
 
       for(var i = this.initialLength - 1; i >= 0; i--) {
-        if(this.initialDirection == RIGHT) {
-          currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), RIGHT);
-        } else if(this.initialDirection == LEFT) {
-          currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), LEFT);
-        } else if(this.initialDirection == BOTTOM) {
-          currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), BOTTOM);
-        } else if(this.initialDirection == UP) {
-          currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), UP);
+        if(i < this.initialLength - 1) {
+          if(this.initialDirection == RIGHT) {
+            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), RIGHT);
+          } else if(this.initialDirection == LEFT) {
+            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), LEFT);
+          } else if(this.initialDirection == BOTTOM) {
+            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), BOTTOM);
+          } else if(this.initialDirection == UP) {
+            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), UP);
+          }
         }
 
         if(this.grid.get(currentPos) != EMPTY_VAL) {
