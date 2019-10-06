@@ -271,7 +271,7 @@ Position.prototype.indexIn = function(array) {
   return -1;
 }
 
-function Grid(width, height, generateWalls, borderWalls, maze) {
+function Grid(width, height, generateWalls, borderWalls, maze, customGrid) {
   this.width = width == undefined ? 20 : width;
   this.height = height == undefined ? 20 : height;
   this.generateWalls = generateWalls == undefined ? false : generateWalls;
@@ -279,27 +279,49 @@ function Grid(width, height, generateWalls, borderWalls, maze) {
   this.maze = maze == undefined ? false : maze;
   this.mazeFirstPosition;
   this.grid;
+  this.initialGrid;
   this.fruitPos;
 
   this.init = function() {
-    this.grid = new Array(this.height);
+    if(customGrid != undefined || this.initialGrid != undefined) {
+      var gridToCopy;
 
-    for(var i = 0; i < this.height; i++) {
-      this.grid[i] = new Array(this.width);
+      if(this.initialGrid != undefined) {
+        gridToCopy = this.initialGrid;
+      } else {
+        gridToCopy = customGrid;
+      }
 
-      for(var j = 0; j < this.width; j++) {
-        if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && Math.random() > 0.65) || this.maze) {
-          this.grid[i][j] = WALL_VAL;
-        } else {
-          this.grid[i][j] = EMPTY_VAL;
+      this.height = gridToCopy.length;
+      this.width = gridToCopy[0].length;
+
+      this.initialGrid = new Array(this.height);
+      this.grid = new Array(this.height);
+
+      for(var i = 0; i < this.height; i++) {
+        this.initialGrid[i] = gridToCopy[i].slice();
+        this.grid[i] = gridToCopy[i].slice();
+      }
+    } else {
+      this.grid = new Array(this.height);
+
+      for(var i = 0; i < this.height; i++) {
+        this.grid[i] = new Array(this.width);
+
+        for(var j = 0; j < this.width; j++) {
+          if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && Math.random() > 0.65) || this.maze) {
+            this.grid[i][j] = WALL_VAL;
+          } else {
+            this.grid[i][j] = EMPTY_VAL;
+          }
         }
       }
-    }
 
-    if(this.maze) {
-      this.generateMaze();
-    } else if(this.generateWalls) {
-      this.fixWalls(this.borderWalls);
+      if(this.maze) {
+        this.generateMaze();
+      } else if(this.generateWalls) {
+        this.fixWalls(this.borderWalls);
+      }
     }
   };
 
