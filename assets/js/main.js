@@ -289,6 +289,12 @@ function selectMode(mode) {
     document.getElementById("sameGridDiv").style.display = "none";
   }
 
+  if(selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER) {
+    document.getElementById("mazeGridDiv").style.display = "block";
+  } else {
+    document.getElementById("mazeGridDiv").style.display = "none";
+  }
+
   displaySettings();
 }
 
@@ -321,6 +327,7 @@ function displaySettings() {
   checkGameSpeed();
   checkPlayer();
   checkFailSettings();
+  checkMazeGrid();
 }
 
 function displayMenu() {
@@ -398,6 +405,21 @@ function checkPlayer() {
     document.getElementById("playerSettings").style.display = "block";
   } else {
     document.getElementById("playerSettings").style.display = "none";
+  }
+}
+
+function checkMazeGrid() {
+  if(document.getElementById("mazeGrid").checked && (selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER)) {
+    document.getElementById("borderWalls").checked = false;
+    document.getElementById("borderWalls").disabled = true;
+    document.getElementById("generateWalls").checked = false;
+    document.getElementById("generateWalls").disabled = true;
+    document.getElementById("aiAssistant").checked = false;
+    document.getElementById("aiAssistant").disabled = true;
+  } else {
+    document.getElementById("borderWalls").disabled = false;
+    document.getElementById("generateWalls").disabled = false;
+    document.getElementById("aiAssistant").disabled = false;
   }
 }
 
@@ -493,6 +515,10 @@ document.getElementById("battleAgainstAIs").onchange = function() {
   checkFailSettings();
 };
 
+document.getElementById("mazeGrid").onchange = function() {
+  checkMazeGrid();
+};
+
 function resetForm(resetValues) {
   document.getElementById("invalidHeight").style.display = "none";
   document.getElementById("invalidWidth").style.display = "none";
@@ -516,6 +542,7 @@ function resetForm(resetValues) {
     document.getElementById("widthGrid").value = 20;
     document.getElementById("borderWalls").checked = false;
     document.getElementById("generateWalls").checked = false;
+    document.getElementById("mazeGrid").checked = false;
     document.getElementById("sameGrid").checked = true;
     document.getElementById("gameSpeed").value = 8;
     document.getElementById("progressiveSpeed").checked = false;
@@ -532,6 +559,7 @@ function resetForm(resetValues) {
   checkGameSpeed();
   checkPlayer();
   checkFailSettings();
+  checkMazeGrid();
 }
 
 document.getElementById("resetSettings").onclick = function() {
@@ -547,6 +575,7 @@ function validateSettings(returnValidation) {
   var widthGrid = document.getElementById("widthGrid").value;
   var borderWalls = document.getElementById("borderWalls").checked;
   var generateWalls = document.getElementById("generateWalls").checked;
+  var mazeGrid = document.getElementById("mazeGrid").checked;
   var sameGrid = document.getElementById("sameGrid").checked;
   var speed = document.getElementById("gameSpeed").value;
   var progressiveSpeed = document.getElementById("progressiveSpeed").checked;
@@ -688,12 +717,12 @@ function validateSettings(returnValidation) {
     var games = [];
 
     if(selectedMode == SOLO_AI) {
-      var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+      var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
       var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
       games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
     } else if(selectedMode == SOLO_PLAYER) {
-      var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+      var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
       var snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
       games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));

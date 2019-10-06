@@ -217,6 +217,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
 * hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible (workaround trouvé avec le Snake pointé par la flèche + détection et texte différent)
 * Animations
+* Labyrinthes
 
 ### Problèmes :
 
