@@ -1140,7 +1140,7 @@ function ImageLoader() {
   };
 }
 
-function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType) {
+function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
   // Assets loader
   this.imageLoader;
   this.assetsLoaded = false;
@@ -1156,6 +1156,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.progressiveSpeed = progressiveSpeed == undefined ? false : progressiveSpeed;
   this.displayFPS = displayFPS == undefined ? false : displayFPS;
   this.outputType = outputType == undefined ? OUTPUT_GRAPHICAL : outputType;
+  this.disableAnimation = disableAnimation == undefined ? false : disableAnimation;
   this.countBeforePlay = 3;
   // Game variables
   this.lastKey = -1;
@@ -1171,6 +1172,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.isReseted = true;
   this.gameOver = false;
   this.gameFinished = false; // only used if 2 and more snakes
+  this.gameMazeWin = false; // used in maze mode
   this.scoreMax = false;
   this.errorOccured = false;
   this.fullscreen = false;
@@ -1292,7 +1294,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.snakes = [];
     } else if(!Array.isArray(this.snakes)) {
       this.snakes = [this.snakes];
-    } else if(Array.isArray(this.snakes) && this.snakes.length <= 0) {
+    } else if((Array.isArray(this.snakes) && this.snakes.length <= 0) || (this.grid.maze && this.snakes.length > 1)) {
       this.errorOccured = true;
     }
 
@@ -1311,6 +1313,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.errorOccured = true;
     } else {
       this.grid.setFruit();
+    }
+
+    if(this.grid.maze) {
+      this.notificationMessage = new NotificationMessage(window.i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, 0, null, null, true);
     }
 
     document.addEventListener("keydown", function(evt) {
@@ -1437,6 +1443,10 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     for(var i = 0; i < this.snakes.length; i++) {
       this.snakes[i].reset();
+    }
+
+    if(this.grid.maze) {
+      this.notificationMessage = new NotificationMessage(window.i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, 0, null, null, true);
     }
 
     this.numFruit = 1;
@@ -1610,7 +1620,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
         self.frame++;
         self.offsetFrame++;
 
-        if(self.frame % self.speed == 0) {
+        if((self.frame % self.speed == 0 && (!self.grid.maze || (self.grid.maze && (self.getNBPlayer(PLAYER_HUMAN) <= 0 && self.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) <= 0)))) || (self.grid.maze && ((self.getNBPlayer(PLAYER_HUMAN) > 0 || self.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) > 0) && self.lastKey != -1))) {
           for(var i = 0; i < self.snakes.length; i++) {
             var initialDirection = self.snakes[i].direction;
             var setFruit = false;
@@ -1619,6 +1629,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
               if(self.snakes[i].player == PLAYER_HUMAN || self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
                 self.snakes[i].moveTo(self.lastKey);
+                self.lastKey = -1;
               } else if(self.snakes[i].player == PLAYER_AI) {
                 self.snakes[i].moveTo(self.snakes[i].ai(true));
               }
@@ -1641,7 +1652,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
                   self.reactor.dispatchEvent("onScoreIncreased");
                   self.snakes[i].insert(headSnakePos);
 
-                  if(self.snakes[i].hasMaxScore() && self.snakes.length <= 1) {
+                  if(self.grid.maze) {
+                    self.stop();
+                    self.gameMazeWin = true;
+                    self.gameFinished = true;
+                  } else if(self.snakes[i].hasMaxScore() && self.snakes.length <= 1) {
                     self.scoreMax = true;
                     self.snakes[i].scoreMax = true;
                   } else {
@@ -1840,23 +1855,25 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
         var totalWidth = caseWidth * this.grid.width;
 
-        for(var i = 0; i < this.grid.height; i++) {
-          for(var j = 0; j < this.grid.width; j++) {
-            var caseX = Math.floor(j * caseWidth + ((this.canvas.width - totalWidth) / 2));
-            var caseY = this.headerHeight + i * caseHeight;
+        if(!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished))) {
+          for(var i = 0; i < this.grid.height; i++) {
+            for(var j = 0; j < this.grid.width; j++) {
+              var caseX = Math.floor(j * caseWidth + ((this.canvas.width - totalWidth) / 2));
+              var caseY = this.headerHeight + i * caseHeight;
 
-            if((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
-              ctx.fillStyle = "rgba(127, 140, 141, 0.75)";
-            } else {
-              ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+              if((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
+                ctx.fillStyle = "rgba(127, 140, 141, 0.75)";
+              } else {
+                ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+              }
+
+              ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
+              this.drawImage(ctx, this.grid.getImageCase(new Position(j, i)), caseX, caseY, caseWidth, caseHeight);
             }
-
-            ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
-            this.drawImage(ctx, this.grid.getImageCase(new Position(j, i)), caseX, caseY, caseWidth, caseHeight);
           }
-        }
 
-        this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, renderBlur);
+          this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, renderBlur);
+        }
 
         if(this.timerToDisplay != undefined && this.timerToDisplay != null && this.timerToDisplay >= 0) {
           this.drawImage(ctx, "assets/images/clock.png", this.headerHeight * 0.24, this.headerHeight + 15, this.headerHeight * 0.64, this.headerHeight * 0.64);
@@ -1988,7 +2005,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
             });
           });
         } else if(this.gameFinished) {
-          this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], window.i18next.t("engine.gameFinished"), "white", this.fontSize, FONT_FAMILY, "center", null, true, function() {
+          this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], (this.grid.maze && this.gameMazeWin) ? window.i18next.t("engine.mazeWin") : window.i18next.t("engine.gameFinished"), (this.grid.maze && this.gameMazeWin) ? "#2ecc71" : "white", this.fontSize, FONT_FAMILY, "center", null, true, function() {
             self.btnRetry.addClickAction(self.canvas, function() {
               self.selectedButton = 0;
               self.reset();
@@ -2490,7 +2507,7 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       if(i == 0) {
         direction = this.snakes[j].getHeadPosition().direction;
       } else if(i == -1) {
-        if(!this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
+        if(!this.disableAnimation && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
           direction = this.snakes[j].getTailPosition().direction;
         } else {
           direction = this.snakes[j].get(this.snakes[j].length() - 2).direction;
@@ -2500,7 +2517,7 @@ Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur
       }
 
       // Animation
-      if((i == 0 || i == -1) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
+      if(!this.disableAnimation && (i == 0 || i == -1) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
         var offset = this.offsetFrame / this.speed; // percentage of the animation
         var offset = (offset > 1 ? 1 : offset);
         var offsetX = (caseWidth * offset) - caseWidth;

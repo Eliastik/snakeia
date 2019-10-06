@@ -86,7 +86,9 @@
      "ready": "Partez !",
      "assistAI": "Assistant IA",
      "exitFullScreen": "Quitter plein-écran",
-     "enterFullScreen": "Mode plein-écran"
+     "enterFullScreen": "Mode plein-écran",
+     "mazeMode": "Mode labyrinthe ! Trouvez le chemin vers la pomme pour réussir cette partie.\nLe Snake n'avance pas automatiquement.",
+     "mazeWin": "Bien joué !"
    }
 }, true, false);
 
@@ -160,6 +162,8 @@ i18next.addResourceBundle("en", "translation", {
     "ready": "Go!",
     "assistAI": "AI assistant",
     "exitFullScreen": "Exit fullscreen",
-    "enterFullScreen": "Fullscreen mode"
+    "enterFullScreen": "Fullscreen mode",
+    "mazeMode": "Maze mode! Find the path to the apple to succeed this game.\nThe Snake doesn't move automatically.",
+    "mazeWin": "Good game!"
   }
 }, true, false);
