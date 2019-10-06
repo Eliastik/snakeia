@@ -665,8 +665,6 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.color;
 
   this.init = function() {
-    this.initTriedDirections.push(this.initialDirection);
-
     if(this.initialLength <= 0) {
       this.errorInit = true;
       return false;
@@ -675,7 +673,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     var spaceLineAvailable = 0;
     var spaceColAvailable = 0;
 
-    if(this.initialDirection == RIGHT || this.initialDirection == LEFT) {
+    if((this.initialDirection == RIGHT && this.initTriedDirections.indexOf(RIGHT) == -1) || (this.initialDirection == LEFT && this.initTriedDirections.indexOf(LEFT) == -1)) {
       for(var i = 0; i < this.grid.height; i++) {
         var emptyOnLine = 0;
 
@@ -692,7 +690,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
           }
         }
       }
-    } else if(this.initialDirection == UP || this.initialDirection == BOTTOM) {
+    } else if((this.initialDirection == UP && this.initTriedDirections.indexOf(UP) == -1) || (this.initialDirection == BOTTOM && this.initTriedDirections.indexOf(BOTTOM) == -1)) {
       for(var i = 0; i < this.grid.width; i++) {
         var emptyOnCol = 0;
 
@@ -711,28 +709,27 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
       }
     }
 
-    if(spaceLineAvailable <= 0 && (this.initialDirection == RIGHT || this.initialDirection == LEFT) && this.initTriedDirections.indexOf(RIGHT) == -1) {
-      this.initialDirection = RIGHT;
-      this.direction = RIGHT;
-      return this.init();
-    } else if(spaceLineAvailable <= 0 && (this.initialDirection == RIGHT || this.initialDirection == LEFT) && this.initTriedDirections.indexOf(LEFT) == -1) {
-      this.initialDirection = LEFT;
-      this.direction = LEFT;
-      return this.init();
-    } else if(spaceColAvailable <= 0 && (this.initialDirection == UP || this.initialDirection == BOTTOM) && this.initTriedDirections.indexOf(UP) == -1) {
-      this.initialDirection = UP;
-      this.direction = UP;
-      return this.init();
-    } else if(spaceColAvailable <= 0 && (this.initialDirection == UP || this.initialDirection == BOTTOM) && this.initTriedDirections.indexOf(BOTTOM) == -1) {
-      this.initialDirection = BOTTOM;
-      this.direction = BOTTOM;
-      return this.init();
-    }
+    this.initTriedDirections.push(this.initialDirection);
 
-    if(spaceLineAvailable <= 0 && (this.initialDirection == RIGHT || this.initialDirection == LEFT)) {
-      this.errorInit = true;
-      return false;
-    } else if(spaceColAvailable <= 0 && (this.initialDirection == UP || this.initialDirection == BOTTOM)) {
+    if((spaceLineAvailable <= 0 && (this.initialDirection == RIGHT || this.initialDirection == LEFT)) || (spaceColAvailable <= 0 && (this.initialDirection == UP || this.initialDirection == BOTTOM))) {
+      if(this.initTriedDirections.indexOf(RIGHT) == -1) {
+        this.initialDirection = RIGHT;
+        this.direction = RIGHT;
+        return this.init();
+      } else if(this.initTriedDirections.indexOf(LEFT) == -1) {
+        this.initialDirection = LEFT;
+        this.direction = LEFT;
+        return this.init();
+      } else if(this.initTriedDirections.indexOf(UP) == -1) {
+       this.initialDirection = UP;
+       this.direction = UP;
+       return this.init();
+      } else if(this.initTriedDirections.indexOf(BOTTOM) == -1) {
+       this.initialDirection = BOTTOM;
+       this.direction = BOTTOM;
+       return this.init();
+      }
+
       this.errorInit = true;
       return false;
     }
@@ -743,7 +740,13 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
 
     while(posNotValidated) {
       posNotValidated = false;
-      startPos = this.grid.getRandomPosition();
+
+      if(this.grid.maze) {
+        startPos = this.grid.mazeFirstPosition;
+      } else {
+        startPos = this.grid.getRandomPosition();
+      }
+
       currentPos = new Position(startPos.x, startPos.y, this.initialDirection);
       positionsToAdd = [];
 
@@ -763,6 +766,10 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
         } else {
           positionsToAdd.push(new Position(currentPos.x, currentPos.y, currentPos.direction));
         }
+      }
+
+      if(this.grid.maze && posNotValidated) {
+        return this.init();
       }
     }
 
