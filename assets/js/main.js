@@ -30,10 +30,11 @@ LEVEL_REACH_MAX_SCORE = "LEVEL_REACH_MAX_SCORE";
 LEVEL_MULTI_BEST_SCORE = "LEVEL_MULTI_BEST_SCORE";
 LEVEL_MULTI_REACH_SCORE_FIRST = "LEVEL_MULTI_REACH_SCORE_FIRST";
 LEVEL_REACH_SCORE_ON_TIME = "LEVEL_REACH_SCORE_ON_TIME";
+LEVEL_MAZE_WIN = "LEVEL_MAZE_WIN";
 DEFAULT_LEVEL = "DEFAULT_LEVEL";
 DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
 // Default levels :
-// Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA], type: levelType(see below), typeValue: levelTypeValue(score, time, ...), version: (version min to play the level) }
+// Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA, generateMaze], type: levelType(see below), typeValue: levelTypeValue(score, time, ...), version: (version min to play the level) }
 DEFAULT_LEVELS_SOLO_PLAYER = {
   1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
   2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
@@ -929,7 +930,7 @@ function setLevelSave(value, level, player, type) {
 
     if(item != null) {
       if(Array.isArray(value) && value.length >= 2 && Array.isArray(item[level]) && item[level].length >= 2 && item[level][0] == true) {
-        if(levels[level]["type"] != LEVEL_REACH_SCORE_ON_TIME && levels[level]["type"] != LEVEL_MULTI_REACH_SCORE_FIRST) {
+        if(levels[level]["type"] != LEVEL_REACH_SCORE_ON_TIME && levels[level]["type"] != LEVEL_MULTI_REACH_SCORE_FIRST && levels[level]["type"] != LEVEL_MAZE_WIN) {
           if(value[1] < item[level][1]) {
             value[1] = item[level][1];
           }
@@ -1011,7 +1012,7 @@ function canPlay(level, player, type) {
 }
 
 function levelCompatible(levelType, version) {
-  if((levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME && levelType != LEVEL_MULTI_REACH_SCORE_FIRST) || APP_VERSION.strcmp(version) < 0) {
+  if((levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME && levelType != LEVEL_MULTI_REACH_SCORE_FIRST && levelType != LEVEL_MAZE_WIN) || APP_VERSION.strcmp(version) < 0) {
     return false;
   }
 
@@ -1035,13 +1036,13 @@ function printResultLevel(level, player, levelType, type, shortVersion) {
   if(shortVersion) {
     if(levelType == LEVEL_REACH_SCORE || levelType == LEVEL_REACH_MAX_SCORE || levelType == LEVEL_MULTI_BEST_SCORE) {
       val = window.i18next.t("levels.bestScoreShort", { count: resultLevel });
-    } else if(levelType == LEVEL_REACH_SCORE_ON_TIME || levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
+    } else if(levelType == LEVEL_REACH_SCORE_ON_TIME || levelType == LEVEL_MULTI_REACH_SCORE_FIRST || levelType == LEVEL_MAZE_WIN) {
       val = window.i18next.t("levels.bestTimeShort", { count: Math.round(resultLevel) });
     }
   } else {
     if(levelType == LEVEL_REACH_SCORE || levelType == LEVEL_REACH_MAX_SCORE || levelType == LEVEL_MULTI_BEST_SCORE) {
       val = window.i18next.t("levels.bestScore", { count: resultLevel });
-    } else if(levelType == LEVEL_REACH_SCORE_ON_TIME || levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
+    } else if(levelType == LEVEL_REACH_SCORE_ON_TIME || levelType == LEVEL_MULTI_REACH_SCORE_FIRST || levelType == LEVEL_MAZE_WIN) {
       val = window.i18next.t("levels.bestTime", { count: Math.round(resultLevel) });
     }
   }
@@ -1082,10 +1083,11 @@ function playLevel(level, player, type) {
     var progressiveSpeed = levelSettings[6];
     var aiLevel = levelSettings[7];
     var numberIA = levelSettings[8];
+    var generateMaze = levelSettings[9];
 
     var games = [];
 
-    var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+    var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze);
 
     if(player == PLAYER_AI) {
       var playerSnake = new Snake(RIGHT, 3, grid, player, AI_LEVEL_HIGH);
@@ -1314,6 +1316,41 @@ function playLevel(level, player, type) {
             }
           }
         });
+      } else if(levelType == LEVEL_MAZE_WIN) {
+        var time = 0;
+
+        var timerInterval = new TimerInterval(function() {
+          time++;
+        });
+
+        playerGame.onStart(function() {
+          timerInterval.start();
+        });
+
+        playerGame.onPause(function() {
+          timerInterval.stop();
+        });
+
+        playerGame.onReset(function() {
+          time = 0;
+          timerInterval.stop();
+        });
+
+        playerGame.onStop(function() {
+          timerInterval.stop();
+        });
+
+        playerGame.onScoreIncreased(function() {
+          if(playerSnake.score >= 1) {
+            setLevelSave([true, time], level, player, type);
+            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
+
+            if(!notificationEndDisplayed) {
+              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, 0, null, null, true));
+              notificationEndDisplayed = true;
+            }
+          }
+        });
       }
     }
 
@@ -1332,9 +1369,11 @@ function playLevel(level, player, type) {
         textToDisplayGoal = window.i18next.t("levels.multiBestScore", { count: numberIA });
       } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
         textToDisplayGoal = window.i18next.t("levels.multiReachScoreFirst", { value: levelTypeValue, count: numberIA });
+      } else if(levelType == LEVEL_MAZE_WIN) {
+        textToDisplayGoal = window.i18next.t("levels.mazeMode", { value: levelTypeValue, count: numberIA });
       }
 
-      document.getElementById("gameOrder").innerHTML = textToDisplayGoal;
+      document.getElementById("gameOrder").innerHTML = textToDisplayGoal.replace("\n", "<br />");
     }
 
     initGoal();
