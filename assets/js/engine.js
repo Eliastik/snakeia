@@ -1372,10 +1372,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
       this.grid.setFruit();
     }
 
-    if(this.grid.maze) {
-      this.notificationMessage = new NotificationMessage(window.i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, 0, null, null, true);
-    }
-
     document.addEventListener("keydown", function(evt) {
       if(!self.killed) {
         var keyCode = evt.keyCode;
@@ -1500,10 +1496,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     for(var i = 0; i < this.snakes.length; i++) {
       this.snakes[i].reset();
-    }
-
-    if(this.grid.maze) {
-      this.notificationMessage = new NotificationMessage(window.i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, 0, null, null, true);
     }
 
     this.numFruit = 1;

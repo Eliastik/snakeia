@@ -794,6 +794,10 @@ function validateSettings(returnValidation) {
       group.games[0].canvas.scrollIntoView();
     }
 
+    if(mazeGrid && (selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER)) {
+      group.setNotification(new NotificationMessage(window.i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, 0, null, null, true));
+    }
+
     document.getElementById("backToMenuGame").onclick = function() {
       if(confirm(window.i18next.t("game.confirmQuit"))) {
         group.killAll();

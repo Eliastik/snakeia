@@ -87,7 +87,7 @@
      "assistAI": "Assistant IA",
      "exitFullScreen": "Quitter plein-écran",
      "enterFullScreen": "Mode plein-écran",
-     "mazeMode": "Mode labyrinthe ! Trouvez le chemin vers la pomme pour réussir cette partie.\nLe Snake n'avance pas automatiquement.",
+     "mazeMode": "Mode labyrinthe ! Trouvez le chemin vers la pomme pour réussir la partie.\nLe Snake n'avance pas automatiquement.",
      "mazeWin": "Bien joué !",
      "mazeModeMin": "Mode labyrinthe"
    }
