@@ -380,16 +380,16 @@ function Grid(width, height, generateWalls, borderWalls, maze) {
   };
 
   this.generateMaze = function() {
-    var r = randRange(0, this.height);
+    var r = randRange(0, this.height - 1);
 
     while(r % 2 == 0) {
-      r = randRange(0, this.height);
+      r = randRange(0, this.height - 1);
     }
 
-    var c = randRange(0, this.width);
+    var c = randRange(0, this.width - 1);
 
     while(c % 2 == 0) {
-      c = randRange(0, this.width);
+      c = randRange(0, this.width - 1);
     }
 
     this.set(EMPTY_VAL, new Position(c, r, null));
