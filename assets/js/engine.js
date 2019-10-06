@@ -277,6 +277,7 @@ function Grid(width, height, generateWalls, borderWalls, maze) {
   this.generateWalls = generateWalls == undefined ? false : generateWalls;
   this.borderWalls = borderWalls == undefined ? false : borderWalls;
   this.maze = maze == undefined ? false : maze;
+  this.mazeFirstPosition;
   this.grid;
   this.fruitPos;
 
@@ -380,20 +381,9 @@ function Grid(width, height, generateWalls, borderWalls, maze) {
   };
 
   this.generateMaze = function() {
-    var r = randRange(0, this.height - 1);
-
-    while(r % 2 == 0) {
-      r = randRange(0, this.height - 1);
-    }
-
-    var c = randRange(0, this.width - 1);
-
-    while(c % 2 == 0) {
-      c = randRange(0, this.width - 1);
-    }
-
-    this.set(EMPTY_VAL, new Position(c, r, null));
-    this.maze_recursion(r, c);
+    this.mazeFirstPosition = new Position(1, 1, null);
+    this.set(EMPTY_VAL, this.mazeFirstPosition);
+    this.maze_recursion(1, 1);
   };
 
   this.set = function(value, position) {
@@ -661,6 +651,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.direction = direction == undefined ? RIGHT : direction;
   this.initialDirection = direction == undefined ? RIGHT : direction;
   this.initialLength = length == undefined ? 3 : length;
+  this.initTriedDirections = [];
   this.errorInit = false;
   this.grid = grid;
   this.queue = [];
@@ -674,63 +665,109 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.color;
 
   this.init = function() {
+    this.initTriedDirections.push(this.initialDirection);
+
     if(this.initialLength <= 0) {
       this.errorInit = true;
-      return;
+      return false;
     }
 
     var spaceLineAvailable = 0;
+    var spaceColAvailable = 0;
 
-    for(var i = 0; i < this.grid.height; i++) {
-      var emptyOnLine = 0;
+    if(this.initialDirection == RIGHT || this.initialDirection == LEFT) {
+      for(var i = 0; i < this.grid.height; i++) {
+        var emptyOnLine = 0;
 
-      for(var j = 0; j < this.grid.width; j++) {
-        if(this.grid.get(new Position(j, i)) == EMPTY_VAL) {
-          emptyOnLine++;
-        } else {
-          emptyOnLine = 0;
+        for(var j = 0; j < this.grid.width; j++) {
+          if(this.grid.get(new Position(j, i)) == EMPTY_VAL) {
+            emptyOnLine++;
+          } else {
+            emptyOnLine = 0;
+          }
+
+          if(emptyOnLine >= this.initialLength) {
+            spaceLineAvailable++;
+            break;
+          }
         }
+      }
+    } else if(this.initialDirection == UP || this.initialDirection == BOTTOM) {
+      for(var i = 0; i < this.grid.width; i++) {
+        var emptyOnCol = 0;
 
-        if(emptyOnLine >= this.initialLength) {
-          spaceLineAvailable++;
-          break;
+        for(var j = 0; j < this.grid.height; j++) {
+          if(this.grid.get(new Position(i, j)) == EMPTY_VAL) {
+            emptyOnCol++;
+          } else {
+            emptyOnCol = 0;
+          }
+
+          if(emptyOnCol >= this.initialLength) {
+            spaceColAvailable++;
+            break;
+          }
         }
       }
     }
 
-    if(spaceLineAvailable <= 0) {
-      this.errorInit = true;
-      return;
+    if(spaceLineAvailable <= 0 && (this.initialDirection == RIGHT || this.initialDirection == LEFT) && this.initTriedDirections.indexOf(RIGHT) == -1) {
+      this.initialDirection = RIGHT;
+      this.direction = RIGHT;
+      return this.init();
+    } else if(spaceLineAvailable <= 0 && (this.initialDirection == RIGHT || this.initialDirection == LEFT) && this.initTriedDirections.indexOf(LEFT) == -1) {
+      this.initialDirection = LEFT;
+      this.direction = LEFT;
+      return this.init();
+    } else if(spaceColAvailable <= 0 && (this.initialDirection == UP || this.initialDirection == BOTTOM) && this.initTriedDirections.indexOf(UP) == -1) {
+      this.initialDirection = UP;
+      this.direction = UP;
+      return this.init();
+    } else if(spaceColAvailable <= 0 && (this.initialDirection == UP || this.initialDirection == BOTTOM) && this.initTriedDirections.indexOf(BOTTOM) == -1) {
+      this.initialDirection = BOTTOM;
+      this.direction = BOTTOM;
+      return this.init();
     }
 
-    var posValidated = false;
-    var startPos;
+    if(spaceLineAvailable <= 0 && (this.initialDirection == RIGHT || this.initialDirection == LEFT)) {
+      this.errorInit = true;
+      return false;
+    } else if(spaceColAvailable <= 0 && (this.initialDirection == UP || this.initialDirection == BOTTOM)) {
+      this.errorInit = true;
+      return false;
+    }
 
-    while(!posValidated) {
-      posValidated = true;
+    var posNotValidated = true;
+    var positionsToAdd = [];
+    var startPos, currentPos;
+
+    while(posNotValidated) {
+      posNotValidated = false;
       startPos = this.grid.getRandomPosition();
+      currentPos = new Position(startPos.x, startPos.y, this.initialDirection);
+      positionsToAdd = [];
 
       for(var i = this.initialLength - 1; i >= 0; i--) {
-        var posX = startPos.x - i;
-
-        if(posX < 0) {
-          posX = this.grid.width - -posX;
+        if(this.initialDirection == RIGHT) {
+          currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), RIGHT);
+        } else if(this.initialDirection == LEFT) {
+          currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), LEFT);
+        } else if(this.initialDirection == BOTTOM) {
+          currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), BOTTOM);
+        } else if(this.initialDirection == UP) {
+          currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), UP);
         }
 
-        if(this.grid.get(new Position(posX, startPos.y)) != EMPTY_VAL) {
-          posValidated = false;
+        if(this.grid.get(currentPos) != EMPTY_VAL) {
+          posNotValidated = true;
+        } else {
+          positionsToAdd.push(new Position(currentPos.x, currentPos.y, currentPos.direction));
         }
       }
     }
 
-    for(var i = this.initialLength - 1; i >= 0; i--) {
-      var posX = startPos.x - i;
-
-      if(posX < 0) {
-        posX = this.grid.width - -posX;
-      }
-
-      this.insert(new Position(posX, startPos.y, this.direction));
+    for(var i = 0; i < positionsToAdd.length; i++) {
+      this.insert(positionsToAdd[i]);
     }
 
     if(this.player == PLAYER_HYBRID_HUMAN_AI) {
@@ -738,10 +775,12 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     }
 
     this.lastTail = this.get(this.queue.length - 1);
+    return true;
   };
 
   this.reset = function() {
     this.direction = this.initialDirection;
+    this.initTriedDirections = [];
     this.queue = [];
     this.score = 0;
     this.gameOver = false;
