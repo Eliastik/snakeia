@@ -168,6 +168,20 @@ function isFilterHueAvailable() {
   return true;
 }
 
+// Shuffle array
+function shuffle(a) {
+    var j, x;
+
+    for(var i = a.length - 1; i > 0; i--) {
+      j = Math.floor(Math.random() * (i + 1));
+      x = a[i];
+      a[i] = a[j];
+      a[j] = x;
+    }
+
+    return a;
+}
+
 // Event handlers objects type
 function Event(name) {
   this.name = name;
@@ -257,11 +271,12 @@ Position.prototype.indexIn = function(array) {
   return -1;
 }
 
-function Grid(width, height, generateWalls, borderWalls) {
+function Grid(width, height, generateWalls, borderWalls, maze) {
   this.width = width == undefined ? 20 : width;
   this.height = height == undefined ? 20 : height;
   this.generateWalls = generateWalls == undefined ? false : generateWalls;
   this.borderWalls = borderWalls == undefined ? false : borderWalls;
+  this.maze = maze == undefined ? false : maze;
   this.grid;
   this.fruitPos;
 
@@ -272,7 +287,7 @@ function Grid(width, height, generateWalls, borderWalls) {
       this.grid[i] = new Array(this.width);
 
       for(var j = 0; j < this.width; j++) {
-        if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && Math.random() > 0.65)) {
+        if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && Math.random() > 0.65) || this.maze) {
           this.grid[i][j] = WALL_VAL;
         } else {
           this.grid[i][j] = EMPTY_VAL;
@@ -282,6 +297,10 @@ function Grid(width, height, generateWalls, borderWalls) {
 
     if(this.generateWalls) {
       this.fixWalls(this.borderWalls);
+    }
+
+    if(this.maze) {
+      this.generateMaze();
     }
   };
 
@@ -309,6 +328,72 @@ function Grid(width, height, generateWalls, borderWalls) {
         }
       }
     }
+  };
+
+  this.maze_recursion = function(r, c) {
+    var directions = shuffle([UP, RIGHT, BOTTOM, LEFT]);
+
+    for(var i = 0; i < directions.length; i++) {
+      switch(directions[i]) {
+        case UP:
+          if(r - 2 <= 0) continue;
+
+          if(this.get(new Position(c, r - 2)) != EMPTY_VAL) {
+            this.set(EMPTY_VAL, new Position(c, r - 2));
+            this.set(EMPTY_VAL, new Position(c, r - 1));
+            this.maze_recursion(r - 2, c);
+          }
+
+          break;
+        case RIGHT:
+          if(c + 2 >= this.width - 1) continue;
+
+          if(this.get(new Position(c + 2, r)) != EMPTY_VAL) {
+            this.set(EMPTY_VAL, new Position(c + 2, r));
+            this.set(EMPTY_VAL, new Position(c + 1, r));
+            this.maze_recursion(r, c + 2);
+          }
+
+          break;
+        case BOTTOM:
+          if(r + 2 >= this.height - 1) continue;
+
+          if(this.get(new Position(c, r + 2)) != EMPTY_VAL) {
+            this.set(EMPTY_VAL, new Position(c, r + 2));
+            this.set(EMPTY_VAL, new Position(c, r + 1));
+            this.maze_recursion(r + 2, c);
+          }
+
+          break;
+        case LEFT:
+          if(c - 2 <= 0) continue;
+
+          if(this.get(new Position(c - 2, r)) != EMPTY_VAL) {
+            this.set(EMPTY_VAL, new Position(c - 2, r));
+            this.set(EMPTY_VAL, new Position(c - 1, r));
+            this.maze_recursion(r, c - 2);
+          }
+
+          break;
+      }
+    }
+  };
+
+  this.generateMaze = function() {
+    var r = randRange(0, this.height);
+
+    while(r % 2 == 0) {
+      r = randRange(0, this.height);
+    }
+
+    var c = randRange(0, this.width);
+
+    while(c % 2 == 0) {
+      c = randRange(0, this.width);
+    }
+
+    this.set(EMPTY_VAL, new Position(c, r, null));
+    this.maze_recursion(r, c);
   };
 
   this.set = function(value, position) {
