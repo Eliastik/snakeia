@@ -960,33 +960,6 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     return this.getGraphicDirectionFor(this.get(index), this.get(index - 1), this.get(index + 1))
   };
 
-  this.simulateGameTick = function(snake, direction) {
-    var direction = direction == undefined ? snake.ai(false) : direction;
-    snake.moveTo(direction);
-
-    var headSnakePos = snake.getHeadPosition();
-    headSnakePos = snake.getNextPosition(headSnakePos, snake.direction);
-
-    if(snake.grid.isDeadPosition(headSnakePos)) {
-      return 0;
-    } else {
-      if(snake.grid.get(headSnakePos) == FRUIT_VAL) {
-        snake.insert(headSnakePos);
-
-        if(!snake.grid.setFruit()) {
-          return 0;
-        }
-
-        return 2;
-      } else {
-        snake.insert(headSnakePos);
-        snake.remove();
-      }
-    }
-
-    return 1;
-  };
-
   this.copy = function() {
     var snake = new Snake(direction, 3, new Grid(this.grid.width, this.grid.height, false, false), this.player, this.aiLevel, false);
 
@@ -2433,8 +2406,7 @@ Game.prototype.drawTextBitmap = function(ctx, bitmapFontSet, text, size, x, y, w
       }
 
       var widthBitmap = currentCarBitmap.width * (size / currentCarBitmap.height);
-
-      this.drawImageData(ctx, currentCarBitmap, currentX, currentY, widthBitmap, size, 0, 0, widthBitmap, size);
+      this.drawImageData(ctx, currentCarBitmap, currentX, currentY, widthBitmap, size, 0, 0, currentCarBitmap.width, currentCarBitmap.height);
       currentX += widthBitmap;
     }
 
