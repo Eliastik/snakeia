@@ -509,7 +509,7 @@ function Grid(width, height, generateWalls, borderWalls, maze, customGrid) {
     var grid = this.getGraph(true);
     var graph = new Lowlight.Astar.Configuration(grid, {
       order: "yx",
-      torus: true,
+      torus: false,
       diagonals: false,
       cutting: false,
       cost(a, b) { return b == 1 ? null : 1 }
@@ -2015,7 +2015,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
            });
          });
        } else if(this.getInfosGame) {
-          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + ((this.snakes[0].player == PLAYER_HUMAN  || this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.speed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : "") + (!this.grid.maze && this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI ? "\n" + window.i18next.t("engine.assistAI") : "") + (this.grid.maze ? "\n" + window.i18next.t("engine.mazeModeMin") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
+          this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + ((this.snakes[0].player == PLAYER_HUMAN  || this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.initialSpeed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : "") + (!this.grid.maze && this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI ? "\n" + window.i18next.t("engine.assistAI") : "") + (this.grid.maze ? "\n" + window.i18next.t("engine.mazeModeMin") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
             self.btnOK.addClickAction(self.canvas, function() {
               self.getInfosGame = false;
               self.selectedButton = 0;
