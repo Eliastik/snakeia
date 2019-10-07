@@ -12,7 +12,7 @@ Game written in pure JavaScript and object oriented.
 
 ## About this game
 
-* Version: 1.4.1
+* Version: 1.4.2
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -26,6 +26,10 @@ Game written in pure JavaScript and object oriented.
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 
 ## Changelog
+
+* Version 1.4.2 (10/7/2019) :
+  - Added a labyrinth mode: it's now possible to generate mazes. The goal is to find the path to the apple through the maze. Levels of this type are also possible (to download later).
+  - Bug fixes and other adjustments.
 
 * Version 1.4.1 (9/29/2019) :
   - The movement of the Snakes is now animated;
@@ -111,7 +115,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## À propos du jeu
 
-* Version du jeu : 1.4.1
+* Version du jeu : 1.4.2
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -125,6 +129,10 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 
 ## Journal des changements
+
+* Version 1.4.2 (07/10/2019) :
+  - Ajout d'un mode labyrinthe : il est désormais possible de générer des labyrinthes. Le but est de trouver le chemin vers la pomme à travers le labyrinthe. Des niveaux de ce type sont également possibles (à télécharger ultérieurement).
+  - Corrections de bugs et autres ajustements.
 
 * Version 1.4.1 (29/09/2019) :
   - Le déplacement des Snake est désormais animé, rendant le jeu plus fluide ;
