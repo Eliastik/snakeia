@@ -1383,11 +1383,9 @@ function playLevel(level, player, type) {
     displayInfosGoal();
 
     group.onExit(function() {
-      if(selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER || selectedMode == AI_VS_AI || (selectedMode == PLAYER_VS_AI && sameGrid) || (selectedMode == BATTLE_ROYALE && sameGrid)) {
-        levelTimer.pause();
-        group.killAll();
-        displayLevelList(player);
-      }
+      levelTimer.pause();
+      group.killAll();
+      displayLevelList(player);
     });
 
     group.onReset(function() {

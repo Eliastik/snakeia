@@ -201,12 +201,12 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## TO-DO list
 
-### À faire :
+### À faire (ou idées) :
 
 * Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
 * Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
-* Afficher difficulté niveaux
-* Nouveau type niveau avec le contrôle de plusieurs Snake joueurs (prit correctement en compte par le jeu)
+* (Afficher difficulté niveaux)
+* (?) Nouveau type niveau avec le contrôle de plusieurs Snake joueurs (prit correctement en compte par le jeu)
 * (Architecture client-serveur)
 
 ### Fait :
