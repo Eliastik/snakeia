@@ -479,6 +479,8 @@ function Grid(width, height, generateWalls, borderWalls, maze, customGrid) {
   };
 
   this.setFruit = function() {
+    var tried = [1];
+
     if(this.fruitPos != null && this.get(this.fruitPos) == FRUIT_VAL) {
       this.set(EMPTY_VAL, this.fruitPos);
     }
@@ -486,7 +488,7 @@ function Grid(width, height, generateWalls, borderWalls, maze, customGrid) {
     if(this.getTotal(EMPTY_VAL) > 0) {
       var randomPos = this.getRandomPosition();
 
-      while(this.get(randomPos) != EMPTY_VAL || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos))) {
+      while(this.get(randomPos) != EMPTY_VAL || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos, tried))) {
         if(this.getTotal(EMPTY_VAL) <= 0) {
           return false;
         }
@@ -503,7 +505,7 @@ function Grid(width, height, generateWalls, borderWalls, maze, customGrid) {
     return true;
   };
 
-  this.testFruitMaze = function(position) { // Maze mode: avoid putting the fruit too close to the Snake
+  this.testFruitMaze = function(position, tried) { // Maze mode: avoid putting the fruit too close to the Snake
     var grid = this.getGraph(true);
     var graph = new Lowlight.Astar.Configuration(grid, {
       order: "yx",
@@ -514,9 +516,11 @@ function Grid(width, height, generateWalls, borderWalls, maze, customGrid) {
     });
     var path = graph.path({x: this.mazeFirstPosition.x, y: this.mazeFirstPosition.y}, {x: position.x, y: position.y});
 
-    if(path.length < Math.ceil(this.getTotal(EMPTY_VAL) / 4)) {
+    if(path.length < Math.ceil(this.getTotal(EMPTY_VAL) / (1 * Math.ceil(tried[0] / 4)))) {
+      tried[0]++;
       return false;
     } else {
+      tried[0]++;
       return true;
     }
   };
