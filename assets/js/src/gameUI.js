@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Eliastik (eliastiksofts.com)
+ * Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
  *
  * This file is part of "SnakeIA".
  *
@@ -16,41 +16,41 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
+function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
   // Assets loader
   this.imageLoader;
   this.assetsLoaded = false;
   // Game settings
-  this.grid = grid;
-  this.snakes = snake;
-  this.speed = speed == undefined ? 8 : speed;
-  this.initialSpeed = speed == undefined ? 8 : speed;
-  this.initialSpeedUntouched = speed == undefined ? 8 : speed;
+  this.controller = controller;
   this.appendTo = appendTo;
-  this.enablePause = enablePause == undefined ? true : enablePause;
-  this.enableRetry = enableRetry == undefined ? true : enableRetry;
-  this.progressiveSpeed = progressiveSpeed == undefined ? false : progressiveSpeed;
   this.displayFPS = displayFPS == undefined ? false : displayFPS;
   this.outputType = outputType == undefined ? OUTPUT_GRAPHICAL : outputType;
   this.disableAnimation = disableAnimation == undefined ? false : disableAnimation;
-  this.countBeforePlay = 3;
-  // Game variables
+  // UI variables
   this.lastKey = -1;
-  this.numFruit = 1;
   this.frame = 0;
-  this.offsetFrame = this.speed; // offset between current and last frame
   this.lastFrame = 0;
-  this.lastTime = 0; // time of last frame draw
+  this.offsetFrame = 0;
   this.currentFPS = 0;
-  // Game state variables
+  // Copy of engine variables
+  this.grid;
+  this.snakes;
+  this.speed;
+  this.initialSpeed;
+  this.ticks;
+  this.countBeforePlay;
+  this.numFruit;
   this.paused = true;
   this.exited = false;
   this.killed = false;
   this.isReseted = true;
   this.gameOver = false;
-  this.gameFinished = false; // only used if 2 and more snakes
-  this.gameMazeWin = false; // used in maze mode
+  this.gameFinished = false;
+  this.gameMazeWin = false;
   this.scoreMax = false;
+  this.enablePause = false;
+  this.enableRetry = false;
+  // Game state variables
   this.errorOccured = false;
   this.fullscreen = false;
   // Menus state variables
@@ -74,9 +74,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.preRenderedFont;
   // Intervals, timeouts, frames
   this.intervalCountFPS;
-  this.intervalPlay;
-  this.frameGlobal;
-  this.frameDisplayMenu;
   // Buttons
   this.btnFullScreen;
   this.btnPause;
@@ -96,20 +93,11 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   this.btnEnterFullScreen;
   // Notification
   this.notificationMessage;
-  // Events
-  this.reactor = new Reactor();
-  this.reactor.registerEvent("onStart");
-  this.reactor.registerEvent("onPause");
-  this.reactor.registerEvent("onContinue");
-  this.reactor.registerEvent("onReset");
-  this.reactor.registerEvent("onStop");
-  this.reactor.registerEvent("onExit");
-  this.reactor.registerEvent("onScoreIncreased");
 
   this.init();
 }
 
-Game.prototype.init = function() {
+GameUI.prototype.init = function() {
   var self = this;
 
   this.imageLoader = new ImageLoader();
@@ -153,73 +141,40 @@ Game.prototype.init = function() {
     });
 
     this.btnTopArrow.addClickAction(this.canvas, function() {
-      self.lastKey = KEY_UP;
+      self.controller.key(KEY_UP);
     });
 
     this.btnBottomArrow.addClickAction(this.canvas, function() {
-      self.lastKey = KEY_BOTTOM;
+      self.controller.key(KEY_BOTTOM);
     });
 
     this.btnLeftArrow.addClickAction(this.canvas, function() {
-      self.lastKey = KEY_LEFT;
+      self.controller.key(KEY_LEFT);
     });
 
     this.btnRightArrow.addClickAction(this.canvas, function() {
-      self.lastKey = KEY_RIGHT;
+      self.controller.key(KEY_RIGHT);
     });
   }
-
-  if(this.snakes == null || this.snakes == undefined) {
-    this.errorOccured = true;
-    this.snakes = [];
-  } else if(!Array.isArray(this.snakes)) {
-    this.snakes = [this.snakes];
-  } else if((Array.isArray(this.snakes) && this.snakes.length <= 0) || (this.grid.maze && this.snakes.length > 1)) {
-    this.errorOccured = true;
-  }
-
-  var startHue = randRange(0, 360);
-
-  for(var i = 0; i < this.snakes.length; i++) {
-    if(this.snakes[i] instanceof Snake == false) {
-      this.errorOccured = true;
-    } else {
-      startHue = addHue(startHue, Math.round(360 / (this.snakes.length)));
-      this.snakes[i].color = startHue;
-    }
-  }
-
-  if(this.grid instanceof Grid == false) {
-    this.errorOccured = true;
-  } else if(!this.errorOccured) {
-    this.grid.setFruit();
-  }
+  
+  this.setIntervalCountFPS();
 
   document.addEventListener("keydown", function(evt) {
-    if(!self.killed) {
-      var keyCode = evt.keyCode;
+    var keyCode = evt.keyCode;
 
-      if(keyCode == 90 || keyCode == 87) keyCode = KEY_UP; // W or Z
-      if(keyCode == 65 || keyCode == 81) keyCode = KEY_LEFT; // A or Q
-      if(keyCode == 83) keyCode = KEY_BOTTOM; // S
-      if(keyCode == 68) keyCode = KEY_RIGHT; // D
+    if(keyCode == 90 || keyCode == 87) keyCode = KEY_UP; // W or Z
+    if(keyCode == 65 || keyCode == 81) keyCode = KEY_LEFT; // A or Q
+    if(keyCode == 83) keyCode = KEY_BOTTOM; // S
+    if(keyCode == 68) keyCode = KEY_RIGHT; // D
 
-      if(!self.paused) {
-        if(evt.keyCode == KEY_ENTER && self.outputType == OUTPUT_GRAPHICAL) {
-          self.pause();
-        } else {
-          self.lastKey = keyCode;
-        }
-      } else if(self.countBeforePlay <= -1 && self.enableKeyMenu) {
-        self.lastKeyMenu = keyCode;
-        self.updateUI();
-      }
-
-      evt.preventDefault();
+    if(!self.paused) {
+      self.controller.key(keyCode);
+    } else if(self.countBeforePlay < 0) {
+      self.lastKeyMenu = keyCode;
     }
+  
+    evt.preventDefault();
   });
-
-  this.setIntervalCountFPS();
 
   window.addEventListener("blur", function() {
     if(!self.paused) {
@@ -232,454 +187,179 @@ Game.prototype.init = function() {
   }, true);
 
   this.autoResizeCanvas();
+  this.loadAssets();
+  this.startDraw();
 };
 
-Game.prototype.autoResizeCanvas = function() {
-  if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
-    if(!document.fullscreenElement) {
-      if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
-        var ratio = this.canvasWidth / this.canvasHeight;
-        this.canvas.width = document.documentElement.clientWidth * 0.85;
-        this.canvas.height = this.canvas.width / ratio;
-      } else {
-        this.canvas.width = this.canvasWidth;
-        this.canvas.height = this.canvasHeight;
-      }
-    } else if(document.fullscreenElement == this.canvas) {
-      this.canvas.width = window.innerWidth;
-      this.canvas.height = window.innerHeight;
-    }
-
-    this.updateUI();
-  }
-};
-
-Game.prototype.setIntervalCountFPS = function() {
-  var self = this;
-
-  this.clearIntervalCountFPS();
-
-  this.intervalCountFPS = window.setInterval(function() {
-    self.countFPS();
-  }, 1000);
-};
-
-Game.prototype.countFPS = function() {
-  if(this.lastFrame > 0 && !this.paused) {
-    this.currentFPS = this.frame - this.lastFrame;
-    this.lastFrame = this.frame;
-  }
-};
-
-Game.prototype.clearIntervalCountFPS = function() {
-  clearInterval(this.intervalCountFPS);
-};
-
-Game.prototype.getNBPlayer = function(type) {
-  var numPlayer = 0;
-
-  for(var i = 0; i < this.snakes.length; i++) {
-    if(this.snakes[i].player == type) {
-      numPlayer++;
-    }
-  }
-
-  return numPlayer;
-};
-
-Game.prototype.getPlayer = function(num, type) {
-  var numPlayer = 0;
-
-  for(var i = 0; i < this.snakes.length; i++) {
-    if(this.snakes[i].player == type) {
-      numPlayer++;
-    }
-
-    if(numPlayer == num) {
-      return this.snakes[i];
-    }
-  }
-
-  return null;
-};
-
-Game.prototype.reset = function() {
-  this.paused = true;
-  this.isReseted = true;
-  this.exited = false;
-  this.reactor.dispatchEvent("onReset");
-  this.clearIntervalCountFPS();
-  this.clearIntervalPlay();
-  this.grid.init();
-
-  for(var i = 0; i < this.snakes.length; i++) {
-    this.snakes[i].reset();
-  }
-
-  this.numFruit = 1;
-  this.frame = 0;
-  this.lastFrame = 0;
-  this.currentFPS = TARGET_FPS;
-  this.scoreMax = false;
-  this.errorOccured = false;
-  this.lastKey = -1;
-  this.gameOver = false;
-  this.gameFinished = false;
-  this.gameMazeWin = false;
-  this.initialSpeed = this.initialSpeedUntouched;
-  this.speed = this.initialSpeedUntouched;
-  this.offsetFrame = this.speed;
-  this.grid.setFruit();
-  this.start();
-};
-
-Game.prototype.onReset = function(callback) {
-  this.reactor.addEventListener("onReset", callback);
-};
-
-Game.prototype.start = function() {
-  var self = this;
-
-  if(!this.errorOccured) {
-    for(var i = 0; i < this.snakes.length; i++) {
-      if(this.snakes[i].errorInit) {
-        this.errorOccured = true;
-        this.stop();
-      }
-    }
-
-    if(this.paused && !this.gameOver && !this.killed && this.assetsLoaded && !this.scoreMax) {
-      this.disableAllButtons();
-      this.getInfos = false;
-      this.getInfosGame = false;
-      this.confirmExit = false;
-      this.confirmReset = false;
-      this.countBeforePlay = 3;
-      this.updateUI();
-      this.clearIntervalPlay();
-
-      this.intervalPlay = setInterval(function() {
-        self.countBeforePlay--;
-
-        if(self.countBeforePlay <= 0) {
-          if(self.countBeforePlay <= -1) {
-            self.clearIntervalPlay();
-            self.paused = false;
-            self.isReseted = false;
-            self.reactor.dispatchEvent("onStart");
-            self.tick();
-          } else if(self.countBeforePlay >= 0) {
-            self.lastFrame = self.frame > 0 ? self.frame : 1;
-            self.testFrameRate();
-            self.setIntervalCountFPS();
-          }
+GameUI.prototype.autoResizeCanvas = function() {
+    if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
+      if(!document.fullscreenElement) {
+        if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
+          var ratio = this.canvasWidth / this.canvasHeight;
+          this.canvas.width = document.documentElement.clientWidth * 0.85;
+          this.canvas.height = this.canvas.width / ratio;
         } else {
-          self.updateUI();
+          this.canvas.width = this.canvasWidth;
+          this.canvas.height = this.canvasHeight;
         }
-      }, 1000);
+      } else if(document.fullscreenElement == this.canvas) {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      }
     }
-  } else {
-    this.updateUI();
-  }
-
-  if(!this.assetsLoaded) {
-    this.loadAssets();
-    this.updateUI();
-  }
 };
 
-Game.prototype.testFrameRate = function() {
+GameUI.prototype.setIntervalCountFPS = function() {
+    var self = this;
+
+    this.clearIntervalCountFPS();
+
+    this.intervalCountFPS = window.setInterval(function() {
+      self.countFPS();
+    }, 1000);
+};
+
+GameUI.prototype.countFPS = function() {
+    if(this.lastFrame > 0) this.currentFPS = this.frame - this.lastFrame;
+    this.lastFrame = this.frame;
+};
+
+GameUI.prototype.clearIntervalCountFPS = function() {
+    clearInterval(this.intervalCountFPS);
+};
+
+GameUI.prototype.getNBPlayer = function(type) {
+    return this.controller.getNBPlayer(type);
+};
+
+GameUI.prototype.getPlayer = function(num, type) {
+    return this.controller.getPlayer(num, type);
+};
+
+GameUI.prototype.reset = function() {
+    this.controller.reset();
+    /*this.clearIntervalCountFPS();
+    this.currentFPS = TARGET_FPS;
+    this.errorOccured = false;
+    this.lastKey = -1;
+    this.offsetFrame = this.speed;*/
+};
+
+GameUI.prototype.start = function() {
+    this.controller.start();
+};
+
+GameUI.prototype.stop = function() {
+    this.controller.stop();
+};
+
+GameUI.prototype.pause = function() {
+    this.controller.pause();
+};
+
+GameUI.prototype.kill = function() {
+    this.controller.kill();
+};
+
+GameUI.prototype.exit = function() {
+    this.controller.exit();
+};
+
+GameUI.prototype.tick = function() {
+    this.controller.tick();
+};
+
+GameUI.prototype.toggleFullscreen = function() {
+    var self = this;
+
+    if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
+      if(!document.fullscreenElement) {
+        if(this.canvas.requestFullscreen) {
+          this.canvas.requestFullscreen();
+        } else if(this.canvas.mozRequestFullScreen) {
+          this.canvas.mozRequestFullScreen();
+        } else if(this.canvas.webkitRequestFullscreen) {
+          this.canvas.webkitRequestFullscreen();
+        } else if(this.canvas.msRequestFullscreen) {
+          this.canvas.msRequestFullscreen();
+        } else if(this.canvas.oRequestFullscreen) {
+          this.canvas.oRequestFullscreen();
+        }
+      } else {
+        if(document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+
+      var onfullscreenchange = function(event) {
+        if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
+          if(document.fullscreenElement == self.canvas) {
+            self.fullscreen = true;
+          } else {
+            self.fullscreen = false;
+          }
+
+          self.autoResizeCanvas();
+
+          if(document.fullscreenElement == self.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
+            screen.orientation.lock("landscape");
+          }
+        }
+      };
+
+      if(typeof(document.onfullscreenchange) !== "undefined") {
+        document.onfullscreenchange = onfullscreenchange;
+      } else if(typeof(document.onmsfullscreenchange) !== "undefined") {
+        document.onmsfullscreenchange = onfullscreenchange;
+      } else if(typeof(document.onmozfullscreenchange) !== "undefined") {
+        document.onmozfullscreenchange = onfullscreenchange;
+      } else if(typeof(document.onwebkitfullscreenchange) !== "undefined") {
+        document.onwebkitfullscreenchange = onfullscreenchange;
+      } else if(typeof(document.onokitfullscreenchange) !== "undefined") {
+        document.onofullscreenchange = onfullscreenchange;
+      }
+
+      onfullscreenchange();
+    }
+};
+
+GameUI.prototype.loadAssets = function() {
+    var self = this;
+
+    if(!this.errorOccured) {
+      this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/clock.png"], function() {
+        if(self.imageLoader.hasError == true) {
+          self.errorOccured = true;
+        } else {
+          self.assetsLoaded = true;
+          self.btnFullScreen.loadImage(self.imageLoader);
+          self.btnPause.loadImage(self.imageLoader);
+          self.btnTopArrow.loadImage(self.imageLoader);
+          self.btnBottomArrow.loadImage(self.imageLoader);
+          self.btnLeftArrow.loadImage(self.imageLoader);
+          self.btnRightArrow.loadImage(self.imageLoader);
+          self.start();
+        }
+      }, this);
+    }
+};
+
+GameUI.prototype.startDraw = function(renderBlur) {
   var self = this;
 
-  if(this.countBeforePlay >= 0) {
-    this.updateUI();
+  requestAnimationFrame(function() {
+    if(!document.hasFocus() && !this.paused) {
+      self.controller.pause();
+    }
 
-    this.frameGlobal = window.requestAnimationFrame(function() {
-      self.frame++;
-      self.testFrameRate();
-    });
-  }
-};
-
-Game.prototype.clearIntervalPlay = function() {
-  clearInterval(this.intervalPlay);
-};
-
-Game.prototype.onStart = function(callback) {
-  this.reactor.addEventListener("onStart", callback);
-};
-
-Game.prototype.onContinue = function(callback) {
-  this.reactor.addEventListener("onContinue", callback);
-};
-
-Game.prototype.stop = function() {
-  this.paused = true;
-  this.gameOver = true;
-  this.clearIntervalCountFPS();
-  this.clearIntervalPlay();
-  this.reactor.dispatchEvent("onStop");
-};
-
-Game.prototype.onStop = function(callback) {
-  this.reactor.addEventListener("onStop", callback);
-};
-
-Game.prototype.pause = function() {
-  this.paused = true;
-  this.clearIntervalCountFPS();
-  this.clearIntervalPlay();
-  this.updateUI();
-  this.reactor.dispatchEvent("onPause");
-};
-
-Game.prototype.onPause = function(callback) {
-  this.reactor.addEventListener("onPause", callback);
-};
-
-Game.prototype.kill = function() {
-  this.paused = true;
-  this.gameOver = true;
-  this.killed = true;
-
-  for(var i = 0; i < this.snakes.length; i++) {
-    this.snakes[i].kill();
-    this.snakes[i] = null;
-  }
-
-  this.clearIntervalCountFPS();
-  this.clearIntervalPlay();
-  window.cancelAnimationFrame(this.frameGlobal);
-  window.cancelAnimationFrame(this.frameDisplayMenu);
-  this.frameGlobal, this.frameDisplayMenu = null;
-
-  this.grid = null;
-  this.snakes = null;
-  this.preRenderedFont = null;
-
-  if(this.outputType == OUTPUT_TEXT) {
-    this.appendTo.removeChild(this.textarea);
-    this.textarea = null;
-  } else if(this.outputType == OUTPUT_GRAPHICAL) {
-    this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.appendTo.removeChild(this.canvas);
-    this.canvas = null;
-    this.canvasCtx = null;
-    this.imageLoader.clear();
-  }
-};
-
-Game.prototype.exit = function() {
-  this.stop();
-  this.exited = true;
-  this.updateUI();
-  this.reactor.dispatchEvent("onExit");
+    self.draw(renderBlur);
+    self.frame++;
+    self.offsetFrame++;
+    self.startDraw();
+  });
 }
 
-Game.prototype.onExit = function(callback) {
-  this.reactor.addEventListener("onExit", callback);
-};
-
-Game.prototype.tick = function() {
-  var self = this;
-
-  if(!document.hasFocus() && !this.paused) {
-    this.pause();
-  }
-
-  this.updateUI();
-
-  this.frameGlobal = window.requestAnimationFrame(function(time) {
-    if(!self.paused && !self.killed) {
-      if(self.lastTime == 0) self.lastTime = time;
-      self.frame++;
-      self.offsetFrame++;
-
-      if((self.frame % self.speed == 0 && (!self.grid.maze || (self.grid.maze && (self.getNBPlayer(PLAYER_HUMAN) <= 0 && self.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) <= 0)))) || (self.grid.maze && ((self.getNBPlayer(PLAYER_HUMAN) > 0 || self.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) > 0) && self.lastKey != -1))) {
-        for(var i = 0; i < self.snakes.length; i++) {
-          var initialDirection = self.snakes[i].direction;
-          var setFruit = false;
-          var setFruitError = false;
-          self.snakes[i].lastTailMoved = false;
-
-          if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
-            if(self.snakes[i].player == PLAYER_HUMAN || self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
-              self.snakes[i].moveTo(self.lastKey);
-              self.lastKey = -1;
-            } else if(self.snakes[i].player == PLAYER_AI) {
-              self.snakes[i].moveTo(self.snakes[i].ai(true));
-            }
-
-            var headSnakePos = self.snakes[i].getHeadPosition();
-
-            if(self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI && self.grid.isDeadPosition(self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction))) {
-              self.snakes[i].direction = initialDirection;
-              self.snakes[i].moveTo(self.snakes[i].ai(true));
-              self.lastKey = -1;
-            }
-
-            headSnakePos = self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction);
-
-            if(self.grid.isDeadPosition(headSnakePos)) {
-              self.snakes[i].setGameOver();
-            } else {
-              if(self.grid.get(headSnakePos) == FRUIT_VAL) {
-                self.snakes[i].score++;
-                self.reactor.dispatchEvent("onScoreIncreased");
-                self.snakes[i].insert(headSnakePos);
-
-                if(self.grid.maze) {
-                  self.stop();
-                  self.gameMazeWin = true;
-                  self.gameFinished = true;
-                } else if(self.snakes[i].hasMaxScore() && self.snakes.length <= 1) {
-                  self.scoreMax = true;
-                  self.snakes[i].scoreMax = true;
-                } else {
-                  self.numFruit++;
-                  var setFruit = true;
-                }
-
-                if(self.snakes.length <= 1 && self.progressiveSpeed && self.snakes[i].score > 0 && self.initialSpeed > 1) {
-                  self.initialSpeed = Math.ceil(((-self.initialSpeedUntouched / 100) * self.snakes[i].score) + self.initialSpeedUntouched);
-                  self.initialSpeed = self.initialSpeed < 1 ? 1 : self.initialSpeed;
-                }
-              } else {
-                self.snakes[i].insert(headSnakePos);
-
-                if(!self.grid.maze) {
-                  self.snakes[i].remove();
-                  self.snakes[i].lastTailMoved = true;
-                }
-              }
-            }
-          }
-
-          if(!self.scoreMax && setFruit) {
-            var setFruitError = !self.grid.setFruit();
-          }
-        }
-
-        if(!self.scoreMax && !setFruitError && self.grid.isFruitSurrounded(self.grid.fruitPos, true)) {
-          var setFruitError = !self.grid.setFruit();
-        }
-
-        var nbOver = 0;
-
-        for(var j = 0; j < self.snakes.length; j++) {
-          (self.snakes[j].gameOver || self.snakes[j].scoreMax) && nbOver++;
-        }
-
-        if(nbOver >= self.snakes.length || setFruitError) {
-          self.stop();
-
-          if(self.snakes.length > 1) {
-            self.gameFinished = true;
-          }
-        }
-
-        self.offsetFrame = 0;
-      }
-
-      var expected_time = 1000 / TARGET_FPS;
-
-      if(time - self.lastTime <= expected_time * 0.75 || time - self.lastTime >= expected_time * 1.25) {
-        self.speed = Math.floor(self.initialSpeed * (expected_time / (time - self.lastTime)));
-        self.speed = self.speed < 1 ? 1 : self.speed;
-      } else {
-        self.speed = self.initialSpeed;
-      }
-
-      self.lastTime = time;
-
-      self.tick();
-    }
-  });
-};
-
-Game.prototype.onScoreIncreased = function(callback) {
-  this.reactor.addEventListener("onScoreIncreased", callback);
-};
-
-Game.prototype.toggleFullscreen = function() {
-  var self = this;
-
-  if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
-    if(!document.fullscreenElement) {
-      if(this.canvas.requestFullscreen) {
-        this.canvas.requestFullscreen();
-      } else if(this.canvas.mozRequestFullScreen) {
-        this.canvas.mozRequestFullScreen();
-      } else if(this.canvas.webkitRequestFullscreen) {
-        this.canvas.webkitRequestFullscreen();
-      } else if(this.canvas.msRequestFullscreen) {
-        this.canvas.msRequestFullscreen();
-      } else if(this.canvas.oRequestFullscreen) {
-        this.canvas.oRequestFullscreen();
-      }
-    } else {
-      if(document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-
-    var onfullscreenchange = function(event) {
-      if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
-        if(document.fullscreenElement == self.canvas) {
-          self.fullscreen = true;
-        } else {
-          self.fullscreen = false;
-        }
-
-        self.autoResizeCanvas();
-
-        if(document.fullscreenElement == self.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
-          screen.orientation.lock("landscape");
-        }
-      }
-    };
-
-    if(typeof(document.onfullscreenchange) !== "undefined") {
-      document.onfullscreenchange = onfullscreenchange;
-    } else if(typeof(document.onmsfullscreenchange) !== "undefined") {
-      document.onmsfullscreenchange = onfullscreenchange;
-    } else if(typeof(document.onmozfullscreenchange) !== "undefined") {
-      document.onmozfullscreenchange = onfullscreenchange;
-    } else if(typeof(document.onwebkitfullscreenchange) !== "undefined") {
-      document.onwebkitfullscreenchange = onfullscreenchange;
-    } else if(typeof(document.onokitfullscreenchange) !== "undefined") {
-      document.onofullscreenchange = onfullscreenchange;
-    }
-
-    onfullscreenchange();
-  }
-};
-
-Game.prototype.loadAssets = function() {
-  var self = this;
-
-  if(!this.errorOccured) {
-    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/clock.png"], function() {
-      if(self.imageLoader.hasError == true) {
-        self.errorOccured = true;
-        self.updateUI();
-      } else {
-        self.assetsLoaded = true;
-        self.btnFullScreen.loadImage(self.imageLoader);
-        self.btnPause.loadImage(self.imageLoader);
-        self.btnTopArrow.loadImage(self.imageLoader);
-        self.btnBottomArrow.loadImage(self.imageLoader);
-        self.btnLeftArrow.loadImage(self.imageLoader);
-        self.btnRightArrow.loadImage(self.imageLoader);
-        self.start();
-      }
-    }, this);
-  } else {
-    this.updateUI();
-  }
-};
-
-Game.prototype.updateUI = function(renderBlur) {
+GameUI.prototype.draw = function(renderBlur) {
   var self = this;
   
   if(this.outputType == OUTPUT_TEXT && !this.killed) {
@@ -750,7 +430,7 @@ Game.prototype.updateUI = function(renderBlur) {
 
       var totalWidth = caseWidth * this.grid.width;
 
-      if(!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished))) {
+      if(this.grid != null && (!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished)))) {
         for(var i = 0; i < this.grid.height; i++) {
           for(var j = 0; j < this.grid.width; j++) {
             var caseX = Math.floor(j * caseWidth + ((this.canvas.width - totalWidth) / 2));
@@ -783,13 +463,15 @@ Game.prototype.updateUI = function(renderBlur) {
       this.notificationMessage.draw(this);
     }
 
-    for(var i = 0; i < this.snakes.length; i++) {
-      if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
-        this.btnTopArrow.draw(this);
-        this.btnBottomArrow.draw(this);
-        this.btnRightArrow.draw(this);
-        this.btnLeftArrow.draw(this);
-        break;
+    if(this.snakes != null) {
+      for(var i = 0; i < this.snakes.length; i++) {
+        if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
+          this.btnTopArrow.draw(this);
+          this.btnBottomArrow.draw(this);
+          this.btnRightArrow.draw(this);
+          this.btnLeftArrow.draw(this);
+          break;
+        }
       }
     }
 
@@ -815,7 +497,6 @@ Game.prototype.updateUI = function(renderBlur) {
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfosGame = false;
             self.selectedButton = 0;
-            self.updateUI();
           });
         });
       }  else if(this.getInfos) {
@@ -823,13 +504,11 @@ Game.prototype.updateUI = function(renderBlur) {
           self.btnInfosGame.addClickAction(self.canvas, function() {
             self.getInfosGame = true;
             self.selectedButton = 0;
-            self.updateUI();
           });
 
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfos = false;
             self.selectedButton = 0;
-            self.updateUI();
           });
         });
       } else if(this.confirmExit) {
@@ -843,7 +522,6 @@ Game.prototype.updateUI = function(renderBlur) {
           self.btnNo.addClickAction(self.canvas, function() {
             self.confirmExit = false;
             self.selectedButton = 0;
-            self.updateUI();
           });
         });
       } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
@@ -896,7 +574,6 @@ Game.prototype.updateUI = function(renderBlur) {
           self.btnNo.addClickAction(self.canvas, function() {
             self.confirmReset = false;
             self.selectedButton = 0;
-            self.updateUI();
           });
         });
       } else if(this.gameFinished) {
@@ -909,7 +586,6 @@ Game.prototype.updateUI = function(renderBlur) {
           self.btnQuit.addClickAction(self.canvas, function() {
             self.confirmExit = true;
             self.selectedButton = 0;
-            self.updateUI();
           });
         });
       } else if(this.scoreMax && this.snakes.length <= 1) {
@@ -922,7 +598,6 @@ Game.prototype.updateUI = function(renderBlur) {
           self.btnQuit.addClickAction(self.canvas, function() {
             self.confirmExit = true;
             self.selectedButton = 0;
-            self.updateUI();
           });
 
           self.btnExitFullScreen.addClickAction(self.canvas, function() {
@@ -945,7 +620,6 @@ Game.prototype.updateUI = function(renderBlur) {
             self.btnQuit.addClickAction(self.canvas, function() {
               self.confirmExit = true;
               self.selectedButton = 0;
-              self.updateUI();
             });
 
             self.btnExitFullScreen.addClickAction(self.canvas, function() {
@@ -956,7 +630,6 @@ Game.prototype.updateUI = function(renderBlur) {
       } else if(this.paused && !this.gameOver && this.assetsLoaded) {
         this.drawMenu(ctx, this.enablePause ? (this.enableRetry ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], window.i18next.t("engine.pause"), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
           self.btnContinue.addClickAction(self.canvas, function() {
-            self.reactor.dispatchEvent("onContinue");
             self.selectedButton = 0;
             self.start();
           });
@@ -964,19 +637,16 @@ Game.prototype.updateUI = function(renderBlur) {
           self.btnRetry.addClickAction(self.canvas, function() {
             self.confirmReset = true;
             self.selectedButton = 0;
-            self.updateUI();
           });
 
           self.btnQuit.addClickAction(self.canvas, function() {
             self.confirmExit = true;
             self.selectedButton = 0;
-            self.updateUI();
           });
 
           self.btnAbout.addClickAction(self.canvas, function() {
             self.getInfos = true;
             self.selectedButton = 0;
-            self.updateUI();
           });
         });
       } else if(this.assetsLoaded) {
@@ -1016,7 +686,11 @@ Game.prototype.updateUI = function(renderBlur) {
   }
 };
 
-Game.prototype.disableAllButtons = function() {
+GameUI.prototype.setDisplayFPS = function(display) {
+  this.displayFPS = display;
+};
+
+GameUI.prototype.disableAllButtons = function() {
   if(this.outputType == OUTPUT_GRAPHICAL) {
     this.btnContinue.disable();
     this.btnRetry.disable();
@@ -1043,34 +717,33 @@ Game.prototype.disableAllButtons = function() {
   }
 };
 
-Game.prototype.setNotification = function(notification) {
+GameUI.prototype.setNotification = function(notification) {
   if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
     this.notificationMessage.close();
   }
 
   this.notificationMessage = notification;
-  this.updateUI();
 };
 
-Game.prototype.setTimeToDisplay = function(time) {
+GameUI.prototype.setTimeToDisplay = function(time) {
   this.timerToDisplay = time;
 };
 
-Game.prototype.setBestScore = function(score) {
+GameUI.prototype.setBestScore = function(score) {
   if(score != undefined && score != null && score.trim() != "") {
     this.bestScoreToDisplay = score;
   }
 };
 
-Game.prototype.getDebugText = function() {
-  return window.i18next.t("engine.debug.fps") + " : " + this.currentFPS + " / " + window.i18next.t("engine.debug.frames") + " : " + this.frame + " / " + window.i18next.t("engine.debug.ticks") + " : " + Math.floor(this.frame / this.speed) + " / " + window.i18next.t("engine.debug.speed") + " : " + this.speed;
+GameUI.prototype.getDebugText = function() {
+  return window.i18next.t("engine.debug.fps") + " : " + this.currentFPS + " / " + window.i18next.t("engine.debug.frames") + " : " + this.frame + " / " + window.i18next.t("engine.debug.ticks") + " : " + this.ticks + " / " + window.i18next.t("engine.debug.speed") + " : " + this.speed;
 };
 
-Game.prototype.toString = function() {
+GameUI.prototype.toString = function() {
   return this.grid.toString() + "\n" + (this.snakes.length <= 1 ? window.i18next.t("engine.score") + " : " + this.snakes[0].score : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + window.i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + window.i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + window.i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
 };
 
-Game.prototype.preRenderFont = function(cars, size, color, fontFamily) {
+GameUI.prototype.preRenderFont = function(cars, size, color, fontFamily) {
   cars.push("?"); cars.push(" "); cars.push("A");
 
   for(var i = 0; i < cars.length; i++) {
@@ -1091,15 +764,15 @@ Game.prototype.preRenderFont = function(cars, size, color, fontFamily) {
   }
 };
 
-Game.prototype.drawImage = function(ctx, imgSrc, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
+GameUI.prototype.drawImage = function(ctx, imgSrc, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
   this.drawImageWrapper(ctx, this.imageLoader.get(imgSrc), x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees);
 };
 
-Game.prototype.drawImageData = function(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
+GameUI.prototype.drawImageData = function(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
   this.drawImageWrapper(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees);
 };
 
-Game.prototype.drawImageWrapper = function(ctx, image, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
+GameUI.prototype.drawImageWrapper = function(ctx, image, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
   var x = (x == undefined || isNaN(x)) ? null : Math.round(x);
   var y = (y == undefined || isNaN(y)) ? null : Math.round(y);
   var width = (width == undefined || isNaN(width)) ? null : Math.round(width);
@@ -1136,7 +809,7 @@ Game.prototype.drawImageWrapper = function(ctx, image, x, y, width, height, sx, 
   }
 };
 
-Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignement, verticalAlignement, x, y, wrap, bold) {
+GameUI.prototype.drawText = function(ctx, text, color, size, fontFamily, alignement, verticalAlignement, x, y, wrap, bold) {
   var precFillStyle = ctx.fillStyle;
   var precFont = ctx.font;
   var precFilter = ctx.filter;
@@ -1197,7 +870,7 @@ Game.prototype.drawText = function(ctx, text, color, size, fontFamily, alignemen
   };
 };
 
-Game.prototype.drawTextBitmap = function(ctx, bitmapFontSet, text, size, x, y, wrap) {
+GameUI.prototype.drawTextBitmap = function(ctx, bitmapFontSet, text, size, x, y, wrap) {
   if(bitmapFontSet == undefined || bitmapFontSet == null) {
     this.preRenderedFont = {};
     this.preRenderFont(CAR_TO_PRERENDER, FONT_SIZE * 2, "white", FONT_FAMILY);
@@ -1236,7 +909,7 @@ Game.prototype.drawTextBitmap = function(ctx, bitmapFontSet, text, size, x, y, w
   }
 };
 
-Game.prototype.wrapText = function(text, limit) {
+GameUI.prototype.wrapText = function(text, limit) {
   if(text.length > limit) {
     var p = limit;
 
@@ -1252,7 +925,7 @@ Game.prototype.wrapText = function(text, limit) {
   return text;
 };
 
-Game.prototype.wrapTextLines = function(ctx, text, width, fontSize) {
+GameUI.prototype.wrapTextLines = function(ctx, text, width, fontSize) {
   var lines = text.split("\n");
   var newText = "";
   var widthCar = width || ctx.measureText("A").width;
@@ -1278,292 +951,281 @@ Game.prototype.wrapTextLines = function(ctx, text, width, fontSize) {
   };
 };
 
-Game.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, wrap, func, disableAnimationFrame) {
+GameUI.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, wrap, func) {
   var self = this;
-  var disableAnimationFrame = disableAnimationFrame == undefined ? false : disableAnimationFrame;
+  
+  ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+  ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
 
-  if(!disableAnimationFrame) {
-    window.cancelAnimationFrame(this.frameDisplayMenu);
+  var heightText = self.wrapTextLines(ctx, text, null, size)["height"];
+  var heightButtons = 0;
+
+  if(buttons != null) {
+    if(self.lastKeyMenu == KEY_UP) {
+      self.selectedButton--;
+    } else if(self.lastKeyMenu == KEY_BOTTOM) {
+      self.selectedButton++;
+    }
+
+    if(self.selectedButton >= buttons.length) {
+      self.selectedButton = 0;
+    } else if(self.selectedButton < 0) {
+      self.selectedButton = buttons.length - 1;
+    }
+
+    for(var i = 0; i < buttons.length; i++) {
+      if(buttons[i].autoHeight) {
+        heightButtons += self.wrapTextLines(ctx, buttons[i].text, null, buttons[i].getFontSize(ctx))["height"] + 8;
+      } else {
+        heightButtons += buttons[i].height + 5;
+      }
+    }
   }
 
-  var displayMenu = function() {
-    ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
-    ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
+  var totalHeight = heightText + heightButtons;
+  var startY = self.canvas.height / 2 - totalHeight / 2 + 16;
+  var currentY = startY + heightText;
 
-    var heightText = self.wrapTextLines(ctx, text, null, size)["height"];
-    var heightButtons = 0;
+  self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY, true);
 
-    if(buttons != null) {
-      if(self.lastKeyMenu == KEY_UP) {
-        self.selectedButton--;
-      } else if(self.lastKeyMenu == KEY_BOTTOM) {
-        self.selectedButton++;
+  var buttonEntered = false;
+
+  if(buttons != null) {
+    for(var i = 0; i < buttons.length; i++) {
+      buttons[i].y = currentY;
+
+      if(self.selectedButton == i) {
+        buttons[i].selected = true;
+      } else {
+        buttons[i].selected = false;
       }
 
-      if(self.selectedButton >= buttons.length) {
-        self.selectedButton = 0;
-      } else if(self.selectedButton < 0) {
-        self.selectedButton = buttons.length - 1;
+      buttons[i].enable();
+      buttons[i].draw(self);
+
+      if(self.selectedButton == i && self.lastKeyMenu == KEY_ENTER && buttons[i].triggerClick != null && !buttons[i].disabled) {
+        buttonEntered = true;
+        buttons[i].triggerClick();
+        break;
       }
 
-      for(var i = 0; i < buttons.length; i++) {
-        if(buttons[i].autoHeight) {
-          heightButtons += self.wrapTextLines(ctx, buttons[i].text, null, buttons[i].getFontSize(ctx))["height"] + 8;
-        } else {
-          heightButtons += buttons[i].height + 5;
-        }
-      }
+      currentY += buttons[i].height + 8;
     }
-
-    var totalHeight = heightText + heightButtons;
-    var startY = self.canvas.height / 2 - totalHeight / 2 + 16;
-    var currentY = startY + heightText;
-
-    self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY, true);
-
-    var buttonEntered = false;
-
-    if(buttons != null) {
-      for(var i = 0; i < buttons.length; i++) {
-        buttons[i].y = currentY;
-
-        if(self.selectedButton == i) {
-          buttons[i].selected = true;
-        } else {
-          buttons[i].selected = false;
-        }
-
-        buttons[i].enable();
-        buttons[i].draw(self);
-
-        if(self.selectedButton == i && self.lastKeyMenu == KEY_ENTER && buttons[i].triggerClick != null && !buttons[i].disabled) {
-          buttonEntered = true;
-          buttons[i].triggerClick();
-          break;
-        }
-
-        currentY += buttons[i].height + 8;
-      }
-    }
-
-    if(self.notificationMessage != undefined && self.notificationMessage != null && self.notificationMessage instanceof NotificationMessage && self.notificationMessage.foreGround && !buttonEntered) {
-      self.notificationMessage.draw(self);
-    }
-
-    if(func != null) {
-      func(true);
-    }
-
-    self.lastKeyMenu = -1;
-  };
-
-  if(disableAnimationFrame) {
-    displayMenu();
-  } else {
-    this.frameDisplayMenu = window.requestAnimationFrame(displayMenu);
   }
+
+  if(self.notificationMessage != undefined && self.notificationMessage != null && self.notificationMessage instanceof NotificationMessage && self.notificationMessage.foreGround && !buttonEntered) {
+    self.notificationMessage.draw(self);
+  }
+
+  if(func != null) {
+    func(true);
+  }
+
+  self.lastKeyMenu = -1;
 };
 
-Game.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur) {
+GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur) {
   var canvasTmp = document.createElement("canvas");
   canvasTmp.width = this.canvas.width;
   canvasTmp.height = this.canvas.height;
   var ctxTmp = canvasTmp.getContext("2d");
 
-  for(var j = 0; j < this.snakes.length; j++) {
-    ctxTmp.clearRect(0, 0, canvasTmp.width, canvasTmp.height);
+  if(this.snakes != null) {
+    for(var j = 0; j < this.snakes.length; j++) {
+      ctxTmp.clearRect(0, 0, canvasTmp.width, canvasTmp.height);
 
-    if(this.snakes[j].color != undefined) {
-      ctxTmp.filter = "hue-rotate(" + this.snakes[j].color + "deg)";
-    }
-
-    if(blur) {
-      ctxTmp.filter = ctxTmp.filter + " blur(5px)";
-    }
-
-    for(var i = this.snakes[j].length() - 1; (i >= -1 && this.snakes[j].length() > 1) || i >= 0; i--) { // -1 == tail
-      if(i == -1) {
-        var position = this.snakes[j].get(this.snakes[j].length() - 1);
-      } else {
-        var position = this.snakes[j].get(i);
+      if(this.snakes[j].color != undefined) {
+        ctxTmp.filter = "hue-rotate(" + this.snakes[j].color + "deg)";
       }
 
-      var caseX = 0;
-      var caseY = 0;
-      var direction = position.direction;
-      var angle = 0;
-      var imageLoc = "";
-      var eraseBelow = true;
+      if(blur) {
+        ctxTmp.filter = ctxTmp.filter + " blur(5px)";
+      }
 
-      if(i == 0) {
-        direction = this.snakes[j].getHeadPosition().direction;
-      } else if(i == -1) {
-        if(!this.disableAnimation && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished && this.snakes[j].lastTailMoved) {
-          direction = this.snakes[j].getTailPosition().direction;
+      for(var i = this.snakes[j].length() - 1; (i >= -1 && this.snakes[j].length() > 1) || i >= 0; i--) { // -1 == tail
+        if(i == -1) {
+          var position = this.snakes[j].get(this.snakes[j].length() - 1);
         } else {
-          direction = this.snakes[j].get(this.snakes[j].length() - 2).direction;
+          var position = this.snakes[j].get(i);
         }
-      } else {
-        direction = this.snakes[j].getGraphicDirection(i);
-      }
 
-      // Animation
-      if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
-        var offset = this.offsetFrame / this.speed; // percentage of the animation
-        var offset = (offset > 1 ? 1 : offset);
-        var offsetX = (caseWidth * offset) - caseWidth;
-        var offsetY = (caseHeight * offset) - caseHeight;
-
-        var currentPosition = position;
+        var caseX = 0;
+        var caseY = 0;
+        var direction = position.direction;
+        var angle = 0;
+        var imageLoc = "";
+        var eraseBelow = true;
 
         if(i == 0) {
-          if(this.snakes[j].length() > 1) {
-            var graphicDirection = this.snakes[j].getGraphicDirection(1);
-          } else {
-            var graphicDirection = this.snakes[j].getGraphicDirection(0);
-          }
+          direction = this.snakes[j].getHeadPosition().direction;
         } else if(i == -1) {
-          var graphicDirection = this.snakes[j].getGraphicDirectionFor(this.snakes[j].getTailPosition(), this.snakes[j].lastTail, this.snakes[j].get(this.snakes[j].length() - 2));
-        }
-
-        if(i == -1 && this.snakes[j].length() > 1) {
-          currentPosition = this.snakes[j].get(this.snakes[j].length() - 1);
-        }
-
-        if((i == 0 || i == -1) && (graphicDirection == ANGLE_1 || graphicDirection == ANGLE_2 || graphicDirection == ANGLE_3 || graphicDirection == ANGLE_4)) {
-          if(i == 0) {
-            angle = -90;
+          if(!this.disableAnimation && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished && this.snakes[j].lastTailMoved) {
+            direction = this.snakes[j].getTailPosition().direction;
+          } else {
+            direction = this.snakes[j].get(this.snakes[j].length() - 2).direction;
           }
+        } else {
+          direction = this.snakes[j].getGraphicDirection(i);
+        }
+
+        // Animation
+        if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
+          var offset = this.offsetFrame / this.speed; // percentage of the animation
+          var offset = (offset > 1 ? 1 : offset);
+          var offsetX = (caseWidth * offset) - caseWidth;
+          var offsetY = (caseHeight * offset) - caseHeight;
+
+          var currentPosition = position;
 
           if(i == 0) {
-            angle += -128.073 * Math.pow(offset, 2) + 222.332 * offset - 5.47066;
+            if(this.snakes[j].length() > 1) {
+              var graphicDirection = this.snakes[j].getGraphicDirection(1);
+            } else {
+              var graphicDirection = this.snakes[j].getGraphicDirection(0);
+            }
           } else if(i == -1) {
-            angle += 126.896 * Math.pow(offset, 2) + -33.6471 * offset + 1.65942;
+            var graphicDirection = this.snakes[j].getGraphicDirectionFor(this.snakes[j].getTailPosition(), this.snakes[j].lastTail, this.snakes[j].get(this.snakes[j].length() - 2));
           }
 
-          if(i == 0 && ((graphicDirection == ANGLE_4 && direction == UP) || (graphicDirection == ANGLE_1 && direction == LEFT) || (graphicDirection == ANGLE_2 && direction == BOTTOM) || (graphicDirection == ANGLE_3 && direction == RIGHT))) {
-            angle = -angle;
-          } else if(i == -1 && ((graphicDirection == ANGLE_4 && direction == RIGHT) || (graphicDirection == ANGLE_3 && direction == BOTTOM) || (graphicDirection == ANGLE_1 && direction == UP) || (graphicDirection == ANGLE_2 && direction == LEFT))) {
-            angle = - angle;
+          if(i == -1 && this.snakes[j].length() > 1) {
+            currentPosition = this.snakes[j].get(this.snakes[j].length() - 1);
           }
 
-          eraseBelow = false;
-        }
+          if((i == 0 || i == -1) && (graphicDirection == ANGLE_1 || graphicDirection == ANGLE_2 || graphicDirection == ANGLE_3 || graphicDirection == ANGLE_4)) {
+            if(i == 0) {
+              angle = -90;
+            }
 
-        switch(currentPosition.direction) {
-          case UP:
-            caseY -= offsetY;
-            break;
-          case BOTTOM:
-            caseY += offsetY;
-            break;
-          case RIGHT:
-            caseX += offsetX;
-            break;
-          case LEFT:
-            caseX -= offsetX;
-            break;
-        }
-      }
+            if(i == 0) {
+              angle += -128.073 * Math.pow(offset, 2) + 222.332 * offset - 5.47066;
+            } else if(i == -1) {
+              angle += 126.896 * Math.pow(offset, 2) + -33.6471 * offset + 1.65942;
+            }
 
-      if(i == this.snakes[j].length() - 1) {
-        direction = this.snakes[j].getGraphicDirectionFor(position, this.snakes[j].get(i - 1), this.snakes[j].lastTail);
-      }
+            if(i == 0 && ((graphicDirection == ANGLE_4 && direction == UP) || (graphicDirection == ANGLE_1 && direction == LEFT) || (graphicDirection == ANGLE_2 && direction == BOTTOM) || (graphicDirection == ANGLE_3 && direction == RIGHT))) {
+              angle = -angle;
+            } else if(i == -1 && ((graphicDirection == ANGLE_4 && direction == RIGHT) || (graphicDirection == ANGLE_3 && direction == BOTTOM) || (graphicDirection == ANGLE_1 && direction == UP) || (graphicDirection == ANGLE_2 && direction == LEFT))) {
+              angle = - angle;
+            }
 
-      var posX = position.x;
-      var posY = position.y;
-      caseX += Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
-      caseY += this.headerHeight + posY * caseHeight;
+            eraseBelow = false;
+          }
 
-      if(i == 0) {
-        if(this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
-          switch(direction) {
+          switch(currentPosition.direction) {
+            case UP:
+              caseY -= offsetY;
+              break;
             case BOTTOM:
-              imageLoc = "assets/images/snake_dead.png";
+              caseY += offsetY;
               break;
             case RIGHT:
-              imageLoc = "assets/images/snake_dead_2.png";
-              break;
-            case UP:
-              imageLoc = "assets/images/snake_dead_3.png";
+              caseX += offsetX;
               break;
             case LEFT:
-              imageLoc = "assets/images/snake_dead_4.png";
+              caseX -= offsetX;
+              break;
+          }
+        }
+
+        if(i == this.snakes[j].length() - 1) {
+          direction = this.snakes[j].getGraphicDirectionFor(position, this.snakes[j].get(i - 1), this.snakes[j].lastTail);
+        }
+
+        var posX = position.x;
+        var posY = position.y;
+        caseX += Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
+        caseY += this.headerHeight + posY * caseHeight;
+
+        if(i == 0) {
+          if(this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
+            switch(direction) {
+              case BOTTOM:
+                imageLoc = "assets/images/snake_dead.png";
+                break;
+              case RIGHT:
+                imageLoc = "assets/images/snake_dead_2.png";
+                break;
+              case UP:
+                imageLoc = "assets/images/snake_dead_3.png";
+                break;
+              case LEFT:
+                imageLoc = "assets/images/snake_dead_4.png";
+                break;
+            }
+          } else {
+            switch(direction) {
+              case BOTTOM:
+                imageLoc = "assets/images/snake.png";
+                break;
+              case RIGHT:
+                imageLoc = "assets/images/snake_2.png";
+                break;
+              case UP:
+                imageLoc = "assets/images/snake_3.png";
+                break;
+              case LEFT:
+                imageLoc = "assets/images/snake_4.png";
+                break;
+            }
+          }
+        } else if(i == -1) {
+          switch(direction) {
+            case BOTTOM:
+              imageLoc = "assets/images/body_end.png";
+              break;
+            case RIGHT:
+              imageLoc = "assets/images/body_2_end.png";
+              break;
+            case UP:
+              imageLoc = "assets/images/body_3_end.png";
+              break;
+            case LEFT:
+              imageLoc = "assets/images/body_4_end.png";
               break;
           }
         } else {
           switch(direction) {
+            case UP:
+              imageLoc = "assets/images/body.png";
+              break;
             case BOTTOM:
-              imageLoc = "assets/images/snake.png";
+              imageLoc = "assets/images/body.png";
               break;
             case RIGHT:
-              imageLoc = "assets/images/snake_2.png";
-              break;
-            case UP:
-              imageLoc = "assets/images/snake_3.png";
+              imageLoc = "assets/images/body_2.png";
               break;
             case LEFT:
-              imageLoc = "assets/images/snake_4.png";
+              imageLoc = "assets/images/body_2.png";
+              break;
+            case ANGLE_1:
+              imageLoc = "assets/images/body_angle_1.png";
+              break;
+            case ANGLE_2:
+              imageLoc = "assets/images/body_angle_2.png";
+              break;
+            case ANGLE_3:
+              imageLoc = "assets/images/body_angle_3.png";
+              break;
+            case ANGLE_4:
+              imageLoc = "assets/images/body_angle_4.png";
               break;
           }
         }
-      } else if(i == -1) {
-        switch(direction) {
-          case BOTTOM:
-            imageLoc = "assets/images/body_end.png";
-            break;
-          case RIGHT:
-            imageLoc = "assets/images/body_2_end.png";
-            break;
-          case UP:
-            imageLoc = "assets/images/body_3_end.png";
-            break;
-          case LEFT:
-            imageLoc = "assets/images/body_4_end.png";
-            break;
-        }
-      } else {
-        switch(direction) {
-          case UP:
-            imageLoc = "assets/images/body.png";
-            break;
-          case BOTTOM:
-            imageLoc = "assets/images/body.png";
-            break;
-          case RIGHT:
-            imageLoc = "assets/images/body_2.png";
-            break;
-          case LEFT:
-            imageLoc = "assets/images/body_2.png";
-            break;
-          case ANGLE_1:
-            imageLoc = "assets/images/body_angle_1.png";
-            break;
-          case ANGLE_2:
-            imageLoc = "assets/images/body_angle_2.png";
-            break;
-          case ANGLE_3:
-            imageLoc = "assets/images/body_angle_3.png";
-            break;
-          case ANGLE_4:
-            imageLoc = "assets/images/body_angle_4.png";
-            break;
-        }
+
+        this.drawImage(ctxTmp, imageLoc, caseX, caseY, caseWidth, caseHeight, null, null, null, null, eraseBelow, angle);
       }
 
-      this.drawImage(ctxTmp, imageLoc, caseX, caseY, caseWidth, caseHeight, null, null, null, null, eraseBelow, angle);
+      this.drawImageData(ctx, canvasTmp, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height);
+      ctxTmp.filter = "none";
     }
 
-    this.drawImageData(ctx, canvasTmp, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height);
-    ctxTmp.filter = "none";
-  }
-
-  if(this.snakes.length > 1) {
-    this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight);
+    if(this.snakes.length > 1) {
+      this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight);
+    }
   }
 };
 
-Game.prototype.drawArrow = function(ctx, fromx, fromy, tox, toy) {
+GameUI.prototype.drawArrow = function(ctx, fromx, fromy, tox, toy) {
   var lineCap = ctx.lineCap;
   var lineWidth = ctx.lineWidth;
   var strokeStyle = ctx.strokeStyle;
@@ -1592,7 +1254,7 @@ Game.prototype.drawArrow = function(ctx, fromx, fromy, tox, toy) {
   ctx.filter = filter;
 };
 
-Game.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight) {
+GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight) {
   var numPlayer = 0;
   var numAI = 0;
 

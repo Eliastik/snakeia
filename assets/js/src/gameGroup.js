@@ -188,7 +188,7 @@ GameGroup.prototype.onScoreIncreased = function(callback) {
 
 GameGroup.prototype.setDisplayFPS = function(value) {
     for(var i = 0; i < this.games.length; i++) {
-      this.games[i].displayFPS = value;
+      this.games[i].setDisplayFPS(value);
     }
 };
 
