@@ -18,13 +18,9 @@
  */
 // Old game API
 function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
-    var controller = new GameController();
-    
-    var engine = new GameEngine(controller, grid, snake, speed, enablePause, enableRetry, progressiveSpeed);
-    controller.gameEngine = engine;
+    var controller = new GameController(new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed));
 
-    var ui = new GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation);
-    controller.gameUI = ui;
+    controller.gameUI = new GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation);
 
     return controller;
 }

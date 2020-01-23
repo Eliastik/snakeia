@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-function GameController(ui, engine) {
+function GameController(engine, ui) {
     this.gameUI = ui;
     this.gameEngine = engine;
     // Events
@@ -27,8 +27,61 @@ function GameController(ui, engine) {
     this.reactor.registerEvent("onReset");
     this.reactor.registerEvent("onStop");
     this.reactor.registerEvent("onExit");
+    this.reactor.registerEvent("onKill");
     this.reactor.registerEvent("onScoreIncreased");
+    this.reactor.registerEvent("onUpdate");
+
+    this.init();
 }
+
+GameController.prototype.init = function() {
+    var self = this;
+
+    this.gameEngine.onReset(function() {
+        self.update("reset");
+        self.reactor.dispatchEvent("onReset");
+    });
+
+    this.gameEngine.onStart(function() {
+        self.update("start");
+        self.reactor.dispatchEvent("onStart");
+    });
+
+    this.gameEngine.onPause(function() {
+        self.update("pause");
+        self.reactor.dispatchEvent("onPause");
+    });
+
+    this.gameEngine.onContinue(function() {
+        self.update("continue");
+        self.reactor.dispatchEvent("onContinue");
+    });
+
+    this.gameEngine.onStop(function() {
+        self.update("stop");
+        self.reactor.dispatchEvent("onStop");
+    });
+
+    this.gameEngine.onExit(function() {
+        self.update("exit");
+        self.reactor.dispatchEvent("onExit");
+    });
+
+    this.gameEngine.onKill(function() {
+        self.update("kill");
+        self.reactor.dispatchEvent("onKill");
+    });
+
+    this.gameEngine.onScoreIncreased(function() {
+        self.update("scoreIncreased");
+        self.reactor.dispatchEvent("onScoreIncreased");
+    });
+
+    this.gameEngine.onUpdate(function() {
+        self.update("update");
+        self.reactor.dispatchEvent("onUpdate");
+    });
+};
 
 GameController.prototype.getNBPlayer = function(type) {
     return this.gameEngine.getNBPlayer(type);
@@ -78,30 +131,36 @@ GameController.prototype.setNotification = function(notification) {
     this.gameUI.setNotification(notification);
 };
 
-GameController.prototype.update = function(message) {
-    this.gameUI.snakes = this.gameEngine.snakes;
-    this.gameUI.grid = this.gameEngine.grid;
-    this.gameUI.speed = this.gameEngine.speed;
-    this.gameUI.offsetFrame = 0;
-    this.gameUI.countBeforePlay = this.gameEngine.countBeforePlay;
-    this.gameUI.paused = this.gameEngine.paused;
-    this.gameUI.exited = this.gameEngine.exited;
-    this.gameUI.killed = this.gameEngine.killed;
-    this.gameUI.isReseted = this.gameEngine.isReseted;
-    this.gameUI.gameOver = this.gameEngine.gameOver;
-    this.gameUI.gameFinished = this.gameEngine.gameFinished; // only used if 2 and more snakes
-    this.gameUI.gameMazeWin = this.gameEngine.gameMazeWin; // used in maze mode
-    this.gameUI.scoreMax = this.gameEngine.scoreMax;
-    this.gameUI.errorOccured = this.gameEngine.errorOccured;
-    this.gameUI.enablePause = this.gameEngine.enablePause;
-    this.gameUI.enableRetry = this.gameEngine.enableRetry;
-    this.gameUI.ticks = this.gameEngine.ticks;
-    this.gameUI.initialSpeed = this.gameEngine.initialSpeed;
-    this.gameUI.numFruit = this.gameEngine.numFruit;
-    this.gameUI.getInfos = false;
-    this.gameUI.getInfosGame = false;
-    this.gameUI.confirmExit = false;
-    this.gameUI.confirmReset = false;
+GameController.prototype.update = function(message, data) {
+    if(this.gameUI != null && this.gameEngine != null) {
+        this.gameUI.snakes = this.gameEngine.snakes;
+        this.gameUI.grid = this.gameEngine.grid;
+        this.gameUI.speed = this.gameEngine.speed;
+        this.gameUI.offsetFrame = 0;
+        this.gameUI.countBeforePlay = this.gameEngine.countBeforePlay;
+        this.gameUI.paused = this.gameEngine.paused;
+        this.gameUI.exited = this.gameEngine.exited;
+        this.gameUI.killed = this.gameEngine.killed;
+        this.gameUI.isReseted = this.gameEngine.isReseted;
+        this.gameUI.gameOver = this.gameEngine.gameOver;
+        this.gameUI.gameFinished = this.gameEngine.gameFinished; // only used if 2 and more snakes
+        this.gameUI.gameMazeWin = this.gameEngine.gameMazeWin; // used in maze mode
+        this.gameUI.scoreMax = this.gameEngine.scoreMax;
+        this.gameUI.errorOccured = this.gameEngine.errorOccured;
+        this.gameUI.enablePause = this.gameEngine.enablePause;
+        this.gameUI.enableRetry = this.gameEngine.enableRetry;
+        this.gameUI.ticks = this.gameEngine.ticks;
+        this.gameUI.initialSpeed = this.gameEngine.initialSpeed;
+        this.gameUI.numFruit = this.gameEngine.numFruit;
+        this.gameUI.getInfos = false;
+        this.gameUI.getInfosGame = false;
+        this.gameUI.confirmExit = false;
+        this.gameUI.confirmReset = false;
+    }
+};
+
+GameController.prototype.setBestScore = function(score) {
+    this.gameUI.setBestScore(score);
 };
 
 GameController.prototype.key = function(key) {
@@ -130,6 +189,10 @@ GameController.prototype.onPause = function(callback) {
 
 GameController.prototype.onExit = function(callback) {
     this.reactor.addEventListener("onExit", callback);
+};
+
+GameController.prototype.onKill = function(callback) {
+    this.reactor.addEventListener("onKill", callback);
 };
 
 GameController.prototype.onScoreIncreased = function(callback) {

@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-function GameEngine(controller, grid, snake, speed, enablePause, enableRetry, progressiveSpeed) {
+function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed) {
     // Game settings
-    this.controller = controller;
     this.grid = grid;
     this.snakes = snake;
     this.speed = speed == undefined ? 8 : speed;
@@ -33,6 +32,7 @@ function GameEngine(controller, grid, snake, speed, enablePause, enableRetry, pr
     this.numFruit = 1;
     this.ticks = 0;
     // Game state variables
+    this.firstStart = true;
     this.paused = true;
     this.exited = false;
     this.killed = false;
@@ -52,7 +52,9 @@ function GameEngine(controller, grid, snake, speed, enablePause, enableRetry, pr
     this.reactor.registerEvent("onReset");
     this.reactor.registerEvent("onStop");
     this.reactor.registerEvent("onExit");
+    this.reactor.registerEvent("onKill");
     this.reactor.registerEvent("onScoreIncreased");
+    this.reactor.registerEvent("onUpdate");
   
     this.init();
 }
@@ -117,7 +119,7 @@ GameEngine.prototype.reset = function() {
     this.paused = true;
     this.isReseted = true;
     this.exited = false;
-    // this.reactor.dispatchEvent("onReset");
+    this.reactor.dispatchEvent("onReset");
     this.clearIntervalPlay();
     this.grid.init();
   
@@ -140,14 +142,14 @@ GameEngine.prototype.reset = function() {
 };
 
 GameEngine.prototype.start = function() {
-    this.controller.update();
+    this.reactor.dispatchEvent("onUpdate");
     var self = this;
   
     if(!this.errorOccured) {
       for(var i = 0; i < this.snakes.length; i++) {
         if(this.snakes[i].errorInit) {
-          this.errorOccured = true;
-          this.stop();
+            this.errorOccured = true;
+            this.stop();
         }
       }
   
@@ -158,21 +160,26 @@ GameEngine.prototype.start = function() {
         this.confirmExit = false;
         this.confirmReset = false;*/
         this.countBeforePlay = 3;
-        // this.updateUI();
         this.clearIntervalPlay();
-        this.controller.update();
+        this.reactor.dispatchEvent("onUpdate");
   
         this.intervalPlay = setInterval(function() {
           self.countBeforePlay--;
-          self.controller.update();
+          self.reactor.dispatchEvent("onUpdate");
   
           if(self.countBeforePlay <= 0) {
             if(self.countBeforePlay <= -1) {
               self.clearIntervalPlay();
               self.paused = false;
               self.isReseted = false;
-              // self.reactor.dispatchEvent("onStart");
-              console.log(self);
+
+              if(self.firstStart) {
+                  self.reactor.dispatchEvent("onStart");
+              } else {
+                  self.reactor.dispatchEvent("onContinue");
+              }
+
+              self.firstStart = false;
               self.tick();
             }
           }
@@ -182,61 +189,73 @@ GameEngine.prototype.start = function() {
 };
 
 GameEngine.prototype.clearIntervalPlay = function() {
-  clearInterval(this.intervalPlay);
+    clearInterval(this.intervalPlay);
+};
+
+GameEngine.prototype.continue = function() {
+    this.start();
+    this.reactor.dispatchEvent("onContinue");
 };
 
 GameEngine.prototype.stop = function() {
-  this.paused = true;
-  this.gameOver = true;
-  //this.clearIntervalCountFPS();
-  this.clearIntervalPlay();
-  // this.reactor.dispatchEvent("onStop");
+    if(!this.paused && !this.gameOver) {
+        this.paused = true;
+        this.gameOver = true;
+        this.clearIntervalPlay();
+        this.reactor.dispatchEvent("onStop");
+    }
 };
 
 GameEngine.prototype.pause = function() {
-  this.paused = true;
-  //this.clearIntervalCountFPS();
-  this.clearIntervalPlay();
-  /*this.updateUI();
-  this.reactor.dispatchEvent("onPause");*/
+    if(!this.paused) {
+        this.paused = true;
+        this.clearIntervalPlay();
+        this.reactor.dispatchEvent("onPause");
+    }
 };
 
 GameEngine.prototype.kill = function() {
-  this.paused = true;
-  this.gameOver = true;
-  this.killed = true;
-
-  for(var i = 0; i < this.snakes.length; i++) {
-    this.snakes[i].kill();
-    this.snakes[i] = null;
-  }
-
-  //this.clearIntervalCountFPS();
-  this.clearIntervalPlay();
-  //window.cancelAnimationFrame(this.frameGlobal);
-  //window.cancelAnimationFrame(this.frameDisplayMenu);
-  //this.frameGlobal, this.frameDisplayMenu = null;
-
-  this.grid = null;
-  this.snakes = null;
-  //this.preRenderedFont = null;
-
-  /*if(this.outputType == OUTPUT_TEXT) {
-    this.appendTo.removeChild(this.textarea);
-    this.textarea = null;
-  } else if(this.outputType == OUTPUT_GRAPHICAL) {
-    this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.appendTo.removeChild(this.canvas);
-    this.canvas = null;
-    this.canvasCtx = null;
-    this.imageLoader.clear();
-  }*/
+    if(!this.killed) {
+        this.paused = true;
+        this.gameOver = true;
+        this.killed = true;
+    
+        for(var i = 0; i < this.snakes.length; i++) {
+          this.snakes[i].kill();
+          this.snakes[i] = null;
+        }
+    
+        //this.clearIntervalCountFPS();
+        this.clearIntervalPlay();
+        //window.cancelAnimationFrame(this.frameGlobal);
+        //window.cancelAnimationFrame(this.frameDisplayMenu);
+        //this.frameGlobal, this.frameDisplayMenu = null;
+    
+        this.grid = null;
+        this.snakes = null;
+        //this.preRenderedFont = null;
+    
+        /*if(this.outputType == OUTPUT_TEXT) {
+          this.appendTo.removeChild(this.textarea);
+          this.textarea = null;
+        } else if(this.outputType == OUTPUT_GRAPHICAL) {
+          this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
+          this.appendTo.removeChild(this.canvas);
+          this.canvas = null;
+          this.canvasCtx = null;
+          this.imageLoader.clear();
+        }*/
+    
+        this.reactor.dispatchEvent("onKill");
+    }
 };
 
 GameEngine.prototype.exit = function() {
-    this.stop();
-    this.exited = true;
-    // this.reactor.dispatchEvent("onExit");
+    if(!this.exited) {
+        this.stop();
+        this.exited = true;
+        this.reactor.dispatchEvent("onExit");
+    }
 };
 
 GameEngine.prototype.tick = function() {
@@ -244,16 +263,16 @@ GameEngine.prototype.tick = function() {
 
     setTimeout(function() {
       if(!self.paused && !self.killed) {
-        if(self.lastTime == 0) self.lastTime = time;
-        self.ticks++;
+          if(self.lastTime == 0) self.lastTime = time;
+          self.ticks++;
 
-        // Input
-        if(!self.paused) {
-          if(self.lastKey == KEY_ENTER) {
-            self.pause();
+          // Input
+          if(!self.paused) {
+            if(self.lastKey == KEY_ENTER) {
+              self.pause();
+              self.lastKey = -1;
+            }
           }
-        }
-
         
           for(var i = 0; i < self.snakes.length; i++) {
             var initialDirection = self.snakes[i].direction;
@@ -337,8 +356,44 @@ GameEngine.prototype.tick = function() {
             }
           }
 
-          self.controller.update();
+          self.reactor.dispatchEvent("onUpdate");
           self.tick();
       }
-    }, this.speed * 10);
+    }, this.initialSpeed * 10);
+};
+
+GameEngine.prototype.onReset = function(callback) {
+    this.reactor.addEventListener("onReset", callback);
+};
+
+GameEngine.prototype.onStart = function(callback) {
+    this.reactor.addEventListener("onStart", callback);
+};
+
+GameEngine.prototype.onContinue = function(callback) {
+    this.reactor.addEventListener("onContinue", callback);
+};
+
+GameEngine.prototype.onStop = function(callback) {
+    this.reactor.addEventListener("onStop", callback);
+};
+
+GameEngine.prototype.onPause = function(callback) {
+    this.reactor.addEventListener("onPause", callback);
+};
+
+GameEngine.prototype.onExit = function(callback) {
+    this.reactor.addEventListener("onExit", callback);
+};
+
+GameEngine.prototype.onKill = function(callback) {
+    this.reactor.addEventListener("onKill", callback);
+};
+
+GameEngine.prototype.onScoreIncreased = function(callback) {
+    this.reactor.addEventListener("onScoreIncreased", callback);
+};
+
+GameEngine.prototype.onUpdate = function(callback) {
+    this.reactor.addEventListener("onUpdate", callback);
 };

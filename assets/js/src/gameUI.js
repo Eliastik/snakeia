@@ -54,7 +54,6 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.errorOccured = false;
   this.fullscreen = false;
   // Menus state variables
-  this.enableKeyMenu = false;
   this.lastKeyMenu = -1;
   this.selectedButton = 0;
   this.confirmReset = false;
@@ -104,8 +103,6 @@ GameUI.prototype.init = function() {
 
   if(this.outputType == OUTPUT_TEXT) {
     this.textarea = document.createElement("textarea");
-    this.textarea.style.width = this.grid.width * 16.5 + "px";
-    this.textarea.style.height = this.grid.height * 16 + 100 + "px";
     this.appendTo.appendChild(this.textarea);
     this.assetsLoaded = true;
   } else if(this.outputType == OUTPUT_GRAPHICAL) {
@@ -326,7 +323,7 @@ GameUI.prototype.toggleFullscreen = function() {
 GameUI.prototype.loadAssets = function() {
     var self = this;
 
-    if(!this.errorOccured) {
+    if(!this.errorOccured && this.outputType != OUTPUT_TEXT) {
       this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/clock.png"], function() {
         if(self.imageLoader.hasError == true) {
           self.errorOccured = true;
@@ -341,6 +338,9 @@ GameUI.prototype.loadAssets = function() {
           self.start();
         }
       }, this);
+    } else if(!this.errorOccured && this.outputType == OUTPUT_TEXT) {
+      this.assetsLoaded = true;
+      this.start();
     }
 };
 
@@ -363,6 +363,11 @@ GameUI.prototype.draw = function(renderBlur) {
   var self = this;
   
   if(this.outputType == OUTPUT_TEXT && !this.killed) {
+    if(this.grid != null) {
+      this.textarea.style.width = this.grid.width * 16.5 + "px";
+      this.textarea.style.height = this.grid.height * 16 + 100 + "px";
+    }
+
     this.textarea.innerHTML = this.toString();
   } else if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
     var ctx = this.canvasCtx;
@@ -740,7 +745,7 @@ GameUI.prototype.getDebugText = function() {
 };
 
 GameUI.prototype.toString = function() {
-  return this.grid.toString() + "\n" + (this.snakes.length <= 1 ? window.i18next.t("engine.score") + " : " + this.snakes[0].score : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + window.i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + window.i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + window.i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
+  return (this.grid != null ? this.grid.toString() : "") + "\n" + (this.snakes != null && this.snakes.length <= 1 ? window.i18next.t("engine.score") + " : " + (this.snakes != null ? this.snakes[0].score : "") : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + window.i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + window.i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + window.i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
 };
 
 GameUI.prototype.preRenderFont = function(cars, size, color, fontFamily) {
