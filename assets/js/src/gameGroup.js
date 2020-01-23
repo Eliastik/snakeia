@@ -34,45 +34,45 @@ GameGroup.prototype.init = function() {
     var self = this;
 
     for(var i = 0; i < this.games.length; i++) {
-      if(i == 0) {
-        self.games[i].enableKeyMenu = true;
-      }
+        if(i == 0) {
+            self.games[i].enableKeyMenu = true;
+        }
 
-      this.games[i].onPause(function(v) {
-        return function() {
-          self.pauseAll(v);
-        };
-      }(i));
+        this.games[i].onPause(function(v) {
+            return function() {
+                self.pauseAll(v);
+            };
+        }(i));
 
-      this.games[i].onContinue(function(v) {
-        return function() {
-          self.startAll(v);
-        };
-      }(i));
+        this.games[i].onContinue(function(v) {
+            return function() {
+                self.startAll(v);
+            };
+        }(i));
 
-      this.games[i].onExit(function(v) {
-        return function() {
-          self.checkExit(v);
-        };
-      }(i));
+        this.games[i].onExit(function(v) {
+            return function() {
+                self.checkExit(v);
+            };
+        }(i));
 
-      this.games[i].onStop(function(v) {
-        return function() {
-          self.checkStop(v);
-        };
-      }(i));
+        this.games[i].onStop(function(v) {
+            return function() {
+                self.checkStop(v);
+            };
+        }(i));
 
-      this.games[i].onReset(function(v) {
-        return function() {
-          self.resetAll(v);
-        };
-      }(i));
+        this.games[i].onReset(function(v) {
+            return function() {
+                self.resetAll(v);
+            };
+        }(i));
 
-      this.games[i].onScoreIncreased(function(v) {
-        return function() {
-          self.checkOnScoreIncreased(v);
-        };
-      }(i));
+        this.games[i].onScoreIncreased(function(v) {
+            return function() {
+                self.checkOnScoreIncreased(v);
+            };
+        }(i));
     }
 };
 
@@ -82,9 +82,9 @@ GameGroup.prototype.start = function() {
 
 GameGroup.prototype.startAll = function(game) {
     for(var i = 0; i < this.games.length; i++) {
-      if(this.games[i].paused && (game == null || i != game)) {
-        this.games[i].start();
-      }
+        if(this.games[i].paused && !this.games[i].starting && (game == null || i != game)) {
+            this.games[i].start();
+        }
     }
 
     this.reactor.dispatchEvent("onStart");
@@ -96,9 +96,9 @@ GameGroup.prototype.onStart = function(callback) {
 
 GameGroup.prototype.pauseAll = function(game) {
     for(var i = 0; i < this.games.length; i++) {
-      if(!this.games[i].paused && (game == null || i != game)) {
-        this.games[i].pause();
-      }
+        if(!this.games[i].paused && (game == null || i != game)) {
+            this.games[i].pause();
+        }
     }
 
     this.reactor.dispatchEvent("onPause");
@@ -110,9 +110,9 @@ GameGroup.prototype.onPause = function(callback) {
 
 GameGroup.prototype.resetAll = function(game) {
     for(var i = 0; i < this.games.length; i++) {
-      if(!this.games[i].isReseted && (game == null || i != game)) {
-        this.games[i].reset();
-      }
+        if(!this.games[i].isReseted && (game == null || i != game)) {
+            this.games[i].reset();
+        }
     }
 
     this.reactor.dispatchEvent("onReset");
@@ -126,15 +126,15 @@ GameGroup.prototype.checkExit = function(game) {
     allExited = true;
 
     for(var i = 0; i < this.games.length; i++) {
-      if(!this.games[i].exited) {
-        allExited = false;
-      }
+        if(!this.games[i].exited) {
+            allExited = false;
+        }
     }
 
     if(allExited) {
-      this.reactor.dispatchEvent("onExit");
+        this.reactor.dispatchEvent("onExit");
     } else {
-      this.startAll(game);
+        this.startAll(game);
     }
 };
 
@@ -146,13 +146,13 @@ GameGroup.prototype.checkStop = function() {
     allStopped = true;
 
     for(var i = 0; i < this.games.length; i++) {
-      if(!this.games[i].gameOver) {
-        allStopped = false;
-      }
+        if(!this.games[i].gameOver) {
+            allStopped = false;
+        }
     }
 
     if(allStopped) {
-      this.reactor.dispatchEvent("onStop");
+        this.reactor.dispatchEvent("onStop");
     }
 };
 
@@ -162,19 +162,17 @@ GameGroup.prototype.onStop = function(callback) {
 
 GameGroup.prototype.stopAll = function(finished) {
     for(var i = 0; i < this.games.length; i++) {
-      this.games[i].stop();
+        this.games[i].stop();
 
-      if(finished) {
-        this.games[i].gameFinished = true;
-      }
-
-      this.games[i].updateUI();
+        if(finished) {
+            this.games[i].finish(true);
+        }
     }
 };
 
 GameGroup.prototype.killAll = function() {
     for(var i = 0; i < this.games.length; i++) {
-      this.games[i].kill();
+        this.games[i].kill();
     }
 };
 
@@ -188,19 +186,19 @@ GameGroup.prototype.onScoreIncreased = function(callback) {
 
 GameGroup.prototype.setDisplayFPS = function(value) {
     for(var i = 0; i < this.games.length; i++) {
-      this.games[i].setDisplayFPS(value);
+        this.games[i].setDisplayFPS(value);
     }
 };
 
 GameGroup.prototype.setNotification = function(notification) {
     for(var i = 0; i < this.games.length; i++) {
-      this.games[i].setNotification(notification.copy());
+        this.games[i].setNotification(notification.copy());
     }
 };
 
 GameGroup.prototype.closeNotification = function() {
     for(var i = 0; i < this.games.length; i++) {
-      this.games[i].setNotification(null);
+        this.games[i].setNotification(null);
     }
 };
 
@@ -210,31 +208,31 @@ GameGroup.prototype.getWinners = function() {
     maxScore = -1;
 
     for(var i = 0; i < this.games.length; i++) {
-      for(var j = 0; j < this.games[i].snakes.length; j++) {
-        if(this.games[i].snakes[j].score > maxScore) {
-          maxScore = this.games[i].snakes[j].score;
+        for(var j = 0; j < this.games[i].snakes.length; j++) {
+            if(this.games[i].snakes[j].score > maxScore) {
+                maxScore = this.games[i].snakes[j].score;
+            }
         }
-      }
     }
 
     if(maxScore >= 0) {
-      var idx = 0;
+        var idx = 0;
 
-      for(var i = 0; i < this.games.length; i++) {
-        for(var j = 0; j < this.games[i].snakes.length; j++) {
-          if(this.games[i].snakes[j].score >= maxScore) {
-            winners.push(this.games[i].snakes[j]);
-            index.push(idx);
+        for(var i = 0; i < this.games.length; i++) {
+            for(var j = 0; j < this.games[i].snakes.length; j++) {
+                if(this.games[i].snakes[j].score >= maxScore) {
+                    winners.push(this.games[i].snakes[j]);
+                    index.push(idx);
+                }
+
+                idx++;
+            }
           }
-
-          idx++;
-        }
-      }
     }
 
     return {
-      winners: winners,
-      score: maxScore,
-      index: index
+        winners: winners,
+        score: maxScore,
+        index: index
     }
 };

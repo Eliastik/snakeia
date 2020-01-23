@@ -266,6 +266,26 @@ GameUI.prototype.tick = function() {
     this.controller.tick();
 };
 
+GameUI.prototype.setKill = function() {
+    this.killed = true;
+    this.clearIntervalCountFPS();
+
+    this.grid = null;
+    this.snakes = null;
+    this.preRenderedFont = null;
+
+    if(this.outputType == OUTPUT_TEXT) {
+      this.appendTo.removeChild(this.textarea);
+      this.textarea = null;
+    } else if(this.outputType == OUTPUT_GRAPHICAL) {
+      this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.appendTo.removeChild(this.canvas);
+      this.canvas = null;
+      this.canvasCtx = null;
+      this.imageLoader.clear();
+    }
+};
+
 GameUI.prototype.toggleFullscreen = function() {
     var self = this;
 
@@ -348,14 +368,16 @@ GameUI.prototype.startDraw = function(renderBlur) {
   var self = this;
 
   requestAnimationFrame(function() {
-    if(!document.hasFocus() && !this.paused) {
-      self.controller.pause();
+    if(!this.killed) {
+        if(!document.hasFocus() && !this.paused) {
+          self.controller.pause();
+        }
+    
+        self.draw(renderBlur);
+        self.frame++;
+        self.offsetFrame++;
+        self.startDraw();
     }
-
-    self.draw(renderBlur);
-    self.frame++;
-    self.offsetFrame++;
-    self.startDraw();
   });
 }
 

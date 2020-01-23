@@ -33,6 +33,7 @@ function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpe
     this.ticks = 0;
     // Game state variables
     this.firstStart = true;
+    this.starting = false;
     this.paused = true;
     this.exited = false;
     this.killed = false;
@@ -146,45 +147,40 @@ GameEngine.prototype.start = function() {
     var self = this;
   
     if(!this.errorOccured) {
-      for(var i = 0; i < this.snakes.length; i++) {
-        if(this.snakes[i].errorInit) {
-            this.errorOccured = true;
-            this.stop();
-        }
-      }
-  
-      if(this.paused && !this.gameOver && !this.killed && !this.scoreMax) {
-        // this.disableAllButtons();
-        /*this.getInfos = false;
-        this.getInfosGame = false;
-        this.confirmExit = false;
-        this.confirmReset = false;*/
-        this.countBeforePlay = 3;
-        this.clearIntervalPlay();
-        this.reactor.dispatchEvent("onUpdate");
-  
-        this.intervalPlay = setInterval(function() {
-          self.countBeforePlay--;
-          self.reactor.dispatchEvent("onUpdate");
-  
-          if(self.countBeforePlay <= 0) {
-            if(self.countBeforePlay <= -1) {
-              self.clearIntervalPlay();
-              self.paused = false;
-              self.isReseted = false;
-
-              if(self.firstStart) {
-                  self.reactor.dispatchEvent("onStart");
-              } else {
-                  self.reactor.dispatchEvent("onContinue");
-              }
-
-              self.firstStart = false;
-              self.tick();
+        for(var i = 0; i < this.snakes.length; i++) {
+            if(this.snakes[i].errorInit) {
+                this.errorOccured = true;
+                this.stop();
             }
-          }
-        }, 1000);
-      }
+        }
+    
+        if(this.paused && !this.gameOver && !this.killed && !this.scoreMax && !this.starting) {
+            this.starting = true;
+
+            if(!this.firstStart) {
+                this.reactor.dispatchEvent("onContinue");
+            }
+
+            this.countBeforePlay = 3;
+            this.clearIntervalPlay();
+
+            this.reactor.dispatchEvent("onUpdate");
+      
+            this.intervalPlay = setInterval(function() {
+                self.countBeforePlay--;
+                self.reactor.dispatchEvent("onUpdate");
+        
+                if(self.countBeforePlay < 0) {
+                    self.clearIntervalPlay();
+                    self.paused = false;
+                    self.isReseted = false;
+                    self.firstStart = false;
+                    self.starting = false;
+                    self.reactor.dispatchEvent("onStart");
+                    self.tick();
+                }
+            }, 1000);
+        }
     }
 };
 
@@ -197,10 +193,11 @@ GameEngine.prototype.continue = function() {
     this.reactor.dispatchEvent("onContinue");
 };
 
-GameEngine.prototype.stop = function() {
-    if(!this.paused && !this.gameOver) {
+GameEngine.prototype.stop = function(finish) {
+    if(!this.gameOver) {
         this.paused = true;
         this.gameOver = true;
+        if(finish) this.gameFinished = true;
         this.clearIntervalPlay();
         this.reactor.dispatchEvent("onStop");
     }
@@ -225,26 +222,10 @@ GameEngine.prototype.kill = function() {
           this.snakes[i] = null;
         }
     
-        //this.clearIntervalCountFPS();
         this.clearIntervalPlay();
-        //window.cancelAnimationFrame(this.frameGlobal);
-        //window.cancelAnimationFrame(this.frameDisplayMenu);
-        //this.frameGlobal, this.frameDisplayMenu = null;
     
         this.grid = null;
         this.snakes = null;
-        //this.preRenderedFont = null;
-    
-        /*if(this.outputType == OUTPUT_TEXT) {
-          this.appendTo.removeChild(this.textarea);
-          this.textarea = null;
-        } else if(this.outputType == OUTPUT_GRAPHICAL) {
-          this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
-          this.appendTo.removeChild(this.canvas);
-          this.canvas = null;
-          this.canvasCtx = null;
-          this.imageLoader.clear();
-        }*/
     
         this.reactor.dispatchEvent("onKill");
     }
@@ -266,11 +247,10 @@ GameEngine.prototype.tick = function() {
           if(self.lastTime == 0) self.lastTime = time;
           self.ticks++;
 
-          // Input
           if(!self.paused) {
             if(self.lastKey == KEY_ENTER) {
-              self.pause();
-              self.lastKey = -1;
+                self.pause();
+                self.lastKey = -1;
             }
           }
         

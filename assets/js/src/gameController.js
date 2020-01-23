@@ -19,6 +19,13 @@
 function GameController(engine, ui) {
     this.gameUI = ui;
     this.gameEngine = engine;
+    // Copy of game engine variables
+    this.snakes;
+    this.paused;
+    this.isReseted;
+    this.exited;
+    this.gameOver;
+    this.starting;
     // Events
     this.reactor = new Reactor();
     this.reactor.registerEvent("onStart");
@@ -107,6 +114,10 @@ GameController.prototype.stop = function() {
     this.gameEngine.stop();
 };
 
+GameController.prototype.finish = function(finish) {
+    this.gameEngine.stop(finish);
+};
+
 GameController.prototype.pause = function() {
     this.gameEngine.pause();
 };
@@ -131,6 +142,10 @@ GameController.prototype.setNotification = function(notification) {
     this.gameUI.setNotification(notification);
 };
 
+GameController.prototype.setTimeToDisplay = function(time) {
+    this.gameUI.setTimeToDisplay(time);
+};
+
 GameController.prototype.update = function(message, data) {
     if(this.gameUI != null && this.gameEngine != null) {
         this.gameUI.snakes = this.gameEngine.snakes;
@@ -140,7 +155,11 @@ GameController.prototype.update = function(message, data) {
         this.gameUI.countBeforePlay = this.gameEngine.countBeforePlay;
         this.gameUI.paused = this.gameEngine.paused;
         this.gameUI.exited = this.gameEngine.exited;
-        this.gameUI.killed = this.gameEngine.killed;
+
+        if(this.gameEngine.killed) {
+            this.gameUI.setKill();
+        }
+
         this.gameUI.isReseted = this.gameEngine.isReseted;
         this.gameUI.gameOver = this.gameEngine.gameOver;
         this.gameUI.gameFinished = this.gameEngine.gameFinished; // only used if 2 and more snakes
@@ -156,6 +175,13 @@ GameController.prototype.update = function(message, data) {
         this.gameUI.getInfosGame = false;
         this.gameUI.confirmExit = false;
         this.gameUI.confirmReset = false;
+
+        this.snakes = this.gameEngine.snakes;
+        this.paused = this.gameEngine.paused;
+        this.isReseted = this.gameEngine.isReseted;
+        this.exited = this.gameEngine.exited;
+        this.gameOver = this.gameEngine.gameOver;
+        this.starting = this.gameEngine.starting;
     }
 };
 
