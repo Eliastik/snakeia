@@ -91,10 +91,12 @@ GameEngine.prototype.init = function() {
 GameEngine.prototype.getNBPlayer = function(type) {
     var numPlayer = 0;
   
-    for(var i = 0; i < this.snakes.length; i++) {
-      if(this.snakes[i].player == type) {
-        numPlayer++;
-      }
+    if(this.snakes != null) {
+        for(var i = 0; i < this.snakes.length; i++) {
+            if(this.snakes[i].player == type) {
+                numPlayer++;
+            }
+        }
     }
   
     return numPlayer;
@@ -103,14 +105,16 @@ GameEngine.prototype.getNBPlayer = function(type) {
 GameEngine.prototype.getPlayer = function(num, type) {
     var numPlayer = 0;
   
-    for(var i = 0; i < this.snakes.length; i++) {
-      if(this.snakes[i].player == type) {
-        numPlayer++;
-      }
-  
-      if(numPlayer == num) {
-        return this.snakes[i];
-      }
+    if(this.snakes != null) {
+        for(var i = 0; i < this.snakes.length; i++) {
+            if(this.snakes[i].player == type) {
+                numPlayer++;
+            }
+    
+            if(numPlayer == num) {
+                return this.snakes[i];
+            }
+        }
     }
   
     return null;
@@ -120,12 +124,13 @@ GameEngine.prototype.reset = function() {
     this.paused = true;
     this.isReseted = true;
     this.exited = false;
-    this.reactor.dispatchEvent("onReset");
     this.clearIntervalPlay();
     this.grid.init();
   
-    for(var i = 0; i < this.snakes.length; i++) {
-      this.snakes[i].reset();
+    if(this.snakes != null) {
+        for(var i = 0; i < this.snakes.length; i++) {
+            this.snakes[i].reset();
+        }
     }
   
     this.numFruit = 1;
@@ -140,6 +145,7 @@ GameEngine.prototype.reset = function() {
     this.initialSpeed = this.initialSpeedUntouched;
     this.speed = this.initialSpeedUntouched;
     this.grid.setFruit();
+    this.reactor.dispatchEvent("onReset");
     this.start();
 };
 
@@ -148,10 +154,12 @@ GameEngine.prototype.start = function() {
     var self = this;
   
     if(!this.errorOccured) {
-        for(var i = 0; i < this.snakes.length; i++) {
-            if(this.snakes[i].errorInit) {
-                this.errorOccured = true;
-                this.stop();
+        if(this.snakes != null) {
+            for(var i = 0; i < this.snakes.length; i++) {
+                if(this.snakes[i].errorInit) {
+                    this.errorOccured = true;
+                    this.stop();
+                }
             }
         }
     
@@ -218,9 +226,11 @@ GameEngine.prototype.kill = function() {
         this.gameOver = true;
         this.killed = true;
     
-        for(var i = 0; i < this.snakes.length; i++) {
-          this.snakes[i].kill();
-          this.snakes[i] = null;
+        if(this.snakes != null) {
+            for(var i = 0; i < this.snakes.length; i++) {
+                this.snakes[i].kill();
+                this.snakes[i] = null;
+            }
         }
     
         this.clearIntervalPlay();

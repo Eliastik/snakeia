@@ -20,13 +20,13 @@ function GameController(engine, ui) {
     this.gameUI = ui;
     this.gameEngine = engine;
     // Copy of game engine variables
-    this.snakes;
-    this.paused;
-    this.isReseted;
-    this.exited;
-    this.gameOver;
-    this.starting;
-    this.scoreMax;
+    this.snakes = null;
+    this.paused = false;
+    this.isReseted = false;
+    this.exited = false;
+    this.gameOver = false;
+    this.starting = false;
+    this.scoreMax = false;
     // Events
     this.reactor = new Reactor();
     this.reactor.registerEvent("onStart");
@@ -38,25 +38,58 @@ function GameController(engine, ui) {
     this.reactor.registerEvent("onKill");
     this.reactor.registerEvent("onScoreIncreased");
     this.reactor.registerEvent("onUpdate");
-
-    this.init();
 }
 
 GameController.prototype.init = function() {
     var self = this;
+    
+    this.update("init", {
+        "snakes": this.gameEngine.snakes,
+        "grid": this.gameEngine.grid,
+        "enablePause": this.gameEngine.enablePause,
+        "enableRetry": this.gameEngine.enableRetry,
+        "progressiveSpeed": this.gameEngine.progressiveSpeed
+    });
 
     this.gameEngine.onReset(function() {
-        self.update("reset");
+        self.update("reset", {
+            "paused": self.gameEngine.paused,
+            "isReseted": self.gameEngine.isReseted,
+            "exited": self.gameEngine.exited,
+            "grid": self.gameEngine.grid,
+            "numFruit": self.gameEngine.numFruit,
+            "ticks": self.gameEngine.ticks,
+            "scoreMax": self.gameEngine.scoreMax,
+            "errorOccured": self.gameEngine.errorOccured,
+            "gameOver": self.gameEngine.gameOver,
+            "gameFinished": self.gameEngine.gameFinished,
+            "gameMazeWin": self.gameEngine.gameMazeWin,
+            "starting": self.gameEngine.starting,
+            "initialSpeed": self.gameEngine.initialSpeed,
+            "speed": self.gameEngine.speed,
+            "snakes": self.gameEngine.snakes,
+            "offsetFrame": self.gameEngine.speed
+        });
         self.reactor.dispatchEvent("onReset");
     });
 
     this.gameEngine.onStart(function() {
-        self.update("start");
+        self.update("start", {
+            "snakes": self.gameEngine.snakes,
+            "grid": self.gameEngine.grid,
+            "starting": self.gameEngine.starting,
+            "errorOccured": self.gameEngine.errorOccured,
+            "countBeforePlay": self.gameEngine.countBeforePlay,
+            "paused": self.gameEngine.paused,
+            "isReseted": self.gameEngine.isReseted,
+        });
         self.reactor.dispatchEvent("onStart");
     });
 
     this.gameEngine.onPause(function() {
-        self.update("pause");
+        self.update("pause", {
+            "paused": self.gameEngine.paused
+        });
         self.reactor.dispatchEvent("onPause");
     });
 
@@ -66,27 +99,63 @@ GameController.prototype.init = function() {
     });
 
     this.gameEngine.onStop(function() {
-        self.update("stop");
+        self.update("stop", {
+            "paused": self.gameEngine.paused,
+            "gameOver": self.gameEngine.gameOver,
+            "gameFinished": self.gameEngine.gameFinished
+        });
         self.reactor.dispatchEvent("onStop");
     });
 
     this.gameEngine.onExit(function() {
-        self.update("exit");
+        self.update("exit", {
+            "paused": self.gameEngine.paused,
+            "gameOver": self.gameEngine.gameOver,
+            "gameFinished": self.gameEngine.gameFinished,
+            "exited": self.gameEngine.exited
+        });
         self.reactor.dispatchEvent("onExit");
     });
 
     this.gameEngine.onKill(function() {
-        self.update("kill");
+        self.update("kill", {
+            "paused": self.gameEngine.paused,
+            "gameOver": self.gameEngine.gameOver,
+            "killed": self.gameEngine.killed,
+            "snakes": self.gameEngine.snakes,
+            "grid": self.gameEngine.grid
+        });
         self.reactor.dispatchEvent("onKill");
     });
 
     this.gameEngine.onScoreIncreased(function() {
-        self.update("scoreIncreased");
+        self.update("scoreIncreased", {
+            "snake": self.gameEngine.snakes
+        });
         self.reactor.dispatchEvent("onScoreIncreased");
     });
 
     this.gameEngine.onUpdate(function() {
-        self.update("update");
+        self.update("update", {
+            "paused": self.gameEngine.paused,
+            "isReseted": self.gameEngine.isReseted,
+            "exited": self.gameEngine.exited,
+            "grid": self.gameEngine.grid,
+            "numFruit": self.gameEngine.numFruit,
+            "ticks": self.gameEngine.ticks,
+            "scoreMax": self.gameEngine.scoreMax,
+            "errorOccured": self.gameEngine.errorOccured,
+            "gameOver": self.gameEngine.gameOver,
+            "gameFinished": self.gameEngine.gameFinished,
+            "gameMazeWin": self.gameEngine.gameMazeWin,
+            "starting": self.gameEngine.starting,
+            "initialSpeed": self.gameEngine.initialSpeed,
+            "speed": self.gameEngine.speed,
+            "snakes": self.gameEngine.snakes,
+            "countBeforePlay": self.gameEngine.countBeforePlay,
+            "numFruit": self.gameEngine.numFruit,
+            "offsetFrame": 0
+        });
         self.reactor.dispatchEvent("onUpdate");
     });
 };
@@ -148,42 +217,22 @@ GameController.prototype.setTimeToDisplay = function(time) {
 };
 
 GameController.prototype.update = function(message, data) {
-    if(this.gameUI != null && this.gameEngine != null) {
-        this.gameUI.snakes = this.gameEngine.snakes;
-        this.gameUI.grid = this.gameEngine.grid;
-        this.gameUI.speed = this.gameEngine.speed;
-        this.gameUI.offsetFrame = 0;
-        this.gameUI.countBeforePlay = this.gameEngine.countBeforePlay;
-        this.gameUI.paused = this.gameEngine.paused;
-        this.gameUI.exited = this.gameEngine.exited;
+    if(this.gameUI != null && data != null) {
+        var dataKeys = Object.keys(data);
 
-        if(this.gameEngine.killed) {
-            this.gameUI.setKill();
+        for(var i = 0; i < dataKeys.length; i++) {
+            if(Object.prototype.hasOwnProperty.call(this.gameUI, dataKeys[i])) {
+                this.gameUI[dataKeys[i]] = data[dataKeys[i]];
+            }
+
+            if(Object.prototype.hasOwnProperty.call(this, dataKeys[i])) {
+                this[dataKeys[i]] = data[dataKeys[i]];
+            }
         }
 
-        this.gameUI.isReseted = this.gameEngine.isReseted;
-        this.gameUI.gameOver = this.gameEngine.gameOver;
-        this.gameUI.gameFinished = this.gameEngine.gameFinished; // only used if 2 and more snakes
-        this.gameUI.gameMazeWin = this.gameEngine.gameMazeWin; // used in maze mode
-        this.gameUI.scoreMax = this.gameEngine.scoreMax;
-        this.gameUI.errorOccured = this.gameEngine.errorOccured;
-        this.gameUI.enablePause = this.gameEngine.enablePause;
-        this.gameUI.enableRetry = this.gameEngine.enableRetry;
-        this.gameUI.ticks = this.gameEngine.ticks;
-        this.gameUI.initialSpeed = this.gameEngine.initialSpeed;
-        this.gameUI.numFruit = this.gameEngine.numFruit;
-        this.gameUI.getInfos = false;
-        this.gameUI.getInfosGame = false;
-        this.gameUI.confirmExit = false;
-        this.gameUI.confirmReset = false;
-
-        this.snakes = this.gameEngine.snakes;
-        this.paused = this.gameEngine.paused;
-        this.isReseted = this.gameEngine.isReseted;
-        this.exited = this.gameEngine.exited;
-        this.gameOver = this.gameEngine.gameOver;
-        this.starting = this.gameEngine.starting;
-        this.scoreMax = this.gameEngine.scoreMax;
+        if(data.hasOwnProperty("killed") && data.killed) {
+            this.gameUI.setKill();
+        }
     }
 };
 

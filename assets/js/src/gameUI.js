@@ -33,13 +33,13 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.offsetFrame = 0;
   this.currentFPS = 0;
   // Copy of engine variables
-  this.grid;
-  this.snakes;
-  this.speed;
-  this.initialSpeed;
-  this.ticks;
-  this.countBeforePlay;
-  this.numFruit;
+  this.grid = null;
+  this.snakes = null;
+  this.speed = 8;
+  this.initialSpeed = 8;
+  this.ticks = 0;
+  this.countBeforePlay = 3;
+  this.numFruit = 0;
   this.paused = true;
   this.exited = false;
   this.killed = false;
@@ -235,11 +235,6 @@ GameUI.prototype.getPlayer = function(num, type) {
 
 GameUI.prototype.reset = function() {
     this.controller.reset();
-    /*this.clearIntervalCountFPS();
-    this.currentFPS = TARGET_FPS;
-    this.errorOccured = false;
-    this.lastKey = -1;
-    this.offsetFrame = this.speed;*/
 };
 
 GameUI.prototype.start = function() {
@@ -433,10 +428,6 @@ GameUI.prototype.draw = function(renderBlur) {
     }
 
     if(this.assetsLoaded && !this.errorOccured) {
-      var caseHeight = Math.floor((this.canvas.height - this.headerHeight) / this.grid.height);
-      var caseWidth = Math.floor(this.canvas.width / this.grid.width);
-      caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
-      caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
 
       if(this.bestScoreToDisplay != undefined && this.bestScoreToDisplay != null) {
         displayBestScore = true;
@@ -444,10 +435,10 @@ GameUI.prototype.draw = function(renderBlur) {
 
       this.drawImage(ctx, "assets/images/fruit.png", 5, 5, this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1), this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1));
 
-      if(this.snakes.length <= 1) {
+      if(this.snakes != null && this.snakes.length <= 1) {
         this.drawText(ctx, "× " + this.snakes[0].score, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
       } else {
-        this.drawText(ctx, window.i18next.t("engine.num") + this.numFruit, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
+        this.drawText(ctx, window.i18next.t("engine.num") + (this.numFruit != null ? this.numFruit : "???"), "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
       }
 
       if(displayBestScore) {
@@ -455,9 +446,14 @@ GameUI.prototype.draw = function(renderBlur) {
         this.drawText(ctx, this.bestScoreToDisplay, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.425 + this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
       }
 
-      var totalWidth = caseWidth * this.grid.width;
-
       if(this.grid != null && (!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished)))) {
+        var caseHeight = Math.floor((this.canvas.height - this.headerHeight) / this.grid.height);
+        var caseWidth = Math.floor(this.canvas.width / this.grid.width);
+        caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
+        caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
+
+        var totalWidth = caseWidth * this.grid.width;
+
         for(var i = 0; i < this.grid.height; i++) {
           for(var j = 0; j < this.grid.width; j++) {
             var caseX = Math.floor(j * caseWidth + ((this.canvas.width - totalWidth) / 2));
@@ -520,7 +516,7 @@ GameUI.prototype.draw = function(renderBlur) {
          });
        });
      } else if(this.getInfosGame) {
-        this.drawMenu(ctx, [this.btnOK], (this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + ((this.snakes[0].player == PLAYER_HUMAN  || this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + this.grid.width + "×" + this.grid.height + "\n" + window.i18next.t("engine.currentSpeed") + " " + this.initialSpeed + (this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : "") + (!this.grid.maze && this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI ? "\n" + window.i18next.t("engine.assistAI") : "") + (this.grid.maze ? "\n" + window.i18next.t("engine.mazeModeMin") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
+        this.drawMenu(ctx, [this.btnOK], (this.snakes != null && this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == PLAYER_HUMAN) || (this.snakes != null && this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI)) ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + window.i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI ? "\n" + window.i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + window.i18next.t("engine.mazeModeMin") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfosGame = false;
             self.selectedButton = 0;
@@ -679,13 +675,15 @@ GameUI.prototype.draw = function(renderBlur) {
       } else if(this.assetsLoaded) {
         this.btnFullScreen.enable();
 
-        for(var i = 0; i < this.snakes.length; i++) {
-          if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
-            this.btnTopArrow.enable();
-            this.btnBottomArrow.enable();
-            this.btnLeftArrow.enable();
-            this.btnRightArrow.enable();
-            break;
+        if(this.snakes != null) {
+          for(var i = 0; i < this.snakes.length; i++) {
+            if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
+              this.btnTopArrow.enable();
+              this.btnBottomArrow.enable();
+              this.btnLeftArrow.enable();
+              this.btnRightArrow.enable();
+              break;
+            }
           }
         }
 
