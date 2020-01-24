@@ -136,6 +136,7 @@ GameEngine.prototype.reset = function() {
     this.gameOver = false;
     this.gameFinished = false;
     this.gameMazeWin = false;
+    this.starting = false;
     this.initialSpeed = this.initialSpeedUntouched;
     this.speed = this.initialSpeedUntouched;
     this.grid.setFruit();
