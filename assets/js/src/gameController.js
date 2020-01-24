@@ -26,6 +26,7 @@ function GameController(engine, ui) {
     this.exited;
     this.gameOver;
     this.starting;
+    this.scoreMax;
     // Events
     this.reactor = new Reactor();
     this.reactor.registerEvent("onStart");
@@ -182,6 +183,7 @@ GameController.prototype.update = function(message, data) {
         this.exited = this.gameEngine.exited;
         this.gameOver = this.gameEngine.gameOver;
         this.starting = this.gameEngine.starting;
+        this.scoreMax = this.gameEngine.scoreMax;
     }
 };
 
