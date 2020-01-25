@@ -38,6 +38,7 @@ function GameController(engine, ui) {
     this.reactor.registerEvent("onKill");
     this.reactor.registerEvent("onScoreIncreased");
     this.reactor.registerEvent("onUpdate");
+    this.reactor.registerEvent("onUpdateCounter");
 }
 
 GameController.prototype.init = function() {
@@ -48,7 +49,8 @@ GameController.prototype.init = function() {
         "grid": this.gameEngine.grid,
         "enablePause": this.gameEngine.enablePause,
         "enableRetry": this.gameEngine.enableRetry,
-        "progressiveSpeed": this.gameEngine.progressiveSpeed
+        "progressiveSpeed": this.gameEngine.progressiveSpeed,
+        "offsetFrame": this.gameEngine.speed
     });
 
     this.gameEngine.onReset(function() {
@@ -68,7 +70,11 @@ GameController.prototype.init = function() {
             "initialSpeed": self.gameEngine.initialSpeed,
             "speed": self.gameEngine.speed,
             "snakes": self.gameEngine.snakes,
-            "offsetFrame": self.gameEngine.speed
+            "offsetFrame": self.gameEngine.speed,
+            "confirmReset": false,
+            "confirmExit": false,
+            "getInfos": false,
+            "getInfosGame": false
         });
         self.reactor.dispatchEvent("onReset");
     });
@@ -82,27 +88,45 @@ GameController.prototype.init = function() {
             "countBeforePlay": self.gameEngine.countBeforePlay,
             "paused": self.gameEngine.paused,
             "isReseted": self.gameEngine.isReseted,
+            "confirmReset": false,
+            "confirmExit": false,
+            "getInfos": false,
+            "getInfosGame": false
         });
         self.reactor.dispatchEvent("onStart");
     });
 
     this.gameEngine.onPause(function() {
         self.update("pause", {
-            "paused": self.gameEngine.paused
+            "paused": self.gameEngine.paused,
+            "confirmReset": false,
+            "confirmExit": false,
+            "getInfos": false,
+            "getInfosGame": false
         });
         self.reactor.dispatchEvent("onPause");
     });
 
     this.gameEngine.onContinue(function() {
-        self.update("continue");
+        self.update("continue", {
+            "confirmReset": false,
+            "confirmExit": false,
+            "getInfos": false,
+            "getInfosGame": false
+        });
         self.reactor.dispatchEvent("onContinue");
     });
 
     this.gameEngine.onStop(function() {
         self.update("stop", {
             "paused": self.gameEngine.paused,
+            "scoreMax": self.gameEngine.scoreMax,
             "gameOver": self.gameEngine.gameOver,
-            "gameFinished": self.gameEngine.gameFinished
+            "gameFinished": self.gameEngine.gameFinished,
+            "confirmReset": false,
+            "confirmExit": false,
+            "getInfos": false,
+            "getInfosGame": false
         });
         self.reactor.dispatchEvent("onStop");
     });
@@ -112,7 +136,11 @@ GameController.prototype.init = function() {
             "paused": self.gameEngine.paused,
             "gameOver": self.gameEngine.gameOver,
             "gameFinished": self.gameEngine.gameFinished,
-            "exited": self.gameEngine.exited
+            "exited": self.gameEngine.exited,
+            "confirmReset": false,
+            "confirmExit": false,
+            "getInfos": false,
+            "getInfosGame": false
         });
         self.reactor.dispatchEvent("onExit");
     });
@@ -123,14 +151,21 @@ GameController.prototype.init = function() {
             "gameOver": self.gameEngine.gameOver,
             "killed": self.gameEngine.killed,
             "snakes": self.gameEngine.snakes,
-            "grid": self.gameEngine.grid
+            "gameFinished": self.gameEngine.gameFinished,
+            "grid": self.gameEngine.grid,
+            "confirmReset": false,
+            "confirmExit": false,
+            "getInfos": false,
+            "getInfosGame": false
         });
         self.reactor.dispatchEvent("onKill");
     });
 
     this.gameEngine.onScoreIncreased(function() {
         self.update("scoreIncreased", {
-            "snake": self.gameEngine.snakes
+            "snake": self.gameEngine.snakes,
+            "scoreMax": self.gameEngine.scoreMax,
+            "gameFinished": self.gameEngine.gameFinished
         });
         self.reactor.dispatchEvent("onScoreIncreased");
     });
@@ -157,6 +192,29 @@ GameController.prototype.init = function() {
             "offsetFrame": 0
         });
         self.reactor.dispatchEvent("onUpdate");
+    });
+
+    this.gameEngine.onUpdateCounter(function() {
+        self.update("updateCounter", {
+            "paused": self.gameEngine.paused,
+            "isReseted": self.gameEngine.isReseted,
+            "exited": self.gameEngine.exited,
+            "grid": self.gameEngine.grid,
+            "numFruit": self.gameEngine.numFruit,
+            "ticks": self.gameEngine.ticks,
+            "scoreMax": self.gameEngine.scoreMax,
+            "errorOccured": self.gameEngine.errorOccured,
+            "gameOver": self.gameEngine.gameOver,
+            "gameFinished": self.gameEngine.gameFinished,
+            "gameMazeWin": self.gameEngine.gameMazeWin,
+            "starting": self.gameEngine.starting,
+            "initialSpeed": self.gameEngine.initialSpeed,
+            "speed": self.gameEngine.speed,
+            "snakes": self.gameEngine.snakes,
+            "countBeforePlay": self.gameEngine.countBeforePlay,
+            "numFruit": self.gameEngine.numFruit
+        });
+        self.reactor.dispatchEvent("onUpdateCounter");
     });
 };
 

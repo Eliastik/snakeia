@@ -56,6 +56,7 @@ function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpe
     this.reactor.registerEvent("onKill");
     this.reactor.registerEvent("onScoreIncreased");
     this.reactor.registerEvent("onUpdate");
+    this.reactor.registerEvent("onUpdateCounter");
   
     this.init();
 }
@@ -150,7 +151,7 @@ GameEngine.prototype.reset = function() {
 };
 
 GameEngine.prototype.start = function() {
-    this.reactor.dispatchEvent("onUpdate");
+    this.reactor.dispatchEvent("onUpdateCounter");
     var self = this;
   
     if(!this.errorOccured) {
@@ -173,11 +174,11 @@ GameEngine.prototype.start = function() {
             this.countBeforePlay = 3;
             this.clearIntervalPlay();
 
-            this.reactor.dispatchEvent("onUpdate");
+            this.reactor.dispatchEvent("onUpdateCounter");
       
             this.intervalPlay = setInterval(function() {
                 self.countBeforePlay--;
-                self.reactor.dispatchEvent("onUpdate");
+                self.reactor.dispatchEvent("onUpdateCounter");
         
                 if(self.countBeforePlay < 0) {
                     self.clearIntervalPlay();
@@ -387,4 +388,8 @@ GameEngine.prototype.onScoreIncreased = function(callback) {
 
 GameEngine.prototype.onUpdate = function(callback) {
     this.reactor.addEventListener("onUpdate", callback);
+};
+
+GameEngine.prototype.onUpdateCounter = function(callback) {
+    this.reactor.addEventListener("onUpdateCounter", callback);
 };
