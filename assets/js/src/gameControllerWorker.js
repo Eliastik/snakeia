@@ -19,10 +19,19 @@
 function GameControllerWorker(game, ui) {
     GameController.call(this, game, ui);
 
-    this.worker = new Worker("assets/js/src/gameEngineWorker.js");
+    this.worker;
 
     this.init = function() {
         if(window.Worker) {
+            try {
+                this.worker = new Worker("assets/js/src/gameEngineWorker.js");
+            } catch(e) {
+                this.update("init", {
+                    "errorOccured": true
+                });
+                return;
+            }
+
             if(this.worker instanceof Worker) {
                 this.worker.postMessage(["init", game]);
 
@@ -34,12 +43,12 @@ function GameControllerWorker(game, ui) {
                     if(data.length > 1) {
                         var grid;
 
-                        if(data[1].hasOwnProperty("grid")) {
+                        if(data[1].hasOwnProperty("grid") && data[1]["grid"] != null) {
                             grid = Object.assign(new Grid(), data[1]["grid"]);
                             data[1]["grid"] = grid;
                         }
 
-                        if(data[1].hasOwnProperty("snakes")) {
+                        if(data[1].hasOwnProperty("snakes") && data[1]["snakes"] != null) {
                             for(var i = 0; i < data[1]["snakes"].length; i++) {
                                 data[1]["snakes"][i].grid = grid;
                                 data[1]["snakes"][i] = Object.assign(new Snake(), data[1]["snakes"][i]);
@@ -51,6 +60,39 @@ function GameControllerWorker(game, ui) {
                         }
 
                         self.update(data[0], data[1]);
+
+                        switch(data[0]) {
+                            case "reset":
+                                self.reactor.dispatchEvent("onReset");
+                                break;
+                            case "start":
+                                self.reactor.dispatchEvent("onStart");
+                                break;
+                            case "pause":
+                                self.reactor.dispatchEvent("onPause");
+                                break;
+                            case "continue":
+                                self.reactor.dispatchEvent("onContinue");
+                                break;
+                            case "stop":
+                                self.reactor.dispatchEvent("onStop");
+                                break;
+                            case "exit":
+                                self.reactor.dispatchEvent("onExit");
+                                break;
+                            case "kill":
+                                self.reactor.dispatchEvent("onKill");
+                                break;
+                            case "scoreIncreased":
+                                self.reactor.dispatchEvent("onScoreIncreased");
+                                break;
+                            case "update":
+                                self.reactor.dispatchEvent("onUpdate");
+                                break;
+                            case "updateCounter":
+                                self.reactor.dispatchEvent("onUpdateCounter");
+                                break;
+                        }
                     }
                 };
             } else {
@@ -59,6 +101,12 @@ function GameControllerWorker(game, ui) {
                         "errorOccured": true
                     });
                 }
+            }
+        } else {
+            if(this.gameUI != null) {
+                this.update("init", {
+                    "errorOccured": true
+                });
             }
         }
     };
