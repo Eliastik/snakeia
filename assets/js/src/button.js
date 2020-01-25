@@ -147,8 +147,38 @@ Button.prototype.draw = function(game) {
     ctx.fillStyle = precFillStyle;
     ctx.font = precFont;
 
-    if(!this.init) {
-        this.addMouseOverAction(game, null);
+    if(!this.init && game != null) {
+        var self = this;
+        
+        game.canvas.addEventListener("mousemove", function mouseOverFunction(evt) {
+            if(!self.disabled) {
+                if(self.isInside(self.getMousePos(game.canvas, evt))) {
+                    if(self.triggerHover != null && !self.disabled) {
+                        self.triggerHover();
+                    }
+    
+                    self.hovered = true;
+                    self.clicked = false;
+                } else {
+                    self.hovered = false;
+                }
+            }
+        }, false);
+
+        game.canvas.addEventListener("click", function clickFunction(evt) {
+            if(!self.disabled) {
+                if(self.isInside(self.getMousePos(canvas, evt))) {
+                    if(self.triggerClick != null) {
+                        self.triggerClick();
+                    }
+    
+                    self.hovered = false;
+                    self.clicked = true;
+                } else {
+                    self.clicked = false;
+                }
+            }
+        }, false);
     }
 
     this.init = true;
@@ -172,26 +202,7 @@ Button.prototype.isInside = function(pos) {
 };
 
 Button.prototype.addClickAction = function(canvas, trigger) {
-    var self = this;
-
     this.triggerClick = trigger;
-
-    function clickFunction(evt) {
-        if(!self.disabled) {
-            if(self.isInside(self.getMousePos(canvas, evt))) {
-                if(self.triggerClick != null) {
-                    self.triggerClick();
-                }
-
-                self.hovered = false;
-                self.clicked = true;
-            } else {
-                self.clicked = false;
-            }
-        }
-    };
-
-    canvas.addEventListener("click", clickFunction, false);
 };
 
 Button.prototype.removeClickAction = function(self) {
@@ -201,26 +212,7 @@ Button.prototype.removeClickAction = function(self) {
 };
 
 Button.prototype.addMouseOverAction = function(game, trigger) {
-    var self = this;
-    
     this.triggerHover = trigger;
-
-    function mouseOverFunction(evt) {
-        if(!self.disabled) {
-            if(self.isInside(self.getMousePos(game.canvas, evt))) {
-                if(self.triggerHover != null && !self.disabled) {
-                    self.triggerHover();
-                }
-
-                self.hovered = true;
-                self.clicked = false;
-            } else {
-                self.hovered = false;
-            }
-        }
-    };
-
-    game.canvas.addEventListener("mousemove", mouseOverFunction, false);
 };
 
 Button.prototype.removeHoverAction = function(self) {

@@ -1165,8 +1165,8 @@ function playLevel(level, player, type) {
     function initGoal() {
       if(levelType == LEVEL_REACH_SCORE) {
         playerGame.onScoreIncreased(function() {
-          if(playerSnake.score >= levelTypeValue) {
-            setLevelSave([true, playerSnake.score], level, player, type);
+          if(playerGame.snakes[0].score >= levelTypeValue) {
+            setLevelSave([true, playerGame.snakes[0].score], level, player, type);
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
@@ -1177,7 +1177,7 @@ function playLevel(level, player, type) {
         });
 
         playerGame.onStop(function() {
-          if(playerSnake.score < levelTypeValue) {
+          if(playerGame.snakes[0].score < levelTypeValue) {
             if(!notificationEndDisplayed) {
               playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, 0, null, null, true));
               notificationEndDisplayed = true;
@@ -1217,7 +1217,7 @@ function playLevel(level, player, type) {
         });
 
         playerGame.onScoreIncreased(function() {
-          if(playerSnake.score >= levelTypeValue[0]) {
+          if(playerGame.snakes[0].score >= levelTypeValue[0]) {
             var stop = (levelTypeValue[1] * 1000) - levelTimer.getTime();
             levelTimer.reset();
             group.stopAll(true);
@@ -1233,7 +1233,7 @@ function playLevel(level, player, type) {
       } else if(levelType == LEVEL_REACH_MAX_SCORE) {
         playerGame.onStop(function() {
           if(playerGame.scoreMax) {
-            setLevelSave([true, playerSnake.score], level, player, type);
+            setLevelSave([true, playerGame.snakes[0].score], level, player, type);
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
@@ -1253,9 +1253,9 @@ function playLevel(level, player, type) {
           var won = false;
 
           for(var i = 0; i < winners.winners.length; i++) {
-            if(winners.winners[i] == playerSnake) {
+            if(winners.winners[i] == playerGame.snakes[0]) {
               won = true;
-              setLevelSave([true, playerSnake.score], level, player, type);
+              setLevelSave([true, playerGame.snakes[0].score], level, player, type);
               playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
               if(!notificationEndDisplayed) {
@@ -1298,7 +1298,7 @@ function playLevel(level, player, type) {
           for(var i = 0; i < group.games.length; i++) {
             for(var j = 0; j < group.games[i].snakes.length; j++) {
               if(group.games[i].snakes[j].score >= levelTypeValue) {
-                if(group.games[i].snakes[j] == playerSnake) {
+                if(group.games[i].snakes[j] == playerGame.snakes[0]) {
                   group.stopAll(true);
                   setLevelSave([true, time], level, player, type);
                   playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
@@ -1344,7 +1344,7 @@ function playLevel(level, player, type) {
         });
 
         playerGame.onScoreIncreased(function() {
-          if(playerSnake.score >= 1) {
+          if(playerGame.snakes[0].score >= 1) {
             setLevelSave([true, time], level, player, type);
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 

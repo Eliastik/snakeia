@@ -161,7 +161,8 @@ onmessage = function(e) {
     
         game.onScoreIncreased(function() {
             self.postMessage(["scoreIncreased", {
-                "snake": JSON.parse(JSON.stringify(game.snakes)),
+                "snakes": JSON.parse(JSON.stringify(game.snakes)),
+                "grid": JSON.parse(JSON.stringify(game.grid)),
                 "scoreMax": game.scoreMax,
                 "gameFinished": game.gameFinished
             }]);

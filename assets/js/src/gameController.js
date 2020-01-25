@@ -163,7 +163,7 @@ GameController.prototype.init = function() {
 
     this.gameEngine.onScoreIncreased(function() {
         self.update("scoreIncreased", {
-            "snake": self.gameEngine.snakes,
+            "snakes": self.gameEngine.snakes,
             "scoreMax": self.gameEngine.scoreMax,
             "gameFinished": self.gameEngine.gameFinished
         });
@@ -288,6 +288,38 @@ GameController.prototype.update = function(message, data) {
             this.gameUI.setKill();
         }
     }
+};
+
+GameController.prototype.getNBPlayer = function(type) {
+    var numPlayer = 0;
+
+    if(this.snakes != null) {
+        for(var i = 0; i < this.snakes.length; i++) {
+            if(this.snakes[i].player == type) {
+                numPlayer++;
+            }
+        }
+    }
+
+    return numPlayer;
+};
+
+GameController.prototype.getPlayer = function(num, type) {
+    var numPlayer = 0;
+
+    if(this.snakes != null) {
+        for(var i = 0; i < this.snakes.length; i++) {
+            if(this.snakes[i].player == type) {
+                numPlayer++;
+            }
+    
+            if(numPlayer == num) {
+                return this.snakes[i];
+            }
+        }
+    }
+
+    return null;
 };
 
 GameController.prototype.onReset = function(callback) {

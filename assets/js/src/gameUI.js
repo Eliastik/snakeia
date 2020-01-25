@@ -229,35 +229,11 @@ GameUI.prototype.clearIntervalCountFPS = function() {
 };
 
 GameUI.prototype.getNBPlayer = function(type) {
-    var numPlayer = 0;
-
-    if(this.snakes != null) {
-        for(var i = 0; i < this.snakes.length; i++) {
-            if(this.snakes[i].player == type) {
-                numPlayer++;
-            }
-        }
-    }
-
-    return numPlayer;
+    return this.controller.getNBPlayer(type);
 };
 
 GameUI.prototype.getPlayer = function(num, type) {
-    var numPlayer = 0;
-
-    if(this.snakes != null) {
-        for(var i = 0; i < this.snakes.length; i++) {
-            if(this.snakes[i].player == type) {
-                numPlayer++;
-            }
-    
-            if(numPlayer == num) {
-                return this.snakes[i];
-            }
-        }
-    }
-
-    return null;
+    return this.controller.getPlayer(num, type);
 };
 
 GameUI.prototype.reset = function() {
@@ -397,7 +373,7 @@ GameUI.prototype.startDraw = function(renderBlur) {
     
         self.draw(renderBlur);
         self.frame++;
-        self.offsetFrame++;
+        if(!self.paused) self.offsetFrame++;
         self.startDraw();
     }
   });
