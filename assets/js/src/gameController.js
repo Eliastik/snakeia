@@ -218,18 +218,6 @@ GameController.prototype.init = function() {
     });
 };
 
-GameController.prototype.getNBPlayer = function(type) {
-    return this.gameEngine.getNBPlayer(type);
-};
-
-GameController.prototype.getPlayer = function(num, type) {
-    return this.gameEngine.getPlayer(num, type);
-};
-
-GameController.prototype.getNBSnakes = function() {
-    return this.gameEngine.snakes.length;
-};
-
 GameController.prototype.reset = function() {
     this.gameEngine.reset();
 };
@@ -274,16 +262,24 @@ GameController.prototype.setTimeToDisplay = function(time) {
     this.gameUI.setTimeToDisplay(time);
 };
 
+GameController.prototype.setBestScore = function(score) {
+    this.gameUI.setBestScore(score);
+};
+
+GameController.prototype.key = function(key) {
+    this.gameEngine.lastKey = key;
+};
+
 GameController.prototype.update = function(message, data) {
     if(this.gameUI != null && data != null) {
         var dataKeys = Object.keys(data);
 
         for(var i = 0; i < dataKeys.length; i++) {
-            if(Object.prototype.hasOwnProperty.call(this.gameUI, dataKeys[i])) {
+            if(Object.prototype.hasOwnProperty.call(this.gameUI, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this.gameUI[dataKeys[i]]) !== "function") {
                 this.gameUI[dataKeys[i]] = data[dataKeys[i]];
             }
 
-            if(Object.prototype.hasOwnProperty.call(this, dataKeys[i])) {
+            if(Object.prototype.hasOwnProperty.call(this, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this[dataKeys[i]]) !== "function") {
                 this[dataKeys[i]] = data[dataKeys[i]];
             }
         }
@@ -292,14 +288,6 @@ GameController.prototype.update = function(message, data) {
             this.gameUI.setKill();
         }
     }
-};
-
-GameController.prototype.setBestScore = function(score) {
-    this.gameUI.setBestScore(score);
-};
-
-GameController.prototype.key = function(key) {
-    this.gameEngine.lastKey = key;
 };
 
 GameController.prototype.onReset = function(callback) {

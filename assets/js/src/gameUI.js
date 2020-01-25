@@ -50,6 +50,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.scoreMax = false;
   this.enablePause = false;
   this.enableRetry = false;
+  this.progressiveSpeed = false;
   // Game state variables
   this.errorOccured = false;
   this.fullscreen = false;
@@ -157,20 +158,22 @@ GameUI.prototype.init = function() {
   this.setIntervalCountFPS();
 
   document.addEventListener("keydown", function(evt) {
-    var keyCode = evt.keyCode;
-
-    if(keyCode == 90 || keyCode == 87) keyCode = KEY_UP; // W or Z
-    if(keyCode == 65 || keyCode == 81) keyCode = KEY_LEFT; // A or Q
-    if(keyCode == 83) keyCode = KEY_BOTTOM; // S
-    if(keyCode == 68) keyCode = KEY_RIGHT; // D
-
-    if(!self.paused) {
-      self.controller.key(keyCode);
-    } else if(self.countBeforePlay < 0) {
-      self.lastKeyMenu = keyCode;
-    }
+    if(!self.killed) {
+      var keyCode = evt.keyCode;
   
-    evt.preventDefault();
+      if(keyCode == 90 || keyCode == 87) keyCode = KEY_UP; // W or Z
+      if(keyCode == 65 || keyCode == 81) keyCode = KEY_LEFT; // A or Q
+      if(keyCode == 83) keyCode = KEY_BOTTOM; // S
+      if(keyCode == 68) keyCode = KEY_RIGHT; // D
+  
+      if(!self.paused) {
+        self.controller.key(keyCode);
+      } else if(self.countBeforePlay < 0) {
+        self.lastKeyMenu = keyCode;
+      }
+    
+      evt.preventDefault();
+    }
   });
 
   window.addEventListener("blur", function() {
@@ -226,11 +229,35 @@ GameUI.prototype.clearIntervalCountFPS = function() {
 };
 
 GameUI.prototype.getNBPlayer = function(type) {
-    return this.controller.getNBPlayer(type);
+    var numPlayer = 0;
+
+    if(this.snakes != null) {
+        for(var i = 0; i < this.snakes.length; i++) {
+            if(this.snakes[i].player == type) {
+                numPlayer++;
+            }
+        }
+    }
+
+    return numPlayer;
 };
 
 GameUI.prototype.getPlayer = function(num, type) {
-    return this.controller.getPlayer(num, type);
+    var numPlayer = 0;
+
+    if(this.snakes != null) {
+        for(var i = 0; i < this.snakes.length; i++) {
+            if(this.snakes[i].player == type) {
+                numPlayer++;
+            }
+    
+            if(numPlayer == num) {
+                return this.snakes[i];
+            }
+        }
+    }
+
+    return null;
 };
 
 GameUI.prototype.reset = function() {
@@ -303,7 +330,7 @@ GameUI.prototype.toggleFullscreen = function() {
         }
       }
 
-      var onfullscreenchange = function(event) {
+      var onfullscreenchange = function() {
         if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
           if(document.fullscreenElement == self.canvas) {
             self.fullscreen = true;
@@ -314,7 +341,7 @@ GameUI.prototype.toggleFullscreen = function() {
           self.autoResizeCanvas();
 
           if(document.fullscreenElement == self.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
-            screen.orientation.lock("landscape");
+            screen.orientation.lock("landscape").catch(function() {});
           }
         }
       };
@@ -548,7 +575,7 @@ GameUI.prototype.draw = function(renderBlur) {
           });
         });
       } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
-        if((this.snakes.length > 1 && this.getNBPlayer(PLAYER_HUMAN) <= 1 && this.getPlayer(1, PLAYER_HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, PLAYER_HYBRID_HUMAN_AI) != null)) {
+        if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(PLAYER_HUMAN) <= 1 && this.getPlayer(1, PLAYER_HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, PLAYER_HYBRID_HUMAN_AI) != null))) {
           if(this.getPlayer(1, PLAYER_HUMAN) != null) {
             var playerHuman = this.getPlayer(1, PLAYER_HUMAN);
           } else {

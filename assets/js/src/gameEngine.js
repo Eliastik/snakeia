@@ -89,38 +89,6 @@ GameEngine.prototype.init = function() {
     }
 };
 
-GameEngine.prototype.getNBPlayer = function(type) {
-    var numPlayer = 0;
-  
-    if(this.snakes != null) {
-        for(var i = 0; i < this.snakes.length; i++) {
-            if(this.snakes[i].player == type) {
-                numPlayer++;
-            }
-        }
-    }
-  
-    return numPlayer;
-};
-
-GameEngine.prototype.getPlayer = function(num, type) {
-    var numPlayer = 0;
-  
-    if(this.snakes != null) {
-        for(var i = 0; i < this.snakes.length; i++) {
-            if(this.snakes[i].player == type) {
-                numPlayer++;
-            }
-    
-            if(numPlayer == num) {
-                return this.snakes[i];
-            }
-        }
-    }
-  
-    return null;
-};
-
 GameEngine.prototype.reset = function() {
     this.paused = true;
     this.isReseted = true;

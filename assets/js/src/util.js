@@ -17,24 +17,31 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 // Polyfills
-window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.oRequestAnimationFrame;
-window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame || window.msCancelAnimationFrame || window.oCancelAnimationFrame || window.mozCancelRequestAnimationFrame || window.webkitCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame;
-
-if(typeof(document.fullscreenElement) === "undefined") {
-  Object.defineProperty(document, "fullscreenElement", {
-    get: function() {
-      return document.mozFullScreenElement || document.msFullscreenElement || document.webkitFullscreenElement || document.oFullscreenElement;
-    }
-  });
+if(typeof(window) !== "undefined") {
+    window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.oRequestAnimationFrame;
+    window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame || window.msCancelAnimationFrame || window.oCancelAnimationFrame || window.mozCancelRequestAnimationFrame || window.webkitCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame;
 }
 
-document.exitFullscreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen;
-screen.orientation = screen.msOrientation || screen.mozOrientation || screen.orientation;
+if(typeof(document) !== "undefined" && typeof(document.fullscreenElement) === "undefined") {
+    Object.defineProperty(document, "fullscreenElement", {
+        get: function() {
+            return document.mozFullScreenElement || document.msFullscreenElement || document.webkitFullscreenElement || document.oFullscreenElement;
+        }
+    });
+}
+
+if(typeof(document) !== "undefined") {
+    document.exitFullscreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen;
+}
+
+if(typeof(screen) !== "undefined") {
+    screen.orientation = screen.msOrientation || screen.mozOrientation || screen.orientation;
+}
 
 if(!String.prototype.trim) {
-  String.prototype.trim = function () {
-    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-  };
+    String.prototype.trim = function () {
+        return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    };
 }
 
 // Return an integer between min (inclusive) and max (inclusive)

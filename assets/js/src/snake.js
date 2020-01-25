@@ -22,7 +22,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     this.initialLength = length == undefined ? 3 : length;
     this.initTriedDirections = [];
     this.errorInit = false;
-    this.grid = grid;
+    this.grid = grid || new Grid();
     this.queue = [];
     this.lastTail;
     this.lastTailMoved;
