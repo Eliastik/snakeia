@@ -18,7 +18,16 @@
  */
 // Old game API
 function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
-    var controller = new GameControllerWorker(new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed));
+    var controller;
+
+    try { // Test if Worker is supported
+        if(!window.Worker) throw "Worker not supported";
+        new Worker("assets/js/src/gameEngineWorker.js").terminate();
+        controller = new GameControllerWorker(new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed));
+    } catch(e) {
+        controller = new GameController(new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed));
+    }
+    
     controller.gameUI = new GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation);
     controller.init();
 

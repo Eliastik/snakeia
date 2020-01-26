@@ -82,6 +82,7 @@ function GameControllerWorker(game, ui) {
                                 break;
                             case "kill":
                                 self.reactor.dispatchEvent("onKill");
+                                self.worker.terminate();
                                 break;
                             case "scoreIncreased":
                                 self.reactor.dispatchEvent("onScoreIncreased");
