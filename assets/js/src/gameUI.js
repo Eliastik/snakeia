@@ -31,6 +31,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.frame = 0;
   this.lastFrame = 0;
   this.offsetFrame = 0;
+  this.lastFrameTime = 0;
   this.currentFPS = 0;
   // Copy of engine variables
   this.grid = null;
@@ -373,7 +374,12 @@ GameUI.prototype.startDraw = function(renderBlur) {
     
         self.draw(renderBlur);
         self.frame++;
-        if(!self.paused) self.offsetFrame++;
+
+        if(!self.paused) {
+            self.offsetFrame += (Date.now() - self.lastFrameTime);
+            self.lastFrameTime = Date.now();
+        }
+
         self.startDraw();
     }
   });
@@ -1098,7 +1104,7 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, bl
 
         // Animation
         if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
-          var offset = this.offsetFrame / this.speed; // percentage of the animation
+          var offset = this.offsetFrame / (this.speed * Setting.TIME_MULTIPLIER); // percentage of the animation
           var offset = (offset > 1 ? 1 : offset);
           var offsetX = (caseWidth * offset) - caseWidth;
           var offsetY = (caseHeight * offset) - caseHeight;
@@ -1300,7 +1306,7 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
     var caseY = this.headerHeight + posY * caseHeight;
 
     if(!this.snakes[i].gameOver) {
-      var offset = this.offsetFrame / this.speed;
+      var offset = this.offsetFrame / (this.speed * Setting.TIME_MULTIPLIER);
       var offset = (offset > 1 ? 1 : offset);
       var offsetX = (caseWidth * offset) - caseWidth;
       var offsetY = (caseHeight * offset) - caseHeight;

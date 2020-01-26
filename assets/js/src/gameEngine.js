@@ -336,7 +336,7 @@ GameEngine.prototype.tick = function() {
           
           self.tick();
       }
-    }, this.initialSpeed * 10);
+    }, this.initialSpeed * Setting.TIME_MULTIPLIER);
 };
 
 GameEngine.prototype.onReset = function(callback) {

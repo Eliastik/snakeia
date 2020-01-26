@@ -51,7 +51,7 @@ GameController.prototype.init = function() {
         "enablePause": this.gameEngine.enablePause,
         "enableRetry": this.gameEngine.enableRetry,
         "progressiveSpeed": this.gameEngine.progressiveSpeed,
-        "offsetFrame": this.gameEngine.speed
+        "offsetFrame": this.gameEngine.speed * Setting.TIME_MULTIPLIER
     });
 
     this.gameEngine.onReset(function() {

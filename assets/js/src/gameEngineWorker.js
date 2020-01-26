@@ -55,7 +55,7 @@ onmessage = function(e) {
             "enablePause": game.enablePause,
             "enableRetry": game.enableRetry,
             "progressiveSpeed": game.progressiveSpeed,
-            "offsetFrame": game.speed
+            "offsetFrame": game.speed * Setting.TIME_MULTIPLIER
         }]);
     
         game.onReset(function() {
