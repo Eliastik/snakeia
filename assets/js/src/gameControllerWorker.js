@@ -124,7 +124,7 @@ function GameControllerWorker(game, ui) {
     };
 
     this.finish = function(finish) {
-        if(this.worker instanceof Worker) this.worker.postMessage([(finish ? "finish" : "stop")]);
+        if(this.worker instanceof Worker) this.worker.postMessage([finish ? "finish" : "stop"]);
     };
 
     this.pause = function() {

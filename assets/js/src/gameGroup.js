@@ -162,10 +162,10 @@ GameGroup.prototype.onStop = function(callback) {
 
 GameGroup.prototype.stopAll = function(finished) {
     for(var i = 0; i < this.games.length; i++) {
-        this.games[i].stop();
-
         if(finished) {
             this.games[i].finish(true);
+        } else {
+            this.games[i].stop();
         }
     }
 };

@@ -27,6 +27,7 @@ function GameController(engine, ui) {
     this.gameOver = false;
     this.starting = false;
     this.scoreMax = false;
+    this.gameFinished = false;
     // Events
     this.reactor = new Reactor();
     this.reactor.registerEvent("onStart");
