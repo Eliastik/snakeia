@@ -219,6 +219,20 @@ GameEngine.prototype.exit = function() {
     }
 };
 
+GameEngine.prototype.getNBPlayer = function(type) {
+    var numPlayer = 0;
+
+    if(this.snakes != null) {
+        for(var i = 0; i < this.snakes.length; i++) {
+            if(this.snakes[i].player == type) {
+                numPlayer++;
+            }
+        }
+    }
+
+    return numPlayer;
+};
+
 GameEngine.prototype.tick = function() {
     var self = this;
 
@@ -228,95 +242,98 @@ GameEngine.prototype.tick = function() {
           self.ticks++;
 
           if(!self.paused) {
-            if(self.lastKey == KEY_ENTER) {
-                self.pause();
-                self.lastKey = -1;
-            }
+              if(self.lastKey == KEY_ENTER) {
+                  self.pause();
+                  self.lastKey = -1;
+              }
           }
-        
-          for(var i = 0; i < self.snakes.length; i++) {
-            var initialDirection = self.snakes[i].direction;
-            var setFruit = false;
-            var setFruitError = false;
-            self.snakes[i].lastTailMoved = false;
 
-            if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
-              if(self.snakes[i].player == PLAYER_HUMAN || self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
-                self.snakes[i].moveTo(self.lastKey);
-                self.lastKey = -1;
-              } else if(self.snakes[i].player == PLAYER_AI) {
-                self.snakes[i].moveTo(self.snakes[i].ai(true));
-              }
+          if(!self.grid.maze || ((self.grid.maze && (self.getNBPlayer(PLAYER_HUMAN) <= 0 && self.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) <= 0))) || (self.grid.maze && ((self.getNBPlayer(PLAYER_HUMAN) > 0 || self.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) > 0) && self.lastKey != -1))) {
+              for(var i = 0; i < self.snakes.length; i++) {
+                var initialDirection = self.snakes[i].direction;
+                var setFruit = false;
+                var setFruitError = false;
+                self.snakes[i].lastTailMoved = false;
 
-              var headSnakePos = self.snakes[i].getHeadPosition();
+                if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
+                  if(self.snakes[i].player == PLAYER_HUMAN || self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
+                    self.snakes[i].moveTo(self.lastKey);
+                    self.lastKey = -1;
+                  } else if(self.snakes[i].player == PLAYER_AI) {
+                    self.snakes[i].moveTo(self.snakes[i].ai(true));
+                  }
 
-              if(self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI && self.grid.isDeadPosition(self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction))) {
-                self.snakes[i].direction = initialDirection;
-                self.snakes[i].moveTo(self.snakes[i].ai(true));
-                self.lastKey = -1;
-              }
+                  var headSnakePos = self.snakes[i].getHeadPosition();
 
-              headSnakePos = self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction);
+                  if(self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI && self.grid.isDeadPosition(self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction))) {
+                    self.snakes[i].direction = initialDirection;
+                    self.snakes[i].moveTo(self.snakes[i].ai(true));
+                    self.lastKey = -1;
+                  }
 
-              if(self.grid.isDeadPosition(headSnakePos)) {
-                self.snakes[i].setGameOver();
-              } else {
-                if(self.grid.get(headSnakePos) == FRUIT_VAL) {
-                  self.snakes[i].score++;
-                  self.reactor.dispatchEvent("onScoreIncreased");
-                  self.snakes[i].insert(headSnakePos);
+                  headSnakePos = self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction);
 
-                  if(self.grid.maze) {
-                    self.stop();
-                    self.gameMazeWin = true;
-                    self.gameFinished = true;
-                  } else if(self.snakes[i].hasMaxScore() && self.snakes.length <= 1) {
-                    self.scoreMax = true;
-                    self.snakes[i].scoreMax = true;
+                  if(self.grid.isDeadPosition(headSnakePos)) {
+                    self.snakes[i].setGameOver();
                   } else {
-                    self.numFruit++;
-                    var setFruit = true;
-                  }
+                    if(self.grid.get(headSnakePos) == FRUIT_VAL) {
+                      self.snakes[i].score++;
+                      self.reactor.dispatchEvent("onScoreIncreased");
+                      self.snakes[i].insert(headSnakePos);
 
-                  if(self.snakes.length <= 1 && self.progressiveSpeed && self.snakes[i].score > 0 && self.initialSpeed > 1) {
-                    self.initialSpeed = Math.ceil(((-self.initialSpeedUntouched / 100) * self.snakes[i].score) + self.initialSpeedUntouched);
-                    self.initialSpeed = self.initialSpeed < 1 ? 1 : self.initialSpeed;
-                  }
-                } else {
-                  self.snakes[i].insert(headSnakePos);
+                      if(self.grid.maze) {
+                        self.stop();
+                        self.gameMazeWin = true;
+                        self.gameFinished = true;
+                      } else if(self.snakes[i].hasMaxScore() && self.snakes.length <= 1) {
+                        self.scoreMax = true;
+                        self.snakes[i].scoreMax = true;
+                      } else {
+                        self.numFruit++;
+                        var setFruit = true;
+                      }
 
-                  if(!self.grid.maze) {
-                    self.snakes[i].remove();
-                    self.snakes[i].lastTailMoved = true;
+                      if(self.snakes.length <= 1 && self.progressiveSpeed && self.snakes[i].score > 0 && self.initialSpeed > 1) {
+                        self.initialSpeed = Math.ceil(((-self.initialSpeedUntouched / 100) * self.snakes[i].score) + self.initialSpeedUntouched);
+                        self.initialSpeed = self.initialSpeed < 1 ? 1 : self.initialSpeed;
+                      }
+                    } else {
+                      self.snakes[i].insert(headSnakePos);
+
+                      if(!self.grid.maze) {
+                        self.snakes[i].remove();
+                        self.snakes[i].lastTailMoved = true;
+                      }
+                    }
                   }
                 }
+
+                if(!self.scoreMax && setFruit) {
+                  var setFruitError = !self.grid.setFruit();
+                }
               }
-            }
 
-            if(!self.scoreMax && setFruit) {
-              var setFruitError = !self.grid.setFruit();
-            }
+              if(!self.scoreMax && !setFruitError && self.grid.isFruitSurrounded(self.grid.fruitPos, true)) {
+                var setFruitError = !self.grid.setFruit();
+              }
+
+              var nbOver = 0;
+
+              for(var j = 0; j < self.snakes.length; j++) {
+                (self.snakes[j].gameOver || self.snakes[j].scoreMax) && nbOver++;
+              }
+
+              if(nbOver >= self.snakes.length || setFruitError) {
+                self.stop();
+
+                if(self.snakes.length > 1) {
+                  self.gameFinished = true;
+                }
+              }
+
+              self.reactor.dispatchEvent("onUpdate");
           }
-
-          if(!self.scoreMax && !setFruitError && self.grid.isFruitSurrounded(self.grid.fruitPos, true)) {
-            var setFruitError = !self.grid.setFruit();
-          }
-
-          var nbOver = 0;
-
-          for(var j = 0; j < self.snakes.length; j++) {
-            (self.snakes[j].gameOver || self.snakes[j].scoreMax) && nbOver++;
-          }
-
-          if(nbOver >= self.snakes.length || setFruitError) {
-            self.stop();
-
-            if(self.snakes.length > 1) {
-              self.gameFinished = true;
-            }
-          }
-
-          self.reactor.dispatchEvent("onUpdate");
+          
           self.tick();
       }
     }, this.initialSpeed * 10);
