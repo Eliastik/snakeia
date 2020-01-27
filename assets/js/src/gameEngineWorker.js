@@ -75,7 +75,7 @@ onmessage = function(e) {
                 "initialSpeed": game.initialSpeed,
                 "speed": game.speed,
                 "snakes": JSON.parse(JSON.stringify(game.snakes)),
-                "offsetFrame": game.speed,
+                "offsetFrame": game.speed * Setting.TIME_MULTIPLIER,
                 "confirmReset": false,
                 "confirmExit": false,
                 "getInfos": false,
