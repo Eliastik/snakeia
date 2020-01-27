@@ -34,7 +34,7 @@ LEVEL_MAZE_WIN = "LEVEL_MAZE_WIN";
 DEFAULT_LEVEL = "DEFAULT_LEVEL";
 DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
 // Default levels :
-// Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA, generateMaze, customGrid], type: levelType(see below), typeValue: levelTypeValue(score, time, ...), version: (version min to play the level) }
+// Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA, generateMaze, customGrid, mazeForceAuto], type: levelType(see below), typeValue: levelTypeValue(score, time, ...), version: (version min to play the level) }
 DEFAULT_LEVELS_SOLO_PLAYER = {
   1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
   2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
@@ -1087,10 +1087,11 @@ function playLevel(level, player, type) {
     var numberIA = levelSettings[8];
     var generateMaze = levelSettings[9];
     var customGrid = levelSettings[10];
+    var mazeForceAuto = levelSettings[11];
 
     var games = [];
 
-    var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid);
+    var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto);
 
     if(player == PLAYER_AI) {
       var playerSnake = new Snake(RIGHT, 3, grid, player, AI_LEVEL_HIGH);

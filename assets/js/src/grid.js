@@ -16,13 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-function Grid(width, height, generateWalls, borderWalls, maze, customGrid) {
+function Grid(width, height, generateWalls, borderWalls, maze, customGrid, mazeForceAuto) {
   this.width = width == undefined ? 20 : width;
   this.height = height == undefined ? 20 : height;
   this.generateWalls = generateWalls == undefined ? false : generateWalls;
   this.borderWalls = borderWalls == undefined ? false : borderWalls;
   this.maze = maze == undefined ? false : maze;
-  this.mazeFirstPosition;
+  this.mazeFirstPosition = new Position(1, 1, RIGHT);
+  this.mazeForceAuto = mazeForceAuto == undefined ? false : mazeForceAuto;
   this.grid;
   this.initialGrid;
   this.fruitPos;
