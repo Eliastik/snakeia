@@ -41,7 +41,7 @@ function GameControllerWorker(game, ui) {
                     var data = e.data;
 
                     if(data.length > 1) {
-                        var grid;
+                        var grid = self.gameUI.grid;
 
                         if(data[1].hasOwnProperty("grid") && data[1]["grid"] != null) {
                             grid = Object.assign(new Grid(), data[1]["grid"]);

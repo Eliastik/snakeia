@@ -24,7 +24,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.controller = controller;
   this.appendTo = appendTo;
   this.displayFPS = displayFPS == undefined ? false : displayFPS;
-  this.outputType = outputType == undefined ? OUTPUT_GRAPHICAL : outputType;
+  this.outputType = outputType == undefined ? GameConstants.OutputType.GRAPHICAL : outputType;
   this.disableAnimation = disableAnimation == undefined ? false : disableAnimation;
   // UI variables
   this.lastKey = -1;
@@ -67,8 +67,8 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.textarea;
   this.canvas;
   this.canvasCtx;
-  this.canvasWidth = canvasWidth == undefined ? CANVAS_WIDTH : canvasWidth;
-  this.canvasHeight = canvasHeight == undefined ? CANVAS_HEIGHT : canvasHeight;
+  this.canvasWidth = canvasWidth == undefined ? GameConstants.Setting.CANVAS_WIDTH : canvasWidth;
+  this.canvasHeight = canvasHeight == undefined ? GameConstants.Setting.CANVAS_HEIGHT : canvasHeight;
   this.fontSize = FONT_SIZE;
   this.headerHeight = HEADER_HEIGHT_DEFAULT;
   this.timerToDisplay;
@@ -104,11 +104,11 @@ GameUI.prototype.init = function() {
 
   this.imageLoader = new ImageLoader();
 
-  if(this.outputType == OUTPUT_TEXT) {
+  if(this.outputType == GameConstants.OutputType.TEXT) {
     this.textarea = document.createElement("textarea");
     this.appendTo.appendChild(this.textarea);
     this.assetsLoaded = true;
-  } else if(this.outputType == OUTPUT_GRAPHICAL) {
+  } else if(this.outputType == GameConstants.OutputType.GRAPHICAL) {
     this.canvas = document.createElement("canvas");
     this.canvas.width = this.canvasWidth;
     this.canvas.height = this.canvasHeight;
@@ -141,19 +141,19 @@ GameUI.prototype.init = function() {
     });
 
     this.btnTopArrow.addClickAction(this.canvas, function() {
-      self.controller.key(KEY_UP);
+      self.controller.key(GameConstants.Key.UP);
     });
 
     this.btnBottomArrow.addClickAction(this.canvas, function() {
-      self.controller.key(KEY_BOTTOM);
+      self.controller.key(GameConstants.Key.BOTTOM);
     });
 
     this.btnLeftArrow.addClickAction(this.canvas, function() {
-      self.controller.key(KEY_LEFT);
+      self.controller.key(GameConstants.Key.LEFT);
     });
 
     this.btnRightArrow.addClickAction(this.canvas, function() {
-      self.controller.key(KEY_RIGHT);
+      self.controller.key(GameConstants.Key.RIGHT);
     });
   }
   
@@ -163,10 +163,10 @@ GameUI.prototype.init = function() {
     if(!self.killed) {
       var keyCode = evt.keyCode;
   
-      if(keyCode == 90 || keyCode == 87) keyCode = KEY_UP; // W or Z
-      if(keyCode == 65 || keyCode == 81) keyCode = KEY_LEFT; // A or Q
-      if(keyCode == 83) keyCode = KEY_BOTTOM; // S
-      if(keyCode == 68) keyCode = KEY_RIGHT; // D
+      if(keyCode == 90 || keyCode == 87) keyCode = GameConstants.Key.UP; // W or Z
+      if(keyCode == 65 || keyCode == 81) keyCode = GameConstants.Key.LEFT; // A or Q
+      if(keyCode == 83) keyCode = GameConstants.Key.BOTTOM; // S
+      if(keyCode == 68) keyCode = GameConstants.Key.RIGHT; // D
   
       if(!self.paused) {
         self.controller.key(keyCode);
@@ -194,7 +194,7 @@ GameUI.prototype.init = function() {
 };
 
 GameUI.prototype.autoResizeCanvas = function() {
-  if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
+  if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
     if(!document.fullscreenElement) {
       if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
         var ratio = this.canvasWidth / this.canvasHeight;
@@ -274,10 +274,10 @@ GameUI.prototype.setKill = function() {
   this.snakes = null;
   this.preRenderedFont = null;
 
-  if(this.outputType == OUTPUT_TEXT) {
+  if(this.outputType == GameConstants.OutputType.TEXT) {
     this.appendTo.removeChild(this.textarea);
     this.textarea = null;
-  } else if(this.outputType == OUTPUT_GRAPHICAL) {
+  } else if(this.outputType == GameConstants.OutputType.GRAPHICAL) {
     this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.appendTo.removeChild(this.canvas);
     this.canvas = null;
@@ -289,7 +289,7 @@ GameUI.prototype.setKill = function() {
 GameUI.prototype.toggleFullscreen = function() {
   var self = this;
 
-  if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
+  if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
     if(!document.fullscreenElement) {
       if(this.canvas.requestFullscreen) {
         this.canvas.requestFullscreen();
@@ -309,7 +309,7 @@ GameUI.prototype.toggleFullscreen = function() {
     }
 
     var onfullscreenchange = function() {
-      if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
+      if(self.outputType == GameConstants.OutputType.GRAPHICAL && !self.killed) {
         if(document.fullscreenElement == self.canvas) {
           self.fullscreen = true;
         } else {
@@ -343,7 +343,7 @@ GameUI.prototype.toggleFullscreen = function() {
 GameUI.prototype.loadAssets = function() {
   var self = this;
 
-  if(!this.errorOccurred && this.outputType != OUTPUT_TEXT) {
+  if(!this.errorOccurred && this.outputType != GameConstants.OutputType.TEXT) {
     this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/clock.png"], function() {
       if(self.imageLoader.hasError == true) {
         self.errorOccurred = true;
@@ -358,7 +358,7 @@ GameUI.prototype.loadAssets = function() {
         self.start();
       }
     }, this);
-  } else if(!this.errorOccurred && this.outputType == OUTPUT_TEXT) {
+  } else if(!this.errorOccurred && this.outputType == GameConstants.OutputType.TEXT) {
     this.assetsLoaded = true;
     this.start();
   }
@@ -389,24 +389,24 @@ GameUI.prototype.startDraw = function(renderBlur) {
 GameUI.prototype.draw = function(renderBlur) {
   var self = this;
   
-  if(this.outputType == OUTPUT_TEXT && !this.killed) {
+  if(this.outputType == GameConstants.OutputType.TEXT && !this.killed) {
     if(this.grid != null) {
       this.textarea.style.width = this.grid.width * 16.5 + "px";
       this.textarea.style.height = this.grid.height * 16 + 100 + "px";
     }
 
     this.textarea.innerHTML = this.toString();
-  } else if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
+  } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
     var ctx = this.canvasCtx;
     var displayBestScore = false;
     var renderBlur = renderBlur == undefined ? false : renderBlur;
     this.fontSize = FONT_SIZE;
     this.headerHeight = HEADER_HEIGHT_DEFAULT;
 
-    if(this.canvas.width <= CANVAS_WIDTH / 1.25) {
+    if(this.canvas.width <= GameConstants.Setting.CANVAS_WIDTH / 1.25) {
       this.fontSize /= 1.25;
       this.headerHeight = HEADER_HEIGHT_DEFAULT / 1.25;
-    } else if(this.canvas.width >= CANVAS_WIDTH * 1.5) {
+    } else if(this.canvas.width >= GameConstants.Setting.CANVAS_WIDTH * 1.5) {
       this.fontSize *= 1.25;
       this.headerHeight = HEADER_HEIGHT_DEFAULT * 1.25;
     }
@@ -498,7 +498,7 @@ GameUI.prototype.draw = function(renderBlur) {
 
     if(this.snakes != null) {
       for(var i = 0; i < this.snakes.length; i++) {
-        if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
+        if(this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
           this.btnTopArrow.draw(this);
           this.btnBottomArrow.draw(this);
           this.btnRightArrow.draw(this);
@@ -526,7 +526,7 @@ GameUI.prototype.draw = function(renderBlur) {
          });
        });
      } else if(this.getInfosGame) {
-        this.drawMenu(ctx, [this.btnOK], (this.snakes != null && this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == PLAYER_HUMAN) || (this.snakes != null && this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI)) ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(PLAYER_AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, PLAYER_AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + window.i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == PLAYER_HYBRID_HUMAN_AI ? "\n" + window.i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + window.i18next.t("engine.mazeModeMin") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
+        this.drawMenu(ctx, [this.btnOK], (this.snakes != null && this.snakes.length <= 1 ? window.i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? window.i18next.t("engine.playerHuman") : window.i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  window.i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + window.i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + window.i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + window.i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + window.i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + window.i18next.t("engine.mazeModeMin") : ""), "white", this.fontSize, FONT_FAMILY, "center", null, false, function() {
           self.btnOK.addClickAction(self.canvas, function() {
             self.getInfosGame = false;
             self.selectedButton = 0;
@@ -558,11 +558,11 @@ GameUI.prototype.draw = function(renderBlur) {
           });
         });
       } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
-        if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(PLAYER_HUMAN) <= 1 && this.getPlayer(1, PLAYER_HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, PLAYER_HYBRID_HUMAN_AI) != null))) {
-          if(this.getPlayer(1, PLAYER_HUMAN) != null) {
-            var playerHuman = this.getPlayer(1, PLAYER_HUMAN);
+        if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null))) {
+          if(this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) {
+            var playerHuman = this.getPlayer(1, GameConstants.PlayerType.HUMAN);
           } else {
-            var playerHuman = this.getPlayer(1, PLAYER_HYBRID_HUMAN_AI);
+            var playerHuman = this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
           }
 
           var colorName = GameUtils.hslToName(GameUtils.addHue(IMAGE_SNAKE_HUE, playerHuman.color), IMAGE_SNAKE_SATURATION, IMAGE_SNAKE_VALUE);
@@ -688,7 +688,7 @@ GameUI.prototype.draw = function(renderBlur) {
 
         if(this.snakes != null) {
           for(var i = 0; i < this.snakes.length; i++) {
-            if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
+            if(this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
               this.btnTopArrow.enable();
               this.btnBottomArrow.enable();
               this.btnLeftArrow.enable();
@@ -727,7 +727,7 @@ GameUI.prototype.setDisplayFPS = function(display) {
 };
 
 GameUI.prototype.disableAllButtons = function() {
-  if(this.outputType == OUTPUT_GRAPHICAL) {
+  if(this.outputType == GameConstants.OutputType.GRAPHICAL) {
     this.btnContinue.disable();
     this.btnRetry.disable();
     this.btnQuit.disable();
@@ -997,9 +997,9 @@ GameUI.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily
   var heightButtons = 0;
 
   if(buttons != null) {
-    if(self.lastKeyMenu == KEY_UP) {
+    if(self.lastKeyMenu == GameConstants.Key.UP) {
       self.selectedButton--;
-    } else if(self.lastKeyMenu == KEY_BOTTOM) {
+    } else if(self.lastKeyMenu == GameConstants.Key.BOTTOM) {
       self.selectedButton++;
     }
 
@@ -1039,7 +1039,7 @@ GameUI.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily
       buttons[i].enable();
       buttons[i].draw(self);
 
-      if(self.selectedButton == i && self.lastKeyMenu == KEY_ENTER && buttons[i].triggerClick != null && !buttons[i].disabled) {
+      if(self.selectedButton == i && self.lastKeyMenu == GameConstants.Key.ENTER && buttons[i].triggerClick != null && !buttons[i].disabled) {
         buttonEntered = true;
         buttons[i].triggerClick();
         break;
@@ -1106,7 +1106,7 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, bl
 
         // Animation
         if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
-          var offset = this.offsetFrame / (this.speed * Setting.TIME_MULTIPLIER); // percentage of the animation
+          var offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER); // percentage of the animation
           var offset = (offset > 1 ? 1 : offset);
           var offsetX = (caseWidth * offset) - caseWidth;
           var offsetY = (caseHeight * offset) - caseHeight;
@@ -1127,7 +1127,7 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, bl
             currentPosition = this.snakes[j].get(this.snakes[j].length() - 1);
           }
 
-          if((i == 0 || i == -1) && (graphicDirection == ANGLE_1 || graphicDirection == ANGLE_2 || graphicDirection == ANGLE_3 || graphicDirection == ANGLE_4)) {
+          if((i == 0 || i == -1) && (graphicDirection == GameConstants.Direction.ANGLE_1 || graphicDirection == GameConstants.Direction.ANGLE_2 || graphicDirection == GameConstants.Direction.ANGLE_3 || graphicDirection == GameConstants.Direction.ANGLE_4)) {
             if(i == 0) {
               angle = -90;
             }
@@ -1138,9 +1138,9 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, bl
               angle += 126.896 * Math.pow(offset, 2) + -33.6471 * offset + 1.65942;
             }
 
-            if(i == 0 && ((graphicDirection == ANGLE_4 && direction == UP) || (graphicDirection == ANGLE_1 && direction == LEFT) || (graphicDirection == ANGLE_2 && direction == BOTTOM) || (graphicDirection == ANGLE_3 && direction == RIGHT))) {
+            if(i == 0 && ((graphicDirection == GameConstants.Direction.ANGLE_4 && direction == GameConstants.Direction.UP) || (graphicDirection == GameConstants.Direction.ANGLE_1 && direction == GameConstants.Direction.LEFT) || (graphicDirection == GameConstants.Direction.ANGLE_2 && direction == GameConstants.Direction.BOTTOM) || (graphicDirection == GameConstants.Direction.ANGLE_3 && direction == GameConstants.Direction.RIGHT))) {
               angle = -angle;
-            } else if(i == -1 && ((graphicDirection == ANGLE_4 && direction == RIGHT) || (graphicDirection == ANGLE_3 && direction == BOTTOM) || (graphicDirection == ANGLE_1 && direction == UP) || (graphicDirection == ANGLE_2 && direction == LEFT))) {
+            } else if(i == -1 && ((graphicDirection == GameConstants.Direction.ANGLE_4 && direction == GameConstants.Direction.RIGHT) || (graphicDirection == GameConstants.Direction.ANGLE_3 && direction == GameConstants.Direction.BOTTOM) || (graphicDirection == GameConstants.Direction.ANGLE_1 && direction == GameConstants.Direction.UP) || (graphicDirection == GameConstants.Direction.ANGLE_2 && direction == GameConstants.Direction.LEFT))) {
               angle = - angle;
             }
 
@@ -1148,16 +1148,16 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, bl
           }
 
           switch(currentPosition.direction) {
-            case UP:
+            case GameConstants.Direction.UP:
               caseY -= offsetY;
               break;
-            case BOTTOM:
+            case GameConstants.Direction.BOTTOM:
               caseY += offsetY;
               break;
-            case RIGHT:
+            case GameConstants.Direction.RIGHT:
               caseX += offsetX;
               break;
-            case LEFT:
+            case GameConstants.Direction.LEFT:
               caseX -= offsetX;
               break;
           }
@@ -1175,74 +1175,74 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, bl
         if(i == 0) {
           if(this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
             switch(direction) {
-              case BOTTOM:
+              case GameConstants.Direction.BOTTOM:
                 imageLoc = "assets/images/snake_dead.png";
                 break;
-              case RIGHT:
+              case GameConstants.Direction.RIGHT:
                 imageLoc = "assets/images/snake_dead_2.png";
                 break;
-              case UP:
+              case GameConstants.Direction.UP:
                 imageLoc = "assets/images/snake_dead_3.png";
                 break;
-              case LEFT:
+              case GameConstants.Direction.LEFT:
                 imageLoc = "assets/images/snake_dead_4.png";
                 break;
             }
           } else {
             switch(direction) {
-              case BOTTOM:
+              case GameConstants.Direction.BOTTOM:
                 imageLoc = "assets/images/snake.png";
                 break;
-              case RIGHT:
+              case GameConstants.Direction.RIGHT:
                 imageLoc = "assets/images/snake_2.png";
                 break;
-              case UP:
+              case GameConstants.Direction.UP:
                 imageLoc = "assets/images/snake_3.png";
                 break;
-              case LEFT:
+              case GameConstants.Direction.LEFT:
                 imageLoc = "assets/images/snake_4.png";
                 break;
             }
           }
         } else if(i == -1) {
           switch(direction) {
-            case BOTTOM:
+            case GameConstants.Direction.BOTTOM:
               imageLoc = "assets/images/body_end.png";
               break;
-            case RIGHT:
+            case GameConstants.Direction.RIGHT:
               imageLoc = "assets/images/body_2_end.png";
               break;
-            case UP:
+            case GameConstants.Direction.UP:
               imageLoc = "assets/images/body_3_end.png";
               break;
-            case LEFT:
+            case GameConstants.Direction.LEFT:
               imageLoc = "assets/images/body_4_end.png";
               break;
           }
         } else {
           switch(direction) {
-            case UP:
+            case GameConstants.Direction.UP:
               imageLoc = "assets/images/body.png";
               break;
-            case BOTTOM:
+            case GameConstants.Direction.BOTTOM:
               imageLoc = "assets/images/body.png";
               break;
-            case RIGHT:
+            case GameConstants.Direction.RIGHT:
               imageLoc = "assets/images/body_2.png";
               break;
-            case LEFT:
+            case GameConstants.Direction.LEFT:
               imageLoc = "assets/images/body_2.png";
               break;
-            case ANGLE_1:
+            case GameConstants.Direction.ANGLE_1:
               imageLoc = "assets/images/body_angle_1.png";
               break;
-            case ANGLE_2:
+            case GameConstants.Direction.ANGLE_2:
               imageLoc = "assets/images/body_angle_2.png";
               break;
-            case ANGLE_3:
+            case GameConstants.Direction.ANGLE_3:
               imageLoc = "assets/images/body_angle_3.png";
               break;
-            case ANGLE_4:
+            case GameConstants.Direction.ANGLE_4:
               imageLoc = "assets/images/body_angle_4.png";
               break;
           }
@@ -1295,7 +1295,7 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
   var numAI = 0;
 
   for(var i = 0; i < this.snakes.length; i++) {
-    if(this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
+    if(this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
       numPlayer++;
     } else {
       numAI++;
@@ -1310,30 +1310,30 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
       var caseY = this.headerHeight + posY * caseHeight;
   
       if(!this.snakes[i].gameOver) {
-        var offset = this.offsetFrame / (this.speed * Setting.TIME_MULTIPLIER);
+        var offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
         var offset = (offset > 1 ? 1 : offset);
         var offsetX = (caseWidth * offset) - caseWidth;
         var offsetY = (caseHeight * offset) - caseHeight;
   
         switch(position.direction) {
-          case UP:
+          case GameConstants.Direction.UP:
             caseY -= offsetY;
             break;
-          case BOTTOM:
+          case GameConstants.Direction.BOTTOM:
             caseY += offsetY;
             break;
-          case RIGHT:
+          case GameConstants.Direction.RIGHT:
             caseX += offsetX;
             break;
-          case LEFT:
+          case GameConstants.Direction.LEFT:
             caseX -= offsetX;
             break;
         }
       }
   
-      this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
+      this.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
   
-      if((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) && this.countBeforePlay >= 0 && ((GameUtils.isFilterHueAvailable() && this.snakes.length > 2) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
+      if((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) && this.countBeforePlay >= 0 && ((GameUtils.isFilterHueAvailable() && this.snakes.length > 2) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
         this.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
       }
     }

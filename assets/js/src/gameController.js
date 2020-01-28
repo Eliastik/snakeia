@@ -52,7 +52,7 @@ GameController.prototype.init = function() {
         "enablePause": this.gameEngine.enablePause,
         "enableRetry": this.gameEngine.enableRetry,
         "progressiveSpeed": this.gameEngine.progressiveSpeed,
-        "offsetFrame": this.gameEngine.speed * Setting.TIME_MULTIPLIER,
+        "offsetFrame": this.gameEngine.speed * GameConstants.Setting.TIME_MULTIPLIER,
         "errorOccurred": this.gameEngine.errorOccurred
     });
 
@@ -77,7 +77,8 @@ GameController.prototype.init = function() {
             "confirmExit": false,
             "getInfos": false,
             "getInfosGame": false,
-            "errorOccurred": self.gameEngine.errorOccurred
+            "errorOccurred": self.gameEngine.errorOccurred,
+            "offsetFrame": game.speed * GameConstants.Setting.TIME_MULTIPLIER,
         });
         self.reactor.dispatchEvent("onReset");
     });

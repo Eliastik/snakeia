@@ -17,66 +17,66 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 function Position(x, y, direction) {
-    this.x = x;
-    this.y = y;
-    this.direction = direction;
+  this.x = x;
+  this.y = y;
+  this.direction = direction;
 }
 
 Position.prototype.copy = function() {
-    return new Position(this.x, this.y, this.direction);
+  return new Position(this.x, this.y, this.direction);
 };
 
 Position.prototype.convertToKeyDirection = function() {
-    switch(this.direction) {
-      case UP:
-        return KEY_UP;
-      case RIGHT:
-        return KEY_RIGHT;
-      case LEFT:
-        return KEY_LEFT;
-      case BOTTOM:
-        return KEY_BOTTOM;
-      default:
-        return this.direction;
-    }
+  switch(this.direction) {
+    case GameConstants.Direction.UP:
+      return GameConstants.Key.UP;
+    case GameConstants.Direction.RIGHT:
+      return GameConstants.Key.RIGHT;
+    case GameConstants.Direction.LEFT:
+      return GameConstants.Key.LEFT;
+    case GameConstants.Direction.BOTTOM:
+      return GameConstants.Key.BOTTOM;
+    default:
+      return this.direction;
+  }
 };
 
 Position.prototype.convertToSimpleDirection = function() {
-    switch(this.direction) {
-      case KEY_UP:
-        return UP;
-      case KEY_RIGHT:
-        return RIGHT;
-      case KEY_LEFT:
-        return LEFT;
-      case KEY_BOTTOM:
-        return BOTTOM;
-      default:
-        return this.direction;
-    }
+  switch(this.direction) {
+    case GameConstants.Key.UP:
+      return GameConstants.Direction.UP;
+    case GameConstants.Key.RIGHT:
+      return GameConstants.Direction.RIGHT;
+    case GameConstants.Key.LEFT:
+      return GameConstants.Direction.LEFT;
+    case GameConstants.Key.BOTTOM:
+      return GameConstants.Direction.BOTTOM;
+    default:
+      return this.direction;
+  }
 };
 
 Position.prototype.equals = function(otherPosition) {
-    if(otherPosition != null) {
-      return this.x == otherPosition.x && this.y == otherPosition.y;
-    } else {
-      return false;
-    }
+  if(otherPosition != null) {
+    return this.x == otherPosition.x && this.y == otherPosition.y;
+  } else {
+    return false;
+  }
 };
 
 Position.prototype.indexIn = function(array) {
-    for(var i = 0; i < array.length; i++) {
-      if(this.equals(array[i])) {
-        return i;
-      }
+  for(var i = 0; i < array.length; i++) {
+    if(this.equals(array[i])) {
+      return i;
     }
-    
-    return -1;
+  }
+  
+  return -1;
 };
 
 // Export module
 if(typeof(module) !== "undefined") {
-    module.exports = {
-      Position: Position
-    };
+  module.exports = {
+    Position: Position
+  };
 }

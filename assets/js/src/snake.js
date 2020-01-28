@@ -17,8 +17,8 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 function Snake(direction, length, grid, player, aiLevel, autoRetry) {
-    this.direction = direction == undefined ? RIGHT : direction;
-    this.initialDirection = direction == undefined ? RIGHT : direction;
+    this.direction = direction == undefined ? GameConstants.Direction.RIGHT : direction;
+    this.initialDirection = direction == undefined ? GameConstants.Direction.RIGHT : direction;
     this.initialLength = length == undefined ? 3 : length;
     this.initTriedDirections = [];
     this.errorInit = false;
@@ -26,8 +26,8 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
     this.queue = [];
     this.lastTail;
     this.lastTailMoved;
-    this.player = player == undefined ? PLAYER_HUMAN : player;
-    this.aiLevel = aiLevel == undefined ? AI_LEVEL_DEFAULT : aiLevel;
+    this.player = player == undefined ? GameConstants.PlayerType.HUMAN : player;
+    this.aiLevel = aiLevel == undefined ? GameConstants.AiLevel.DEFAULT : aiLevel;
     this.autoRetry = autoRetry == undefined ? false : autoRetry;
     this.score = 0;
     this.gameOver = false;
@@ -51,12 +51,12 @@ Snake.prototype.init = function() {
     var spaceLineAvailable = 0;
     var spaceColAvailable = 0;
 
-    if((this.initialDirection == RIGHT && this.initTriedDirections.indexOf(RIGHT) == -1) || (this.initialDirection == LEFT && this.initTriedDirections.indexOf(LEFT) == -1)) {
+    if((this.initialDirection == GameConstants.Direction.RIGHT && this.initTriedDirections.indexOf(GameConstants.Direction.RIGHT) == -1) || (this.initialDirection == GameConstants.Direction.LEFT && this.initTriedDirections.indexOf(GameConstants.Direction.LEFT) == -1)) {
       for(var i = 0; i < this.grid.height; i++) {
         var emptyOnLine = 0;
 
         for(var j = 0; j < this.grid.width; j++) {
-          if(this.grid.get(new Position(j, i)) == EMPTY_VAL) {
+          if(this.grid.get(new Position(j, i)) == GameConstants.CaseType.EMPTY) {
             emptyOnLine++;
           } else {
             emptyOnLine = 0;
@@ -68,12 +68,12 @@ Snake.prototype.init = function() {
           }
         }
       }
-    } else if((this.initialDirection == UP && this.initTriedDirections.indexOf(UP) == -1) || (this.initialDirection == BOTTOM && this.initTriedDirections.indexOf(BOTTOM) == -1)) {
+    } else if((this.initialDirection == GameConstants.Direction.UP && this.initTriedDirections.indexOf(GameConstants.Direction.UP) == -1) || (this.initialDirection == GameConstants.Direction.BOTTOM && this.initTriedDirections.indexOf(GameConstants.Direction.BOTTOM) == -1)) {
       for(var i = 0; i < this.grid.width; i++) {
         var emptyOnCol = 0;
 
         for(var j = 0; j < this.grid.height; j++) {
-          if(this.grid.get(new Position(i, j)) == EMPTY_VAL) {
+          if(this.grid.get(new Position(i, j)) == GameConstants.CaseType.EMPTY) {
             emptyOnCol++;
           } else {
             emptyOnCol = 0;
@@ -89,22 +89,22 @@ Snake.prototype.init = function() {
 
     this.initTriedDirections.push(this.initialDirection);
 
-    if((spaceLineAvailable <= 0 && (this.initialDirection == RIGHT || this.initialDirection == LEFT)) || (spaceColAvailable <= 0 && (this.initialDirection == UP || this.initialDirection == BOTTOM))) {
-      if(this.initTriedDirections.indexOf(RIGHT) == -1) {
-        this.initialDirection = RIGHT;
-        this.direction = RIGHT;
+    if((spaceLineAvailable <= 0 && (this.initialDirection == GameConstants.Direction.RIGHT || this.initialDirection == GameConstants.Direction.LEFT)) || (spaceColAvailable <= 0 && (this.initialDirection == GameConstants.Direction.UP || this.initialDirection == GameConstants.Direction.BOTTOM))) {
+      if(this.initTriedDirections.indexOf(GameConstants.Direction.RIGHT) == -1) {
+        this.initialDirection = GameConstants.Direction.RIGHT;
+        this.direction = GameConstants.Direction.RIGHT;
         return this.init();
-      } else if(this.initTriedDirections.indexOf(LEFT) == -1) {
-        this.initialDirection = LEFT;
-        this.direction = LEFT;
+      } else if(this.initTriedDirections.indexOf(GameConstants.Direction.LEFT) == -1) {
+        this.initialDirection = GameConstants.Direction.LEFT;
+        this.direction = GameConstants.Direction.LEFT;
         return this.init();
-      } else if(this.initTriedDirections.indexOf(UP) == -1) {
-       this.initialDirection = UP;
-       this.direction = UP;
+      } else if(this.initTriedDirections.indexOf(GameConstants.Direction.UP) == -1) {
+       this.initialDirection = GameConstants.Direction.UP;
+       this.direction = GameConstants.Direction.UP;
        return this.init();
-      } else if(this.initTriedDirections.indexOf(BOTTOM) == -1) {
-       this.initialDirection = BOTTOM;
-       this.direction = BOTTOM;
+      } else if(this.initTriedDirections.indexOf(GameConstants.Direction.BOTTOM) == -1) {
+       this.initialDirection = GameConstants.Direction.BOTTOM;
+       this.direction = GameConstants.Direction.BOTTOM;
        return this.init();
       }
 
@@ -130,18 +130,18 @@ Snake.prototype.init = function() {
 
       for(var i = this.initialLength - 1; i >= 0; i--) {
         if(i < this.initialLength - 1) {
-          if(this.initialDirection == RIGHT) {
-            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), RIGHT);
-          } else if(this.initialDirection == LEFT) {
-            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), LEFT);
-          } else if(this.initialDirection == BOTTOM) {
-            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), BOTTOM);
-          } else if(this.initialDirection == UP) {
-            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), UP);
+          if(this.initialDirection == GameConstants.Direction.RIGHT) {
+            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), GameConstants.Direction.RIGHT);
+          } else if(this.initialDirection == GameConstants.Direction.LEFT) {
+            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), GameConstants.Direction.LEFT);
+          } else if(this.initialDirection == GameConstants.Direction.BOTTOM) {
+            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), GameConstants.Direction.BOTTOM);
+          } else if(this.initialDirection == GameConstants.Direction.UP) {
+            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), GameConstants.Direction.UP);
           }
         }
 
-        if(this.grid.get(currentPos) != EMPTY_VAL) {
+        if(this.grid.get(currentPos) != GameConstants.CaseType.EMPTY) {
           posNotValidated = true;
         } else {
           positionsToAdd.push(new Position(currentPos.x, currentPos.y, currentPos.direction));
@@ -157,12 +157,12 @@ Snake.prototype.init = function() {
       this.insert(positionsToAdd[i]);
     }
 
-    if(this.grid.maze && this.player == PLAYER_HYBRID_HUMAN_AI) {
-      this.player = PLAYER_HUMAN;
+    if(this.grid.maze && this.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
+      this.player = GameConstants.PlayerType.HUMAN;
     }
 
-    if(this.player == PLAYER_HYBRID_HUMAN_AI) {
-      this.aiLevel = AI_LEVEL_HIGH;
+    if(this.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
+      this.aiLevel = GameConstants.AiLevel.HIGH;
     }
 
     this.lastTail = this.get(this.queue.length - 1);
@@ -182,12 +182,12 @@ Snake.prototype.reset = function() {
 
 Snake.prototype.insert = function(position) {
     this.queue.unshift(position);
-    this.grid.set(SNAKE_VAL, position);
+    this.grid.set(GameConstants.CaseType.SNAKE, position);
 };
 
 Snake.prototype.remove = function() {
     var last = this.queue.pop();
-    this.grid.set(EMPTY_VAL, last);
+    this.grid.set(GameConstants.CaseType.EMPTY, last);
     this.lastTail = last;
 };
 
@@ -218,14 +218,14 @@ Snake.prototype.getTailPosition = function() {
 };
 
 Snake.prototype.hasMaxScore = function() {
-    return this.grid.getTotal(EMPTY_VAL) <= 0;
+    return this.grid.getTotal(GameConstants.CaseType.EMPTY) <= 0;
 };
 
 Snake.prototype.setGameOver = function() {
     this.gameOver = true;
 
     for(var i = 0; i < this.length(); i++) {
-      this.grid.set(SNAKE_DEAD_VAL, this.get(i));
+      this.grid.set(GameConstants.CaseType.SNAKE_DEAD, this.get(i));
     }
 };
 
@@ -236,20 +236,20 @@ Snake.prototype.kill = function() {
 };
 
 Snake.prototype.moveTo = function(direction) {
-    if(direction == KEY_LEFT && this.direction != RIGHT && this.direction != LEFT) {
-      this.direction = LEFT;
+    if(direction == GameConstants.Key.LEFT && this.direction != GameConstants.Direction.RIGHT && this.direction != GameConstants.Direction.LEFT) {
+      this.direction = GameConstants.Direction.LEFT;
     }
 
-    if(direction == KEY_UP && this.direction != BOTTOM && this.direction != UP) {
-      this.direction = UP;
+    if(direction == GameConstants.Key.UP && this.direction != GameConstants.Direction.BOTTOM && this.direction != GameConstants.Direction.UP) {
+      this.direction = GameConstants.Direction.UP;
     }
 
-    if(direction == KEY_RIGHT && this.direction != LEFT && this.direction != RIGHT) {
-      this.direction = RIGHT;
+    if(direction == GameConstants.Key.RIGHT && this.direction != GameConstants.Direction.LEFT && this.direction != GameConstants.Direction.RIGHT) {
+      this.direction = GameConstants.Direction.RIGHT;
     }
 
-    if(direction == KEY_BOTTOM && this.direction != UP && this.direction != BOTTOM) {
-      this.direction = BOTTOM;
+    if(direction == GameConstants.Key.BOTTOM && this.direction != GameConstants.Direction.UP && this.direction != GameConstants.Direction.BOTTOM) {
+      this.direction = GameConstants.Direction.BOTTOM;
     }
 };
 
@@ -267,16 +267,16 @@ Snake.prototype.getGraphicDirectionFor = function(current, next, prec) {
     var directionToPrec = this.getDirectionTo(current, prec);
     var directionToNext = this.getDirectionTo(current, next);
 
-    var direction = UP;
+    var direction = GameConstants.Direction.UP;
 
-    if(directionToPrec == LEFT && directionToNext == BOTTOM || directionToPrec == BOTTOM && directionToNext == LEFT) {
-      direction = ANGLE_1;
-    } else if(directionToPrec == RIGHT && directionToNext == BOTTOM || directionToPrec == BOTTOM && directionToNext == RIGHT) {
-      direction = ANGLE_2;
-    } else if(directionToPrec == UP && directionToNext == RIGHT || directionToPrec == RIGHT && directionToNext == UP) {
-      direction = ANGLE_3;
-    } else if(directionToPrec == UP && directionToNext == LEFT || directionToPrec == LEFT && directionToNext == UP) {
-      direction = ANGLE_4;
+    if(directionToPrec == GameConstants.Direction.LEFT && directionToNext == GameConstants.Direction.BOTTOM || directionToPrec == GameConstants.Direction.BOTTOM && directionToNext == GameConstants.Direction.LEFT) {
+      direction = GameConstants.Direction.ANGLE_1;
+    } else if(directionToPrec == GameConstants.Direction.RIGHT && directionToNext == GameConstants.Direction.BOTTOM || directionToPrec == GameConstants.Direction.BOTTOM && directionToNext == GameConstants.Direction.RIGHT) {
+      direction = GameConstants.Direction.ANGLE_2;
+    } else if(directionToPrec == GameConstants.Direction.UP && directionToNext == GameConstants.Direction.RIGHT || directionToPrec == GameConstants.Direction.RIGHT && directionToNext == GameConstants.Direction.UP) {
+      direction = GameConstants.Direction.ANGLE_3;
+    } else if(directionToPrec == GameConstants.Direction.UP && directionToNext == GameConstants.Direction.LEFT || directionToPrec == GameConstants.Direction.LEFT && directionToNext == GameConstants.Direction.UP) {
+      direction = GameConstants.Direction.ANGLE_4;
     } else {
       direction = current.direction;
     }
@@ -308,13 +308,13 @@ Snake.prototype.copy = function() {
 
 Snake.prototype.randomAI = function() {
     var currentPosition = this.getHeadPosition();
-    var top = this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_UP));
-    var left = this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_LEFT));
-    var bottom = this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_BOTTOM));
-    var right = this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_RIGHT));
+    var top = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.UP));
+    var left = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.LEFT));
+    var bottom = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.BOTTOM));
+    var right = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.RIGHT));
 
     if(top && left && bottom && right) {
-      return KEY_UP;
+      return GameConstants.Key.UP;
     } else {
       var direction = null;
 
@@ -323,16 +323,16 @@ Snake.prototype.randomAI = function() {
 
         switch(r) {
           case 1:
-            direction = KEY_UP;
+            direction = GameConstants.Key.UP;
             break;
           case 2:
-            direction = KEY_LEFT;
+            direction = GameConstants.Key.LEFT;
             break;
           case 3:
-            direction = KEY_BOTTOM;
+            direction = GameConstants.Key.BOTTOM;
             break;
           case 4:
-            direction = KEY_RIGHT;
+            direction = GameConstants.Key.RIGHT;
             break;
         }
       }
@@ -345,31 +345,31 @@ Snake.prototype.simpleAI = function() {
     if(this.grid.fruitPos != null) {
       var currentPosition = this.getHeadPosition();
       var fruitPos = this.grid.fruitPos.copy();
-      var directionNext = KEY_RIGHT;
+      var directionNext = GameConstants.Key.RIGHT;
 
       if(fruitPos.x > currentPosition.x) {
         if(fruitPos.x - currentPosition.x > this.grid.width / 2) {
-          directionNext = KEY_LEFT;
+          directionNext = GameConstants.Key.LEFT;
         } else {
-          directionNext = KEY_RIGHT;
+          directionNext = GameConstants.Key.RIGHT;
         }
       } else if(fruitPos.x < currentPosition.x) {
         if(currentPosition.x - fruitPos.x > this.grid.width / 2) {
-          directionNext = KEY_RIGHT;
+          directionNext = GameConstants.Key.RIGHT;
         } else {
-          directionNext = KEY_LEFT;
+          directionNext = GameConstants.Key.LEFT;
         }
       } else if(fruitPos.y < currentPosition.y) {
         if(currentPosition.y - fruitPos.y > this.grid.height / 2) {
-          directionNext = KEY_BOTTOM;
+          directionNext = GameConstants.Key.BOTTOM;
         } else {
-          directionNext = KEY_UP;
+          directionNext = GameConstants.Key.UP;
         }
       } else if(fruitPos.y > currentPosition.y) {
         if(fruitPos.y - currentPosition.y > this.grid.height / 2) {
-          directionNext = KEY_UP;
+          directionNext = GameConstants.Key.UP;
         } else {
-          directionNext = KEY_BOTTOM;
+          directionNext = GameConstants.Key.BOTTOM;
         }
       }
 
@@ -389,14 +389,14 @@ Snake.prototype.simpleAI = function() {
         nextPosition = this.getNextPosition(currentPosition, firstDifferentDirection);
 
         if(this.grid.isDeadPosition(nextPosition)) {
-          if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_UP))) {
-            directionNext = KEY_UP;
-          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_RIGHT))) {
-            directionNext = KEY_RIGHT;
-          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_BOTTOM))) {
-            directionNext = KEY_BOTTOM;
-          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, KEY_LEFT))) {
-            directionNext = KEY_LEFT;
+          if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.UP))) {
+            directionNext = GameConstants.Key.UP;
+          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.RIGHT))) {
+            directionNext = GameConstants.Key.RIGHT;
+          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.BOTTOM))) {
+            directionNext = GameConstants.Key.BOTTOM;
+          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.LEFT))) {
+            directionNext = GameConstants.Key.LEFT;
           }
         } else {
           directionNext = nextPosition.convertToKeyDirection();
@@ -409,11 +409,11 @@ Snake.prototype.simpleAI = function() {
 
 Snake.prototype.ai = function(bestFind) {
     var bestFind = bestFind == undefined ? false : bestFind;
-    var res = KEY_RIGHT;
+    var res = GameConstants.Key.RIGHT;
 
-    if(this.aiLevel == AI_LEVEL_RANDOM) {
+    if(this.aiLevel == GameConstants.AiLevel.RANDOM) {
       res = this.randomAI();
-    } else if(this.aiLevel == AI_LEVEL_LOW) {
+    } else if(this.aiLevel == GameConstants.AiLevel.LOW) {
         res = this.simpleAI();
     } else {
       if(this.grid.fruitPos != null) {
@@ -423,7 +423,7 @@ Snake.prototype.ai = function(bestFind) {
         var grid = this.grid.getGraph(false);
         var graph = new Lowlight.Astar.Configuration(grid, {
           order: "yx",
-          torus: (this.aiLevel == AI_LEVEL_HIGH || this.aiLevel == AI_LEVEL_ULTRA) ? true : false,
+          torus: (this.aiLevel == GameConstants.AiLevel.HIGH || this.aiLevel == GameConstants.AiLevel.ULTRA) ? true : false,
           diagonals: false,
           cutting: false,
           static: true,
@@ -434,7 +434,7 @@ Snake.prototype.ai = function(bestFind) {
         if(path.length > 1) {
           var nextPosition = new Position(path[1].x, path[1].y);
           res = new Position(null, null, this.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
-        } else if(this.aiLevel == AI_LEVEL_HIGH || this.aiLevel == AI_LEVEL_ULTRA) {
+        } else if(this.aiLevel == GameConstants.AiLevel.HIGH || this.aiLevel == GameConstants.AiLevel.ULTRA) {
           res = this.simpleAI();
         }
 
@@ -447,15 +447,15 @@ Snake.prototype.ai = function(bestFind) {
 
 Snake.prototype.getAILevelText = function() {
     switch(this.aiLevel) {
-      case AI_LEVEL_RANDOM:
+      case GameConstants.AiLevel.RANDOM:
         return window.i18next.t("engine.aiLevelList.random");
-      case AI_LEVEL_LOW:
+      case GameConstants.AiLevel.LOW:
         return window.i18next.t("engine.aiLevelList.low");
-      case AI_LEVEL_DEFAULT:
+      case GameConstants.AiLevel.DEFAULT:
         return window.i18next.t("engine.aiLevelList.normal");
-      case AI_LEVEL_HIGH:
+      case GameConstants.AiLevel.HIGH:
         return window.i18next.t("engine.aiLevelList.high");
-      case AI_LEVEL_ULTRA:
+      case GameConstants.AiLevel.ULTRA:
         return window.i18next.t("engine.aiLevelList.ultra");
       default:
         return window.i18next.t("engine.aiLevelList.normal");

@@ -16,35 +16,32 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-var CaseType = {
+var GameConstants = {
+  CaseType: {
     EMPTY: 0,
     SNAKE: 1,
     FRUIT: 2,
     WALL: 3,
     SNAKE_DEAD: 4,
     SURROUNDED: 5
-};
-
-var PlayerType = {
+  },
+  PlayerType: {
     AI: "PLAYER_AI",
     HUMAN: "PLAYER_HUMAN",
     HYBRID_HUMAN_AI: "PLAYER_HYBRID_HUMAN_AI"
-};
-
-var AiLevel = {
+  },
+  AiLevel: {
     RANDOM: "AI_LEVEL_RANDOM",
     LOW: "AI_LEVEL_LOW",
     DEFAULT: "AI_LEVEL_DEFAULT",
     HIGH: "AI_LEVEL_HIGH",
     ULTRA: "AI_LEVEL_ULTRA"
-};
-
-var OutputType = {
+  },
+  OutputType: {
     TEXT: "OUTPUT_TEXT",
     GRAPHICAL: "OUTPUT_GRAPHICAL"
-};
-
-var Setting = {
+  },
+  Setting: {
     CANVAS_WIDTH: 800,
     CANVAS_HEIGHT: 600,
     FONT_FAMILY: "Delius",
@@ -58,36 +55,31 @@ var Setting = {
     CAR_TO_PRERENDER: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "×"],
     APP_VERSION: "1.4.2",
     DATE_VERSION: "10/07/2019"
-};
-
-var Direction = {
+  },
+  Direction: {
     UP: 0,
+    TOP: 0,
     RIGHT: 1,
     BOTTOM: 2,
+    DOWN: 2,
     LEFT: 3,
     ANGLE_1: 4,
     ANGLE_2: 5,
     ANGLE_3: 6,
     ANGLE_4: 7
-};
-
-var Key = {
+  },
+  Key: {
     UP: 38,
     RIGHT: 39,
     BOTTOM: 40,
     LEFT: 37,
     ENTER: 13
+  }
 };
 
 // Export module
 if(typeof(module) !== "undefined") {
-    module.exports = {
-        CaseType: CaseType,
-        PlayerType: PlayerType,
-        AiLevel: AiLevel,
-        OutputType: OutputType,
-        Setting: Setting,
-        Direction: Direction,
-        Key: Key
-    };
+  module.exports = {
+    GameConstants: GameConstants
+  };
 }

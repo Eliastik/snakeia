@@ -242,13 +242,13 @@ GameEngine.prototype.tick = function() {
           self.ticks++;
 
           if(!self.paused) {
-              if(self.lastKey == KEY_ENTER) {
+              if(self.lastKey == GameConstants.Key.ENTER) {
                   self.pause();
                   self.lastKey = -1;
               }
           }
 
-          if(!self.grid.maze || self.grid.mazeForceAuto || ((self.grid.maze && (self.getNBPlayer(PLAYER_HUMAN) <= 0 && self.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) <= 0))) || (self.grid.maze && ((self.getNBPlayer(PLAYER_HUMAN) > 0 || self.getNBPlayer(PLAYER_HYBRID_HUMAN_AI) > 0) && self.lastKey != -1))) {
+          if(!self.grid.maze || self.grid.mazeForceAuto || ((self.grid.maze && (self.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (self.grid.maze && ((self.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && self.lastKey != -1))) {
               for(var i = 0; i < self.snakes.length; i++) {
                 var initialDirection = self.snakes[i].direction;
                 var setFruit = false;
@@ -256,16 +256,16 @@ GameEngine.prototype.tick = function() {
                 self.snakes[i].lastTailMoved = false;
 
                 if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
-                  if(self.snakes[i].player == PLAYER_HUMAN || self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) {
+                  if(self.snakes[i].player == GameConstants.PlayerType.HUMAN || self.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
                     self.snakes[i].moveTo(self.lastKey);
                     self.lastKey = -1;
-                  } else if(self.snakes[i].player == PLAYER_AI) {
+                  } else if(self.snakes[i].player == GameConstants.PlayerType.AI) {
                     self.snakes[i].moveTo(self.snakes[i].ai(true));
                   }
 
                   var headSnakePos = self.snakes[i].getHeadPosition();
 
-                  if(self.snakes[i].player == PLAYER_HYBRID_HUMAN_AI && self.grid.isDeadPosition(self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction))) {
+                  if(self.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI && self.grid.isDeadPosition(self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction))) {
                     self.snakes[i].direction = initialDirection;
                     self.snakes[i].moveTo(self.snakes[i].ai(true));
                     self.lastKey = -1;
@@ -276,7 +276,7 @@ GameEngine.prototype.tick = function() {
                   if(self.grid.isDeadPosition(headSnakePos)) {
                     self.snakes[i].setGameOver();
                   } else {
-                    if(self.grid.get(headSnakePos) == FRUIT_VAL) {
+                    if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT) {
                       self.snakes[i].score++;
                       self.reactor.dispatchEvent("onScoreIncreased");
                       self.snakes[i].insert(headSnakePos);
@@ -336,7 +336,7 @@ GameEngine.prototype.tick = function() {
           
           self.tick();
       }
-    }, this.initialSpeed * Setting.TIME_MULTIPLIER);
+    }, this.initialSpeed * GameConstants.Setting.TIME_MULTIPLIER);
 };
 
 GameEngine.prototype.onReset = function(callback) {

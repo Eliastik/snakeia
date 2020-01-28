@@ -55,7 +55,7 @@ onmessage = function(e) {
             "enablePause": game.enablePause,
             "enableRetry": game.enableRetry,
             "progressiveSpeed": game.progressiveSpeed,
-            "offsetFrame": game.speed * Setting.TIME_MULTIPLIER,
+            "offsetFrame": game.speed * GameConstants.Setting.TIME_MULTIPLIER,
             "errorOccurred": game.errorOccurred
         }]);
     
@@ -75,7 +75,7 @@ onmessage = function(e) {
                 "initialSpeed": game.initialSpeed,
                 "speed": game.speed,
                 "snakes": JSON.parse(JSON.stringify(game.snakes)),
-                "offsetFrame": game.speed * Setting.TIME_MULTIPLIER,
+                "offsetFrame": game.speed * GameConstants.Setting.TIME_MULTIPLIER,
                 "confirmReset": false,
                 "confirmExit": false,
                 "getInfos": false,
