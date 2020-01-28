@@ -36,3 +36,10 @@ Reactor.prototype.dispatchEvent = function(eventName, eventArgs) {
 Reactor.prototype.addEventListener = function(eventName, callback) {
     this.events[eventName].registerCallback(callback);
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+    module.exports = {
+        Reactor: Reactor
+    };
+}

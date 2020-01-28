@@ -16,6 +16,34 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+// Polyfills
+if(typeof(window) !== "undefined") {
+    window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.oRequestAnimationFrame;
+    window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame || window.msCancelAnimationFrame || window.oCancelAnimationFrame || window.mozCancelRequestAnimationFrame || window.webkitCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame;
+}
+
+if(typeof(document) !== "undefined" && typeof(document.fullscreenElement) === "undefined") {
+    Object.defineProperty(document, "fullscreenElement", {
+        get: function() {
+            return document.mozFullScreenElement || document.msFullscreenElement || document.webkitFullscreenElement || document.oFullscreenElement;
+        }
+    });
+}
+
+if(typeof(document) !== "undefined") {
+    document.exitFullscreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen;
+}
+
+if(typeof(screen) !== "undefined") {
+    screen.orientation = screen.msOrientation || screen.mozOrientation || screen.orientation;
+}
+
+if(!String.prototype.trim) {
+    String.prototype.trim = function () {
+        return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    };
+}
+
 // Old game API
 function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
     var controller;
@@ -33,6 +61,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
     return controller;
 }
+
 // Constants
 // Case type
 EMPTY_VAL = CaseType.EMPTY;
@@ -84,3 +113,10 @@ CAR_TO_PRERENDER = Setting.CAR_TO_PRERENDER
 // Infos
 APP_VERSION = Setting.APP_VERSION;
 DATE_VERSION = Setting.DATE_VERSION;
+
+// Export module
+if(typeof(module) !== "undefined") {
+    module.exports = {
+        Game: Game
+    };
+}

@@ -17,83 +17,83 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 function ImageLoader() {
-    this.images = {};
-    this.triedLoading = 0;
-    this.hasError = false;
-    this.nbImagesToLoad = 1;
-    this.firstImage = true;
+  this.images = {};
+  this.triedLoading = 0;
+  this.hasError = false;
+  this.nbImagesToLoad = 1;
+  this.firstImage = true;
 }
 
 ImageLoader.prototype.load = function(img, func, game) {
-    var self = this;
+  var self = this;
 
-    if(this.firstImage) {
-      this.nbImagesToLoad = img.length;
-      this.firstImage = false;
-    }
+  if(this.firstImage) {
+    this.nbImagesToLoad = img.length;
+    this.firstImage = false;
+  }
 
-    if(img.length > 0) {
-      this.loadImage(img[0], function(result) {
-        if(result == true) {
-          img.shift();
-          self.load(img, func, game);
-        } else {
-          self.hasError = true;
-          return func();
-        }
-      });
-    } else {
-      return func();
-    }
+  if(img.length > 0) {
+    this.loadImage(img[0], function(result) {
+      if(result == true) {
+        img.shift();
+        self.load(img, func, game);
+      } else {
+        self.hasError = true;
+        return func();
+      }
+    });
+  } else {
+    return func();
+  }
 
-    if(game != undefined && game != null && game instanceof Game) {
-      game.updateUI();
-    }
+  if(game != undefined && game != null && game instanceof Game) {
+    game.updateUI();
+  }
 };
 
 ImageLoader.prototype.loadImage = function(src, func) {
-    var self = this;
-    
-    this.triedLoading++;
+  var self = this;
+  
+  this.triedLoading++;
 
-    var image = new Image();
-    image.src = src;
+  var image = new Image();
+  image.src = src;
 
-    image.onload = function() {
+  image.onload = function() {
+    if(self.images != null) {
+      self.images[src] = image;
+    } else {
+      return func(false);
+    }
+
+    self.triedLoading = 0;
+    return func(true);
+  };
+
+  image.onerror = function() {
+    if(self.triedLoading >= 5) {
       if(self.images != null) {
         self.images[src] = image;
-      } else {
-        return func(false);
       }
 
       self.triedLoading = 0;
-      return func(true);
-    };
-
-    image.onerror = function() {
-      if(self.triedLoading >= 5) {
-        if(self.images != null) {
-          self.images[src] = image;
-        }
-
-        self.triedLoading = 0;
-        return func(false);
-      }
-
-      setTimeout(function() {
-        self.loadImage(src, func);
-      }, 250);
+      return func(false);
     }
+
+    setTimeout(function() {
+      self.loadImage(src, func);
+    }, 250);
+  }
 };
 
 ImageLoader.prototype.get = function(src) {
-    if(this.images != null) {
-      return this.images[src];
-    } else {
-      return null;
-    }
+  if(this.images != null) {
+    return this.images[src];
+  } else {
+    return null;
+  }
 };
 
 ImageLoader.prototype.clear = function() {
-    this.images = null;
+  this.images = null;
 };

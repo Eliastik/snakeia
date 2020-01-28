@@ -73,3 +73,10 @@ Position.prototype.indexIn = function(array) {
     
     return -1;
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+    module.exports = {
+      Position: Position
+    };
+}

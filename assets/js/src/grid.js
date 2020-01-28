@@ -101,7 +101,7 @@ Grid.prototype.fixWalls = function(borderWalls) {
 };
 
 Grid.prototype.maze_recursion = function(r, c) {
-    var directions = shuffle([UP, RIGHT, BOTTOM, LEFT]);
+    var directions = GameUtils.shuffle([UP, RIGHT, BOTTOM, LEFT]);
 
     for(var i = 0; i < directions.length; i++) {
       switch(directions[i]) {
@@ -218,7 +218,7 @@ Grid.prototype.getGraph = function(ignoreSnakePos) {
 };
 
 Grid.prototype.getRandomPosition = function() {
-    return new Position(randRange(0, this.width - 1), randRange(0, this.height - 1));
+    return new Position(GameUtils.randRange(0, this.width - 1), GameUtils.randRange(0, this.height - 1));
 };
 
 Grid.prototype.setFruit = function() {
@@ -430,3 +430,10 @@ Grid.prototype.toString = function() {
 
   return res;
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+    module.exports = {
+      Grid: Grid
+    };
+}

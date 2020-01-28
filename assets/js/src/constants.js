@@ -78,3 +78,16 @@ var Key = {
     LEFT: 37,
     ENTER: 13
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+    module.exports = {
+        CaseType: CaseType,
+        PlayerType: PlayerType,
+        AiLevel: AiLevel,
+        OutputType: OutputType,
+        Setting: Setting,
+        Direction: Direction,
+        Key: Key
+    };
+}

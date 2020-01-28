@@ -17,7 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 importScripts("../libs/lowlight.astar.min.js");
-importScripts("util.js");
+importScripts("gameUtils.js");
 importScripts("constants.js");
 importScripts("event.js");
 importScripts("reactor.js");

@@ -17,36 +17,36 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 function Button(text, x, y, alignement, color, colorHover, width, height, fontSize, fontFamily, fontColor, imgSrc, imageLoader, verticalAlignement) {
-    this.x = x || 0;
-    this.y = y || 0;
-    this.initialX = x;
-    this.initialY = y;
-    this.width = width || "auto";
-    this.height = height || "auto";
-    this.autoWidth = (this.width == "auto" ? true : false);
-    this.autoHeight = (this.height == "auto" ? true : false);
-    this.clicked = false;
-    this.hovered = false;
-    this.text = text;
-    this.fontSize = fontSize || Math.floor(FONT_SIZE / 1.25);
-    this.fontFamily = fontFamily || FONT_FAMILY;
-    this.fontColor = fontColor || "white";
-    this.color = color || "rgba(0, 0, 0, 0)";
-    this.colorHover = colorHover || "#95a5a6";
-    this.triggerClick;
-    this.triggerHover;
-    this.init = false;
-    this.disabled = false;
-    this.alignement = alignement || "default";
-    this.image;
-    this.imgSrc = imgSrc;
-    this.verticalAlignement = verticalAlignement || "default";
-    this.selected = false;
-    this.imageLoader = imageLoader;
+  this.x = x || 0;
+  this.y = y || 0;
+  this.initialX = x;
+  this.initialY = y;
+  this.width = width || "auto";
+  this.height = height || "auto";
+  this.autoWidth = (this.width == "auto" ? true : false);
+  this.autoHeight = (this.height == "auto" ? true : false);
+  this.clicked = false;
+  this.hovered = false;
+  this.text = text;
+  this.fontSize = fontSize || Math.floor(FONT_SIZE / 1.25);
+  this.fontFamily = fontFamily || FONT_FAMILY;
+  this.fontColor = fontColor || "white";
+  this.color = color || "rgba(0, 0, 0, 0)";
+  this.colorHover = colorHover || "#95a5a6";
+  this.triggerClick;
+  this.triggerHover;
+  this.init = false;
+  this.disabled = false;
+  this.alignement = alignement || "default";
+  this.image;
+  this.imgSrc = imgSrc;
+  this.verticalAlignement = verticalAlignement || "default";
+  this.selected = false;
+  this.imageLoader = imageLoader;
 }
   
 function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height, color, colorHover, imageLoader) {
-    return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc, imageLoader, verticalAlignement);
+  return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc, imageLoader, verticalAlignement);
 }
   
 Button.prototype.draw = function(game) {

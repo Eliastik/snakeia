@@ -319,7 +319,7 @@ Snake.prototype.randomAI = function() {
       var direction = null;
 
       while(direction == null || this.grid.isDeadPosition(this.getNextPosition(currentPosition, direction))) {
-        var r = randRange(1, 4);
+        var r = GameUtils.randRange(1, 4);
 
         switch(r) {
           case 1:
@@ -461,3 +461,10 @@ Snake.prototype.getAILevelText = function() {
         return window.i18next.t("engine.aiLevelList.normal");
     }
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+    module.exports = {
+      Snake: Snake
+    };
+}

@@ -71,13 +71,13 @@ GameEngine.prototype.init = function() {
       this.errorOccured = true;
     }
   
-    var startHue = randRange(0, 360);
+    var startHue = GameUtils.randRange(0, 360);
   
     for(var i = 0; i < this.snakes.length; i++) {
       if(this.snakes[i] instanceof Snake == false) {
         this.errorOccured = true;
       } else {
-        startHue = addHue(startHue, Math.round(360 / (this.snakes.length)));
+        startHue = GameUtils.addHue(startHue, Math.round(360 / (this.snakes.length)));
         this.snakes[i].color = startHue;
       }
     }
@@ -378,3 +378,10 @@ GameEngine.prototype.onUpdate = function(callback) {
 GameEngine.prototype.onUpdateCounter = function(callback) {
     this.reactor.addEventListener("onUpdateCounter", callback);
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+    module.exports = {
+        GameEngine: GameEngine
+    };
+}
