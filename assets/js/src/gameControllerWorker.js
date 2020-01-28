@@ -27,7 +27,7 @@ function GameControllerWorker(game, ui) {
                 this.worker = new Worker("assets/js/src/gameEngineWorker.js");
             } catch(e) {
                 this.update("init", {
-                    "errorOccured": true
+                    "errorOccurred": true
                 });
                 return;
             }
@@ -99,14 +99,14 @@ function GameControllerWorker(game, ui) {
             } else {
                 if(this.gameUI != null) {
                     this.update("init", {
-                        "errorOccured": true
+                        "errorOccurred": true
                     });
                 }
             }
         } else {
             if(this.gameUI != null) {
                 this.update("init", {
-                    "errorOccured": true
+                    "errorOccurred": true
                 });
             }
         }

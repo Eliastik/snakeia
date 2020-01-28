@@ -28,6 +28,7 @@ function GameController(engine, ui) {
     this.starting = false;
     this.scoreMax = false;
     this.gameFinished = false;
+    this.errorOccurred = false;
     // Events
     this.reactor = new Reactor();
     this.reactor.registerEvent("onStart");
@@ -51,7 +52,8 @@ GameController.prototype.init = function() {
         "enablePause": this.gameEngine.enablePause,
         "enableRetry": this.gameEngine.enableRetry,
         "progressiveSpeed": this.gameEngine.progressiveSpeed,
-        "offsetFrame": this.gameEngine.speed * Setting.TIME_MULTIPLIER
+        "offsetFrame": this.gameEngine.speed * Setting.TIME_MULTIPLIER,
+        "errorOccurred": this.gameEngine.errorOccurred
     });
 
     this.gameEngine.onReset(function() {
@@ -63,7 +65,6 @@ GameController.prototype.init = function() {
             "numFruit": self.gameEngine.numFruit,
             "ticks": self.gameEngine.ticks,
             "scoreMax": self.gameEngine.scoreMax,
-            "errorOccured": self.gameEngine.errorOccured,
             "gameOver": self.gameEngine.gameOver,
             "gameFinished": self.gameEngine.gameFinished,
             "gameMazeWin": self.gameEngine.gameMazeWin,
@@ -75,7 +76,8 @@ GameController.prototype.init = function() {
             "confirmReset": false,
             "confirmExit": false,
             "getInfos": false,
-            "getInfosGame": false
+            "getInfosGame": false,
+            "errorOccurred": self.gameEngine.errorOccurred
         });
         self.reactor.dispatchEvent("onReset");
     });
@@ -85,14 +87,14 @@ GameController.prototype.init = function() {
             "snakes": self.gameEngine.snakes,
             "grid": self.gameEngine.grid,
             "starting": self.gameEngine.starting,
-            "errorOccured": self.gameEngine.errorOccured,
             "countBeforePlay": self.gameEngine.countBeforePlay,
             "paused": self.gameEngine.paused,
             "isReseted": self.gameEngine.isReseted,
             "confirmReset": false,
             "confirmExit": false,
             "getInfos": false,
-            "getInfosGame": false
+            "getInfosGame": false,
+            "errorOccurred": self.gameEngine.errorOccurred
         });
         self.reactor.dispatchEvent("onStart");
     });
@@ -103,7 +105,8 @@ GameController.prototype.init = function() {
             "confirmReset": false,
             "confirmExit": false,
             "getInfos": false,
-            "getInfosGame": false
+            "getInfosGame": false,
+            "errorOccurred": self.gameEngine.errorOccurred
         });
         self.reactor.dispatchEvent("onPause");
     });
@@ -113,7 +116,8 @@ GameController.prototype.init = function() {
             "confirmReset": false,
             "confirmExit": false,
             "getInfos": false,
-            "getInfosGame": false
+            "getInfosGame": false,
+            "errorOccurred": self.gameEngine.errorOccurred
         });
         self.reactor.dispatchEvent("onContinue");
     });
@@ -127,7 +131,8 @@ GameController.prototype.init = function() {
             "confirmReset": false,
             "confirmExit": false,
             "getInfos": false,
-            "getInfosGame": false
+            "getInfosGame": false,
+            "errorOccurred": self.gameEngine.errorOccurred
         });
         self.reactor.dispatchEvent("onStop");
     });
@@ -141,7 +146,8 @@ GameController.prototype.init = function() {
             "confirmReset": false,
             "confirmExit": false,
             "getInfos": false,
-            "getInfosGame": false
+            "getInfosGame": false,
+            "errorOccurred": self.gameEngine.errorOccurred
         });
         self.reactor.dispatchEvent("onExit");
     });
@@ -157,7 +163,8 @@ GameController.prototype.init = function() {
             "confirmReset": false,
             "confirmExit": false,
             "getInfos": false,
-            "getInfosGame": false
+            "getInfosGame": false,
+            "errorOccurred": self.gameEngine.errorOccurred
         });
         self.reactor.dispatchEvent("onKill");
     });
@@ -166,7 +173,8 @@ GameController.prototype.init = function() {
         self.update("scoreIncreased", {
             "snakes": self.gameEngine.snakes,
             "scoreMax": self.gameEngine.scoreMax,
-            "gameFinished": self.gameEngine.gameFinished
+            "gameFinished": self.gameEngine.gameFinished,
+            "errorOccurred": self.gameEngine.errorOccurred
         });
         self.reactor.dispatchEvent("onScoreIncreased");
     });
@@ -180,7 +188,6 @@ GameController.prototype.init = function() {
             "numFruit": self.gameEngine.numFruit,
             "ticks": self.gameEngine.ticks,
             "scoreMax": self.gameEngine.scoreMax,
-            "errorOccured": self.gameEngine.errorOccured,
             "gameOver": self.gameEngine.gameOver,
             "gameFinished": self.gameEngine.gameFinished,
             "gameMazeWin": self.gameEngine.gameMazeWin,
@@ -190,7 +197,8 @@ GameController.prototype.init = function() {
             "snakes": self.gameEngine.snakes,
             "countBeforePlay": self.gameEngine.countBeforePlay,
             "numFruit": self.gameEngine.numFruit,
-            "offsetFrame": 0
+            "offsetFrame": 0,
+            "errorOccurred": self.gameEngine.errorOccurred
         });
         self.reactor.dispatchEvent("onUpdate");
     });
@@ -204,7 +212,6 @@ GameController.prototype.init = function() {
             "numFruit": self.gameEngine.numFruit,
             "ticks": self.gameEngine.ticks,
             "scoreMax": self.gameEngine.scoreMax,
-            "errorOccured": self.gameEngine.errorOccured,
             "gameOver": self.gameEngine.gameOver,
             "gameFinished": self.gameEngine.gameFinished,
             "gameMazeWin": self.gameEngine.gameMazeWin,
@@ -213,7 +220,8 @@ GameController.prototype.init = function() {
             "speed": self.gameEngine.speed,
             "snakes": self.gameEngine.snakes,
             "countBeforePlay": self.gameEngine.countBeforePlay,
-            "numFruit": self.gameEngine.numFruit
+            "numFruit": self.gameEngine.numFruit,
+            "errorOccurred": self.gameEngine.errorOccurred
         });
         self.reactor.dispatchEvent("onUpdateCounter");
     });

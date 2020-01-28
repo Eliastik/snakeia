@@ -202,6 +202,14 @@ GameGroup.prototype.closeNotification = function() {
     }
 };
 
+GameGroup.prototype.errorOccurred = function() {
+    for(var i = 0; i < this.games.length; i++) {
+        if(this.games[i].errorOccurred) return true;
+    }
+
+    return false;
+};
+
 GameGroup.prototype.getWinners = function() {
     winners = [];
     index = [];

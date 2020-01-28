@@ -53,7 +53,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.enableRetry = false;
   this.progressiveSpeed = false;
   // Game state variables
-  this.errorOccured = false;
+  this.errorOccurred = false;
   this.fullscreen = false;
   // Menus state variables
   this.lastKeyMenu = -1;
@@ -194,194 +194,194 @@ GameUI.prototype.init = function() {
 };
 
 GameUI.prototype.autoResizeCanvas = function() {
-    if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
-      if(!document.fullscreenElement) {
-        if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
-          var ratio = this.canvasWidth / this.canvasHeight;
-          this.canvas.width = document.documentElement.clientWidth * 0.85;
-          this.canvas.height = this.canvas.width / ratio;
-        } else {
-          this.canvas.width = this.canvasWidth;
-          this.canvas.height = this.canvasHeight;
-        }
-      } else if(document.fullscreenElement == this.canvas) {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+  if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
+    if(!document.fullscreenElement) {
+      if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
+        var ratio = this.canvasWidth / this.canvasHeight;
+        this.canvas.width = document.documentElement.clientWidth * 0.85;
+        this.canvas.height = this.canvas.width / ratio;
+      } else {
+        this.canvas.width = this.canvasWidth;
+        this.canvas.height = this.canvasHeight;
       }
+    } else if(document.fullscreenElement == this.canvas) {
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = window.innerHeight;
     }
+  }
 };
 
 GameUI.prototype.setIntervalCountFPS = function() {
-    var self = this;
+  var self = this;
 
-    this.clearIntervalCountFPS();
+  this.clearIntervalCountFPS();
 
-    this.intervalCountFPS = window.setInterval(function() {
-      self.countFPS();
-    }, 1000);
+  this.intervalCountFPS = window.setInterval(function() {
+    self.countFPS();
+  }, 1000);
 };
 
 GameUI.prototype.countFPS = function() {
-    if(this.lastFrame > 0) this.currentFPS = this.frame - this.lastFrame;
-    this.lastFrame = this.frame;
+  if(this.lastFrame > 0) this.currentFPS = this.frame - this.lastFrame;
+  this.lastFrame = this.frame;
 };
 
 GameUI.prototype.clearIntervalCountFPS = function() {
-    clearInterval(this.intervalCountFPS);
+  clearInterval(this.intervalCountFPS);
 };
 
 GameUI.prototype.getNBPlayer = function(type) {
-    return this.controller.getNBPlayer(type);
+  return this.controller.getNBPlayer(type);
 };
 
 GameUI.prototype.getPlayer = function(num, type) {
-    return this.controller.getPlayer(num, type);
+  return this.controller.getPlayer(num, type);
 };
 
 GameUI.prototype.reset = function() {
-    this.controller.reset();
+  this.controller.reset();
 };
 
 GameUI.prototype.start = function() {
-    this.controller.start();
+  this.controller.start();
 };
 
 GameUI.prototype.stop = function() {
-    this.controller.stop();
+  this.controller.stop();
 };
 
 GameUI.prototype.pause = function() {
-    this.controller.pause();
+  this.controller.pause();
 };
 
 GameUI.prototype.kill = function() {
-    this.controller.kill();
+  this.controller.kill();
 };
 
 GameUI.prototype.exit = function() {
-    this.controller.exit();
+  this.controller.exit();
 };
 
 GameUI.prototype.tick = function() {
-    this.controller.tick();
+  this.controller.tick();
 };
 
 GameUI.prototype.setKill = function() {
-    this.killed = true;
-    this.clearIntervalCountFPS();
+  this.killed = true;
+  this.clearIntervalCountFPS();
 
-    this.grid = null;
-    this.snakes = null;
-    this.preRenderedFont = null;
+  this.grid = null;
+  this.snakes = null;
+  this.preRenderedFont = null;
 
-    if(this.outputType == OUTPUT_TEXT) {
-      this.appendTo.removeChild(this.textarea);
-      this.textarea = null;
-    } else if(this.outputType == OUTPUT_GRAPHICAL) {
-      this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.appendTo.removeChild(this.canvas);
-      this.canvas = null;
-      this.canvasCtx = null;
-      this.imageLoader.clear();
-    }
+  if(this.outputType == OUTPUT_TEXT) {
+    this.appendTo.removeChild(this.textarea);
+    this.textarea = null;
+  } else if(this.outputType == OUTPUT_GRAPHICAL) {
+    this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.appendTo.removeChild(this.canvas);
+    this.canvas = null;
+    this.canvasCtx = null;
+    this.imageLoader.clear();
+  }
 };
 
 GameUI.prototype.toggleFullscreen = function() {
-    var self = this;
+  var self = this;
 
-    if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
-      if(!document.fullscreenElement) {
-        if(this.canvas.requestFullscreen) {
-          this.canvas.requestFullscreen();
-        } else if(this.canvas.mozRequestFullScreen) {
-          this.canvas.mozRequestFullScreen();
-        } else if(this.canvas.webkitRequestFullscreen) {
-          this.canvas.webkitRequestFullscreen();
-        } else if(this.canvas.msRequestFullscreen) {
-          this.canvas.msRequestFullscreen();
-        } else if(this.canvas.oRequestFullscreen) {
-          this.canvas.oRequestFullscreen();
-        }
-      } else {
-        if(document.exitFullscreen) {
-          document.exitFullscreen();
-        }
+  if(this.outputType == OUTPUT_GRAPHICAL && !this.killed) {
+    if(!document.fullscreenElement) {
+      if(this.canvas.requestFullscreen) {
+        this.canvas.requestFullscreen();
+      } else if(this.canvas.mozRequestFullScreen) {
+        this.canvas.mozRequestFullScreen();
+      } else if(this.canvas.webkitRequestFullscreen) {
+        this.canvas.webkitRequestFullscreen();
+      } else if(this.canvas.msRequestFullscreen) {
+        this.canvas.msRequestFullscreen();
+      } else if(this.canvas.oRequestFullscreen) {
+        this.canvas.oRequestFullscreen();
       }
-
-      var onfullscreenchange = function() {
-        if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
-          if(document.fullscreenElement == self.canvas) {
-            self.fullscreen = true;
-          } else {
-            self.fullscreen = false;
-          }
-
-          self.autoResizeCanvas();
-
-          if(document.fullscreenElement == self.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
-            screen.orientation.lock("landscape").catch(function() {});
-          }
-        }
-      };
-
-      if(typeof(document.onfullscreenchange) !== "undefined") {
-        document.onfullscreenchange = onfullscreenchange;
-      } else if(typeof(document.onmsfullscreenchange) !== "undefined") {
-        document.onmsfullscreenchange = onfullscreenchange;
-      } else if(typeof(document.onmozfullscreenchange) !== "undefined") {
-        document.onmozfullscreenchange = onfullscreenchange;
-      } else if(typeof(document.onwebkitfullscreenchange) !== "undefined") {
-        document.onwebkitfullscreenchange = onfullscreenchange;
-      } else if(typeof(document.onokitfullscreenchange) !== "undefined") {
-        document.onofullscreenchange = onfullscreenchange;
+    } else {
+      if(document.exitFullscreen) {
+        document.exitFullscreen();
       }
-
-      onfullscreenchange();
     }
+
+    var onfullscreenchange = function() {
+      if(self.outputType == OUTPUT_GRAPHICAL && !self.killed) {
+        if(document.fullscreenElement == self.canvas) {
+          self.fullscreen = true;
+        } else {
+          self.fullscreen = false;
+        }
+
+        self.autoResizeCanvas();
+
+        if(document.fullscreenElement == self.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
+          screen.orientation.lock("landscape").catch(function() {});
+        }
+      }
+    };
+
+    if(typeof(document.onfullscreenchange) !== "undefined") {
+      document.onfullscreenchange = onfullscreenchange;
+    } else if(typeof(document.onmsfullscreenchange) !== "undefined") {
+      document.onmsfullscreenchange = onfullscreenchange;
+    } else if(typeof(document.onmozfullscreenchange) !== "undefined") {
+      document.onmozfullscreenchange = onfullscreenchange;
+    } else if(typeof(document.onwebkitfullscreenchange) !== "undefined") {
+      document.onwebkitfullscreenchange = onfullscreenchange;
+    } else if(typeof(document.onokitfullscreenchange) !== "undefined") {
+      document.onofullscreenchange = onfullscreenchange;
+    }
+
+    onfullscreenchange();
+  }
 };
 
 GameUI.prototype.loadAssets = function() {
-    var self = this;
+  var self = this;
 
-    if(!this.errorOccured && this.outputType != OUTPUT_TEXT) {
-      this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/clock.png"], function() {
-        if(self.imageLoader.hasError == true) {
-          self.errorOccured = true;
-        } else {
-          self.assetsLoaded = true;
-          self.btnFullScreen.loadImage(self.imageLoader);
-          self.btnPause.loadImage(self.imageLoader);
-          self.btnTopArrow.loadImage(self.imageLoader);
-          self.btnBottomArrow.loadImage(self.imageLoader);
-          self.btnLeftArrow.loadImage(self.imageLoader);
-          self.btnRightArrow.loadImage(self.imageLoader);
-          self.start();
-        }
-      }, this);
-    } else if(!this.errorOccured && this.outputType == OUTPUT_TEXT) {
-      this.assetsLoaded = true;
-      this.start();
-    }
+  if(!this.errorOccurred && this.outputType != OUTPUT_TEXT) {
+    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/clock.png"], function() {
+      if(self.imageLoader.hasError == true) {
+        self.errorOccurred = true;
+      } else {
+        self.assetsLoaded = true;
+        self.btnFullScreen.loadImage(self.imageLoader);
+        self.btnPause.loadImage(self.imageLoader);
+        self.btnTopArrow.loadImage(self.imageLoader);
+        self.btnBottomArrow.loadImage(self.imageLoader);
+        self.btnLeftArrow.loadImage(self.imageLoader);
+        self.btnRightArrow.loadImage(self.imageLoader);
+        self.start();
+      }
+    }, this);
+  } else if(!this.errorOccurred && this.outputType == OUTPUT_TEXT) {
+    this.assetsLoaded = true;
+    this.start();
+  }
 };
 
 GameUI.prototype.startDraw = function(renderBlur) {
   var self = this;
 
   requestAnimationFrame(function() {
-    if(!this.killed) {
-        if(!document.hasFocus() && !this.paused) {
-          self.controller.pause();
-        }
-    
-        self.draw(renderBlur);
-        self.frame++;
+    if(!self.killed) {
+      if(!document.hasFocus() && !this.paused) {
+        self.controller.pause();
+      }
+  
+      self.draw(renderBlur);
+      self.frame++;
 
-        if(!self.paused) {
-            self.offsetFrame += (Date.now() - self.lastFrameTime);
-            self.lastFrameTime = Date.now();
-        }
+      if(!self.paused) {
+        self.offsetFrame += (Date.now() - self.lastFrameTime);
+        self.lastFrameTime = Date.now();
+      }
 
-        self.startDraw();
+      self.startDraw();
     }
   });
 }
@@ -437,7 +437,7 @@ GameUI.prototype.draw = function(renderBlur) {
       this.btnPause.draw(this);
     }
 
-    if(this.assetsLoaded && !this.errorOccured) {
+    if(this.assetsLoaded && !this.errorOccurred) {
 
       if(this.bestScoreToDisplay != undefined && this.bestScoreToDisplay != null) {
         displayBestScore = true;
@@ -517,7 +517,7 @@ GameUI.prototype.draw = function(renderBlur) {
             self.toggleFullscreen();
           });
         });
-      } else if(this.errorOccured) {
+      } else if(this.errorOccurred) {
        this.drawMenu(ctx, [this.btnQuit], this.imageLoader.hasError ? window.i18next.t("engine.errorLoading") : window.i18next.t("engine.error"), "red", this.fontSize, FONT_FAMILY, "center", null, true, function() {
          self.btnQuit.addClickAction(self.canvas, function() {
            self.confirmExit = false;
@@ -1302,37 +1302,40 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
     }
 
     var position = this.snakes[i].get(0);
-    var posX = position.x;
-    var posY = position.y;
-    var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
-    var caseY = this.headerHeight + posY * caseHeight;
 
-    if(!this.snakes[i].gameOver) {
-      var offset = this.offsetFrame / (this.speed * Setting.TIME_MULTIPLIER);
-      var offset = (offset > 1 ? 1 : offset);
-      var offsetX = (caseWidth * offset) - caseWidth;
-      var offsetY = (caseHeight * offset) - caseHeight;
-
-      switch(position.direction) {
-        case UP:
-          caseY -= offsetY;
-          break;
-        case BOTTOM:
-          caseY += offsetY;
-          break;
-        case RIGHT:
-          caseX += offsetX;
-          break;
-        case LEFT:
-          caseX -= offsetX;
-          break;
+    if(position != null) {
+      var posX = position.x;
+      var posY = position.y;
+      var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
+      var caseY = this.headerHeight + posY * caseHeight;
+  
+      if(!this.snakes[i].gameOver) {
+        var offset = this.offsetFrame / (this.speed * Setting.TIME_MULTIPLIER);
+        var offset = (offset > 1 ? 1 : offset);
+        var offsetX = (caseWidth * offset) - caseWidth;
+        var offsetY = (caseHeight * offset) - caseHeight;
+  
+        switch(position.direction) {
+          case UP:
+            caseY -= offsetY;
+            break;
+          case BOTTOM:
+            caseY += offsetY;
+            break;
+          case RIGHT:
+            caseX += offsetX;
+            break;
+          case LEFT:
+            caseX -= offsetX;
+            break;
+        }
       }
-    }
-
-    this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
-
-    if((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) && this.countBeforePlay >= 0 && ((GameUtils.isFilterHueAvailable() && this.snakes.length > 2) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
-      this.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
+  
+      this.drawText(ctx, ((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) ? window.i18next.t("engine.playerMin") + numPlayer : window.i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
+  
+      if((this.snakes[i].player == PLAYER_HUMAN || this.snakes[i].player == PLAYER_HYBRID_HUMAN_AI) && this.countBeforePlay >= 0 && ((GameUtils.isFilterHueAvailable() && this.snakes.length > 2) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
+        this.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
+      }
     }
   }
 };

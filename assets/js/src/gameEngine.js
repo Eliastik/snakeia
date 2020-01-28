@@ -42,7 +42,7 @@ function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpe
     this.gameFinished = false; // only used if 2 and more snakes
     this.gameMazeWin = false; // used in maze mode
     this.scoreMax = false;
-    this.errorOccured = false;
+    this.errorOccurred = false;
     // Intervals, timeouts, frames
     this.intervalPlay;
     // Events
@@ -63,19 +63,19 @@ function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpe
 
 GameEngine.prototype.init = function() {
     if(this.snakes == null || this.snakes == undefined) {
-      this.errorOccured = true;
+      this.errorOccurred = true;
       this.snakes = [];
     } else if(!Array.isArray(this.snakes)) {
       this.snakes = [this.snakes];
     } else if((Array.isArray(this.snakes) && this.snakes.length <= 0) || (this.grid.maze && this.snakes.length > 1)) {
-      this.errorOccured = true;
+      this.errorOccurred = true;
     }
   
     var startHue = GameUtils.randRange(0, 360);
   
     for(var i = 0; i < this.snakes.length; i++) {
       if(this.snakes[i] instanceof Snake == false) {
-        this.errorOccured = true;
+        this.errorOccurred = true;
       } else {
         startHue = GameUtils.addHue(startHue, Math.round(360 / (this.snakes.length)));
         this.snakes[i].color = startHue;
@@ -83,8 +83,8 @@ GameEngine.prototype.init = function() {
     }
   
     if(this.grid instanceof Grid == false) {
-      this.errorOccured = true;
-    } else if(!this.errorOccured) {
+      this.errorOccurred = true;
+    } else if(!this.errorOccurred) {
       this.grid.setFruit();
     }
 };
@@ -106,7 +106,7 @@ GameEngine.prototype.reset = function() {
     this.ticks = 0;
     this.lastKey = -1;
     this.scoreMax = false;
-    this.errorOccured = false;
+    this.errorOccurred = false;
     this.gameOver = false;
     this.gameFinished = false;
     this.gameMazeWin = false;
@@ -122,11 +122,11 @@ GameEngine.prototype.start = function() {
     this.reactor.dispatchEvent("onUpdateCounter");
     var self = this;
   
-    if(!this.errorOccured) {
+    if(!this.errorOccurred) {
         if(this.snakes != null) {
             for(var i = 0; i < this.snakes.length; i++) {
                 if(this.snakes[i].errorInit) {
-                    this.errorOccured = true;
+                    this.errorOccurred = true;
                     this.stop();
                 }
             }

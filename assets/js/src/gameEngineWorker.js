@@ -55,7 +55,8 @@ onmessage = function(e) {
             "enablePause": game.enablePause,
             "enableRetry": game.enableRetry,
             "progressiveSpeed": game.progressiveSpeed,
-            "offsetFrame": game.speed * Setting.TIME_MULTIPLIER
+            "offsetFrame": game.speed * Setting.TIME_MULTIPLIER,
+            "errorOccurred": game.errorOccurred
         }]);
     
         game.onReset(function() {
@@ -67,7 +68,6 @@ onmessage = function(e) {
                 "numFruit": game.numFruit,
                 "ticks": game.ticks,
                 "scoreMax": game.scoreMax,
-                "errorOccured": game.errorOccured,
                 "gameOver": game.gameOver,
                 "gameFinished": game.gameFinished,
                 "gameMazeWin": game.gameMazeWin,
@@ -79,7 +79,8 @@ onmessage = function(e) {
                 "confirmReset": false,
                 "confirmExit": false,
                 "getInfos": false,
-                "getInfosGame": false
+                "getInfosGame": false,
+                "errorOccurred": game.errorOccurred
             }]);
         });
     
@@ -88,14 +89,14 @@ onmessage = function(e) {
                 "snakes": JSON.parse(JSON.stringify(game.snakes)),
                 "grid": JSON.parse(JSON.stringify(game.grid)),
                 "starting": game.starting,
-                "errorOccured": game.errorOccured,
                 "countBeforePlay": game.countBeforePlay,
                 "paused": game.paused,
                 "isReseted": game.isReseted,
                 "confirmReset": false,
                 "confirmExit": false,
                 "getInfos": false,
-                "getInfosGame": false
+                "getInfosGame": false,
+                "errorOccurred": game.errorOccurred
             }]);
         });
     
@@ -105,7 +106,8 @@ onmessage = function(e) {
                 "confirmReset": false,
                 "confirmExit": false,
                 "getInfos": false,
-                "getInfosGame": false
+                "getInfosGame": false,
+                "errorOccurred": game.errorOccurred
             }]);
         });
     
@@ -114,7 +116,8 @@ onmessage = function(e) {
                 "confirmReset": false,
                 "confirmExit": false,
                 "getInfos": false,
-                "getInfosGame": false
+                "getInfosGame": false,
+                "errorOccurred": game.errorOccurred
             }]);
         });
     
@@ -127,7 +130,8 @@ onmessage = function(e) {
                 "confirmReset": false,
                 "confirmExit": false,
                 "getInfos": false,
-                "getInfosGame": false
+                "getInfosGame": false,
+                "errorOccurred": game.errorOccurred
             }]);
         });
     
@@ -140,7 +144,8 @@ onmessage = function(e) {
                 "confirmReset": false,
                 "confirmExit": false,
                 "getInfos": false,
-                "getInfosGame": false
+                "getInfosGame": false,
+                "errorOccurred": game.errorOccurred
             }]);
         });
     
@@ -155,7 +160,8 @@ onmessage = function(e) {
                 "confirmReset": false,
                 "confirmExit": false,
                 "getInfos": false,
-                "getInfosGame": false
+                "getInfosGame": false,
+                "errorOccurred": game.errorOccurred
             }]);
         });
     
@@ -164,7 +170,8 @@ onmessage = function(e) {
                 "snakes": JSON.parse(JSON.stringify(game.snakes)),
                 "grid": JSON.parse(JSON.stringify(game.grid)),
                 "scoreMax": game.scoreMax,
-                "gameFinished": game.gameFinished
+                "gameFinished": game.gameFinished,
+                "errorOccurred": game.errorOccurred
             }]);
         });
     
@@ -177,7 +184,6 @@ onmessage = function(e) {
                 "numFruit": game.numFruit,
                 "ticks": game.ticks,
                 "scoreMax": game.scoreMax,
-                "errorOccured": game.errorOccured,
                 "gameOver": game.gameOver,
                 "gameFinished": game.gameFinished,
                 "gameMazeWin": game.gameMazeWin,
@@ -187,7 +193,8 @@ onmessage = function(e) {
                 "snakes": JSON.parse(JSON.stringify(game.snakes)),
                 "countBeforePlay": game.countBeforePlay,
                 "numFruit": game.numFruit,
-                "offsetFrame": 0
+                "offsetFrame": 0,
+                "errorOccurred": game.errorOccurred
             }]);
         });
     
@@ -200,7 +207,6 @@ onmessage = function(e) {
                 "numFruit": game.numFruit,
                 "ticks": game.ticks,
                 "scoreMax": game.scoreMax,
-                "errorOccured": game.errorOccured,
                 "gameOver": game.gameOver,
                 "gameFinished": game.gameFinished,
                 "gameMazeWin": game.gameMazeWin,
@@ -209,7 +215,8 @@ onmessage = function(e) {
                 "speed": game.speed,
                 "snakes": JSON.parse(JSON.stringify(game.snakes)),
                 "countBeforePlay": game.countBeforePlay,
-                "numFruit": game.numFruit
+                "numFruit": game.numFruit,
+                "errorOccurred": game.errorOccurred
             }]);
         });
     } else if(game != null) {

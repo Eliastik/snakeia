@@ -795,7 +795,7 @@ function validateSettings(returnValidation) {
     }
 
     if(mazeGrid && (selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER)) {
-      group.setNotification(new NotificationMessage(window.i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, 0, null, null, true));
+      group.setNotification(new NotificationMessage(window.i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, null, null, null, true));
     }
 
     document.getElementById("backToMenuGame").onclick = function() {
@@ -807,7 +807,7 @@ function validateSettings(returnValidation) {
     };
 
     group.onStop(function() {
-      if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE) {
+      if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE && !group.errorOccurred()) {
         var resultMessage = "";
         var winners = group.getWinners();
 
@@ -862,7 +862,7 @@ function validateSettings(returnValidation) {
 
         if(resultMessage.trim() != "") {
           document.getElementById("gameOrder").innerHTML = resultMessage;
-          group.setNotification(new NotificationMessage(resultMessage, null, "rgba(52, 152, 219, 0.5)", 15, 0, null, null, true));
+          group.setNotification(new NotificationMessage(resultMessage, null, "rgba(52, 152, 219, 0.5)", 15, null, null, null, true));
         }
       }
     });
