@@ -24,7 +24,6 @@ importScripts("reactor.js");
 importScripts("position.js");
 importScripts("grid.js");
 importScripts("snake.js");
-importScripts("shim.js");
 importScripts("gameEngine.js");
 
 var game;

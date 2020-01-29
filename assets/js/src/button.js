@@ -28,8 +28,8 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.clicked = false;
   this.hovered = false;
   this.text = text;
-  this.fontSize = fontSize || Math.floor(FONT_SIZE / 1.25);
-  this.fontFamily = fontFamily || FONT_FAMILY;
+  this.fontSize = fontSize || Math.floor(GameConstants.Setting.FONT_SIZE / 1.25);
+  this.fontFamily = fontFamily || GameConstants.Setting.FONT_FAMILY;
   this.fontColor = fontColor || "white";
   this.color = color || "rgba(0, 0, 0, 0)";
   this.colorHover = colorHover || "#95a5a6";

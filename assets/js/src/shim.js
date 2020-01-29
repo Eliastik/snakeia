@@ -62,7 +62,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   return controller;
 }
 
-// Constants
+// Constants shim
 // Player type
 PLAYER_AI = GameConstants.PlayerType.AI;
 PLAYER_HUMAN = GameConstants.PlayerType.HUMAN;
@@ -82,15 +82,6 @@ ANGLE_1 = GameConstants.Direction.ANGLE_1;
 ANGLE_2 = GameConstants.Direction.ANGLE_2;
 ANGLE_3 = GameConstants.Direction.ANGLE_3;
 ANGLE_4 = GameConstants.Direction.ANGLE_4;
-// UI
-FONT_FAMILY = GameConstants.Setting.FONT_FAMILY;
-FONT_SIZE = GameConstants.Setting.FONT_SIZE;
-HEADER_HEIGHT_DEFAULT = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
-TARGET_FPS = GameConstants.Setting.TARGET_FPS;
-IMAGE_SNAKE_HUE = GameConstants.Setting.IMAGE_SNAKE_HUE;
-IMAGE_SNAKE_SATURATION = GameConstants.Setting.IMAGE_SNAKE_SATURATION;
-IMAGE_SNAKE_VALUE = GameConstants.Setting.IMAGE_SNAKE_VALUE;
-CAR_TO_PRERENDER = GameConstants.Setting.CAR_TO_PRERENDER
 // Infos
 APP_VERSION = GameConstants.Setting.APP_VERSION;
 DATE_VERSION = GameConstants.Setting.DATE_VERSION;

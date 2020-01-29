@@ -21,8 +21,8 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
     this.textColor = textColor == undefined ? "rgba(255, 255, 255, 0.75)" : textColor;
     this.backgroundColor = backgroundColor == undefined ? "rgba(46, 204, 113, 0.5)" : backgroundColor;
     this.delayBeforeClosing = delayBeforeClosing == undefined ? 5 : delayBeforeClosing; // second
-    this.fontSize = fontSize == undefined ? Math.floor(FONT_SIZE / 1.25) : fontSize;
-    this.fontFamily = fontFamily == undefined ? FONT_FAMILY : fontFamily;
+    this.fontSize = fontSize == undefined ? Math.floor(GameConstants.Setting.FONT_SIZE / 1.25) : fontSize;
+    this.fontFamily = fontFamily == undefined ? GameConstants.Setting.FONT_FAMILY : fontFamily;
     this.animationDelay = animationDelay == undefined ? 500 : animationDelay;
     this.foreGround = foreGround == undefined ? false : foreGround;
     this.timeLastFrame = 0;
