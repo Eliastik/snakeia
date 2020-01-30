@@ -27,7 +27,5 @@ Event.prototype.registerCallback = function(callback) {
 
 // Export module
 if(typeof(module) !== "undefined") {
-  module.exports = {
-    Event: Event
-  };
+  module.exports = Event;
 }

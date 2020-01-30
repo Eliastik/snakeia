@@ -16,32 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-if(typeof(require) !== "undefined") {
-  var Event = require("./event");
-}
-
-function Reactor() {
-  this.events = {};
-}
-
-Reactor.prototype.registerEvent = function(eventName) {
-  var event = new Event(eventName);
-  this.events[eventName] = event;
+// Exports engine classes
+module.exports = {
+    GameConstants: require("./assets/js/src/constants"),
+    Event: require("./assets/js/src/event"),
+    Reactor: require("./assets/js/src/reactor"),
+    Grid: require("./assets/js/src/grid"),
+    Snake: require("./assets/js/src/snake"),
+    GameGroup: require("./assets/js/src/gameGroup"),
+    GameUtils: require("./assets/js/src/gameUtils"),
+    Position: require("./assets/js/src/position"),
+    GameEngine: require('./assets/js/src/gameEngine'),
+    Game: require("./assets/js/src/shim").Game,
 };
-
-Reactor.prototype.dispatchEvent = function(eventName, eventArgs) {
-  var callbacks = this.events[eventName].callbacks;
-  
-  for(var i = 0, l = callbacks.length; i < l; i++) {
-    callbacks[i](eventArgs);
-  }
-};
-
-Reactor.prototype.addEventListener = function(eventName, callback) {
-  this.events[eventName].registerCallback(callback);
-};
-
-// Export module
-if(typeof(module) !== "undefined") {
-  module.exports = Reactor;
-}

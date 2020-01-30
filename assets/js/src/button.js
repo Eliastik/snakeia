@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var GameConstants = require("./constants");
+}
+
 function Button(text, x, y, alignement, color, colorHover, width, height, fontSize, fontFamily, fontColor, imgSrc, imageLoader, verticalAlignement) {
   this.x = x || 0;
   this.y = y || 0;
@@ -232,3 +236,8 @@ Button.prototype.enable = function() {
 Button.prototype.loadImage = function(imageLoader) {
   this.image = imageLoader.get(this.imgSrc);
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+  module.exports = Button;
+}

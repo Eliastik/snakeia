@@ -79,7 +79,5 @@ var GameConstants = {
 
 // Export module
 if(typeof(module) !== "undefined") {
-  module.exports = {
-    GameConstants: GameConstants
-  };
+  module.exports = GameConstants;
 }

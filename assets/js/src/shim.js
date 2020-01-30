@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var GameConstants = require("./constants");
+}
+
 // Polyfills
 if(typeof(window) !== "undefined") {
   window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.oRequestAnimationFrame;
@@ -88,7 +92,5 @@ DATE_VERSION = GameConstants.Setting.DATE_VERSION;
 
 // Export module
 if(typeof(module) !== "undefined") {
-  module.exports = {
-    Game: Game
-  };
+  module.exports = Game;
 }

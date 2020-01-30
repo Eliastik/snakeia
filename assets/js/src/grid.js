@@ -16,6 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var Lowlight = require("../libs/lowlight.astar.min");
+  var GameUtils = require("./gameUtils");
+  var GameConstants = require("./constants");
+  var Position = require("./position");
+}
+
 function Grid(width, height, generateWalls, borderWalls, maze, customGrid, mazeForceAuto) {
   this.width = width == undefined ? 20 : width;
   this.height = height == undefined ? 20 : height;
@@ -433,7 +440,5 @@ Grid.prototype.toString = function() {
 
 // Export module
 if(typeof(module) !== "undefined") {
-  module.exports = {
-    Grid: Grid
-  };
+  module.exports = Grid;
 }

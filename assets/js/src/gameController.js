@@ -363,3 +363,8 @@ GameController.prototype.onKill = function(callback) {
 GameController.prototype.onScoreIncreased = function(callback) {
   this.reactor.addEventListener("onScoreIncreased", callback);
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+  module.exports = GameController;
+}

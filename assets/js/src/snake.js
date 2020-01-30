@@ -16,6 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var Lowlight = require("../libs/lowlight.astar.min");
+  var GameUtils = require("./gameUtils");
+  var GameConstants = require("./constants");
+  var Position = require("./position");
+  var Grid = require("./grid");
+}
+
 function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.direction = direction == undefined ? GameConstants.Direction.RIGHT : direction;
   this.initialDirection = direction == undefined ? GameConstants.Direction.RIGHT : direction;
@@ -464,7 +472,5 @@ Snake.prototype.getAILevelText = function() {
 
 // Export module
 if(typeof(module) !== "undefined") {
-  module.exports = {
-    Snake: Snake
-  };
+  module.exports = Snake;
 }

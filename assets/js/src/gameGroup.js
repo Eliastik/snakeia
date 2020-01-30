@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var Reactor = require("./reactor");
+}
+
 function GameGroup(games) {
   this.games = games == undefined ? [] : games;
   this.reactor = new Reactor();
@@ -244,3 +248,8 @@ GameGroup.prototype.getWinners = function() {
     index: index
   }
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+  module.exports = GameGroup;
+}

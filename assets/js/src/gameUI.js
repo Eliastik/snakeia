@@ -16,6 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var GameUtils = require("./gameUtils");
+  var GameConstants = require("./constants");
+  var Position = require("./position");
+}
+
 function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
   // Assets loader
   this.imageLoader;
@@ -1339,3 +1345,8 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
     }
   }
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+  module.exports = GameUI;
+}

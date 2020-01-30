@@ -16,6 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var GameConstants = require("./constants");
+}
+
 function Position(x, y, direction) {
   this.x = x;
   this.y = y;
@@ -76,7 +80,5 @@ Position.prototype.indexIn = function(array) {
 
 // Export module
 if(typeof(module) !== "undefined") {
-  module.exports = {
-    Position: Position
-  };
+  module.exports = Position;
 }

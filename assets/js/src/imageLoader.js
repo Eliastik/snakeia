@@ -97,3 +97,8 @@ ImageLoader.prototype.get = function(src) {
 ImageLoader.prototype.clear = function() {
   this.images = null;
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+  module.exports = ImageLoader;
+}

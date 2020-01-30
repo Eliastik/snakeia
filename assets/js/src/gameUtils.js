@@ -107,7 +107,5 @@ var GameUtils = {
 
 // Export module
 if(typeof(module) !== "undefined") {
-  module.exports = {
-    GameUtils: GameUtils
-  };
+  module.exports = GameUtils;
 }

@@ -152,3 +152,8 @@ function GameControllerWorker(game, ui) {
  // extends GameController
 GameControllerWorker.prototype = Object.create(GameController).prototype;
 GameControllerWorker.prototype.constructor = GameControllerWorker;
+
+// Export module
+if(typeof(module) !== "undefined") {
+  module.exports = GameControllerWorker;
+}

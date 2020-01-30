@@ -16,6 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var GameUtils = require("./gameUtils");
+  var GameConstants = require("./constants");
+  var Reactor = require("./reactor");
+  var Grid = require("./grid");
+  var Snake = require("./snake");
+}
+
 function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed) {
   // Game settings
   this.grid = grid;
@@ -381,7 +389,5 @@ GameEngine.prototype.onUpdateCounter = function(callback) {
 
 // Export module
 if(typeof(module) !== "undefined") {
-  module.exports = {
-    GameEngine: GameEngine
-  };
+  module.exports = GameEngine;
 }

@@ -16,6 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var Button = require("./button");
+  var GameConstants = require("./constants");
+}
+
 function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround) {
   this.text = text;
   this.textColor = textColor == undefined ? "rgba(255, 255, 255, 0.75)" : textColor;
@@ -137,3 +142,8 @@ NotificationMessage.prototype.copy = function() {
 NotificationMessage.prototype.getFontSize = function(ctx) {
   return Math.floor(parseInt(ctx.font.match(/\d+/), 10) / 1.25);
 };
+
+// Export module
+if(typeof(module) !== "undefined") {
+  module.exports = NotificationMessage;
+}
