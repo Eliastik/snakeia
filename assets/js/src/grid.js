@@ -32,389 +32,389 @@ function Grid(width, height, generateWalls, borderWalls, maze, customGrid, mazeF
 }
 
 Grid.prototype.init = function(customGrid) {
-    if(customGrid != undefined || this.initialGrid != undefined) {
-      var gridToCopy;
+  if(customGrid != undefined || this.initialGrid != undefined) {
+    var gridToCopy;
 
-      if(this.initialGrid != undefined) {
-        gridToCopy = this.initialGrid;
-      } else {
-        gridToCopy = customGrid;
-      }
-
-      this.height = gridToCopy.length;
-      this.width = gridToCopy[0].length;
-
-      this.initialGrid = new Array(this.height);
-      this.grid = new Array(this.height);
-
-      for(var i = 0; i < this.height; i++) {
-        this.initialGrid[i] = gridToCopy[i].slice();
-        this.grid[i] = gridToCopy[i].slice();
-      }
+    if(this.initialGrid != undefined) {
+      gridToCopy = this.initialGrid;
     } else {
-      this.grid = new Array(this.height);
+      gridToCopy = customGrid;
+    }
 
-      for(var i = 0; i < this.height; i++) {
-        this.grid[i] = new Array(this.width);
+    this.height = gridToCopy.length;
+    this.width = gridToCopy[0].length;
 
-        for(var j = 0; j < this.width; j++) {
-          if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && Math.random() > 0.65) || this.maze) {
-            this.grid[i][j] = GameConstants.CaseType.WALL;
-          } else {
-            this.grid[i][j] = GameConstants.CaseType.EMPTY;
-          }
+    this.initialGrid = new Array(this.height);
+    this.grid = new Array(this.height);
+
+    for(var i = 0; i < this.height; i++) {
+      this.initialGrid[i] = gridToCopy[i].slice();
+      this.grid[i] = gridToCopy[i].slice();
+    }
+  } else {
+    this.grid = new Array(this.height);
+
+    for(var i = 0; i < this.height; i++) {
+      this.grid[i] = new Array(this.width);
+
+      for(var j = 0; j < this.width; j++) {
+        if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && Math.random() > 0.65) || this.maze) {
+          this.grid[i][j] = GameConstants.CaseType.WALL;
+        } else {
+          this.grid[i][j] = GameConstants.CaseType.EMPTY;
         }
       }
-
-      if(this.maze) {
-        this.generateMaze();
-      } else if(this.generateWalls) {
-        this.fixWalls(this.borderWalls);
-      }
     }
+
+    if(this.maze) {
+      this.generateMaze();
+    } else if(this.generateWalls) {
+      this.fixWalls(this.borderWalls);
+    }
+  }
 };
 
 Grid.prototype.fixWalls = function(borderWalls) {
-    if(borderWalls) {
-      var startY = 1; var endY = this.height - 1;
-      var startX = 1; var endX = this.width - 1;
-    } else {
-      var startY = 0; var endY = this.height;
-      var startX = 0; var endX = this.width;
-    }
+  if(borderWalls) {
+    var startY = 1; var endY = this.height - 1;
+    var startX = 1; var endX = this.width - 1;
+  } else {
+    var startY = 0; var endY = this.height;
+    var startX = 0; var endX = this.width;
+  }
 
-    for(var i = startY; i < endY; i++) {
-      for(var j = startX; j < endX; j++) {
-        var currentPos = new Position(j, i);
-        var upperCase = this.getNextPosition(currentPos, GameConstants.Direction.UP);
-        var upperLeftCase = this.getNextPosition(upperCase, GameConstants.Direction.LEFT);
-        var upperRightCase = this.getNextPosition(upperCase, GameConstants.Direction.RIGHT);
-        var downCase = this.getNextPosition(currentPos, GameConstants.Direction.BOTTOM);
-        var downLeftCase = this.getNextPosition(downCase, GameConstants.Direction.LEFT);
-        var downRightCase = this.getNextPosition(downCase, GameConstants.Direction.RIGHT);
+  for(var i = startY; i < endY; i++) {
+    for(var j = startX; j < endX; j++) {
+      var currentPos = new Position(j, i);
+      var upperCase = this.getNextPosition(currentPos, GameConstants.Direction.UP);
+      var upperLeftCase = this.getNextPosition(upperCase, GameConstants.Direction.LEFT);
+      var upperRightCase = this.getNextPosition(upperCase, GameConstants.Direction.RIGHT);
+      var downCase = this.getNextPosition(currentPos, GameConstants.Direction.BOTTOM);
+      var downLeftCase = this.getNextPosition(downCase, GameConstants.Direction.LEFT);
+      var downRightCase = this.getNextPosition(downCase, GameConstants.Direction.RIGHT);
 
-        if(this.get(upperLeftCase) == GameConstants.CaseType.WALL || this.get(upperRightCase) == GameConstants.CaseType.WALL || this.get(downLeftCase) == GameConstants.CaseType.WALL || this.get(downRightCase) == GameConstants.CaseType.WALL) {
-          this.set(GameConstants.CaseType.EMPTY, currentPos);
-        }
+      if(this.get(upperLeftCase) == GameConstants.CaseType.WALL || this.get(upperRightCase) == GameConstants.CaseType.WALL || this.get(downLeftCase) == GameConstants.CaseType.WALL || this.get(downRightCase) == GameConstants.CaseType.WALL) {
+        this.set(GameConstants.CaseType.EMPTY, currentPos);
       }
     }
+  }
 };
 
 Grid.prototype.maze_recursion = function(r, c) {
-    var directions = GameUtils.shuffle([GameConstants.Direction.UP, GameConstants.Direction.RIGHT, GameConstants.Direction.BOTTOM, GameConstants.Direction.LEFT]);
+  var directions = GameUtils.shuffle([GameConstants.Direction.UP, GameConstants.Direction.RIGHT, GameConstants.Direction.BOTTOM, GameConstants.Direction.LEFT]);
 
-    for(var i = 0; i < directions.length; i++) {
-      switch(directions[i]) {
-        case GameConstants.Direction.UP:
-          if(r - 2 <= 0) continue;
+  for(var i = 0; i < directions.length; i++) {
+    switch(directions[i]) {
+      case GameConstants.Direction.UP:
+        if(r - 2 <= 0) continue;
 
-          if(this.get(new Position(c, r - 2)) != GameConstants.CaseType.EMPTY) {
-            this.set(GameConstants.CaseType.EMPTY, new Position(c, r - 2));
-            this.set(GameConstants.CaseType.EMPTY, new Position(c, r - 1));
-            this.maze_recursion(r - 2, c);
-          }
+        if(this.get(new Position(c, r - 2)) != GameConstants.CaseType.EMPTY) {
+          this.set(GameConstants.CaseType.EMPTY, new Position(c, r - 2));
+          this.set(GameConstants.CaseType.EMPTY, new Position(c, r - 1));
+          this.maze_recursion(r - 2, c);
+        }
 
-          break;
-        case GameConstants.Direction.RIGHT:
-          if(c + 2 >= this.width - 1) continue;
+        break;
+      case GameConstants.Direction.RIGHT:
+        if(c + 2 >= this.width - 1) continue;
 
-          if(this.get(new Position(c + 2, r)) != GameConstants.CaseType.EMPTY) {
-            this.set(GameConstants.CaseType.EMPTY, new Position(c + 2, r));
-            this.set(GameConstants.CaseType.EMPTY, new Position(c + 1, r));
-            this.maze_recursion(r, c + 2);
-          }
+        if(this.get(new Position(c + 2, r)) != GameConstants.CaseType.EMPTY) {
+          this.set(GameConstants.CaseType.EMPTY, new Position(c + 2, r));
+          this.set(GameConstants.CaseType.EMPTY, new Position(c + 1, r));
+          this.maze_recursion(r, c + 2);
+        }
 
-          break;
-        case GameConstants.Direction.BOTTOM:
-          if(r + 2 >= this.height - 1) continue;
+        break;
+      case GameConstants.Direction.BOTTOM:
+        if(r + 2 >= this.height - 1) continue;
 
-          if(this.get(new Position(c, r + 2)) != GameConstants.CaseType.EMPTY) {
-            this.set(GameConstants.CaseType.EMPTY, new Position(c, r + 2));
-            this.set(GameConstants.CaseType.EMPTY, new Position(c, r + 1));
-            this.maze_recursion(r + 2, c);
-          }
+        if(this.get(new Position(c, r + 2)) != GameConstants.CaseType.EMPTY) {
+          this.set(GameConstants.CaseType.EMPTY, new Position(c, r + 2));
+          this.set(GameConstants.CaseType.EMPTY, new Position(c, r + 1));
+          this.maze_recursion(r + 2, c);
+        }
 
-          break;
-        case GameConstants.Direction.LEFT:
-          if(c - 2 <= 0) continue;
+        break;
+      case GameConstants.Direction.LEFT:
+        if(c - 2 <= 0) continue;
 
-          if(this.get(new Position(c - 2, r)) != GameConstants.CaseType.EMPTY) {
-            this.set(GameConstants.CaseType.EMPTY, new Position(c - 2, r));
-            this.set(GameConstants.CaseType.EMPTY, new Position(c - 1, r));
-            this.maze_recursion(r, c - 2);
-          }
+        if(this.get(new Position(c - 2, r)) != GameConstants.CaseType.EMPTY) {
+          this.set(GameConstants.CaseType.EMPTY, new Position(c - 2, r));
+          this.set(GameConstants.CaseType.EMPTY, new Position(c - 1, r));
+          this.maze_recursion(r, c - 2);
+        }
 
-          break;
-      }
+        break;
     }
+  }
 };
 
 Grid.prototype.generateMaze = function() {
-    this.mazeFirstPosition = new Position(1, 1, GameConstants.Direction.RIGHT);
-    this.set(GameConstants.CaseType.EMPTY, this.mazeFirstPosition);
-    this.maze_recursion(1, 1);
+  this.mazeFirstPosition = new Position(1, 1, GameConstants.Direction.RIGHT);
+  this.set(GameConstants.CaseType.EMPTY, this.mazeFirstPosition);
+  this.maze_recursion(1, 1);
 };
 
 Grid.prototype.set = function(value, position) {
-    this.grid[position.y][position.x] = value;
+  this.grid[position.y][position.x] = value;
 };
 
 Grid.prototype.get = function(position) {
-    return this.grid[position.y][position.x];
+  return this.grid[position.y][position.x];
 };
 
 Grid.prototype.valToChar = function(value) {
-    switch(value) {
-      case GameConstants.CaseType.EMPTY:
-        return "-";
-      case GameConstants.CaseType.SNAKE:
-        return "o";
-      case GameConstants.CaseType.SNAKE_DEAD:
-        return "O";
-      case GameConstants.CaseType.FRUIT:
-        return "x";
-      case GameConstants.CaseType.WALL:
-        return "#";
-      case GameConstants.CaseType.SURROUNDED:
-        return "/";
-    }
+  switch(value) {
+    case GameConstants.CaseType.EMPTY:
+      return "-";
+    case GameConstants.CaseType.SNAKE:
+      return "o";
+    case GameConstants.CaseType.SNAKE_DEAD:
+      return "O";
+    case GameConstants.CaseType.FRUIT:
+      return "x";
+    case GameConstants.CaseType.WALL:
+      return "#";
+    case GameConstants.CaseType.SURROUNDED:
+      return "/";
+  }
 };
 
 Grid.prototype.getImageCase = function(position) {
-    var imageRes = "";
+  var imageRes = "";
 
-    switch(this.get(position)) {
-        case GameConstants.CaseType.WALL:
-          imageRes = "assets/images/wall.png";
-          break;
-        case GameConstants.CaseType.FRUIT:
-          imageRes = "assets/images/fruit.png";
-          break;
-    }
+  switch(this.get(position)) {
+    case GameConstants.CaseType.WALL:
+      imageRes = "assets/images/wall.png";
+      break;
+    case GameConstants.CaseType.FRUIT:
+      imageRes = "assets/images/fruit.png";
+      break;
+  }
 
-    return imageRes;
+  return imageRes;
 };
 
 Grid.prototype.getGraph = function(ignoreSnakePos) {
-    var res = new Array(this.height);
+  var res = new Array(this.height);
 
-    for(var i = 0; i < this.height; i++) {
-      res[i] = new Array(this.width);
+  for(var i = 0; i < this.height; i++) {
+    res[i] = new Array(this.width);
 
-      for(var j = 0; j < this.width; j++) {
-        var currentPos = new Position(j, i);
+    for(var j = 0; j < this.width; j++) {
+      var currentPos = new Position(j, i);
 
-        if(ignoreSnakePos && this.get(currentPos) == GameConstants.CaseType.SNAKE) {
-          res[i][j] = 0;
-        } else if(this.isDeadPosition(currentPos)) {
-          res[i][j] = 1;
-        } else {
-          res[i][j] = 0;
-        }
+      if(ignoreSnakePos && this.get(currentPos) == GameConstants.CaseType.SNAKE) {
+        res[i][j] = 0;
+      } else if(this.isDeadPosition(currentPos)) {
+        res[i][j] = 1;
+      } else {
+        res[i][j] = 0;
       }
     }
+  }
 
-    return res;
+  return res;
 };
 
 Grid.prototype.getRandomPosition = function() {
-    return new Position(GameUtils.randRange(0, this.width - 1), GameUtils.randRange(0, this.height - 1));
+  return new Position(GameUtils.randRange(0, this.width - 1), GameUtils.randRange(0, this.height - 1));
 };
 
 Grid.prototype.setFruit = function() {
-    var tried = [1];
+  var tried = [1];
 
-    if(this.fruitPos != null && this.get(this.fruitPos) == GameConstants.CaseType.FRUIT) {
-      this.set(GameConstants.CaseType.EMPTY, this.fruitPos);
-    }
+  if(this.fruitPos != null && this.get(this.fruitPos) == GameConstants.CaseType.FRUIT) {
+    this.set(GameConstants.CaseType.EMPTY, this.fruitPos);
+  }
 
-    if(this.getTotal(GameConstants.CaseType.EMPTY) > 0) {
-      var randomPos = this.getRandomPosition();
+  if(this.getTotal(GameConstants.CaseType.EMPTY) > 0) {
+    var randomPos = this.getRandomPosition();
 
-      while(this.get(randomPos) != GameConstants.CaseType.EMPTY || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos, tried))) {
-        if(this.getTotal(GameConstants.CaseType.EMPTY) <= 0) {
-          return false;
-        }
-
-        randomPos = this.getRandomPosition();
+    while(this.get(randomPos) != GameConstants.CaseType.EMPTY || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos, tried))) {
+      if(this.getTotal(GameConstants.CaseType.EMPTY) <= 0) {
+        return false;
       }
 
-      this.fruitPos = randomPos;
-      this.set(GameConstants.CaseType.FRUIT, randomPos);
-    } else {
-      return false;
+      randomPos = this.getRandomPosition();
     }
 
-    return true;
+    this.fruitPos = randomPos;
+    this.set(GameConstants.CaseType.FRUIT, randomPos);
+  } else {
+    return false;
+  }
+
+  return true;
 };
 
 Grid.prototype.testFruitMaze = function(position, tried) { // Maze mode: avoid putting the fruit too close to the Snake
-    var grid = this.getGraph(true);
-    var graph = new Lowlight.Astar.Configuration(grid, {
-      order: "yx",
-      torus: false,
-      diagonals: false,
-      cutting: false,
-      cost(a, b) { return b == 1 ? null : 1 }
-    });
-    var path = graph.path({x: this.mazeFirstPosition.x, y: this.mazeFirstPosition.y}, {x: position.x, y: position.y});
+  var grid = this.getGraph(true);
+  var graph = new Lowlight.Astar.Configuration(grid, {
+    order: "yx",
+    torus: false,
+    diagonals: false,
+    cutting: false,
+    cost(a, b) { return b == 1 ? null : 1 }
+  });
+  var path = graph.path({x: this.mazeFirstPosition.x, y: this.mazeFirstPosition.y}, {x: position.x, y: position.y});
 
-    if(path.length < Math.ceil(this.getTotal(GameConstants.CaseType.EMPTY) / (1 * Math.ceil(tried[0] / 4)))) {
-      tried[0]++;
-      return false;
-    } else {
-      tried[0]++;
-      return true;
-    }
+  if(path.length < Math.ceil(this.getTotal(GameConstants.CaseType.EMPTY) / (1 * Math.ceil(tried[0] / 4)))) {
+    tried[0]++;
+    return false;
+  } else {
+    tried[0]++;
+    return true;
+  }
 };
 
 Grid.prototype.isCaseSurrounded = function(position, fill, foundVals, forbiddenVals) {
-    if(position == null || position == undefined) {
-      return false;
-    }
+  if(position == null || position == undefined) {
+    return false;
+  }
 
-    var fill = fill == undefined ? false : fill;
+  var fill = fill == undefined ? false : fill;
 
-    var checkList = [position];
-    var complete = [];
+  var checkList = [position];
+  var complete = [];
 
-    while(checkList.length > 0) {
-      var currentPosition = checkList[0];
-      checkList.shift();
+  while(checkList.length > 0) {
+    var currentPosition = checkList[0];
+    checkList.shift();
 
-      var directions = [this.getNextPosition(currentPosition, GameConstants.Direction.UP), this.getNextPosition(currentPosition, GameConstants.Direction.BOTTOM), this.getNextPosition(currentPosition, GameConstants.Direction.LEFT), this.getNextPosition(currentPosition, GameConstants.Direction.RIGHT)]; // UP, DOWN, LEFT, RIGHT
+    var directions = [this.getNextPosition(currentPosition, GameConstants.Direction.UP), this.getNextPosition(currentPosition, GameConstants.Direction.BOTTOM), this.getNextPosition(currentPosition, GameConstants.Direction.LEFT), this.getNextPosition(currentPosition, GameConstants.Direction.RIGHT)]; // UP, DOWN, LEFT, RIGHT
 
-      for(var i = 0; i < directions.length; i++) {
-        var alreadyCompleted = false;
+    for(var i = 0; i < directions.length; i++) {
+      var alreadyCompleted = false;
 
-        if(directions[i].indexIn(complete) > -1 || directions[i].indexIn(checkList) > -1) {
-          alreadyCompleted = true;
-        }
-
-        if(!alreadyCompleted && (forbiddenVals.indexOf(this.get(directions[i])) > -1)) {
-          checkList.push(directions[i]);
-
-          if(foundVals.indexOf(this.get(directions[i])) > -1) {
-            return false;
-          }
-
-          if(fill && this.get(directions[i]) == GameConstants.CaseType.EMPTY) {
-            this.set(GameConstants.CaseType.SURROUNDED, directions[i]);
-          }
-        }
+      if(directions[i].indexIn(complete) > -1 || directions[i].indexIn(checkList) > -1) {
+        alreadyCompleted = true;
       }
 
-      complete.push(currentPosition);
+      if(!alreadyCompleted && (forbiddenVals.indexOf(this.get(directions[i])) > -1)) {
+        checkList.push(directions[i]);
+
+        if(foundVals.indexOf(this.get(directions[i])) > -1) {
+          return false;
+        }
+
+        if(fill && this.get(directions[i]) == GameConstants.CaseType.EMPTY) {
+          this.set(GameConstants.CaseType.SURROUNDED, directions[i]);
+        }
+      }
     }
 
-    if(fill && (this.get(position) == GameConstants.CaseType.EMPTY || this.get(position) == GameConstants.CaseType.FRUIT)) {
-      this.set(GameConstants.CaseType.SURROUNDED, position);
-    }
+    complete.push(currentPosition);
+  }
 
-    return true;
+  if(fill && (this.get(position) == GameConstants.CaseType.EMPTY || this.get(position) == GameConstants.CaseType.FRUIT)) {
+    this.set(GameConstants.CaseType.SURROUNDED, position);
+  }
+
+  return true;
 };
 
 Grid.prototype.isFruitSurrounded = function(position, fill) {
-    var surrounded = this.isCaseSurrounded(position, false, [GameConstants.CaseType.SNAKE], [GameConstants.CaseType.EMPTY, GameConstants.CaseType.SNAKE]);
+  var surrounded = this.isCaseSurrounded(position, false, [GameConstants.CaseType.SNAKE], [GameConstants.CaseType.EMPTY, GameConstants.CaseType.SNAKE]);
 
-    if(surrounded && fill) {
-      this.isCaseSurrounded(position, true, [GameConstants.CaseType.SNAKE], [GameConstants.CaseType.EMPTY, GameConstants.CaseType.SNAKE]);
-    }
+  if(surrounded && fill) {
+    this.isCaseSurrounded(position, true, [GameConstants.CaseType.SNAKE], [GameConstants.CaseType.EMPTY, GameConstants.CaseType.SNAKE]);
+  }
 
-    return surrounded;
+  return surrounded;
 };
 
 Grid.prototype.getOnLine = function(type, line) {
-    var tot = 0;
+  var tot = 0;
 
-    for(var j = 0; j < this.width; j++) {
-      if(this.get(new Position(j, line)) == type) {
-        tot++;
-      }
+  for(var j = 0; j < this.width; j++) {
+    if(this.get(new Position(j, line)) == type) {
+      tot++;
     }
+  }
 
-    return tot;
+  return tot;
 };
 
 Grid.prototype.getTotal = function(type) {
-    var tot = 0;
+  var tot = 0;
 
-    for(var i = 0; i < this.height; i++) {
-      tot += this.getOnLine(type, i);
-    }
+  for(var i = 0; i < this.height; i++) {
+    tot += this.getOnLine(type, i);
+  }
 
-    return tot;
+  return tot;
 };
 
 Grid.prototype.getNextPosition = function(oldPos, newDirection) {
-    var position = new Position(oldPos.x, oldPos.y, newDirection);
+  var position = new Position(oldPos.x, oldPos.y, newDirection);
 
-    switch(newDirection) {
-      case GameConstants.Direction.LEFT:
-        position.x--;
-        position.direction = GameConstants.Direction.LEFT;
-        break;
-      case GameConstants.Direction.UP:
-        position.y--;
-        position.direction = GameConstants.Direction.UP;
-        break;
-      case GameConstants.Direction.RIGHT:
-        position.x++;
-        position.direction = GameConstants.Direction.RIGHT;
-        break;
-      case GameConstants.Direction.BOTTOM:
-        position.y++;
-        position.direction = GameConstants.Direction.BOTTOM;
-        break;
-      case GameConstants.Key.LEFT:
-        position.x--;
-        position.direction = GameConstants.Key.LEFT;
-        break;
-      case GameConstants.Key.UP:
-        position.y--;
-        position.direction = GameConstants.Key.UP;
-        break;
-      case GameConstants.Key.RIGHT:
-        position.x++;
-        position.direction = GameConstants.Direction.RIGHT;
-        break;
-      case GameConstants.Key.BOTTOM:
-        position.y++;
-        position.direction = GameConstants.Direction.BOTTOM;
-        break;
-    }
+  switch(newDirection) {
+    case GameConstants.Direction.LEFT:
+      position.x--;
+      position.direction = GameConstants.Direction.LEFT;
+      break;
+    case GameConstants.Direction.UP:
+      position.y--;
+      position.direction = GameConstants.Direction.UP;
+      break;
+    case GameConstants.Direction.RIGHT:
+      position.x++;
+      position.direction = GameConstants.Direction.RIGHT;
+      break;
+    case GameConstants.Direction.BOTTOM:
+      position.y++;
+      position.direction = GameConstants.Direction.BOTTOM;
+      break;
+    case GameConstants.Key.LEFT:
+      position.x--;
+      position.direction = GameConstants.Key.LEFT;
+      break;
+    case GameConstants.Key.UP:
+      position.y--;
+      position.direction = GameConstants.Key.UP;
+      break;
+    case GameConstants.Key.RIGHT:
+      position.x++;
+      position.direction = GameConstants.Direction.RIGHT;
+      break;
+    case GameConstants.Key.BOTTOM:
+      position.y++;
+      position.direction = GameConstants.Direction.BOTTOM;
+      break;
+  }
 
-    if(position.x < 0) {
-      position.x = this.width - 1;
-    } else if(position.x >= this.width) {
-      position.x = 0;
-    }
+  if(position.x < 0) {
+    position.x = this.width - 1;
+  } else if(position.x >= this.width) {
+    position.x = 0;
+  }
 
-    if(position.y < 0) {
-      position.y = this.height - 1;
-    } else if(position.y >= this.height) {
-      position.y = 0;
-    }
+  if(position.y < 0) {
+    position.y = this.height - 1;
+  } else if(position.y >= this.height) {
+    position.y = 0;
+  }
 
-    return position;
+  return position;
 };
 
 Grid.prototype.getDirectionTo = function(position, otherPosition) {
-    if(this.getNextPosition(position, GameConstants.Direction.UP).equals(otherPosition)) {
-      return GameConstants.Direction.UP;
-    } else if(this.getNextPosition(position, GameConstants.Direction.BOTTOM).equals(otherPosition)) {
-      return GameConstants.Direction.BOTTOM;
-    } else if(this.getNextPosition(position, GameConstants.Direction.RIGHT).equals(otherPosition)) {
-      return GameConstants.Direction.RIGHT;
-    } else if(this.getNextPosition(position, GameConstants.Direction.LEFT).equals(otherPosition)) {
-      return GameConstants.Direction.LEFT;
-    }
+  if(this.getNextPosition(position, GameConstants.Direction.UP).equals(otherPosition)) {
+    return GameConstants.Direction.UP;
+  } else if(this.getNextPosition(position, GameConstants.Direction.BOTTOM).equals(otherPosition)) {
+    return GameConstants.Direction.BOTTOM;
+  } else if(this.getNextPosition(position, GameConstants.Direction.RIGHT).equals(otherPosition)) {
+    return GameConstants.Direction.RIGHT;
+  } else if(this.getNextPosition(position, GameConstants.Direction.LEFT).equals(otherPosition)) {
+    return GameConstants.Direction.LEFT;
+  }
 
-    return -1;
+  return -1;
 };
 
 Grid.prototype.isDeadPosition = function(position) {
-    return this.get(position) == GameConstants.CaseType.SNAKE || this.get(position) == GameConstants.CaseType.WALL || this.get(position) == GameConstants.CaseType.SNAKE_DEAD;
+  return this.get(position) == GameConstants.CaseType.SNAKE || this.get(position) == GameConstants.CaseType.WALL || this.get(position) == GameConstants.CaseType.SNAKE_DEAD;
 };
 
 Grid.prototype.toString = function() {
@@ -433,7 +433,7 @@ Grid.prototype.toString = function() {
 
 // Export module
 if(typeof(module) !== "undefined") {
-    module.exports = {
-      Grid: Grid
-    };
+  module.exports = {
+    Grid: Grid
+  };
 }

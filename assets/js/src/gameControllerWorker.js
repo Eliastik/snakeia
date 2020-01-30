@@ -17,137 +17,138 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 function GameControllerWorker(game, ui) {
-    GameController.call(this, game, ui);
+  GameController.call(this, game, ui);
 
-    this.worker;
+  this.worker;
 
-    this.init = function() {
-        if(window.Worker) {
-            try {
-                this.worker = new Worker("assets/js/src/gameEngineWorker.js");
-            } catch(e) {
-                this.update("init", {
-                    "errorOccurred": true
-                });
-                return;
+  this.init = function() {
+    if(window.Worker) {
+      try {
+        this.worker = new Worker("assets/js/src/gameEngineWorker.js");
+      } catch(e) {
+        this.update("init", {
+          "errorOccurred": true
+        });
+        return;
+      }
+
+      if(this.worker instanceof Worker) {
+        this.worker.postMessage(["init", game]);
+
+        var self = this;
+
+        this.worker.onmessage = function(e) {
+          var data = e.data;
+
+          if(data.length > 1) {
+            var grid = self.gameUI.grid;
+
+            if(data[1].hasOwnProperty("grid") && data[1]["grid"] != null) {
+              grid = Object.assign(new Grid(), data[1]["grid"]);
+              data[1]["grid"] = grid;
             }
+            
+            if(data[1].hasOwnProperty("snakes") && data[1]["snakes"] != null) {
+              for(var i = 0; i < data[1]["snakes"].length; i++) {
+                data[1]["snakes"][i].grid = grid;
+                data[1]["snakes"][i] = Object.assign(new Snake(), data[1]["snakes"][i]);
 
-            if(this.worker instanceof Worker) {
-                this.worker.postMessage(["init", game]);
-
-                var self = this;
-
-                this.worker.onmessage = function(e) {
-                    var data = e.data;
-
-                    if(data.length > 1) {
-                        var grid = self.gameUI.grid;
-
-                        if(data[1].hasOwnProperty("grid") && data[1]["grid"] != null) {
-                            grid = Object.assign(new Grid(), data[1]["grid"]);
-                            data[1]["grid"] = grid;
-                        }
-
-                        if(data[1].hasOwnProperty("snakes") && data[1]["snakes"] != null) {
-                            for(var i = 0; i < data[1]["snakes"].length; i++) {
-                                data[1]["snakes"][i].grid = grid;
-                                data[1]["snakes"][i] = Object.assign(new Snake(), data[1]["snakes"][i]);
-
-                                for(var j = 0; j < data[1]["snakes"][i].queue.length; j++) {
-                                    data[1]["snakes"][i].queue[j] = Object.assign(new Position(), data[1]["snakes"][i].queue[j]);
-                                }
-                            }
-                        }
-
-                        self.update(data[0], data[1]);
-
-                        switch(data[0]) {
-                            case "reset":
-                                self.reactor.dispatchEvent("onReset");
-                                break;
-                            case "start":
-                                self.reactor.dispatchEvent("onStart");
-                                break;
-                            case "pause":
-                                self.reactor.dispatchEvent("onPause");
-                                break;
-                            case "continue":
-                                self.reactor.dispatchEvent("onContinue");
-                                break;
-                            case "stop":
-                                self.reactor.dispatchEvent("onStop");
-                                break;
-                            case "exit":
-                                self.reactor.dispatchEvent("onExit");
-                                break;
-                            case "kill":
-                                self.reactor.dispatchEvent("onKill");
-                                self.worker.terminate();
-                                break;
-                            case "scoreIncreased":
-                                self.reactor.dispatchEvent("onScoreIncreased");
-                                break;
-                            case "update":
-                                self.reactor.dispatchEvent("onUpdate");
-                                break;
-                            case "updateCounter":
-                                self.reactor.dispatchEvent("onUpdateCounter");
-                                break;
-                        }
-                    }
-                };
-            } else {
-                if(this.gameUI != null) {
-                    this.update("init", {
-                        "errorOccurred": true
-                    });
+                for(var j = 0; j < data[1]["snakes"][i].queue.length; j++) {
+                  data[1]["snakes"][i].queue[j] = Object.assign(new Position(), data[1]["snakes"][i].queue[j]);
                 }
+              }
             }
-        } else {
-            if(this.gameUI != null) {
-                this.update("init", {
-                    "errorOccurred": true
-                });
+            
+            self.update(data[0], data[1]);
+            
+            switch(data[0]) {
+              case "reset":
+                self.reactor.dispatchEvent("onReset");
+                break;
+              case "start":
+                self.reactor.dispatchEvent("onStart");
+                break;
+              case "pause":
+                self.reactor.dispatchEvent("onPause");
+                break;
+              case "continue":
+                self.reactor.dispatchEvent("onContinue");
+                break;
+              case "stop":
+                self.reactor.dispatchEvent("onStop");
+                break;
+              case "exit":
+                self.reactor.dispatchEvent("onExit");
+                break;
+              case "kill":
+                self.reactor.dispatchEvent("onKill");
+                self.worker.terminate();
+                break;
+              case "scoreIncreased":
+                self.reactor.dispatchEvent("onScoreIncreased");
+                break;
+              case "update":
+                self.reactor.dispatchEvent("onUpdate");
+                break;
+              case "updateCounter":
+                self.reactor.dispatchEvent("onUpdateCounter");
+                break;
             }
+          }
+        };
+      } else {
+        if(this.gameUI != null) {
+          this.update("init", {
+            "errorOccurred": true
+          });
         }
-    };
+      }
+    } else {
+      if(this.gameUI != null) {
+        this.update("init", {
+          "errorOccurred": true
+        });
+      }
+    }
+  };
 
-    this.reset = function() {
-        if(this.worker instanceof Worker) this.worker.postMessage(["reset"]);
-    };
+  this.reset = function() {
+    if(this.worker instanceof Worker) this.worker.postMessage(["reset"]);
+  };
 
-    this.start = function() {
-        if(this.worker instanceof Worker) this.worker.postMessage(["start"]);
-    };
+  this.start = function() {
+    if(this.worker instanceof Worker) this.worker.postMessage(["start"]);
+  };
 
-    this.stop = function() {
-        if(this.worker instanceof Worker) this.worker.postMessage(["stop"]);
-    };
+  this.stop = function() {
+    if(this.worker instanceof Worker) this.worker.postMessage(["stop"]);
+  };
 
-    this.finish = function(finish) {
-        if(this.worker instanceof Worker) this.worker.postMessage([finish ? "finish" : "stop"]);
-    };
+  this.finish = function(finish) {
+    if(this.worker instanceof Worker) this.worker.postMessage([finish ? "finish" : "stop"]);
+  };
 
-    this.pause = function() {
-        if(this.worker instanceof Worker) this.worker.postMessage(["pause"]);
-    };
+  this.pause = function() {
+    if(this.worker instanceof Worker) this.worker.postMessage(["pause"]);
+  };
 
-    this.kill = function() {
-        if(this.worker instanceof Worker) this.worker.postMessage(["kill"]);
-    };
+  this.kill = function() {
+    if(this.worker instanceof Worker) this.worker.postMessage(["kill"]);
+  };
 
-    this.tick = function() {
-        if(this.worker instanceof Worker) this.worker.postMessage(["tick"]);
-    };
+  this.tick = function() {
+    if(this.worker instanceof Worker) this.worker.postMessage(["tick"]);
+  };
 
-    this.exit = function() {
-        if(this.worker instanceof Worker) this.worker.postMessage(["exit"]);
-    };
+  this.exit = function() {
+    if(this.worker instanceof Worker) this.worker.postMessage(["exit"]);
+  };
 
-    this.key = function(key) {
-        if(this.worker instanceof Worker) this.worker.postMessage(["key", key]);
-    };
+  this.key = function(key) {
+    if(this.worker instanceof Worker) this.worker.postMessage(["key", key]);
+  };
 }
 
+ // extends GameController
 GameControllerWorker.prototype = Object.create(GameController).prototype;
 GameControllerWorker.prototype.constructor = GameControllerWorker;

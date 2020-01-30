@@ -17,17 +17,17 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 function Event(name) {
-    this.name = name;
-    this.callbacks = [];
+  this.name = name;
+  this.callbacks = [];
 }
 
 Event.prototype.registerCallback = function(callback) {
-    this.callbacks.push(callback);
+  this.callbacks.push(callback);
 };
 
 // Export module
 if(typeof(module) !== "undefined") {
-    module.exports = {
-        Event: Event
-    };
+  module.exports = {
+    Event: Event
+  };
 }
