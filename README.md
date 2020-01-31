@@ -12,7 +12,7 @@ Game written in pure JavaScript and object oriented.
 
 ## About this game
 
-* Version: 1.4.2
+* Version: 1.5
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -26,6 +26,12 @@ Game written in pure JavaScript and object oriented.
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 
 ## Changelog
+
+* Version 1.5 (1/31/2020) :
+  - Performance improvement (multi-threading);
+  - Fixed speed management: the game is smoother;
+  - Major changes in the architecture of the game code (MVC, other changes);
+  - Bug fixes and other adjustments.
 
 * Version 1.4.2 (10/7/2019) :
   - Added a labyrinth mode: it's now possible to generate mazes. The goal is to find the path to the apple through the maze. Levels of this type are also possible (to download later).
@@ -115,7 +121,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## À propos du jeu
 
-* Version du jeu : 1.4.2
+* Version du jeu : 1.5
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -129,6 +135,12 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 
 ## Journal des changements
+
+* Version 1.5 (31/01/2020) :
+  - Amélioration des performances (multi-threading) ;
+  - Correction de la gestion de la vitesse : le jeu est plus fluide ;
+  - Grands changements dans l'architecture du code du jeu (MVC, autres changements) ;
+  - Corrections de bugs et autres ajustements.
 
 * Version 1.4.2 (07/10/2019) :
   - Ajout d'un mode labyrinthe : il est désormais possible de générer des labyrinthes. Le but est de trouver le chemin vers la pomme à travers le labyrinthe. Des niveaux de ce type sont également possibles (à télécharger ultérieurement).
@@ -211,11 +223,10 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ### À faire (ou idées) :
 
+* Jeu multi-joueur en ligne (création d'un programme serveur avec socket.io)
 * Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
 * Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
 * (Afficher difficulté niveaux)
-* (?) Nouveau type niveau avec le contrôle de plusieurs Snake joueurs (prit correctement en compte par le jeu)
-* (Architecture client-serveur)
 
 ### Fait :
 
@@ -226,6 +237,8 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible (workaround trouvé avec le Snake pointé par la flèche + détection et texte différent)
 * Animations
 * Labyrinthes
+* Multithreading
+* MVC (architecture client-serveur)
 
 ### Problèmes :
 
@@ -233,7 +246,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## Déclaration de licence
 
-Copyright (C) 2019 Eliastik (eliastiksofts.com)
+Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
 
 Ce programme est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant les termes de la GNU General Public License telle que publiée par la Free Software Foundation ; soit la version 3 de la licence, soit (à votre gré) toute version ultérieure.
 
@@ -243,7 +256,7 @@ Vous devez avoir reçu une copie de la GNU General Public License en même temps
 
 ----
 
-Copyright (C) 2019 Eliastik (eliastiksofts.com)
+Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

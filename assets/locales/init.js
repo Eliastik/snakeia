@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Eliastik (eliastiksofts.com)
+ * Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
  *
  * This file is part of "SnakeIA".
  *

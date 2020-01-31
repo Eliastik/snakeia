@@ -21,7 +21,7 @@ if(typeof(require) !== "undefined") {
   var GameConstants = require("./constants");
 }
 
-function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround) {
+function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround, disableAnimation) {
   this.text = text;
   this.textColor = textColor == undefined ? "rgba(255, 255, 255, 0.75)" : textColor;
   this.backgroundColor = backgroundColor == undefined ? "rgba(46, 204, 113, 0.5)" : backgroundColor;
@@ -35,6 +35,7 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
   this.init = false;
   this.closed = false;
   this.closing = false;
+  this.disableAnimation = disableAnimation == undefined ? false : disableAnimation;
   this.closeButton;
 }
 
@@ -65,16 +66,18 @@ NotificationMessage.prototype.draw = function(game) {
     this.fontSize = this.getFontSize(ctx) * 1.25;
 
     var heightText = game.wrapTextLines(ctx, this.text, null, this.fontSize)["height"];
-
     var height = heightText + this.fontSize / 2;
     var width = canvas.width;
-
-    var offsetY = this.animationTime / this.animationDelay;
+    var offsetY = 1;
 
     if(!this.closing) {
       this.animationTime += offsetTime;
     } else {
-      this.animationTime -= offsetTime;
+      if(this.disableAnimation) {
+        this.animationTime = -1;
+      } else {
+        this.animationTime -= offsetTime;
+      }
     }
 
     if(this.animationTime < 0) {
@@ -83,7 +86,10 @@ NotificationMessage.prototype.draw = function(game) {
     }
 
     if(!this.closed) {
-      var offsetY = this.animationTime / this.animationDelay;
+      if(!this.disableAnimation) {
+        offsetY = this.animationTime / this.animationDelay;
+      }
+
       var y = canvas.height - (height * (offsetY <= 1 ? offsetY : 1));
 
       ctx.fillStyle = this.backgroundColor;

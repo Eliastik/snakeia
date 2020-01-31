@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Eliastik (eliastiksofts.com)
+ * Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
  *
  * This file is part of "SnakeIA".
  *
@@ -17,7 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 const CACHE_BASENAME = 'snake-ia';
-const CACHE_VER = '-v1.4.2';
+const CACHE_VER = '-v1.5';
 const CACHE = CACHE_BASENAME + CACHE_VER;
 
 const CACHE_URLS = [
@@ -27,14 +27,31 @@ const CACHE_URLS = [
   "favicon.ico",
   "README.md",
   "manifest.json",
+  "LICENCE.txt",
   "assets/css/balloon.min.css",
   "assets/css/bootstrap.min.css",
   "assets/css/flat-ui.min.css",
   "assets/css/main.css",
-  "assets/js/engine.js",
-  "assets/js/i18next.min.js",
-  "assets/js/i18nextBrowserLanguageDetector.min.js",
-  "assets/js/lowlight.astar.min.js",
+  "assets/js/libs/i18next.min.js",
+  "assets/js/libs/i18nextBrowserLanguageDetector.min.js",
+  "assets/js/libs/lowlight.astar.min.js",
+  "assets/js/src/button.js",
+  "assets/js/src/constants.js",
+  "assets/js/src/event.js",
+  "assets/js/src/gameController.js",
+  "assets/js/src/gameControllerWorker.js",
+  "assets/js/src/gameEngine.js",
+  "assets/js/src/gameEngineWorker.js",
+  "assets/js/src/gameGroup.js",
+  "assets/js/src/gameUI.js",
+  "assets/js/src/gameUtils.js",
+  "assets/js/src/grid.js",
+  "assets/js/src/imageLoader.js",
+  "assets/js/src/notificationMessage.js",
+  "assets/js/src/position.js",
+  "assets/js/src/reactor.js",
+  "assets/js/src/shim.js",
+  "assets/js/src/snake.js",
   "assets/js/main.js",
   "assets/fonts/delius-regular.ttf",
   "assets/fonts/delius-regular.woff",

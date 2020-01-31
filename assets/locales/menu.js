@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Eliastik (eliastiksofts.com)
+ * Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
  *
  * This file is part of "SnakeIA".
  *
@@ -52,6 +52,7 @@ i18next.addResourceBundle("fr", "translation", {
     "readme": "Fichier Lisez-moi",
     "source": "Télécharger la source",
     "language": "Langue :",
+    "enableAnimations": "Activer les animations"
   },
   "settings": {
     "title": "Paramètres de la partie :",
@@ -198,7 +199,8 @@ i18next.addResourceBundle("en", "translation", {
     "infos": "More informations",
     "readme": "Readme file",
     "source": "Download the source",
-    "language": "Language:"
+    "language": "Language:",
+    "enableAnimations": "Enable the animations"
   },
   "settings": {
     "title": "Game settings:",

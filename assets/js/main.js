@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Eliastik (eliastiksofts.com)
+ * Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
  *
  * This file is part of "SnakeIA".
  *
@@ -66,12 +66,17 @@ SOLO_PLAYER_DOWNLOAD_LEVELS_TO = "snakeia_solo_player_downloadedLevels";
 SOLO_AI_DOWNLOAD_LEVELS_TO = "snakeia_solo_ai_downloadedLevels";
 
 var selectedMode = SOLO_AI;
+var enableAnimations = true;
 var showDebugInfo = false;
 
 document.getElementById("versionTxt").innerHTML = APP_VERSION;
 document.getElementById("appVersion").innerHTML = APP_VERSION;
 document.getElementById("dateTxt").innerHTML = DATE_VERSION;
 document.getElementById("appUpdateDate").innerHTML = DATE_VERSION;
+
+document.getElementById("enableAnimations").onchange = function() {
+  enableAnimations = this.checked;
+};
 
 // Libs
 String.prototype.strcmp = function(str) {
@@ -721,25 +726,25 @@ function validateSettings(returnValidation) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
       var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
-      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
+      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
     } else if(selectedMode == SOLO_PLAYER) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
       var snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
-      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
+      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
     } else if(selectedMode == PLAYER_VS_AI) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
       var snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
       if(sameGrid) {
         var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
-        games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
+        games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
       } else {
         var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
         var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
-        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed));
-        games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed));
+        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, null, null, null, null, !enableAnimations));
+        games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, null, null, null, null, !enableAnimations));
       }
     } else if(selectedMode == AI_VS_AI) {
       var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
@@ -747,13 +752,13 @@ function validateSettings(returnValidation) {
 
       if(sameGrid) {
         var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
-        games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
+        games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
       } else {
         var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
         var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
-        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
-        games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
+        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+        games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
       }
     } else if(selectedMode == BATTLE_ROYALE) {
       if(sameGrid) {
@@ -768,20 +773,20 @@ function validateSettings(returnValidation) {
           snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry));
         }
 
-        games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed));
+        games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
       } else {
         if(battleAgainstAIs) {
           var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
           var snake = new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry);
 
-          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250));
+          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, !enableAnimations));
         }
 
         for(var i = 0; i < numberIA; i++) {
           var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
           var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
-          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250));
+          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, !enableAnimations));
         }
       }
     }
@@ -1106,7 +1111,7 @@ function playLevel(level, player, type) {
         snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel));
       }
 
-      var playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed);
+      var playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations);
       games.push(playerGame);
     } else {
       if(numberIA + 1 <= 2) {
@@ -1117,14 +1122,14 @@ function playLevel(level, player, type) {
         var height = 250;
       }
 
-      var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height);
+      var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height, null, null, !enableAnimations);
       games.push(playerGame);
 
       for(var i = 0; i < numberIA; i++) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
         var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, false);
 
-        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, width, height));
+        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, width, height, null, null, !enableAnimations));
       }
     }
 

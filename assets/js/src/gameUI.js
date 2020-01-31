@@ -765,6 +765,10 @@ GameUI.prototype.setNotification = function(notification) {
   }
 
   this.notificationMessage = notification;
+
+  if(this.notificationMessage instanceof NotificationMessage && this.disableAnimation) {
+    this.notificationMessage.disableAnimation = true;
+  }
 };
 
 GameUI.prototype.setTimeToDisplay = function(time) {
@@ -1315,7 +1319,7 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
       var caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
       var caseY = this.headerHeight + posY * caseHeight;
   
-      if(!this.snakes[i].gameOver) {
+      if(!this.disableAnimation && !this.snakes[i].gameOver) {
         var offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
         var offset = (offset > 1 ? 1 : offset);
         var offsetX = (caseWidth * offset) - caseWidth;
