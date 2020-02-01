@@ -16,6 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var i18next = require("../libs/i18next.min");
+  var GameUtils = require("./gameUtils");
+}
+
 var GameUtils = {
   randRange: function(min, max) { // Return an integer between min (inclusive) and max (inclusive)
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -53,25 +58,25 @@ var GameUtils = {
   },
   hslToName: function(h, s, l) {
     if(s <= 10 && l >= 90) {
-      return window.i18next.t("engine.colors.white");
+      return i18next.t("engine.colors.white");
     } else if((s <= 10 && l <= 70) || s == 0) {
-      return window.i18next.t("engine.colors.gray");
+      return i18next.t("engine.colors.gray");
     } else if(l <= 15) {
-      return window.i18next.t("engine.colors.black");
+      return i18next.t("engine.colors.black");
     } else if((h >= 0 && h <= 6) || h >= 350) {
-      return window.i18next.t("engine.colors.red");
+      return i18next.t("engine.colors.red");
     } else if(h >= 7 && h <= 42) {
-      return window.i18next.t("engine.colors.orange");
+      return i18next.t("engine.colors.orange");
     } else if(h >= 43 && h <= 70) {
-      return window.i18next.t("engine.colors.yellow");
+      return i18next.t("engine.colors.yellow");
     } else if(h >= 71 && h <= 156) {
-      return window.i18next.t("engine.colors.green");
+      return i18next.t("engine.colors.green");
     } else if(h >= 157 && h <= 221) {
-      return window.i18next.t("engine.colors.blue");
+      return i18next.t("engine.colors.blue");
     } else if(h >= 222 && h <= 290) {
-      return window.i18next.t("engine.colors.purple");
+      return i18next.t("engine.colors.purple");
     } else if(h >= 291 && h <= 349) {
-      return window.i18next.t("engine.colors.pink");
+      return i18next.t("engine.colors.pink");
     }
   },
   isFilterHueAvailable: function() {

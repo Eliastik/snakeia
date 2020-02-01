@@ -17,6 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 if(typeof(require) !== "undefined") {
+  var i18next = require("../libs/i18next.min");
   var Lowlight = require("../libs/lowlight.astar.min");
   var GameUtils = require("./gameUtils");
   var GameConstants = require("./constants");
@@ -456,17 +457,17 @@ Snake.prototype.ai = function(bestFind) {
 Snake.prototype.getAILevelText = function() {
   switch(this.aiLevel) {
     case GameConstants.AiLevel.RANDOM:
-      return window.i18next.t("engine.aiLevelList.random");
+      return i18next.t("engine.aiLevelList.random");
     case GameConstants.AiLevel.LOW:
-      return window.i18next.t("engine.aiLevelList.low");
+      return i18next.t("engine.aiLevelList.low");
     case GameConstants.AiLevel.DEFAULT:
-      return window.i18next.t("engine.aiLevelList.normal");
+      return i18next.t("engine.aiLevelList.normal");
     case GameConstants.AiLevel.HIGH:
-      return window.i18next.t("engine.aiLevelList.high");
+      return i18next.t("engine.aiLevelList.high");
     case GameConstants.AiLevel.ULTRA:
-      return window.i18next.t("engine.aiLevelList.ultra");
+      return i18next.t("engine.aiLevelList.ultra");
     default:
-      return window.i18next.t("engine.aiLevelList.normal");
+      return i18next.t("engine.aiLevelList.normal");
   }
 };
 

@@ -110,6 +110,29 @@ Game written in pure JavaScript and object oriented.
 * Version 1.0 (6/19/2019):
     - Initial version
 
+## How to compile
+
+You can compile yourself the JavaScript code if you made a change. To do this, you have to install Node.js and npm.
+
+To install Node.js and npm for your OS, read this page: https://docs.npmjs.com/getting-started/installing-node
+
+Git clone the repository and cd to the project directory (or download it directly from Github):
+````
+git clone https://github.com/Eliastik/snakeia.git
+cd snakeia
+````
+
+Then run this command to install the dependencies:
+````
+npm install
+````
+Then to compile:
+
+* Dev mode: `npm run build-dev`
+* Prod mode: `npm run build`
+
+This will compile the JavaScript code into the sub-directory "dist".
+
 # Français
 
 Une version du Snake dotée d'une intelligence artificielle. Cette version est dotée de nombreux modes de jeu. Vous pouvez notamment jouer contre l'IA, ou la laisser jouer seule. Un mode Battle Royale est également disponible, ce mode voit s'affronter entre 2 et 100 IA ! De nombreux paramétrages sont disponibles pour varier les parties. Un mode Niveaux (pour le joueur et l'IA) est également disponible, il s'agit d'un série de niveau dotés d'un objectif particulier à accomplir (obtenir un score minimal, obtenir un score en un certain temps, …). Des niveaux téléchargeables sont disponibles.
@@ -218,6 +241,29 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 * Version 1.0 (19/06/2019) :
     - Version initiale
+
+## Comment compiler
+
+Vous pouvez compiler vous-même le code JavaScript si vous avez effectué un changement. Pour cela, vous devez avoir installé Node.js et npm.
+
+Pour installer Node.js et npm sur votre système, suivez le guide : https://docs.npmjs.com/getting-started/installing-node
+
+Effectuez un clonage du dépôt et déplacez-vous dedans (ou téléchargez-le directement depuis Github) :
+````
+git clone https://github.com/Eliastik/snakeia.git
+cd snakeia
+````
+
+Puis lancez cette commande pour installer les dépendances :
+````
+npm install
+````
+Puis pour compiler :
+
+* Mode développement : `npm run build-dev`
+* Mode production : `npm run build`
+
+Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 
 ## TO-DO list
 
