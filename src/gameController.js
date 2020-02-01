@@ -77,13 +77,12 @@ GameController.prototype.init = function() {
       "initialSpeed": self.gameEngine.initialSpeed,
       "speed": self.gameEngine.speed,
       "snakes": self.gameEngine.snakes,
-      "offsetFrame": self.gameEngine.speed,
       "confirmReset": false,
       "confirmExit": false,
       "getInfos": false,
       "getInfosGame": false,
       "errorOccurred": self.gameEngine.errorOccurred,
-      "offsetFrame": game.speed * GameConstants.Setting.TIME_MULTIPLIER,
+      "offsetFrame": self.gameEngine.speed * GameConstants.Setting.TIME_MULTIPLIER
     });
     self.reactor.dispatchEvent("onReset");
   });
