@@ -20,6 +20,7 @@ if(typeof(require) !== "undefined") {
   var GameConstants = require("./constants");
   var GameController = require("./gameController");
   var GameControllerWorker = require("./gameControllerWorker");
+  var GameControllerSocket = require("./gameControllerSocket");
   var GameUI = require("./gameUI");
   var GameEngine = require("./gameEngine");
 }

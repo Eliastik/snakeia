@@ -35,6 +35,7 @@ module.exports = {
     Button: require("./button"),
     GameController: require("./gameController"),
     GameControllerWorker: require("./gameControllerWorker"),
+    GameControllerSocket: require("./gameControllerSocket"),
     GameGroup: require("./gameGroup"),
     GameUI: require("./gameUI"),
     ImageLoader: require("./imageLoader"),
