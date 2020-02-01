@@ -16,6 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var GameConstants = require("./constants");
+  var Reactor = require("./reactor");
+}
+
 function GameController(engine, ui) {
   this.gameUI = ui;
   this.gameEngine = engine;

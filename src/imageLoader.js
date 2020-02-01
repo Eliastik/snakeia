@@ -45,10 +45,6 @@ ImageLoader.prototype.load = function(img, func, game) {
   } else {
     return func();
   }
-
-  if(game != undefined && game != null && game instanceof Game) {
-    game.updateUI();
-  }
 };
 
 ImageLoader.prototype.loadImage = function(src, func) {

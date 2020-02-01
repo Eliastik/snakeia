@@ -16,7 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-i18next.use(window.i18nextBrowserLanguageDetector).init({
+if(typeof(require) !== "undefined") {
+  var i18next = require("../../libs/i18next.min");
+  var i18nextBrowserLanguageDetector = require("../../libs/i18nextBrowserLanguageDetector.min");
+}
+
+i18next.use(i18nextBrowserLanguageDetector).init({
   fallbackLng: ['en', 'fr'],
   load: 'languageOnly',
   detection: {

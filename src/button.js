@@ -239,5 +239,8 @@ Button.prototype.loadImage = function(imageLoader) {
 
 // Export module
 if(typeof(module) !== "undefined") {
-  module.exports = Button;
+  module.exports = {
+    Button: Button,
+    ButtonImage: ButtonImage
+  }
 }

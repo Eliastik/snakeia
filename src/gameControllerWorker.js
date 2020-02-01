@@ -16,6 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var GameController = require('./gameController');
+  var Grid = require('./grid');
+  var Snake = require('./snake');
+  var Position = require('./position');
+}
+
 function GameControllerWorker(game, ui) {
   GameController.call(this, game, ui);
 
@@ -24,7 +31,7 @@ function GameControllerWorker(game, ui) {
   this.init = function() {
     if(window.Worker) {
       try {
-        this.worker = new Worker("assets/js/src/gameEngineWorker.js");
+        this.worker = new Worker("src/gameEngineWorker.js");
       } catch(e) {
         this.update("init", {
           "errorOccurred": true

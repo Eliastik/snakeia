@@ -16,81 +16,85 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
- // French
- i18next.addResourceBundle("fr", "translation", {
-   "engine": {
-     "score": "Score",
-     "num": "n°",
-     "initFailed": "Échec de l'initialisation du jeu : le Snake est plus grand que la grille",
-     "continue": "Reprendre",
-     "reset": "Recommencer la partie",
-     "retryInit": "Réessayer",
-     "exit": "Quitter",
-     "yes": "Oui",
-     "no": "Non",
-     "ok": "OK",
-     "about": "À propos…",
-     "infosGame": "Infos partie",
-     "player": "Joueur :",
-     "playerHuman": "Vous",
-     "playerAI": "IA",
-     "aiLevel": "Niveau de l'IA :",
-     "aiLevelList": {
-       "random": "Au hasard",
-       "low": "Faible",
-       "normal": "Normal",
-       "high": "Élevé",
-       "ultra": "Ultra"
-     },
-     "sizeGrid": "Taille de la grille :",
-     "currentSpeed": "Vitesse actuelle :",
-     "progressiveSpeed": "Vitesse progressive",
-     "loading": "Chargement des ressources…",
-     "exited": "Cette partie a été définitivement quittée. En attente de la fin des autres parties…",
-     "error": "Une erreur est survenue !",
-     "errorLoading": "Une erreur est survenue lors du chargement des ressources. Vérifiez votre connexion Internet.",
-     "exitConfirm": "Êtes-vous sûr de vouloir quitter la partie ?",
-     "resetConfirm": "Êtes-vous sûr de vouloir recommencer la partie ?",
-     "scoreMax": "Score maximal atteint !",
-     "gameOver": "Game Over !",
-     "gameFinished": "Partie terminée !",
-     "pause": "Pause",
-     "playerMin": "J",
-     "aiMin": "IA",
-     "aboutScreen": {
-       "title": "SnakeIA par Eliastik",
-       "versionAndDate": "Version {{version}} ({{date, DD/MM/YYYY}})"
-     },
-     "debug": {
-       "fps": "IPS",
-       "frames": "Images",
-       "ticks": "Tours",
-       "speed": "Vit.",
-       "paused": "En pause"
-     },
-     "colors": {
-       "white": "Blanc",
-       "gray": "Gris",
-       "black": "Noir",
-       "red": "Rouge",
-       "brown": "Marron",
-       "orange": "Orange",
-       "yellow": "Jaune",
-       "green": "Vert",
-       "blue": "Bleu",
-       "purple": "Mauve",
-       "pink": "Rose"
-     },
-     "colorPlayer": "Vous êtes le Snake\nen {{color}}",
-     "arrowPlayer": "Vous êtes le Snake\nindiqué par la\nflèche",
-     "ready": "Partez !",
-     "assistAI": "Assistant IA",
-     "exitFullScreen": "Quitter plein-écran",
-     "enterFullScreen": "Mode plein-écran",
-     "mazeMode": "Mode labyrinthe ! Trouvez le chemin vers la pomme pour réussir la partie.\nLe Snake n'avance pas automatiquement.",
-     "mazeWin": "Bien joué !",
-     "mazeModeMin": "Mode labyrinthe"
-   }
+if(typeof(require) !== "undefined") {
+  var i18next = require("../../libs/i18next.min");
+}
+
+// French
+i18next.addResourceBundle("fr", "translation", {
+  "engine": {
+    "score": "Score",
+    "num": "n°",
+    "initFailed": "Échec de l'initialisation du jeu : le Snake est plus grand que la grille",
+    "continue": "Reprendre",
+    "reset": "Recommencer la partie",
+    "retryInit": "Réessayer",
+    "exit": "Quitter",
+    "yes": "Oui",
+    "no": "Non",
+    "ok": "OK",
+    "about": "À propos…",
+    "infosGame": "Infos partie",
+    "player": "Joueur :",
+    "playerHuman": "Vous",
+    "playerAI": "IA",
+    "aiLevel": "Niveau de l'IA :",
+    "aiLevelList": {
+      "random": "Au hasard",
+      "low": "Faible",
+      "normal": "Normal",
+      "high": "Élevé",
+      "ultra": "Ultra"
+    },
+    "sizeGrid": "Taille de la grille :",
+    "currentSpeed": "Vitesse actuelle :",
+    "progressiveSpeed": "Vitesse progressive",
+    "loading": "Chargement des ressources…",
+    "exited": "Cette partie a été définitivement quittée. En attente de la fin des autres parties…",
+    "error": "Une erreur est survenue !",
+    "errorLoading": "Une erreur est survenue lors du chargement des ressources. Vérifiez votre connexion Internet.",
+    "exitConfirm": "Êtes-vous sûr de vouloir quitter la partie ?",
+    "resetConfirm": "Êtes-vous sûr de vouloir recommencer la partie ?",
+    "scoreMax": "Score maximal atteint !",
+    "gameOver": "Game Over !",
+    "gameFinished": "Partie terminée !",
+    "pause": "Pause",
+    "playerMin": "J",
+    "aiMin": "IA",
+    "aboutScreen": {
+      "title": "SnakeIA par Eliastik",
+      "versionAndDate": "Version {{version}} ({{date, DD/MM/YYYY}})"
+    },
+    "debug": {
+      "fps": "IPS",
+      "frames": "Images",
+      "ticks": "Tours",
+      "speed": "Vit.",
+      "paused": "En pause"
+    },
+    "colors": {
+      "white": "Blanc",
+      "gray": "Gris",
+      "black": "Noir",
+      "red": "Rouge",
+      "brown": "Marron",
+      "orange": "Orange",
+      "yellow": "Jaune",
+      "green": "Vert",
+      "blue": "Bleu",
+      "purple": "Mauve",
+      "pink": "Rose"
+    },
+    "colorPlayer": "Vous êtes le Snake\nen {{color}}",
+    "arrowPlayer": "Vous êtes le Snake\nindiqué par la\nflèche",
+    "ready": "Partez !",
+    "assistAI": "Assistant IA",
+    "exitFullScreen": "Quitter plein-écran",
+    "enterFullScreen": "Mode plein-écran",
+    "mazeMode": "Mode labyrinthe ! Trouvez le chemin vers la pomme pour réussir la partie.\nLe Snake n'avance pas automatiquement.",
+    "mazeWin": "Bien joué !",
+    "mazeModeMin": "Mode labyrinthe"
+  }
 }, true, false);
 
 // English

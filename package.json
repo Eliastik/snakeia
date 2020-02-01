@@ -1,10 +1,12 @@
 {
   "name": "snakeia",
-  "version": "1.5",
+  "version": "1.5.0",
   "description": "A Snake version with an artificial intelligence. This version has many game modes. You can play against the AI, or let it play alone. A Battle Royale mode is also available, this mode sees between 2 and 100 AI fight! Many settings are available to vary the games. A Levels mode (for the player and the AI) is also available, it's a series of level with a particular goal to achieve (get a minimum score, get a score in time, …). Downloadable levels are available.",
-  "main": "node-index.js",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config prod.webpack.config.js",
+    "build-dev": "webpack --config dev.webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/Eliastik/snakeia/issues"
   },
-  "homepage": "https://github.com/Eliastik/snakeia#readme"
+  "homepage": "https://github.com/Eliastik/snakeia#readme",
+  "devDependencies": {
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  }
 }

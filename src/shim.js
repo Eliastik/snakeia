@@ -18,6 +18,10 @@
  */
 if(typeof(require) !== "undefined") {
   var GameConstants = require("./constants");
+  var GameController = require("./gameController");
+  var GameControllerWorker = require("./gameControllerWorker");
+  var GameUI = require("./gameUI");
+  var GameEngine = require("./gameEngine");
 }
 
 // Polyfills
@@ -54,7 +58,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   
   try { // Test if Worker is supported
     if(!window.Worker) throw "Worker not supported";
-    new Worker("assets/js/src/gameEngineWorker.js").terminate();
+    new Worker("src/gameEngineWorker.js").terminate();
     controller = new GameControllerWorker(new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed));
   } catch(e) {
     controller = new GameController(new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed));

@@ -16,61 +16,71 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+if(typeof(require) !== "undefined") {
+  var i18next = require("./libs/i18next.min");
+  var Game = require("./src/shim");
+  var GameConstants = require("./src/constants");
+  var Snake = require("./src/snake");
+  var Grid = require("./src/grid");
+  var NotificationMessage = require('./src/notificationMessage');
+  var GameGroup = require('./src/gameGroup');
+}
+
 // Modes :
-SOLO_AI = "SOLO_AI";
-SOLO_PLAYER = "SOLO_PLAYER";
-PLAYER_VS_AI = "PLAYER_VS_AI";
-AI_VS_AI = "AI_VS_AI";
-BATTLE_ROYALE = "BATTLE_ROYALE";
+window.SOLO_AI = "SOLO_AI";
+window.SOLO_PLAYER = "SOLO_PLAYER";
+window.PLAYER_VS_AI = "PLAYER_VS_AI";
+window.AI_VS_AI = "AI_VS_AI";
+window.BATTLE_ROYALE = "BATTLE_ROYALE";
 // Updater :
-UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update.php";
+window.UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update.php";
 // Levels types :
-LEVEL_REACH_SCORE = "LEVEL_REACH_SCORE";
-LEVEL_REACH_MAX_SCORE = "LEVEL_REACH_MAX_SCORE";
-LEVEL_MULTI_BEST_SCORE = "LEVEL_MULTI_BEST_SCORE";
-LEVEL_MULTI_REACH_SCORE_FIRST = "LEVEL_MULTI_REACH_SCORE_FIRST";
-LEVEL_REACH_SCORE_ON_TIME = "LEVEL_REACH_SCORE_ON_TIME";
-LEVEL_MAZE_WIN = "LEVEL_MAZE_WIN";
-DEFAULT_LEVEL = "DEFAULT_LEVEL";
-DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
+window.LEVEL_REACH_SCORE = "LEVEL_REACH_SCORE";
+window.LEVEL_REACH_MAX_SCORE = "LEVEL_REACH_MAX_SCORE";
+window.LEVEL_MULTI_BEST_SCORE = "LEVEL_MULTI_BEST_SCORE";
+window.LEVEL_MULTI_REACH_SCORE_FIRST = "LEVEL_MULTI_REACH_SCORE_FIRST";
+window.LEVEL_REACH_SCORE_ON_TIME = "LEVEL_REACH_SCORE_ON_TIME";
+window.LEVEL_MAZE_WIN = "LEVEL_MAZE_WIN";
+window.DEFAULT_LEVEL = "DEFAULT_LEVEL";
+window.DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
 // Default levels :
 // Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA, generateMaze, customGrid, mazeForceAuto], type: levelType(see below), typeValue: levelTypeValue(score, time, ...), version: (version min to play the level) }
-DEFAULT_LEVELS_SOLO_PLAYER = {
-  1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
-  2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
-  3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 15, version: APP_VERSION },
-  4: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 60], version: APP_VERSION },
-  5: { settings: [10, 10, true, false, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
-  6: { settings: [15, 15, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: APP_VERSION },
-  7: { settings: [15, 15, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 45], version: APP_VERSION },
-  8: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 35, version: APP_VERSION },
-  9: { settings: [15, 15, false, false, false, null, false, null, 1], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: APP_VERSION },
-  10: { settings: [10, 10, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [10, 15], version: APP_VERSION },
-  11: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: APP_VERSION },
-  12: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: APP_VERSION },
-  13: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: APP_VERSION },
-  14: { settings: [20, 20, true, false, true, 5, true, null, 0], type: LEVEL_REACH_SCORE, typeValue: 30, version: APP_VERSION },
-  15: { settings: [15, 15, false, false, true, null, false, null, 1], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: APP_VERSION },
-  16: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 75, version: APP_VERSION },
-  17: { settings: [15, 15, true, false, true, 15, false, null, 2], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: APP_VERSION },
-  18: { settings: [5, 5, true, false, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: APP_VERSION },
-  19: { settings: [5, 5, false, true, true, 10, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 10, version: APP_VERSION },
-  20: { settings: [20, 20, false, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: APP_VERSION }
+window.DEFAULT_LEVELS_SOLO_PLAYER = {
+  1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
+  2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
+  3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 15, version: GameConstants.Setting.APP_VERSION },
+  4: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 60], version: GameConstants.Setting.APP_VERSION },
+  5: { settings: [10, 10, true, false, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
+  6: { settings: [15, 15, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
+  7: { settings: [15, 15, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 45], version: GameConstants.Setting.APP_VERSION },
+  8: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 35, version: GameConstants.Setting.APP_VERSION },
+  9: { settings: [15, 15, false, false, false, null, false, null, 1], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: GameConstants.Setting.APP_VERSION },
+  10: { settings: [10, 10, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [10, 15], version: GameConstants.Setting.APP_VERSION },
+  11: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: GameConstants.Setting.APP_VERSION },
+  12: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: GameConstants.Setting.APP_VERSION },
+  13: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: GameConstants.Setting.APP_VERSION },
+  14: { settings: [20, 20, true, false, true, 5, true, null, 0], type: LEVEL_REACH_SCORE, typeValue: 30, version: GameConstants.Setting.APP_VERSION },
+  15: { settings: [15, 15, false, false, true, null, false, null, 1], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: GameConstants.Setting.APP_VERSION },
+  16: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 75, version: GameConstants.Setting.APP_VERSION },
+  17: { settings: [15, 15, true, false, true, 15, false, null, 2], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: GameConstants.Setting.APP_VERSION },
+  18: { settings: [5, 5, true, false, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: GameConstants.Setting.APP_VERSION },
+  19: { settings: [5, 5, false, true, true, 10, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 10, version: GameConstants.Setting.APP_VERSION },
+  20: { settings: [20, 20, false, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: GameConstants.Setting.APP_VERSION }
 };
-SOLO_PLAYER_SAVE = "snakeia_solo_player_";
-DEFAULT_LEVELS_SOLO_AI = DEFAULT_LEVELS_SOLO_PLAYER;
-SOLO_AI_SAVE = "snakeia_solo_ai_";
+window.SOLO_PLAYER_SAVE = "snakeia_solo_player_";
+window.DEFAULT_LEVELS_SOLO_AI = DEFAULT_LEVELS_SOLO_PLAYER;
+window.SOLO_AI_SAVE = "snakeia_solo_ai_";
 // Downloadable levels :
-DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLevels.php?player={player}&ver={appVersion}";
-SOLO_PLAYER_DOWNLOAD_LEVELS_TO = "snakeia_solo_player_downloadedLevels";
-SOLO_AI_DOWNLOAD_LEVELS_TO = "snakeia_solo_ai_downloadedLevels";
+window.DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLevels.php?player={player}&ver={appVersion}";
+window.SOLO_PLAYER_DOWNLOAD_LEVELS_TO = "snakeia_solo_player_downloadedLevels";
+window.SOLO_AI_DOWNLOAD_LEVELS_TO = "snakeia_solo_ai_downloadedLevels";
 
 var selectedMode = SOLO_AI;
 var enableAnimations = true;
 var showDebugInfo = false;
 
-document.getElementById("versionTxt").innerHTML = APP_VERSION;
-document.getElementById("appVersion").innerHTML = APP_VERSION;
+document.getElementById("versionTxt").innerHTML = GameConstants.Setting.APP_VERSION;
+document.getElementById("appVersion").innerHTML = GameConstants.Setting.APP_VERSION;
 document.getElementById("dateTxt").innerHTML = DATE_VERSION;
 document.getElementById("appUpdateDate").innerHTML = DATE_VERSION;
 
@@ -209,7 +219,7 @@ function TimerInterval(callback) {
 
 function enableDebugMode() {
   showDebugInfo = true;
-  console.log(window.i18next.t("debugModeEnabled"));
+  console.log(i18next.t("debugModeEnabled"));
 }
 
 // Updater
@@ -220,9 +230,9 @@ function checkUpdate() {
   document.getElementsByTagName('head')[0].appendChild(script);
 }
 
-function updateCallback(data) {
+window.updateCallback = function(data) {
   if(typeof(data) !== "undefined" && data !== null && typeof(data.version) !== "undefined" && data.version !== null) {
-    var newVersionTest = APP_VERSION.strcmp(data.version);
+    var newVersionTest = GameConstants.Setting.APP_VERSION.strcmp(data.version);
 
     if(newVersionTest < 0) {
       document.getElementById("updateAvailable").style.display = "block";
@@ -247,17 +257,17 @@ function updateCallback(data) {
       };
 
       document.getElementById("appDownloadURLGet").onclick = function() {
-          prompt(window.i18next.t("update.URLToDownload"), downloadURL);
+          prompt(i18next.t("update.URLToDownload"), downloadURL);
       };
 
-      var changes = window.i18next.t("update.noChanges");
+      var changes = i18next.t("update.noChanges");
 
       if(typeof(data.changes) !== "undefined" && data.changes !== null) {
           var changes = data.changes;
       }
 
       document.getElementById("appUpdateChanges").onclick = function() {
-          alert(window.i18next.t("update.changes") + "\n" + changes);
+          alert(i18next.t("update.changes") + "\n" + changes);
       };
 
       translateContent();
@@ -360,13 +370,13 @@ function displayLevelList(player) {
   document.getElementById("btnDeblockDiv").innerHTML = "";
 
   if(player == PLAYER_HUMAN) {
-    document.getElementById("titleLevelList").innerHTML = window.i18next.t("levels.titlePlayer");
+    document.getElementById("titleLevelList").innerHTML = i18next.t("levels.titlePlayer");
     document.getElementById("levelListDefault").innerHTML = getListLevel(PLAYER_HUMAN, DEFAULT_LEVEL);
     document.getElementById("levelListDownloadAI").style.display = "none";
     document.getElementById("levelListDownloadPlayer").style.display = "block";
     document.getElementById("levelListDownloadPlayer").innerHTML = getListLevel(PLAYER_HUMAN, DOWNLOADED_LEVEL);
   } else if(player == PLAYER_AI) {
-    document.getElementById("titleLevelList").innerHTML = window.i18next.t("levels.titleAI");
+    document.getElementById("titleLevelList").innerHTML = i18next.t("levels.titleAI");
     document.getElementById("levelListDefault").innerHTML = getListLevel(PLAYER_AI, DEFAULT_LEVEL);
     document.getElementById("levelListDownloadAI").style.display = "block";
     document.getElementById("levelListDownloadPlayer").style.display = "none";
@@ -702,23 +712,23 @@ function validateSettings(returnValidation) {
 
     switch(selectedMode) {
       case SOLO_AI:
-        titleGame = window.i18next.t("menu.soloAi");
+        titleGame = i18next.t("menu.soloAi");
         break;
       case SOLO_PLAYER:
-        titleGame = window.i18next.t("menu.soloPlayer");
+        titleGame = i18next.t("menu.soloPlayer");
         break;
       case PLAYER_VS_AI:
-        titleGame = window.i18next.t("menu.playerVsAi");
+        titleGame = i18next.t("menu.playerVsAi");
         break;
       case AI_VS_AI:
-        titleGame = window.i18next.t("menu.aiVsAi");
+        titleGame = i18next.t("menu.aiVsAi");
         break;
       case BATTLE_ROYALE:
-        titleGame = window.i18next.t("menu.battleRoyale");
+        titleGame = i18next.t("menu.battleRoyale");
         break;
     }
 
-    document.getElementById("titleGame").innerHTML = window.i18next.t("game.currentMode") + " " + titleGame;
+    document.getElementById("titleGame").innerHTML = i18next.t("game.currentMode") + " " + titleGame;
 
     var games = [];
 
@@ -800,11 +810,11 @@ function validateSettings(returnValidation) {
     }
 
     if(mazeGrid && (selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER)) {
-      group.setNotification(new NotificationMessage(window.i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, null, null, null, true));
+      group.setNotification(new NotificationMessage(i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, null, null, null, true));
     }
 
     document.getElementById("backToMenuGame").onclick = function() {
-      if(confirm(window.i18next.t("game.confirmQuit"))) {
+      if(confirm(i18next.t("game.confirmQuit"))) {
         group.killAll();
         displayMenu();
         group = null;
@@ -818,49 +828,49 @@ function validateSettings(returnValidation) {
 
         if(selectedMode == PLAYER_VS_AI) {
           if(winners.index.length == 2) {
-            resultMessage = window.i18next.t("game.equalityPlayerVSAI");
+            resultMessage = i18next.t("game.equalityPlayerVSAI");
           } else if(winners.index[0] == 0) {
-            resultMessage = window.i18next.t("game.winPlayerVSAI");
+            resultMessage = i18next.t("game.winPlayerVSAI");
           } else if(winners.index[0] == 1) {
-            resultMessage = window.i18next.t("game.losePlayerVSAI");
+            resultMessage = i18next.t("game.losePlayerVSAI");
           }
         } else if(selectedMode == AI_VS_AI) {
           if(winners.index.length == 1) {
-            resultMessage = window.i18next.t("game.oneWinnerAIVSAI", { numWinner: winners.index[0] + 1 });
+            resultMessage = i18next.t("game.oneWinnerAIVSAI", { numWinner: winners.index[0] + 1 });
           } else if(winners.index.length == 2) {
-            resultMessage = window.i18next.t("game.equalityAIVSAI");
+            resultMessage = i18next.t("game.equalityAIVSAI");
           }
         } else if(selectedMode == BATTLE_ROYALE) {
           if(winners.index.length == 1) {
             if(battleAgainstAIs && winners.index[0] == 0) {
-              resultMessage = window.i18next.t("game.playerWinnerBattleRoyale", { score: winners.score });
+              resultMessage = i18next.t("game.playerWinnerBattleRoyale", { score: winners.score });
             } else {
-              resultMessage = window.i18next.t("game.oneWinnerBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[0] : winners.index[0] + 1), score: winners.score });
+              resultMessage = i18next.t("game.oneWinnerBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[0] : winners.index[0] + 1), score: winners.score });
             }
           } else if(battleAgainstAIs && winners.index.length == 2 && winners.index[0] == 0) {
-            resultMessage = window.i18next.t("game.winnerAIBattleRoyale") + " " + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: winners.index[1] }) + " " + window.i18next.t("game.andPlayerWinnersBattleRoyale") + " " + window.i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
+            resultMessage = i18next.t("game.winnerAIBattleRoyale") + " " + i18next.t("game.winnersNumBattleRoyale", { numWinner: winners.index[1] }) + " " + i18next.t("game.andPlayerWinnersBattleRoyale") + " " + i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
           } else if(winners.index.length > 1) {
             var playerWinnerBattleRoyale = false;
-            resultMessage = window.i18next.t("game.winnersBattleRoyale") + " ";
+            resultMessage = i18next.t("game.winnersBattleRoyale") + " ";
 
             for(var i = 0; i < winners.index.length; i++) {
               if(battleAgainstAIs && winners.index[i] == 0) {
                 var playerWinnerBattleRoyale = true;
               } else {
-                resultMessage = resultMessage + window.i18next.t("game.winnersNumBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[i] : winners.index[i] + 1) });
+                resultMessage = resultMessage + i18next.t("game.winnersNumBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[i] : winners.index[i] + 1) });
 
                 if((i + 1) < winners.index.length - 1) {
                   resultMessage = resultMessage + ", ";
                 } else if((i + 1) == winners.index.length - 1) {
-                  resultMessage = resultMessage + " " + window.i18next.t("game.andWinnersBattleRoyale") + " ";
+                  resultMessage = resultMessage + " " + i18next.t("game.andWinnersBattleRoyale") + " ";
                 }
               }
             }
 
             if(battleAgainstAIs && playerWinnerBattleRoyale) {
-              resultMessage = resultMessage + " " + window.i18next.t("game.andPlayerWinnersBattleRoyale") + " " + window.i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
+              resultMessage = resultMessage + " " + i18next.t("game.andPlayerWinnersBattleRoyale") + " " + i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
             } else {
-              resultMessage = resultMessage + " " + window.i18next.t("game.winScoreBattleRoyale", { score: winners.score });
+              resultMessage = resultMessage + " " + i18next.t("game.winScoreBattleRoyale", { score: winners.score });
             }
           }
         }
@@ -963,7 +973,7 @@ function initSaveLevel(player, type, force) {
     var item = storageGlobal.getItem(save);
 
     if(item == null || force) {
-      storageGlobal.setItem(save, JSON.stringify({ version: APP_VERSION }));
+      storageGlobal.setItem(save, JSON.stringify({ version: GameConstants.Setting.APP_VERSION }));
       setLevelSave([false, 0], 1, player, type);
     }
 
@@ -1019,7 +1029,7 @@ function canPlay(level, player, type) {
 }
 
 function levelCompatible(levelType, version) {
-  if((levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME && levelType != LEVEL_MULTI_REACH_SCORE_FIRST && levelType != LEVEL_MAZE_WIN) || APP_VERSION.strcmp(version) < 0) {
+  if((levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME && levelType != LEVEL_MULTI_REACH_SCORE_FIRST && levelType != LEVEL_MAZE_WIN) || GameConstants.Setting.APP_VERSION.strcmp(version) < 0) {
     return false;
   }
 
@@ -1042,22 +1052,22 @@ function printResultLevel(level, player, levelType, type, shortVersion) {
 
   if(shortVersion) {
     if(levelType == LEVEL_REACH_SCORE || levelType == LEVEL_REACH_MAX_SCORE || levelType == LEVEL_MULTI_BEST_SCORE) {
-      val = window.i18next.t("levels.bestScoreShort", { count: resultLevel });
+      val = i18next.t("levels.bestScoreShort", { count: resultLevel });
     } else if(levelType == LEVEL_REACH_SCORE_ON_TIME || levelType == LEVEL_MULTI_REACH_SCORE_FIRST || levelType == LEVEL_MAZE_WIN) {
-      val = window.i18next.t("levels.bestTimeShort", { count: Math.round(resultLevel) });
+      val = i18next.t("levels.bestTimeShort", { count: Math.round(resultLevel) });
     }
   } else {
     if(levelType == LEVEL_REACH_SCORE || levelType == LEVEL_REACH_MAX_SCORE || levelType == LEVEL_MULTI_BEST_SCORE) {
-      val = window.i18next.t("levels.bestScore", { count: resultLevel });
+      val = i18next.t("levels.bestScore", { count: resultLevel });
     } else if(levelType == LEVEL_REACH_SCORE_ON_TIME || levelType == LEVEL_MULTI_REACH_SCORE_FIRST || levelType == LEVEL_MAZE_WIN) {
-      val = window.i18next.t("levels.bestTime", { count: Math.round(resultLevel) });
+      val = i18next.t("levels.bestTime", { count: Math.round(resultLevel) });
     }
   }
 
   return val;
 }
 
-function playLevel(level, player, type) {
+window.playLevel = function(level, player, type) {
   var levels = getLevels(player, type);
 
   if(levels == null) {
@@ -1072,12 +1082,12 @@ function playLevel(level, player, type) {
     var levelVersion = levelSelected["version"];
 
     if(!levelCompatible(levelType, levelVersion)) {
-      alert(window.i18next.t("levels.notCompatible"));
+      alert(i18next.t("levels.notCompatible"));
       return false;
     }
 
     if(!canPlay(level, player, type)) {
-      alert(window.i18next.t("levels.disabledLevel"));
+      alert(i18next.t("levels.disabledLevel"));
       return false;
     }
 
@@ -1143,7 +1153,7 @@ function playLevel(level, player, type) {
     document.getElementById("gameOrder").innerHTML = "";
     document.getElementById("gameStatusError").innerHTML = "";
 
-    document.getElementById("titleGame").innerHTML = window.i18next.t("levels.level") + " " + level;
+    document.getElementById("titleGame").innerHTML = i18next.t("levels.level") + " " + level;
 
     var group = new GameGroup(games);
     group.setDisplayFPS(showDebugInfo ? true : false);
@@ -1160,7 +1170,7 @@ function playLevel(level, player, type) {
     var textToDisplayGoal;
 
     document.getElementById("backToMenuGame").onclick = function() {
-      if(confirm(window.i18next.t("game.confirmQuit"))) {
+      if(confirm(i18next.t("game.confirmQuit"))) {
         levelTimer.pause();
         group.killAll();
         displayLevelList(player);
@@ -1176,7 +1186,7 @@ function playLevel(level, player, type) {
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved")));
+              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved")));
               notificationEndDisplayed = true;
             }
           }
@@ -1185,7 +1195,7 @@ function playLevel(level, player, type) {
         playerGame.onStop(function() {
           if(playerGame.snakes[0].score < levelTypeValue) {
             if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
+              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
               notificationEndDisplayed = true;
             }
           }
@@ -1193,16 +1203,16 @@ function playLevel(level, player, type) {
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
         levelTimer = new Timer(function() {
           playerGame.setTimeToDisplay(0);
-          document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: 0 });
+          document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: 0 });
 
           if(!notificationEndDisplayed) {
-            playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
+            playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
             notificationEndDisplayed = true;
           }
 
           group.stopAll(true);
         }, levelTypeValue[1] * 1000 - 1, new TimerInterval(function() {
-          document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: Math.round(levelTimer.getTime() / 1000) });
+          document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: Math.round(levelTimer.getTime() / 1000) });
           playerGame.setTimeToDisplay(Math.round(levelTimer.getTime() / 1000));
         }));
 
@@ -1231,7 +1241,7 @@ function playLevel(level, player, type) {
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
+              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
               notificationEndDisplayed = true;
             }
           }
@@ -1243,12 +1253,12 @@ function playLevel(level, player, type) {
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
+              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
               notificationEndDisplayed = true;
             }
           } else {
             if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
+              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
               notificationEndDisplayed = true;
             }
           }
@@ -1265,14 +1275,14 @@ function playLevel(level, player, type) {
               playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
               if(!notificationEndDisplayed) {
-                playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
+                playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
                 notificationEndDisplayed = true;
               }
             }
           }
 
           if(!won && !notificationEndDisplayed) {
-            playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
+            playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
             notificationEndDisplayed = true;
           }
         });
@@ -1310,14 +1320,14 @@ function playLevel(level, player, type) {
                   playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
                   if(!notificationEndDisplayed) {
-                    playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
+                    playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
                     notificationEndDisplayed = true;
                   }
                 } else {
                   group.stopAll(true);
 
                   if(!notificationEndDisplayed) {
-                    playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
+                    playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
                     notificationEndDisplayed = true;
                   }
                 }
@@ -1355,7 +1365,7 @@ function playLevel(level, player, type) {
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(window.i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
+              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
               notificationEndDisplayed = true;
             }
           }
@@ -1367,19 +1377,19 @@ function playLevel(level, player, type) {
       playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
       if(levelType == LEVEL_REACH_SCORE) {
-        textToDisplayGoal = window.i18next.t("levels.reachScore", { value: levelTypeValue });
+        textToDisplayGoal = i18next.t("levels.reachScore", { value: levelTypeValue });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
-        textToDisplayGoal = window.i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
-        document.getElementById("gameStatus").innerHTML = window.i18next.t("levels.timerRemaining", { count: levelTypeValue[1] });
+        textToDisplayGoal = i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
+        document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: levelTypeValue[1] });
         playerGame.setTimeToDisplay(levelTypeValue[1]);
       } else if(levelType == LEVEL_REACH_MAX_SCORE) {
-        textToDisplayGoal = window.i18next.t("levels.reachMaxScore");
+        textToDisplayGoal = i18next.t("levels.reachMaxScore");
       } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
-        textToDisplayGoal = window.i18next.t("levels.multiBestScore", { count: numberIA });
+        textToDisplayGoal = i18next.t("levels.multiBestScore", { count: numberIA });
       } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
-        textToDisplayGoal = window.i18next.t("levels.multiReachScoreFirst", { value: levelTypeValue, count: numberIA });
+        textToDisplayGoal = i18next.t("levels.multiReachScoreFirst", { value: levelTypeValue, count: numberIA });
       } else if(levelType == LEVEL_MAZE_WIN) {
-        textToDisplayGoal = window.i18next.t("levels.mazeMode", { value: levelTypeValue, count: numberIA });
+        textToDisplayGoal = i18next.t("levels.mazeMode", { value: levelTypeValue, count: numberIA });
       }
 
       document.getElementById("gameOrder").innerHTML = textToDisplayGoal.replace("\n", "<br />");
@@ -1416,18 +1426,18 @@ function playLevel(level, player, type) {
   }
 }
 
-function editDownloadURL() {
-  var value = window.prompt(window.i18next.t("levels.editDownloadURLPrompt"), DOWNLOAD_DEFAULT_URI);
+window.editDownloadURL = function() {
+  var value = window.prompt(i18next.t("levels.editDownloadURLPrompt"), DOWNLOAD_DEFAULT_URI);
 
   if(value != null) {
     DOWNLOAD_DEFAULT_URI = value;
   }
 }
 
-function downloadLevels(player, button) {
+window.downloadLevels = function(player, button) {
   var url = DOWNLOAD_DEFAULT_URI;
   url = url.replace("{player}", player);
-  url = url.replace("{appVersion}", APP_VERSION);
+  url = url.replace("{appVersion}", GameConstants.Setting.APP_VERSION);
 
   var script = document.createElement("script");
   script.src = url;
@@ -1452,9 +1462,9 @@ function downloadLevels(player, button) {
   button.disabled = true;
   var buttonDeblock = document.createElement("button");
   buttonDeblock.classList = "btn btn-lg btn-warning";
-  buttonDeblock.innerHTML = window.i18next.t("levels.buttonDeblock");
+  buttonDeblock.innerHTML = i18next.t("levels.buttonDeblock");
 
-  document.getElementById("levelDownloading").innerHTML = '<strong>' + window.i18next.t("levels.downloading") + '</strong>';
+  document.getElementById("levelDownloading").innerHTML = '<strong>' + i18next.t("levels.downloading") + '</strong>';
   document.getElementById("btnDeblockDiv").innerHTML = "";
 
   document.getElementsByTagName('head')[0].appendChild(script);
@@ -1480,11 +1490,11 @@ function getListLevel(player, type) {
   var res = "";
 
   if(type == DOWNLOADED_LEVEL) {
-    res += '<div class="row mb-3"><div class="col text-center"><button class="btn btn-lg btn-warning" onclick="downloadLevels(' + player + ', this);"><span class="fui-plus-circle"></span>&nbsp; ' + window.i18next.t("levels.download") + '</button><br /><a href="#null" onclick="editDownloadURL();" class="small"><span class="fui-new"></span>&nbsp; ' + window.i18next.t("levels.editDownloadURL") + '</a></div></div>';
+    res += '<div class="row mb-3"><div class="col text-center"><button class="btn btn-lg btn-warning" onclick="downloadLevels(' + player + ', this);"><span class="fui-plus-circle"></span>&nbsp; ' + i18next.t("levels.download") + '</button><br /><a href="#null" onclick="editDownloadURL();" class="small"><span class="fui-new"></span>&nbsp; ' + i18next.t("levels.editDownloadURL") + '</a></div></div>';
   }
 
   if(levels == null) {
-    return res + "<strong>" + window.i18next.t("levels.emptyList") + "</strong>";
+    return res + "<strong>" + i18next.t("levels.emptyList") + "</strong>";
   }
 
   var index = 1;
@@ -1493,13 +1503,13 @@ function getListLevel(player, type) {
   for(var key in levels) {
     if(levels.hasOwnProperty(key)) {
       if(!canPlay(key, player, type)) {
-        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + window.i18next.t("levels.disabledLevel") + '" data-balloon-length="fit" data-balloon-pos="up">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + i18next.t("levels.disabledLevel") + '" data-balloon-length="fit" data-balloon-pos="up">' + i18next.t("levels.level") + ' ' + index + '</button>';
       } else if(!levelCompatible(levels[key]["type"], levels[key]["version"])) {
-        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + window.i18next.t("levels.notCompatible") + '" data-balloon-length="fit" data-balloon-pos="up">' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + i18next.t("levels.notCompatible") + '" data-balloon-length="fit" data-balloon-pos="up">' + i18next.t("levels.level") + ' ' + index + '</button>';
       } else {
         var resultLevel = printResultLevel(key, player, levels[key]["type"], type);
 
-        var button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');" ' + (resultLevel.trim() != "" ? 'aria-label="' + printResultLevel(key, player, levels[key]["type"], type) + '" data-balloon-length="fit" data-balloon-pos="up"' : '') + '>' + window.i18next.t("levels.level") + ' ' + index + '</button>';
+        var button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');" ' + (resultLevel.trim() != "" ? 'aria-label="' + printResultLevel(key, player, levels[key]["type"], type) + '" data-balloon-length="fit" data-balloon-pos="up"' : '') + '>' + i18next.t("levels.level") + ' ' + index + '</button>';
       }
 
       if(index == 1) {
@@ -1519,7 +1529,7 @@ function getListLevel(player, type) {
   }
 
   if(empty) {
-    return res + "<strong>" + window.i18next.t("levels.emptyList") + "</strong>";
+    return res + "<strong>" + i18next.t("levels.emptyList") + "</strong>";
   }
 
   if(index % 2 == 0) {
@@ -1550,22 +1560,22 @@ function translateContent() {
   var i18nList = document.querySelectorAll("[data-i18n]");
 
   for(var i = 0, l = i18nList.length; i < l; i++) {
-    i18nList[i].innerHTML = window.i18next.t(i18nList[i].dataset.i18n);
+    i18nList[i].innerHTML = i18next.t(i18nList[i].dataset.i18n);
   }
 
-  document.getElementById("dateTxt").innerHTML = window.i18next.t("menu.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)) });
+  document.getElementById("dateTxt").innerHTML = i18next.t("menu.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)) });
 
-  document.getElementById("heightGrid").placeholder = window.i18next.t("settings.placeholderHeight");
-  document.getElementById("widthGrid").placeholder = window.i18next.t("settings.placeholderWidth");
-  document.getElementById("customSpeed").placeholder = window.i18next.t("settings.placeholderCustomSpeed");
-  document.getElementById("numberIA").placeholder = window.i18next.t("settings.placeholderNumberIA");
+  document.getElementById("heightGrid").placeholder = i18next.t("settings.placeholderHeight");
+  document.getElementById("widthGrid").placeholder = i18next.t("settings.placeholderWidth");
+  document.getElementById("customSpeed").placeholder = i18next.t("settings.placeholderCustomSpeed");
+  document.getElementById("numberIA").placeholder = i18next.t("settings.placeholderNumberIA");
 
-  document.getElementById("appDownloadURLGet").setAttribute("aria-label", window.i18next.t("update.getURL"));
-  document.getElementById("appUpdateChanges").setAttribute("aria-label", window.i18next.t("update.getChanges"));
+  document.getElementById("appDownloadURLGet").setAttribute("aria-label", i18next.t("update.getURL"));
+  document.getElementById("appUpdateChanges").setAttribute("aria-label", i18next.t("update.getChanges"));
 
-  document.getElementById("appUpdateDateLocalized").innerHTML = window.i18next.t("update.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(document.getElementById("appUpdateDate").innerHTML)) });
+  document.getElementById("appUpdateDateLocalized").innerHTML = i18next.t("update.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(document.getElementById("appUpdateDate").innerHTML)) });
 
-  document.getElementById("aiAssistantInfos").setAttribute("aria-label", window.i18next.t("settings.aiAssistantInfos"));
+  document.getElementById("aiAssistantInfos").setAttribute("aria-label", i18next.t("settings.aiAssistantInfos"));
 }
 
 document.getElementById("languageSelect").onchange = function() {
