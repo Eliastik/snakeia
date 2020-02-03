@@ -32,8 +32,9 @@ window.SOLO_PLAYER = "SOLO_PLAYER";
 window.PLAYER_VS_AI = "PLAYER_VS_AI";
 window.AI_VS_AI = "AI_VS_AI";
 window.BATTLE_ROYALE = "BATTLE_ROYALE";
-// Updater :
+// URIs :
 window.UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update.php";
+window.SERVERS_LIST_URI = "https://www.eliastiksofts.com/snakeia/serversList.php";
 // Levels types :
 window.LEVEL_REACH_SCORE = "LEVEL_REACH_SCORE";
 window.LEVEL_REACH_MAX_SCORE = "LEVEL_REACH_MAX_SCORE";
@@ -277,6 +278,45 @@ window.updateCallback = function(data) {
 
 checkUpdate();
 
+// Load server list
+function loadServerList() {
+  var script = document.createElement("script");
+  script.src = SERVERS_LIST_URI;
+
+  document.getElementsByTagName('head')[0].appendChild(script);
+  document.getElementById("loadingServersList").style.display = "inline-block";
+  this.document.getElementById("serverListGroup").innerHTML = "";
+}
+
+window.listServersCallback = function(data) {
+  this.document.getElementById("serverListGroup").innerHTML = "";
+
+  if(data != null && data.length > 0) {
+    for(var i = 0; i < data.length; i++) {
+      var linkServer = document.createElement("a");
+      linkServer.href = "#null";
+      linkServer.classList.add("list-group-item");
+      linkServer.classList.add("list-group-item-action");
+      linkServer.textContent = data[i]["name"];
+
+      var serverAddress = document.createElement("div");
+      serverAddress.classList.add("small");
+      serverAddress.classList.add("text-muted");
+      serverAddress.textContent = data[i]["url"] + ":" + data[i]["port"];
+      linkServer.appendChild(serverAddress);
+
+      this.document.getElementById("serverListGroup").appendChild(linkServer);
+    }
+  } else {
+    var noServerFound = document.createElement("strong");
+    noServerFound.textContent = i18next.t("servers.noServerFound");
+
+    this.document.getElementById("serverListGroup").appendChild(noServerFound);
+  }
+    
+  document.getElementById("loadingServersList").style.display = "none";
+}
+
 // Simple modes
 function selectMode(mode) {
   selectedMode = mode;
@@ -338,6 +378,7 @@ function displaySettings() {
   document.getElementById("menu").style.display = "none";
   document.getElementById("levelContainer").style.display = "none";
   document.getElementById("gameContainer").style.display = "none";
+  document.getElementById("serverListContainer").style.display = "none";
   document.getElementById("settings").style.display = "block";
   checkSameGrid();
   checkGameSpeed();
@@ -350,6 +391,7 @@ function displayMenu() {
   document.getElementById("settings").style.display = "none";
   document.getElementById("levelContainer").style.display = "none";
   document.getElementById("gameContainer").style.display = "none";
+  document.getElementById("serverListContainer").style.display = "none";
   document.getElementById("menu").style.display = "block";
 }
 
@@ -361,10 +403,28 @@ document.getElementById("backToMenuLevelList").onclick = function() {
   displayMenu();
 };
 
+document.getElementById("backToMenuServerList").onclick = function() {
+  displayMenu();
+};
+
+function displayServerList() {
+  document.getElementById("settings").style.display = "none";
+  document.getElementById("levelContainer").style.display = "none";
+  document.getElementById("gameContainer").style.display = "none";
+  document.getElementById("serverListContainer").style.display = "block";
+  document.getElementById("menu").style.display = "none";
+  loadServerList();
+}
+
+document.getElementById("onlineBattleRoyale").onclick = function() {
+  displayServerList();
+};
+
 function displayLevelList(player) {
   document.getElementById("settings").style.display = "none";
   document.getElementById("levelContainer").style.display = "block";
   document.getElementById("gameContainer").style.display = "none";
+  document.getElementById("serverListContainer").style.display = "none";
   document.getElementById("menu").style.display = "none";
   document.getElementById("levelDownloading").innerHTML = "";
   document.getElementById("btnDeblockDiv").innerHTML = "";
@@ -706,6 +766,7 @@ function validateSettings(returnValidation) {
     document.getElementById("settings").style.display = "none";
     document.getElementById("menu").style.display = "none";
     document.getElementById("levelContainer").style.display = "none";
+    document.getElementById("serverListContainer").style.display = "none";
     document.getElementById("gameContainer").style.display = "block";
 
     var titleGame = "";
@@ -1146,6 +1207,7 @@ window.playLevel = function(level, player, type) {
     document.getElementById("settings").style.display = "none";
     document.getElementById("menu").style.display = "none";
     document.getElementById("levelContainer").style.display = "none";
+    document.getElementById("serverListContainer").style.display = "none";
     document.getElementById("gameContainer").style.display = "block";
 
     document.getElementById("resultLevels").innerHTML = "";

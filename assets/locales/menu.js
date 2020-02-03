@@ -47,6 +47,7 @@ i18next.addResourceBundle("fr", "translation", {
     "playerVsAi": "Joueur VS IA",
     "aiVsAi": "IA VS IA",
     "battleRoyale": "Battle Royale",
+    "onlineBattleRoyale": "Battle Royale en ligne",
     "levelsSoloPlayer": "Niveaux (joueur solo)",
     "levelsSoloAI": "Niveaux (IA solo)",
     "version": "Version",
@@ -165,6 +166,11 @@ i18next.addResourceBundle("fr", "translation", {
     "timerRemaining_plural": "Il reste {{count}} secondes",
     "localstorageDisabled": "Les cookies sont désactivés sur votre navigateur. Vous perdrez votre progression au prochain rechargement de la page. Activez-les puis rechargez la page pour éviter cela.",
     "difficulty": "Difficulté :"
+  },
+  "servers": {
+    "selectInfo": "Sélectionnez un serveur :",
+    "noServerFound": "Aucun serveur trouvé…",
+    "loadingList": "Chargement de la liste des serveurs… Veuillez patienter."
   }
 }, true, false);
 
@@ -195,6 +201,7 @@ i18next.addResourceBundle("en", "translation", {
     "playerVsAi": "Player VS AI",
     "aiVsAi": "AI VS AI",
     "battleRoyale": "Battle Royale",
+    "onlineBattleRoyale": "Online Battle Royale",
     "levelsSoloPlayer": "Levels (single player)",
     "levelsSoloAI": "Levels (single AI)",
     "version": "Version",
@@ -313,5 +320,10 @@ i18next.addResourceBundle("en", "translation", {
     "bestTimeShort_plural": "{{count}} seconds",
     "localstorageDisabled": "Cookies are disabled on your browser. You will lose your progress the next time you reload the page. Activate them and reload the page to avoid this.",
     "difficulty": "Difficulty :"
+  },
+  "servers": {
+    "selectInfo": "Select a server:",
+    "noServerFound": "No server found…",
+    "loadingList": "Loading servers list… Please wait."
   }
 }, true, false);

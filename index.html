@@ -73,6 +73,12 @@
           <hr />
           <div class="row mb-2">
             <div class="col text-center">
+              <button class="btn btn-lg btn-primary btn-block" id="onlineBattleRoyale" data-i18n="menu.onlineBattleRoyale">Battle Royale en ligne</button>
+            </div>
+          </div>
+          <hr />
+          <div class="row mb-2">
+            <div class="col text-center">
               <button class="btn btn-lg btn-warning btn-block" id="levelsSoloPlayer" data-i18n="menu.levelsSoloPlayer">Niveaux (joueur solo)</button>
             </div>
           </div>
@@ -265,6 +271,20 @@
         <div class="row mt-2">
           <div class="col text-center">
             <button class="btn btn-lg btn-danger" id="backToMenu"><span class="fui-cross"></span>&nbsp; <span data-i18n="settings.backToMenu">Retour au menu</span></button>
+          </div>
+        </div>
+      </div>
+      <div id="serverListContainer">
+        <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
+        <h1 class="h3 font-weight-normal">Liste des serveurs</h1>
+        <h1 class="h6 mb-3 mt-3 font-weight-normal">Sélectionnez un serveur :</h1>
+        <div id="serverList">
+          <strong id="loadingServersList" data-i18n="servers.loadingList">Chargement de la liste des serveurs… Veuillez patienter.</strong>
+          <div id="serverListGroup" class="list-group"></div>
+        </div>
+        <div class="row mt-2">
+          <div class="col text-center">
+            <button class="btn btn-lg btn-danger" id="backToMenuServerList"><span class="fui-cross"></span>&nbsp; <span data-i18n="settings.backToMenu">Retour au menu</span></button>
           </div>
         </div>
       </div>

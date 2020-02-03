@@ -72,13 +72,19 @@ body {
   font-size: 75%;
 }
 
-#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer, #levelListDownloadPlayer, #levelListDownloadAI, #localstorageDisabled {
+#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer, #levelListDownloadPlayer, #levelListDownloadAI, #localstorageDisabled, #serverListContainer {
   display: none;
 }
 
 #formSettings, #updateAvailable {
   width: 100%;
   max-width: 525px;
+  margin: auto;
+}
+
+#serverList {
+  width: 100%;
+  max-width: 400px;
   margin: auto;
 }
 
