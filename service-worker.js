@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-const CACHE_BASENAME = 'snake-ia';
-const CACHE_VER = '-v1.5';
+const CACHE_BASENAME = "snake-ia";
+const CACHE_VER = "-v1.5";
 const CACHE = CACHE_BASENAME + CACHE_VER;
 
 const CACHE_URLS = [
@@ -33,6 +33,15 @@ const CACHE_URLS = [
   "assets/css/flat-ui.min.css",
   "assets/css/main.css",
   "dist/SnakeIA.js",
+  "libs/lowlight.astar.min.js",
+  "src/gameUtils.js",
+  "src/constants.js",
+  "src/event.js",
+  "src/reactor.js",
+  "src/position.js",
+  "src/grid.js",
+  "src/snake.js",
+  "src/gameEngine.js",
   "src/gameEngineWorker.js",
   "assets/fonts/delius-regular.ttf",
   "assets/fonts/delius-regular.woff",
@@ -75,11 +84,11 @@ const CACHE_URLS = [
   "assets/images/close.png"
 ];
 
-self.addEventListener('install', event => {
+self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CACHE_URLS)).then(self.skipWaiting()));
 });
 
-self.addEventListener('activate', function(event) {
+self.addEventListener("activate", function(event) {
   event.waitUntil(
     caches.keys().then(function(cacheNames) {
       return Promise.all(
@@ -101,7 +110,7 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-self.addEventListener('fetch', event => {
+self.addEventListener("fetch", event => {
   event.respondWith(
     caches.open(CACHE).then(function(cache) {
       return cache.match(event.request).then(function(response) {

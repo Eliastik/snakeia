@@ -217,7 +217,7 @@ function TimerInterval(callback) {
   };
 }
 
-function enableDebugMode() {
+window.enableDebugMode = function() {
   showDebugInfo = true;
   console.log(i18next.t("debugModeEnabled"));
 }
