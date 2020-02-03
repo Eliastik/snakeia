@@ -168,6 +168,7 @@ i18next.addResourceBundle("fr", "translation", {
     "difficulty": "Difficulté :"
   },
   "servers": {
+    "serverList": "Liste des serveurs",
     "selectInfo": "Sélectionnez un serveur :",
     "noServerFound": "Aucun serveur trouvé…",
     "loadingList": "Chargement de la liste des serveurs… Veuillez patienter."
@@ -322,6 +323,7 @@ i18next.addResourceBundle("en", "translation", {
     "difficulty": "Difficulty :"
   },
   "servers": {
+    "serverList": "Servers list",
     "selectInfo": "Select a server:",
     "noServerFound": "No server found…",
     "loadingList": "Loading servers list… Please wait."
