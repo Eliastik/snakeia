@@ -171,7 +171,17 @@ i18next.addResourceBundle("fr", "translation", {
     "serverList": "Liste des serveurs",
     "selectInfo": "Sélectionnez un serveur :",
     "noServerFound": "Aucun serveur trouvé…",
-    "loadingList": "Chargement de la liste des serveurs… Veuillez patienter."
+    "loadingList": "Chargement de la liste des serveurs… Veuillez patienter.",
+    "noRoomound": "Aucune salle trouvée…",
+    "infos": "{{width}}×{{height}} – Vitesse : {{speed}}",
+    "infosBorderWalls": "Grille entourée de murs",
+    "infosGenerateWalls": "Murs générés aléatoirement",
+    "infosPlayers": "{{count}} joueur",
+    "infosPlayers_plural": "{{count}} joueurs",
+    "backToList": "Retour à la liste des serveurs",
+    "roomsListTitle": "Liste des salles",
+    "roomsListInfos": "Sélectionnez une salle :",
+    "loadingRooms": "Chargement de la liste des salles… Veuillez patienter."
   }
 }, true, false);
 
@@ -326,6 +336,16 @@ i18next.addResourceBundle("en", "translation", {
     "serverList": "Servers list",
     "selectInfo": "Select a server:",
     "noServerFound": "No server found…",
-    "loadingList": "Loading servers list… Please wait."
+    "loadingList": "Loading servers list… Please wait.",
+    "noRoomound": "No room found…",
+    "infos": "{{width}}×{{height}} – Speed: {{speed}}",
+    "infosBorderWalls": "Grid bordered by walls",
+    "infosGenerateWalls": "Random walls",
+    "infosPlayers": "{{count}} player",
+    "infosPlayers_plural": "{{count}} players",
+    "backToList": "Back to the servers list",
+    "roomsListTitle": "Rooms list",
+    "roomsListInfos": "Select a room:",
+    "loadingRooms": "Loading the rooms list… Please wait."
   }
 }, true, false);

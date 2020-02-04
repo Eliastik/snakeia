@@ -293,19 +293,28 @@ window.listServersCallback = function(data) {
 
   if(data != null && data.length > 0) {
     for(var i = 0; i < data.length; i++) {
-      var linkServer = document.createElement("a");
-      linkServer.href = "#null";
-      linkServer.classList.add("list-group-item");
-      linkServer.classList.add("list-group-item-action");
-      linkServer.textContent = data[i]["name"];
+      if(data[i]["url"] != null && data[i]["port"] != null) {
+        var url = data[i]["url"];
+        var port = data[i]["port"];
 
-      var serverAddress = document.createElement("div");
-      serverAddress.classList.add("small");
-      serverAddress.classList.add("text-muted");
-      serverAddress.textContent = data[i]["url"] + ":" + data[i]["port"];
-      linkServer.appendChild(serverAddress);
+        var linkServer = document.createElement("a");
+        linkServer.classList.add("list-group-item");
+        linkServer.classList.add("list-group-item-action");
+        linkServer.textContent = data[i]["name"];
 
-      this.document.getElementById("serverListGroup").appendChild(linkServer);
+        linkServer.onclick = function() {
+          displayRoomsList();
+          displayRooms(url, port);
+        };
+  
+        var serverAddress = document.createElement("div");
+        serverAddress.classList.add("small");
+        serverAddress.classList.add("text-muted");
+        serverAddress.textContent = url + ":" + port;
+        linkServer.appendChild(serverAddress);
+  
+        this.document.getElementById("serverListGroup").appendChild(linkServer);
+      }
     }
   } else {
     var noServerFound = document.createElement("strong");
@@ -315,6 +324,68 @@ window.listServersCallback = function(data) {
   }
     
   document.getElementById("loadingServersList").style.display = "none";
+}
+
+function displayRooms(server, port) {
+  var script = document.createElement("script");
+  script.src = server + ":" + port + "/rooms";
+
+  document.getElementsByTagName('head')[0].appendChild(script);
+  document.getElementById("loadingRoomsOnlineList").style.display = "inline-block";
+  this.document.getElementById("roomsOnlineListGroup").innerHTML = "";
+}
+
+window.callbackDisplayRooms = function(data) {
+  this.document.getElementById("roomsOnlineListGroup").innerHTML = "";
+
+  if(data != null && Object.keys(data).length > 0) {
+    for(var i = 0; i < Object.keys(data).length; i++) {
+      var room = data[Object.keys(data)[i]];
+
+      var linkRoom = document.createElement("a");
+      linkRoom.classList.add("list-group-item");
+      linkRoom.classList.add("list-group-item-action");
+      linkRoom.textContent = "Salle n°" + (i + 1);
+
+      linkRoom.onclick = function() {
+        
+      };
+
+      var gameInfos = document.createElement("div");
+      gameInfos.classList.add("small");
+      gameInfos.classList.add("text-muted");
+      gameInfos.textContent = i18next.t("servers.infos", { width : room.width, height: room.height, speed: room.speed });
+
+      var gameInfosSecond = document.createElement("div");
+      gameInfosSecond.classList.add("small");
+      gameInfosSecond.classList.add("text-muted");
+      gameInfosSecond.textContent = room.borderWalls ? i18next.t("servers.infosBorderWalls") : "";
+      
+      var gameInfosThird = document.createElement("div");
+      gameInfosThird.classList.add("small");
+      gameInfosThird.classList.add("text-muted");
+      gameInfosThird.textContent = room.generateWalls ? i18next.t("servers.infosGenerateWalls") : "";
+
+      var gameInfosPlayers = document.createElement("div");
+      gameInfosPlayers.classList.add("small");
+      gameInfosPlayers.classList.add("text-muted");
+      gameInfosPlayers.textContent = i18next.t("servers.infosPlayers", { count : room.players });
+
+      linkRoom.appendChild(gameInfos);
+      linkRoom.appendChild(gameInfosSecond);
+      linkRoom.appendChild(gameInfosThird);
+      linkRoom.appendChild(gameInfosPlayers);
+
+      this.document.getElementById("roomsOnlineListGroup").appendChild(linkRoom);
+    }
+  } else {
+    var noRoomFound = document.createElement("strong");
+    noRoomFound.textContent = i18next.t("servers.noRoomound");
+
+    this.document.getElementById("roomsOnlineListGroup").appendChild(noRoomFound);
+  }
+    
+  document.getElementById("loadingRoomsOnlineList").style.display = "none";
 }
 
 // Simple modes
@@ -379,6 +450,7 @@ function displaySettings() {
   document.getElementById("levelContainer").style.display = "none";
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("serverListContainer").style.display = "none";
+  document.getElementById("roomsOnlineListContainer").style.display = "none";
   document.getElementById("settings").style.display = "block";
   checkSameGrid();
   checkGameSpeed();
@@ -392,6 +464,7 @@ function displayMenu() {
   document.getElementById("levelContainer").style.display = "none";
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("serverListContainer").style.display = "none";
+  document.getElementById("roomsOnlineListContainer").style.display = "none";
   document.getElementById("menu").style.display = "block";
 }
 
@@ -412,6 +485,7 @@ function displayServerList() {
   document.getElementById("levelContainer").style.display = "none";
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("serverListContainer").style.display = "block";
+  document.getElementById("roomsOnlineListContainer").style.display = "none";
   document.getElementById("menu").style.display = "none";
   loadServerList();
 }
@@ -420,11 +494,25 @@ document.getElementById("onlineBattleRoyale").onclick = function() {
   displayServerList();
 };
 
+document.getElementById("backToServersRoomsList").onclick = function() {
+  displayServerList();
+};
+
+function displayRoomsList() {
+  document.getElementById("settings").style.display = "none";
+  document.getElementById("levelContainer").style.display = "none";
+  document.getElementById("gameContainer").style.display = "none";
+  document.getElementById("serverListContainer").style.display = "none";
+  document.getElementById("roomsOnlineListContainer").style.display = "block";
+  document.getElementById("menu").style.display = "none";
+}
+
 function displayLevelList(player) {
   document.getElementById("settings").style.display = "none";
   document.getElementById("levelContainer").style.display = "block";
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("serverListContainer").style.display = "none";
+  document.getElementById("roomsOnlineListContainer").style.display = "none";
   document.getElementById("menu").style.display = "none";
   document.getElementById("levelDownloading").innerHTML = "";
   document.getElementById("btnDeblockDiv").innerHTML = "";
@@ -767,6 +855,7 @@ function validateSettings(returnValidation) {
     document.getElementById("menu").style.display = "none";
     document.getElementById("levelContainer").style.display = "none";
     document.getElementById("serverListContainer").style.display = "none";
+    document.getElementById("roomsOnlineListContainer").style.display = "none";
     document.getElementById("gameContainer").style.display = "block";
 
     var titleGame = "";
@@ -1208,6 +1297,7 @@ window.playLevel = function(level, player, type) {
     document.getElementById("menu").style.display = "none";
     document.getElementById("levelContainer").style.display = "none";
     document.getElementById("serverListContainer").style.display = "none";
+    document.getElementById("roomsOnlineListContainer").style.display = "none";
     document.getElementById("gameContainer").style.display = "block";
 
     document.getElementById("resultLevels").innerHTML = "";
