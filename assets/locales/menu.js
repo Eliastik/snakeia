@@ -181,7 +181,9 @@ i18next.addResourceBundle("fr", "translation", {
     "backToList": "Retour à la liste des serveurs",
     "roomsListTitle": "Liste des salles",
     "roomsListInfos": "Sélectionnez une salle :",
-    "loadingRooms": "Chargement de la liste des salles… Veuillez patienter."
+    "loadingRooms": "Chargement de la liste des salles… Veuillez patienter.",
+    "createRoom": "Créer une salle",
+    "connectionError": "Une erreur est survenue lors de la connexion au serveur. Veuillez réessayer."
   }
 }, true, false);
 
@@ -346,6 +348,8 @@ i18next.addResourceBundle("en", "translation", {
     "backToList": "Back to the servers list",
     "roomsListTitle": "Rooms list",
     "roomsListInfos": "Select a room:",
-    "loadingRooms": "Loading the rooms list… Please wait."
+    "loadingRooms": "Loading the rooms list… Please wait.",
+    "createRoom": "Create a room",
+    "connectionError": "An error has occurred when connecting to the server. Please retry."
   }
 }, true, false);

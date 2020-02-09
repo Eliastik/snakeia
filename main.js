@@ -24,6 +24,7 @@ if(typeof(require) !== "undefined") {
   var Grid = require("./src/grid");
   var NotificationMessage = require('./src/notificationMessage');
   var GameGroup = require('./src/gameGroup');
+  var OnlineClient = require('./src/onlineClient');
 }
 
 // Modes :
@@ -32,6 +33,7 @@ window.SOLO_PLAYER = "SOLO_PLAYER";
 window.PLAYER_VS_AI = "PLAYER_VS_AI";
 window.AI_VS_AI = "AI_VS_AI";
 window.BATTLE_ROYALE = "BATTLE_ROYALE";
+window.BATTLE_ROYALE_ONLINE = "BATTLE_ROYALE_ONLINE";
 // URIs :
 window.UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update.php";
 window.SERVERS_LIST_URI = "https://www.eliastiksofts.com/snakeia/serversList.php";
@@ -79,6 +81,7 @@ window.SOLO_AI_DOWNLOAD_LEVELS_TO = "snakeia_solo_ai_downloadedLevels";
 var selectedMode = SOLO_AI;
 var enableAnimations = true;
 var showDebugInfo = false;
+var onlineClient = new OnlineClient();
 
 document.getElementById("versionTxt").innerHTML = GameConstants.Setting.APP_VERSION;
 document.getElementById("appVersion").innerHTML = GameConstants.Setting.APP_VERSION;
@@ -303,8 +306,13 @@ window.listServersCallback = function(data) {
         linkServer.textContent = data[i]["name"];
 
         linkServer.onclick = function() {
-          displayRoomsList();
-          displayRooms(url, port);
+          onlineClient.connect(url, port, function(success) { // Connection to the server
+            if(!success) {
+              return alert(i18next.t("servers.connectionError"));
+            }
+  
+            displayRoomsList();
+          });
         };
   
         var serverAddress = document.createElement("div");
@@ -326,66 +334,62 @@ window.listServersCallback = function(data) {
   document.getElementById("loadingServersList").style.display = "none";
 }
 
-function displayRooms(server, port) {
-  var script = document.createElement("script");
-  script.src = server + ":" + port + "/rooms";
-
-  document.getElementsByTagName('head')[0].appendChild(script);
+function displayRooms() {
   document.getElementById("loadingRoomsOnlineList").style.display = "inline-block";
-  this.document.getElementById("roomsOnlineListGroup").innerHTML = "";
-}
+  document.getElementById("roomsOnlineListGroup").innerHTML = "";
 
-window.callbackDisplayRooms = function(data) {
-  this.document.getElementById("roomsOnlineListGroup").innerHTML = "";
-
-  if(data != null && Object.keys(data).length > 0) {
-    for(var i = 0; i < Object.keys(data).length; i++) {
-      var room = data[Object.keys(data)[i]];
-
-      var linkRoom = document.createElement("a");
-      linkRoom.classList.add("list-group-item");
-      linkRoom.classList.add("list-group-item-action");
-      linkRoom.textContent = "Salle n°" + (i + 1);
-
-      linkRoom.onclick = function() {
+  onlineClient.displayRooms(function(data) { // Request rooms data
+    document.getElementById("roomsOnlineListGroup").innerHTML = "";
+  
+    if(data != null && Object.keys(data).length > 0) {
+      for(var i = 0; i < Object.keys(data).length; i++) {
+        var room = data[Object.keys(data)[i]];
+  
+        var linkRoom = document.createElement("a");
+        linkRoom.classList.add("list-group-item");
+        linkRoom.classList.add("list-group-item-action");
+        linkRoom.textContent = "Salle n°" + (i + 1);
+  
+        linkRoom.onclick = function() {
+          // TODO: Enter a room
+        };
+  
+        var gameInfos = document.createElement("div");
+        gameInfos.classList.add("small");
+        gameInfos.classList.add("text-muted");
+        gameInfos.textContent = i18next.t("servers.infos", { width : room.width, height: room.height, speed: room.speed });
+  
+        var gameInfosSecond = document.createElement("div");
+        gameInfosSecond.classList.add("small");
+        gameInfosSecond.classList.add("text-muted");
+        gameInfosSecond.textContent = room.borderWalls ? i18next.t("servers.infosBorderWalls") : "";
         
-      };
-
-      var gameInfos = document.createElement("div");
-      gameInfos.classList.add("small");
-      gameInfos.classList.add("text-muted");
-      gameInfos.textContent = i18next.t("servers.infos", { width : room.width, height: room.height, speed: room.speed });
-
-      var gameInfosSecond = document.createElement("div");
-      gameInfosSecond.classList.add("small");
-      gameInfosSecond.classList.add("text-muted");
-      gameInfosSecond.textContent = room.borderWalls ? i18next.t("servers.infosBorderWalls") : "";
-      
-      var gameInfosThird = document.createElement("div");
-      gameInfosThird.classList.add("small");
-      gameInfosThird.classList.add("text-muted");
-      gameInfosThird.textContent = room.generateWalls ? i18next.t("servers.infosGenerateWalls") : "";
-
-      var gameInfosPlayers = document.createElement("div");
-      gameInfosPlayers.classList.add("small");
-      gameInfosPlayers.classList.add("text-muted");
-      gameInfosPlayers.textContent = i18next.t("servers.infosPlayers", { count : room.players });
-
-      linkRoom.appendChild(gameInfos);
-      linkRoom.appendChild(gameInfosSecond);
-      linkRoom.appendChild(gameInfosThird);
-      linkRoom.appendChild(gameInfosPlayers);
-
-      this.document.getElementById("roomsOnlineListGroup").appendChild(linkRoom);
+        var gameInfosThird = document.createElement("div");
+        gameInfosThird.classList.add("small");
+        gameInfosThird.classList.add("text-muted");
+        gameInfosThird.textContent = room.generateWalls ? i18next.t("servers.infosGenerateWalls") : "";
+  
+        var gameInfosPlayers = document.createElement("div");
+        gameInfosPlayers.classList.add("small");
+        gameInfosPlayers.classList.add("text-muted");
+        gameInfosPlayers.textContent = i18next.t("servers.infosPlayers", { count : room.players });
+  
+        linkRoom.appendChild(gameInfos);
+        linkRoom.appendChild(gameInfosSecond);
+        linkRoom.appendChild(gameInfosThird);
+        linkRoom.appendChild(gameInfosPlayers);
+  
+        document.getElementById("roomsOnlineListGroup").appendChild(linkRoom);
+      }
+    } else {
+      var noRoomFound = document.createElement("strong");
+      noRoomFound.textContent = i18next.t("servers.noRoomound");
+  
+      document.getElementById("roomsOnlineListGroup").appendChild(noRoomFound);
     }
-  } else {
-    var noRoomFound = document.createElement("strong");
-    noRoomFound.textContent = i18next.t("servers.noRoomound");
-
-    this.document.getElementById("roomsOnlineListGroup").appendChild(noRoomFound);
-  }
-    
-  document.getElementById("loadingRoomsOnlineList").style.display = "none";
+      
+    document.getElementById("loadingRoomsOnlineList").style.display = "none";
+  });
 }
 
 // Simple modes
@@ -422,6 +426,14 @@ function selectMode(mode) {
     document.getElementById("mazeGridDiv").style.display = "none";
   }
 
+  if(selectedMode == BATTLE_ROYALE_ONLINE) {
+    document.getElementById("sameGridDiv").style.display = "none";
+    document.getElementById("mazeGridDiv").style.display = "none";
+    document.getElementById("iaSettings").style.display = "none";
+    document.getElementById("autoRetrySettings").style.display = "none";
+    document.getElementById("progressiveSpeedDiv").style.display = "none";
+  }
+
   displaySettings();
 }
 
@@ -443,6 +455,10 @@ document.getElementById("aiVsAi").onclick = function() {
 
 document.getElementById("battleRoyale").onclick = function() {
   selectMode(BATTLE_ROYALE);
+};
+
+document.getElementById("createRoom").onclick = function() {
+  selectMode(BATTLE_ROYALE_ONLINE);
 };
 
 function displaySettings() {
@@ -481,6 +497,7 @@ document.getElementById("backToMenuServerList").onclick = function() {
 };
 
 function displayServerList() {
+  selectMode(BATTLE_ROYALE_ONLINE);
   document.getElementById("settings").style.display = "none";
   document.getElementById("levelContainer").style.display = "none";
   document.getElementById("gameContainer").style.display = "none";
@@ -505,6 +522,7 @@ function displayRoomsList() {
   document.getElementById("serverListContainer").style.display = "none";
   document.getElementById("roomsOnlineListContainer").style.display = "block";
   document.getElementById("menu").style.display = "none";
+  displayRooms();
 }
 
 function displayLevelList(player) {
@@ -801,14 +819,14 @@ function validateSettings(returnValidation) {
     speed = parseInt(customSpeed);
   }
 
-  if(selectedMode != SOLO_PLAYER && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high" && aiLevel != "random")) {
+  if(selectedMode != SOLO_PLAYER && selectedMode != BATTLE_ROYALE_ONLINE && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high" && aiLevel != "random")) {
     formValidated = false;
 
     if(!returnValidation) {
       document.getElementById("aiLevel").classList.add("is-invalid");
       document.getElementById("invalidaiLevel").style.display = "block";
     }
-  } else if(selectedMode != SOLO_PLAYER) {
+  } else if(selectedMode != SOLO_PLAYER && selectedMode != BATTLE_ROYALE_ONLINE) {
     switch(aiLevel) {
       case "random":
         aiLevel = AI_LEVEL_RANDOM;
@@ -851,201 +869,205 @@ function validateSettings(returnValidation) {
   }
 
   if(formValidated) {
-    document.getElementById("settings").style.display = "none";
-    document.getElementById("menu").style.display = "none";
-    document.getElementById("levelContainer").style.display = "none";
-    document.getElementById("serverListContainer").style.display = "none";
-    document.getElementById("roomsOnlineListContainer").style.display = "none";
-    document.getElementById("gameContainer").style.display = "block";
+    if(selectedMode == BATTLE_ROYALE_ONLINE) {
+      // TODO: create a room on the currently connected server
+    } else {
+      document.getElementById("settings").style.display = "none";
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("levelContainer").style.display = "none";
+      document.getElementById("serverListContainer").style.display = "none";
+      document.getElementById("roomsOnlineListContainer").style.display = "none";
+      document.getElementById("gameContainer").style.display = "block";
 
-    var titleGame = "";
+      var titleGame = "";
 
-    switch(selectedMode) {
-      case SOLO_AI:
-        titleGame = i18next.t("menu.soloAi");
-        break;
-      case SOLO_PLAYER:
-        titleGame = i18next.t("menu.soloPlayer");
-        break;
-      case PLAYER_VS_AI:
-        titleGame = i18next.t("menu.playerVsAi");
-        break;
-      case AI_VS_AI:
-        titleGame = i18next.t("menu.aiVsAi");
-        break;
-      case BATTLE_ROYALE:
-        titleGame = i18next.t("menu.battleRoyale");
-        break;
-    }
-
-    document.getElementById("titleGame").innerHTML = i18next.t("game.currentMode") + " " + titleGame;
-
-    var games = [];
-
-    if(selectedMode == SOLO_AI) {
-      var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
-      var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
-
-      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
-    } else if(selectedMode == SOLO_PLAYER) {
-      var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
-      var snake = new Snake(RIGHT, 3, grid, playerHumanType);
-
-      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
-    } else if(selectedMode == PLAYER_VS_AI) {
-      var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-      var snake = new Snake(RIGHT, 3, grid, playerHumanType);
-
-      if(sameGrid) {
-        var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
-        games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
-      } else {
-        var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-        var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
-
-        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, null, null, null, null, !enableAnimations));
-        games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, null, null, null, null, !enableAnimations));
+      switch(selectedMode) {
+        case SOLO_AI:
+          titleGame = i18next.t("menu.soloAi");
+          break;
+        case SOLO_PLAYER:
+          titleGame = i18next.t("menu.soloPlayer");
+          break;
+        case PLAYER_VS_AI:
+          titleGame = i18next.t("menu.playerVsAi");
+          break;
+        case AI_VS_AI:
+          titleGame = i18next.t("menu.aiVsAi");
+          break;
+        case BATTLE_ROYALE:
+          titleGame = i18next.t("menu.battleRoyale");
+          break;
       }
-    } else if(selectedMode == AI_VS_AI) {
-      var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-      var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
-      if(sameGrid) {
-        var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
-        games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
-      } else {
-        var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-        var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
+      document.getElementById("titleGame").innerHTML = i18next.t("game.currentMode") + " " + titleGame;
+
+      var games = [];
+
+      if(selectedMode == SOLO_AI) {
+        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
+        var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
-        games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
-      }
-    } else if(selectedMode == BATTLE_ROYALE) {
-      if(sameGrid) {
+      } else if(selectedMode == SOLO_PLAYER) {
+        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
+        var snake = new Snake(RIGHT, 3, grid, playerHumanType);
+
+        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+      } else if(selectedMode == PLAYER_VS_AI) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-        var snakes = [];
+        var snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
-        if(battleAgainstAIs) {
-          snakes.push(new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry));
+        if(sameGrid) {
+          var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+          games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+        } else {
+          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+          var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
+
+          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, null, null, null, null, !enableAnimations));
+          games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, null, null, null, null, !enableAnimations));
         }
+      } else if(selectedMode == AI_VS_AI) {
+        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+        var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
-        for(var i = 0; i < numberIA; i++) {
-          snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry));
+        if(sameGrid) {
+          var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+          games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+        } else {
+          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+          var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
+
+          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+          games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
         }
-
-        games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
-      } else {
-        if(battleAgainstAIs) {
+      } else if(selectedMode == BATTLE_ROYALE) {
+        if(sameGrid) {
           var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-          var snake = new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry);
+          var snakes = [];
 
-          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, !enableAnimations));
-        }
+          if(battleAgainstAIs) {
+            snakes.push(new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry));
+          }
 
-        for(var i = 0; i < numberIA; i++) {
-          var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
-          var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+          for(var i = 0; i < numberIA; i++) {
+            snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry));
+          }
 
-          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, !enableAnimations));
+          games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+        } else {
+          if(battleAgainstAIs) {
+            var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+            var snake = new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry);
+
+            games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, !enableAnimations));
+          }
+
+          for(var i = 0; i < numberIA; i++) {
+            var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+            var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+
+            games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, !enableAnimations));
+          }
         }
       }
-    }
 
-    var group = new GameGroup(games);
-    group.setDisplayFPS(showDebugInfo ? true : false);
-    group.start();
+      var group = new GameGroup(games);
+      group.setDisplayFPS(showDebugInfo ? true : false);
+      group.start();
 
-    if(group.games[0].canvas != undefined) {
-      group.games[0].canvas.scrollIntoView();
-    }
-
-    if(mazeGrid && (selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER)) {
-      group.setNotification(new NotificationMessage(i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, null, null, null, true));
-    }
-
-    document.getElementById("backToMenuGame").onclick = function() {
-      if(confirm(i18next.t("game.confirmQuit"))) {
-        group.killAll();
-        displayMenu();
-        group = null;
+      if(group.games[0].canvas != undefined) {
+        group.games[0].canvas.scrollIntoView();
       }
-    };
 
-    group.onStop(function() {
-      if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE && !group.errorOccurred()) {
-        var resultMessage = "";
-        var winners = group.getWinners();
+      if(mazeGrid && (selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER)) {
+        group.setNotification(new NotificationMessage(i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, null, null, null, true));
+      }
 
-        if(selectedMode == PLAYER_VS_AI) {
-          if(winners.index.length == 2) {
-            resultMessage = i18next.t("game.equalityPlayerVSAI");
-          } else if(winners.index[0] == 0) {
-            resultMessage = i18next.t("game.winPlayerVSAI");
-          } else if(winners.index[0] == 1) {
-            resultMessage = i18next.t("game.losePlayerVSAI");
-          }
-        } else if(selectedMode == AI_VS_AI) {
-          if(winners.index.length == 1) {
-            resultMessage = i18next.t("game.oneWinnerAIVSAI", { numWinner: winners.index[0] + 1 });
-          } else if(winners.index.length == 2) {
-            resultMessage = i18next.t("game.equalityAIVSAI");
-          }
-        } else if(selectedMode == BATTLE_ROYALE) {
-          if(winners.index.length == 1) {
-            if(battleAgainstAIs && winners.index[0] == 0) {
-              resultMessage = i18next.t("game.playerWinnerBattleRoyale", { score: winners.score });
-            } else {
-              resultMessage = i18next.t("game.oneWinnerBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[0] : winners.index[0] + 1), score: winners.score });
+      document.getElementById("backToMenuGame").onclick = function() {
+        if(confirm(i18next.t("game.confirmQuit"))) {
+          group.killAll();
+          displayMenu();
+          group = null;
+        }
+      };
+
+      group.onStop(function() {
+        if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE && !group.errorOccurred()) {
+          var resultMessage = "";
+          var winners = group.getWinners();
+
+          if(selectedMode == PLAYER_VS_AI) {
+            if(winners.index.length == 2) {
+              resultMessage = i18next.t("game.equalityPlayerVSAI");
+            } else if(winners.index[0] == 0) {
+              resultMessage = i18next.t("game.winPlayerVSAI");
+            } else if(winners.index[0] == 1) {
+              resultMessage = i18next.t("game.losePlayerVSAI");
             }
-          } else if(battleAgainstAIs && winners.index.length == 2 && winners.index[0] == 0) {
-            resultMessage = i18next.t("game.winnerAIBattleRoyale") + " " + i18next.t("game.winnersNumBattleRoyale", { numWinner: winners.index[1] }) + " " + i18next.t("game.andPlayerWinnersBattleRoyale") + " " + i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
-          } else if(winners.index.length > 1) {
-            var playerWinnerBattleRoyale = false;
-            resultMessage = i18next.t("game.winnersBattleRoyale") + " ";
-
-            for(var i = 0; i < winners.index.length; i++) {
-              if(battleAgainstAIs && winners.index[i] == 0) {
-                var playerWinnerBattleRoyale = true;
+          } else if(selectedMode == AI_VS_AI) {
+            if(winners.index.length == 1) {
+              resultMessage = i18next.t("game.oneWinnerAIVSAI", { numWinner: winners.index[0] + 1 });
+            } else if(winners.index.length == 2) {
+              resultMessage = i18next.t("game.equalityAIVSAI");
+            }
+          } else if(selectedMode == BATTLE_ROYALE) {
+            if(winners.index.length == 1) {
+              if(battleAgainstAIs && winners.index[0] == 0) {
+                resultMessage = i18next.t("game.playerWinnerBattleRoyale", { score: winners.score });
               } else {
-                resultMessage = resultMessage + i18next.t("game.winnersNumBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[i] : winners.index[i] + 1) });
+                resultMessage = i18next.t("game.oneWinnerBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[0] : winners.index[0] + 1), score: winners.score });
+              }
+            } else if(battleAgainstAIs && winners.index.length == 2 && winners.index[0] == 0) {
+              resultMessage = i18next.t("game.winnerAIBattleRoyale") + " " + i18next.t("game.winnersNumBattleRoyale", { numWinner: winners.index[1] }) + " " + i18next.t("game.andPlayerWinnersBattleRoyale") + " " + i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
+            } else if(winners.index.length > 1) {
+              var playerWinnerBattleRoyale = false;
+              resultMessage = i18next.t("game.winnersBattleRoyale") + " ";
 
-                if((i + 1) < winners.index.length - 1) {
-                  resultMessage = resultMessage + ", ";
-                } else if((i + 1) == winners.index.length - 1) {
-                  resultMessage = resultMessage + " " + i18next.t("game.andWinnersBattleRoyale") + " ";
+              for(var i = 0; i < winners.index.length; i++) {
+                if(battleAgainstAIs && winners.index[i] == 0) {
+                  var playerWinnerBattleRoyale = true;
+                } else {
+                  resultMessage = resultMessage + i18next.t("game.winnersNumBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[i] : winners.index[i] + 1) });
+
+                  if((i + 1) < winners.index.length - 1) {
+                    resultMessage = resultMessage + ", ";
+                  } else if((i + 1) == winners.index.length - 1) {
+                    resultMessage = resultMessage + " " + i18next.t("game.andWinnersBattleRoyale") + " ";
+                  }
                 }
               }
-            }
 
-            if(battleAgainstAIs && playerWinnerBattleRoyale) {
-              resultMessage = resultMessage + " " + i18next.t("game.andPlayerWinnersBattleRoyale") + " " + i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
-            } else {
-              resultMessage = resultMessage + " " + i18next.t("game.winScoreBattleRoyale", { score: winners.score });
+              if(battleAgainstAIs && playerWinnerBattleRoyale) {
+                resultMessage = resultMessage + " " + i18next.t("game.andPlayerWinnersBattleRoyale") + " " + i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
+              } else {
+                resultMessage = resultMessage + " " + i18next.t("game.winScoreBattleRoyale", { score: winners.score });
+              }
             }
           }
+
+          if(resultMessage.trim() != "") {
+            document.getElementById("gameOrder").innerHTML = resultMessage;
+            group.setNotification(new NotificationMessage(resultMessage, null, "rgba(52, 152, 219, 0.5)", 15, null, null, null, true));
+          }
         }
+      });
 
-        if(resultMessage.trim() != "") {
-          document.getElementById("gameOrder").innerHTML = resultMessage;
-          group.setNotification(new NotificationMessage(resultMessage, null, "rgba(52, 152, 219, 0.5)", 15, null, null, null, true));
+      group.onExit(function() {
+        if(selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER || selectedMode == AI_VS_AI || (selectedMode == PLAYER_VS_AI && sameGrid) || (selectedMode == BATTLE_ROYALE && sameGrid)) {
+          group.killAll();
+          displayMenu();
         }
-      }
-    });
+      });
 
-    group.onExit(function() {
-      if(selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER || selectedMode == AI_VS_AI || (selectedMode == PLAYER_VS_AI && sameGrid) || (selectedMode == BATTLE_ROYALE && sameGrid)) {
-        group.killAll();
-        displayMenu();
-      }
-    });
-
-    group.onReset(function() {
-      document.getElementById("resultLevels").innerHTML = "";
-      document.getElementById("gameStatus").innerHTML = "";
-      document.getElementById("gameOrder").innerHTML = "";
-      document.getElementById("gameStatusError").innerHTML = "";
-      group.closeNotification();
-    });
+      group.onReset(function() {
+        document.getElementById("resultLevels").innerHTML = "";
+        document.getElementById("gameStatus").innerHTML = "";
+        document.getElementById("gameOrder").innerHTML = "";
+        document.getElementById("gameStatusError").innerHTML = "";
+        group.closeNotification();
+      });
+    }
   }
 }
 

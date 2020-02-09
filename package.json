@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config prod.webpack.config.js",
-    "build-dev": "webpack --config dev.webpack.config.js"
+    "build-dev": "webpack --config dev.webpack.config.js",
+    "watch": "webpack --config dev.webpack.config.js --watch",
+    "start": "webpack-dev-server --config dev.webpack.config.js --open"
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,7 @@
   "homepage": "https://github.com/Eliastik/snakeia#readme",
   "devDependencies": {
     "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.10.3"
   }
 }

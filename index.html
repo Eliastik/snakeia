@@ -152,7 +152,7 @@
                 <div class="invalid-feedback" id="invalidSpeed" data-i18n="settings.invalidSpeed">
                   Cette valeur doit être au moins égale ou supérieure à 1
                 </div>
-                <div class="custom-control custom-checkbox">
+                <div class="custom-control custom-checkbox" id="progressiveSpeedDiv">
                   <input type="checkbox" class="custom-control-input" id="progressiveSpeed">
                   <label class="custom-control-label" for="progressiveSpeed" data-i18n="settings.progressiveSpeed">Augmenter la vitesse progressivement</label>
                 </div>
@@ -292,6 +292,11 @@
         <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
         <h1 class="h3 font-weight-normal" data-i18n="servers.roomsListTitle">Liste des salles</h1>
         <h1 class="h6 mb-3 mt-3 font-weight-normal" data-i18n="servers.roomsListInfos">Sélectionnez une salle :</h1>
+        <div class="row mb-2">
+          <div class="col text-center">
+            <button class="btn btn-lg btn-success" id="createRoom"><span class="fui-plus-circle"></span>&nbsp; <span data-i18n="servers.createRoom">Créer une salle</span></button>
+          </div>
+        </div>
         <div id="serverList">
           <strong id="loadingRoomsOnlineList" data-i18n="servers.loadingRooms">Chargement de la liste des salles… Veuillez patienter.</strong>
           <div id="roomsOnlineListGroup" class="list-group"></div>

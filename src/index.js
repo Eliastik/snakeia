@@ -39,5 +39,6 @@ module.exports = {
     GameGroup: require("./gameGroup"),
     GameUI: require("./gameUI"),
     ImageLoader: require("./imageLoader"),
-    NotificationMessage: require("./notificationMessage")
+    NotificationMessage: require("./notificationMessage"),
+    OnlineClient: require("./onlineClient")
 };
