@@ -65,8 +65,6 @@ function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpe
   this.reactor.registerEvent("onScoreIncreased");
   this.reactor.registerEvent("onUpdate");
   this.reactor.registerEvent("onUpdateCounter");
-
-  this.init();
 }
 
 GameEngine.prototype.init = function() {

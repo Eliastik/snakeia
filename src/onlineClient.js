@@ -59,6 +59,7 @@ OnlineClient.prototype.disconnect = function() {
 
 OnlineClient.prototype.displayRooms = function(callback) {
   var ioRooms = new io(this.url + ":" + this.port + "/rooms");
+
   ioRooms.on("rooms", function(data) {
     callback(data);
     ioRooms.close();
@@ -68,12 +69,15 @@ OnlineClient.prototype.displayRooms = function(callback) {
 OnlineClient.prototype.createRoom = function(data, callback) {
   var ioCreate = new io(this.url + ":" + this.port + "/createRoom");
 
-  ioRooms.on("connection", function() {
+  ioCreate.on("connect", function() {
     ioCreate.emit("create", data);
   });
 
-  ioRooms.on("process", function(data) {
-    callback(data);
+  ioCreate.on("process", function(data) {
+    if(data.success != null) {
+      callback(data.success);
+    }
+
     ioCreate.close();
   });
 };

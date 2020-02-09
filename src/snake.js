@@ -353,7 +353,7 @@ Snake.prototype.randomAI = function() {
 Snake.prototype.simpleAI = function() {
   if(this.grid.fruitPos != null) {
     var currentPosition = this.getHeadPosition();
-    var fruitPos = this.grid.fruitPos.copy();
+    var fruitPos = this.grid.fruitPos;
     var directionNext = GameConstants.Key.RIGHT;
 
     if(fruitPos.x > currentPosition.x) {
@@ -427,7 +427,7 @@ Snake.prototype.ai = function(bestFind) {
   } else {
     if(this.grid.fruitPos != null) {
       var currentPosition = this.getHeadPosition();
-      var fruitPos = this.grid.fruitPos.copy();
+      var fruitPos = this.grid.fruitPos;
 
       var grid = this.grid.getGraph(false);
       var graph = new Lowlight.Astar.Configuration(grid, {

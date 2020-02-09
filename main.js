@@ -870,7 +870,17 @@ function validateSettings(returnValidation) {
 
   if(formValidated) {
     if(selectedMode == BATTLE_ROYALE_ONLINE) {
-      // TODO: create a room on the currently connected server
+      onlineClient.createRoom({
+        speed: speed,
+        heightGrid: heightGrid,
+        widthGrid: widthGrid,
+        borderWalls: borderWalls,
+        generateWalls: generateWalls,
+        customSpeed: customSpeed,
+        enableAI: false
+      }, function(success) {
+        alert(success);
+      });
     } else {
       document.getElementById("settings").style.display = "none";
       document.getElementById("menu").style.display = "none";
