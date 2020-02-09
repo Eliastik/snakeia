@@ -294,10 +294,16 @@
         <h1 class="h6 mb-3 mt-3 font-weight-normal" data-i18n="servers.roomsListInfos">Sélectionnez une salle :</h1>
         <div class="row mb-2">
           <div class="col text-center">
-            <button class="btn btn-lg btn-success" id="createRoom"><span class="fui-plus-circle"></span>&nbsp; <span data-i18n="servers.createRoom">Créer une salle</span></button>
+            <button class="btn btn-lg btn-success" id="createRoom"><span class="fui-plus-circle"></span>&nbsp; <span data-i18n="servers.createRoom">Créer une salle</span></button> <button class="btn btn-lg btn-info" id="joinPrivateRoom"><span class="fui-export"></span>&nbsp; <span data-i18n="servers.joinPrivateRoom">Rejoindre une salle privée</span></button>
           </div>
         </div>
         <div id="serverList">
+          <div class="alert alert-danger" role="alert" id="errorRoomsList">
+            <span class="fui-cross-circle"></span>&nbsp; <span data-i18n="servers.errorLoadingRooms">Une erreur est survenue lors du chargement de la liste des salles. Veuillez réessayer.</span>
+          </div>
+          <div class="alert alert-danger" role="alert" id="errorRoomCreation">
+            <span class="fui-cross-circle"></span>&nbsp; <span data-i18n="servers.errorRoomCreation">Une erreur est survenue lors de la création de la salle. Veuillez réessayer.</span>
+          </div>
           <strong id="loadingRoomsOnlineList" data-i18n="servers.loadingRooms">Chargement de la liste des salles… Veuillez patienter.</strong>
           <div id="roomsOnlineListGroup" class="list-group"></div>
         </div>
@@ -305,6 +311,12 @@
           <div class="col text-center">
             <button class="btn btn-lg btn-danger" id="backToServersRoomsList"><span class="fui-cross"></span>&nbsp; <span data-i18n="servers.backToList">Retour à la liste des serveurs</span></button>
           </div>
+        </div>
+      </div>
+      <div id="roomsOnlineCreation">
+        <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
+        <div class="alert alert-info mt-3" role="alert" id="infoRoomsCreate">
+          <span class="fui-info-circle"></span>&nbsp; <span data-i18n="servers.creatingRoom">Création de la salle… Veuillez patienter.</span>
         </div>
       </div>
       <div id="levelContainer">

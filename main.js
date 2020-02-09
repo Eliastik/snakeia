@@ -308,10 +308,11 @@ window.listServersCallback = function(data) {
         linkServer.onclick = function() {
           onlineClient.connect(url, port, function(success) { // Connection to the server
             if(!success) {
-              return alert(i18next.t("servers.connectionError"));
+              alert(i18next.t("servers.connectionError"));
+              displayServerList();
+            } else {
+              displayRoomsList();
             }
-  
-            displayRoomsList();
           });
         };
   
@@ -340,18 +341,22 @@ function displayRooms() {
 
   onlineClient.displayRooms(function(data) { // Request rooms data
     document.getElementById("roomsOnlineListGroup").innerHTML = "";
+    document.getElementById("errorRoomsList").style.display = "none";
   
-    if(data != null && Object.keys(data).length > 0) {
+    if(data != null && data.error) {
+      document.getElementById("errorRoomsList").style.display = "block";
+    } else if(data != null && Object.keys(data).length > 0) {
       for(var i = 0; i < Object.keys(data).length; i++) {
         var room = data[Object.keys(data)[i]];
+        var code = room["code"];
   
         var linkRoom = document.createElement("a");
         linkRoom.classList.add("list-group-item");
         linkRoom.classList.add("list-group-item-action");
-        linkRoom.textContent = "Salle n°" + (i + 1);
+        linkRoom.textContent = i18next.t("servers.room", { number: (i + 1) });
   
         linkRoom.onclick = function() {
-          // TODO: Enter a room
+          joinRoom(code);
         };
   
         var gameInfos = document.createElement("div");
@@ -391,6 +396,20 @@ function displayRooms() {
     document.getElementById("loadingRoomsOnlineList").style.display = "none";
   });
 }
+
+function joinRoom(code) {
+  onlineClient.joinRoom(code, function(data) {
+
+  });
+}
+
+document.getElementById("joinPrivateRoom").onclick = function() {
+  var code = prompt(i18next.t("servers.enterCode"));
+
+  if(code != null) {
+    joinRoom(code);
+  }
+};
 
 // Simple modes
 function selectMode(mode) {
@@ -467,12 +486,24 @@ function displaySettings() {
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("serverListContainer").style.display = "none";
   document.getElementById("roomsOnlineListContainer").style.display = "none";
+  document.getElementById("roomsOnlineCreation").style.display = "none";
+  document.getElementById("errorRoomCreation").style.display = "none";
   document.getElementById("settings").style.display = "block";
   checkSameGrid();
   checkGameSpeed();
   checkPlayer();
   checkFailSettings();
   checkMazeGrid();
+
+  if(selectedMode == BATTLE_ROYALE_ONLINE) {
+    document.getElementById("backToMenu").onclick = function() {
+      displayRoomsList();
+    };
+  } else {
+    document.getElementById("backToMenu").onclick = function() {
+      displayMenu();
+    };
+  }
 }
 
 function displayMenu() {
@@ -481,6 +512,8 @@ function displayMenu() {
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("serverListContainer").style.display = "none";
   document.getElementById("roomsOnlineListContainer").style.display = "none";
+  document.getElementById("roomsOnlineCreation").style.display = "none";
+  document.getElementById("errorRoomCreation").style.display = "none";
   document.getElementById("menu").style.display = "block";
 }
 
@@ -503,6 +536,8 @@ function displayServerList() {
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("serverListContainer").style.display = "block";
   document.getElementById("roomsOnlineListContainer").style.display = "none";
+  document.getElementById("roomsOnlineCreation").style.display = "none";
+  document.getElementById("errorRoomCreation").style.display = "none";
   document.getElementById("menu").style.display = "none";
   loadServerList();
 }
@@ -521,6 +556,7 @@ function displayRoomsList() {
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("serverListContainer").style.display = "none";
   document.getElementById("roomsOnlineListContainer").style.display = "block";
+  document.getElementById("roomsOnlineCreation").style.display = "none";
   document.getElementById("menu").style.display = "none";
   displayRooms();
 }
@@ -531,6 +567,8 @@ function displayLevelList(player) {
   document.getElementById("gameContainer").style.display = "none";
   document.getElementById("serverListContainer").style.display = "none";
   document.getElementById("roomsOnlineListContainer").style.display = "none";
+  document.getElementById("roomsOnlineCreation").style.display = "none";
+  document.getElementById("errorRoomCreation").style.display = "none";
   document.getElementById("menu").style.display = "none";
   document.getElementById("levelDownloading").innerHTML = "";
   document.getElementById("btnDeblockDiv").innerHTML = "";
@@ -869,6 +907,10 @@ function validateSettings(returnValidation) {
   }
 
   if(formValidated) {
+    document.getElementById("roomsOnlineCreation").style.display = "block";
+    document.getElementById("settings").style.display = "none";
+    document.getElementById("errorRoomCreation").style.display = "none";
+
     if(selectedMode == BATTLE_ROYALE_ONLINE) {
       onlineClient.createRoom({
         speed: speed,
@@ -878,8 +920,18 @@ function validateSettings(returnValidation) {
         generateWalls: generateWalls,
         customSpeed: customSpeed,
         enableAI: false
-      }, function(success) {
-        alert(success);
+      }, function(data) {
+        if(data.connection_error) {
+          alert(i18next.t("servers.connectionError"));
+          displayServerList();
+        } else {
+          if(data.success) {
+            joinRoom(data.code);
+          } else {
+            document.getElementById("errorRoomCreation").style.display = "block";
+            displayRoomsList();
+          }
+        }
       });
     } else {
       document.getElementById("settings").style.display = "none";
@@ -887,6 +939,8 @@ function validateSettings(returnValidation) {
       document.getElementById("levelContainer").style.display = "none";
       document.getElementById("serverListContainer").style.display = "none";
       document.getElementById("roomsOnlineListContainer").style.display = "none";
+      document.getElementById("roomsOnlineCreation").style.display = "none";
+      document.getElementById("errorRoomCreation").style.display = "none";
       document.getElementById("gameContainer").style.display = "block";
 
       var titleGame = "";
@@ -1330,6 +1384,8 @@ window.playLevel = function(level, player, type) {
     document.getElementById("levelContainer").style.display = "none";
     document.getElementById("serverListContainer").style.display = "none";
     document.getElementById("roomsOnlineListContainer").style.display = "none";
+    document.getElementById("roomsOnlineCreation").style.display = "none";
+    document.getElementById("errorRoomCreation").style.display = "none";
     document.getElementById("gameContainer").style.display = "block";
 
     document.getElementById("resultLevels").innerHTML = "";

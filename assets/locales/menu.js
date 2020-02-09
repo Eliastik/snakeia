@@ -183,7 +183,13 @@ i18next.addResourceBundle("fr", "translation", {
     "roomsListInfos": "Sélectionnez une salle :",
     "loadingRooms": "Chargement de la liste des salles… Veuillez patienter.",
     "createRoom": "Créer une salle",
-    "connectionError": "Une erreur est survenue lors de la connexion au serveur. Veuillez réessayer."
+    "connectionError": "Une erreur est survenue lors de la connexion au serveur. Veuillez réessayer.",
+    "errorLoadingRooms": "Une erreur est survenue lors du chargement de la liste des salles. Veuillez réessayer.",
+    "creatingRoom": "Création de la salle… Veuillez patienter.",
+    "room": "Salle n°{{number}}",
+    "errorRoomCreation": "Une erreur est survenue lors de la création de la salle. Veuillez réessayer.",
+    "joinPrivateRoom": "Rejoindre une salle privée",
+    "enterCode": "Entrez le code de la salle :"
   }
 }, true, false);
 
@@ -350,6 +356,12 @@ i18next.addResourceBundle("en", "translation", {
     "roomsListInfos": "Select a room:",
     "loadingRooms": "Loading the rooms list… Please wait.",
     "createRoom": "Create a room",
-    "connectionError": "An error has occurred when connecting to the server. Please retry."
+    "connectionError": "An error has occurred when connecting to the server. Please retry.",
+    "errorLoadingRooms": "An error has occurred when loading the rooms list. Please retry.",
+    "creatingRoom": "Creating the room… Please wait.",
+    "room": "Room n°{{number}}",
+    "errorRoomCreation": "An error has occurred when creating the room. Please retry.",
+    "joinPrivateRoom": "Join a private room",
+    "enterCode": "Enter the code of the room:"
   }
 }, true, false);

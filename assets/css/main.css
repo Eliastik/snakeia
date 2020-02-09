@@ -72,7 +72,7 @@ body {
   font-size: 75%;
 }
 
-#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer, #levelListDownloadPlayer, #levelListDownloadAI, #localstorageDisabled, #serverListContainer, #roomsOnlineListContainer {
+#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer, #levelListDownloadPlayer, #levelListDownloadAI, #localstorageDisabled, #serverListContainer, #roomsOnlineListContainer, #errorRoomsList, #roomsOnlineCreation, #errorRoomCreation {
   display: none;
 }
 
@@ -82,7 +82,7 @@ body {
   margin: auto;
 }
 
-#serverList {
+#serverList, #infoRoomsCreate {
   width: 100%;
   max-width: 400px;
   margin: auto;

@@ -36,18 +36,25 @@ OnlineClient.prototype.connect = function(url, port, callback) {
 
   var self = this;
 
-  this.socket.on("connect", function() {
+  var successConnect = false;
+
+  this.socket.once("connect", function() {
     callback(true);
+    successConnect = true;
   });
 
-  this.socket.on("error", function() {
-    callback(false);
-    self.disconnect();
+  this.socket.once("error", function() {
+    if(!successConnect) {
+      callback(false);
+      self.disconnect();
+    }
   });
 
-  this.socket.on("connect_error", function() {
-    callback(false);
-    self.disconnect();
+  this.socket.once("connect_error", function() {
+    if(!successConnect) {
+      callback(false);
+      self.disconnect();
+    }
   });
 };
 
@@ -60,8 +67,18 @@ OnlineClient.prototype.disconnect = function() {
 OnlineClient.prototype.displayRooms = function(callback) {
   var ioRooms = new io(this.url + ":" + this.port + "/rooms");
 
-  ioRooms.on("rooms", function(data) {
+  ioRooms.once("rooms", function(data) {
     callback(data);
+    ioRooms.close();
+  });
+
+  ioRooms.once("error", function() {
+    callback({ error: true });
+    ioRooms.close();
+  });
+
+  ioRooms.once("connect_error", function() {
+    callback({ error: true });
     ioRooms.close();
   });
 };
@@ -69,17 +86,47 @@ OnlineClient.prototype.displayRooms = function(callback) {
 OnlineClient.prototype.createRoom = function(data, callback) {
   var ioCreate = new io(this.url + ":" + this.port + "/createRoom");
 
-  ioCreate.on("connect", function() {
+  ioCreate.once("connect", function() {
     ioCreate.emit("create", data);
   });
 
-  ioCreate.on("process", function(data) {
+  ioCreate.once("process", function(data) {
     if(data.success != null) {
-      callback(data.success);
+      callback({
+        success: data.success,
+        connection_error: false
+      });
+    } else {
+      callback({
+        success: false,
+        connection_error: true
+      });
     }
 
     ioCreate.close();
   });
+
+  ioCreate.once("error", function() {
+    callback({
+      success: false,
+      connection_error: true
+    });
+    ioCreate.close();
+  });
+
+  ioCreate.once("connect_error", function() {
+    callback({
+      success: false,
+      connection_error: true
+    });
+    ioCreate.close();
+  });
+};
+
+OnlineClient.prototype.joinRoom = function(code, callback) {
+  if(this.socket != null) {
+    this.socket.emit("join-room", code);
+  }
 };
 
 // Export module
