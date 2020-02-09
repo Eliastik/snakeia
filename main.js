@@ -451,6 +451,9 @@ function selectMode(mode) {
     document.getElementById("iaSettings").style.display = "none";
     document.getElementById("autoRetrySettings").style.display = "none";
     document.getElementById("progressiveSpeedDiv").style.display = "none";
+    document.getElementById("privateGameDiv").style.display = "block";
+  } else {
+    document.getElementById("privateGameDiv").style.display = "none";
   }
 
   displaySettings();
@@ -919,7 +922,8 @@ function validateSettings(returnValidation) {
         borderWalls: borderWalls,
         generateWalls: generateWalls,
         customSpeed: customSpeed,
-        enableAI: false
+        enableAI: false,
+        private: document.getElementById("privateGame").checked
       }, function(data) {
         if(data.connection_error) {
           alert(i18next.t("servers.connectionError"));

@@ -109,7 +109,8 @@ i18next.addResourceBundle("fr", "translation", {
     "battleAgainstAIs": "Jouer contre les IA",
     "validate": "Valider",
     "reset": "Réinitialiser",
-    "backToMenu": "Retour au menu"
+    "backToMenu": "Retour au menu",
+    "privateGame": "Garder la partie privée"
   },
   "game": {
     "backToMenu": "Retour au menu",
@@ -282,7 +283,8 @@ i18next.addResourceBundle("en", "translation", {
     "battleAgainstAIs": "Play against AIs",
     "validate": "Validate",
     "reset": "Reset",
-    "backToMenu": "Back to the menu"
+    "backToMenu": "Back to the menu",
+    "privateGame": "Keep the game private"
   },
   "game": {
     "backToMenu": "Back to the menu",
