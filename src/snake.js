@@ -33,6 +33,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.errorInit = false;
   this.grid = grid || new Grid();
   this.queue = [];
+  this.lastKey = -1;
   this.lastTail;
   this.lastTailMoved;
   this.player = player == undefined ? GameConstants.PlayerType.HUMAN : player;

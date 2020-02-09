@@ -250,7 +250,15 @@ onmessage = function(e) {
         game.exit();
         break;
       case "key":
-        if(data.length > 1) game.lastKey = data[1];
+        if(data.length > 1) {
+          game.lastKey = data[1];
+
+          var playerSnake = game.getPlayer(1, GameConstants.PlayerType.HUMAN) || game.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+
+          if(playerSnake != null && playerSnake.lastKey != null) {
+            playerSnake.lastKey = data[1];
+          }
+        }
         break;
     }
   }

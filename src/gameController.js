@@ -282,6 +282,11 @@ GameController.prototype.setBestScore = function(score) {
 
 GameController.prototype.key = function(key) {
   this.gameEngine.lastKey = key;
+  var playerSnake = this.gameEngine.getPlayer(1, GameConstants.PlayerType.HUMAN) || this.gameEngine.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+
+  if(playerSnake != null && playerSnake.lastKey != null) {
+    playerSnake.lastKey = key;
+  }
 };
 
 GameController.prototype.update = function(message, data) {

@@ -239,6 +239,24 @@ GameEngine.prototype.getNBPlayer = function(type) {
   return numPlayer;
 };
 
+GameEngine.prototype.getPlayer = function(num, type) {
+  var numPlayer = 0;
+
+  if(this.snakes != null) {
+    for(var i = 0; i < this.snakes.length; i++) {
+      if(this.snakes[i].player == type) {
+        numPlayer++;
+      }
+  
+      if(numPlayer == num) {
+        return this.snakes[i];
+      }
+    }
+  }
+
+  return null;
+};
+
 GameEngine.prototype.tick = function() {
   var self = this;
 
@@ -254,7 +272,7 @@ GameEngine.prototype.tick = function() {
         }
       }
       
-      if(!self.grid.maze || self.grid.mazeForceAuto || ((self.grid.maze && (self.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (self.grid.maze && ((self.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && self.lastKey != -1))) {
+      if(!self.grid.maze || self.grid.mazeForceAuto || ((self.grid.maze && (self.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (self.grid.maze && ((self.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (self.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) || self.getPlayer(1, GameConstants.PlayerType.HUMAN)).lastKey != -1))) {
         for(var i = 0; i < self.snakes.length; i++) {
           var initialDirection = self.snakes[i].direction;
           var setFruit = false;
@@ -263,8 +281,8 @@ GameEngine.prototype.tick = function() {
 
           if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
             if(self.snakes[i].player == GameConstants.PlayerType.HUMAN || self.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
-              self.snakes[i].moveTo(self.lastKey);
-              self.lastKey = -1;
+              self.snakes[i].moveTo(self.snakes[i].lastKey);
+              self.snakes[i].lastKey = -1;
             } else if(self.snakes[i].player == GameConstants.PlayerType.AI) {
               self.snakes[i].moveTo(self.snakes[i].ai(true));
             }
@@ -274,7 +292,7 @@ GameEngine.prototype.tick = function() {
             if(self.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI && self.grid.isDeadPosition(self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction))) {
               self.snakes[i].direction = initialDirection;
               self.snakes[i].moveTo(self.snakes[i].ai(true));
-              self.lastKey = -1;
+              self.snakes[i].lastKey = -1;
             }
 
             headSnakePos = self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction);

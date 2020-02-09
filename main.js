@@ -776,6 +776,7 @@ function resetForm(resetValues) {
     document.getElementById("numberIA").value = 20;
     document.getElementById("battleAgainstAIs").checked = false;
     document.getElementById("aiAssistant").checked = false;
+    document.getElementById("privateGame").checked = false;
   }
 
   checkSameGrid();
