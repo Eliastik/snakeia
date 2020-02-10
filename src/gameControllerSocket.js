@@ -26,10 +26,10 @@ if(typeof(require) !== "undefined") {
   var NotificationMessage = require('./notificationMessage');
 }
 
-function GameControllerSocket(game, ui) {
-  GameController.call(this, game, ui);
+function GameControllerSocket(socket, ui) {
+  GameController.call(this, null, ui);
 
-  this.socket;
+  this.socket = socket;
 
   this.parseData = function(m, d) {
     var data = [m, d];
@@ -58,17 +58,6 @@ function GameControllerSocket(game, ui) {
   };
 
   this.init = function() {
-    try {
-      this.socket = new io("http://localhost:3000");
-    } catch(e) {
-      this.update("init", {
-        "errorOccurred": true
-      });
-      return;
-    }
-    
-    // this.socket.postMessage(["init", game]);
-
     var self = this;
 
     this.socket.on("init", function(data) {

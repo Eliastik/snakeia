@@ -18,6 +18,7 @@
  */
 if(typeof(require) !== "undefined") {
   var io = require('../libs/socket.io.js');
+  var GameControllerSocket = require('./gameControllerSocket.js')
 }
 
 function OnlineClient() {
@@ -25,6 +26,7 @@ function OnlineClient() {
   this.port;
   this.token;
   this.socket;
+  this.currentRoom;
 }
 
 OnlineClient.prototype.connect = function(url, port, callback) {
@@ -35,7 +37,6 @@ OnlineClient.prototype.connect = function(url, port, callback) {
   this.socket = new io(url + ":" + port);
 
   var self = this;
-
   var successConnect = false;
 
   this.socket.once("connect", function() {
@@ -94,12 +95,14 @@ OnlineClient.prototype.createRoom = function(data, callback) {
     if(data.success != null) {
       callback({
         success: data.success,
-        connection_error: false
+        connection_error: false,
+        code: data.code
       });
     } else {
       callback({
         success: false,
-        connection_error: true
+        connection_error: true,
+        code: null
       });
     }
 
@@ -126,6 +129,39 @@ OnlineClient.prototype.createRoom = function(data, callback) {
 OnlineClient.prototype.joinRoom = function(code, callback) {
   if(this.socket != null) {
     this.socket.emit("join-room", code);
+
+    var self = this;
+    var successConnect = false;
+
+    this.socket.once("join-room", function(data) {
+      self.currentRoom = code;
+      successConnect = true;
+      callback(data);
+    });
+
+    this.socket.once("error", function() {
+      if(!successConnect) {
+        callback({
+          success: false
+        });
+        self.disconnect();
+      }
+    });
+  
+    this.socket.once("connect_error", function() {
+      if(!successConnect) {
+        callback({
+          success: false
+        });
+        self.disconnect();
+      }
+    });
+  }
+};
+
+OnlineClient.prototype.getGame = function() {
+  if(this.socket != null && this.currentRoom) {
+    return new GameControllerSocket(this.socket);
   }
 };
 

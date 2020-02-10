@@ -190,12 +190,6 @@ GameUI.prototype.init = function() {
     }
   });
 
-  window.addEventListener("blur", function() {
-    if(!self.paused) {
-      self.pause();
-    }
-  }, false);
-
   window.addEventListener("resize", function() {
     self.autoResizeCanvas();
   }, true);

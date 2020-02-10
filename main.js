@@ -25,6 +25,7 @@ if(typeof(require) !== "undefined") {
   var NotificationMessage = require('./src/notificationMessage');
   var GameGroup = require('./src/gameGroup');
   var OnlineClient = require('./src/onlineClient');
+  var GameUI = require('./src/gameUI.js');
 }
 
 // Modes :
@@ -399,7 +400,47 @@ function displayRooms() {
 
 function joinRoom(code) {
   onlineClient.joinRoom(code, function(data) {
+    if(data.success) {
+      var game = onlineClient.getGame();
+      var ui = new GameUI(game, document.getElementById("gameContainer"));
+      game.gameUI = ui;
+      game.init();
 
+      document.getElementById("settings").style.display = "none";
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("levelContainer").style.display = "none";
+      document.getElementById("serverListContainer").style.display = "none";
+      document.getElementById("roomsOnlineListContainer").style.display = "none";
+      document.getElementById("roomsOnlineCreation").style.display = "none";
+      document.getElementById("errorRoomCreation").style.display = "none";
+      document.getElementById("gameContainer").style.display = "block";
+      
+      document.getElementById("titleGame").innerHTML = i18next.t("game.currentMode") + " " + i18next.t("menu.onlineBattleRoyale");
+
+      var group = new GameGroup(game);
+      group.setDisplayFPS(showDebugInfo ? true : false);
+      group.start();
+
+      if(game.canvas != undefined) {
+        game.canvas.scrollIntoView();
+      }
+
+      group.onExit(function() {
+        group.killAll();
+        displayMenu();
+      });
+
+      document.getElementById("backToMenuGame").onclick = function() {
+        if(confirm(i18next.t("game.confirmQuit"))) {
+          group.killAll();
+          displayMenu();
+          group = null;
+        }
+      };
+    } else {
+      alert(i18next.t("servers.connectionError"));
+      displayServerList();
+    }
   });
 }
 
