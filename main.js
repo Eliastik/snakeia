@@ -427,13 +427,17 @@ function joinRoom(code) {
 
       group.onExit(function() {
         group.killAll();
-        displayMenu();
+        displayRoomsList();
+      });
+
+      game.onKill(function() {
+        displayRoomsList();
       });
 
       document.getElementById("backToMenuGame").onclick = function() {
         if(confirm(i18next.t("game.confirmQuit"))) {
           group.killAll();
-          displayMenu();
+          displayRoomsList();
           group = null;
         }
       };

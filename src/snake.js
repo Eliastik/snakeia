@@ -187,6 +187,7 @@ Snake.prototype.reset = function() {
   this.gameOver = false;
   this.scoreMax = false;
   this.lastTailMoved = true;
+  this.lastKey = -1;
   this.init();
 };
 
