@@ -401,9 +401,8 @@ function displayRooms() {
 function joinRoom(code) {
   onlineClient.joinRoom(code, function(data) {
     if(data.success) {
-      var game = onlineClient.getGame();
-      var ui = new GameUI(game, document.getElementById("gameContainer"));
-      game.gameUI = ui;
+      var ui = new GameUI(null, document.getElementById("gameContainer"));
+      var game = onlineClient.getGame(ui);
       game.init();
 
       document.getElementById("settings").style.display = "none";
@@ -417,26 +416,25 @@ function joinRoom(code) {
       
       document.getElementById("titleGame").innerHTML = i18next.t("game.currentMode") + " " + i18next.t("menu.onlineBattleRoyale");
 
-      var group = new GameGroup(game);
-      group.setDisplayFPS(showDebugInfo ? true : false);
-      group.start();
+      game.setDisplayFPS(showDebugInfo ? true : false);
 
-      if(game.canvas != undefined) {
-        game.canvas.scrollIntoView();
+      if(ui.canvas != undefined) {
+        ui.canvas.scrollIntoView();
       }
 
-      group.onExit(function() {
-        group.killAll();
+      game.onExit(function() {
+        onlineClient.stopGame();
         displayRoomsList();
       });
 
       game.onKill(function() {
+        onlineClient.stopGame();
         displayRoomsList();
       });
 
       document.getElementById("backToMenuGame").onclick = function() {
         if(confirm(i18next.t("game.confirmQuit"))) {
-          group.killAll();
+          onlineClient.stopGame();
           displayRoomsList();
           group = null;
         }

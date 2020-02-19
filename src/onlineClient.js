@@ -18,7 +18,7 @@
  */
 if(typeof(require) !== "undefined") {
   var io = require('../libs/socket.io.js');
-  var GameControllerSocket = require('./gameControllerSocket.js')
+  var GameControllerSocket = require('./gameControllerSocket.js');
 }
 
 function OnlineClient() {
@@ -27,6 +27,7 @@ function OnlineClient() {
   this.token;
   this.socket;
   this.currentRoom;
+  this.game;
 }
 
 OnlineClient.prototype.connect = function(url, port, callback) {
@@ -61,7 +62,15 @@ OnlineClient.prototype.connect = function(url, port, callback) {
 
 OnlineClient.prototype.disconnect = function() {
   if(this.socket != null) {
+    this.stopGame();
     this.socket.close();
+  }
+};
+
+OnlineClient.prototype.stopGame = function() {
+  if(this.game != null && this.game.gameUI != null) {
+    this.game.kill();
+    this.game.gameUI.setKill();
   }
 };
 
@@ -159,9 +168,13 @@ OnlineClient.prototype.joinRoom = function(code, callback) {
   }
 };
 
-OnlineClient.prototype.getGame = function() {
-  if(this.socket != null && this.currentRoom) {
-    return new GameControllerSocket(this.socket);
+OnlineClient.prototype.getGame = function(ui) {
+  if(this.socket != null && this.currentRoom && ui != null) {
+    this.game = null;
+    this.stopGame();
+    this.game = new GameControllerSocket(this.socket, ui);
+    ui.controller = this.game;
+    return this.game;
   }
 };
 

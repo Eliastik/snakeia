@@ -280,15 +280,17 @@ GameUI.prototype.setKill = function() {
   this.snakes = null;
   this.preRenderedFont = null;
 
-  if(this.outputType == GameConstants.OutputType.TEXT) {
-    this.appendTo.removeChild(this.textarea);
-    this.textarea = null;
-  } else if(this.outputType == GameConstants.OutputType.GRAPHICAL) {
-    this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.appendTo.removeChild(this.canvas);
-    this.canvas = null;
-    this.canvasCtx = null;
-    this.imageLoader.clear();
+  if(this.appendTo != null) {
+    if(this.outputType == GameConstants.OutputType.TEXT && this.textarea != null) {
+      this.appendTo.removeChild(this.textarea);
+      this.textarea = null;
+    } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && this.canvas != null) {
+      this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.appendTo.removeChild(this.canvas);
+      this.canvas = null;
+      this.canvasCtx = null;
+      this.imageLoader.clear();
+    }
   }
 };
 

@@ -68,7 +68,7 @@ function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpe
 }
 
 GameEngine.prototype.init = function() {
-  if(this.snakes == null || this.snakes == undefined) {
+  if(this.snakes == null) {
     this.errorOccurred = true;
     this.snakes = [];
   } else if(!Array.isArray(this.snakes)) {
