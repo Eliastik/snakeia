@@ -375,7 +375,7 @@ GameUI.prototype.startDraw = function(renderBlur) {
 
   requestAnimationFrame(function() {
     if(!self.killed) {
-      if(!document.hasFocus() && !this.paused) {
+      if(!document.hasFocus() && !self.paused) {
         self.controller.pause();
       }
   

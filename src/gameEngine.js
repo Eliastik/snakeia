@@ -28,12 +28,12 @@ function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpe
   // Game settings
   this.grid = grid;
   this.snakes = snake;
-  this.speed = speed == undefined ? 8 : speed;
-  this.initialSpeed = speed == undefined ? 8 : speed;
-  this.initialSpeedUntouched = speed == undefined ? 8 : speed;
-  this.enablePause = enablePause == undefined ? true : enablePause;
-  this.enableRetry = enableRetry == undefined ? true : enableRetry;
-  this.progressiveSpeed = progressiveSpeed == undefined ? false : progressiveSpeed;
+  this.speed = speed == null ? 8 : speed;
+  this.initialSpeed = speed == null ? 8 : speed;
+  this.initialSpeedUntouched = speed == null ? 8 : speed;
+  this.enablePause = enablePause == null ? true : enablePause;
+  this.enableRetry = enableRetry == null ? true : enableRetry;
+  this.progressiveSpeed = progressiveSpeed == null ? false : progressiveSpeed;
   this.countBeforePlay = 3;
   // Game variables
   this.lastKey = -1;
