@@ -35,7 +35,12 @@ OnlineClient.prototype.connect = function(url, port, callback) {
 
   this.url = url;
   this.port = port;
-  this.socket = new io(url + ":" + port);
+
+  if(this.port != null) {
+    this.socket = new io(url + ":" + port);
+  } else {
+    this.socket = new io(url);
+  }
 
   var self = this;
   var successConnect = false;
@@ -75,7 +80,13 @@ OnlineClient.prototype.stopGame = function() {
 };
 
 OnlineClient.prototype.displayRooms = function(callback) {
-  var ioRooms = new io(this.url + ":" + this.port + "/rooms");
+  var ioRooms;
+
+  if(this.port != null) {
+    ioRooms = new io(this.url + ":" + this.port + "/rooms");
+  } else {
+    ioRooms = new io(this.url + "/rooms");
+  }
 
   ioRooms.once("rooms", function(data) {
     callback(data);
@@ -94,7 +105,13 @@ OnlineClient.prototype.displayRooms = function(callback) {
 };
 
 OnlineClient.prototype.createRoom = function(data, callback) {
-  var ioCreate = new io(this.url + ":" + this.port + "/createRoom");
+  var ioCreate;
+
+  if(this.port != null) {
+    ioCreate = new io(this.url + ":" + this.port + "/createRoom");
+  } else {
+    ioCreate = new io(this.url + "/createRoom");
+  }
 
   ioCreate.once("connect", function() {
     ioCreate.emit("create", data);

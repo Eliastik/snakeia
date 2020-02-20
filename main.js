@@ -289,11 +289,11 @@ function loadServerList() {
 
   document.getElementsByTagName('head')[0].appendChild(script);
   document.getElementById("loadingServersList").style.display = "inline-block";
-  this.document.getElementById("serverListGroup").innerHTML = "";
+  document.getElementById("serverListGroup").innerHTML = "";
 }
 
 window.listServersCallback = function(data) {
-  this.document.getElementById("serverListGroup").innerHTML = "";
+  document.getElementById("serverListGroup").innerHTML = "";
 
   if(data != null && data.length > 0) {
     for(var i = 0; i < data.length; i++) {
@@ -307,14 +307,7 @@ window.listServersCallback = function(data) {
         linkServer.textContent = data[i]["name"];
 
         linkServer.onclick = function() {
-          onlineClient.connect(url, port, function(success) { // Connection to the server
-            if(!success) {
-              alert(i18next.t("servers.connectionError"));
-              displayServerList();
-            } else {
-              displayRoomsList();
-            }
-          });
+          connectToServer(url, port);
         };
   
         var serverAddress = document.createElement("div");
@@ -323,17 +316,69 @@ window.listServersCallback = function(data) {
         serverAddress.textContent = url + ":" + port;
         linkServer.appendChild(serverAddress);
   
-        this.document.getElementById("serverListGroup").appendChild(linkServer);
+        document.getElementById("serverListGroup").appendChild(linkServer);
       }
     }
   } else {
     var noServerFound = document.createElement("strong");
     noServerFound.textContent = i18next.t("servers.noServerFound");
 
-    this.document.getElementById("serverListGroup").appendChild(noServerFound);
+    document.getElementById("serverListGroup").appendChild(noServerFound);
   }
-    
+
+  var linkCustomServerIcon = document.createElement("span");
+  linkCustomServerIcon.classList.add("fui-new");
+  linkCustomServerIcon.classList.add("mr-2");
+
+  var linkCustomServerText = document.createElement("span");
+  linkCustomServerText.textContent = i18next.t("servers.customServer");
+
+  var linkCustomServer = document.createElement("a");
+  linkCustomServer.classList.add("list-group-item");
+  linkCustomServer.classList.add("list-group-item-action");
+  
+  linkCustomServer.appendChild(linkCustomServerIcon);
+  linkCustomServer.appendChild(linkCustomServerText);
+
+  linkCustomServer.onclick = function() {
+    var url = prompt(i18next.t("servers.enterCustomServer"));
+
+    if(url.trim() != "") {
+      connectToServer(url);
+    }
+  };
+  
+  document.getElementById("serverListGroup").appendChild(linkCustomServer);
   document.getElementById("loadingServersList").style.display = "none";
+}
+
+function connectToServer(url, port) {
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("levelContainer").style.display = "none";
+  document.getElementById("gameContainer").style.display = "none";
+  document.getElementById("serverListContainer").style.display = "none";
+  document.getElementById("roomsOnlineListContainer").style.display = "none";
+  document.getElementById("roomsOnlineCreation").style.display = "none";
+  document.getElementById("errorRoomCreation").style.display = "none";
+  document.getElementById("settings").style.display = "none";
+  document.getElementById("connectingToServer").style.display = "block";
+
+  document.getElementById("cancelConnectingToServer").onclick = function() {
+    document.getElementById("connectingToServer").style.display = "none";
+    onlineClient.disconnect();
+    displayServerList();
+  };
+
+  onlineClient.connect(url, port, function(success) {
+    document.getElementById("connectingToServer").style.display = "none";
+
+    if(!success) {
+      alert(i18next.t("servers.connectionError"));
+      displayServerList();
+    } else {
+      displayRoomsList();
+    }
+  });
 }
 
 function displayRooms() {

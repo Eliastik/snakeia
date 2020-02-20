@@ -190,7 +190,11 @@ i18next.addResourceBundle("fr", "translation", {
     "room": "Salle n°{{number}}",
     "errorRoomCreation": "Une erreur est survenue lors de la création de la salle. Veuillez réessayer.",
     "joinPrivateRoom": "Rejoindre une salle privée",
-    "enterCode": "Entrez le code de la salle :"
+    "enterCode": "Entrez le code de la salle :",
+    "customServer": "Serveur personnalisé…",
+    "enterCustomServer": "Entrez l'adresse du serveur :",
+    "connectingToServer": "Connexion au serveur… Veuillez patienter.",
+    "cancel": "Annuler"
   }
 }, true, false);
 
@@ -364,6 +368,10 @@ i18next.addResourceBundle("en", "translation", {
     "room": "Room n°{{number}}",
     "errorRoomCreation": "An error has occurred when creating the room. Please retry.",
     "joinPrivateRoom": "Join a private room",
-    "enterCode": "Enter the code of the room:"
+    "enterCode": "Enter the code of the room:",
+    "customServer": "Custom server…",
+    "enterCustomServer": "Enter the address of the server:",
+    "connectingToServer": "Connecting to the server… Please wait.",
+    "cancel": "Cancel"
   }
 }, true, false);
