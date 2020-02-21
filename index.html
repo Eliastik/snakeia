@@ -314,6 +314,11 @@
             <button class="btn btn-lg btn-success" id="createRoom"><span class="fui-plus-circle"></span>&nbsp; <span data-i18n="servers.createRoom">Créer une salle</span></button> <button class="btn btn-lg btn-info" id="joinPrivateRoom"><span class="fui-export"></span>&nbsp; <span data-i18n="servers.joinPrivateRoom">Rejoindre une salle privée</span></button>
           </div>
         </div>
+        <div class="row mb-2">
+          <div class="col text-center">
+            <button class="btn btn-lg btn-secondary" id="refreshRooms"><span class="fui-search"></span>&nbsp; <span data-i18n="servers.refreshRooms">Actualiser</span></button>
+          </div>
+        </div>
         <div id="serverList">
           <div class="alert alert-danger" role="alert" id="errorRoomsList">
             <span class="fui-cross-circle"></span>&nbsp; <span data-i18n="servers.errorLoadingRooms">Une erreur est survenue lors du chargement de la liste des salles. Veuillez réessayer.</span>
@@ -334,6 +339,12 @@
         <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
         <div class="alert alert-info mt-3" role="alert" id="infoRoomsCreate">
           <span class="fui-info-circle"></span>&nbsp; <span data-i18n="servers.creatingRoom">Création de la salle… Veuillez patienter.</span>
+        </div>
+      </div>
+      <div id="roomsOnlineJoin">
+        <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
+        <div class="alert alert-info mt-3" role="alert" id="infoJoinRoom">
+          <span class="fui-info-circle"></span>&nbsp; <span data-i18n="servers.joinRoom">Connexion à la salle… Veuillez patienter.</span>
         </div>
       </div>
       <div id="levelContainer">

@@ -74,6 +74,11 @@ var GameConstants = {
     BOTTOM: 40,
     LEFT: 37,
     ENTER: 13
+  },
+  Error: {
+    ROOM_NOT_FOUND: "ROOM_NOT_FOUND",
+    ROOM_ALREADY_JOINED: "ROOM_ALREADY_JOINED",
+    INVALID_SETTINGS: "INVALID_SETTINGS"
   }
 };
 

@@ -194,7 +194,9 @@ i18next.addResourceBundle("fr", "translation", {
     "customServer": "Serveur personnalisé…",
     "enterCustomServer": "Entrez l'adresse du serveur :",
     "connectingToServer": "Connexion au serveur… Veuillez patienter.",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "refreshRooms": "Actualiser la liste",
+    "joinRoom": "Connexion à la salle… Veuillez patienter."
   }
 }, true, false);
 
@@ -372,6 +374,8 @@ i18next.addResourceBundle("en", "translation", {
     "customServer": "Custom server…",
     "enterCustomServer": "Enter the address of the server:",
     "connectingToServer": "Connecting to the server… Please wait.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "refreshRooms": "Refresh the list",
+    "joinRoom": "Joining the room… Please wait."
   }
 }, true, false);

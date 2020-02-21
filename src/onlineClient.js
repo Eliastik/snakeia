@@ -28,6 +28,9 @@ function OnlineClient() {
   this.socket;
   this.currentRoom;
   this.game;
+  this.creatingRoom = false;
+  this.joiningRoom = false;
+  this.loadingRooms = false;
 }
 
 OnlineClient.prototype.connect = function(url, port, callback) {
@@ -43,25 +46,20 @@ OnlineClient.prototype.connect = function(url, port, callback) {
   }
 
   var self = this;
-  var successConnect = false;
 
   this.socket.once("connect", function() {
     callback(true);
     successConnect = true;
   });
 
-  this.socket.once("error", function() {
-    if(!successConnect) {
-      callback(false);
-      self.disconnect();
-    }
+  this.socket.on("error", function() {
+    callback(false);
+    self.disconnect();
   });
 
-  this.socket.once("connect_error", function() {
-    if(!successConnect) {
-      callback(false);
-      self.disconnect();
-    }
+  this.socket.on("connect_error", function() {
+    callback(false);
+    self.disconnect();
   });
 };
 
@@ -69,6 +67,9 @@ OnlineClient.prototype.disconnect = function() {
   if(this.socket != null) {
     this.stopGame();
     this.socket.close();
+    this.creatingRoom = false;
+    this.joiningRoom = false;
+    this.loadingRooms = false;
   }
 };
 
@@ -80,107 +81,120 @@ OnlineClient.prototype.stopGame = function() {
 };
 
 OnlineClient.prototype.displayRooms = function(callback) {
-  var ioRooms;
+  if(!this.loadingRooms) {
+    this.loadingRooms = true;
 
-  if(this.port != null) {
-    ioRooms = new io(this.url + ":" + this.port + "/rooms");
+    var ioRooms;
+    var self = this;
+
+    if(this.port != null) {
+      ioRooms = new io(this.url + ":" + this.port + "/rooms");
+    } else {
+      ioRooms = new io(this.url + "/rooms");
+    }
+  
+    ioRooms.once("rooms", function(data) {
+      callback(data);
+      ioRooms.close();
+      self.loadingRooms = false;
+    });
+  
+    ioRooms.once("error", function() {
+      callback({ error: true });
+      ioRooms.close();
+      self.loadingRooms = false;
+    });
+  
+    ioRooms.once("connect_error", function() {
+      callback({ error: true });
+      ioRooms.close();
+      self.loadingRooms = false;
+    });
   } else {
-    ioRooms = new io(this.url + "/rooms");
+    callback({ error: true });
   }
-
-  ioRooms.once("rooms", function(data) {
-    callback(data);
-    ioRooms.close();
-  });
-
-  ioRooms.once("error", function() {
-    callback({ error: true });
-    ioRooms.close();
-  });
-
-  ioRooms.once("connect_error", function() {
-    callback({ error: true });
-    ioRooms.close();
-  });
 };
 
 OnlineClient.prototype.createRoom = function(data, callback) {
-  var ioCreate;
+  if(!this.creatingRoom) {
+    this.creatingRoom = true;
+    
+    var ioCreate;
+    var self = this;
 
-  if(this.port != null) {
-    ioCreate = new io(this.url + ":" + this.port + "/createRoom");
-  } else {
-    ioCreate = new io(this.url + "/createRoom");
-  }
-
-  ioCreate.once("connect", function() {
-    ioCreate.emit("create", data);
-  });
-
-  ioCreate.once("process", function(data) {
-    if(data.success != null) {
-      callback({
-        success: data.success,
-        connection_error: false,
-        code: data.code
-      });
+    if(this.port != null) {
+      ioCreate = new io(this.url + ":" + this.port + "/createRoom");
     } else {
-      callback({
-        success: false,
-        connection_error: true,
-        code: null
-      });
+      ioCreate = new io(this.url + "/createRoom");
     }
 
-    ioCreate.close();
-  });
+    ioCreate.once("connect", function() {
+      ioCreate.emit("create", data);
+    });
 
-  ioCreate.once("error", function() {
+    ioCreate.once("process", function(data) {
+      if(data.success != null) {
+        callback({
+          success: data.success,
+          connection_error: false,
+          code: data.code
+        });
+      } else {
+        callback({
+          success: false,
+          connection_error: true,
+          code: null
+        });
+      }
+
+      ioCreate.close();
+      self.creatingRoom = false;
+    });
+
+    ioCreate.once("error", function() {
+      callback({
+        success: false,
+        connection_error: true
+      });
+      ioCreate.close();
+      self.creatingRoom = false;
+    });
+
+    ioCreate.once("connect_error", function() {
+      callback({
+        success: false,
+        connection_error: true
+      });
+      ioCreate.close();
+      self.creatingRoom = false;
+    });
+  } else {
     callback({
       success: false,
-      connection_error: true
+      connection_error: false
     });
-    ioCreate.close();
-  });
-
-  ioCreate.once("connect_error", function() {
-    callback({
-      success: false,
-      connection_error: true
-    });
-    ioCreate.close();
-  });
+  }
 };
 
 OnlineClient.prototype.joinRoom = function(code, callback) {
-  if(this.socket != null) {
-    this.socket.emit("join-room", code);
+  if(!this.joiningRoom) {
+    this.joiningRoom = true;
 
-    var self = this;
-    var successConnect = false;
+    if(this.socket != null) {
+      this.socket.emit("join-room", code);
 
-    this.socket.once("join-room", function(data) {
-      self.currentRoom = code;
-      successConnect = true;
-      callback(data);
-    });
+      var self = this;
 
-    this.socket.once("error", function() {
-      if(!successConnect) {
-        callback({
-          success: false
-        });
-        self.disconnect();
-      }
-    });
-  
-    this.socket.once("connect_error", function() {
-      if(!successConnect) {
-        callback({
-          success: false
-        });
-        self.disconnect();
-      }
+      this.socket.once("join-room", function(data) {
+        self.currentRoom = code;
+        successConnect = true;
+        callback(data);
+        self.joiningRoom = false;
+      });
+    }
+  } else {
+    callback({
+      success: false
     });
   }
 };
