@@ -181,7 +181,11 @@ GameUI.prototype.init = function() {
       if(keyCode == 68) keyCode = GameConstants.Key.RIGHT; // D
   
       if(!self.paused) {
-        self.controller.key(keyCode);
+        if(keyCode == GameConstants.Key.ENTER) {
+          self.pause();
+        } else {
+          self.controller.key(keyCode);
+        }
       } else if(self.countBeforePlay < 0) {
         self.lastKeyMenu = keyCode;
       }

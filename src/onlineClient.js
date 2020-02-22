@@ -137,7 +137,8 @@ OnlineClient.prototype.createRoom = function(data, callback) {
         callback({
           success: data.success,
           connection_error: false,
-          code: data.code
+          code: data.code,
+          errorCode: data.errorCode
         });
       } else {
         callback({

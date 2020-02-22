@@ -343,7 +343,7 @@ window.listServersCallback = function(data) {
   linkCustomServer.onclick = function() {
     var url = prompt(i18next.t("servers.enterCustomServer"), "http://");
 
-    if(url.trim() != "") {
+    if(url != null && url.trim() != "") {
       connectToServer(url);
     }
   };
@@ -386,6 +386,7 @@ function displayRooms() {
   document.getElementById("loadingRoomsOnlineList").style.display = "inline-block";
   document.getElementById("roomsOnlineListGroup").innerHTML = "";
   document.getElementById("refreshRooms").disabled = "disabled";
+  document.getElementById("errorRoomJoin").style.display = "none";
 
   onlineClient.displayRooms(function(data) { // Request rooms data
     document.getElementById("roomsOnlineListGroup").innerHTML = "";
@@ -461,19 +462,18 @@ function joinRoom(code) {
   document.getElementById("settings").style.display = "none";
   document.getElementById("connectingToServer").style.display = "none";
   document.getElementById("roomsOnlineJoin").style.display = "block";
+  document.getElementById("errorRoomJoin").style.display = "none";
 
   onlineClient.joinRoom(code, function(data) {
     document.getElementById("roomsOnlineJoin").style.display = "none";
 
     if(data.success) {
-      var ui = new GameUI(null, document.getElementById("gameContainer"));
+      var ui = new GameUI(null, document.getElementById("gameContainer"), null, null, (showDebugInfo ? true : false), null, !enableAnimations);
       var game = onlineClient.getGame(ui);
       game.init();
 
       document.getElementById("gameContainer").style.display = "block";
       document.getElementById("titleGame").innerHTML = i18next.t("game.currentMode") + " " + i18next.t("menu.onlineBattleRoyale");
-
-      game.setDisplayFPS(showDebugInfo ? true : false);
 
       if(ui.canvas != undefined) {
         ui.canvas.scrollIntoView();
@@ -497,8 +497,25 @@ function joinRoom(code) {
         }
       };
     } else {
-      alert(i18next.t("servers.connectionError"));
-      displayServerList();
+      var errorCode = data.errorCode;
+      var errorCode_text = "";
+
+      switch(errorCode) {
+        case GameConstants.Error.ROOM_NOT_FOUND:
+          errorCode_text = i18next.t("servers.errorRoomJoinReason_roomNotFound");
+          break;
+        case GameConstants.Error.ROOM_ALREADY_JOINED:
+          errorCode_text = i18next.t("servers.errorRoomJoinReason_roomAlreadyJoined");
+          break;
+        default:
+          errorCode_text = i18next.t("servers.errorReason_unknown");
+          break;
+      }
+
+      document.getElementById("errorRoomJoinReason").textContent = errorCode_text;
+      document.getElementById("errorRoomJoin").style.display = "block";
+      document.getElementById("roomsOnlineJoin").style.display = "none";
+      document.getElementById("roomsOnlineListContainer").style.display = "block";
     }
   });
 }
@@ -1043,7 +1060,20 @@ function validateSettings(returnValidation) {
           if(data.success) {
             joinRoom(data.code);
           } else {
+            var errorCode = data.errorCode;
+            var errorCode_text = "";
+
+            switch(errorCode) {
+              case GameConstants.Error.INVALID_SETTINGS:
+                errorCode_text = i18next.t("servers.errorRoomCreationReason_invalidSettings");
+                break;
+              default:
+                errorCode_text = i18next.t("servers.errorReason_unknown");
+                break;
+            }
+
             document.getElementById("errorRoomCreation").style.display = "block";
+            document.getElementById("errorRoomCreationReason").textContent = errorCode_text;
             displayRoomsList();
           }
         }

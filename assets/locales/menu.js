@@ -196,7 +196,13 @@ i18next.addResourceBundle("fr", "translation", {
     "connectingToServer": "Connexion au serveur… Veuillez patienter.",
     "cancel": "Annuler",
     "refreshRooms": "Actualiser la liste",
-    "joinRoom": "Connexion à la salle… Veuillez patienter."
+    "joinRoom": "Connexion à la salle… Veuillez patienter.",
+    "errorRoomJoin": "Une erreur est survenue lors de la connexion à la salle. Veuillez réessayer.",
+    "errorReason": "Raison de l'erreur :",
+    "errorReason_unknown": "Inconnue",
+    "errorRoomJoinReason_roomNotFound": "La salle n'a pas été trouvée.",
+    "errorRoomJoinReason_roomAlreadyJoined": "Vous avez déjà rejoint cette salle.",
+    "errorRoomCreationReason_invalidSettings": "Paramètres invalides."
   }
 }, true, false);
 
@@ -376,6 +382,12 @@ i18next.addResourceBundle("en", "translation", {
     "connectingToServer": "Connecting to the server… Please wait.",
     "cancel": "Cancel",
     "refreshRooms": "Refresh the list",
-    "joinRoom": "Joining the room… Please wait."
+    "joinRoom": "Joining the room… Please wait.",
+    "errorRoomJoin": "An error has occurred when joining the room. Please retry.",
+    "errorReason": "Error reason:",
+    "errorReason_unknown": "Unknown",
+    "errorRoomJoinReason_roomNotFound": "The room was not found.",
+    "errorRoomJoinReason_roomAlreadyJoined": "You already joined this room.",
+    "errorRoomCreationReason_invalidSettings": "Invalid settings."
   }
 }, true, false);

@@ -264,13 +264,6 @@ GameEngine.prototype.tick = function() {
     if(!self.paused && !self.killed) {
       if(self.lastTime == 0) self.lastTime = time;
       self.ticks++;
-
-      if(!self.paused) {
-        if(self.lastKey == GameConstants.Key.ENTER) {
-          self.pause();
-          self.lastKey = -1;
-        }
-      }
       
       if(!self.grid.maze || self.grid.mazeForceAuto || ((self.grid.maze && (self.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (self.grid.maze && ((self.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (self.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) || self.getPlayer(1, GameConstants.PlayerType.HUMAN)).lastKey != -1))) {
         for(var i = 0; i < self.snakes.length; i++) {
