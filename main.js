@@ -650,6 +650,7 @@ document.getElementById("backToMenuLevelList").onclick = function() {
 };
 
 document.getElementById("backToMenuServerList").onclick = function() {
+  onlineClient.disconnect();
   displayMenu();
 };
 
@@ -673,6 +674,7 @@ document.getElementById("onlineBattleRoyale").onclick = function() {
 };
 
 document.getElementById("backToServersRoomsList").onclick = function() {
+  onlineClient.disconnect();
   displayServerList();
 };
 
