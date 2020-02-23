@@ -82,7 +82,7 @@ body {
   margin: auto;
 }
 
-#serverList, #infoRoomsCreate, #connectingToServer, #roomsOnlineJoin {
+#serverList, #infoRoomsCreate, #connectingToServer, #roomsOnlineJoin, #roomsList {
   width: 100%;
   max-width: 400px;
   margin: auto;

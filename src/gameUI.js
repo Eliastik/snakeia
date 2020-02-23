@@ -67,6 +67,12 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   // Game state variables
   this.errorOccurred = false;
   this.fullscreen = false;
+  // Online variables
+  this.searchingPlayers = false;
+  this.playerNumber = 0;
+  this.maxPlayers = 0;
+  this.timeStart = 0;
+  this.lastTime = 0;
   // Menus state variables
   this.lastKeyMenu = -1;
   this.selectedButton = 0;
@@ -386,6 +392,7 @@ GameUI.prototype.startDraw = function(renderBlur) {
       }
   
       self.draw(renderBlur);
+      self.lastTime = Date.now();
       self.frame++;
 
       if(!self.paused) {
@@ -530,7 +537,7 @@ GameUI.prototype.draw = function(renderBlur) {
           });
         });
       } else if(this.errorOccurred) {
-       this.drawMenu(ctx, [this.btnQuit], this.imageLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error"), "red", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
+       this.drawMenu(ctx, [this.btnQuit], this.imageLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
          self.btnQuit.addClickAction(self.canvas, function() {
            self.confirmExit = false;
            self.selectedButton = 0;
@@ -567,6 +574,13 @@ GameUI.prototype.draw = function(renderBlur) {
           self.btnNo.addClickAction(self.canvas, function() {
             self.confirmExit = false;
             self.selectedButton = 0;
+          });
+        });
+      } else if(this.assetsLoaded && this.searchingPlayers) {
+        if(this.lastTime > 0) this.timeStart -= Math.max(0, Date.now() - this.lastTime);
+        this.drawMenu(ctx, [this.btnQuit], i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : ""), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
+          self.btnQuit.addClickAction(self.canvas, function() {
+            self.confirmExit = true;
           });
         });
       } else if(this.assetsLoaded && this.countBeforePlay >= 0) {

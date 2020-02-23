@@ -115,11 +115,11 @@ function GameControllerSocket(socket, ui) {
     });
 
     this.socket.on("connect_error", function() {
-      self.gameUI.setNotification(new NotificationMessage(i18next.t("engine.socket.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
+      self.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
     });
 
     this.socket.on("reconnect_error", function() {
-      self.gameUI.setNotification(new NotificationMessage(i18next.t("engine.socket.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
+      self.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
     });
   };
 

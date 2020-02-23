@@ -94,8 +94,10 @@ i18next.addResourceBundle("fr", "translation", {
     "mazeMode": "Mode labyrinthe ! Trouvez le chemin vers la pomme pour réussir la partie.\nLe Snake n'avance pas automatiquement.",
     "mazeWin": "Bien joué !",
     "mazeModeMin": "Mode labyrinthe",
-    "socket": {
-      "errorConnection": "Une erreur est survenue lors de la connexion au serveur."
+    "servers": {
+      "errorConnection": "Une erreur est survenue lors de la connexion au serveur.",
+      "waitingPlayers": "En attente de joueurs…",
+      "gameStart": "Début de la partie\ndans"
     }
   }
 }, true, false);
@@ -174,8 +176,10 @@ i18next.addResourceBundle("en", "translation", {
     "mazeMode": "Maze mode! Find the path to the apple to succeed this game.\nThe Snake doesn't move automatically.",
     "mazeWin": "Good game!",
     "mazeModeMin": "Maze mode",
-    "socket": {
-      "errorConnection": "An error has occurred when connecting to the server."
+    "servers": {
+      "errorConnection": "An error has occurred when connecting to the server.",
+      "waitingPlayers": "Waiting for players…",
+      "gameStart": "Start of the game\nin"
     }
   }
 }, true, false);

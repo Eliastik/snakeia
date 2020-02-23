@@ -393,11 +393,11 @@ function displayRooms() {
     document.getElementById("errorRoomsList").style.display = "none";
     document.getElementById("refreshRooms").disabled = "";
   
-    if(data != null && data.error) {
+    if(data.rooms != null && data.rooms.error) {
       document.getElementById("errorRoomsList").style.display = "block";
-    } else if(data != null && Object.keys(data).length > 0) {
-      for(var i = 0; i < Object.keys(data).length; i++) {
-        var room = data[Object.keys(data)[i]];
+    } else if(data.rooms != null && Object.keys(data.rooms).length > 0) {
+      for(var i = 0; i < Object.keys(data.rooms).length; i++) {
+        var room = data.rooms[Object.keys(data.rooms)[i]];
         var code = room["code"];
   
         var linkRoom = document.createElement("a");
