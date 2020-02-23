@@ -202,7 +202,10 @@ i18next.addResourceBundle("fr", "translation", {
     "errorReason_unknown": "Inconnue",
     "errorRoomJoinReason_roomNotFound": "La salle n'a pas été trouvée.",
     "errorRoomJoinReason_roomAlreadyJoined": "Vous avez déjà rejoint cette salle.",
-    "errorRoomCreationReason_invalidSettings": "Paramètres invalides."
+    "errorRoomCreationReason_invalidSettings": "Paramètres invalides.",
+    "errorServerVersion": "La version de ce serveur ({{server_version}}) est différente de votre version du jeu ({{client_version}}). Vous risquez de rencontrer des problèmes.",
+    "addressLabel": "Adresse du serveur :",
+    "roomCode": "Code de la salle :"
   }
 }, true, false);
 
@@ -388,6 +391,9 @@ i18next.addResourceBundle("en", "translation", {
     "errorReason_unknown": "Unknown",
     "errorRoomJoinReason_roomNotFound": "The room was not found.",
     "errorRoomJoinReason_roomAlreadyJoined": "You already joined this room.",
-    "errorRoomCreationReason_invalidSettings": "Invalid settings."
+    "errorRoomCreationReason_invalidSettings": "Invalid settings.",
+    "errorServerVersion": "This server version ({{server_version}}) is different from your version of the game ({{client_version}}). You may encounter problems.",
+    "addressLabel": "Server address:",
+    "roomCode": "Room code:"
   }
 }, true, false);

@@ -387,6 +387,7 @@ function displayRooms() {
   document.getElementById("roomsOnlineListGroup").innerHTML = "";
   document.getElementById("refreshRooms").disabled = "disabled";
   document.getElementById("errorRoomJoin").style.display = "none";
+  document.getElementById("errorServerVersion").style.display = "none";
 
   onlineClient.displayRooms(function(data) { // Request rooms data
     document.getElementById("roomsOnlineListGroup").innerHTML = "";
@@ -442,8 +443,14 @@ function displayRooms() {
   
       document.getElementById("roomsOnlineListGroup").appendChild(noRoomFound);
     }
+
+    if(data != null && data.serverVersion != null && data.serverVersion != GameConstants.Setting.APP_VERSION) {
+      document.getElementById("errorServerVersion").style.display = "block";
+      document.getElementById("errorServerVersionText").textContent = i18next.t("servers.errorServerVersion", { server_version: data.serverVersion, client_version: GameConstants.Setting.APP_VERSION });
+    }
       
     document.getElementById("loadingRoomsOnlineList").style.display = "none";
+    document.getElementById("serverAddress").textContent = onlineClient.url + (onlineClient.port != null ? (":" + onlineClient.port) : "");
   });
 }
 
@@ -474,6 +481,9 @@ function joinRoom(code) {
 
       document.getElementById("gameContainer").style.display = "block";
       document.getElementById("titleGame").innerHTML = i18next.t("game.currentMode") + " " + i18next.t("menu.onlineBattleRoyale");
+      document.getElementById("gameOrder").textContent = i18next.t("servers.roomCode") + " " + code;
+      document.getElementById("gameStatus").textContent = "";
+      document.getElementById("gameStatusError").textContent = "";
 
       if(ui.canvas != undefined) {
         ui.canvas.scrollIntoView();

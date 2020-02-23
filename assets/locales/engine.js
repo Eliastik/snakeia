@@ -173,7 +173,7 @@ i18next.addResourceBundle("en", "translation", {
     "assistAI": "AI assistant",
     "exitFullScreen": "Exit fullscreen",
     "enterFullScreen": "Fullscreen mode",
-    "mazeMode": "Maze mode! Find the path to the apple to succeed this game.\nThe Snake doesn't move automatically.",
+    "mazeMode": "Maze mode! Find the path to the apple to finish this game.\nThe Snake doesn't move automatically.",
     "mazeWin": "Good game!",
     "mazeModeMin": "Maze mode",
     "servers": {

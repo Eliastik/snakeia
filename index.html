@@ -320,6 +320,9 @@
           </div>
         </div>
         <div id="roomsList">
+          <div class="alert alert-danger" role="alert" id="errorServerVersion">
+            <span class="fui-cross-circle"></span>&nbsp; <span id="errorServerVersionText"></span>
+          </div>
           <div class="alert alert-danger" role="alert" id="errorRoomsList">
             <span class="fui-cross-circle"></span>&nbsp; <span data-i18n="servers.errorLoadingRooms">Une erreur est survenue lors du chargement de la liste des salles. Veuillez réessayer.</span>
           </div>
@@ -337,6 +340,11 @@
         <div class="row mt-2">
           <div class="col text-center">
             <button class="btn btn-lg btn-danger" id="backToServersRoomsList"><span class="fui-cross"></span>&nbsp; <span data-i18n="servers.backToList">Retour à la liste des serveurs</span></button>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col text-center">
+            <p class="small"><strong data-i18n="servers.addressLabel">Adresse du serveur :</strong> <span id="serverAddress"></span></p>
           </div>
         </div>
       </div>
