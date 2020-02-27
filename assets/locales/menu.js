@@ -205,7 +205,8 @@ i18next.addResourceBundle("fr", "translation", {
     "errorRoomCreationReason_invalidSettings": "Paramètres invalides.",
     "errorServerVersion": "La version de ce serveur ({{server_version}}) est différente de votre version du jeu ({{client_version}}). Vous risquez de rencontrer des problèmes.",
     "addressLabel": "Adresse du serveur :",
-    "roomCode": "Code de la salle :"
+    "roomCode": "Code de la salle :",
+    "untitled": "Sans titre"
   }
 }, true, false);
 
@@ -394,6 +395,7 @@ i18next.addResourceBundle("en", "translation", {
     "errorRoomCreationReason_invalidSettings": "Invalid settings.",
     "errorServerVersion": "This server version ({{server_version}}) is different from your version of the game ({{client_version}}). You may encounter problems.",
     "addressLabel": "Server address:",
-    "roomCode": "Room code:"
+    "roomCode": "Room code:",
+    "untitled": "Untitled"
   }
 }, true, false);

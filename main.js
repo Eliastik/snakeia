@@ -300,11 +300,17 @@ window.listServersCallback = function(data) {
       if(data[i]["url"] != null && data[i]["port"] != null) {
         var url = data[i]["url"];
         var port = data[i]["port"];
+        var name = data[i]["name"];
 
         var linkServer = document.createElement("a");
         linkServer.classList.add("list-group-item");
         linkServer.classList.add("list-group-item-action");
-        linkServer.textContent = data[i]["name"];
+
+        if(name != null) {
+          linkServer.textContent = name;
+        } else {
+          linkServer.textContent = i18next.t("servers.untitled");
+        }
 
         linkServer.onclick = function() {
           connectToServer(url, port);
@@ -325,32 +331,17 @@ window.listServersCallback = function(data) {
 
     document.getElementById("serverListGroup").appendChild(noServerFound);
   }
-
-  var linkCustomServerIcon = document.createElement("span");
-  linkCustomServerIcon.classList.add("fui-new");
-  linkCustomServerIcon.classList.add("mr-2");
-
-  var linkCustomServerText = document.createElement("span");
-  linkCustomServerText.textContent = i18next.t("servers.customServer");
-
-  var linkCustomServer = document.createElement("a");
-  linkCustomServer.classList.add("list-group-item");
-  linkCustomServer.classList.add("list-group-item-action");
   
-  linkCustomServer.appendChild(linkCustomServerIcon);
-  linkCustomServer.appendChild(linkCustomServerText);
-
-  linkCustomServer.onclick = function() {
-    var url = prompt(i18next.t("servers.enterCustomServer"), "http://");
-
-    if(url != null && url.trim() != "") {
-      connectToServer(url);
-    }
-  };
-  
-  document.getElementById("serverListGroup").appendChild(linkCustomServer);
   document.getElementById("loadingServersList").style.display = "none";
 }
+
+document.getElementById("linkCustomServer").onclick = function() {
+  var url = prompt(i18next.t("servers.enterCustomServer"), "http://");
+
+  if(url != null && url.trim() != "") {
+    connectToServer(url);
+  }
+};
 
 function connectToServer(url, port) {
   document.getElementById("menu").style.display = "none";
