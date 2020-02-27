@@ -331,7 +331,7 @@ window.listServersCallback = function(data) {
 
     document.getElementById("serverListGroup").appendChild(noServerFound);
   }
-  
+
   document.getElementById("loadingServersList").style.display = "none";
 }
 
@@ -1069,6 +1069,9 @@ function validateSettings(returnValidation) {
             switch(errorCode) {
               case GameConstants.Error.INVALID_SETTINGS:
                 errorCode_text = i18next.t("servers.errorRoomCreationReason_invalidSettings");
+                break;
+              case GameConstants.Error.MAX_ROOM_LIMIT_REACHED:
+                errorCode_text = i18next.t("servers.errorRoomCreationReason_maxRoomLimitReached");
                 break;
               default:
                 errorCode_text = i18next.t("servers.errorReason_unknown");
