@@ -73,6 +73,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.maxPlayers = 0;
   this.timeStart = 0;
   this.lastTime = 0;
+  this.currentPlayer = null;
   // Menus state variables
   this.lastKeyMenu = -1;
   this.selectedButton = 0;
@@ -584,24 +585,28 @@ GameUI.prototype.draw = function(renderBlur) {
           });
         });
       } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
-        if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null))) {
-          if(this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) {
+        if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null) || this.currentPlayer != null)) {
+          if(this.currentPlayer != null) {
+            var playerHuman = this.getPlayer(this.currentPlayer, GameConstants.PlayerType.HUMAN);
+          } else if(this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) {
             var playerHuman = this.getPlayer(1, GameConstants.PlayerType.HUMAN);
           } else {
             var playerHuman = this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
           }
 
-          var colorName = GameUtils.hslToName(GameUtils.addHue(GameConstants.Setting.IMAGE_SNAKE_HUE, playerHuman.color), GameConstants.Setting.IMAGE_SNAKE_SATURATION, GameConstants.Setting.IMAGE_SNAKE_VALUE);
-          var colorRgb = GameUtils.hsvToRgb(GameUtils.addHue(GameConstants.Setting.IMAGE_SNAKE_HUE, playerHuman.color) / 360, GameConstants.Setting.IMAGE_SNAKE_SATURATION / 100, GameConstants.Setting.IMAGE_SNAKE_VALUE / 100);
+          if(playerHuman != null) {
+            var colorName = GameUtils.hslToName(GameUtils.addHue(GameConstants.Setting.IMAGE_SNAKE_HUE, playerHuman.color), GameConstants.Setting.IMAGE_SNAKE_SATURATION, GameConstants.Setting.IMAGE_SNAKE_VALUE);
+            var colorRgb = GameUtils.hsvToRgb(GameUtils.addHue(GameConstants.Setting.IMAGE_SNAKE_HUE, playerHuman.color) / 360, GameConstants.Setting.IMAGE_SNAKE_SATURATION / 100, GameConstants.Setting.IMAGE_SNAKE_VALUE / 100);
+          }
 
           if(this.countBeforePlay > 0) {
-            this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + "\n" + (GameUtils.isFilterHueAvailable() ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer")), (GameUtils.isFilterHueAvailable() ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
+            this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
               self.btnEnterFullScreen.addClickAction(self.canvas, function() {
                 self.toggleFullscreen();
               });
             });
           } else {
-            this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready") + "\n" + (GameUtils.isFilterHueAvailable() ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer")), (GameUtils.isFilterHueAvailable() ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
+            this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready") + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
               self.btnEnterFullScreen.addClickAction(self.canvas, function() {
                 self.toggleFullscreen();
               });
@@ -1363,7 +1368,7 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
   
       this.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
   
-      if((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) && this.countBeforePlay >= 0 && ((GameUtils.isFilterHueAvailable() && this.snakes.length > 2) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
+      if((this.currentPlayer == null && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) || this.currentPlayer == (i + 1)) && this.countBeforePlay >= 0 && (this.currentPlayer != null || (GameUtils.isFilterHueAvailable() && this.snakes.length > 2) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
         this.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
       }
     }
