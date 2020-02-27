@@ -395,7 +395,11 @@ function displayRooms() {
         var linkRoom = document.createElement("a");
         linkRoom.classList.add("list-group-item");
         linkRoom.classList.add("list-group-item-action");
-        linkRoom.textContent = i18next.t("servers.room", { number: (i + 1) });
+        linkRoom.textContent = i18next.t("servers.room", { number: (i + 1) }) + (room.state != null ? " " + (
+          room.state == GameConstants.GameState.SEARCHING_PLAYERS ? i18next.t("servers.searchingPlayers") :
+          room.state == GameConstants.GameState.STARTING ? i18next.t("servers.starting") :
+          room.state == GameConstants.GameState.STARTED ? i18next.t("servers.started") : ""
+        ) : "");
   
         linkRoom.onclick = function() {
           joinRoom(code);
@@ -419,12 +423,20 @@ function displayRooms() {
         var gameInfosPlayers = document.createElement("div");
         gameInfosPlayers.classList.add("small");
         gameInfosPlayers.classList.add("text-muted");
-        gameInfosPlayers.textContent = i18next.t("servers.infosPlayers", { count : room.players });
+        gameInfosPlayers.textContent = i18next.t("servers.infosPlayers", { count : room.players, max: room.maxPlayers });
   
         linkRoom.appendChild(gameInfos);
         linkRoom.appendChild(gameInfosSecond);
         linkRoom.appendChild(gameInfosThird);
         linkRoom.appendChild(gameInfosPlayers);
+  
+        if(room.spectators > 0) {
+          var gameInfosSpectators = document.createElement("div");
+          gameInfosSpectators.classList.add("small");
+          gameInfosSpectators.classList.add("text-muted");
+          gameInfosSpectators.textContent = i18next.t("servers.infosSpectators", { count : room.spectators });
+          linkRoom.appendChild(gameInfosSpectators);
+        }
   
         document.getElementById("roomsOnlineListGroup").appendChild(linkRoom);
       }

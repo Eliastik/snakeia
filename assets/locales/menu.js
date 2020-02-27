@@ -177,8 +177,10 @@ i18next.addResourceBundle("fr", "translation", {
     "infos": "{{width}}×{{height}} – Vitesse : {{speed}}",
     "infosBorderWalls": "Grille entourée de murs",
     "infosGenerateWalls": "Murs générés aléatoirement",
-    "infosPlayers": "{{count}} joueur",
-    "infosPlayers_plural": "{{count}} joueurs",
+    "infosPlayers": "{{count}} joueur/{{max}}",
+    "infosPlayers_plural": "{{count}} joueurs/{{max}}",
+    "infosSpectators": "{{count}} spectateur",
+    "infosSpectators_plural": "{{count}} spectateurs",
     "backToList": "Retour à la liste des serveurs",
     "roomsListTitle": "Liste des salles",
     "roomsListInfos": "Sélectionnez une salle :",
@@ -207,7 +209,10 @@ i18next.addResourceBundle("fr", "translation", {
     "errorServerVersion": "La version de ce serveur ({{server_version}}) est différente de votre version du jeu ({{client_version}}). Vous risquez de rencontrer des problèmes.",
     "addressLabel": "Adresse du serveur :",
     "roomCode": "Code de la salle :",
-    "untitled": "Sans titre"
+    "untitled": "Sans titre",
+    "searchingPlayers": "(recherche de joueurs)",
+    "started": "(partie démarrée)",
+    "starting": "(démarrage en cours)"
   }
 }, true, false);
 
@@ -368,8 +373,10 @@ i18next.addResourceBundle("en", "translation", {
     "infos": "{{width}}×{{height}} – Speed: {{speed}}",
     "infosBorderWalls": "Grid bordered by walls",
     "infosGenerateWalls": "Random walls",
-    "infosPlayers": "{{count}} player",
-    "infosPlayers_plural": "{{count}} players",
+    "infosPlayers": "{{count}} player/{{max}}",
+    "infosPlayers_plural": "{{count}} players/{{max}}",
+    "infosSpectators": "{{count}} spectator",
+    "infosSpectators_plural": "{{count}} spectators",
     "backToList": "Back to the servers list",
     "roomsListTitle": "Rooms list",
     "roomsListInfos": "Select a room:",
@@ -398,6 +405,9 @@ i18next.addResourceBundle("en", "translation", {
     "errorServerVersion": "This server version ({{server_version}}) is different from your version of the game ({{client_version}}). You may encounter problems.",
     "addressLabel": "Server address:",
     "roomCode": "Room code:",
-    "untitled": "Untitled"
+    "untitled": "Untitled",
+    "searchingPlayers": "(searching players)",
+    "started": "(game started)",
+    "starting": "(game starting)"
   }
 }, true, false);
