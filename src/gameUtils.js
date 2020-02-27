@@ -111,6 +111,9 @@ var GameUtils = {
   millisecondsFormat: function(milliseconds) {
     milliseconds /= 1000;
     return ("0" + Math.trunc(milliseconds / 60)).slice(-2) + ":" + ("0" + Math.trunc(milliseconds % 60)).slice(-2);
+  },
+  secondsFormat: function(seconds) {
+    return this.millisecondsFormat(seconds * 1000);
   }
 };
 

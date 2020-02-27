@@ -503,9 +503,9 @@ GameUI.prototype.draw = function(renderBlur) {
         this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, renderBlur);
       }
 
-      if(this.timerToDisplay != undefined && this.timerToDisplay != null && this.timerToDisplay >= 0) {
+      if(this.timerToDisplay != undefined && this.timerToDisplay != null && !isNaN(this.timerToDisplay) && this.timerToDisplay >= 0) {
         this.drawImage(ctx, "assets/images/clock.png", this.headerHeight * 0.24, this.headerHeight + 15, this.headerHeight * 0.64, this.headerHeight * 0.64);
-        this.drawText(ctx, "" + this.timerToDisplay, "rgba(0, 0, 0, 0.5)", GameConstants.Setting.FONT_SIZE, GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight, this.headerHeight + 15 + this.headerHeight * 0.475);
+        this.drawText(ctx, "" + GameUtils.secondsFormat(this.timerToDisplay), "rgba(0, 0, 0, 0.5)", GameConstants.Setting.FONT_SIZE, GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight, this.headerHeight + 15 + this.headerHeight * 0.475);
       }
     } else if(!this.assetsLoaded && !renderBlur) {
       var percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
