@@ -135,20 +135,20 @@ GameUI.prototype.init = function() {
     this.appendTo.appendChild(this.canvas);
     this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", null, 64, 64);
     this.btnPause = new ButtonImage("assets/images/pause.png", null, 5, null, null, 64, 64);
-    this.btnContinue = new Button(i18next.t("engine.continue"), null, null, "center", "#3498db", "#246A99");
-    this.btnRetry = new Button(i18next.t("engine.reset"), null, null, "center", "#3498db", "#246A99");
-    this.btnQuit = new Button(i18next.t("engine.exit"), null, null, "center", "#3498db", "#246A99");
-    this.btnYes = new Button(i18next.t("engine.yes"), null, null, "center", "#3498db", "#246A99");
-    this.btnNo = new Button(i18next.t("engine.no"), null, null, "center", "#3498db", "#246A99");
-    this.btnOK = new Button(i18next.t("engine.ok"), null, null, "center", "#3498db", "#246A99");
-    this.btnAbout = new Button(i18next.t("engine.about"), null, null, "center", "#3498db", "#246A99");
-    this.btnInfosGame = new Button(i18next.t("engine.infosGame"), null, null, "center", "#3498db", "#246A99");
+    this.btnContinue = new Button(i18next.t("engine.continue"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnRetry = new Button(i18next.t("engine.reset"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnQuit = new Button(i18next.t("engine.exit"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnYes = new Button(i18next.t("engine.yes"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnNo = new Button(i18next.t("engine.no"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnOK = new Button(i18next.t("engine.ok"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnAbout = new Button(i18next.t("engine.about"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnInfosGame = new Button(i18next.t("engine.infosGame"), null, null, "center", "#3498db", "#246A99", "#184766");
     this.btnTopArrow = new ButtonImage("assets/images/up.png", 64, 92, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
     this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
     this.btnLeftArrow = new ButtonImage("assets/images/left.png", 128, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
     this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 64, 0, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
-    this.btnExitFullScreen = new Button(i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99");
-    this.btnEnterFullScreen = new Button(i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99");
+    this.btnExitFullScreen = new Button(i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnEnterFullScreen = new Button(i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
 
     this.btnFullScreen.addClickAction(this.canvas, function() {
       self.toggleFullscreen();

@@ -20,7 +20,7 @@ if(typeof(require) !== "undefined") {
   var GameConstants = require("./constants");
 }
 
-function Button(text, x, y, alignement, color, colorHover, width, height, fontSize, fontFamily, fontColor, imgSrc, imageLoader, verticalAlignement) {
+function Button(text, x, y, alignement, color, colorHover, colorDown, width, height, fontSize, fontFamily, fontColor, imgSrc, imageLoader, verticalAlignement) {
   this.x = x || 0;
   this.y = y || 0;
   this.initialX = x;
@@ -37,8 +37,10 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.fontColor = fontColor || "white";
   this.color = color || "rgba(0, 0, 0, 0)";
   this.colorHover = colorHover || "#95a5a6";
+  this.colorDown = colorDown || "#727F80"
   this.triggerClick;
   this.triggerHover;
+  this.triggerDown;
   this.init = false;
   this.disabled = false;
   this.alignement = alignement || "default";
@@ -48,9 +50,9 @@ function Button(text, x, y, alignement, color, colorHover, width, height, fontSi
   this.selected = false;
   this.imageLoader = imageLoader;
 }
-  
+
 function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height, color, colorHover, imageLoader) {
-  return new Button(null, x, y, alignement, color, colorHover, width, height, null, null, null, imgSrc, imageLoader, verticalAlignement);
+  return new Button(null, x, y, alignement, color, colorHover, null, width, height, null, null, null, imgSrc, imageLoader, verticalAlignement);
 }
   
 Button.prototype.draw = function(game) {
@@ -107,7 +109,9 @@ Button.prototype.draw = function(game) {
     this.y = 15;
   }
 
-  if(this.hovered) {
+  if(this.hovered && this.clicked) {
+    ctx.fillStyle = this.colorDown;
+  } else if(this.hovered) {
     ctx.fillStyle = this.colorHover;
   } else {
     ctx.fillStyle = this.color;
@@ -162,10 +166,12 @@ Button.prototype.draw = function(game) {
           }
           
           self.hovered = true;
-          self.clicked = false;
         } else {
           self.hovered = false;
         }
+      } else {
+        self.hovered = false;
+        self.clicked = false;
       }
     }, false);
     
@@ -175,13 +181,34 @@ Button.prototype.draw = function(game) {
           if(self.triggerClick != null) {
             self.triggerClick();
           }
+        } else {
+          self.clicked = false;
+        }
+      } else {
+        self.hovered = false;
+        self.clicked = false;
+      }
+    }, false);
+    
+    game.canvas.addEventListener("mousedown", function clickFunction(evt) {
+      if(!self.disabled) {
+        if(self.isInside(self.getMousePos(canvas, evt))) {
+          if(self.triggerDown != null) {
+            self.triggerDown();
+          }
           
-          self.hovered = false;
           self.clicked = true;
         } else {
           self.clicked = false;
         }
+      } else {
+        self.hovered = false;
+        self.clicked = false;
       }
+    }, false);
+    
+    game.canvas.addEventListener("mouseup", function clickFunction(evt) {
+      self.clicked = false;
     }, false);
   }
 
@@ -210,9 +237,7 @@ Button.prototype.addClickAction = function(canvas, trigger) {
 };
 
 Button.prototype.removeClickAction = function(self) {
-  if(self.triggerClick != null)  {
-    self.triggerClick = null;
-  }
+  self.triggerClick = null;
 };
 
 Button.prototype.addMouseOverAction = function(game, trigger) {
@@ -220,9 +245,15 @@ Button.prototype.addMouseOverAction = function(game, trigger) {
 };
 
 Button.prototype.removeHoverAction = function(self) {
-  if(self.triggerHover != null)  {
-    self.triggerHover = null;
-  }
+  self.triggerHover = null;
+};
+
+Button.prototype.addMouseDownAction = function(game, trigger) {
+  this.triggerDown = trigger;
+};
+
+Button.prototype.removeDownAction = function(self) {
+  self.triggerDown = null;
 };
 
 Button.prototype.disable = function() {
