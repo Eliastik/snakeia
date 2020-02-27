@@ -74,6 +74,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.timeStart = 0;
   this.lastTime = 0;
   this.currentPlayer = null;
+  this.spectatorMode = false;
   // Menus state variables
   this.lastKeyMenu = -1;
   this.selectedButton = 0;
@@ -745,6 +746,10 @@ GameUI.prototype.draw = function(renderBlur) {
 
     if(this.displayFPS) {
       this.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
+    }
+
+    if(this.spectatorMode) {
+      this.drawText(ctx, i18next.t("engine.servers.spectatorMode"), "rgba(255, 255, 255, 0.5)", this.fontSize, GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
     }
 
     if(renderBlur) {

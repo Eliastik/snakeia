@@ -97,7 +97,8 @@ i18next.addResourceBundle("fr", "translation", {
     "servers": {
       "errorConnection": "Une erreur est survenue lors de la connexion au serveur.",
       "waitingPlayers": "En attente de joueurs…",
-      "gameStart": "Début de la partie\ndans"
+      "gameStart": "Début de la partie\ndans",
+      "spectatorMode": "Mode spectateur"
     }
   }
 }, true, false);
@@ -179,7 +180,8 @@ i18next.addResourceBundle("en", "translation", {
     "servers": {
       "errorConnection": "An error has occurred when connecting to the server.",
       "waitingPlayers": "Waiting for players…",
-      "gameStart": "Start of the game\nin"
+      "gameStart": "Start of the game\nin",
+      "spectatorMode": "Spectator mode"
     }
   }
 }, true, false);
