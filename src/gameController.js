@@ -264,6 +264,10 @@ GameController.prototype.exit = function() {
   this.gameEngine.exit();
 };
 
+GameController.prototype.forceStart = function() {
+  this.gameEngine.start();
+};
+
 GameController.prototype.setDisplayFPS = function(display) {
   this.gameUI.setDisplayFPS(display);
 };

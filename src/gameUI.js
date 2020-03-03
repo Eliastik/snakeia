@@ -51,7 +51,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.speed = 8;
   this.initialSpeed = 8;
   this.ticks = 0;
-  this.countBeforePlay = 3;
+  this.countBeforePlay = -1;
   this.numFruit = 0;
   this.paused = true;
   this.exited = false;
@@ -75,6 +75,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.lastTime = 0;
   this.currentPlayer = null;
   this.spectatorMode = false;
+  this.onlineMaster = false;
   // Menus state variables
   this.lastKeyMenu = -1;
   this.selectedButton = 0;
@@ -113,6 +114,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.btnBottomArrow;
   this.btnExitFullScreen;
   this.btnEnterFullScreen;
+  this.btnStartGame;
   // Notification
   this.notificationMessage;
 
@@ -150,6 +152,7 @@ GameUI.prototype.init = function() {
     this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 64, 0, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
     this.btnExitFullScreen = new Button(i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
     this.btnEnterFullScreen = new Button(i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnStartGame = new Button(i18next.t("engine.servers.startGame"), null, null, "center", "#3498db", "#246A99", "#184766");
 
     this.btnFullScreen.addClickAction(this.canvas, function() {
       self.toggleFullscreen();
@@ -262,6 +265,10 @@ GameUI.prototype.reset = function() {
 
 GameUI.prototype.start = function() {
   this.controller.start();
+};
+
+GameUI.prototype.forceStart = function() {
+  this.controller.forceStart();
 };
 
 GameUI.prototype.stop = function() {
@@ -517,16 +524,11 @@ GameUI.prototype.draw = function(renderBlur) {
       this.notificationMessage.draw(this);
     }
 
-    if(this.snakes != null) {
-      for(var i = 0; i < this.snakes.length; i++) {
-        if(this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
-          this.btnTopArrow.draw(this);
-          this.btnBottomArrow.draw(this);
-          this.btnRightArrow.draw(this);
-          this.btnLeftArrow.draw(this);
-          break;
-        }
-      }
+    if(this.snakes != null && ((this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1) || this.currentPlayer != null) && !this.spectatorMode) {
+      this.btnTopArrow.draw(this);
+      this.btnBottomArrow.draw(this);
+      this.btnRightArrow.draw(this);
+      this.btnLeftArrow.draw(this);
     }
 
     this.disableAllButtons();
@@ -580,9 +582,13 @@ GameUI.prototype.draw = function(renderBlur) {
         });
       } else if(this.assetsLoaded && this.searchingPlayers) {
         if(this.lastTime > 0) this.timeStart -= Math.max(0, Date.now() - this.lastTime);
-        this.drawMenu(ctx, [this.btnQuit], i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : ""), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
+        this.drawMenu(ctx, this.onlineMaster ? [this.btnStartGame, this.btnQuit] : [this.btnQuit], i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : ""), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
           self.btnQuit.addClickAction(self.canvas, function() {
             self.confirmExit = true;
+          });
+
+          self.btnStartGame.addClickAction(self.canvas, function() {
+            self.forceStart();
           });
         });
       } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
@@ -777,6 +783,7 @@ GameUI.prototype.disableAllButtons = function() {
     this.btnPause.disable();
     this.btnExitFullScreen.disable();
     this.btnEnterFullScreen.disable();
+    this.btnStartGame.disable();
 
     if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
       this.notificationMessage.disableCloseButton();
@@ -1373,7 +1380,7 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
   
       this.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
   
-      if((this.currentPlayer == null && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) || this.currentPlayer == (i + 1)) && this.countBeforePlay >= 0 && (this.currentPlayer != null || (GameUtils.isFilterHueAvailable() && this.snakes.length > 2) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
+      if((this.currentPlayer == null && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) || this.currentPlayer == (i + 1)) && this.countBeforePlay >= 0 && (this.currentPlayer != null || (GameUtils.isFilterHueAvailable() && this.snakes.length > 2) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
         this.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
       }
     }

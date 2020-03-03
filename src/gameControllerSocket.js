@@ -158,6 +158,10 @@ function GameControllerSocket(socket, ui) {
   this.key = function(key) {
     this.socket.emit("key", key);
   };
+
+  this.forceStart = function() {
+    this.socket.emit("forceStart");
+  };
 }
 
 // extends GameController
