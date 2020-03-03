@@ -77,6 +77,8 @@ var GameUtils = {
       return i18next.t("engine.colors.purple");
     } else if(h >= 291 && h <= 349) {
       return i18next.t("engine.colors.pink");
+    } else {
+      return "???";
     }
   },
   isFilterHueAvailable: function() {
