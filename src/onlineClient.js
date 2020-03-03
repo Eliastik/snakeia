@@ -39,7 +39,11 @@ OnlineClient.prototype.connect = function(url, port, callback) {
   this.url = url;
   this.port = port;
 
-  if(this.port != null) {
+  if(this.url != null && this.url.charAt(this.url.length - 1) == "/") {
+    this.url = this.url.substring(0, this.url.length - 1);
+  }
+
+  if(this.port != null && this.port.trim() != "") {
     this.socket = new io(url + ":" + port);
   } else {
     this.socket = new io(url);
@@ -87,7 +91,7 @@ OnlineClient.prototype.displayRooms = function(callback) {
     var ioRooms;
     var self = this;
 
-    if(this.port != null) {
+    if(this.port != null && this.port.trim() != "") {
       ioRooms = new io(this.url + ":" + this.port + "/rooms");
     } else {
       ioRooms = new io(this.url + "/rooms");
@@ -122,7 +126,7 @@ OnlineClient.prototype.createRoom = function(data, callback) {
     var ioCreate;
     var self = this;
 
-    if(this.port != null) {
+    if(this.port != null && this.port.trim() != "") {
       ioCreate = new io(this.url + ":" + this.port + "/createRoom");
     } else {
       ioCreate = new io(this.url + "/createRoom");

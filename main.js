@@ -297,7 +297,7 @@ window.listServersCallback = function(data) {
 
   if(data != null && data.length > 0) {
     for(var i = 0; i < data.length; i++) {
-      if(data[i]["url"] != null && data[i]["port"] != null) {
+      if(data[i]["url"] != null) {
         var url = data[i]["url"];
         var port = data[i]["port"];
         var name = data[i]["name"];
@@ -312,14 +312,22 @@ window.listServersCallback = function(data) {
           linkServer.textContent = i18next.t("servers.untitled");
         }
 
-        linkServer.onclick = function() {
-          connectToServer(url, port);
-        };
+        linkServer.onclick = (function(u, p) {
+          return function() {
+            connectToServer(u, p);
+          };
+        }(url, port));
   
         var serverAddress = document.createElement("div");
         serverAddress.classList.add("small");
         serverAddress.classList.add("text-muted");
-        serverAddress.textContent = url + ":" + port;
+
+        if(port != null && port.trim() != "") {
+          serverAddress.textContent = url + ":" + port;
+        } else {
+          serverAddress.textContent = url;
+        }
+
         linkServer.appendChild(serverAddress);
   
         document.getElementById("serverListGroup").appendChild(linkServer);
@@ -453,7 +461,7 @@ function displayRooms() {
     }
       
     document.getElementById("loadingRoomsOnlineList").style.display = "none";
-    document.getElementById("serverAddress").textContent = onlineClient.url + (onlineClient.port != null ? (":" + onlineClient.port) : "");
+    document.getElementById("serverAddress").textContent = onlineClient.url + (onlineClient.port != null && onlineClient.port.trim() != "" ? (":" + onlineClient.port) : "");
   });
 }
 
