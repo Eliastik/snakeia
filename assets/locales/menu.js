@@ -212,7 +212,8 @@ i18next.addResourceBundle("fr", "translation", {
     "untitled": "Sans titre",
     "searchingPlayers": "(recherche de joueurs)",
     "started": "(partie démarrée)",
-    "starting": "(démarrage en cours)"
+    "starting": "(démarrage en cours)",
+    "authenticationServer": "Authentification au serveur"
   }
 }, true, false);
 
@@ -408,6 +409,7 @@ i18next.addResourceBundle("en", "translation", {
     "untitled": "Untitled",
     "searchingPlayers": "(searching players)",
     "started": "(game started)",
-    "starting": "(game starting)"
+    "starting": "(game starting)",
+    "authenticationServer": "Server authentication"
   }
 }, true, false);

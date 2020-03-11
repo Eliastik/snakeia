@@ -362,13 +362,34 @@ function connectToServer(url, port) {
   document.getElementById("settings").style.display = "none";
   document.getElementById("connectingToServer").style.display = "block";
   document.getElementById("roomsOnlineJoin").style.display = "none";
+  document.getElementById("authenticationServer").style.display = "none";
 
-  onlineClient.connect(url, port, function(success) {
+  onlineClient.connect(url, port, function(success, data) {
     document.getElementById("connectingToServer").style.display = "none";
 
     if(!success) {
-      alert(i18next.t("servers.connectionError"));
-      displayServerList();
+      if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+        document.getElementById("authenticationServerContainer").innerHTML = "";
+        var authent_frame = document.createElement("iframe");
+        authent_frame.id = "authent_frame";
+        authent_frame.src = onlineClient.url + (onlineClient.port != null && onlineClient.port.trim() != "" ? ":" + onlineClient.port : "") + "/authentication?lang=" + i18next.language;
+        authent_frame.classList.add("frame-responsive");
+        document.getElementById("authenticationServerContainer").appendChild(authent_frame);
+
+        displayAuthentication();
+
+        var intervalReconnect = setInterval(function() {
+          onlineClient.connect(onlineClient.url, onlineClient.port, function(success) {
+            if(success) {
+              clearInterval(intervalReconnect);
+              connectToServer(onlineClient.url, onlineClient.port);
+            }
+          });
+        }, 2000);
+      } else {
+        alert(i18next.t("servers.connectionError"));
+        displayServerList();
+      }
     } else {
       displayRoomsList();
     }
@@ -376,6 +397,13 @@ function connectToServer(url, port) {
 }
 
 document.getElementById("cancelConnectingToServer").onclick = function() {
+  document.getElementById("connectingToServer").style.display = "none";
+  onlineClient.disconnect();
+  displayServerList();
+};
+
+document.getElementById("cancelAuthenticationToServer").onclick = function() {
+  document.getElementById("authenticationServerContainer").innerHTML = "";
   document.getElementById("connectingToServer").style.display = "none";
   onlineClient.disconnect();
   displayServerList();
@@ -480,6 +508,7 @@ function joinRoom(code) {
   document.getElementById("settings").style.display = "none";
   document.getElementById("connectingToServer").style.display = "none";
   document.getElementById("roomsOnlineJoin").style.display = "block";
+  document.getElementById("authenticationServer").style.display = "none";
   document.getElementById("errorRoomJoin").style.display = "none";
 
   onlineClient.joinRoom(code, function(data) {
@@ -632,6 +661,7 @@ function displaySettings() {
   document.getElementById("settings").style.display = "block";
   document.getElementById("connectingToServer").style.display = "none";
   document.getElementById("roomsOnlineJoin").style.display = "none";
+  document.getElementById("authenticationServer").style.display = "none";
   checkSameGrid();
   checkGameSpeed();
   checkPlayer();
@@ -660,6 +690,7 @@ function displayMenu() {
   document.getElementById("menu").style.display = "block";
   document.getElementById("connectingToServer").style.display = "none";
   document.getElementById("roomsOnlineJoin").style.display = "none";
+  document.getElementById("authenticationServer").style.display = "none";
 }
 
 document.getElementById("backToMenu").onclick = function() {
@@ -687,6 +718,7 @@ function displayServerList() {
   document.getElementById("menu").style.display = "none";
   document.getElementById("connectingToServer").style.display = "none";
   document.getElementById("roomsOnlineJoin").style.display = "none";
+  document.getElementById("authenticationServer").style.display = "none";
   loadServerList();
 }
 
@@ -709,6 +741,21 @@ function displayRoomsList() {
   document.getElementById("menu").style.display = "none";
   document.getElementById("connectingToServer").style.display = "none";
   document.getElementById("roomsOnlineJoin").style.display = "none";
+  document.getElementById("authenticationServer").style.display = "none";
+  displayRooms();
+}
+
+function displayAuthentication() {
+  document.getElementById("settings").style.display = "none";
+  document.getElementById("levelContainer").style.display = "none";
+  document.getElementById("gameContainer").style.display = "none";
+  document.getElementById("serverListContainer").style.display = "none";
+  document.getElementById("roomsOnlineListContainer").style.display = "none";
+  document.getElementById("roomsOnlineCreation").style.display = "none";
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("connectingToServer").style.display = "none";
+  document.getElementById("roomsOnlineJoin").style.display = "none";
+  document.getElementById("authenticationServer").style.display = "block";
   displayRooms();
 }
 
@@ -723,6 +770,7 @@ function displayLevelList(player) {
   document.getElementById("menu").style.display = "none";
   document.getElementById("connectingToServer").style.display = "none";
   document.getElementById("roomsOnlineJoin").style.display = "none";
+  document.getElementById("authenticationServer").style.display = "none";
   document.getElementById("levelDownloading").innerHTML = "";
   document.getElementById("btnDeblockDiv").innerHTML = "";
 
@@ -1115,6 +1163,7 @@ function validateSettings(returnValidation) {
       document.getElementById("gameContainer").style.display = "block";
       document.getElementById("connectingToServer").style.display = "none";
       document.getElementById("roomsOnlineJoin").style.display = "none";
+      document.getElementById("authenticationServer").style.display = "none";
 
       var titleGame = "";
 
@@ -1562,6 +1611,7 @@ window.playLevel = function(level, player, type) {
     document.getElementById("gameContainer").style.display = "block";
     document.getElementById("connectingToServer").style.display = "none";
     document.getElementById("roomsOnlineJoin").style.display = "none";
+    document.getElementById("authenticationServer").style.display = "none";
 
     document.getElementById("resultLevels").innerHTML = "";
     document.getElementById("gameStatus").innerHTML = "";

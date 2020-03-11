@@ -24,7 +24,6 @@ if(typeof(require) !== "undefined") {
 function OnlineClient() {
   this.url;
   this.port;
-  this.token;
   this.socket;
   this.currentRoom;
   this.game;
@@ -56,13 +55,13 @@ OnlineClient.prototype.connect = function(url, port, callback) {
     successConnect = true;
   });
 
-  this.socket.on("error", function() {
-    callback(false);
+  this.socket.on("error", function(data) {
+    callback(false, data);
     self.disconnect();
   });
 
-  this.socket.on("connect_error", function() {
-    callback(false);
+  this.socket.on("connect_error", function(data) {
+    callback(false, data);
     self.disconnect();
   });
 };
