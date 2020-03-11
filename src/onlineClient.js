@@ -27,6 +27,7 @@ function OnlineClient() {
   this.socket;
   this.currentRoom;
   this.game;
+  this.intervalReconnect;
   this.creatingRoom = false;
   this.joiningRoom = false;
   this.loadingRooms = false;
@@ -41,12 +42,8 @@ OnlineClient.prototype.connect = function(url, port, callback) {
   if(this.url != null && this.url.charAt(this.url.length - 1) == "/") {
     this.url = this.url.substring(0, this.url.length - 1);
   }
-
-  if(this.port != null && this.port.trim() != "") {
-    this.socket = new io(url + ":" + port);
-  } else {
-    this.socket = new io(url);
-  }
+  
+  this.socket = new io(this.getURL());
 
   var self = this;
 
@@ -64,6 +61,22 @@ OnlineClient.prototype.connect = function(url, port, callback) {
     callback(false, data);
     self.disconnect();
   });
+};
+
+OnlineClient.prototype.autoReconnect = function(time, callback) {
+  if(this.intervalReconnect) clearInterval(this.intervalReconnect);
+  this.disconnect();
+
+  var self = this;
+
+  this.intervalReconnect = setInterval(function() {
+    self.connect(self.url, self.port, function(success) {
+      if(success) {
+        clearInterval(self.intervalReconnect);
+        callback();
+      }
+    });
+  }, time);
 };
 
 OnlineClient.prototype.disconnect = function() {
@@ -87,14 +100,8 @@ OnlineClient.prototype.displayRooms = function(callback) {
   if(!this.loadingRooms) {
     this.loadingRooms = true;
 
-    var ioRooms;
+    var ioRooms = new io(this.getURL() + "/rooms");
     var self = this;
-
-    if(this.port != null && this.port.trim() != "") {
-      ioRooms = new io(this.url + ":" + this.port + "/rooms");
-    } else {
-      ioRooms = new io(this.url + "/rooms");
-    }
   
     ioRooms.once("rooms", function(data) {
       callback(data);
@@ -122,14 +129,8 @@ OnlineClient.prototype.createRoom = function(data, callback) {
   if(!this.creatingRoom) {
     this.creatingRoom = true;
     
-    var ioCreate;
+    var ioCreate = new io(this.getURL() + "/createRoom");
     var self = this;
-
-    if(this.port != null && this.port.trim() != "") {
-      ioCreate = new io(this.url + ":" + this.port + "/createRoom");
-    } else {
-      ioCreate = new io(this.url + "/createRoom");
-    }
 
     ioCreate.once("connect", function() {
       ioCreate.emit("create", data);
@@ -211,6 +212,14 @@ OnlineClient.prototype.getGame = function(ui) {
     ui.controller = this.game;
     return this.game;
   }
+};
+
+OnlineClient.prototype.getURL = function() {
+  if(this.port != null && this.port.trim() != "") {
+    return this.url + ":" + this.port;
+  } 
+  
+  return this.url;
 };
 
 // Export module

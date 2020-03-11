@@ -213,7 +213,8 @@ i18next.addResourceBundle("fr", "translation", {
     "searchingPlayers": "(recherche de joueurs)",
     "started": "(partie démarrée)",
     "starting": "(démarrage en cours)",
-    "authenticationServer": "Authentification au serveur"
+    "authenticationServer": "Authentification au serveur",
+    "linkAuthenticationServer": "Si le formulaire ne s'affiche pas, cliquez ici"
   }
 }, true, false);
 
@@ -410,6 +411,7 @@ i18next.addResourceBundle("en", "translation", {
     "searchingPlayers": "(searching players)",
     "started": "(game started)",
     "starting": "(game starting)",
-    "authenticationServer": "Server authentication"
+    "authenticationServer": "Server authentication",
+    "linkAuthenticationServer": "If the form does not appear, click here"
   }
 }, true, false);

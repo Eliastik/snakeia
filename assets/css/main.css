@@ -82,13 +82,13 @@ body {
   margin: auto;
 }
 
-#serverList, #infoRoomsCreate, #connectingToServer, #roomsOnlineJoin, #roomsList, #authenticationServer {
+#serverList, #infoRoomsCreate, #connectingToServer, #roomsOnlineJoin, #roomsList {
   width: 100%;
   max-width: 400px;
   margin: auto;
 }
 
-#levelListDefault, #levelListDownload, #levelDownload, #localstorageDisabled {
+#levelListDefault, #levelListDownload, #levelDownload, #localstorageDisabled, #authenticationServer {
   width: 100%;
   max-width: 450px;
   margin: auto;

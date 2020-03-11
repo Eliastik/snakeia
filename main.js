@@ -372,20 +372,16 @@ function connectToServer(url, port) {
         document.getElementById("authenticationServerContainer").innerHTML = "";
         var authent_frame = document.createElement("iframe");
         authent_frame.id = "authent_frame";
-        authent_frame.src = onlineClient.url + (onlineClient.port != null && onlineClient.port.trim() != "" ? ":" + onlineClient.port : "") + "/authentication?lang=" + i18next.language;
+        authent_frame.src = onlineClient.getURL() + "/authentication?lang=" + i18next.language;
         authent_frame.classList.add("frame-responsive");
         document.getElementById("authenticationServerContainer").appendChild(authent_frame);
+        document.getElementById("linkAuthenticationServer").href = onlineClient.getURL() + "/authentication?lang=" + i18next.language;
+
+        onlineClient.autoReconnect(2000, function() {
+          connectToServer(onlineClient.url, onlineClient.port);
+        });
 
         displayAuthentication();
-
-        var intervalReconnect = setInterval(function() {
-          onlineClient.connect(onlineClient.url, onlineClient.port, function(success) {
-            if(success) {
-              clearInterval(intervalReconnect);
-              connectToServer(onlineClient.url, onlineClient.port);
-            }
-          });
-        }, 2000);
       } else {
         alert(i18next.t("servers.connectionError"));
         displayServerList();
