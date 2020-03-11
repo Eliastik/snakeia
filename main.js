@@ -553,6 +553,9 @@ function joinRoom(code) {
         case GameConstants.Error.ROOM_ALREADY_JOINED:
           errorCode_text = i18next.t("servers.errorRoomJoinReason_roomAlreadyJoined");
           break;
+        case GameConstants.Error.ALREADY_CREATED_ROOM:
+          errorCode_text = i18next.t("servers.errorRoomCreationReason_alreadyCreatedRoom");
+          break;
         default:
           errorCode_text = i18next.t("servers.errorReason_unknown");
           break;
@@ -1136,6 +1139,9 @@ function validateSettings(returnValidation) {
                 break;
               case GameConstants.Error.MAX_ROOM_LIMIT_REACHED:
                 errorCode_text = i18next.t("servers.errorRoomCreationReason_maxRoomLimitReached");
+                break;
+              case GameConstants.Error.ALREADY_CREATED_ROOM:
+                errorCode_text = i18next.t("servers.errorRoomCreationReason_alreadyCreatedRoom");
                 break;
               default:
                 errorCode_text = i18next.t("servers.errorReason_unknown");
