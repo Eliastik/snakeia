@@ -19,6 +19,7 @@
 if(typeof(require) !== "undefined") {
   var io = require('../libs/socket.io.js');
   var GameControllerSocket = require('./gameControllerSocket.js');
+  var GameConstants = require('./constants');
 }
 
 function OnlineClient() {
@@ -191,7 +192,10 @@ OnlineClient.prototype.joinRoom = function(code, callback) {
     this.joiningRoom = true;
 
     if(this.socket != null) {
-      this.socket.emit("join-room", code);
+      this.socket.emit("join-room", {
+        code: code,
+        version: GameConstants.Setting.APP_VERSION
+      });
 
       var self = this;
 
