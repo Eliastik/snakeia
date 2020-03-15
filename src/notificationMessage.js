@@ -17,14 +17,13 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 if(typeof(require) !== "undefined") {
-  var Button = require("./button");
   var GameConstants = require("./constants");
   var Buttons = require('./button');
   var Button = Buttons.Button;
-  var ButtonImage = Buttons.ButtonImage;
+  var DrawUtils = require('./drawUtils');
 }
 
-function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround, disableAnimation) {
+function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround, disableAnimation, closeButton) {
   this.text = text;
   this.textColor = textColor == undefined ? "rgba(255, 255, 255, 0.75)" : textColor;
   this.backgroundColor = backgroundColor == undefined ? "rgba(46, 204, 113, 0.5)" : backgroundColor;
@@ -39,21 +38,23 @@ function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosin
   this.closed = false;
   this.closing = false;
   this.disableAnimation = disableAnimation == undefined ? false : disableAnimation;
-  this.closeButton;
+  this.closeButton = closeButton;
 }
 
-NotificationMessage.prototype.draw = function(game) {
+NotificationMessage.prototype.draw = function(ctx, closeButton) {
   var self = this;
 
   if(this.text != null) {
-    var canvas = game.canvas;
+    var canvas = ctx.canvas;
 
     if(!this.init) {
       this.timeLastFrame = Date.now();
+    }
 
-      this.closeButton = new ButtonImage("assets/images/close.png", null, 5, "right", null, 32, 32, null, null, game.imageLoader);
-      
-      this.closeButton.addClickAction(canvas, function() {
+    this.closeButton = closeButton != null ? closeButton : this.closeButton;
+    
+    if(this.closeButton != null) {
+      this.closeButton.addClickAction(function() {
         self.close();
       });
     }
@@ -68,7 +69,7 @@ NotificationMessage.prototype.draw = function(game) {
     var ctx = canvas.getContext("2d");
     this.fontSize = this.getFontSize(ctx) * 1.25;
 
-    var heightText = game.wrapTextLines(ctx, this.text, null, this.fontSize)["height"];
+    var heightText = DrawUtils.wrapTextLines(ctx, this.text, null, this.fontSize)["height"];
     var height = heightText + this.fontSize / 2;
     var width = canvas.width;
     var offsetY = 1;
@@ -98,12 +99,14 @@ NotificationMessage.prototype.draw = function(game) {
       ctx.fillStyle = this.backgroundColor;
       ctx.fillRect(0, y, width, height);
 
-      game.drawText(ctx, this.text, this.textColor, this.fontSize, this.fontFamily, "center", "default", null, y + this.fontSize, true);
+      DrawUtils.drawText(ctx, this.text, this.textColor, this.fontSize, this.fontFamily, "center", "default", null, y + this.fontSize, true);
 
-      this.closeButton.y = y + 5;
+      if(this.close != null) {
+        this.closeButton.y = y + 5;
+      }
 
-      if(!this.foreGround) {
-        this.closeButton.draw(game);
+      if(this.closeButton != null) {
+        this.closeButton.draw(ctx);
       }
 
       this.disableCloseButton();

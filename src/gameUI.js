@@ -26,6 +26,7 @@ if(typeof(require) !== "undefined") {
   var Button = Buttons.Button;
   var ButtonImage = Buttons.ButtonImage;
   var NotificationMessage = require('./notificationMessage');
+  var DrawUtils = require('./drawUtils');
 }
 
 function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
@@ -96,7 +97,6 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.headerHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
   this.timerToDisplay;
   this.bestScoreToDisplay;
-  this.preRenderedFont;
   // Intervals, timeouts, frames
   this.intervalCountFPS;
   // Buttons
@@ -117,6 +117,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.btnExitFullScreen;
   this.btnEnterFullScreen;
   this.btnStartGame;
+  this.btnCloseNotification;
   // Notification
   this.notificationMessage;
 
@@ -155,29 +156,30 @@ GameUI.prototype.init = function() {
     this.btnExitFullScreen = new Button(i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
     this.btnEnterFullScreen = new Button(i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
     this.btnStartGame = new Button(i18next.t("engine.servers.startGame"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnCloseNotification = new ButtonImage("assets/images/close.png", null, 5, "right", null, 32, 32, null, null, this.imageLoader);
 
-    this.btnFullScreen.addClickAction(this.canvas, function() {
+    this.btnFullScreen.addClickAction(function() {
       self.toggleFullscreen();
       self.pause();
     });
 
-    this.btnPause.addClickAction(this.canvas, function() {
+    this.btnPause.addClickAction(function() {
       self.pause();
     });
 
-    this.btnTopArrow.addClickAction(this.canvas, function() {
+    this.btnTopArrow.addClickAction(function() {
       self.controller.key(GameConstants.Key.UP);
     });
 
-    this.btnBottomArrow.addClickAction(this.canvas, function() {
+    this.btnBottomArrow.addClickAction(function() {
       self.controller.key(GameConstants.Key.BOTTOM);
     });
 
-    this.btnLeftArrow.addClickAction(this.canvas, function() {
+    this.btnLeftArrow.addClickAction(function() {
       self.controller.key(GameConstants.Key.LEFT);
     });
 
-    this.btnRightArrow.addClickAction(this.canvas, function() {
+    this.btnRightArrow.addClickAction(function() {
       self.controller.key(GameConstants.Key.RIGHT);
     });
   }
@@ -299,7 +301,6 @@ GameUI.prototype.setKill = function() {
 
   this.grid = null;
   this.snakes = null;
-  this.preRenderedFont = null;
 
   if(this.appendTo != null) {
     if(this.outputType == GameConstants.OutputType.TEXT && this.textarea != null) {
@@ -452,7 +453,7 @@ GameUI.prototype.draw = function(renderBlur) {
       ctx.filter = "blur(5px)";
     }
 
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    DrawUtils.clear(ctx);
     ctx.fillStyle = "rgba(204, 207, 211, 1)";
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.fillStyle = "#27AE60";
@@ -473,17 +474,17 @@ GameUI.prototype.draw = function(renderBlur) {
         displayBestScore = true;
       }
 
-      this.drawImage(ctx, "assets/images/fruit.png", 5, 5, this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1), this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1));
+      DrawUtils.drawImage(ctx, this.imageLoader.get("assets/images/fruit.png"), 5, 5, this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1), this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1));
 
       if(this.snakes != null && this.snakes.length <= 1) {
-        this.drawText(ctx, "× " + this.snakes[0].score, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
+        DrawUtils.drawText(ctx, "× " + this.snakes[0].score, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
       } else {
-        this.drawText(ctx, i18next.t("engine.num") + (this.numFruit != null ? this.numFruit : "???"), "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
+        DrawUtils.drawText(ctx, i18next.t("engine.num") + (this.numFruit != null ? this.numFruit : "???"), "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
       }
 
       if(displayBestScore) {
-        this.drawImage(ctx, "assets/images/trophy.png", 5, 8 + this.headerHeight * 0.425, this.headerHeight * 0.425, this.headerHeight * 0.425);
-        this.drawText(ctx, this.bestScoreToDisplay, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.425 + this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
+        DrawUtils.drawImage(ctx, this.imageLoader.get("assets/images/trophy.png"), 5, 8 + this.headerHeight * 0.425, this.headerHeight * 0.425, this.headerHeight * 0.425);
+        DrawUtils.drawText(ctx, this.bestScoreToDisplay, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.425 + this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
       }
 
       if(this.grid != null && (!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished)))) {
@@ -506,7 +507,7 @@ GameUI.prototype.draw = function(renderBlur) {
             }
 
             ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
-            this.drawImage(ctx, this.grid.getImageCase(new Position(j, i)), caseX, caseY, caseWidth, caseHeight);
+            DrawUtils.drawImage(ctx, this.imageLoader.get(this.grid.getImageCase(new Position(j, i))), caseX, caseY, caseWidth, caseHeight);
           }
         }
 
@@ -514,16 +515,16 @@ GameUI.prototype.draw = function(renderBlur) {
       }
 
       if(this.timerToDisplay != undefined && this.timerToDisplay != null && !isNaN(this.timerToDisplay) && this.timerToDisplay >= 0) {
-        this.drawImage(ctx, "assets/images/clock.png", this.headerHeight * 0.24, this.headerHeight + 15, this.headerHeight * 0.64, this.headerHeight * 0.64);
-        this.drawText(ctx, "" + GameUtils.secondsFormat(this.timerToDisplay), "rgba(0, 0, 0, 0.5)", GameConstants.Setting.FONT_SIZE, GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight, this.headerHeight + 15 + this.headerHeight * 0.475);
+        DrawUtils.drawImage(ctx, this.imageLoader.get("assets/images/clock.png"), this.headerHeight * 0.24, this.headerHeight + 15, this.headerHeight * 0.64, this.headerHeight * 0.64);
+        DrawUtils.drawText(ctx, "" + GameUtils.secondsFormat(this.timerToDisplay), "rgba(0, 0, 0, 0.5)", GameConstants.Setting.FONT_SIZE, GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight, this.headerHeight + 15 + this.headerHeight * 0.475);
       }
     } else if(!this.assetsLoaded && !renderBlur) {
       var percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
-      this.drawMenu(ctx, [], i18next.t("engine.loading") + "\n" + percentLoaded + "%", "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true);
+      DrawUtils.drawMenu(ctx, [], i18next.t("engine.loading") + "\n" + percentLoaded + "%", "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true);
     }
 
     if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
-      this.notificationMessage.draw(this);
+      this.notificationMessage.draw(this, this.btnCloseNotification);
     }
 
     if(this.snakes != null && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 || this.currentPlayer != null) && !this.spectatorMode) {
@@ -537,59 +538,59 @@ GameUI.prototype.draw = function(renderBlur) {
 
     if(!renderBlur) {
       if(this.exited) {
-        this.drawMenu(ctx, this.fullscreen ? [this.btnExitFullScreen] : [], i18next.t("engine.exited"), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnExitFullScreen.addClickAction(self.canvas, function() {
+        DrawUtils.drawMenu(ctx, this.fullscreen ? [this.btnExitFullScreen] : [], i18next.t("engine.exited"), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
+          self.btnExitFullScreen.addClickAction(function() {
             self.toggleFullscreen();
           });
         });
       } else if(this.errorOccurred) {
-       this.drawMenu(ctx, [this.btnQuit], this.imageLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-         self.btnQuit.addClickAction(self.canvas, function() {
+       DrawUtils.drawMenu(ctx, [this.btnQuit], this.imageLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
+         self.btnQuit.addClickAction(function() {
            self.confirmExit = false;
            self.selectedButton = 0;
            self.exit();
          });
        });
      } else if(this.getInfosGame) {
-        this.drawMenu(ctx, [this.btnOK], (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : ""), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-          self.btnOK.addClickAction(self.canvas, function() {
+        DrawUtils.drawMenu(ctx, [this.btnOK], (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : ""), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
+          self.btnOK.addClickAction(function() {
             self.getInfosGame = false;
             self.selectedButton = 0;
           });
         });
       } else if(this.getInfos) {
-        this.drawMenu(ctx, [this.btnInfosGame, this.btnOK], i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + i18next.t("engine.aboutScreen.versionAndDate", { version: GameConstants.Setting.APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(GameConstants.Setting.DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-          self.btnInfosGame.addClickAction(self.canvas, function() {
+        DrawUtils.drawMenu(ctx, [this.btnInfosGame, this.btnOK], i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + i18next.t("engine.aboutScreen.versionAndDate", { version: GameConstants.Setting.APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(GameConstants.Setting.DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
+          self.btnInfosGame.addClickAction(function() {
             self.getInfosGame = true;
             self.selectedButton = 0;
           });
 
-          self.btnOK.addClickAction(self.canvas, function() {
+          self.btnOK.addClickAction(function() {
             self.getInfos = false;
             self.selectedButton = 0;
           });
         });
       } else if(this.confirmExit) {
-        this.drawMenu(ctx, [this.btnNo, this.btnYes], i18next.t("engine.exitConfirm"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnYes.addClickAction(self.canvas, function() {
+        DrawUtils.drawMenu(ctx, [this.btnNo, this.btnYes], i18next.t("engine.exitConfirm"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
+          self.btnYes.addClickAction(function() {
             self.confirmExit = false;
             self.selectedButton = 0;
             self.exit();
           });
 
-          self.btnNo.addClickAction(self.canvas, function() {
+          self.btnNo.addClickAction(function() {
             self.confirmExit = false;
             self.selectedButton = 0;
           });
         });
       } else if(this.assetsLoaded && this.searchingPlayers) {
         if(this.lastTime > 0) this.timeStart -= Math.max(0, Date.now() - this.lastTime);
-        this.drawMenu(ctx, this.onlineMaster ? [this.btnStartGame, this.btnQuit] : [this.btnQuit], i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : ""), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnQuit.addClickAction(self.canvas, function() {
+        DrawUtils.drawMenu(ctx, this.onlineMaster ? [this.btnStartGame, this.btnQuit] : [this.btnQuit], i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : ""), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
+          self.btnQuit.addClickAction(function() {
             self.confirmExit = true;
           });
 
-          self.btnStartGame.addClickAction(self.canvas, function() {
+          self.btnStartGame.addClickAction(function() {
             self.forceStart();
           });
         });
@@ -609,76 +610,76 @@ GameUI.prototype.draw = function(renderBlur) {
           }
 
           if(this.countBeforePlay > 0) {
-            this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-              self.btnEnterFullScreen.addClickAction(self.canvas, function() {
+            DrawUtils.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
+              self.btnEnterFullScreen.addClickAction(function() {
                 self.toggleFullscreen();
               });
             });
           } else {
-            this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready") + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-              self.btnEnterFullScreen.addClickAction(self.canvas, function() {
+            DrawUtils.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready") + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
+              self.btnEnterFullScreen.addClickAction(function() {
                 self.toggleFullscreen();
               });
             }, true);
           }
         } else {
           if(this.countBeforePlay > 0) {
-            this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay, "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-              self.btnEnterFullScreen.addClickAction(self.canvas, function() {
+            DrawUtils.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay, "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
+              self.btnEnterFullScreen.addClickAction(function() {
                 self.toggleFullscreen();
               });
             });
           } else {
-            this.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready"), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-              self.btnEnterFullScreen.addClickAction(self.canvas, function() {
+            DrawUtils.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready"), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
+              self.btnEnterFullScreen.addClickAction(function() {
                 self.toggleFullscreen();
               });
             }, true);
           }
         }
       } else if(this.confirmReset && !this.gameOver) {
-        this.drawMenu(ctx, [this.btnNo, this.btnYes], i18next.t("engine.resetConfirm"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnYes.addClickAction(self.canvas, function() {
+        DrawUtils.drawMenu(ctx, [this.btnNo, this.btnYes], i18next.t("engine.resetConfirm"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
+          self.btnYes.addClickAction(function() {
             self.confirmReset = false;
             self.selectedButton = 0;
             self.reset();
           });
 
-          self.btnNo.addClickAction(self.canvas, function() {
+          self.btnNo.addClickAction(function() {
             self.confirmReset = false;
             self.selectedButton = 0;
           });
         });
       } else if(this.gameFinished) {
-        this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], (this.grid.maze && this.gameMazeWin) ? i18next.t("engine.mazeWin") : i18next.t("engine.gameFinished"), (this.grid.maze && this.gameMazeWin) ? "#2ecc71" : "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnRetry.addClickAction(self.canvas, function() {
+        DrawUtils.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], (this.grid.maze && this.gameMazeWin) ? i18next.t("engine.mazeWin") : i18next.t("engine.gameFinished"), (this.grid.maze && this.gameMazeWin) ? "#2ecc71" : "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
+          self.btnRetry.addClickAction(function() {
             self.selectedButton = 0;
             self.reset();
           });
 
-          self.btnQuit.addClickAction(self.canvas, function() {
+          self.btnQuit.addClickAction(function() {
             self.confirmExit = true;
             self.selectedButton = 0;
           });
         });
       } else if(this.scoreMax && this.snakes.length <= 1) {
-        this.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.scoreMax"), "#2ecc71", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnRetry.addClickAction(self.canvas, function() {
+        DrawUtils.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.scoreMax"), "#2ecc71", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
+          self.btnRetry.addClickAction(function() {
             self.selectedButton = 0;
             self.reset();
           });
 
-          self.btnQuit.addClickAction(self.canvas, function() {
+          self.btnQuit.addClickAction(function() {
             self.confirmExit = true;
             self.selectedButton = 0;
           });
 
-          self.btnExitFullScreen.addClickAction(self.canvas, function() {
+          self.btnExitFullScreen.addClickAction(function() {
             self.toggleFullscreen();
           });
         });
       } else if(this.gameOver && this.snakes.length <= 1) {
-        this.drawMenu(ctx, this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
+        DrawUtils.drawMenu(ctx, this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
           if(self.snakes[0].autoRetry && self.timeoutAutoRetry == null) {
             self.timeoutAutoRetry = setTimeout(function() {
               self.selectedButton = 0;
@@ -686,39 +687,39 @@ GameUI.prototype.draw = function(renderBlur) {
               self.timeoutAutoRetry = null;
             }, 500);
           } else {
-            self.btnRetry.addClickAction(self.canvas, function() {
+            self.btnRetry.addClickAction(function() {
               self.selectedButton = 0;
               self.reset();
             });
 
-            self.btnQuit.addClickAction(self.canvas, function() {
+            self.btnQuit.addClickAction(function() {
               self.confirmExit = true;
               self.selectedButton = 0;
             });
 
-            self.btnExitFullScreen.addClickAction(self.canvas, function() {
+            self.btnExitFullScreen.addClickAction(function() {
               self.toggleFullscreen();
             });
           }
         });
       } else if(this.paused && !this.gameOver && this.assetsLoaded) {
-        this.drawMenu(ctx, this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], i18next.t("engine.pause"), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-          self.btnContinue.addClickAction(self.canvas, function() {
+        DrawUtils.drawMenu(ctx, this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], i18next.t("engine.pause"), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
+          self.btnContinue.addClickAction(function() {
             self.selectedButton = 0;
             self.start();
           });
 
-          self.btnRetry.addClickAction(self.canvas, function() {
+          self.btnRetry.addClickAction(function() {
             self.confirmReset = true;
             self.selectedButton = 0;
           });
 
-          self.btnQuit.addClickAction(self.canvas, function() {
+          self.btnQuit.addClickAction(function() {
             self.confirmExit = true;
             self.selectedButton = 0;
           });
 
-          self.btnAbout.addClickAction(self.canvas, function() {
+          self.btnAbout.addClickAction(function() {
             self.getInfos = true;
             self.selectedButton = 0;
           });
@@ -745,19 +746,20 @@ GameUI.prototype.draw = function(renderBlur) {
         if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
           this.notificationMessage.enableCloseButton();
         }
-
-        if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {
-          this.notificationMessage.draw(this);
-        }
+      }
+    
+      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {
+        this.notificationMessage.draw(this, this.btnCloseNotification);
+        this.notificationMessage.enableCloseButton();
       }
     }
 
     if(this.displayFPS) {
-      this.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
+      DrawUtils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
     }
 
     if(this.spectatorMode) {
-      this.drawText(ctx, i18next.t("engine.servers.spectatorMode"), "rgba(255, 255, 255, 0.5)", this.fontSize, GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
+      DrawUtils.drawText(ctx, i18next.t("engine.servers.spectatorMode"), "rgba(255, 255, 255, 0.5)", this.fontSize, GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
     }
 
     if(renderBlur) {
@@ -787,7 +789,7 @@ GameUI.prototype.disableAllButtons = function() {
     this.btnEnterFullScreen.disable();
     this.btnStartGame.disable();
 
-    if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
+    if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
       this.notificationMessage.disableCloseButton();
     }
 
@@ -826,287 +828,6 @@ GameUI.prototype.getDebugText = function() {
 
 GameUI.prototype.toString = function() {
   return (this.grid != null ? this.grid.toString() : "") + "\n" + (this.snakes != null && this.snakes.length <= 1 ? i18next.t("engine.score") + " : " + (this.snakes != null ? this.snakes[0].score : "") : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
-};
-
-GameUI.prototype.preRenderFont = function(cars, size, color, fontFamily) {
-  cars.push("?"); cars.push(" "); cars.push("A");
-
-  for(var i = 0; i < cars.length; i++) {
-    var canvasTmp = document.createElement("canvas");
-    var ctxTmp = canvasTmp.getContext("2d");
-    ctxTmp.font = size + "px " + fontFamily;
-    var width = ctxTmp.measureText(cars[i]).width;
-
-    canvasTmp.width = width;
-    canvasTmp.height = size + (size / 6);
-
-    ctxTmp.font = size + "px " + fontFamily;
-    ctxTmp.fillStyle = color;
-    ctxTmp.textBaseline = "top";
-    ctxTmp.fillText(cars[i], 0, 0);
-
-    this.preRenderedFont[cars[i]] = canvasTmp;
-  }
-};
-
-GameUI.prototype.drawImage = function(ctx, imgSrc, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
-  this.drawImageWrapper(ctx, this.imageLoader.get(imgSrc), x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees);
-};
-
-GameUI.prototype.drawImageData = function(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
-  this.drawImageWrapper(ctx, imageData, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees);
-};
-
-GameUI.prototype.drawImageWrapper = function(ctx, image, x, y, width, height, sx, sy, sWidth, sHeight, eraseBelow, degrees) {
-  var x = (x == undefined || isNaN(x)) ? null : Math.round(x);
-  var y = (y == undefined || isNaN(y)) ? null : Math.round(y);
-  var width = (width == undefined || isNaN(width)) ? null : Math.round(width);
-  var height = (height == undefined || isNaN(height)) ? null : Math.round(height);
-  var sx = (sx == undefined || isNaN(sx)) ? null : Math.round(sx);
-  var sy = (sy == undefined || isNaN(sy)) ? null : Math.round(sy);
-  var sWidth = (sWidth == undefined || isNaN(sWidth)) ? null : Math.round(sWidth);
-  var sHeight = (sHeight == undefined || isNaN(sHeight)) ? null : Math.round(sHeight);
-  var eraseBelow = eraseBelow == undefined ? false : eraseBelow;
-  var degrees = (degrees == undefined || isNaN(degrees)) ? null : degrees;
-
-  if(degrees != undefined) {
-    ctx.save();
-    ctx.translate(x + width / 2, y + height / 2);
-    ctx.rotate(degrees * Math.PI / 180);
-    x = -(width / 2);
-    y = -(height / 2);
-  }
-
-  if(eraseBelow) {
-    ctx.clearRect(x, y, width, height);
-  }
-
-  if(ctx != undefined && image != undefined) {
-    if(sx != undefined && sy != undefined && sWidth != undefined && sHeight != undefined) {
-      ctx.drawImage(image, sx, sy, sWidth, sHeight, x, y, width, height);
-    } else {
-      ctx.drawImage(image, x, y, width, height);
-    }
-  }
-
-  if(degrees != undefined) {
-    ctx.restore();
-  }
-};
-
-GameUI.prototype.drawText = function(ctx, text, color, size, fontFamily, alignement, verticalAlignement, x, y, wrap, bold) {
-  var precFillStyle = ctx.fillStyle;
-  var precFont = ctx.font;
-  var precFilter = ctx.filter;
-
-  if(!Array.isArray(color)) {
-    ctx.fillStyle = color;
-  }
-
-  ctx.font = (bold ? "bold " : "") + size + "px " + fontFamily;
-  ctx.filter = "none";
-
-  if(wrap) {
-    text = this.wrapTextLines(ctx, text)["text"];
-  }
-
-  var lines = text.split('\n');
-
-  if(verticalAlignement == "center") {
-    y = (this.canvas.height / 2) - (size * lines.length / 2);
-  } else if(verticalAlignement == "top") {
-    y = 5;
-  } else if(verticalAlignement == "bottom") {
-    y = (this.canvas.height) - (size * lines.length) / 2 - size / 5;
-  }
-
-  for(var i = 0; i < lines.length; i++) {
-    var currentText = lines[i];
-
-    if(Array.isArray(color)) {
-      var colorIndex = i;
-
-      if(colorIndex > color.length - 1) {
-        colorIndex = color.length - 1;
-      }
-
-      ctx.fillStyle = color[colorIndex];
-    }
-
-    if(alignement == "center") {
-      ctx.fillText(currentText, Math.round((this.canvas.width / 2) - (ctx.measureText(currentText).width / 2)), Math.round(y + (size * i)));
-    } else if(alignement == "right") {
-      ctx.fillText(currentText, Math.round((this.canvas.width) - (ctx.measureText(currentText).width) - 15), Math.round(y + (size * i)));
-    } else if(alignement == "left") {
-      ctx.fillText(currentText, 5, Math.round(y + (size * i)));
-    } else {
-      ctx.fillText(currentText, Math.round(x), Math.round(y + (size * i)));
-    }
-  }
-
-  ctx.fillStyle = precFillStyle;
-  ctx.font = precFont;
-  ctx.filter = precFilter;
-
-  return {
-    x: x,
-    y: y,
-    height: size * lines.length
-  };
-};
-
-GameUI.prototype.drawTextBitmap = function(ctx, bitmapFontSet, text, size, x, y, wrap) {
-  if(bitmapFontSet == undefined || bitmapFontSet == null) {
-    this.preRenderedFont = {};
-    this.preRenderFont(GameConstants.Setting.CARS_TO_PRERENDER, GameConstants.Setting.FONT_SIZE * 2, "white", GameConstants.Setting.FONT_FAMILY);
-    bitmapFontSet = this.preRenderedFont;
-  }
-
-  if(wrap) {
-    var testCar = bitmapFontSet["A"];
-    text = this.wrapTextLines(ctx, text, testCar.width * (size / testCar.height), size)["text"];
-  }
-
-  var lines = text.split('\n');
-  var currentY = y;
-
-  for(var i = 0; i < lines.length; i++) {
-    var currentText = lines[i];
-    var currentX = x;
-
-    for(var j = 0; j < currentText.length; j++) {
-      var currentCar = currentText.charAt(j);
-
-      if(bitmapFontSet[currentCar] == undefined || bitmapFontSet[currentCar] == null) {
-        var currentCarBitmap = bitmapFontSet["?"];
-      } else {
-        var currentCarBitmap = bitmapFontSet[currentCar];
-      }
-
-      var widthBitmap = currentCarBitmap.width * (size / currentCarBitmap.height);
-      this.drawImageData(ctx, currentCarBitmap, currentX, currentY, widthBitmap, size, 0, 0, currentCarBitmap.width, currentCarBitmap.height);
-      currentX += widthBitmap;
-    }
-
-    if(currentText.length > 0) {
-      currentY += size;
-    }
-  }
-};
-
-GameUI.prototype.wrapText = function(text, limit) {
-  if(text.length > limit) {
-    var p = limit;
-
-    for(; p > 0 && text[p] != " "; p--);
-
-    if(p > 0) {
-      var left = text.substring(0, p);
-      var right = text.substring(p + 1);
-      return left + "\n" + this.wrapText(right, limit);
-    }
-  }
-
-  return text;
-};
-
-GameUI.prototype.wrapTextLines = function(ctx, text, width, fontSize) {
-  var lines = text.split("\n");
-  var newText = "";
-  var widthCar = width || ctx.measureText("A").width;
-  var nbCarLine = Math.round(this.canvas.width / widthCar);
-  var heightTotal = 0;
-
-  for(var i = 0; i < lines.length; i++) {
-    var lineWrap = this.wrapText(lines[i], nbCarLine);
-    newText += lineWrap;
-
-    if(i < lines.length - 1) {
-      newText += "\n";
-    }
-
-    for(var j = 0; j < lineWrap.split("\n").length; j++) {
-      heightTotal += parseFloat(fontSize);
-    }
-  }
-
-  return {
-    text: newText,
-    height: heightTotal
-  };
-};
-
-GameUI.prototype.drawMenu = function(ctx, buttons, text, color, size, fontFamily, alignement, x, wrap, func) {
-  var self = this;
-  
-  ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
-  ctx.fillRect(0, 0, self.canvas.width, self.canvas.height);
-
-  var heightText = self.wrapTextLines(ctx, text, null, size)["height"];
-  var heightButtons = 0;
-
-  if(buttons != null) {
-    if(self.lastKeyMenu == GameConstants.Key.UP) {
-      self.selectedButton--;
-    } else if(self.lastKeyMenu == GameConstants.Key.BOTTOM) {
-      self.selectedButton++;
-    }
-
-    if(self.selectedButton >= buttons.length) {
-      self.selectedButton = 0;
-    } else if(self.selectedButton < 0) {
-      self.selectedButton = buttons.length - 1;
-    }
-
-    for(var i = 0; i < buttons.length; i++) {
-      if(buttons[i].autoHeight) {
-        heightButtons += self.wrapTextLines(ctx, buttons[i].text, null, buttons[i].getFontSize(ctx))["height"] + 8;
-      } else {
-        heightButtons += buttons[i].height + 5;
-      }
-    }
-  }
-
-  var totalHeight = heightText + heightButtons;
-  var startY = self.canvas.height / 2 - totalHeight / 2 + 16;
-  var currentY = startY + heightText;
-
-  self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY, true);
-
-  var buttonEntered = false;
-
-  if(buttons != null) {
-    for(var i = 0; i < buttons.length; i++) {
-      buttons[i].y = currentY;
-
-      if(self.selectedButton == i) {
-        buttons[i].selected = true;
-      } else {
-        buttons[i].selected = false;
-      }
-
-      buttons[i].enable();
-      buttons[i].draw(self);
-
-      if(self.selectedButton == i && self.lastKeyMenu == GameConstants.Key.ENTER && buttons[i].triggerClick != null && !buttons[i].disabled) {
-        buttonEntered = true;
-        buttons[i].triggerClick();
-        break;
-      }
-
-      currentY += buttons[i].height + 8;
-    }
-  }
-
-  if(self.notificationMessage != undefined && self.notificationMessage != null && self.notificationMessage instanceof NotificationMessage && self.notificationMessage.foreGround && !buttonEntered) {
-    self.notificationMessage.draw(self);
-  }
-
-  if(func != null) {
-    func(true);
-  }
-
-  self.lastKeyMenu = -1;
 };
 
 GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur) {
@@ -1297,10 +1018,10 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, bl
           }
         }
 
-        this.drawImage(ctxTmp, imageLoc, caseX, caseY, caseWidth, caseHeight, null, null, null, null, eraseBelow, angle);
+        DrawUtils.drawImage(ctxTmp, this.imageLoader.get(imageLoc), caseX, caseY, caseWidth, caseHeight, null, null, null, null, eraseBelow, angle);
       }
 
-      this.drawImageData(ctx, canvasTmp, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height);
+      DrawUtils.drawImageData(ctx, canvasTmp, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height);
       ctxTmp.filter = "none";
     }
 
@@ -1308,35 +1029,6 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, bl
       this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight);
     }
   }
-};
-
-GameUI.prototype.drawArrow = function(ctx, fromx, fromy, tox, toy) {
-  var lineCap = ctx.lineCap;
-  var lineWidth = ctx.lineWidth;
-  var strokeStyle = ctx.strokeStyle;
-  var filter = ctx.filter;
-  ctx.lineCap = 'round';
-  ctx.lineWidth = 8;
-  ctx.strokeStyle = "#FF0000";
-  ctx.filter = "";
-
-  ctx.beginPath();
-  var headlen = 20;
-  var dx = tox - fromx;
-  var dy = toy - fromy;
-  var angle = Math.atan2(dy, dx);
-  ctx.moveTo(fromx, fromy);
-  ctx.lineTo(tox, toy);
-  ctx.moveTo(tox, toy);
-  ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
-  ctx.moveTo(tox, toy);
-  ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
-  ctx.stroke();
-
-  ctx.lineCap = lineCap;
-  ctx.lineWidth = lineWidth;
-  ctx.strokeStyle = strokeStyle;
-  ctx.filter = filter;
 };
 
 GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight) {
@@ -1380,10 +1072,10 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
         }
       }
   
-      this.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
+      DrawUtils.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
   
       if((this.currentPlayer == null && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) || this.currentPlayer == (i + 1)) && this.countBeforePlay >= 0 && (this.currentPlayer != null || (GameUtils.isFilterHueAvailable() && this.snakes.length > 2) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
-        this.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
+        DrawUtils.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
       }
     }
   }

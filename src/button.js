@@ -18,6 +18,7 @@
  */
 if(typeof(require) !== "undefined") {
   var GameConstants = require("./constants");
+  var DrawUtils = require('./drawUtils');
 }
 
 function Button(text, x, y, alignement, color, colorHover, colorDown, width, height, fontSize, fontFamily, fontColor, imgSrc, imageLoader, verticalAlignement) {
@@ -55,8 +56,8 @@ function ButtonImage(imgSrc, x, y, alignement, verticalAlignement, width, height
   return new Button(null, x, y, alignement, color, colorHover, null, width, height, null, null, null, imgSrc, imageLoader, verticalAlignement);
 }
   
-Button.prototype.draw = function(game) {
-  var canvas = game.canvas;
+Button.prototype.draw = function(ctx) {
+  var canvas = ctx.canvas;
   var ctx = canvas.getContext("2d");
   var precFillStyle = ctx.fillStyle;
   var precFont = ctx.font;
@@ -81,7 +82,7 @@ Button.prototype.draw = function(game) {
       this.height = imgHeight * 1.5;
     }
   } else if(this.text != null) {
-    var textWrapped = game.wrapTextLines(ctx, this.text, null, this.fontSize);
+    var textWrapped = DrawUtils.wrapTextLines(ctx, this.text, null, this.fontSize);
     var heightText = textWrapped["height"];
 
     if(this.autoWidth) {
@@ -149,18 +150,18 @@ Button.prototype.draw = function(game) {
     var textX = this.x + (this.width / 2) - (textSize.width / 2);
     var textY = this.y + this.fontSize + this.fontSize / 5;
     
-    game.drawText(ctx, this.text, this.fontColor, this.fontSize, this.fontFamily, (this.alignement == "center" ? "center" : "default"), "default", Math.round(textX), Math.round(textY), true);
+    DrawUtils.drawText(ctx, this.text, this.fontColor, this.fontSize, this.fontFamily, (this.alignement == "center" ? "center" : "default"), "default", Math.round(textX), Math.round(textY), true);
   }
 
   ctx.fillStyle = precFillStyle;
   ctx.font = precFont;
 
-  if(!this.init && game != null) {
+  if(!this.init && ctx != null) {
     var self = this;
     
-    game.canvas.addEventListener("mousemove", function mouseOverFunction(evt) {
+    ctx.canvas.addEventListener("mousemove", function mouseOverFunction(evt) {
       if(!self.disabled) {
-        if(self.isInside(self.getMousePos(game.canvas, evt))) {
+        if(self.isInside(self.getMousePos(ctx.canvas, evt))) {
           if(self.triggerHover != null && !self.disabled) {
             self.triggerHover();
           }
@@ -175,7 +176,7 @@ Button.prototype.draw = function(game) {
       }
     }, false);
     
-    game.canvas.addEventListener("click", function clickFunction(evt) {
+    ctx.canvas.addEventListener("click", function clickFunction(evt) {
       if(!self.disabled) {
         if(self.isInside(self.getMousePos(canvas, evt))) {
           if(self.triggerClick != null) {
@@ -190,7 +191,7 @@ Button.prototype.draw = function(game) {
       }
     }, false);
     
-    game.canvas.addEventListener("mousedown", function clickFunction(evt) {
+    ctx.canvas.addEventListener("mousedown", function clickFunction(evt) {
       if(!self.disabled) {
         if(self.isInside(self.getMousePos(canvas, evt))) {
           if(self.triggerDown != null) {
@@ -207,7 +208,7 @@ Button.prototype.draw = function(game) {
       }
     }, false);
     
-    game.canvas.addEventListener("mouseup", function clickFunction(evt) {
+    ctx.canvas.addEventListener("mouseup", function clickFunction(evt) {
       self.clicked = false;
     }, false);
   }
@@ -232,7 +233,7 @@ Button.prototype.isInside = function(pos) {
   return pos.x > this.x && pos.x < this.x + this.width && pos.y < this.y + this.height && pos.y > this.y;
 };
 
-Button.prototype.addClickAction = function(canvas, trigger) {
+Button.prototype.addClickAction = function(trigger) {
   this.triggerClick = trigger;
 };
 
@@ -240,7 +241,7 @@ Button.prototype.removeClickAction = function(self) {
   self.triggerClick = null;
 };
 
-Button.prototype.addMouseOverAction = function(game, trigger) {
+Button.prototype.addMouseOverAction = function(trigger) {
   this.triggerHover = trigger;
 };
 
@@ -248,7 +249,7 @@ Button.prototype.removeHoverAction = function(self) {
   self.triggerHover = null;
 };
 
-Button.prototype.addMouseDownAction = function(game, trigger) {
+Button.prototype.addMouseDownAction = function(trigger) {
   this.triggerDown = trigger;
 };
 
