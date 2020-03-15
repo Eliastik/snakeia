@@ -372,10 +372,10 @@ function connectToServer(url, port) {
         document.getElementById("authenticationServerContainer").innerHTML = "";
         var authent_frame = document.createElement("iframe");
         authent_frame.id = "authent_frame";
-        authent_frame.src = onlineClient.getURL() + "/authentication?lang=" + i18next.language;
+        authent_frame.src = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2);
         authent_frame.classList.add("frame-responsive");
         document.getElementById("authenticationServerContainer").appendChild(authent_frame);
-        document.getElementById("linkAuthenticationServer").href = onlineClient.getURL() + "/authentication?lang=" + i18next.language;
+        document.getElementById("linkAuthenticationServer").href = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2);
 
         onlineClient.autoReconnect(2000, function() {
           connectToServer(onlineClient.url, onlineClient.port);
@@ -2030,7 +2030,7 @@ function translateContent() {
     i18nList[i].innerHTML = i18next.t(i18nList[i].dataset.i18n);
   }
 
-  document.getElementById("dateTxt").innerHTML = i18next.t("menu.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(DATE_VERSION)) });
+  document.getElementById("dateTxt").innerHTML = i18next.t("menu.versionDate", { date: new Intl.DateTimeFormat(i18next.language.substr(0, 2)).format(new Date(DATE_VERSION)) });
 
   document.getElementById("heightGrid").placeholder = i18next.t("settings.placeholderHeight");
   document.getElementById("widthGrid").placeholder = i18next.t("settings.placeholderWidth");
@@ -2040,7 +2040,7 @@ function translateContent() {
   document.getElementById("appDownloadURLGet").setAttribute("aria-label", i18next.t("update.getURL"));
   document.getElementById("appUpdateChanges").setAttribute("aria-label", i18next.t("update.getChanges"));
 
-  document.getElementById("appUpdateDateLocalized").innerHTML = i18next.t("update.versionDate", { date: new Intl.DateTimeFormat(i18next.language).format(new Date(document.getElementById("appUpdateDate").innerHTML)) });
+  document.getElementById("appUpdateDateLocalized").innerHTML = i18next.t("update.versionDate", { date: new Intl.DateTimeFormat(i18next.language.substr(0, 2)).format(new Date(document.getElementById("appUpdateDate").innerHTML)) });
 
   document.getElementById("aiAssistantInfos").setAttribute("aria-label", i18next.t("settings.aiAssistantInfos"));
 }
