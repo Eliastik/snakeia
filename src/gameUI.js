@@ -540,7 +540,11 @@ GameUI.prototype.draw = function(renderBlur) {
 
     if(this.searchingPlayers && this.lastTime > 0) {
       this.timeStart -= Math.max(0, Date.now() - this.lastTime);
+    } else {
+      this.timeStart = 0;
     }
+
+    var nextGameText = (this.timeStart > 0 ? ("\n\n" + i18next.t("engine.servers.nextGameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : "");
 
     if(!renderBlur) {
       if(this.exited) {
@@ -590,16 +594,6 @@ GameUI.prototype.draw = function(renderBlur) {
         this.btnNo.addClickAction(function() {
           self.confirmExit = false;
           self.selectedButton = 0;
-        });
-      } else if(this.assetsLoaded && this.searchingPlayers) {
-        this.menu.set(this.onlineMaster ? [this.btnStartGame, this.btnQuit] : [this.btnQuit], i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : ""), "white");
-        
-        this.btnQuit.addClickAction(function() {
-          self.confirmExit = true;
-        });
-
-        this.btnStartGame.addClickAction(function() {
-          self.forceStart();
         });
       } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
         if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null) || this.currentPlayer != null)) {
@@ -658,7 +652,7 @@ GameUI.prototype.draw = function(renderBlur) {
           self.selectedButton = 0;
         });
       } else if(this.gameFinished) {
-        this.menu.set(this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], (this.grid.maze && this.gameMazeWin) ? i18next.t("engine.mazeWin") : i18next.t("engine.gameFinished"), (this.grid.maze && this.gameMazeWin) ? "#2ecc71" : "white");
+        this.menu.set(this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], (this.grid.maze && this.gameMazeWin) ? i18next.t("engine.mazeWin") : i18next.t("engine.gameFinished") + nextGameText, (this.grid.maze && this.gameMazeWin) ? "#2ecc71" : "white");
         
         this.btnRetry.addClickAction(function() {
           self.selectedButton = 0;
@@ -670,7 +664,7 @@ GameUI.prototype.draw = function(renderBlur) {
           self.selectedButton = 0;
         });
       } else if(this.scoreMax && this.snakes.length <= 1) {
-        this.menu.set(this.enableRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.scoreMax"), "#2ecc71");
+        this.menu.set(this.enableRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.scoreMax") + nextGameText, "#2ecc71");
         
         this.btnRetry.addClickAction(function() {
           self.selectedButton = 0;
@@ -686,7 +680,7 @@ GameUI.prototype.draw = function(renderBlur) {
           self.toggleFullscreen();
         });
       } else if(this.gameOver && this.snakes.length <= 1) {
-        this.menu.set(this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.gameOver"), "#E74C3C");
+        this.menu.set(this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.gameOver") + nextGameText, "#E74C3C");
 
         if(this.snakes[0].autoRetry && this.timeoutAutoRetry == null) {
           this.timeoutAutoRetry = setTimeout(function() {
@@ -709,6 +703,16 @@ GameUI.prototype.draw = function(renderBlur) {
             self.toggleFullscreen();
           });
         }
+      } else if(this.assetsLoaded && this.searchingPlayers) {
+        this.menu.set(this.onlineMaster ? [this.btnStartGame, this.btnQuit] : [this.btnQuit], i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : ""), "white");
+        
+        this.btnQuit.addClickAction(function() {
+          self.confirmExit = true;
+        });
+
+        this.btnStartGame.addClickAction(function() {
+          self.forceStart();
+        });
       } else if(this.paused && !this.gameOver && this.assetsLoaded) {
         this.menu.set(this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], i18next.t("engine.pause"), "white");
         

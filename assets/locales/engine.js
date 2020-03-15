@@ -99,6 +99,7 @@ i18next.addResourceBundle("fr", "translation", {
       "errorConnection": "Une erreur est survenue lors de la connexion au serveur.",
       "waitingPlayers": "En attente de joueurs…",
       "gameStart": "Début de la partie\ndans",
+      "nextGameStart": "Prochaine partie\ndans",
       "spectatorMode": "Mode spectateur",
       "startGame": "Commencer la partie"
     }
@@ -184,6 +185,7 @@ i18next.addResourceBundle("en", "translation", {
       "errorConnection": "An error has occurred when connecting to the server.",
       "waitingPlayers": "Waiting for players…",
       "gameStart": "Start of the game\nin",
+      "nextGameStart": "Next game\nin",
       "spectatorMode": "Spectator mode",
       "startGame": "Start the game"
     }
