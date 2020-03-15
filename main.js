@@ -483,9 +483,9 @@ function displayRooms() {
       document.getElementById("roomsOnlineListGroup").appendChild(noRoomFound);
     }
 
-    if(data != null && data.serverVersion != null && data.serverVersion != GameConstants.Setting.APP_VERSION) {
+    if(data != null && data.version != null && data.version != GameConstants.Setting.APP_VERSION) {
       document.getElementById("errorServerVersion").style.display = "block";
-      document.getElementById("errorServerVersionText").textContent = i18next.t("servers.errorServerVersion", { server_version: data.serverVersion, client_version: GameConstants.Setting.APP_VERSION });
+      document.getElementById("errorServerVersionText").textContent = i18next.t("servers.errorServerVersion", { server_version: data.version, client_version: GameConstants.Setting.APP_VERSION });
     }
       
     document.getElementById("loadingRoomsOnlineList").style.display = "none";
@@ -670,6 +670,7 @@ function displaySettings() {
   checkPlayer();
   checkFailSettings();
   checkMazeGrid();
+  resetForm(false);
 
   if(selectedMode == BATTLE_ROYALE_ONLINE) {
     document.getElementById("backToMenu").onclick = function() {
@@ -1009,6 +1010,25 @@ function validateSettings(returnValidation) {
   var numberIA = document.getElementById("numberIA").value;
   var battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
 
+  var minGridSize = 5;
+  var maxGridSize = 100;
+  var minSpeed = 1;
+  var maxSpeed = 100;
+
+  if(selectedMode == BATTLE_ROYALE_ONLINE && onlineClient.serverSettings) {
+    var serverSettings = onlineClient.serverSettings;
+
+    minGridSize = serverSettings.minGridSize != null ? serverSettings.minGridSize : minGridSize;
+    maxGridSize = serverSettings.maxGridSize != null ? serverSettings.maxGridSize : maxGridSize;
+    minSpeed = serverSettings.minSpeed != null ? serverSettings.minSpeed : minSpeed;
+    maxSpeed = serverSettings.maxSpeed != null ? serverSettings.maxSpeed : maxSpeed;
+  }
+
+  document.getElementById("invalidHeight").textContent = i18next.t("settings.invalidSize", { min: minGridSize, max: maxGridSize });
+  document.getElementById("invalidWidth").textContent = i18next.t("settings.invalidSize", { min: minGridSize, max: maxGridSize });
+  document.getElementById("invalidSpeed").textContent = i18next.t("settings.invalidSpeed", { min: minSpeed, max: maxSpeed });
+  document.getElementById("invalidCustomSpeed").textContent = i18next.t("settings.invalidSpeed", { min: minSpeed, max: maxSpeed });
+
   if(document.getElementById("aiAssistant").checked) {
     var playerHumanType = PLAYER_HYBRID_HUMAN_AI;
   } else {
@@ -1017,7 +1037,7 @@ function validateSettings(returnValidation) {
 
   var formValidated = true;
 
-  if(heightGrid.trim() == "" || isNaN(heightGrid) || heightGrid < 5 || heightGrid > 100) {
+  if(heightGrid.trim() == "" || isNaN(heightGrid) || heightGrid < minGridSize || heightGrid > maxGridSize) {
     formValidated = false;
 
     if(!returnValidation) {
@@ -1028,7 +1048,7 @@ function validateSettings(returnValidation) {
     heightGrid = parseInt(heightGrid);
   }
 
-  if(widthGrid.trim() == "" || isNaN(widthGrid) || widthGrid < 5 || widthGrid > 100) {
+  if(widthGrid.trim() == "" || isNaN(widthGrid) || widthGrid < minGridSize || widthGrid > maxGridSize) {
     formValidated = false;
 
     if(!returnValidation) {
@@ -1039,7 +1059,7 @@ function validateSettings(returnValidation) {
     widthGrid = parseInt(widthGrid);
   }
 
-  if(speed != "custom" && (speed.trim() == "" || isNaN(speed) || speed < 1 || speed > 100)) {
+  if(speed != "custom" && (speed.trim() == "" || isNaN(speed) || speed < minSpeed || speed > maxSpeed)) {
     formValidated = false;
 
     if(!returnValidation) {
@@ -1050,7 +1070,7 @@ function validateSettings(returnValidation) {
     speed = parseInt(speed);
   }
 
-  if(speed == "custom" && (customSpeed.trim() == "" || isNaN(customSpeed) || customSpeed < 1 || customSpeed > 100)) {
+  if(speed == "custom" && (customSpeed.trim() == "" || isNaN(customSpeed) || customSpeed < minSpeed || customSpeed > maxSpeed)) {
     formValidated = false;
 
     if(!returnValidation) {

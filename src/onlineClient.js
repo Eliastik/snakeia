@@ -25,6 +25,7 @@ function OnlineClient() {
   this.url;
   this.port;
   this.socket;
+  this.serverSettings;
   this.currentRoom;
   this.game;
   this.intervalReconnect;
@@ -107,6 +108,7 @@ OnlineClient.prototype.displayRooms = function(callback) {
       callback(true, data);
       ioRooms.close();
       self.loadingRooms = false;
+      self.serverSettings = data.settings;
     });
   
     ioRooms.once("error", function(data) {

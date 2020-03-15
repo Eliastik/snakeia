@@ -117,7 +117,7 @@
                 <div class="form-row">
                   <div class="col-sm-5 col-5">
                     <input type="number" id="heightGrid" class="form-control" min="5" max="100" placeholder="Hauteur" value="20">
-                    <div class="invalid-feedback" id="invalidHeight" data-i18n="settings.invalidHeight">
+                    <div class="invalid-feedback" id="invalidHeight">
                       Cette valeur doit être comprise entre 5 et 100
                     </div>
                   </div>
@@ -126,7 +126,7 @@
                   </div>
                   <div class="col-sm-5 col-5">
                     <input type="number" id="widthGrid" class="form-control" min="5" max="100" placeholder="Largeur" value="20">
-                    <div class="invalid-feedback" id="invalidWidth" data-i18n="settings.invalidWidth">
+                    <div class="invalid-feedback" id="invalidWidth">
                       Cette valeur doit être comprise entre 5 et 100
                     </div>
                   </div>
@@ -149,9 +149,7 @@
                   <option value="25" data-i18n="settings.speedSelect.25">25 – Extrêmement lente</option>
                   <option value="custom" data-i18n="settings.speedSelect.custom">Vitesse personnalisée…</option>
                 </select>
-                <div class="invalid-feedback" id="invalidSpeed" data-i18n="settings.invalidSpeed">
-                  Cette valeur doit être au moins égale ou supérieure à 1
-                </div>
+                <div class="invalid-feedback" id="invalidSpeed"></div>
                 <div class="custom-control custom-checkbox" id="progressiveSpeedDiv">
                   <input type="checkbox" class="custom-control-input" id="progressiveSpeed">
                   <label class="custom-control-label" for="progressiveSpeed" data-i18n="settings.progressiveSpeed">Augmenter la vitesse progressivement</label>
@@ -164,9 +162,7 @@
               <label for="customSpeed" class="col-sm-4 col-form-label" data-i18n="settings.customSpeed">Vitesse personnalisée :</label>
               <div class="col-sm-8">
                 <input type="number" id="customSpeed" placeholder="Entrez la vitesse…" class="form-control" min="1" value="8">
-                <div class="invalid-feedback" id="invalidCustomSpeed" data-i18n="settings.invalidCustomSpeed">
-                  Cette valeur doit être au moins égale ou supérieure à 1
-                </div>
+                <div class="invalid-feedback" id="invalidCustomSpeed"></div>
                 <small id="customSpeedHelp" class="form-text text-muted" data-i18n="settings.customSpeedHelp">Plus le nombre est élevé, plus la vitesse du jeu est lente, et inversement</small>
               </div>
             </div>
