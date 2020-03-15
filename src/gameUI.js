@@ -463,11 +463,11 @@ GameUI.prototype.draw = function(renderBlur) {
     ctx.font = this.fontSize + "px " + GameConstants.Setting.FONT_FAMILY;
     ctx.fillStyle = "black";
 
-    this.btnFullScreen.draw(this);
+    this.btnFullScreen.draw(this.canvasCtx);
 
     if(this.enablePause) {
       this.btnPause.x = this.btnFullScreen.x - this.btnPause.width - 10;
-      this.btnPause.draw(this);
+      this.btnPause.draw(this.canvasCtx);
     }
 
     if(this.assetsLoaded && !this.errorOccurred) {
@@ -530,10 +530,10 @@ GameUI.prototype.draw = function(renderBlur) {
     }
 
     if(this.snakes != null && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 || this.currentPlayer != null) && !this.spectatorMode) {
-      this.btnTopArrow.draw(this);
-      this.btnBottomArrow.draw(this);
-      this.btnRightArrow.draw(this);
-      this.btnLeftArrow.draw(this);
+      this.btnTopArrow.draw(this.canvasCtx);
+      this.btnBottomArrow.draw(this.canvasCtx);
+      this.btnRightArrow.draw(this.canvasCtx);
+      this.btnLeftArrow.draw(this.canvasCtx);
     }
 
     this.disableAllButtons();
@@ -755,12 +755,12 @@ GameUI.prototype.draw = function(renderBlur) {
         }
       }
     
+      this.menu.draw(this.canvasCtx);
+    
       if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {
-        this.notificationMessage.draw(this, this.btnCloseNotification);
+        this.notificationMessage.draw(this.canvasCtx, this.btnCloseNotification);
         this.notificationMessage.enableCloseButton();
       }
-    
-      this.menu.draw(this.canvasCtx);
     }
 
     if(this.displayFPS) {
