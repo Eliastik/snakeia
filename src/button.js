@@ -18,7 +18,7 @@
  */
 if(typeof(require) !== "undefined") {
   var GameConstants = require("./constants");
-  var DrawUtils = require('./drawUtils');
+  var DrawUtils = require("./drawUtils");
 }
 
 function Button(text, x, y, alignement, color, colorHover, colorDown, width, height, fontSize, fontFamily, fontColor, imgSrc, imageLoader, verticalAlignement) {

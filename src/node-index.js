@@ -38,5 +38,6 @@ module.exports = {
     GameUI: require("./gameUI"),
     ImageLoader: require("./imageLoader"),
     NotificationMessage: require("./notificationMessage"),
-    DrawUtils: require('./drawUtils')
+    DrawUtils: require('./drawUtils'),
+    Menu: require('./menu')
 };

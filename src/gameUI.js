@@ -21,12 +21,13 @@ if(typeof(require) !== "undefined") {
   var GameUtils = require("./gameUtils");
   var GameConstants = require("./constants");
   var Position = require("./position");
-  var ImageLoader = require('./imageLoader');
-  var Buttons = require('./button');
+  var ImageLoader = require("./imageLoader");
+  var Buttons = require("./button");
   var Button = Buttons.Button;
   var ButtonImage = Buttons.ButtonImage;
-  var NotificationMessage = require('./notificationMessage');
-  var DrawUtils = require('./drawUtils');
+  var NotificationMessage = require("./notificationMessage");
+  var DrawUtils = require("./drawUtils");
+  var Menu = require("./menu");
 }
 
 function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
@@ -80,8 +81,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.spectatorMode = null;
   this.onlineMaster = false;
   // Menus state variables
-  this.lastKeyMenu = -1;
-  this.selectedButton = 0;
+  this.menu = new Menu(null, "", "white", null, null, "center");
   this.confirmReset = false;
   this.confirmExit = false;
   this.getInfos = false;
@@ -448,6 +448,8 @@ GameUI.prototype.draw = function(renderBlur) {
     this.btnFullScreen.width = this.headerHeight * 0.85;
     this.btnFullScreen.height = this.btnFullScreen.width;
     this.btnFullScreen.y = (this.headerHeight / 2) - (this.btnFullScreen.height / 2);
+    this.menu.fontSize = this.fontSize;
+    this.menu.disable();
 
     if(renderBlur) {
       ctx.filter = "blur(5px)";
@@ -520,7 +522,7 @@ GameUI.prototype.draw = function(renderBlur) {
       }
     } else if(!this.assetsLoaded && !renderBlur) {
       var percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
-      DrawUtils.drawMenu(ctx, [], i18next.t("engine.loading") + "\n" + percentLoaded + "%", "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true);
+      this.menu.set([], i18next.t("engine.loading") + "\n" + percentLoaded + "%", "white");
     }
 
     if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
@@ -536,63 +538,68 @@ GameUI.prototype.draw = function(renderBlur) {
 
     this.disableAllButtons();
 
+    if(this.searchingPlayers && this.lastTime > 0) {
+      this.timeStart -= Math.max(0, Date.now() - this.lastTime);
+    }
+
     if(!renderBlur) {
       if(this.exited) {
-        DrawUtils.drawMenu(ctx, this.fullscreen ? [this.btnExitFullScreen] : [], i18next.t("engine.exited"), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnExitFullScreen.addClickAction(function() {
-            self.toggleFullscreen();
-          });
+        this.menu.set(this.fullscreen ? [this.btnExitFullScreen] : [], i18next.t("engine.exited"), "white");
+        
+        this.btnExitFullScreen.addClickAction(function() {
+          self.toggleFullscreen();
         });
       } else if(this.errorOccurred) {
-       DrawUtils.drawMenu(ctx, [this.btnQuit], this.imageLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-         self.btnQuit.addClickAction(function() {
-           self.confirmExit = false;
-           self.selectedButton = 0;
-           self.exit();
-         });
-       });
+        this.menu.set([this.btnQuit], this.imageLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error"), "#E74C3C");
+        
+        this.btnQuit.addClickAction(function() {
+          self.confirmExit = false;
+          self.selectedButton = 0;
+          self.exit();
+        });
      } else if(this.getInfosGame) {
-        DrawUtils.drawMenu(ctx, [this.btnOK], (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : ""), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-          self.btnOK.addClickAction(function() {
-            self.getInfosGame = false;
-            self.selectedButton = 0;
-          });
+        this.menu.set([this.btnOK],
+        (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : ""),
+        "white");
+        
+        this.btnOK.addClickAction(function() {
+          self.getInfosGame = false;
+          self.selectedButton = 0;
         });
       } else if(this.getInfos) {
-        DrawUtils.drawMenu(ctx, [this.btnInfosGame, this.btnOK], i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + i18next.t("engine.aboutScreen.versionAndDate", { version: GameConstants.Setting.APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(GameConstants.Setting.DATE_VERSION)), interpolation: { escapeValue: false } }), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-          self.btnInfosGame.addClickAction(function() {
-            self.getInfosGame = true;
-            self.selectedButton = 0;
-          });
+        this.menu.set([this.btnInfosGame, this.btnOK], i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + i18next.t("engine.aboutScreen.versionAndDate", { version: GameConstants.Setting.APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(GameConstants.Setting.DATE_VERSION)), interpolation: { escapeValue: false } }), "white");
+        
+        this.btnInfosGame.addClickAction(function() {
+          self.getInfosGame = true;
+          self.selectedButton = 0;
+        });
 
-          self.btnOK.addClickAction(function() {
-            self.getInfos = false;
-            self.selectedButton = 0;
-          });
+        this.btnOK.addClickAction(function() {
+          self.getInfos = false;
+          self.selectedButton = 0;
         });
       } else if(this.confirmExit) {
-        DrawUtils.drawMenu(ctx, [this.btnNo, this.btnYes], i18next.t("engine.exitConfirm"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnYes.addClickAction(function() {
-            self.confirmExit = false;
-            self.selectedButton = 0;
-            self.exit();
-          });
-
-          self.btnNo.addClickAction(function() {
-            self.confirmExit = false;
-            self.selectedButton = 0;
-          });
+        this.menu.set([this.btnNo, this.btnYes], i18next.t("engine.exitConfirm"), "#E74C3C");
+        
+        this.btnYes.addClickAction(function() {
+          self.confirmExit = false;
+          self.selectedButton = 0;
+          self.exit();
+        });
+        
+        this.btnNo.addClickAction(function() {
+          self.confirmExit = false;
+          self.selectedButton = 0;
         });
       } else if(this.assetsLoaded && this.searchingPlayers) {
-        if(this.lastTime > 0) this.timeStart -= Math.max(0, Date.now() - this.lastTime);
-        DrawUtils.drawMenu(ctx, this.onlineMaster ? [this.btnStartGame, this.btnQuit] : [this.btnQuit], i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : ""), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnQuit.addClickAction(function() {
-            self.confirmExit = true;
-          });
+        this.menu.set(this.onlineMaster ? [this.btnStartGame, this.btnQuit] : [this.btnQuit], i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : ""), "white");
+        
+        this.btnQuit.addClickAction(function() {
+          self.confirmExit = true;
+        });
 
-          self.btnStartGame.addClickAction(function() {
-            self.forceStart();
-          });
+        this.btnStartGame.addClickAction(function() {
+          self.forceStart();
         });
       } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
         if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null) || this.currentPlayer != null)) {
@@ -610,119 +617,119 @@ GameUI.prototype.draw = function(renderBlur) {
           }
 
           if(this.countBeforePlay > 0) {
-            DrawUtils.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-              self.btnEnterFullScreen.addClickAction(function() {
-                self.toggleFullscreen();
-              });
+            this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]));
+            
+            this.btnEnterFullScreen.addClickAction(function() {
+              self.toggleFullscreen();
             });
           } else {
-            DrawUtils.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready") + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]), this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-              self.btnEnterFullScreen.addClickAction(function() {
-                self.toggleFullscreen();
-              });
-            }, true);
-          }
-        } else {
-          if(this.countBeforePlay > 0) {
-            DrawUtils.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay, "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-              self.btnEnterFullScreen.addClickAction(function() {
-                self.toggleFullscreen();
-              });
-            });
-          } else {
-            DrawUtils.drawMenu(ctx, !this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready"), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-              self.btnEnterFullScreen.addClickAction(function() {
-                self.toggleFullscreen();
-              });
-            }, true);
-          }
-        }
-      } else if(this.confirmReset && !this.gameOver) {
-        DrawUtils.drawMenu(ctx, [this.btnNo, this.btnYes], i18next.t("engine.resetConfirm"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnYes.addClickAction(function() {
-            self.confirmReset = false;
-            self.selectedButton = 0;
-            self.reset();
-          });
-
-          self.btnNo.addClickAction(function() {
-            self.confirmReset = false;
-            self.selectedButton = 0;
-          });
-        });
-      } else if(this.gameFinished) {
-        DrawUtils.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], (this.grid.maze && this.gameMazeWin) ? i18next.t("engine.mazeWin") : i18next.t("engine.gameFinished"), (this.grid.maze && this.gameMazeWin) ? "#2ecc71" : "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnRetry.addClickAction(function() {
-            self.selectedButton = 0;
-            self.reset();
-          });
-
-          self.btnQuit.addClickAction(function() {
-            self.confirmExit = true;
-            self.selectedButton = 0;
-          });
-        });
-      } else if(this.scoreMax && this.snakes.length <= 1) {
-        DrawUtils.drawMenu(ctx, this.enableRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.scoreMax"), "#2ecc71", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, true, function() {
-          self.btnRetry.addClickAction(function() {
-            self.selectedButton = 0;
-            self.reset();
-          });
-
-          self.btnQuit.addClickAction(function() {
-            self.confirmExit = true;
-            self.selectedButton = 0;
-          });
-
-          self.btnExitFullScreen.addClickAction(function() {
-            self.toggleFullscreen();
-          });
-        });
-      } else if(this.gameOver && this.snakes.length <= 1) {
-        DrawUtils.drawMenu(ctx, this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.gameOver"), "#E74C3C", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-          if(self.snakes[0].autoRetry && self.timeoutAutoRetry == null) {
-            self.timeoutAutoRetry = setTimeout(function() {
-              self.selectedButton = 0;
-              self.reset();
-              self.timeoutAutoRetry = null;
-            }, 500);
-          } else {
-            self.btnRetry.addClickAction(function() {
-              self.selectedButton = 0;
-              self.reset();
-            });
-
-            self.btnQuit.addClickAction(function() {
-              self.confirmExit = true;
-              self.selectedButton = 0;
-            });
-
-            self.btnExitFullScreen.addClickAction(function() {
+            this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready") + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]));
+            
+            this.btnEnterFullScreen.addClickAction(function() {
               self.toggleFullscreen();
             });
           }
+        } else {
+          if(this.countBeforePlay > 0) {
+            this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay, "white");
+            
+            this.btnEnterFullScreen.addClickAction(function() {
+              self.toggleFullscreen();
+            });
+          } else {
+            this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready"), "white");
+            
+            this.btnEnterFullScreen.addClickAction(function() {
+              self.toggleFullscreen();
+            });
+          }
+        }
+      } else if(this.confirmReset && !this.gameOver) {
+        this.menu.set([this.btnNo, this.btnYes], i18next.t("engine.resetConfirm"), "#E74C3C");
+        
+        this.btnYes.addClickAction(function() {
+          self.confirmReset = false;
+          self.selectedButton = 0;
+          self.reset();
         });
-      } else if(this.paused && !this.gameOver && this.assetsLoaded) {
-        DrawUtils.drawMenu(ctx, this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], i18next.t("engine.pause"), "white", this.fontSize, GameConstants.Setting.FONT_FAMILY, "center", null, false, function() {
-          self.btnContinue.addClickAction(function() {
+
+        this.btnNo.addClickAction(function() {
+          self.confirmReset = false;
+          self.selectedButton = 0;
+        });
+      } else if(this.gameFinished) {
+        this.menu.set(this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], (this.grid.maze && this.gameMazeWin) ? i18next.t("engine.mazeWin") : i18next.t("engine.gameFinished"), (this.grid.maze && this.gameMazeWin) ? "#2ecc71" : "white");
+        
+        this.btnRetry.addClickAction(function() {
+          self.selectedButton = 0;
+          self.reset();
+        });
+
+        this.btnQuit.addClickAction(function() {
+          self.confirmExit = true;
+          self.selectedButton = 0;
+        });
+      } else if(this.scoreMax && this.snakes.length <= 1) {
+        this.menu.set(this.enableRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.scoreMax"), "#2ecc71");
+        
+        this.btnRetry.addClickAction(function() {
+          self.selectedButton = 0;
+          self.reset();
+        });
+
+        this.btnQuit.addClickAction(function() {
+          self.confirmExit = true;
+          self.selectedButton = 0;
+        });
+
+        this.btnExitFullScreen.addClickAction(function() {
+          self.toggleFullscreen();
+        });
+      } else if(this.gameOver && this.snakes.length <= 1) {
+        this.menu.set(this.enableRetry && !this.snakes[0].autoRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.gameOver"), "#E74C3C");
+
+        if(this.snakes[0].autoRetry && this.timeoutAutoRetry == null) {
+          this.timeoutAutoRetry = setTimeout(function() {
             self.selectedButton = 0;
-            self.start();
+            self.reset();
+            self.timeoutAutoRetry = null;
+          }, 500);
+        } else {
+          this.btnRetry.addClickAction(function() {
+            self.selectedButton = 0;
+            self.reset();
           });
 
-          self.btnRetry.addClickAction(function() {
-            self.confirmReset = true;
-            self.selectedButton = 0;
-          });
-
-          self.btnQuit.addClickAction(function() {
+          this.btnQuit.addClickAction(function() {
             self.confirmExit = true;
             self.selectedButton = 0;
           });
 
-          self.btnAbout.addClickAction(function() {
-            self.getInfos = true;
-            self.selectedButton = 0;
+          this.btnExitFullScreen.addClickAction(function() {
+            self.toggleFullscreen();
           });
+        }
+      } else if(this.paused && !this.gameOver && this.assetsLoaded) {
+        this.menu.set(this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], i18next.t("engine.pause"), "white");
+        
+        this.btnContinue.addClickAction(function() {
+          self.selectedButton = 0;
+          self.start();
+        });
+
+        this.btnRetry.addClickAction(function() {
+          self.confirmReset = true;
+          self.selectedButton = 0;
+        });
+
+        this.btnQuit.addClickAction(function() {
+          self.confirmExit = true;
+          self.selectedButton = 0;
+        });
+
+        this.btnAbout.addClickAction(function() {
+          self.getInfos = true;
+          self.selectedButton = 0;
         });
       } else if(this.assetsLoaded) {
         this.btnFullScreen.enable();
@@ -752,6 +759,8 @@ GameUI.prototype.draw = function(renderBlur) {
         this.notificationMessage.draw(this, this.btnCloseNotification);
         this.notificationMessage.enableCloseButton();
       }
+    
+      this.menu.draw(this.canvasCtx);
     }
 
     if(this.displayFPS) {

@@ -17,7 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 if(typeof(require) !== "undefined") {
-  var GameConstants = require('./constants');
+  var GameConstants = require("./constants");
 }
 
 var DrawUtils = {
@@ -101,7 +101,7 @@ var DrawUtils = {
       text = this.wrapTextLines(ctx, text)["text"];
     }
     
-    var lines = text.split('\n');
+    var lines = text.split("\n");
 
     if(verticalAlignement == "center") {
       y = (ctx.canvas.height / 2) - (size * lines.length / 2);
@@ -157,7 +157,7 @@ var DrawUtils = {
       text = this.wrapTextLines(ctx, text, testCar.width * (size / testCar.height), size)["text"];
     }
 
-    var lines = text.split('\n');
+    var lines = text.split("\n");
     var currentY = y;
 
     for(var i = 0; i < lines.length; i++) {
@@ -223,77 +223,12 @@ var DrawUtils = {
       height: heightTotal
     };
   },
-  drawMenu: function(ctx, buttons, text, color, size, fontFamily, alignement, x, wrap, func) {
-    var self = this;
-    
-    ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    var heightText = self.wrapTextLines(ctx, text, null, size)["height"];
-    var heightButtons = 0;
-
-    if(buttons != null) {
-      if(self.lastKeyMenu == GameConstants.Key.UP) {
-        self.selectedButton--;
-      } else if(self.lastKeyMenu == GameConstants.Key.BOTTOM) {
-        self.selectedButton++;
-      }
-
-      if(self.selectedButton >= buttons.length) {
-        self.selectedButton = 0;
-      } else if(self.selectedButton < 0) {
-        self.selectedButton = buttons.length - 1;
-      }
-
-      for(var i = 0; i < buttons.length; i++) {
-        if(buttons[i].autoHeight) {
-          heightButtons += self.wrapTextLines(ctx, buttons[i].text, null, buttons[i].getFontSize(ctx))["height"] + 8;
-        } else {
-          heightButtons += buttons[i].height + 5;
-        }
-      }
-    }
-
-    var totalHeight = heightText + heightButtons;
-    var startY = ctx.canvas.height / 2 - totalHeight / 2 + 16;
-    var currentY = startY + heightText;
-
-    self.drawText(ctx, text, color, size, fontFamily, alignement, "default", x, startY, true);
-
-    if(buttons != null) {
-      for(var i = 0; i < buttons.length; i++) {
-        buttons[i].y = currentY;
-
-        if(self.selectedButton == i) {
-          buttons[i].selected = true;
-        } else {
-          buttons[i].selected = false;
-        }
-
-        buttons[i].enable();
-        buttons[i].draw(ctx);
-
-        if(self.selectedButton == i && self.lastKeyMenu == GameConstants.Key.ENTER && buttons[i].triggerClick != null && !buttons[i].disabled) {
-          buttons[i].triggerClick();
-          break;
-        }
-
-        currentY += buttons[i].height + 8;
-      }
-    }
-
-    if(func != null) {
-      func(true);
-    }
-
-    self.lastKeyMenu = -1;
-  },
   drawArrow: function(ctx, fromx, fromy, tox, toy) {
     var lineCap = ctx.lineCap;
     var lineWidth = ctx.lineWidth;
     var strokeStyle = ctx.strokeStyle;
     var filter = ctx.filter;
-    ctx.lineCap = 'round';
+    ctx.lineCap = "round";
     ctx.lineWidth = 8;
     ctx.strokeStyle = "#FF0000";
     ctx.filter = "";

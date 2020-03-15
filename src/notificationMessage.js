@@ -18,9 +18,9 @@
  */
 if(typeof(require) !== "undefined") {
   var GameConstants = require("./constants");
-  var Buttons = require('./button');
+  var Buttons = require("./button");
   var Button = Buttons.Button;
-  var DrawUtils = require('./drawUtils');
+  var DrawUtils = require("./drawUtils");
 }
 
 function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround, disableAnimation, closeButton) {

@@ -41,5 +41,6 @@ module.exports = {
     ImageLoader: require("./imageLoader"),
     NotificationMessage: require("./notificationMessage"),
     OnlineClient: require("./onlineClient"),
-    DrawUtils: require('./drawUtils')
+    DrawUtils: require('./drawUtils'),
+    Menu: require('./menu')
 };
