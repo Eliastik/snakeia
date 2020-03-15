@@ -25,7 +25,7 @@ if(typeof(require) !== "undefined") {
   var Grid = require("./grid");
 }
 
-function Snake(direction, length, grid, player, aiLevel, autoRetry) {
+function Snake(direction, length, grid, player, aiLevel, autoRetry, name) {
   this.direction = direction == undefined ? GameConstants.Direction.RIGHT : direction;
   this.initialDirection = direction == undefined ? GameConstants.Direction.RIGHT : direction;
   this.initialLength = length == undefined ? 3 : length;
@@ -43,6 +43,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry) {
   this.gameOver = false;
   this.scoreMax = false;
   this.color;
+  this.name = name == undefined ? "Snake" : name;
 
   this.init();
 }
