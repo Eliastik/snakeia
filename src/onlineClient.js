@@ -104,24 +104,24 @@ OnlineClient.prototype.displayRooms = function(callback) {
     var self = this;
   
     ioRooms.once("rooms", function(data) {
-      callback(data);
+      callback(true, data);
       ioRooms.close();
       self.loadingRooms = false;
     });
   
-    ioRooms.once("error", function() {
-      callback({ error: true });
+    ioRooms.once("error", function(data) {
+      callback(false, data);
       ioRooms.close();
       self.loadingRooms = false;
     });
   
     ioRooms.once("connect_error", function() {
-      callback({ error: true });
+      callback(false, data);
       ioRooms.close();
       self.loadingRooms = false;
     });
   } else {
-    callback({ error: true });
+    callback(false, null);
   }
 };
 
@@ -148,7 +148,8 @@ OnlineClient.prototype.createRoom = function(data, callback) {
         callback({
           success: false,
           connection_error: true,
-          code: null
+          code: null,
+          errorCode: (data != null ? data : null)
         });
       }
 
@@ -156,19 +157,21 @@ OnlineClient.prototype.createRoom = function(data, callback) {
       self.creatingRoom = false;
     });
 
-    ioCreate.once("error", function() {
+    ioCreate.once("error", function(data) {
       callback({
         success: false,
-        connection_error: true
+        connection_error: true,
+        errorCode: (data != null ? data : null)
       });
       ioCreate.close();
       self.creatingRoom = false;
     });
 
-    ioCreate.once("connect_error", function() {
+    ioCreate.once("connect_error", function(data) {
       callback({
         success: false,
-        connection_error: true
+        connection_error: true,
+        errorCode: (data != null ? data : null)
       });
       ioCreate.close();
       self.creatingRoom = false;

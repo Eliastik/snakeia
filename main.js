@@ -412,13 +412,17 @@ function displayRooms() {
   document.getElementById("errorRoomJoin").style.display = "none";
   document.getElementById("errorServerVersion").style.display = "none";
 
-  onlineClient.displayRooms(function(data) { // Request rooms data
+  onlineClient.displayRooms(function(success, data) { // Request rooms data
     document.getElementById("roomsOnlineListGroup").innerHTML = "";
     document.getElementById("errorRoomsList").style.display = "none";
     document.getElementById("refreshRooms").disabled = "";
   
-    if(data.rooms != null && data.rooms.error) {
-      document.getElementById("errorRoomsList").style.display = "block";
+    if(!success) {
+      if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+        connectToServer(onlineClient.url, onlineClient.port);
+      } else {
+        document.getElementById("errorRoomsList").style.display = "block";
+      }
     } else if(data.rooms != null && Object.keys(data.rooms).length > 0) {
       for(var i = 0; i < Object.keys(data.rooms).length; i++) {
         var room = data.rooms[Object.keys(data.rooms)[i]];
@@ -755,7 +759,6 @@ function displayAuthentication() {
   document.getElementById("connectingToServer").style.display = "none";
   document.getElementById("roomsOnlineJoin").style.display = "none";
   document.getElementById("authenticationServer").style.display = "block";
-  displayRooms();
 }
 
 function displayLevelList(player) {
@@ -1123,34 +1126,43 @@ function validateSettings(returnValidation) {
         enableAI: false,
         private: document.getElementById("privateGame").checked
       }, function(data) {
+        var errorCode = data.errorCode;
+
         if(data.connection_error) {
-          alert(i18next.t("servers.connectionError"));
-          displayServerList();
+          if(errorCode == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+            connectToServer(onlineClient.url, onlineClient.port);
+          } else {
+            alert(i18next.t("servers.connectionError"));
+            displayServerList();
+          }
         } else {
           if(data.success) {
             joinRoom(data.code);
           } else {
-            var errorCode = data.errorCode;
-            var errorCode_text = "";
-
-            switch(errorCode) {
-              case GameConstants.Error.INVALID_SETTINGS:
-                errorCode_text = i18next.t("servers.errorRoomCreationReason_invalidSettings");
-                break;
-              case GameConstants.Error.MAX_ROOM_LIMIT_REACHED:
-                errorCode_text = i18next.t("servers.errorRoomCreationReason_maxRoomLimitReached");
-                break;
-              case GameConstants.Error.ALREADY_CREATED_ROOM:
-                errorCode_text = i18next.t("servers.errorRoomCreationReason_alreadyCreatedRoom");
-                break;
-              default:
-                errorCode_text = i18next.t("servers.errorReason_unknown");
-                break;
+            if(errorCode == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+              connectToServer(onlineClient.url, onlineClient.port);
+            } else {
+              var errorCode_text = "";
+  
+              switch(errorCode) {
+                case GameConstants.Error.INVALID_SETTINGS:
+                  errorCode_text = i18next.t("servers.errorRoomCreationReason_invalidSettings");
+                  break;
+                case GameConstants.Error.MAX_ROOM_LIMIT_REACHED:
+                  errorCode_text = i18next.t("servers.errorRoomCreationReason_maxRoomLimitReached");
+                  break;
+                case GameConstants.Error.ALREADY_CREATED_ROOM:
+                  errorCode_text = i18next.t("servers.errorRoomCreationReason_alreadyCreatedRoom");
+                  break;
+                default:
+                  errorCode_text = i18next.t("servers.errorReason_unknown");
+                  break;
+              }
+  
+              document.getElementById("errorRoomCreation").style.display = "block";
+              document.getElementById("errorRoomCreationReason").textContent = errorCode_text;
+              displayRoomsList();
             }
-
-            document.getElementById("errorRoomCreation").style.display = "block";
-            document.getElementById("errorRoomCreationReason").textContent = errorCode_text;
-            displayRoomsList();
           }
         }
       });
