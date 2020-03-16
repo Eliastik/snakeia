@@ -368,7 +368,7 @@ function connectToServer(url, port) {
     document.getElementById("connectingToServer").style.display = "none";
 
     if(!success) {
-      if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+      if(data == GameConstants.Error.AUTHENTICATION_REQUIRED || data == GameConstants.Error.BANNED) {
         document.getElementById("authenticationServerContainer").innerHTML = "";
         var authent_frame = document.createElement("iframe");
         authent_frame.id = "authent_frame";
@@ -377,9 +377,11 @@ function connectToServer(url, port) {
         document.getElementById("authenticationServerContainer").appendChild(authent_frame);
         document.getElementById("linkAuthenticationServer").href = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2);
 
-        onlineClient.autoReconnect(2000, function() {
-          connectToServer(onlineClient.url, onlineClient.port);
-        });
+        if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+          onlineClient.autoReconnect(2000, function() {
+            connectToServer(onlineClient.url, onlineClient.port);
+          });
+        }
 
         displayAuthentication();
       } else {
