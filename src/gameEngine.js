@@ -293,8 +293,13 @@ GameEngine.prototype.tick = function() {
             if(self.grid.isDeadPosition(headSnakePos)) {
               self.snakes[i].setGameOver();
             } else {
-              if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT) {
-                self.snakes[i].score++;
+              if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT || self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
+                if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT) {
+                  self.snakes[i].score++;
+                } else if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
+                  self.snakes[i].score += 3;
+                }
+                
                 self.reactor.dispatchEvent("onScoreIncreased");
                 self.snakes[i].insert(headSnakePos);
 

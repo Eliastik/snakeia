@@ -184,6 +184,8 @@ Grid.prototype.valToChar = function(value) {
       return "#";
     case GameConstants.CaseType.SURROUNDED:
       return "/";
+    case GameConstants.CaseType.FRUIT_GOLD:
+      return "X";
   }
 };
 
@@ -196,6 +198,9 @@ Grid.prototype.getImageCase = function(position) {
       break;
     case GameConstants.CaseType.FRUIT:
       imageRes = "assets/images/fruit.png";
+      break;
+    case GameConstants.CaseType.FRUIT_GOLD:
+      imageRes = "assets/images/fruit_gold.png";
       break;
   }
 
@@ -231,7 +236,7 @@ Grid.prototype.getRandomPosition = function() {
 Grid.prototype.setFruit = function() {
   var tried = [1];
 
-  if(this.fruitPos != null && this.get(this.fruitPos) == GameConstants.CaseType.FRUIT) {
+  if(this.fruitPos != null && (this.get(this.fruitPos) == GameConstants.CaseType.FRUIT || this.get(this.fruitPos) == GameConstants.CaseType.FRUIT_GOLD)) {
     this.set(GameConstants.CaseType.EMPTY, this.fruitPos);
   }
 
@@ -314,7 +319,7 @@ Grid.prototype.isCaseSurrounded = function(position, fill, foundVals, forbiddenV
     complete.push(currentPosition);
   }
 
-  if(fill && (this.get(position) == GameConstants.CaseType.EMPTY || this.get(position) == GameConstants.CaseType.FRUIT)) {
+  if(fill && (this.get(position) == GameConstants.CaseType.EMPTY || this.get(position) == GameConstants.CaseType.FRUIT) || this.get(position) == GameConstants.CaseType.FRUIT_GOLD) {
     this.set(GameConstants.CaseType.SURROUNDED, position);
   }
 
