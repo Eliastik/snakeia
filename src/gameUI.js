@@ -264,35 +264,35 @@ GameUI.prototype.getPlayer = function(num, type) {
 };
 
 GameUI.prototype.reset = function() {
-  this.controller.reset();
+  this.controller && this.controller.reset();
 };
 
 GameUI.prototype.start = function() {
-  this.controller.start();
+  this.controller && this.controller.start();
 };
 
 GameUI.prototype.forceStart = function() {
-  this.controller.forceStart();
+  this.controller && this.controller.forceStart();
 };
 
 GameUI.prototype.stop = function() {
-  this.controller.stop();
+  this.controller && this.controller.stop();
 };
 
 GameUI.prototype.pause = function() {
-  this.controller.pause();
+  this.controller && this.controller.pause();
 };
 
 GameUI.prototype.kill = function() {
-  this.controller.kill();
+  this.controller && this.controller.kill();
 };
 
 GameUI.prototype.exit = function() {
-  this.controller.exit();
+  this.controller && this.controller.exit();
 };
 
 GameUI.prototype.tick = function() {
-  this.controller.tick();
+  this.controller && this.controller.tick();
 };
 
 GameUI.prototype.setKill = function() {
@@ -375,7 +375,7 @@ GameUI.prototype.loadAssets = function() {
 
   if(!this.errorOccurred && this.outputType != GameConstants.OutputType.TEXT) {
     this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/clock.png", "assets/images/fruit_gold.png"], function() {
-      if(self.imageLoader.hasError == true) {
+      if(self.imageLoader.hasError) {
         self.errorOccurred = true;
       } else {
         self.assetsLoaded = true;
