@@ -404,6 +404,7 @@ document.getElementById("cancelAuthenticationToServer").onclick = function() {
   document.getElementById("authenticationServerContainer").innerHTML = "";
   document.getElementById("connectingToServer").style.display = "none";
   onlineClient.disconnect();
+  onlineClient.stopAutoReconnect();
   displayServerList();
 };
 

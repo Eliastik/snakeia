@@ -66,7 +66,7 @@ OnlineClient.prototype.connect = function(url, port, callback) {
 };
 
 OnlineClient.prototype.autoReconnect = function(time, callback) {
-  if(this.intervalReconnect) clearInterval(this.intervalReconnect);
+  this.stopAutoReconnect();
   this.disconnect();
 
   var self = this;
@@ -74,11 +74,17 @@ OnlineClient.prototype.autoReconnect = function(time, callback) {
   this.intervalReconnect = setInterval(function() {
     self.connect(self.url, self.port, function(success) {
       if(success) {
-        clearInterval(self.intervalReconnect);
+        self.stopAutoReconnect();
         callback();
       }
     });
   }, time);
+};
+
+OnlineClient.prototype.stopAutoReconnect = function() {
+  if(this.intervalReconnect) {
+    clearInterval(this.intervalReconnect);
+  }
 };
 
 OnlineClient.prototype.disconnect = function() {
