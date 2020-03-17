@@ -65,6 +65,7 @@ const CACHE_URLS = [
   "assets/images/body.png",
   "assets/images/wall.png",
   "assets/images/fruit.png",
+  "assets/images/fruit_gold.png",
   "assets/images/body_angle_1.png",
   "assets/images/body_angle_2.png",
   "assets/images/body_angle_3.png",
@@ -80,6 +81,8 @@ const CACHE_URLS = [
   "assets/images/right.png",
   "assets/images/bottom.png",
   "assets/images/trophy.png",
+  "assets/images/trophy_silver.png",
+  "assets/images/trophy_bronze.png",
   "assets/images/clock.png",
   "assets/images/close.png"
 ];

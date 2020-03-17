@@ -95,6 +95,7 @@ i18next.addResourceBundle("fr", "translation", {
     "mazeWin": "Bien joué !",
     "mazeModeMin": "Mode labyrinthe",
     "onlineMode": "Jeu en ligne",
+    "ranking": "Classement",
     "servers": {
       "errorConnection": "Une erreur est survenue lors de la connexion au serveur.",
       "waitingPlayers": "En attente de joueurs…",
@@ -181,6 +182,7 @@ i18next.addResourceBundle("en", "translation", {
     "mazeWin": "Good game!",
     "mazeModeMin": "Maze mode",
     "onlineMode": "Online game",
+    "ranking": "Ranking",
     "servers": {
       "errorConnection": "An error has occurred when connecting to the server.",
       "waitingPlayers": "Waiting for players…",

@@ -28,6 +28,7 @@ if(typeof(require) !== "undefined") {
   var NotificationMessage = require("./notificationMessage");
   var DrawUtils = require("./drawUtils");
   var Menu = require("./menu");
+  var GameRanking = require('./gameRanking');
 }
 
 function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
@@ -87,6 +88,8 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.getInfos = false;
   this.getInfosGame = false;
   this.timeoutAutoRetry = null;
+  // Game ranking
+  this.gameRanking = new GameRanking();
   // DOM elements and others settings
   this.textarea;
   this.canvas;
@@ -374,7 +377,7 @@ GameUI.prototype.loadAssets = function() {
   var self = this;
 
   if(!this.errorOccurred && this.outputType != GameConstants.OutputType.TEXT) {
-    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/clock.png", "assets/images/fruit_gold.png"], function() {
+    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/trophy_silver.png", "assets/images/trophy_bronze.png", "assets/images/clock.png", "assets/images/fruit_gold.png"], function() {
       if(self.imageLoader.hasError) {
         self.errorOccurred = true;
       } else {
@@ -535,6 +538,9 @@ GameUI.prototype.draw = function(renderBlur) {
       this.btnRightArrow.draw(this.canvasCtx);
       this.btnLeftArrow.draw(this.canvasCtx);
     }
+
+    this.gameRanking.set(this.snakes, this.fontSize, this.headerHeight);
+    this.gameRanking.draw(this.canvasCtx, this.imageLoader);
 
     this.disableAllButtons();
 
