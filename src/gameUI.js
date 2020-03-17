@@ -433,6 +433,7 @@ GameUI.prototype.draw = function(renderBlur) {
   } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
     var ctx = this.canvasCtx;
     var displayBestScore = false;
+    var currentPlayer = this.getCurrentPlayer();
     var renderBlur = renderBlur == undefined ? false : renderBlur;
     this.fontSize = GameConstants.Setting.FONT_SIZE;
     this.headerHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
@@ -516,7 +517,7 @@ GameUI.prototype.draw = function(renderBlur) {
           }
         }
 
-        this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, renderBlur);
+        this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, renderBlur, currentPlayer);
       }
 
       if(this.timerToDisplay != undefined && this.timerToDisplay != null && !isNaN(this.timerToDisplay) && this.timerToDisplay >= 0) {
@@ -540,7 +541,10 @@ GameUI.prototype.draw = function(renderBlur) {
     }
 
     this.gameRanking.set(this.snakes, this.fontSize, this.headerHeight);
-    this.gameRanking.draw(this.canvasCtx, this.imageLoader);
+
+    if(!this.gameFinished && !this.gameOver) {
+      this.gameRanking.draw(this.canvasCtx, this, currentPlayer);
+    }
 
     this.disableAllButtons();
 
@@ -766,6 +770,10 @@ GameUI.prototype.draw = function(renderBlur) {
       }
     
       this.menu.draw(this.canvasCtx);
+
+      if(this.gameFinished || this.gameOver) {
+        this.gameRanking.draw(this.canvasCtx, this, currentPlayer);
+      }
     
       if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {
         this.notificationMessage.draw(this.canvasCtx, this.btnCloseNotification);
@@ -849,7 +857,22 @@ GameUI.prototype.toString = function() {
   return (this.grid != null ? this.grid.toString() : "") + "\n" + (this.snakes != null && this.snakes.length <= 1 ? i18next.t("engine.score") + " : " + (this.snakes != null ? this.snakes[0].score : "") : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
 };
 
-GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur) {
+GameUI.prototype.getCurrentPlayer = function() {
+  if(this.snakes != null) {
+    var nbPlayers = this.getNBPlayer(GameConstants.PlayerType.HUMAN);
+    var nbPlayersHybrid = this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI);
+  
+    for(var i = 0; i < this.snakes.length; i++) {
+      if((this.currentPlayer == null && nbPlayers <= 1 && nbPlayersHybrid <= 1 && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) || this.currentPlayer == (i + 1)) {
+        return i;
+      }
+    }
+  }
+
+  return -1;
+};
+
+GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, blur, currentPlayer) {
   var canvasTmp = document.createElement("canvas");
   canvasTmp.width = this.canvas.width;
   canvasTmp.height = this.canvas.height;
@@ -1045,12 +1068,12 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, bl
     }
 
     if(this.snakes.length > 1) {
-      this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight);
+      this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight, currentPlayer);
     }
   }
 };
 
-GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight) {
+GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeight, currentPlayer) {
   var numPlayer = 0;
   var numAI = 0;
 
@@ -1093,7 +1116,7 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
   
       DrawUtils.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
   
-      if((this.currentPlayer == null && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) || this.currentPlayer == (i + 1)) && this.countBeforePlay >= 0 && (this.currentPlayer != null || (GameUtils.isFilterHueAvailable() && this.snakes.length > 2) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
+      if((currentPlayer == i && this.countBeforePlay >= 0 && (this.currentPlayer != null || (GameUtils.isFilterHueAvailable() && this.snakes.length > 2)) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
         DrawUtils.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
       }
     }

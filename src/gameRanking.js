@@ -30,10 +30,16 @@ function GameRanking(snakes, fontSize, fontFamily, headerHeight, backgroundColor
   this.headerHeight = headerHeight == undefined ? GameConstants.Setting.HEADER_HEIGHT_DEFAULT : headerHeight;
   this.closed = false;
   this.init = this.init == undefined ? false : this.init;
+  this.overflow = this.init == undefined ? false : this.overflow;
+  this.back = this.back == undefined ? false : this.back;
+  this.timeLastFrame = this.timeLastFrame == undefined ? Date.now() : this.timeLastFrame;
+  this.offsetY = this.offsetY == undefined ? 0 : this.offsetY;
+  this.totalTime = this.totalTime == undefined ? 0 : this.totalTime;
 }
 
-GameRanking.prototype.draw = function(ctx, imageLoader) {
+GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
   if(this.snakes != null) {
+    var imageLoader = ui.imageLoader;
     var canvas = ctx.canvas;
     ctx.save();
 
@@ -41,12 +47,22 @@ GameRanking.prototype.draw = function(ctx, imageLoader) {
     var maxSizeName = ctx.measureText(title).width;
 
     var scores = [];
+    var numPlayer = 0;
+    var numAI = 0;
 
     ctx.font = (this.fontSize / 1.5) + "px " + this.fontFamily;
+    var sizeNumber = ctx.measureText("" + this.snakes.length).width + 15;
 
     for(var i = 0; i < this.snakes.length; i++) {
       var snake = this.snakes[i];
-      var text = snake.name + " × " + snake.score;
+
+      if(snake.player == GameConstants.PlayerType.HUMAN || snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
+        numPlayer++;
+      } else {
+        numAI++;
+      }
+
+      var text = snake.name + " × " + snake.score + " (" + ((currentPlayer == i ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
       var sizeText = ctx.measureText(text).width + 30;
 
       if(sizeText > maxSizeName) maxSizeName = sizeText;
@@ -60,38 +76,80 @@ GameRanking.prototype.draw = function(ctx, imageLoader) {
       };
     }
 
-    var width = maxSizeName + 50;
+    var width = maxSizeName + sizeNumber + 15;
     var height = canvas.height - this.headerHeight;
 
     ctx.fillStyle = "rgba(75, 75, 75, 0.5)";
     ctx.fillRect(0, this.headerHeight, width, height);
     ctx.font = this.fontSize + "px " + this.fontFamily;
 
-    var yTitle = this.headerHeight + this.fontSize;
-    
-    DrawUtils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.75)", this.fontSize, this.fontFamily, "default", null, (width / 2) - (ctx.measureText(title).width / 2), yTitle, false, true);
+    var yTitle = this.headerHeight + this.fontSize - this.offsetY;
+
+    if(yTitle - this.fontSize >= this.headerHeight) {
+      DrawUtils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.75)", this.fontSize, this.fontFamily, "default", null, (width / 2) - (ctx.measureText(title).width / 2), yTitle, false, true);
+    }
 
     var ranking = scores.sort(function(a, b) {
       return b.score - a.score;
     });
     
     var currentY = yTitle + this.fontSize / 1.5;
+    var lastScore = ranking[0].score;
+    this.overflow = false;
+
+    var offsetTime = Date.now() - this.timeLastFrame;
+    this.timeLastFrame = Date.now();
 
     for(var i = 0; i < ranking.length; i++) {
-      switch(i) {
-        case 0:
-          DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy.png"), 5, currentY, this.fontSize, this.fontSize);
-          break;
-        case 1:
-          DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy_silver.png"), 5, currentY, this.fontSize, this.fontSize);
-          break;
-        case 2:
-          DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy_bronze.png"), 5, currentY, this.fontSize, this.fontSize);
-          break;
+      if(currentY > this.headerHeight) {
+        switch(i) {
+          case 0:
+            DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy.png"), 5, currentY, this.fontSize, this.fontSize);
+            break;
+          case 1:
+            DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy_silver.png"), 5, currentY, this.fontSize, this.fontSize);
+            break;
+          case 2:
+            DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy_bronze.png"), 5, currentY, this.fontSize, this.fontSize);
+            break;
+          default:
+            DrawUtils.drawText(ctx, "" + (i + 1), "rgba(255, 255, 255, 0.75)", this.fontSize / 1.5, this.fontFamily, null, null, (this.fontSize / 1.5) / 2 + 5, currentY + (this.fontSize / 1.5));
+            break;
+        }
+
+        DrawUtils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.75)" : "rgba(255, 255, 255, 0.75)"), this.fontSize / 1.5, this.fontFamily, null, null, 5 + sizeNumber + this.fontSize / 1.5, currentY + (this.fontSize / 1.5));
       }
 
-      DrawUtils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.75)" : "rgba(255, 255, 255, 0.75)"), this.fontSize / 1.5, this.fontFamily, null, null, 30 + this.fontSize / 1.5, currentY + (this.fontSize / 1.5));
       currentY += this.fontSize + 5;
+      lastScore = ranking[i].score;
+
+      if(currentY > canvas.height && !this.back) {
+        this.totalTime += offsetTime;
+
+        if(this.totalTime > 5000) {
+          this.overflow = true;
+        }
+
+        break;
+      } else if(i == this.snakes.length - 1) {
+        if(!this.back) this.totalTime = 0;
+        this.back = true;
+      }
+    }
+
+    if(this.back) {
+      this.totalTime += offsetTime;
+
+      if(this.totalTime > 5000) {
+        if(this.offsetY > 0) {
+          this.offsetY -= offsetTime / 20;
+        } else {
+          this.back = false;
+          this.totalTime = 0;
+        }
+      }
+    } else if(this.overflow) {
+      this.offsetY += offsetTime / 20;
     }
 
     ctx.restore();
