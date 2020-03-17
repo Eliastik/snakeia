@@ -173,7 +173,7 @@ GameUI.prototype.init = function() {
     });
 
     this.btnRank.addClickAction(function() {
-      if(self.gameRanking.closed) {
+      if(self.gameRanking.closing || self.gameRanking.closed) {
         self.gameRanking.open();
       } else {
         self.gameRanking.close();
@@ -499,7 +499,7 @@ GameUI.prototype.draw = function(renderBlur) {
       this.btnRank.draw(this.canvasCtx);
     }
 
-    if(this.gameRanking.closed) {
+    if(this.gameRanking.closing || this.gameRanking.closed) {
       this.btnRank.color = "rgba(0, 0, 0, 0)";
     } else {
       this.btnRank.color = this.btnRank.colorHover;
