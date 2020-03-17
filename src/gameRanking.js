@@ -28,9 +28,8 @@ function GameRanking(snakes, fontSize, fontFamily, headerHeight, backgroundColor
   this.fontFamily = fontFamily || GameConstants.Setting.FONT_FAMILY;
   this.backgroundColor = backgroundColor == undefined ? "rgba(44, 62, 80, 0.75)" : backgroundColor;
   this.headerHeight = headerHeight == undefined ? GameConstants.Setting.HEADER_HEIGHT_DEFAULT : headerHeight;
-  this.closed = false;
-  this.init = this.init == undefined ? false : this.init;
-  this.overflow = this.init == undefined ? false : this.overflow;
+  this.closed = this.closed == undefined ? false : this.closed;
+  this.overflow = this.overflow == undefined ? false : this.overflow;
   this.back = this.back == undefined ? false : this.back;
   this.timeLastFrame = this.timeLastFrame == undefined ? Date.now() : this.timeLastFrame;
   this.offsetY = this.offsetY == undefined ? 0 : this.offsetY;
@@ -38,7 +37,7 @@ function GameRanking(snakes, fontSize, fontFamily, headerHeight, backgroundColor
 }
 
 GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
-  if(this.snakes != null) {
+  if(this.snakes != null && !this.closed) {
     var imageLoader = ui.imageLoader;
     var canvas = ctx.canvas;
     ctx.save();
@@ -153,6 +152,12 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
     }
 
     ctx.restore();
+  } else {
+    this.overflow = false;
+    this.back = false;
+    this.timeLastFrame = Date.now();
+    this.offsetY = 0;
+    this.totalTime = 0;
   }
 };
 
