@@ -75,8 +75,11 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
         score: snake.score,
         gameOver: snake.gameOver,
         text: text,
+        rank: 0,
         id: i
       };
+
+      lastScore = snake.score;
     }
 
     var width = maxSizeName + sizeNumber + 15;
@@ -95,9 +98,21 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
     var ranking = scores.sort(function(a, b) {
       return b.score - a.score;
     });
+
+    var rank = 0;
+    var lastScore = 0;
+
+    for(var i = 0; i < ranking.length; i++) {
+      if(ranking[i].score < lastScore) {
+        rank++;
+      }
+
+      ranking[i].rank = rank;
+
+      lastScore = ranking[i].score;
+    }
     
     var currentY = yTitle + this.fontSize / 1.5;
-    var lastScore = ranking[0].score;
     this.overflow = false;
 
     var offsetTime = Date.now() - this.timeLastFrame;
@@ -105,7 +120,7 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
 
     for(var i = 0; i < ranking.length; i++) {
       if(currentY > this.headerHeight) {
-        switch(i) {
+        switch(ranking[i].rank) {
           case 0:
             DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
             break;
@@ -116,7 +131,7 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
             DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy_bronze.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
             break;
           default:
-            DrawUtils.drawText(ctx, "" + (i + 1), "rgba(255, 255, 255, 0.75)", this.fontSize / 1.5, this.fontFamily, null, null, (this.fontSize / 1.5) / 2 + 5 - this.offsetX, currentY + (this.fontSize / 1.5));
+            DrawUtils.drawText(ctx, "" + (rank + 1), "rgba(255, 255, 255, 0.75)", this.fontSize / 1.5, this.fontFamily, null, null, (this.fontSize / 1.5) / 2 + 5 - this.offsetX, currentY + (this.fontSize / 1.5));
             break;
         }
 
@@ -124,7 +139,6 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
       }
 
       currentY += this.fontSize + 5;
-      lastScore = ranking[i].score;
 
       if(currentY > canvas.height && !this.back) {
         this.totalTime += offsetTime;
@@ -163,14 +177,14 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
       this.closed = false;
     } else {
       if(this.closing) {
-        this.offsetX += offsetTime / 5;
+        this.offsetX += offsetTime / 3;
   
         if(Math.abs(this.offsetX) >= width) {
           this.closing = false;
           this.closed = true;
         }
       } else if(this.opening) {
-        this.offsetX -= offsetTime / 5;
+        this.offsetX -= offsetTime / 3;
   
         if(this.offsetX <= 0) {
           this.offsetX = 0;

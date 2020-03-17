@@ -100,6 +100,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.headerHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
   this.timerToDisplay;
   this.bestScoreToDisplay;
+  this.isFilterHueAvailable = DrawUtils.isFilterHueAvailable();
   // Intervals, timeouts, frames
   this.intervalCountFPS;
   // Buttons
@@ -655,13 +656,13 @@ GameUI.prototype.draw = function(renderBlur) {
           }
 
           if(this.countBeforePlay > 0) {
-            this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]));
+            this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + (playerHuman != null ? ("\n" + (this.isFilterHueAvailable && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (this.isFilterHueAvailable && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]));
             
             this.btnEnterFullScreen.addClickAction(function() {
               self.toggleFullscreen();
             });
           } else {
-            this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready") + (playerHuman != null ? ("\n" + (GameUtils.isFilterHueAvailable() && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (GameUtils.isFilterHueAvailable() && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]));
+            this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready") + (playerHuman != null ? ("\n" + (this.isFilterHueAvailable && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (this.isFilterHueAvailable && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]));
             
             this.btnEnterFullScreen.addClickAction(function() {
               self.toggleFullscreen();
@@ -1155,7 +1156,7 @@ GameUI.prototype.drawSnakeInfos = function(ctx, totalWidth, caseWidth, caseHeigh
   
       DrawUtils.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
   
-      if((currentPlayer == i && this.countBeforePlay >= 0 && (this.currentPlayer != null || (GameUtils.isFilterHueAvailable() && this.snakes.length > 2)) || (!GameUtils.isFilterHueAvailable() && this.snakes.length > 1))) {
+      if((currentPlayer == i && this.countBeforePlay >= 0 && (this.currentPlayer != null || (this.isFilterHueAvailable && this.snakes.length > 2)) || (!this.isFilterHueAvailable && this.snakes.length > 1))) {
         DrawUtils.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
       }
     }

@@ -253,6 +253,23 @@ var DrawUtils = {
   },
   clear: function(ctx) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  },
+  isFilterHueAvailable: function() {
+    var canvas = document.createElement("canvas");
+    canvas.width = 5;
+    canvas.height = 5;
+    var ctx = canvas.getContext("2d");
+  
+    ctx.fillStyle = "#FF0000";
+    ctx.filter = "hue-rotate(90deg)";
+    ctx.fillRect(0, 0, 5, 5);
+    var color = ctx.getImageData(0, 0, 1, 1).data;
+  
+    if(color[0] == 255 && color[1] == 0 && color[2] == 0) {
+      return false;
+    }
+  
+    return true;
   }
 };
 
