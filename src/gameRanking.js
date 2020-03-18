@@ -86,14 +86,14 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
     var width = maxSizeName + sizeNumber + 15;
     var height = canvas.height - this.headerHeight;
 
-    ctx.fillStyle = "rgba(75, 75, 75, 0.5)";
+    ctx.fillStyle = "rgba(75, 75, 75, 0.35)";
     ctx.fillRect(-this.offsetX, this.headerHeight, width, height);
     ctx.font = this.fontSize + "px " + this.fontFamily;
 
     var yTitle = this.headerHeight + this.fontSize - this.offsetY;
 
     if(yTitle - this.fontSize >= this.headerHeight) {
-      DrawUtils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.75)", this.fontSize, this.fontFamily, "default", null, (width / 2) - (ctx.measureText(title).width / 2) - this.offsetX, yTitle, false, true);
+      DrawUtils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (width / 2) - (ctx.measureText(title).width / 2) - this.offsetX, yTitle, false, true);
     }
 
     var ranking = scores.sort(function(a, b) {
@@ -134,10 +134,10 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
               break;
           }
         } else {
-          DrawUtils.drawText(ctx, "" + (rank + 1), "rgba(255, 255, 255, 0.75)", this.fontSize / 1.5, this.fontFamily, null, null, (this.fontSize / 1.5) / 2 + 5 - this.offsetX, currentY + (this.fontSize / 1.5));
+          DrawUtils.drawText(ctx, "" + (rank + 1), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, this.fontFamily, null, null, (this.fontSize / 1.5) / 2 + 5 - this.offsetX, currentY + (this.fontSize / 1.5));
         }
 
-        DrawUtils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.75)" : "rgba(255, 255, 255, 0.75)"), this.fontSize / 1.5, this.fontFamily, null, null, 5 + sizeNumber + this.fontSize / 1.5 - this.offsetX, currentY + (this.fontSize / 1.5));
+        DrawUtils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.5)" : "rgba(255, 255, 255, 0.5)"), this.fontSize / 1.5, this.fontFamily, null, null, 5 + sizeNumber + this.fontSize / 1.5 - this.offsetX, currentY + (this.fontSize / 1.5));
       }
 
       currentY += this.fontSize + 5;
