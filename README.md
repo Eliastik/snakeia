@@ -14,7 +14,7 @@ Game written in pure JavaScript and object oriented.
 
 ## About this game
 
-* Version: 2.0
+* Version: 2.0.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -29,6 +29,9 @@ Game written in pure JavaScript and object oriented.
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 
 ## Changelog
+
+* Version 2.0.1 (3/18/2020) :
+  - Fixed online mode authentication
 
 * Version 2.0 (3/18/2020) :
   - Added an online game mode! This is the Battle Royale mode playable online. Servers are already opened and can be used. Check the repository [SnakeIA Server](https://github.com/Eliastik/snakeia-server) for more informations.
@@ -154,7 +157,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## À propos du jeu
 
-* Version du jeu : 2.0
+* Version du jeu : 2.0.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -169,6 +172,9 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 
 ## Journal des changements
+
+* Version 2.0.1 (3/18/2020) :
+  - Correction de l'authentification au mode de jeu en ligne
 
 * Version 2.0 (18/03/2020) :
   - Ajout d'un mode de jeu en ligne ! Il s'agit du mode Battle Royale jouable en ligne. Des serveurs sont déjà ouverts et peuvent être utilisés. Plus d'informations sur le dépôt [SnakeIA Server](https://github.com/Eliastik/snakeia-server).
