@@ -5,6 +5,8 @@
 
 A Snake version with an artificial intelligence. This version has many game modes. You can play against the AI, or let it play alone. A Battle Royale mode is also available, this mode sees between 2 and 100 AI fight! Many settings are available to vary the games. A Levels mode (for the player and the AI) is also available, it's a series of level with a particular goal to achieve (get a minimum score, get a score in time, …). Downloadable levels are available.
 
+An online game mode is also available! Game servers are already opened so you can play online with others players. This repository hosts the client and the game engine used by the server program. Check the repository [SnakeIA Server](https://github.com/Eliastik/snakeia-server) for more informations.
+
 Game written in pure JavaScript and object oriented.
 
 * Online version of this game: [www.eliastiksofts.com/snakeia/demo](http://www.eliastiksofts.com/snakeia/demo/)
@@ -12,13 +14,14 @@ Game written in pure JavaScript and object oriented.
 
 ## About this game
 
-* Version: 1.5
+* Version: 2.0
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
 ### Credits
 
 * Uses the JavaScript library [Lowlight.Astar](https://github.com/lowlighter/astar) under [MIT](https://opensource.org/licenses/mit-license.php) license
+* Uses the JavaScript library [Socket.IO client](https://github.com/socketio/socket.io-client) under [MIT](https://github.com/socketio/socket.io-client/blob/master/LICENSE) license
 * Uses the JavaScript library [i18next](https://github.com/i18next/i18next) (with the module [i18next-browser-languageDetector](https://github.com/i18next/i18next-browser-languageDetector)) under [MIT](https://opensource.org/licenses/mit-license.php) license for the translation engine
 * Uses the CSS framework [Bootstrap 4](https://getbootstrap.com/) and the theme [Flat UI](https://designmodo.github.io/Flat-UI/)
 * Uses the CSS library [balloon.css](https://kazzkiq.github.io/balloon.css/) under [MIT](https://github.com/kazzkiq/balloon.css/blob/master/LICENSE) license
@@ -26,6 +29,10 @@ Game written in pure JavaScript and object oriented.
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 
 ## Changelog
+
+* Version 2.0 (3/18/2020) :
+  - Added an online game mode! This is the Battle Royale mode playable online. Servers are already opened and can be used. Check the repository [SnakeIA Server](https://github.com/Eliastik/snakeia-server) for more informations.
+  - Many fixes and improvements, although every effort has been made for the online game mode.
 
 * Version 1.5 (1/31/2020) :
   - Performance improvement (multi-threading);
@@ -130,12 +137,15 @@ Then to compile:
 
 * Dev mode: `npm run build-dev`
 * Prod mode: `npm run build`
+* Watch mode: `npm run watch`
 
 This will compile the JavaScript code into the sub-directory "dist".
 
 # Français
 
 Une version du Snake dotée d'une intelligence artificielle. Cette version est dotée de nombreux modes de jeu. Vous pouvez notamment jouer contre l'IA, ou la laisser jouer seule. Un mode Battle Royale est également disponible, ce mode voit s'affronter entre 2 et 100 IA ! De nombreux paramétrages sont disponibles pour varier les parties. Un mode Niveaux (pour le joueur et l'IA) est également disponible, il s'agit d'un série de niveau dotés d'un objectif particulier à accomplir (obtenir un score minimal, obtenir un score en un certain temps, …). Des niveaux téléchargeables sont disponibles.
+
+Un mode de jeu en ligne est disponible ! Des serveurs sont déjà ouverts pour que vous puissiez jouer avec d'autres joueurs. Ce dépôt fourni le client ainsi que le moteur de jeu utilisé par le programme serveur. Plus d'informations sur le dépôt [SnakeIA Server](https://github.com/Eliastik/snakeia-server).
 
 Jeu programmé en JavaScript pur et en orienté objet.
 
@@ -144,13 +154,14 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## À propos du jeu
 
-* Version du jeu : 1.5
+* Version du jeu : 2.0
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
 ### Crédits
 
 * Utilise la bibliothèque logicielle JavaScript [Lowlight.Astar](https://github.com/lowlighter/astar) sous licence [MIT](https://opensource.org/licenses/mit-license.php)
+* Utilise la bibliothèque logicielle JavaScript [Socket.IO client](https://github.com/socketio/socket.io-client) sous licence [MIT](https://github.com/socketio/socket.io-client/blob/master/LICENSE)
 * Utilise la bibliothèque logicielle JavaScript [i18next](https://github.com/i18next/i18next) (avec le module [i18next-browser-languageDetector](https://github.com/i18next/i18next-browser-languageDetector)) sous licence [MIT](https://opensource.org/licenses/mit-license.php) pour le moteur de traduction
 * Utilise le framework CSS [Bootstrap 4](https://getbootstrap.com/) et le thème [Flat UI](https://designmodo.github.io/Flat-UI/)
 * Utilise la bibliothèque logicielle CSS [balloon.css](https://kazzkiq.github.io/balloon.css/) sous licence [MIT](https://github.com/kazzkiq/balloon.css/blob/master/LICENSE)
@@ -158,6 +169,10 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 
 ## Journal des changements
+
+* Version 2.0 (18/03/2020) :
+  - Ajout d'un mode de jeu en ligne ! Il s'agit du mode Battle Royale jouable en ligne. Des serveurs sont déjà ouverts et peuvent être utilisés. Plus d'informations sur le dépôt [SnakeIA Server](https://github.com/Eliastik/snakeia-server).
+  - De nombreuses corrections et améliorations, bien que tous les efforts ait été portés sur le mode de jeu en ligne.
 
 * Version 1.5 (31/01/2020) :
   - Amélioration des performances (multi-threading) ;
@@ -262,6 +277,7 @@ Puis pour compiler :
 
 * Mode développement : `npm run build-dev`
 * Mode production : `npm run build`
+* Mode automatique : `npm run watch`
 
 Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 
@@ -269,10 +285,9 @@ Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 
 ### À faire (ou idées) :
 
-* Jeu multi-joueur en ligne (création d'un programme serveur avec socket.io)
 * Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
 * Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
-* (Afficher difficulté niveaux)
+* Afficher difficulté niveaux
 
 ### Fait :
 
@@ -285,6 +300,7 @@ Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 * Labyrinthes
 * Multithreading
 * MVC (architecture client-serveur)
+* Jeu multi-joueur en ligne (création d'un programme serveur avec socket.io)
 
 ### Problèmes :
 
