@@ -31,7 +31,7 @@ function GameRanking(snakes, fontSize, fontFamily, headerHeight, backgroundColor
   this.closed = this.closed == undefined ? false : this.closed;
   this.closing = this.closing == undefined ? false : this.closing;
   this.opening = this.opening == undefined ? false : this.opening;
-  this.forceClose = this.forceClose == undefined ? false : this.forceClose;
+  this.forceClosing = this.forceClosing == undefined ? false : this.forceClosing;
   this.overflow = this.overflow == undefined ? false : this.overflow;
   this.back = this.back == undefined ? false : this.back;
   this.timeLastFrame = this.timeLastFrame == undefined ? Date.now() : this.timeLastFrame;
@@ -179,7 +179,7 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
       this.closed = false;
     } else {
       if(this.closing) {
-        if(this.forceClose) {
+        if(this.forceClosing) {
           this.offsetX = width;
         } else {
           this.offsetX += offsetTime / 3;
@@ -188,7 +188,7 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
         if(this.offsetX >= width) {
           this.closing = false;
           this.closed = true;
-          this.forceClose = false;
+          this.forceClosing = false;
         }
       } else if(this.opening) {
         this.offsetX -= offsetTime / 3;
@@ -214,18 +214,20 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
 GameRanking.prototype.close = function() {
   this.closing = true;
   this.opening = false;
+  this.forceClosing = false;
 };
 
 GameRanking.prototype.forceClose = function() {
   this.closing = true;
   this.opening = false;
-  this.forceClose = true;
+  this.forceClosing = true;
 };
 
 GameRanking.prototype.open = function() {
   this.closing = false;
   this.opening = true;
   this.closed = false;
+  this.forceClosing = false;
 };
 
 GameRanking.prototype.set = function(snakes, fontSize, headerHeight) {

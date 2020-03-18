@@ -574,7 +574,7 @@ GameUI.prototype.draw = function(renderBlur) {
     this.gameRanking.set(this.snakes, this.fontSize, this.headerHeight);
 
     if(this.snakes != null && this.snakes.length <= 1) {
-      this.gameRanking.close();
+      this.gameRanking.forceClose();
     }
 
     if(!this.gameFinished && !this.gameOver) {
