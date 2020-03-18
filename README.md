@@ -1,5 +1,5 @@
 <img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/assets/images/logo/logo.png" width="300" alt="SnakeIA" />
-<p><img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/screenshot.png" width="400" alt="Screenshot" /> <img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/screenshot2.png" width="400" alt="Screenshot" /></p>
+<p><img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/screenshot.png" width="300" alt="Screenshot" /> <img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/screenshot2.png" width="300" alt="Screenshot" /></p> <img src="https://raw.githubusercontent.com/Eliastik/snakeia/master/screenshot3.png" width="300" alt="Screenshot" /></p>
 
 # English
 
