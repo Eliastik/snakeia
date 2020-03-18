@@ -47,9 +47,7 @@ OnlineClient.prototype.connect = function(url, port, callback) {
     this.url = this.url.substring(0, this.url.length - 1);
   }
   
-  this.socket = new io(this.getURL(), {
-    query: {token: this.token}
-  });
+  this.socket = new io(this.getURL() + (this.token ? "?token=" + this.token : ""));
 
   var self = this;
 
@@ -100,11 +98,9 @@ OnlineClient.prototype.stopGame = function() {
 OnlineClient.prototype.displayRooms = function(callback) {
   if(!this.loadingRooms) {
     this.loadingRooms = true;
-
-    var ioRooms = new io(this.getURL() + "/rooms", {
-      query: {token: this.token}
-    });
     var self = this;
+
+    var ioRooms = new io(this.getURL() + "/rooms" + (this.token ? "?token=" + this.token : ""));
   
     ioRooms.once("rooms", function(data) {
       callback(true, data);
@@ -140,11 +136,9 @@ OnlineClient.prototype.displayRooms = function(callback) {
 OnlineClient.prototype.createRoom = function(data, callback) {
   if(!this.creatingRoom) {
     this.creatingRoom = true;
-    
-    var ioCreate = new io(this.getURL() + "/createRoom", {
-      query: {token: this.token}
-    });
     var self = this;
+    
+    var ioCreate = new io(this.getURL() + "/createRoom" + (this.token ? "?token=" + this.token : ""));
 
     ioCreate.once("connect", function() {
       ioCreate.emit("create", data);
