@@ -500,9 +500,9 @@ GameUI.prototype.draw = function(renderBlur) {
       this.btnRank.draw(this.canvasCtx);
     }
 
-    if(this.gameRanking.closing || this.gameRanking.closed) {
+    if((this.gameRanking.closing || this.gameRanking.closed) && this.assetsLoaded) {
       this.btnRank.color = "rgba(0, 0, 0, 0)";
-    } else {
+    } else if(this.assetsLoaded) {
       this.btnRank.color = this.btnRank.colorHover;
     }
 
@@ -571,13 +571,12 @@ GameUI.prototype.draw = function(renderBlur) {
       this.btnLeftArrow.draw(this.canvasCtx);
     }
 
-    this.gameRanking.set(this.snakes, this.fontSize, this.headerHeight);
-
     if(this.snakes != null && this.snakes.length <= 1) {
       this.gameRanking.forceClose();
     }
 
-    if(!this.gameFinished && !this.gameOver) {
+    if(!this.gameFinished && !this.gameOver && this.assetsLoaded) {
+      this.gameRanking.set(this.snakes, this.fontSize, this.headerHeight);
       this.gameRanking.draw(this.canvasCtx, this, currentPlayer);
     }
 
@@ -810,7 +809,8 @@ GameUI.prototype.draw = function(renderBlur) {
     
       this.menu.draw(this.canvasCtx);
 
-      if(this.gameFinished || this.gameOver) {
+      if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1) {
+        this.gameRanking.open();
         this.gameRanking.draw(this.canvasCtx, this, currentPlayer);
       }
     
