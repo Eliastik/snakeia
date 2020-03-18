@@ -214,6 +214,14 @@ GameGroup.prototype.errorOccurred = function() {
   return false;
 };
 
+GameGroup.prototype.closeRanking = function() {
+  for(var i = 0; i < this.games.length; i++) {
+    this.games[i].closeRanking();
+  }
+
+  return false;
+};
+
 GameGroup.prototype.getWinners = function() {
   winners = [];
   index = [];

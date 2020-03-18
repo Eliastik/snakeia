@@ -31,6 +31,7 @@ function GameRanking(snakes, fontSize, fontFamily, headerHeight, backgroundColor
   this.closed = this.closed == undefined ? false : this.closed;
   this.closing = this.closing == undefined ? false : this.closing;
   this.opening = this.opening == undefined ? false : this.opening;
+  this.forceClose = this.forceClose == undefined ? false : this.forceClose;
   this.overflow = this.overflow == undefined ? false : this.overflow;
   this.back = this.back == undefined ? false : this.back;
   this.timeLastFrame = this.timeLastFrame == undefined ? Date.now() : this.timeLastFrame;
@@ -120,19 +121,20 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
 
     for(var i = 0; i < ranking.length; i++) {
       if(currentY > this.headerHeight) {
-        switch(ranking[i].rank) {
-          case 0:
-            DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
-            break;
-          case 1:
-            DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy_silver.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
-            break;
-          case 2:
-            DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy_bronze.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
-            break;
-          default:
-            DrawUtils.drawText(ctx, "" + (rank + 1), "rgba(255, 255, 255, 0.75)", this.fontSize / 1.5, this.fontFamily, null, null, (this.fontSize / 1.5) / 2 + 5 - this.offsetX, currentY + (this.fontSize / 1.5));
-            break;
+        if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
+          switch(ranking[i].rank) {
+            case 0:
+              DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
+              break;
+            case 1:
+              DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy_silver.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
+              break;
+            case 2:
+              DrawUtils.drawImage(ctx, imageLoader.get("assets/images/trophy_bronze.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
+              break;
+          }
+        } else {
+          DrawUtils.drawText(ctx, "" + (rank + 1), "rgba(255, 255, 255, 0.75)", this.fontSize / 1.5, this.fontFamily, null, null, (this.fontSize / 1.5) / 2 + 5 - this.offsetX, currentY + (this.fontSize / 1.5));
         }
 
         DrawUtils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.75)" : "rgba(255, 255, 255, 0.75)"), this.fontSize / 1.5, this.fontFamily, null, null, 5 + sizeNumber + this.fontSize / 1.5 - this.offsetX, currentY + (this.fontSize / 1.5));
@@ -177,11 +179,16 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
       this.closed = false;
     } else {
       if(this.closing) {
-        this.offsetX += offsetTime / 3;
+        if(this.forceClose) {
+          this.offsetX = width;
+        } else {
+          this.offsetX += offsetTime / 3;
+        }
   
-        if(Math.abs(this.offsetX) >= width) {
+        if(this.offsetX >= width) {
           this.closing = false;
           this.closed = true;
+          this.forceClose = false;
         }
       } else if(this.opening) {
         this.offsetX -= offsetTime / 3;
@@ -207,6 +214,12 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
 GameRanking.prototype.close = function() {
   this.closing = true;
   this.opening = false;
+};
+
+GameRanking.prototype.forceClose = function() {
+  this.closing = true;
+  this.opening = false;
+  this.forceClose = true;
 };
 
 GameRanking.prototype.open = function() {

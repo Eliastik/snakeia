@@ -276,6 +276,10 @@ GameController.prototype.setNotification = function(notification) {
   this.gameUI.setNotification(notification);
 };
 
+GameController.prototype.closeRanking = function() {
+  this.gameUI.gameRanking && this.gameUI.gameRanking.forceClose();
+};
+
 GameController.prototype.setTimeToDisplay = function(time) {
   this.gameUI.setTimeToDisplay(time);
 };

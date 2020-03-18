@@ -1660,6 +1660,7 @@ window.playLevel = function(level, player, type) {
     var group = new GameGroup(games);
     group.setDisplayFPS(showDebugInfo ? true : false);
     group.start();
+    group.closeRanking();
 
     document.getElementById("gameOrder").scrollIntoView();
 
