@@ -364,7 +364,7 @@ function connectToServer(url, port) {
   document.getElementById("roomsOnlineJoin").style.display = "none";
   document.getElementById("authenticationServer").style.display = "none";
 
-  onlineClient.connect(url, port, function(success, data) {
+  onlineClient.connect(url, port, function(success, data, id) {
     document.getElementById("connectingToServer").style.display = "none";
 
     if(!success) {
@@ -372,16 +372,10 @@ function connectToServer(url, port) {
         document.getElementById("authenticationServerContainer").innerHTML = "";
         var authent_frame = document.createElement("iframe");
         authent_frame.id = "authent_frame";
-        authent_frame.src = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2);
+        authent_frame.src = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2) + (id ? "&id=" + id : "");
         authent_frame.classList.add("frame-responsive");
         document.getElementById("authenticationServerContainer").appendChild(authent_frame);
-        document.getElementById("linkAuthenticationServer").href = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2);
-
-        if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
-          onlineClient.autoReconnect(2000, function() {
-            connectToServer(onlineClient.url, onlineClient.port);
-          });
-        }
+        document.getElementById("linkAuthenticationServer").href = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2) + (id ? "&id=" + id : "");
 
         displayAuthentication();
       } else {
@@ -404,7 +398,6 @@ document.getElementById("cancelAuthenticationToServer").onclick = function() {
   document.getElementById("authenticationServerContainer").innerHTML = "";
   document.getElementById("connectingToServer").style.display = "none";
   onlineClient.disconnect();
-  onlineClient.stopAutoReconnect();
   displayServerList();
 };
 

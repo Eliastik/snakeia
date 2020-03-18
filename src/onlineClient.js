@@ -26,6 +26,8 @@ function OnlineClient() {
   this.url;
   this.port;
   this.socket;
+  this.token;
+  this.id;
   this.serverSettings;
   this.currentRoom;
   this.game;
@@ -45,13 +47,26 @@ OnlineClient.prototype.connect = function(url, port, callback) {
     this.url = this.url.substring(0, this.url.length - 1);
   }
   
-  this.socket = new io(this.getURL());
+  this.socket = new io(this.getURL(), {
+    query: {token: this.token}
+  });
 
   var self = this;
 
   this.socket.once("connect", function() {
-    callback(true);
-    successConnect = true;
+    self.socket.once("authent", function(data) {
+      if(data == GameConstants.GameState.AUTHENTICATION_SUCCESS) {
+        callback(true);
+      } else {
+        callback(false, data, self.socket.id);
+      }
+    });
+  
+    self.socket.once("token", function(token) {
+      self.token = token;
+      successConnect = true;
+      self.connect(self.url, self.port, callback);
+    });
   });
 
   this.socket.on("error", function(data) {
@@ -63,28 +78,6 @@ OnlineClient.prototype.connect = function(url, port, callback) {
     callback(false, data);
     self.disconnect();
   });
-};
-
-OnlineClient.prototype.autoReconnect = function(time, callback) {
-  this.stopAutoReconnect();
-  this.disconnect();
-
-  var self = this;
-
-  this.intervalReconnect = setInterval(function() {
-    self.connect(self.url, self.port, function(success) {
-      if(success) {
-        self.stopAutoReconnect();
-        callback();
-      }
-    });
-  }, time);
-};
-
-OnlineClient.prototype.stopAutoReconnect = function() {
-  if(this.intervalReconnect) {
-    clearInterval(this.intervalReconnect);
-  }
 };
 
 OnlineClient.prototype.disconnect = function() {
@@ -108,7 +101,9 @@ OnlineClient.prototype.displayRooms = function(callback) {
   if(!this.loadingRooms) {
     this.loadingRooms = true;
 
-    var ioRooms = new io(this.getURL() + "/rooms");
+    var ioRooms = new io(this.getURL() + "/rooms", {
+      query: {token: this.token}
+    });
     var self = this;
   
     ioRooms.once("rooms", function(data) {
@@ -122,6 +117,14 @@ OnlineClient.prototype.displayRooms = function(callback) {
       callback(false, data);
       ioRooms.close();
       self.loadingRooms = false;
+    });
+    
+    ioRooms.once("authent", function(data) {
+      if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+        callback(false, data);
+        ioRooms.close();
+        self.loadingRooms = false;
+      }
     });
   
     ioRooms.once("connect_error", function() {
@@ -138,7 +141,9 @@ OnlineClient.prototype.createRoom = function(data, callback) {
   if(!this.creatingRoom) {
     this.creatingRoom = true;
     
-    var ioCreate = new io(this.getURL() + "/createRoom");
+    var ioCreate = new io(this.getURL() + "/createRoom", {
+      query: {token: this.token}
+    });
     var self = this;
 
     ioCreate.once("connect", function() {
@@ -174,6 +179,18 @@ OnlineClient.prototype.createRoom = function(data, callback) {
       });
       ioCreate.close();
       self.creatingRoom = false;
+    });
+    
+    ioCreate.once("authent", function(data) {
+      if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+        callback({
+          success: false,
+          connection_error: true,
+          errorCode: (data != null ? data : null)
+        });
+        ioCreate.close();
+        self.creatingRoom = false;
+      }
     });
 
     ioCreate.once("connect_error", function(data) {
