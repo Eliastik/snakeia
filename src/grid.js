@@ -265,7 +265,7 @@ Grid.prototype.setFruit = function(numberPlayers, gold) {
     return false;
   }
 
-  if(this.fruitPosGold == null && GameUtils.randRange(1, numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER) == 1) {
+  if(!this.generateMaze && this.fruitPosGold == null && GameUtils.randRange(1, numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER) == 1) {
     this.setFruit(numberPlayers, true);
   }
 
