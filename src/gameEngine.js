@@ -343,6 +343,11 @@ GameEngine.prototype.tick = function() {
           setFruitError = !self.grid.setFruit(self.snakes.length);
         }
 
+        if(!self.scoreMax && self.grid.fruitPosGold != null && self.grid.isFruitSurrounded(self.grid.fruitPosGold, true)) {
+          self.grid.set(GameConstants.CaseType.EMPTY, self.grid.fruitPosGold);
+          self.grid.fruitPosGold = null;
+        }
+
         var nbOver = 0;
 
         for(var j = 0; j < self.snakes.length; j++) {
