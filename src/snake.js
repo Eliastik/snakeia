@@ -44,6 +44,7 @@ function Snake(direction, length, grid, player, aiLevel, autoRetry, name) {
   this.scoreMax = false;
   this.color;
   this.name = name == undefined ? "Snake" : name;
+  this.aiFruitGoal = GameConstants.CaseType.FRUIT;
 
   this.init();
 }
@@ -189,6 +190,7 @@ Snake.prototype.reset = function() {
   this.scoreMax = false;
   this.lastTailMoved = true;
   this.lastKey = -1;
+  this.aiFruitGoal = GameConstants.CaseType.FRUIT;
   this.init();
 };
 
@@ -431,6 +433,19 @@ Snake.prototype.ai = function(bestFind) {
     if(this.grid.fruitPos != null) {
       var currentPosition = this.getHeadPosition();
       var fruitPos = this.grid.fruitPos;
+      var fruitPosGold = this.grid.fruitPosGold;
+      var distFruit = Math.abs(currentPosition.x - fruitPos.x) + Math.abs(currentPosition.y - fruitPos.y);
+      var distFruitGold = fruitPosGold != null ? Math.abs(currentPosition.x - fruitPosGold.x) + Math.abs(currentPosition.y - fruitPosGold.y) : -1;
+
+      if(fruitPosGold != null && this.aiFruitGoal == GameConstants.CaseType.FRUIT) {
+        if(distFruitGold > distFruit) {
+          this.aiFruitGoal = GameConstants.CaseType.FRUIT_GOLD;
+        } else {
+          this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+        }
+      } else if(fruitPosGold == null) {
+        this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+      }
 
       var grid = this.grid.getGraph(false);
       var graph = new Lowlight.Astar.Configuration(grid, {
@@ -441,7 +456,7 @@ Snake.prototype.ai = function(bestFind) {
         static: true,
         cost(a, b) { return b == 1 ? null : 1 }
       });
-      var path = graph.path({x: currentPosition.x, y: currentPosition.y}, {x: fruitPos.x, y: fruitPos.y});
+      var path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.x : fruitPos.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.y : fruitPos.y });
 
       if(path.length > 1) {
         var nextPosition = new Position(path[1].x, path[1].y);

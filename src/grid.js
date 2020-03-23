@@ -34,6 +34,7 @@ function Grid(width, height, generateWalls, borderWalls, maze, customGrid, mazeF
   this.grid;
   this.initialGrid;
   this.fruitPos;
+  this.fruitPosGold;
 
   this.init(customGrid);
 }
@@ -79,6 +80,8 @@ Grid.prototype.init = function(customGrid) {
       this.fixWalls(this.borderWalls);
     }
   }
+
+  this.fruitPosGold = null;
 };
 
 Grid.prototype.fixWalls = function(borderWalls) {
@@ -233,10 +236,10 @@ Grid.prototype.getRandomPosition = function() {
   return new Position(GameUtils.randRange(0, this.width - 1), GameUtils.randRange(0, this.height - 1));
 };
 
-Grid.prototype.setFruit = function() {
+Grid.prototype.setFruit = function(numberPlayers, gold) {
   var tried = [1];
 
-  if(this.fruitPos != null && (this.get(this.fruitPos) == GameConstants.CaseType.FRUIT || this.get(this.fruitPos) == GameConstants.CaseType.FRUIT_GOLD)) {
+  if(!gold && this.fruitPos != null && this.get(this.fruitPos) == GameConstants.CaseType.FRUIT) {
     this.set(GameConstants.CaseType.EMPTY, this.fruitPos);
   }
 
@@ -251,10 +254,19 @@ Grid.prototype.setFruit = function() {
       randomPos = this.getRandomPosition();
     }
 
-    this.fruitPos = randomPos;
-    this.set(GameConstants.CaseType.FRUIT, randomPos);
+    if(gold) {
+      this.fruitPosGold = randomPos;
+      this.set(GameConstants.CaseType.FRUIT_GOLD, randomPos);
+    } else {
+      this.fruitPos = randomPos;
+      this.set(GameConstants.CaseType.FRUIT, randomPos);
+    }
   } else {
     return false;
+  }
+
+  if(this.fruitPosGold == null && GameUtils.randRange(1, numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER) == 1) {
+    this.setFruit(numberPlayers, true);
   }
 
   return true;

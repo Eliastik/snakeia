@@ -91,7 +91,7 @@ GameEngine.prototype.init = function() {
   if(this.grid instanceof Grid == false) {
     this.errorOccurred = true;
   } else if(!this.errorOccurred) {
-    this.grid.setFruit();
+    this.grid.setFruit(this.snakes.length);
   }
 };
 
@@ -119,7 +119,7 @@ GameEngine.prototype.reset = function() {
   this.starting = false;
   this.initialSpeed = this.initialSpeedUntouched;
   this.speed = this.initialSpeedUntouched;
-  this.grid.setFruit();
+  this.grid.setFruit(this.snakes.length);
   this.reactor.dispatchEvent("onReset");
   this.start();
 };
@@ -270,6 +270,7 @@ GameEngine.prototype.tick = function() {
           var initialDirection = self.snakes[i].direction;
           var setFruit = false;
           var setFruitError = false;
+          var goldFruit = false;
           self.snakes[i].lastTailMoved = false;
 
           if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
@@ -298,6 +299,9 @@ GameEngine.prototype.tick = function() {
                   self.snakes[i].score++;
                 } else if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
                   self.snakes[i].score += 3;
+                  self.grid.set(GameConstants.CaseType.EMPTY, self.grid.fruitPosGold);
+                  self.grid.fruitPosGold = null;
+                  goldFruit = true;
                 }
                 
                 self.reactor.dispatchEvent("onScoreIncreased");
@@ -312,7 +316,7 @@ GameEngine.prototype.tick = function() {
                   self.snakes[i].scoreMax = true;
                 } else {
                   self.numFruit++;
-                  var setFruit = true;
+                  if(!goldFruit) setFruit = true;
                 }
 
                 if(self.snakes.length <= 1 && self.progressiveSpeed && self.snakes[i].score > 0 && self.initialSpeed > 1) {
@@ -331,12 +335,12 @@ GameEngine.prototype.tick = function() {
           }
 
           if(!self.scoreMax && setFruit) {
-            var setFruitError = !self.grid.setFruit();
+            setFruitError = !self.grid.setFruit(self.snakes.length);
           }
         }
 
         if(!self.scoreMax && !setFruitError && self.grid.isFruitSurrounded(self.grid.fruitPos, true)) {
-          var setFruitError = !self.grid.setFruit();
+          setFruitError = !self.grid.setFruit(self.snakes.length);
         }
 
         var nbOver = 0;
