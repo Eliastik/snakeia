@@ -270,6 +270,12 @@ var DrawUtils = {
     }
   
     return true;
+  },
+  blurCanvas: function(ctx, length) {
+    ctx.save();
+    ctx.filter = "blur(" + length  + "px)";
+    this.drawImageData(ctx, ctx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.restore();
   }
 };
 

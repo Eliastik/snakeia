@@ -21,7 +21,7 @@ if(typeof(require) !== "undefined") {
   var DrawUtils = require("./drawUtils");
 }
 
-function Menu(buttons, text, colors, fontSize, fontFamily, alignement, x, backgroundColor) {
+function Menu(buttons, text, colors, fontSize, fontFamily, alignement, x, backgroundColor, blurCanvas) {
   this.buttons = buttons;
   this.text = text;
   this.colors = colors;
@@ -30,6 +30,7 @@ function Menu(buttons, text, colors, fontSize, fontFamily, alignement, x, backgr
   this.alignement = alignement || "center";
   this.x = x || 0;
   this.backgroundColor = backgroundColor == undefined ? "rgba(44, 62, 80, 0.75)" : backgroundColor;
+  this.blurCanvas = blurCanvas == undefined ? false : blurCanvas;
   this.disabled = false;
   this.lastKey = this.lastKey == undefined ? -1 : this.lastKey;
   this.selectedButton = this.selectedButton == undefined ? 0 : this.selectedButton;
@@ -48,6 +49,10 @@ Menu.prototype.draw = function(ctx, func) {
       });
 
       this.init = true;
+    }
+
+    if(this.blurCanvas) {
+      DrawUtils.blurCanvas(ctx, 5);
     }
 
     ctx.fillStyle = this.backgroundColor;
@@ -125,7 +130,7 @@ Menu.prototype.enable = function() {
 };
 
 Menu.prototype.set = function(buttons, text, colors, alignement, x,) {
-  Menu.apply(this, [buttons, text, colors, this.fontSize, this.fontFamily, alignement, x, this.backgroundColor]);
+  Menu.apply(this, [buttons, text, colors, this.fontSize, this.fontFamily, alignement, x, this.backgroundColor, this.blurCanvas]);
   this.enable();
 };
 
