@@ -31,13 +31,8 @@ module.exports = {
     Position: require("./position"),
     GameEngine: require('./gameEngine'),
     Game: require("./shim"),
-    Button: require("./button"),
     GameController: require("./gameController"),
     GameControllerWorker: require("./gameControllerWorker"),
     GameGroup: require("./gameGroup"),
-    GameUI: require("./gameUI"),
-    ImageLoader: require("./imageLoader"),
-    NotificationMessage: require("./notificationMessage"),
-    DrawUtils: require('./drawUtils'),
-    Menu: require('./menu')
+    GameUI: require("./gameUI")
 };

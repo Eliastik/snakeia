@@ -22,10 +22,10 @@ if(typeof(require) !== "undefined") {
   var GameConstants = require("./src/constants");
   var Snake = require("./src/snake");
   var Grid = require("./src/grid");
-  var NotificationMessage = require('./src/notificationMessage');
-  var GameGroup = require('./src/gameGroup');
-  var OnlineClient = require('./src/onlineClient');
-  var GameUI = require('./src/gameUI.js');
+  var GameGroup = require("./src/gameGroup");
+  var OnlineClient = require("./src/onlineClient");
+  var GameUI = require("./src/gameUI.js");
+  var NotificationMessage = require("jsgametools").default.NotificationMessage;
 }
 
 // Modes :

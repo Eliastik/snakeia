@@ -21,14 +21,15 @@ if(typeof(require) !== "undefined") {
   var GameUtils = require("./gameUtils");
   var GameConstants = require("./constants");
   var Position = require("./position");
-  var ImageLoader = require("./imageLoader");
-  var Buttons = require("./button");
-  var Button = Buttons.Button;
-  var ButtonImage = Buttons.ButtonImage;
-  var NotificationMessage = require("./notificationMessage");
-  var DrawUtils = require("./drawUtils");
-  var Menu = require("./menu");
-  var GameRanking = require('./gameRanking');
+  var GameRanking = require("./gameRanking");
+  var JSGameTools = require("jsgametools").default;
+  var ImageLoader = JSGameTools.ImageLoader;
+  var Button = JSGameTools.Button;
+  var ButtonImage = JSGameTools.ButtonImage;
+  var NotificationMessage = JSGameTools.NotificationMessage;
+  var DrawUtils = JSGameTools.DrawUtils;
+  var Menu = JSGameTools.Menu;
+  JSGameTools.Constants.Setting.FONT_FAMILY = "DELIUS";
 }
 
 function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation, renderBlur) {
