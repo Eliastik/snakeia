@@ -25,7 +25,7 @@ if(typeof(require) !== "undefined") {
   var GameGroup = require("./src/gameGroup");
   var OnlineClient = require("./src/onlineClient");
   var GameUI = require("./src/gameUI.js");
-  var NotificationMessage = require("jsgametools").default.NotificationMessage;
+  var NotificationMessage = require("jsgametools").NotificationMessage;
 }
 
 // Modes :

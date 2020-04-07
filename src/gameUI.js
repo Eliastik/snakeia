@@ -22,7 +22,7 @@ if(typeof(require) !== "undefined") {
   var GameConstants = require("./constants");
   var Position = require("./position");
   var GameRanking = require("./gameRanking");
-  var JSGameTools = require("jsgametools").default;
+  var JSGameTools = require("jsgametools");
   var ImageLoader = JSGameTools.ImageLoader;
   var Button = JSGameTools.Button;
   var ButtonImage = JSGameTools.ButtonImage;

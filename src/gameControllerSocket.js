@@ -17,13 +17,12 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 if(typeof(require) !== "undefined") {
-  var io = require("../libs/socket.io.js");
   var i18next = require("../libs/i18next.min");
   var GameController = require("./gameController");
   var Grid = require("./grid");
   var Snake = require("./snake");
   var Position = require("./position");
-  var NotificationMessage = require("jsgametools").default.NotificationMessage;
+  var NotificationMessage = require("jsgametools").NotificationMessage;
 }
 
 function GameControllerSocket(socket, ui) {
