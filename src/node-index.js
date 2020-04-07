@@ -18,9 +18,6 @@
  */
 // Exports engine classes
 module.exports = {
-    LocalesInit: require("../assets/locales/init"),
-    LocalesMenu: require("../assets/locales/menu"),
-    LocalesEngine: require("../assets/locales/engine"),
     GameConstants: require("./constants"),
     Event: require("./event"),
     Reactor: require("./reactor"),
@@ -30,9 +27,5 @@ module.exports = {
     GameUtils: require("./gameUtils"),
     Position: require("./position"),
     GameEngine: require('./gameEngine'),
-    Game: require("./shim"),
-    GameController: require("./gameController"),
-    GameControllerWorker: require("./gameControllerWorker"),
-    GameGroup: require("./gameGroup"),
-    GameUI: require("./gameUI")
+    GameGroup: require("./gameGroup")
 };

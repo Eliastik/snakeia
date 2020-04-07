@@ -18,7 +18,6 @@
  */
 if(typeof(require) !== "undefined") {
   var i18next = require("../libs/i18next.min");
-  var GameUtils = require("./gameUtils");
 }
 
 var GameUtils = {
