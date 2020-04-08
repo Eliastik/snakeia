@@ -619,6 +619,7 @@ function selectMode(mode) {
     document.getElementById("progressiveSpeedDiv").style.display = "none";
     document.getElementById("privateGameDiv").style.display = "block";
   } else {
+    document.getElementById("progressiveSpeedDiv").style.display = "block";
     document.getElementById("privateGameDiv").style.display = "none";
   }
 
