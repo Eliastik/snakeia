@@ -18,7 +18,7 @@
  */
 if(typeof(require) !== "undefined") {
   var GameConstants = require("./constants");
-  var DrawUtils = require("jsgametools").DrawUtils;
+  var DrawUtils = require("jsgametools").Utils;
   var i18next = require("../libs/i18next.min");
 }
 

@@ -27,7 +27,7 @@ if(typeof(require) !== "undefined") {
   var Button = JSGameTools.Button;
   var ButtonImage = JSGameTools.ButtonImage;
   var NotificationMessage = JSGameTools.NotificationMessage;
-  var DrawUtils = JSGameTools.DrawUtils;
+  var DrawUtils = JSGameTools.Utils;
   var Menu = JSGameTools.Menu;
   JSGameTools.Constants.Setting.FONT_FAMILY = "DELIUS";
 }
@@ -236,19 +236,7 @@ GameUI.prototype.init = function() {
 
 GameUI.prototype.autoResizeCanvas = function() {
   if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
-    if(!document.fullscreenElement) {
-      if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
-        var ratio = this.canvasWidth / this.canvasHeight;
-        this.canvas.width = document.documentElement.clientWidth * 0.85;
-        this.canvas.height = this.canvas.width / ratio;
-      } else {
-        this.canvas.width = this.canvasWidth;
-        this.canvas.height = this.canvasHeight;
-      }
-    } else if(document.fullscreenElement == this.canvas) {
-      this.canvas.width = window.innerWidth;
-      this.canvas.height = window.innerHeight;
-    }
+    DrawUtils.autoResizeCanvas(this.canvas, this.canvasWidth, this.canvasHeight);
   }
 };
 
@@ -336,24 +324,8 @@ GameUI.prototype.toggleFullscreen = function() {
   var self = this;
 
   if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
-    if(!document.fullscreenElement) {
-      if(this.canvas.requestFullscreen) {
-        this.canvas.requestFullscreen();
-      } else if(this.canvas.mozRequestFullScreen) {
-        this.canvas.mozRequestFullScreen();
-      } else if(this.canvas.webkitRequestFullscreen) {
-        this.canvas.webkitRequestFullscreen();
-      } else if(this.canvas.msRequestFullscreen) {
-        this.canvas.msRequestFullscreen();
-      } else if(this.canvas.oRequestFullscreen) {
-        this.canvas.oRequestFullscreen();
-      }
-    } else {
-      if(document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
-
+    DrawUtils.toggleFullscreen(this.canvas);
+  
     var onfullscreenchange = function() {
       if(self.outputType == GameConstants.OutputType.GRAPHICAL && !self.killed) {
         if(document.fullscreenElement == self.canvas) {
@@ -361,8 +333,6 @@ GameUI.prototype.toggleFullscreen = function() {
         } else {
           self.fullscreen = false;
         }
-
-        self.autoResizeCanvas();
 
         if(document.fullscreenElement == self.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
           screen.orientation.lock("landscape").catch(function() {});
