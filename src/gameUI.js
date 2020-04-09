@@ -442,6 +442,9 @@ GameUI.prototype.draw = function() {
     this.btnRank.y = (this.headerHeight / 2) - (this.btnRank.height / 2);
 
     this.menu.fontSize = this.fontSize;
+    this.menu.fontSizeInitial = this.fontSize;
+    JSGameTools.Constants.Setting.FONT_SIZE = this.fontSize;
+
     this.menu.disable();
 
     DrawUtils.clear(ctx);
