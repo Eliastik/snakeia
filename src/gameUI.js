@@ -839,7 +839,7 @@ GameUI.prototype.setNotification = function(notification) {
     this.notificationMessage.disableAnimation = true;
   }
 
-  this.notificationMessage.open();
+  if(this.notificationMessage) this.notificationMessage.open();
 };
 
 GameUI.prototype.setTimeToDisplay = function(time) {
