@@ -166,16 +166,16 @@ GameUI.prototype.init = function() {
     this.btnStartGame = new Button(i18next.t("engine.servers.startGame"), null, null, "center", "#3498db", "#246A99", "#184766");
     this.btnCloseNotification = new ButtonImage("assets/images/close.png", null, 5, "right", null, 32, 32, null, null, this.imageLoader);
 
-    this.btnFullScreen.addClickAction(function() {
+    this.btnFullScreen.setClickAction(function() {
       self.toggleFullscreen();
       self.pause();
     });
 
-    this.btnPause.addClickAction(function() {
+    this.btnPause.setClickAction(function() {
       self.pause();
     });
 
-    this.btnRank.addClickAction(function() {
+    this.btnRank.setClickAction(function() {
       if(self.gameRanking.closing || self.gameRanking.closed) {
         self.gameRanking.open();
       } else {
@@ -183,19 +183,19 @@ GameUI.prototype.init = function() {
       }
     });
 
-    this.btnTopArrow.addClickAction(function() {
+    this.btnTopArrow.setClickAction(function() {
       self.controller.key(GameConstants.Key.UP);
     });
 
-    this.btnBottomArrow.addClickAction(function() {
+    this.btnBottomArrow.setClickAction(function() {
       self.controller.key(GameConstants.Key.BOTTOM);
     });
 
-    this.btnLeftArrow.addClickAction(function() {
+    this.btnLeftArrow.setClickAction(function() {
       self.controller.key(GameConstants.Key.LEFT);
     });
 
-    this.btnRightArrow.addClickAction(function() {
+    this.btnRightArrow.setClickAction(function() {
       self.controller.key(GameConstants.Key.RIGHT);
     });
   }
@@ -563,13 +563,13 @@ GameUI.prototype.draw = function() {
     if(this.exited) {
       this.menu.set(this.fullscreen ? [this.btnExitFullScreen] : [], i18next.t("engine.exited"), "white");
       
-      this.btnExitFullScreen.addClickAction(function() {
+      this.btnExitFullScreen.setClickAction(function() {
         self.toggleFullscreen();
       });
     } else if(this.errorOccurred) {
       this.menu.set([this.btnQuit], this.imageLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error"), "#E74C3C");
       
-      this.btnQuit.addClickAction(function() {
+      this.btnQuit.setClickAction(function() {
         self.confirmExit = false;
         self.selectedButton = 0;
         self.exit();
@@ -579,32 +579,32 @@ GameUI.prototype.draw = function() {
       (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : ""),
       "white");
       
-      this.btnOK.addClickAction(function() {
+      this.btnOK.setClickAction(function() {
         self.getInfosGame = false;
         self.selectedButton = 0;
       });
     } else if(this.getInfos) {
       this.menu.set([this.btnInfosGame, this.btnOK], i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + i18next.t("engine.aboutScreen.versionAndDate", { version: GameConstants.Setting.APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(GameConstants.Setting.DATE_VERSION)), interpolation: { escapeValue: false } }), "white");
       
-      this.btnInfosGame.addClickAction(function() {
+      this.btnInfosGame.setClickAction(function() {
         self.getInfosGame = true;
         self.selectedButton = 0;
       });
 
-      this.btnOK.addClickAction(function() {
+      this.btnOK.setClickAction(function() {
         self.getInfos = false;
         self.selectedButton = 0;
       });
     } else if(this.confirmExit) {
       this.menu.set([this.btnNo, this.btnYes], i18next.t("engine.exitConfirm"), "#E74C3C");
       
-      this.btnYes.addClickAction(function() {
+      this.btnYes.setClickAction(function() {
         self.confirmExit = false;
         self.selectedButton = 0;
         self.exit();
       });
       
-      this.btnNo.addClickAction(function() {
+      this.btnNo.setClickAction(function() {
         self.confirmExit = false;
         self.selectedButton = 0;
       });
@@ -626,13 +626,13 @@ GameUI.prototype.draw = function() {
         if(this.countBeforePlay > 0) {
           this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay + (playerHuman != null ? ("\n" + (this.isFilterHueAvailable && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (this.isFilterHueAvailable && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]));
           
-          this.btnEnterFullScreen.addClickAction(function() {
+          this.btnEnterFullScreen.setClickAction(function() {
             self.toggleFullscreen();
           });
         } else {
           this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready") + (playerHuman != null ? ("\n" + (this.isFilterHueAvailable && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : ""), (this.isFilterHueAvailable && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]));
           
-          this.btnEnterFullScreen.addClickAction(function() {
+          this.btnEnterFullScreen.setClickAction(function() {
             self.toggleFullscreen();
           });
         }
@@ -640,13 +640,13 @@ GameUI.prototype.draw = function() {
         if(this.countBeforePlay > 0) {
           this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], "" + this.countBeforePlay, "white");
           
-          this.btnEnterFullScreen.addClickAction(function() {
+          this.btnEnterFullScreen.setClickAction(function() {
             self.toggleFullscreen();
           });
         } else {
           this.menu.set(!this.fullscreen ? [this.btnEnterFullScreen] : [], i18next.t("engine.ready"), "white");
           
-          this.btnEnterFullScreen.addClickAction(function() {
+          this.btnEnterFullScreen.setClickAction(function() {
             self.toggleFullscreen();
           });
         }
@@ -654,42 +654,42 @@ GameUI.prototype.draw = function() {
     } else if(this.confirmReset && !this.gameOver) {
       this.menu.set([this.btnNo, this.btnYes], i18next.t("engine.resetConfirm"), "#E74C3C");
       
-      this.btnYes.addClickAction(function() {
+      this.btnYes.setClickAction(function() {
         self.confirmReset = false;
         self.selectedButton = 0;
         self.reset();
       });
 
-      this.btnNo.addClickAction(function() {
+      this.btnNo.setClickAction(function() {
         self.confirmReset = false;
         self.selectedButton = 0;
       });
     } else if(this.gameFinished) {
       this.menu.set(this.enableRetry ? [this.btnRetry, this.btnQuit] : [this.btnQuit], (this.grid.maze && this.gameMazeWin) ? i18next.t("engine.mazeWin") : i18next.t("engine.gameFinished") + nextGameText, (this.grid.maze && this.gameMazeWin) ? "#2ecc71" : "white");
       
-      this.btnRetry.addClickAction(function() {
+      this.btnRetry.setClickAction(function() {
         self.selectedButton = 0;
         self.reset();
       });
 
-      this.btnQuit.addClickAction(function() {
+      this.btnQuit.setClickAction(function() {
         self.confirmExit = true;
         self.selectedButton = 0;
       });
     } else if(this.scoreMax && this.snakes.length <= 1) {
       this.menu.set(this.enableRetry ? [this.btnRetry, this.btnQuit] : (this.fullscreen ? [this.btnExitFullScreen] : []), i18next.t("engine.scoreMax") + nextGameText, "#2ecc71");
       
-      this.btnRetry.addClickAction(function() {
+      this.btnRetry.setClickAction(function() {
         self.selectedButton = 0;
         self.reset();
       });
 
-      this.btnQuit.addClickAction(function() {
+      this.btnQuit.setClickAction(function() {
         self.confirmExit = true;
         self.selectedButton = 0;
       });
 
-      this.btnExitFullScreen.addClickAction(function() {
+      this.btnExitFullScreen.setClickAction(function() {
         self.toggleFullscreen();
       });
     } else if(this.gameOver && this.snakes.length <= 1) {
@@ -702,49 +702,49 @@ GameUI.prototype.draw = function() {
           self.timeoutAutoRetry = null;
         }, 500);
       } else {
-        this.btnRetry.addClickAction(function() {
+        this.btnRetry.setClickAction(function() {
           self.selectedButton = 0;
           self.reset();
         });
 
-        this.btnQuit.addClickAction(function() {
+        this.btnQuit.setClickAction(function() {
           self.confirmExit = true;
           self.selectedButton = 0;
         });
 
-        this.btnExitFullScreen.addClickAction(function() {
+        this.btnExitFullScreen.setClickAction(function() {
           self.toggleFullscreen();
         });
       }
     } else if(this.assetsLoaded && this.searchingPlayers) {
       this.menu.set(this.onlineMaster ? [this.btnStartGame, this.btnQuit] : [this.btnQuit], i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : ""), "white");
       
-      this.btnQuit.addClickAction(function() {
+      this.btnQuit.setClickAction(function() {
         self.confirmExit = true;
       });
 
-      this.btnStartGame.addClickAction(function() {
+      this.btnStartGame.setClickAction(function() {
         self.forceStart();
       });
     } else if(this.paused && !this.gameOver && this.assetsLoaded) {
       this.menu.set(this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ? [this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit] : [this.btnContinue, this.btnAbout, this.btnQuit]) : [this.btnContinue, this.btnAbout], i18next.t("engine.pause"), "white");
       
-      this.btnContinue.addClickAction(function() {
+      this.btnContinue.setClickAction(function() {
         self.selectedButton = 0;
         self.start();
       });
 
-      this.btnRetry.addClickAction(function() {
+      this.btnRetry.setClickAction(function() {
         self.confirmReset = true;
         self.selectedButton = 0;
       });
 
-      this.btnQuit.addClickAction(function() {
+      this.btnQuit.setClickAction(function() {
         self.confirmExit = true;
         self.selectedButton = 0;
       });
 
-      this.btnAbout.addClickAction(function() {
+      this.btnAbout.setClickAction(function() {
         self.getInfos = true;
         self.selectedButton = 0;
       });
