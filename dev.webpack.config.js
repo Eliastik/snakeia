@@ -8,6 +8,7 @@ const config = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'SnakeIA.js'
   },
+  devtool: "inline-source-map",
   devServer: {
     contentBase: './dist',
   }
