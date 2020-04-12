@@ -84,7 +84,6 @@ const CACHE_URLS = [
   "assets/images/trophy_silver.png",
   "assets/images/trophy_bronze.png",
   "assets/images/clock.png",
-  "assets/images/close.png",
   "assets/images/ranking.png"
 ];
 

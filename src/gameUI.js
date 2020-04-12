@@ -84,7 +84,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.spectatorMode = null;
   this.onlineMaster = false;
   // Menus state variables
-  this.menu = new Menu(null, "", "white", null, null, "center", null, null, this.renderBlur);
+  this.menu = new Menu(null, this.renderBlur);
   this.confirmReset = false;
   this.confirmExit = false;
   this.getInfos = false;
@@ -123,7 +123,6 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.btnExitFullScreen;
   this.btnEnterFullScreen;
   this.btnStartGame;
-  this.btnCloseNotification;
   this.btnRank;
   // Notification
   this.notificationMessage;
@@ -164,7 +163,6 @@ GameUI.prototype.init = function() {
     this.btnExitFullScreen = new Button(i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
     this.btnEnterFullScreen = new Button(i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
     this.btnStartGame = new Button(i18next.t("engine.servers.startGame"), null, null, "center", "#3498db", "#246A99", "#184766");
-    this.btnCloseNotification = new ButtonImage("assets/images/close.png", null, 5, "right", null, 32, 32, null, null, this.imageLoader);
 
     this.btnFullScreen.setClickAction(function() {
       self.toggleFullscreen();
@@ -360,7 +358,7 @@ GameUI.prototype.loadAssets = function() {
   var self = this;
 
   if(!this.errorOccurred && this.outputType != GameConstants.OutputType.TEXT) {
-    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/close.png", "assets/images/trophy.png", "assets/images/trophy_silver.png", "assets/images/trophy_bronze.png", "assets/images/clock.png", "assets/images/fruit_gold.png", "assets/images/ranking.png"], function() {
+    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/trophy.png", "assets/images/trophy_silver.png", "assets/images/trophy_bronze.png", "assets/images/clock.png", "assets/images/fruit_gold.png", "assets/images/ranking.png"], function() {
       if(self.imageLoader.hasError) {
         self.errorOccurred = true;
       } else {
@@ -429,6 +427,8 @@ GameUI.prototype.draw = function() {
       this.headerHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25;
     }
 
+    JSGameTools.Constants.Setting.FONT_SIZE = this.fontSize;
+
     this.btnPause.width = this.headerHeight * 0.85;
     this.btnPause.height = this.btnPause.width;
     this.btnPause.y = (this.headerHeight / 2) - (this.btnPause.height / 2);
@@ -440,10 +440,6 @@ GameUI.prototype.draw = function() {
     this.btnRank.width = this.headerHeight * 0.85;
     this.btnRank.height = this.btnRank.width;
     this.btnRank.y = (this.headerHeight / 2) - (this.btnRank.height / 2);
-
-    this.menu.fontSize = this.fontSize;
-    this.menu.fontSizeInitial = this.fontSize;
-    JSGameTools.Constants.Setting.FONT_SIZE = this.fontSize;
 
     this.menu.disable();
 
@@ -531,7 +527,7 @@ GameUI.prototype.draw = function() {
     }
 
     if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
-      this.notificationMessage.draw(this, this.btnCloseNotification);
+      this.notificationMessage.draw(this);
     }
 
     if(this.snakes != null && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 || this.currentPlayer != null) && !this.spectatorMode) {
@@ -784,8 +780,8 @@ GameUI.prototype.draw = function() {
     }
   
     if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {
-      this.notificationMessage.draw(this.canvasCtx, this.btnCloseNotification);
       this.notificationMessage.enableCloseButton();
+      this.notificationMessage.draw(this.canvasCtx);
     }
 
     if(this.displayFPS) {
