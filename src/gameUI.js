@@ -30,6 +30,7 @@ if(typeof(require) !== "undefined") {
   var DrawUtils = JSGameTools.Utils;
   var Menu = JSGameTools.Menu;
   var Label = JSGameTools.Label;
+  var ProgressBar = JSGameTools.ProgressBar;
   JSGameTools.Constants.Setting.FONT_FAMILY = "DELIUS";
 }
 
@@ -129,6 +130,8 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.notificationMessage;
   // Label
   this.labelMenus;
+  // Progress bar
+  this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 2, 25, null, null, null, this.disableAnimation, "center");
 
   this.init();
 }
@@ -530,7 +533,8 @@ GameUI.prototype.draw = function() {
       var percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
       this.labelMenus.text = i18next.t("engine.loading") + "\n" + percentLoaded + "%";
       this.labelMenus.color = "white";
-      this.menu.set(this.labelMenus);
+      this.progressBarLoading.percent = percentLoaded / 1000;
+      this.menu.set(this.labelMenus, this.progressBarLoading);
     }
 
     if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
