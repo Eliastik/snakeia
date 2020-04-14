@@ -131,7 +131,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   // Label
   this.labelMenus;
   // Progress bar
-  this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 2, 25, null, null, null, this.disableAnimation, "center");
+  this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, null, null, null, 0.5, this.disableAnimation, "center");
 
   this.init();
 }
@@ -533,7 +533,8 @@ GameUI.prototype.draw = function() {
       var percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
       this.labelMenus.text = i18next.t("engine.loading") + "\n" + percentLoaded + "%";
       this.labelMenus.color = "white";
-      this.progressBarLoading.percent = percentLoaded / 1000;
+      this.progressBarLoading.percent = percentLoaded / 100;
+      this.progressBarLoading.width = this.canvas.width / 4;
       this.menu.set(this.labelMenus, this.progressBarLoading);
     }
 
