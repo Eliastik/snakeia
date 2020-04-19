@@ -618,7 +618,13 @@ function selectMode(mode) {
     document.getElementById("autoRetrySettings").style.display = "none";
     document.getElementById("progressiveSpeedDiv").style.display = "none";
     document.getElementById("privateGameDiv").style.display = "block";
-    document.getElementById("enableAIDiv").style.display = "block";
+    document.getElementById("iaSettings").style.display = "none";
+
+    if(selectedMode == BATTLE_ROYALE_ONLINE && onlineClient.serverSettings && onlineClient.serverSettings.enableAI) {
+      document.getElementById("enableAIDiv").style.display = "block";
+    } else {
+      document.getElementById("enableAIDiv").style.display = "none";
+    }
   } else {
     document.getElementById("progressiveSpeedDiv").style.display = "block";
     document.getElementById("privateGameDiv").style.display = "none";
@@ -843,7 +849,7 @@ function checkMazeGrid() {
 }
 
 function checkEnableAI() {
-  if(document.getElementById("enableAI").checked) {
+  if(document.getElementById("enableAI").checked && onlineClient.serverSettings && onlineClient.serverSettings.enableAI) {
     document.getElementById("iaSettings").style.display = "block";
   } else if(selectedMode == BATTLE_ROYALE_ONLINE) {
     document.getElementById("iaSettings").style.display = "none";
@@ -1025,14 +1031,16 @@ function validateSettings(returnValidation) {
   var maxGridSize = 100;
   var minSpeed = 1;
   var maxSpeed = 100;
+  var enableAI = true;
 
   if(selectedMode == BATTLE_ROYALE_ONLINE && onlineClient.serverSettings) {
     var serverSettings = onlineClient.serverSettings;
 
-    minGridSize = serverSettings.minGridSize != null ? serverSettings.minGridSize : minGridSize;
-    maxGridSize = serverSettings.maxGridSize != null ? serverSettings.maxGridSize : maxGridSize;
-    minSpeed = serverSettings.minSpeed != null ? serverSettings.minSpeed : minSpeed;
-    maxSpeed = serverSettings.maxSpeed != null ? serverSettings.maxSpeed : maxSpeed;
+    minGridSize = serverSettings.minGridSize != undefined ? serverSettings.minGridSize : minGridSize;
+    maxGridSize = serverSettings.maxGridSize != undefined ? serverSettings.maxGridSize : maxGridSize;
+    minSpeed = serverSettings.minSpeed != undefined ? serverSettings.minSpeed : minSpeed;
+    maxSpeed = serverSettings.maxSpeed != undefined ? serverSettings.maxSpeed : maxSpeed;
+    enableAI = serverSettings.enableAI;
   }
 
   document.getElementById("invalidHeight").textContent = i18next.t("settings.invalidSize", { min: minGridSize, max: maxGridSize });
@@ -1155,7 +1163,7 @@ function validateSettings(returnValidation) {
         generateWalls: generateWalls,
         customSpeed: customSpeed,
         private: document.getElementById("privateGame").checked,
-        enableAI: document.getElementById("enableAI").checked,
+        enableAI: enableAI ? document.getElementById("enableAI").checked : false,
         levelAI: aiLevel
       }, function(data) {
         var errorCode = data.errorCode;

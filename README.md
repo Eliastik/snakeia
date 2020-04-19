@@ -291,9 +291,16 @@ Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 
 ### À faire (ou idées) :
 
+* Bug avec les workers : les Snake semblent "popper"
+* Prédictions pour le mode en ligne (améliore la fluidité)
+* Optimiser flood fill
+* Eviter de placer les joueurs trop près des murs
 * Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
+
+#### Autres idées
 * Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
 * Afficher difficulté niveaux
+* Skin vrai serpent
 
 ### Fait :
 
@@ -307,10 +314,6 @@ Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 * Multithreading
 * MVC (architecture client-serveur)
 * Jeu multi-joueur en ligne (création d'un programme serveur avec socket.io)
-
-### Problèmes :
-
-* (Performances lorsque plusieurs Snake sur une seule grille (aux algorithmes d'IA -> nombreuses IA))
 
 ## Déclaration de licence
 
