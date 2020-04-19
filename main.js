@@ -618,9 +618,11 @@ function selectMode(mode) {
     document.getElementById("autoRetrySettings").style.display = "none";
     document.getElementById("progressiveSpeedDiv").style.display = "none";
     document.getElementById("privateGameDiv").style.display = "block";
+    document.getElementById("enableAIDiv").style.display = "block";
   } else {
     document.getElementById("progressiveSpeedDiv").style.display = "block";
     document.getElementById("privateGameDiv").style.display = "none";
+    document.getElementById("enableAIDiv").style.display = "none";
   }
 
   displaySettings();
@@ -662,11 +664,7 @@ function displaySettings() {
   document.getElementById("connectingToServer").style.display = "none";
   document.getElementById("roomsOnlineJoin").style.display = "none";
   document.getElementById("authenticationServer").style.display = "none";
-  checkSameGrid();
-  checkGameSpeed();
-  checkPlayer();
-  checkFailSettings();
-  checkMazeGrid();
+
   resetForm(false);
 
   if(selectedMode == BATTLE_ROYALE_ONLINE) {
@@ -844,6 +842,16 @@ function checkMazeGrid() {
   }
 }
 
+function checkEnableAI() {
+  if(document.getElementById("enableAI").checked) {
+    document.getElementById("iaSettings").style.display = "block";
+  } else if(selectedMode == BATTLE_ROYALE_ONLINE) {
+    document.getElementById("iaSettings").style.display = "none";
+  } else {
+    document.getElementById("iaSettings").style.display = "block";
+  }
+}
+
 function gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, numberPlayers) {
   var heightGrid = parseInt(heightGrid);
   var widthGrid = parseInt(widthGrid);
@@ -940,6 +948,10 @@ document.getElementById("mazeGrid").onchange = function() {
   checkMazeGrid();
 };
 
+document.getElementById("enableAI").onchange = function() {
+  checkEnableAI();
+};
+
 function resetForm(resetValues) {
   document.getElementById("invalidHeight").style.display = "none";
   document.getElementById("invalidWidth").style.display = "none";
@@ -982,6 +994,7 @@ function resetForm(resetValues) {
   checkPlayer();
   checkFailSettings();
   checkMazeGrid();
+  checkEnableAI();
 }
 
 document.getElementById("resetSettings").onclick = function() {
@@ -1140,8 +1153,9 @@ function validateSettings(returnValidation) {
         borderWalls: borderWalls,
         generateWalls: generateWalls,
         customSpeed: customSpeed,
-        enableAI: false,
-        private: document.getElementById("privateGame").checked
+        private: document.getElementById("privateGame").checked,
+        enableAI: document.getElementById("enableAI").checked,
+        levelAI: aiLevel
       }, function(data) {
         var errorCode = data.errorCode;
 

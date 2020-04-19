@@ -108,7 +108,8 @@ i18next.addResourceBundle("fr", "translation", {
     "validate": "Valider",
     "reset": "Réinitialiser",
     "backToMenu": "Retour au menu",
-    "privateGame": "Garder la partie privée"
+    "privateGame": "Garder la partie privée",
+    "enableAI": "Activer les IA"
   },
   "game": {
     "backToMenu": "Retour au menu",
@@ -305,7 +306,8 @@ i18next.addResourceBundle("en", "translation", {
     "validate": "Validate",
     "reset": "Reset",
     "backToMenu": "Back to the menu",
-    "privateGame": "Keep the game private"
+    "privateGame": "Keep the game private",
+    "enableAI": "Enable the AIs"
   },
   "game": {
     "backToMenu": "Back to the menu",
