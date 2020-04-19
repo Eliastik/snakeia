@@ -987,6 +987,7 @@ function resetForm(resetValues) {
     document.getElementById("battleAgainstAIs").checked = false;
     document.getElementById("aiAssistant").checked = false;
     document.getElementById("privateGame").checked = false;
+    document.getElementById("enableAI").checked = false;
   }
 
   checkSameGrid();
@@ -1098,7 +1099,7 @@ function validateSettings(returnValidation) {
       document.getElementById("aiLevel").classList.add("is-invalid");
       document.getElementById("invalidaiLevel").style.display = "block";
     }
-  } else if(selectedMode != SOLO_PLAYER && selectedMode != BATTLE_ROYALE_ONLINE) {
+  } else if((selectedMode != SOLO_PLAYER && selectedMode != BATTLE_ROYALE_ONLINE) || (selectedMode == BATTLE_ROYALE_ONLINE && document.getElementById("enableAI").checked)) {
     switch(aiLevel) {
       case "random":
         aiLevel = AI_LEVEL_RANDOM;
