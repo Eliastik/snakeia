@@ -102,8 +102,8 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.canvasHeight = canvasHeight == undefined ? GameConstants.Setting.CANVAS_HEIGHT : canvasHeight;
   this.fontSize = GameConstants.Setting.FONT_SIZE;
   this.headerHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
-  this.timerToDisplay;
-  this.bestScoreToDisplay;
+  this.timerToDisplay = null;
+  this.bestScoreToDisplay = null;
   this.isFilterHueAvailable = DrawUtils.isFilterHueAvailable();
   // Intervals, timeouts, frames
   this.intervalCountFPS;
@@ -526,8 +526,8 @@ GameUI.prototype.draw = function() {
       }
 
       if(this.timerToDisplay != undefined && this.timerToDisplay != null && !isNaN(this.timerToDisplay) && this.timerToDisplay >= 0) {
-        DrawUtils.drawImage(ctx, this.imageLoader.get("assets/images/clock.png"), this.headerHeight * 0.24, this.headerHeight + 15, this.headerHeight * 0.64, this.headerHeight * 0.64);
-        DrawUtils.drawText(ctx, "" + GameUtils.secondsFormat(this.timerToDisplay), "rgba(0, 0, 0, 0.5)", GameConstants.Setting.FONT_SIZE, GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight, this.headerHeight + 15 + this.headerHeight * 0.475);
+        var sizesTimer = DrawUtils.drawText(ctx, "" + GameUtils.secondsFormat(this.timerToDisplay), "rgba(0, 0, 0, 0.5)", this.fontSize, GameConstants.Setting.FONT_FAMILY, "right", "default", null, this.headerHeight + 15 + this.headerHeight * 0.475);
+        DrawUtils.drawImage(ctx, this.imageLoader.get("assets/images/clock.png"), sizesTimer["x"] - this.headerHeight * 0.64 - 10, this.headerHeight + 15, this.headerHeight * 0.64, this.headerHeight * 0.64);
       }
     } else if(!this.assetsLoaded) {
       var percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
