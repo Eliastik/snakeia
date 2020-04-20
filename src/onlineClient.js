@@ -32,6 +32,7 @@ function OnlineClient() {
   this.currentRoom;
   this.game;
   this.intervalReconnect;
+  this.disconnected = false;
   this.creatingRoom = false;
   this.joiningRoom = false;
   this.loadingRooms = false;
@@ -39,6 +40,7 @@ function OnlineClient() {
 
 OnlineClient.prototype.connect = function(url, port, callback) {
   this.disconnect();
+  this.disconnected = false;
 
   this.url = url;
   this.port = port;
@@ -77,14 +79,17 @@ OnlineClient.prototype.connect = function(url, port, callback) {
     self.disconnect();
   });
 
-  this.socket.on("disconnect", function() {
-    callback(false, GameConstants.Error.DISCONNECTED);
-    self.disconnect();
+  this.socket.once("disconnect", function() {
+    if(!self.disconnected) {
+      callback(false, GameConstants.Error.DISCONNECTED);
+      self.disconnect();
+    }
   });
 };
 
 OnlineClient.prototype.disconnect = function() {
   if(this.socket != null) {
+    this.disconnected = true;
     this.stopGame();
     this.socket.close();
     this.creatingRoom = false;
