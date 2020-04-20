@@ -214,7 +214,8 @@ i18next.addResourceBundle("fr", "translation", {
     "started": "(partie démarrée)",
     "starting": "(démarrage en cours)",
     "authenticationServer": "Authentification au serveur",
-    "linkAuthenticationServer": "Si le formulaire ne s'affiche pas, cliquez ici"
+    "linkAuthenticationServer": "Si le formulaire ne s'affiche pas, cliquez ici",
+    "disconnectedError": "Vous avez été déconnecté du serveur. Veuillez réessayer."
   }
 }, true, false);
 
@@ -412,6 +413,7 @@ i18next.addResourceBundle("en", "translation", {
     "started": "(game started)",
     "starting": "(game starting)",
     "authenticationServer": "Server authentication",
-    "linkAuthenticationServer": "If the form does not appear, click here"
+    "linkAuthenticationServer": "If the form does not appear, click here",
+    "disconnectedError": "You have been disconnected from the server. Please retry."
   }
 }, true, false);

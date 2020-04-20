@@ -76,6 +76,11 @@ OnlineClient.prototype.connect = function(url, port, callback) {
     callback(false, data);
     self.disconnect();
   });
+
+  this.socket.on("disconnect", function() {
+    callback(false, GameConstants.Error.DISCONNECTED);
+    self.disconnect();
+  });
 };
 
 OnlineClient.prototype.disconnect = function() {

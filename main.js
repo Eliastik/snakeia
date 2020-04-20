@@ -378,6 +378,9 @@ function connectToServer(url, port) {
         document.getElementById("linkAuthenticationServer").href = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2) + (id ? "&id=" + id : "");
 
         displayAuthentication();
+      } else if(data == GameConstants.Error.DISCONNECTED) {
+        alert(i18next.t("servers.disconnectedError"));
+        displayServerList();
       } else {
         alert(i18next.t("servers.connectionError"));
         displayServerList();
@@ -1171,6 +1174,9 @@ function validateSettings(returnValidation) {
         if(data.connection_error) {
           if(errorCode == GameConstants.Error.AUTHENTICATION_REQUIRED) {
             connectToServer(onlineClient.url, onlineClient.port);
+          } else if(data == GameConstants.Error.DISCONNECTED) {
+            alert(i18next.t("servers.disconnectedError"));
+            displayServerList();
           } else {
             alert(i18next.t("servers.connectionError"));
             displayServerList();
