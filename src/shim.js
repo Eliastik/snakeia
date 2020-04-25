@@ -53,7 +53,7 @@ if(!String.prototype.trim) {
 }
 
 // Old game API
-function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation) {
+function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation, ui) {
   var controller;
 
   var engine = new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed);
@@ -67,7 +67,12 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     controller = new GameController(engine);
   }
   
-  controller.gameUI = new GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation);
+  if(ui) {
+    controller.gameUI = ui;
+  } else {
+    controller.gameUI = new GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation);
+  }
+  
   controller.init();
   
   return controller;

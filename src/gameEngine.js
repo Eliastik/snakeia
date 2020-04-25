@@ -51,6 +51,7 @@ function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpe
   this.gameMazeWin = false; // used in maze mode
   this.scoreMax = false;
   this.errorOccurred = false;
+  this.clientSidePredictionsMode = false; // Enable client-side predictions mode for the online game (disable some functions)
   // Intervals, timeouts, frames
   this.intervalPlay;
   // Events
@@ -68,30 +69,32 @@ function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpe
 }
 
 GameEngine.prototype.init = function() {
-  if(this.snakes == null) {
-    this.errorOccurred = true;
-    this.snakes = [];
-  } else if(!Array.isArray(this.snakes)) {
-    this.snakes = [this.snakes];
-  } else if((Array.isArray(this.snakes) && this.snakes.length <= 0) || (this.grid.maze && this.snakes.length > 1)) {
-    this.errorOccurred = true;
-  }
-
-  var startHue = GameUtils.randRange(0, 360);
-
-  for(var i = 0; i < this.snakes.length; i++) {
-    if(this.snakes[i] instanceof Snake == false) {
+  if(!this.clientSidePredictionsMode) {
+    if(this.snakes == null) {
       this.errorOccurred = true;
-    } else {
-      startHue = GameUtils.addHue(startHue, Math.round(360 / (this.snakes.length)));
-      this.snakes[i].color = startHue;
+      this.snakes = [];
+    } else if(!Array.isArray(this.snakes)) {
+      this.snakes = [this.snakes];
+    } else if((Array.isArray(this.snakes) && this.snakes.length <= 0) || (this.grid.maze && this.snakes.length > 1)) {
+      this.errorOccurred = true;
     }
-  }
 
-  if(this.grid instanceof Grid == false) {
-    this.errorOccurred = true;
-  } else if(!this.errorOccurred) {
-    this.grid.setFruit(this.snakes.length);
+    var startHue = GameUtils.randRange(0, 360);
+
+    for(var i = 0; i < this.snakes.length; i++) {
+      if(this.snakes[i] instanceof Snake == false) {
+        this.errorOccurred = true;
+      } else {
+        startHue = GameUtils.addHue(startHue, Math.round(360 / (this.snakes.length)));
+        this.snakes[i].color = startHue;
+      }
+    }
+
+    if(this.grid instanceof Grid == false) {
+      this.errorOccurred = true;
+    } else if(!this.errorOccurred) {
+      this.grid.setFruit(this.snakes.length);
+    }
   }
 };
 
@@ -173,12 +176,14 @@ GameEngine.prototype.clearIntervalPlay = function() {
 };
 
 GameEngine.prototype.continue = function() {
-  this.start();
-  this.reactor.dispatchEvent("onContinue");
+  if(!this.clientSidePredictionsMode) {
+    this.start();
+    this.reactor.dispatchEvent("onContinue");
+  }
 };
 
 GameEngine.prototype.stop = function(finish) {
-  if(!this.gameOver) {
+  if(!this.gameOver && !this.clientSidePredictionsMode) {
     this.paused = true;
     this.gameOver = true;
     if(finish) this.gameFinished = true;
@@ -188,7 +193,7 @@ GameEngine.prototype.stop = function(finish) {
 };
 
 GameEngine.prototype.pause = function() {
-  if(!this.paused) {
+  if(!this.paused && !this.clientSidePredictionsMode) {
     this.paused = true;
     this.clearIntervalPlay();
     this.reactor.dispatchEvent("onPause");
@@ -261,13 +266,13 @@ GameEngine.prototype.tick = function() {
   var self = this;
 
   setTimeout(function() {
-    if(!self.paused && !self.killed) {
+    if((!self.paused && !self.killed) || (self.clientSidePredictionsMode && !self.killed)) {
       if(self.lastTime == 0) self.lastTime = time;
       self.ticks++;
       
       var scoreIncreased = false;
       
-      if(!self.grid.maze || self.grid.mazeForceAuto || ((self.grid.maze && (self.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (self.grid.maze && ((self.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (self.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) || self.getPlayer(1, GameConstants.PlayerType.HUMAN)).lastKey != -1))) {
+      if(self.grid && (!self.grid.maze || self.grid.mazeForceAuto || ((self.grid.maze && (self.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (self.grid.maze && ((self.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (self.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) || self.getPlayer(1, GameConstants.PlayerType.HUMAN)).lastKey != -1)))) {
         for(var i = 0; i < self.snakes.length; i++) {
           var initialDirection = self.snakes[i].direction;
           var setFruit = false;

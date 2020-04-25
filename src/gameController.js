@@ -34,6 +34,7 @@ function GameController(engine, ui) {
   this.scoreMax = false;
   this.gameFinished = false;
   this.errorOccurred = false;
+  this.clientSidePredictionsMode = false;
   // Events
   this.reactor = new Reactor();
   this.reactor.registerEvent("onStart");
@@ -251,6 +252,8 @@ GameController.prototype.kill = function() {
 };
 
 GameController.prototype.tick = function() {
+  this.gameEngine.paused = false;
+  this.gameEngine.countBeforePlay = -1;
   this.gameEngine.tick();
 };
 
@@ -260,6 +263,10 @@ GameController.prototype.exit = function() {
 
 GameController.prototype.forceStart = function() {
   this.gameEngine.start();
+};
+
+GameController.prototype.updateEngine = function(key, data) {
+  this.gameEngine[key] = data;
 };
 
 GameController.prototype.setDisplayFPS = function(display) {
@@ -291,17 +298,21 @@ GameController.prototype.key = function(key) {
   }
 };
 
-GameController.prototype.update = function(message, data) {
+GameController.prototype.update = function(message, data, updateEngine) {
   if(this.gameUI != null && data != null) {
     var dataKeys = Object.keys(data);
 
     for(var i = 0; i < dataKeys.length; i++) {
-      if(Object.prototype.hasOwnProperty.call(this.gameUI, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this.gameUI[dataKeys[i]]) !== "function") {
-        this.gameUI[dataKeys[i]] = data[dataKeys[i]];
-      }
+      if(!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && (dataKeys[i] == "snakes" || dataKeys[i] == "grid" || dataKeys[i] == "offsetFrame"))) {
+        if(Object.prototype.hasOwnProperty.call(this.gameUI, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this.gameUI[dataKeys[i]]) !== "function") {
+          this.gameUI[dataKeys[i]] = data[dataKeys[i]];
+        }
 
-      if(Object.prototype.hasOwnProperty.call(this, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this[dataKeys[i]]) !== "function") {
-        this[dataKeys[i]] = data[dataKeys[i]];
+        if(updateEngine) this.updateEngine(dataKeys[i], data[dataKeys[i]]);
+  
+        if(Object.prototype.hasOwnProperty.call(this, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this[dataKeys[i]]) !== "function") {
+          this[dataKeys[i]] = data[dataKeys[i]];
+        }
       }
     }
 

@@ -158,6 +158,13 @@ function GameControllerWorker(game, ui) {
   this.forceStart = function() {
     if(this.worker instanceof Worker) this.worker.postMessage(["forceStart"]);
   };
+
+  this.updateEngine = function(key, data) {
+    if(this.worker instanceof Worker) this.worker.postMessage(["update", {
+      "key": key,
+      "data": data
+    }]);
+  };
 }
 
  // extends GameController

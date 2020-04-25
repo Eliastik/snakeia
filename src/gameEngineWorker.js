@@ -46,13 +46,13 @@ onmessage = function(e) {
   if(data.length > 1 && data[0] == "init") {
     var grid = data[1]["grid"];
     var snakes = data[1]["snakes"];
-
+  
     grid = Object.assign(new Grid(), grid);
-
+  
     for(var i = 0; i < snakes.length; i++) {
       snakes[i].grid = grid;
       snakes[i] = Object.assign(new Snake(), snakes[i]);
-
+  
       for(var j = 0; j < snakes[i].queue.length; j++) {
         snakes[i].queue[j] = Object.assign(new Position(), snakes[i].queue[j]);
       }
@@ -250,6 +250,8 @@ onmessage = function(e) {
         game.kill();
         break;
       case "tick":
+        game.paused = false;
+        game.countBeforePlay = -1;
         game.tick();
         break;
       case "exit":
@@ -264,6 +266,11 @@ onmessage = function(e) {
           if(playerSnake != null && playerSnake.lastKey != null) {
             playerSnake.lastKey = data[1];
           }
+        }
+        break;
+      case "update":
+        if(data.length > 1) {
+          game[data[1]["key"]] = data[1]["data"];
         }
         break;
     }

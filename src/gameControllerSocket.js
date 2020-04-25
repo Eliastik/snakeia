@@ -23,14 +23,15 @@ if(typeof(require) !== "undefined") {
   var Snake = require("./snake");
   var Position = require("./position");
   var NotificationMessage = require("jsgametools").NotificationMessage;
+  var Game = require("./shim");
 }
 
 function GameControllerSocket(socket, ui) {
-  GameController.call(this, null, ui);
+  GameController.call(this, new Game(null, null, null, null, null, null, null, null, null, null, null, null, ui), ui);
 
   this.socket = socket;
 
-  this.parseData = function(m, d) {
+  this.parseData = function(m, d, updateEngine) {
     var data = [m, d];
 
     if(data.length > 1) {
@@ -52,7 +53,7 @@ function GameControllerSocket(socket, ui) {
         }
       }
       
-      this.update(data[0], data[1]);
+      this.update(data[0], data[1], updateEngine);
     }
   };
 
@@ -60,7 +61,8 @@ function GameControllerSocket(socket, ui) {
     var self = this;
 
     this.socket.on("init", function(data) {
-      self.parseData("init", data);
+      self.parseData("init", data, true);
+      self.gameEngine.update("update", {"clientSidePredictionsMode": true}, true);
     });
 
     this.socket.on("reset", function(data) {
@@ -74,27 +76,29 @@ function GameControllerSocket(socket, ui) {
     });
 
     this.socket.on("pause", function(data) {
-      self.parseData("pause", data);
+      self.parseData("pause", data, true);
       self.reactor.dispatchEvent("onPause");
     });
 
     this.socket.on("continue", function(data) {
-      self.parseData("continue", data);
+      self.parseData("continue", data, true);
       self.reactor.dispatchEvent("onContinue");
     });
 
     this.socket.on("stop", function(data) {
-      self.parseData("stop", data);
+      self.parseData("stop", data, true);
       self.reactor.dispatchEvent("onStop");
     });
 
     this.socket.on("exit", function(data) {
       self.parseData("exit", data);
+      self.gameEngine.exit();
       self.reactor.dispatchEvent("onExit");
     });
 
     this.socket.on("kill", function(data) {
       self.parseData("kill", data);
+      self.gameEngine.kill();
       self.reactor.dispatchEvent("onKill");
     });
 
@@ -104,12 +108,17 @@ function GameControllerSocket(socket, ui) {
     });
 
     this.socket.on("update", function(data) {
-      self.parseData("update", data);
+      self.parseData("update", data, true);
       self.reactor.dispatchEvent("onUpdate");
     });
 
     this.socket.on("updateCounter", function(data) {
       self.parseData("updateCounter", data);
+
+      if(data && data.countBeforePlay < 0) {
+        self.gameEngine.tick();
+      }
+
       self.reactor.dispatchEvent("onUpdateCounter");
     });
 
@@ -156,10 +165,15 @@ function GameControllerSocket(socket, ui) {
 
   this.key = function(key) {
     this.socket.emit("key", key);
+    this.gameEngine.key(key);
   };
 
   this.forceStart = function() {
     this.socket.emit("forceStart");
+  };
+
+  this.updateEngine = function(key, value) {
+    this.gameEngine.updateEngine(key, value);
   };
 }
 

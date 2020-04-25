@@ -487,7 +487,7 @@ GameUI.prototype.draw = function() {
 
       DrawUtils.drawImage(ctx, this.imageLoader.get("assets/images/fruit.png"), 5, 5, this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1), this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1));
 
-      if(this.snakes != null && this.snakes.length <= 1) {
+      if(this.snakes != null && this.snakes.length == 1) {
         DrawUtils.drawText(ctx, "× " + this.snakes[0].score, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
       } else {
         DrawUtils.drawText(ctx, i18next.t("engine.num") + (this.numFruit != null ? this.numFruit : "???"), "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
