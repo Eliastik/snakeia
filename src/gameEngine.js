@@ -280,14 +280,14 @@ GameEngine.prototype.tick = function() {
               self.snakes[i].moveTo(self.snakes[i].lastKey);
               self.snakes[i].lastKey = -1;
             } else if(self.snakes[i].player == GameConstants.PlayerType.AI) {
-              self.snakes[i].moveTo(self.snakes[i].ai(true));
+              self.snakes[i].moveTo(self.snakes[i].ai());
             }
 
             var headSnakePos = self.snakes[i].getHeadPosition();
 
             if(self.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI && self.grid.isDeadPosition(self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction))) {
               self.snakes[i].direction = initialDirection;
-              self.snakes[i].moveTo(self.snakes[i].ai(true));
+              self.snakes[i].moveTo(self.snakes[i].ai());
               self.snakes[i].lastKey = -1;
             }
 

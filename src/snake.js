@@ -358,7 +358,7 @@ Snake.prototype.randomAI = function() {
 Snake.prototype.simpleAI = function() {
   if(this.grid.fruitPos != null) {
     var currentPosition = this.getHeadPosition();
-    var fruitPos = this.grid.fruitPos;
+    var fruitPos = this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? this.grid.fruitPosGold : this.grid.fruitPos;
     var directionNext = GameConstants.Key.RIGHT;
 
     if(fruitPos.x > currentPosition.x) {
@@ -421,52 +421,54 @@ Snake.prototype.simpleAI = function() {
   }
 };
 
-Snake.prototype.ai = function(bestFind) {
-  var bestFind = bestFind == undefined ? false : bestFind;
-  var res = GameConstants.Key.RIGHT;
+Snake.prototype.ai = function() {
+  var res = null;
+  
+  var currentPosition = this.getHeadPosition();
+  var fruitPos = this.grid.fruitPos;
+  var fruitPosGold = this.grid.fruitPosGold;
+
+  if(fruitPos != null) {
+    var distFruit = Math.abs(fruitPos.x - currentPosition.x) + Math.abs(fruitPos.y - currentPosition.y);
+    var distFruitGold = fruitPosGold != null ? Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y) : -1;
+  
+    if(fruitPosGold != null && this.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD && this.aiFruitGoal == GameConstants.CaseType.FRUIT) {
+      if(distFruitGold < distFruit) {
+        this.aiFruitGoal = GameConstants.CaseType.FRUIT_GOLD;
+      } else {
+        this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+      }
+    } else if(fruitPosGold == null || this.grid.get(fruitPosGold) != GameConstants.CaseType.FRUIT_GOLD) {
+      this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+    }
+  }
 
   if(this.aiLevel == GameConstants.AiLevel.RANDOM) {
     res = this.randomAI();
   } else if(this.aiLevel == GameConstants.AiLevel.LOW) {
+    res = this.simpleAI();
+  } else if(fruitPos != null) {
+    var grid = this.grid.getGraph(false);
+
+    var graph = new Lowlight.Astar.Configuration(grid, {
+      order: "yx",
+      torus: (this.aiLevel == GameConstants.AiLevel.HIGH || this.aiLevel == GameConstants.AiLevel.ULTRA) ? true : false,
+      diagonals: false,
+      cutting: false,
+      static: true,
+      cost(a, b) { return b == 1 ? null : 1 }
+    });
+
+    var path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.x : fruitPos.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.y : fruitPos.y });
+
+    if(path.length > 1) {
+      var nextPosition = new Position(path[1].x, path[1].y);
+      res = new Position(null, null, this.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
+    } else if(this.aiLevel == GameConstants.AiLevel.HIGH || this.aiLevel == GameConstants.AiLevel.ULTRA) {
       res = this.simpleAI();
-  } else {
-    if(this.grid.fruitPos != null) {
-      var currentPosition = this.getHeadPosition();
-      var fruitPos = this.grid.fruitPos;
-      var fruitPosGold = this.grid.fruitPosGold;
-      var distFruit = Math.abs(currentPosition.x - fruitPos.x) + Math.abs(currentPosition.y - fruitPos.y);
-      var distFruitGold = fruitPosGold != null ? Math.abs(currentPosition.x - fruitPosGold.x) + Math.abs(currentPosition.y - fruitPosGold.y) : -1;
-
-      if(fruitPosGold != null && this.aiFruitGoal == GameConstants.CaseType.FRUIT) {
-        if(distFruitGold > distFruit) {
-          this.aiFruitGoal = GameConstants.CaseType.FRUIT_GOLD;
-        } else {
-          this.aiFruitGoal = GameConstants.CaseType.FRUIT;
-        }
-      } else if(fruitPosGold == null) {
-        this.aiFruitGoal = GameConstants.CaseType.FRUIT;
-      }
-
-      var grid = this.grid.getGraph(false);
-      var graph = new Lowlight.Astar.Configuration(grid, {
-        order: "yx",
-        torus: (this.aiLevel == GameConstants.AiLevel.HIGH || this.aiLevel == GameConstants.AiLevel.ULTRA) ? true : false,
-        diagonals: false,
-        cutting: false,
-        static: true,
-        cost(a, b) { return b == 1 ? null : 1 }
-      });
-      var path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.x : fruitPos.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.y : fruitPos.y });
-
-      if(path.length > 1) {
-        var nextPosition = new Position(path[1].x, path[1].y);
-        res = new Position(null, null, this.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
-      } else if(this.aiLevel == GameConstants.AiLevel.HIGH || this.aiLevel == GameConstants.AiLevel.ULTRA) {
-        res = this.simpleAI();
-      }
-
-      grid, graph, path = null;
     }
+
+    grid, graph, path = null;
   }
 
   return res;
