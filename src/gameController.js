@@ -175,12 +175,6 @@ GameController.prototype.init = function() {
   });
 
   this.gameEngine.onScoreIncreased(function() {
-    self.update("scoreIncreased", {
-      "snakes": self.gameEngine.snakes,
-      "scoreMax": self.gameEngine.scoreMax,
-      "gameFinished": self.gameEngine.gameFinished,
-      "errorOccurred": self.gameEngine.errorOccurred
-    });
     self.reactor.dispatchEvent("onScoreIncreased");
   });
 

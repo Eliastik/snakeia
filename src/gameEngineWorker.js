@@ -28,6 +28,18 @@ importScripts("gameEngine.js");
 
 var game;
 
+function copySnakes(snakes) {
+  const copy = JSON.parse(JSON.stringify(snakes));
+
+  if(copy) {
+    for(var i = 0; i < copy.length; i++) {
+      delete copy[i]["grid"];
+    }
+  }
+
+  return copy;
+}
+
 onmessage = function(e) {
   var data = e.data;
 
@@ -49,8 +61,8 @@ onmessage = function(e) {
     game = new GameEngine(grid, snakes, data[1]["speed"], data[1]["enablePause"], data[1]["enableRetry"], data[1]["progressiveSpeed"]);
 
     this.postMessage(["init", {
-      "snakes": JSON.parse(JSON.stringify(game.snakes)),
-      "grid": JSON.parse(JSON.stringify(game.grid)),
+      "snakes": copySnakes(game.snakes),
+      "grid": game.grid,
       "enablePause": game.enablePause,
       "enableRetry": game.enableRetry,
       "progressiveSpeed": game.progressiveSpeed,
@@ -63,7 +75,8 @@ onmessage = function(e) {
         "paused": game.paused,
         "isReseted": game.isReseted,
         "exited": game.exited,
-        "grid": JSON.parse(JSON.stringify(game.grid)),
+        "snakes": copySnakes(game.snakes),
+        "grid": game.grid,
         "numFruit": game.numFruit,
         "ticks": game.ticks,
         "scoreMax": game.scoreMax,
@@ -73,7 +86,6 @@ onmessage = function(e) {
         "starting": game.starting,
         "initialSpeed": game.initialSpeed,
         "speed": game.speed,
-        "snakes": JSON.parse(JSON.stringify(game.snakes)),
         "offsetFrame": game.speed * GameConstants.Setting.TIME_MULTIPLIER,
         "confirmReset": false,
         "confirmExit": false,
@@ -85,8 +97,8 @@ onmessage = function(e) {
 
     game.onStart(function() {
       self.postMessage(["start", {
-        "snakes": JSON.parse(JSON.stringify(game.snakes)),
-        "grid": JSON.parse(JSON.stringify(game.grid)),
+        "snakes": copySnakes(game.snakes),
+        "grid": game.grid,
         "starting": game.starting,
         "countBeforePlay": game.countBeforePlay,
         "paused": game.paused,
@@ -153,9 +165,9 @@ onmessage = function(e) {
         "paused": game.paused,
         "gameOver": game.gameOver,
         "killed": game.killed,
-        "snakes": JSON.parse(JSON.stringify(game.snakes)),
+        "snakes": copySnakes(game.snakes),
+        "grid": game.grid,
         "gameFinished": game.gameFinished,
-        "grid": JSON.parse(JSON.stringify(game.grid)),
         "confirmReset": false,
         "confirmExit": false,
         "getInfos": false,
@@ -165,13 +177,7 @@ onmessage = function(e) {
     });
 
     game.onScoreIncreased(function() {
-      self.postMessage(["scoreIncreased", {
-        "snakes": JSON.parse(JSON.stringify(game.snakes)),
-        "grid": JSON.parse(JSON.stringify(game.grid)),
-        "scoreMax": game.scoreMax,
-        "gameFinished": game.gameFinished,
-        "errorOccurred": game.errorOccurred
-      }]);
+      self.postMessage(["scoreIncreased", {}]);
     });
     
     game.onUpdate(function() {
@@ -179,7 +185,8 @@ onmessage = function(e) {
         "paused": game.paused,
         "isReseted": game.isReseted,
         "exited": game.exited,
-        "grid": JSON.parse(JSON.stringify(game.grid)),
+        "snakes": copySnakes(game.snakes),
+        "grid": game.grid,
         "numFruit": game.numFruit,
         "ticks": game.ticks,
         "scoreMax": game.scoreMax,
@@ -189,7 +196,6 @@ onmessage = function(e) {
         "starting": game.starting,
         "initialSpeed": game.initialSpeed,
         "speed": game.speed,
-        "snakes": JSON.parse(JSON.stringify(game.snakes)),
         "countBeforePlay": game.countBeforePlay,
         "numFruit": game.numFruit,
         "offsetFrame": 0,
@@ -202,7 +208,8 @@ onmessage = function(e) {
         "paused": game.paused,
         "isReseted": game.isReseted,
         "exited": game.exited,
-        "grid": JSON.parse(JSON.stringify(game.grid)),
+        "snakes": copySnakes(game.snakes),
+        "grid": game.grid,
         "numFruit": game.numFruit,
         "ticks": game.ticks,
         "scoreMax": game.scoreMax,
@@ -212,7 +219,6 @@ onmessage = function(e) {
         "starting": game.starting,
         "initialSpeed": game.initialSpeed,
         "speed": game.speed,
-        "snakes": JSON.parse(JSON.stringify(game.snakes)),
         "countBeforePlay": game.countBeforePlay,
         "numFruit": game.numFruit,
         "errorOccurred": game.errorOccurred

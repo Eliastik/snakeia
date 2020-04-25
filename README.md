@@ -289,31 +289,26 @@ Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 
 ## TO-DO list
 
-### À faire (ou idées) :
-
-* Bug avec les workers : les Snake semblent "popper"
-* Prédictions pour le mode en ligne (améliore la fluidité)
-* Optimiser flood fill
-* Eviter de placer les joueurs trop près des murs
-* Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
+- [ ] Prédictions pour le mode en ligne (améliore la fluidité)
+- [ ] Optimiser flood fill
+- [ ] Eviter de placer les joueurs trop près des murs
+- [x] Bug avec les workers : les Snake semblent "popper"
+- [ ] Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
+- [x] Performances lorsque plusieurs Snake sur une seule grille (problème affichage texte drawSnakeInfos et aussi la fonction isCaseSurrounded de la classe Grid corrigés)
+- [x] Correction vitesse démarrage partie si fps > 60
+- [x] Idée type de niveau : atteindre le score avant les adversaires
+- [x] Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
+- [x] hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible (workaround trouvé avec le Snake pointé par la flèche + détection et texte différent)
+- [x] Animations
+- [x] Labyrinthes
+- [x] Multithreading
+- [x] MVC (architecture client-serveur)
+- [x] Jeu multi-joueur en ligne (création d'un programme serveur avec socket.io)
 
 #### Autres idées
-* Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
-* Afficher difficulté niveaux
-* Skin vrai serpent
-
-### Fait :
-
-* Performances lorsque plusieurs Snake sur une seule grille (problème affichage texte drawSnakeInfos et aussi la fonction isCaseSurrounded de la classe Grid corrigés)
-* Correction vitesse démarrage partie si fps > 60
-* Idée type de niveau : atteindre le score avant les adversaires
-* Corriger l'algorithme de génération de murs à des positions aléatoires (empêcher les blocages possibles)
-* hue-rotate ne fonctionne pas sur Microsoft Edge et Safari -> pas de changement de couleur des Snake possible (workaround trouvé avec le Snake pointé par la flèche + détection et texte différent)
-* Animations
-* Labyrinthes
-* Multithreading
-* MVC (architecture client-serveur)
-* Jeu multi-joueur en ligne (création d'un programme serveur avec socket.io)
+- [ ] Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
+- [ ] Afficher difficulté niveaux
+- [ ] Skin vrai serpent
 
 ## Déclaration de licence
 

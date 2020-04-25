@@ -265,6 +265,8 @@ GameEngine.prototype.tick = function() {
       if(self.lastTime == 0) self.lastTime = time;
       self.ticks++;
       
+      var scoreIncreased = false;
+      
       if(!self.grid.maze || self.grid.mazeForceAuto || ((self.grid.maze && (self.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (self.grid.maze && ((self.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (self.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) || self.getPlayer(1, GameConstants.PlayerType.HUMAN)).lastKey != -1))) {
         for(var i = 0; i < self.snakes.length; i++) {
           var initialDirection = self.snakes[i].direction;
@@ -304,7 +306,7 @@ GameEngine.prototype.tick = function() {
                   goldFruit = true;
                 }
                 
-                self.reactor.dispatchEvent("onScoreIncreased");
+                scoreIncreased = true;
                 self.snakes[i].insert(headSnakePos);
 
                 if(self.grid.maze) {
@@ -363,6 +365,10 @@ GameEngine.prototype.tick = function() {
         }
 
         self.reactor.dispatchEvent("onUpdate");
+
+        if(scoreIncreased) {
+          self.reactor.dispatchEvent("onScoreIncreased");
+        }
       }
       
       self.tick();
