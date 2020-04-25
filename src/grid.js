@@ -299,8 +299,8 @@ Grid.prototype.isCaseSurrounded = function(position, fill, foundVals, forbiddenV
 
   var fill = fill == undefined ? false : fill;
 
+  var gridCopy = JSON.parse(JSON.stringify(this.grid));
   var checkList = [position];
-  var complete = [];
 
   while(checkList.length > 0) {
     var currentPosition = checkList[0];
@@ -309,13 +309,7 @@ Grid.prototype.isCaseSurrounded = function(position, fill, foundVals, forbiddenV
     var directions = [this.getNextPosition(currentPosition, GameConstants.Direction.UP), this.getNextPosition(currentPosition, GameConstants.Direction.BOTTOM), this.getNextPosition(currentPosition, GameConstants.Direction.LEFT), this.getNextPosition(currentPosition, GameConstants.Direction.RIGHT)]; // UP, DOWN, LEFT, RIGHT
 
     for(var i = 0; i < directions.length; i++) {
-      var alreadyCompleted = false;
-
-      if(directions[i].indexIn(complete) > -1 || directions[i].indexIn(checkList) > -1) {
-        alreadyCompleted = true;
-      }
-
-      if(!alreadyCompleted && (forbiddenVals.indexOf(this.get(directions[i])) > -1)) {
+      if(gridCopy[directions[i].y][directions[i].x] != GameConstants.CaseType.CROSSED && forbiddenVals.indexOf(this.get(directions[i])) > -1) {
         checkList.push(directions[i]);
 
         if(foundVals.indexOf(this.get(directions[i])) > -1) {
@@ -324,11 +318,12 @@ Grid.prototype.isCaseSurrounded = function(position, fill, foundVals, forbiddenV
 
         if(fill && this.get(directions[i]) == GameConstants.CaseType.EMPTY) {
           this.set(GameConstants.CaseType.SURROUNDED, directions[i]);
+          gridCopy[directions[i].y][directions[i].x] = GameConstants.CaseType.SURROUNDED;
+        } else {
+          gridCopy[directions[i].y][directions[i].x] = GameConstants.CaseType.CROSSED;
         }
       }
     }
-
-    complete.push(currentPosition);
   }
 
   if(fill && (this.get(position) == GameConstants.CaseType.EMPTY || this.get(position) == GameConstants.CaseType.FRUIT) || this.get(position) == GameConstants.CaseType.FRUIT_GOLD) {

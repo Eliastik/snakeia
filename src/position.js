@@ -68,16 +68,6 @@ Position.prototype.equals = function(otherPosition) {
   }
 };
 
-Position.prototype.indexIn = function(array) {
-  for(var i = 0; i < array.length; i++) {
-    if(this.equals(array[i])) {
-      return i;
-    }
-  }
-  
-  return -1;
-};
-
 // Export module
 if(typeof(module) !== "undefined") {
   module.exports = Position;

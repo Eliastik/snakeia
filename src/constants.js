@@ -24,7 +24,8 @@ var GameConstants = {
     WALL: 3,
     SNAKE_DEAD: 4,
     SURROUNDED: 5,
-    FRUIT_GOLD: 6
+    FRUIT_GOLD: 6,
+    CROSSED: 7
   },
   PlayerType: {
     AI: "PLAYER_AI",

@@ -290,7 +290,7 @@ Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 ## TO-DO list
 
 - [ ] Prédictions pour le mode en ligne (améliore la fluidité)
-- [ ] Optimiser flood fill
+- [x] Optimiser flood fill
 - [ ] Eviter de placer les joueurs trop près des murs
 - [x] Bug avec les workers : les Snake semblent "popper"
 - [ ] Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
