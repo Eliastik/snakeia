@@ -63,10 +63,11 @@ function GameControllerSocket(socket, ui) {
     this.socket.on("init", function(data) {
       self.parseData("init", data, true);
       self.gameEngine.update("update", {"clientSidePredictionsMode": true}, true);
+      if(data && data["currentPlayer"]) self.gameEngine.currentPlayer = data["currentPlayer"];
     });
 
     this.socket.on("reset", function(data) {
-      self.parseData("reset", data);
+      self.parseData("reset", data, true);
       self.reactor.dispatchEvent("onReset");
     });
 
@@ -166,6 +167,7 @@ function GameControllerSocket(socket, ui) {
   this.key = function(key) {
     this.socket.emit("key", key);
     this.gameEngine.key(key);
+    this.lastKey = this.gameEngine.lastKey;
   };
 
   this.forceStart = function() {

@@ -266,7 +266,7 @@ GameEngine.prototype.tick = function() {
   var self = this;
 
   setTimeout(function() {
-    if((!self.paused && !self.killed) || (self.clientSidePredictionsMode && !self.killed)) {
+    if((!self.clientSidePredictionsMode && !self.paused && !self.killed) || (self.clientSidePredictionsMode && !self.killed && (!self.gameOver || !self.gameFinished))) {
       if(self.lastTime == 0) self.lastTime = time;
       self.ticks++;
       
@@ -341,12 +341,12 @@ GameEngine.prototype.tick = function() {
             }
           }
 
-          if(!self.scoreMax && setFruit) {
+          if(!self.scoreMax && setFruit && !self.clientSidePredictionsMode) {
             setFruitError = !self.grid.setFruit(self.snakes.length);
           }
         }
 
-        if(!self.scoreMax && !setFruitError && self.grid.isFruitSurrounded(self.grid.fruitPos, true)) {
+        if(!self.scoreMax && !setFruitError && self.grid.isFruitSurrounded(self.grid.fruitPos, true) && !self.clientSidePredictionsMode) {
           setFruitError = !self.grid.setFruit(self.snakes.length);
         }
 

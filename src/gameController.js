@@ -26,6 +26,7 @@ function GameController(engine, ui) {
   this.gameEngine = engine;
   // Copy of game engine variables
   this.snakes = null;
+  this.lastKey = -1;
   this.paused = false;
   this.isReseted = false;
   this.exited = false;
@@ -35,6 +36,7 @@ function GameController(engine, ui) {
   this.gameFinished = false;
   this.errorOccurred = false;
   this.clientSidePredictionsMode = false;
+  this.currentPlayer = null;
   // Events
   this.reactor = new Reactor();
   this.reactor.registerEvent("onStart");
@@ -291,35 +293,28 @@ GameController.prototype.setBestScore = function(score) {
 
 GameController.prototype.key = function(key) {
   this.gameEngine.lastKey = key;
-  var playerSnake = this.gameEngine.getPlayer(1, GameConstants.PlayerType.HUMAN) || this.gameEngine.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+  this.lastKey = key;
+
+  var playerSnake = this.snakes[this.getCurrentPlayer()];
 
   if(playerSnake != null && playerSnake.lastKey != null) {
     playerSnake.lastKey = key;
   }
 };
 
-GameController.prototype.update = function(message, data, updateEngine) {
-  if(this.gameUI != null && data != null) {
-    var dataKeys = Object.keys(data);
-
-    for(var i = 0; i < dataKeys.length; i++) {
-      if(!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && (dataKeys[i] == "snakes" || dataKeys[i] == "grid" || dataKeys[i] == "offsetFrame"))) {
-        if(Object.prototype.hasOwnProperty.call(this.gameUI, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this.gameUI[dataKeys[i]]) !== "function") {
-          this.gameUI[dataKeys[i]] = data[dataKeys[i]];
-        }
-
-        if(updateEngine) this.updateEngine(dataKeys[i], data[dataKeys[i]]);
+GameController.prototype.getCurrentPlayer = function() {
+  if(this.snakes != null) {
+    var nbPlayers = this.getNBPlayer(GameConstants.PlayerType.HUMAN);
+    var nbPlayersHybrid = this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI);
   
-        if(Object.prototype.hasOwnProperty.call(this, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this[dataKeys[i]]) !== "function") {
-          this[dataKeys[i]] = data[dataKeys[i]];
-        }
+    for(var i = 0; i < this.snakes.length; i++) {
+      if((this.currentPlayer == null && nbPlayers <= 1 && nbPlayersHybrid <= 1 && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) || this.currentPlayer == (i + 1)) {
+        return i;
       }
     }
-
-    if(data.hasOwnProperty("killed") && data.killed) {
-      this.gameUI.setKill();
-    }
   }
+
+  return -1;
 };
 
 GameController.prototype.getNBPlayer = function(type) {
@@ -352,6 +347,37 @@ GameController.prototype.getPlayer = function(num, type) {
   }
 
   return null;
+};
+
+GameController.prototype.update = function(message, data, updateEngine) {
+  if(this.gameUI != null && data != null) {
+    var dataKeys = Object.keys(data);
+
+    for(var i = 0; i < dataKeys.length; i++) {
+      if(!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && (dataKeys[i] == "snakes" || dataKeys[i] == "grid" || dataKeys[i] == "offsetFrame" || dataKeys[i] == "gameOver" || dataKeys[i] == "gameFinished"))) {
+        if(Object.prototype.hasOwnProperty.call(this.gameUI, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this.gameUI[dataKeys[i]]) !== "function") {
+          this.gameUI[dataKeys[i]] = data[dataKeys[i]];
+        }
+
+        if(updateEngine) {
+          if(data.snakes && data.snakes[this.getCurrentPlayer()]) {
+            data.snakes[this.getCurrentPlayer()].lastKey = this.lastKey;
+            this.lastKey = -1;
+          }
+
+          this.updateEngine(dataKeys[i], data[dataKeys[i]]);
+        }
+  
+        if(Object.prototype.hasOwnProperty.call(this, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this[dataKeys[i]]) !== "function") {
+          this[dataKeys[i]] = data[dataKeys[i]];
+        }
+      }
+    }
+
+    if(data.hasOwnProperty("killed") && data.killed) {
+      this.gameUI.setKill();
+    }
+  }
 };
 
 GameController.prototype.onReset = function(callback) {

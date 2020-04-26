@@ -242,8 +242,8 @@ OnlineClient.prototype.joinRoom = function(code, callback) {
 
 OnlineClient.prototype.getGame = function(ui) {
   if(this.socket != null && this.currentRoom && ui != null) {
-    this.stopGame();
     this.game = null;
+    this.stopGame();
     this.game = new GameControllerSocket(this.socket, ui);
     ui.controller = this.game;
     return this.game;

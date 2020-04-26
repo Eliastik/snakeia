@@ -422,7 +422,7 @@ GameUI.prototype.draw = function() {
   } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
     var ctx = this.canvasCtx;
     var displayBestScore = false;
-    var currentPlayer = this.getCurrentPlayer();
+    var currentPlayer = this.controller.getCurrentPlayer();
     this.fontSize = GameConstants.Setting.FONT_SIZE;
     this.headerHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
 
@@ -884,21 +884,6 @@ GameUI.prototype.getDebugText = function() {
 
 GameUI.prototype.toString = function() {
   return (this.grid != null ? this.grid.toString() : "") + "\n" + (this.snakes != null && this.snakes.length <= 1 ? i18next.t("engine.score") + " : " + (this.snakes != null ? this.snakes[0].score : "") : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
-};
-
-GameUI.prototype.getCurrentPlayer = function() {
-  if(this.snakes != null) {
-    var nbPlayers = this.getNBPlayer(GameConstants.PlayerType.HUMAN);
-    var nbPlayersHybrid = this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI);
-  
-    for(var i = 0; i < this.snakes.length; i++) {
-      if((this.currentPlayer == null && nbPlayers <= 1 && nbPlayersHybrid <= 1 && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) || this.currentPlayer == (i + 1)) {
-        return i;
-      }
-    }
-  }
-
-  return -1;
 };
 
 GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, currentPlayer) {
