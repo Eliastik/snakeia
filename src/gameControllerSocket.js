@@ -117,7 +117,7 @@ function GameControllerSocket(socket, ui) {
       self.parseData("updateCounter", data);
 
       if(data && data.countBeforePlay < 0) {
-        self.gameEngine.tick();
+        self.gameEngine.forceStart();
       }
 
       self.reactor.dispatchEvent("onUpdateCounter");

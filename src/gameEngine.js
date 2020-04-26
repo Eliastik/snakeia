@@ -158,17 +158,22 @@ GameEngine.prototype.start = function() {
         self.reactor.dispatchEvent("onUpdateCounter");
         
         if(self.countBeforePlay < 0) {
-          self.clearIntervalPlay();
-          self.paused = false;
-          self.isReseted = false;
-          self.firstStart = false;
-          self.starting = false;
-          self.reactor.dispatchEvent("onStart");
-          self.tick();
+          self.forceStart();
         }
       }, 1000);
     }
   }
+};
+
+GameEngine.prototype.forceStart = function() {
+  this.clearIntervalPlay();
+  this.countBeforePlay = -1;
+  this.paused = false;
+  this.isReseted = false;
+  this.firstStart = false;
+  this.starting = false;
+  this.reactor.dispatchEvent("onStart");
+  this.tick();
 };
 
 GameEngine.prototype.clearIntervalPlay = function() {

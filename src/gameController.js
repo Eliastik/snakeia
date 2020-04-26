@@ -264,7 +264,7 @@ GameController.prototype.exit = function() {
 };
 
 GameController.prototype.forceStart = function() {
-  this.gameEngine.start();
+  this.gameEngine.forceStart();
 };
 
 GameController.prototype.updateEngine = function(key, data) {

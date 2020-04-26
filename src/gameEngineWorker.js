@@ -40,23 +40,39 @@ function copySnakes(snakes) {
   return copy;
 }
 
+function parseSnakes(snakes, grid) {
+  if(game) {
+    var grid = grid || game.grid;
+  }
+
+  grid = Object.assign(new Grid(), grid);
+
+  if(!snakes && game) {
+    snakes = game.snakes;
+  }
+  
+  for(var i = 0; i < snakes.length; i++) {
+    snakes[i].grid = grid;
+    snakes[i] = Object.assign(new Snake(), snakes[i]);
+
+    for(var j = 0; j < snakes[i].queue.length; j++) {
+      snakes[i].queue[j] = Object.assign(new Position(), snakes[i].queue[j]);
+    }
+  }
+
+  return {
+    grid: grid,
+    snakes: snakes
+  };
+}
+
 onmessage = function(e) {
   var data = e.data;
 
   if(data.length > 1 && data[0] == "init") {
-    var grid = data[1]["grid"];
-    var snakes = data[1]["snakes"];
-  
-    grid = Object.assign(new Grid(), grid);
-  
-    for(var i = 0; i < snakes.length; i++) {
-      snakes[i].grid = grid;
-      snakes[i] = Object.assign(new Snake(), snakes[i]);
-  
-      for(var j = 0; j < snakes[i].queue.length; j++) {
-        snakes[i].queue[j] = Object.assign(new Position(), snakes[i].queue[j]);
-      }
-    }
+    var parsed = parseSnakes(data[1]["snakes"], data[1]["grid"]);
+    var grid = parsed["grid"];
+    var snakes = parsed["snakes"];
 
     game = new GameEngine(grid, snakes, data[1]["speed"], data[1]["enablePause"], data[1]["enableRetry"], data[1]["progressiveSpeed"]);
 
@@ -257,6 +273,9 @@ onmessage = function(e) {
       case "exit":
         game.exit();
         break;
+      case "forceStart":
+        game.forceStart();
+        break;
       case "key":
         if(data.length > 1) {
           game.lastKey = data[1];
@@ -270,7 +289,13 @@ onmessage = function(e) {
         break;
       case "update":
         if(data.length > 1) {
-          game[data[1]["key"]] = data[1]["data"];
+          if(data[1]["key"] == "snakes") {
+            parseSnakes(data[1]["data"]);
+          } else if(data[1]["key"] == "grid") {
+            parseSnakes(null, data[1]["data"]);
+          } else {
+            game[data[1]["key"]] = data[1]["data"];
+          }
         }
         break;
     }
