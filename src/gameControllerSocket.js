@@ -26,9 +26,10 @@ if(typeof(require) !== "undefined") {
   var Game = require("./shim");
 }
 
-function GameControllerSocket(socket, ui) {
+function GameControllerSocket(socket, ui, enableClientSidePredictions) {
   GameController.call(this, new Game(null, null, null, null, null, null, null, null, null, null, null, null, ui), ui);
 
+  this.enableClientSidePredictions = enableClientSidePredictions || false;
   this.socket = socket;
 
   this.parseData = function(m, d, updateEngine) {
@@ -61,13 +62,16 @@ function GameControllerSocket(socket, ui) {
     var self = this;
 
     this.socket.on("init", function(data) {
-      self.parseData("init", data, true);
-      self.gameEngine.update("update", {"clientSidePredictionsMode": true}, true);
-      if(data && data["currentPlayer"]) self.gameEngine.currentPlayer = data["currentPlayer"];
+      self.parseData("init", data, self.enableClientSidePredictions);
+
+      if(self.enableClientSidePredictions) {
+        self.gameEngine.update("update", {"clientSidePredictionsMode": true}, true);
+        if(data && data["currentPlayer"]) self.gameEngine.currentPlayer = data["currentPlayer"];
+      }
     });
 
     this.socket.on("reset", function(data) {
-      self.parseData("reset", data, true);
+      self.parseData("reset", data, self.enableClientSidePredictions);
       self.reactor.dispatchEvent("onReset");
     });
 
@@ -87,7 +91,7 @@ function GameControllerSocket(socket, ui) {
     });
 
     this.socket.on("stop", function(data) {
-      self.parseData("stop", data, true);
+      self.parseData("stop", data, self.enableClientSidePredictions);
       self.reactor.dispatchEvent("onStop");
     });
 
@@ -109,14 +113,14 @@ function GameControllerSocket(socket, ui) {
     });
 
     this.socket.on("update", function(data) {
-      self.parseData("update", data, true);
+      self.parseData("update", data, self.enableClientSidePredictions);
       self.reactor.dispatchEvent("onUpdate");
     });
 
     this.socket.on("updateCounter", function(data) {
       self.parseData("updateCounter", data);
 
-      if(data && data.countBeforePlay < 0) {
+      if(self.enableClientSidePredictions && data && data.countBeforePlay < 0) {
         self.gameEngine.forceStart();
       }
 

@@ -31,6 +31,8 @@ function OnlineClient() {
   this.serverSettings;
   this.currentRoom;
   this.game;
+  this.serverVersion;
+  this.engineServerVersion;
   this.intervalReconnect;
   this.disconnected = false;
   this.creatingRoom = false;
@@ -244,7 +246,7 @@ OnlineClient.prototype.getGame = function(ui) {
   if(this.socket != null && this.currentRoom && ui != null) {
     this.game = null;
     this.stopGame();
-    this.game = new GameControllerSocket(this.socket, ui);
+    this.game = new GameControllerSocket(this.socket, ui, this.engineServerVersion == GameConstants.Setting.APP_VERSION);
     ui.controller = this.game;
     return this.game;
   }

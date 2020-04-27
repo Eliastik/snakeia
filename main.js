@@ -83,6 +83,7 @@ var selectedMode = SOLO_AI;
 var enableAnimations = true;
 var showDebugInfo = false;
 var onlineClient = new OnlineClient();
+var onlineEnableClientSidePredictions = true;
 
 document.getElementById("versionTxt").innerHTML = GameConstants.Setting.APP_VERSION;
 document.getElementById("appVersion").innerHTML = GameConstants.Setting.APP_VERSION;
@@ -482,9 +483,14 @@ function displayRooms() {
       document.getElementById("roomsOnlineListGroup").appendChild(noRoomFound);
     }
 
-    if(data != null && data.version != null && data.version != GameConstants.Setting.APP_VERSION) {
-      document.getElementById("errorServerVersion").style.display = "block";
-      document.getElementById("errorServerVersionText").textContent = i18next.t("servers.errorServerVersion", { server_version: data.version, client_version: GameConstants.Setting.APP_VERSION });
+    if(data && data.version) {
+      onlineClient.engineServerVersion = data.version;
+      onlineClient.serverVersion = data.serverVersion;
+
+      if(data.version != GameConstants.Setting.APP_VERSION) {
+        document.getElementById("errorServerVersion").style.display = "block";
+        document.getElementById("errorServerVersionText").textContent = i18next.t("servers.errorServerVersion", { server_version: data.version, client_version: GameConstants.Setting.APP_VERSION });
+      }
     }
       
     document.getElementById("loadingRoomsOnlineList").style.display = "none";
