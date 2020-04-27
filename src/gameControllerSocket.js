@@ -77,12 +77,12 @@ function GameControllerSocket(socket, ui) {
     });
 
     this.socket.on("pause", function(data) {
-      self.parseData("pause", data, true);
+      self.parseData("pause", data);
       self.reactor.dispatchEvent("onPause");
     });
 
     this.socket.on("continue", function(data) {
-      self.parseData("continue", data, true);
+      self.parseData("continue", data);
       self.reactor.dispatchEvent("onContinue");
     });
 

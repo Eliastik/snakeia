@@ -354,7 +354,7 @@ GameController.prototype.update = function(message, data, updateEngine) {
     var dataKeys = Object.keys(data);
 
     for(var i = 0; i < dataKeys.length; i++) {
-      if(!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && (dataKeys[i] == "snakes" || dataKeys[i] == "grid" || dataKeys[i] == "offsetFrame" || dataKeys[i] == "gameOver" || dataKeys[i] == "gameFinished"))) {
+      if(!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && (dataKeys[i] == "snakes" || dataKeys[i] == "grid" || dataKeys[i] == "offsetFrame" || dataKeys[i] == "gameOver"))) {
         if(Object.prototype.hasOwnProperty.call(this.gameUI, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this.gameUI[dataKeys[i]]) !== "function") {
           this.gameUI[dataKeys[i]] = data[dataKeys[i]];
         }

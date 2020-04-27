@@ -290,9 +290,11 @@ onmessage = function(e) {
       case "update":
         if(data.length > 1) {
           if(data[1]["key"] == "snakes") {
-            parseSnakes(data[1]["data"]);
+            var d = parseSnakes(data[1]["data"]);
+            game.snakes = d.snakes;
           } else if(data[1]["key"] == "grid") {
-            parseSnakes(null, data[1]["data"]);
+            var d = parseSnakes(null, data[1]["data"]);
+            game.grid = d.grid;
           } else {
             game[data[1]["key"]] = data[1]["data"];
           }

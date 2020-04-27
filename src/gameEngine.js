@@ -271,7 +271,7 @@ GameEngine.prototype.tick = function() {
   var self = this;
 
   setTimeout(function() {
-    if((!self.clientSidePredictionsMode && !self.paused && !self.killed) || (self.clientSidePredictionsMode && !self.killed && (!self.gameOver || !self.gameFinished))) {
+    if(!self.paused && !self.killed) {
       if(self.lastTime == 0) self.lastTime = time;
       self.ticks++;
       
