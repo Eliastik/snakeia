@@ -242,11 +242,11 @@ OnlineClient.prototype.joinRoom = function(code, callback) {
   }
 };
 
-OnlineClient.prototype.getGame = function(ui) {
+OnlineClient.prototype.getGame = function(ui, settings) {
   if(this.socket != null && this.currentRoom && ui != null) {
     this.game = null;
     this.stopGame();
-    this.game = new GameControllerSocket(this.socket, ui, this.engineServerVersion == GameConstants.Setting.APP_VERSION);
+    this.game = new GameControllerSocket(this.socket, ui, settings.onlineEnableClientSidePredictions && this.engineServerVersion == GameConstants.Setting.APP_VERSION);
     ui.controller = this.game;
     return this.game;
   }

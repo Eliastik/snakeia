@@ -20,6 +20,7 @@ if(typeof(require) !== "undefined") {
   var i18next = require("./libs/i18next.min");
   var Shim = require("./src/shim");
   var Game = Shim.Game;
+  var WorkersAvailable = Shim.WorkersAvailable;
   var GameConstants = require("./src/constants");
   var Snake = require("./src/snake");
   var Grid = require("./src/grid");
@@ -81,19 +82,13 @@ window.SOLO_PLAYER_DOWNLOAD_LEVELS_TO = "snakeia_solo_player_downloadedLevels";
 window.SOLO_AI_DOWNLOAD_LEVELS_TO = "snakeia_solo_ai_downloadedLevels";
 
 var selectedMode = SOLO_AI;
-var enableAnimations = true;
-var showDebugInfo = false;
 var onlineClient = new OnlineClient();
-var onlineEnableClientSidePredictions = true;
+var customSettings = {};
 
 document.getElementById("versionTxt").innerHTML = GameConstants.Setting.APP_VERSION;
 document.getElementById("appVersion").innerHTML = GameConstants.Setting.APP_VERSION;
 document.getElementById("dateTxt").innerHTML = DATE_VERSION;
 document.getElementById("appUpdateDate").innerHTML = DATE_VERSION;
-
-document.getElementById("enableAnimations").onchange = function() {
-  enableAnimations = this.checked;
-};
 
 // Libs
 String.prototype.strcmp = function(str) {
@@ -224,10 +219,80 @@ function TimerInterval(callback) {
   };
 }
 
-window.enableDebugMode = function() {
-  showDebugInfo = true;
-  console.log(i18next.t("debugModeEnabled"));
+// Settings handling
+function restoreSettings() {
+  customSettings = {
+    enableAnimations: true,
+    onlineEnableClientSidePredictions: true,
+    renderBlur: false,
+    enableMultithreading: true,
+    showDebugInfo: false
+  };
 }
+
+function saveSettings() {
+  storageGlobal.setItem("snakeia_settings", JSON.stringify(customSettings));
+  showSettings();
+}
+
+function getSettings() {
+  return (storageGlobal.getItem("snakeia_settings") && JSON.parse(storageGlobal.getItem("snakeia_settings"))) || customSettings;
+}
+
+function showSettings() {
+  var settings = getSettings();
+  var workersAvailable = WorkersAvailable();
+
+  document.getElementById("enableAnimations").checked = false;
+  document.getElementById("renderBlur").checked = false;
+  document.getElementById("enableMultithreading").checked = false;
+  document.getElementById("onlineEnableClientSidePredictions").checked = false;
+  document.getElementById("showDebugInfo").checked = false;
+
+  if(settings.enableAnimations) document.getElementById("enableAnimations").checked = true;
+  if(settings.renderBlur) document.getElementById("renderBlur").checked = true;
+  if(settings.enableMultithreading && workersAvailable) document.getElementById("enableMultithreading").checked = true;
+  if(settings.onlineEnableClientSidePredictions) document.getElementById("onlineEnableClientSidePredictions").checked = true;
+  if(settings.showDebugInfo) document.getElementById("showDebugInfo").checked = true;
+
+  if(!WorkersAvailable()) {
+    document.getElementById("enableMultithreading").disabled = true;
+  }
+}
+
+restoreSettings();
+customSettings = getSettings();
+showSettings();
+
+document.getElementById("enableAnimations").onchange = function() {
+  customSettings.enableAnimations = this.checked;
+  saveSettings();
+};
+
+document.getElementById("renderBlur").onchange = function() {
+  customSettings.renderBlur = this.checked;
+  saveSettings();
+};
+
+document.getElementById("enableMultithreading").onchange = function() {
+  customSettings.enableMultithreading = this.checked;
+  saveSettings();
+};
+
+document.getElementById("onlineEnableClientSidePredictions").onchange = function() {
+  customSettings.onlineEnableClientSidePredictions = this.checked;
+  saveSettings();
+};
+
+document.getElementById("showDebugInfo").onchange = function() {
+  customSettings.showDebugInfo = this.checked;
+  saveSettings();
+};
+
+document.getElementById("resetParameters").onclick = function() {
+  restoreSettings();
+  saveSettings();
+};
 
 // Updater
 function checkUpdate() {
@@ -521,8 +586,8 @@ function joinRoom(code) {
     document.getElementById("roomsOnlineJoin").style.display = "none";
 
     if(data.success) {
-      var ui = new GameUI(null, document.getElementById("gameContainer"), null, null, (showDebugInfo ? true : false), null, !enableAnimations);
-      var game = onlineClient.getGame(ui);
+      var ui = new GameUI(null, document.getElementById("gameContainer"), null, null, (customSettings.showDebugInfo ? true : false), null, customSettings);
+      var game = onlineClient.getGame(ui, customSettings);
       game.init();
 
       document.getElementById("gameContainer").style.display = "block";
@@ -706,6 +771,13 @@ function displayMenu() {
   document.getElementById("connectingToServer").style.display = "none";
   document.getElementById("roomsOnlineJoin").style.display = "none";
   document.getElementById("authenticationServer").style.display = "none";
+  document.getElementById("parameters").style.display = "none";
+}
+
+function displayOthersSettings() {
+  displayMenu();
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("parameters").style.display = "block";
 }
 
 document.getElementById("backToMenu").onclick = function() {
@@ -714,6 +786,14 @@ document.getElementById("backToMenu").onclick = function() {
 
 document.getElementById("backToMenuLevelList").onclick = function() {
   displayMenu();
+};
+
+document.getElementById("backToMenuParameters").onclick = function() {
+  displayMenu();
+};
+
+document.getElementById("othersSettings").onclick = function() {
+  displayOthersSettings();
 };
 
 document.getElementById("backToMenuServerList").onclick = function() {
@@ -1260,25 +1340,25 @@ function validateSettings(returnValidation) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
         var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
-        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
       } else if(selectedMode == SOLO_PLAYER) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
         var snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
-        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
       } else if(selectedMode == PLAYER_VS_AI) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
         var snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
         if(sameGrid) {
           var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
-          games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+          games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
           var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
           var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
-          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, null, null, null, null, !enableAnimations));
-          games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, null, null, null, null, !enableAnimations));
+          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, null, null, null, null, customSettings));
+          games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, null, null, null, null, customSettings));
         }
       } else if(selectedMode == AI_VS_AI) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
@@ -1286,13 +1366,13 @@ function validateSettings(returnValidation) {
 
         if(sameGrid) {
           var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
-          games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+          games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
           var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
           var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
-          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
-          games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
+          games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         }
       } else if(selectedMode == BATTLE_ROYALE) {
         if(sameGrid) {
@@ -1307,26 +1387,26 @@ function validateSettings(returnValidation) {
             snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry));
           }
 
-          games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations));
+          games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
           if(battleAgainstAIs) {
             var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
             var snake = new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry);
 
-            games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, !enableAnimations));
+            games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, customSettings));
           }
 
           for(var i = 0; i < numberIA; i++) {
             var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
             var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
-            games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, !enableAnimations));
+            games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, customSettings));
           }
         }
       }
 
       var group = new GameGroup(games);
-      group.setDisplayFPS(showDebugInfo ? true : false);
+      group.setDisplayFPS(customSettings.showDebugInfo ? true : false);
       group.start();
 
       if(group.games[0].canvas != undefined) {
@@ -1646,7 +1726,7 @@ window.playLevel = function(level, player, type) {
         snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel));
       }
 
-      var playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, !enableAnimations);
+      var playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings);
       games.push(playerGame);
     } else {
       if(numberIA + 1 <= 2) {
@@ -1657,14 +1737,14 @@ window.playLevel = function(level, player, type) {
         var height = 250;
       }
 
-      var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height, null, null, !enableAnimations);
+      var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height, null, null, customSettings);
       games.push(playerGame);
 
       for(var i = 0; i < numberIA; i++) {
         var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
         var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, false);
 
-        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, width, height, null, null, !enableAnimations));
+        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, width, height, null, null, customSettings));
       }
     }
 
@@ -1688,7 +1768,7 @@ window.playLevel = function(level, player, type) {
     document.getElementById("titleGame").innerHTML = i18next.t("levels.level") + " " + level;
 
     var group = new GameGroup(games);
-    group.setDisplayFPS(showDebugInfo ? true : false);
+    group.setDisplayFPS(customSettings.showDebugInfo ? true : false);
     group.start();
     group.closeRanking();
 

@@ -67,13 +67,13 @@ function WorkersAvailable() {
 }
 
 // Old game API
-function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation, ui) {
+function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, settings, ui) {
   var controller;
 
   var engine = new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed);
   engine.init();
   
-  if(WorkersAvailable()) {
+  if(WorkersAvailable() && settings.enableMultithreading) {
     controller = new GameControllerWorker(engine);
   } else {
     controller = new GameController(engine);
@@ -82,7 +82,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   if(ui) {
     controller.gameUI = ui;
   } else {
-    controller.gameUI = new GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation);
+    controller.gameUI = new GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, settings);
   }
   
   controller.init();

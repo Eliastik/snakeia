@@ -57,7 +57,13 @@ i18next.addResourceBundle("fr", "translation", {
     "readme": "Fichier Lisez-moi",
     "source": "Télécharger la source",
     "language": "Langue :",
-    "enableAnimations": "Activer les animations"
+    "othersSettings": "Autres paramètres",
+    "enableAnimations": "Activer les animations",
+    "showDebugInfo": "Activer le mode de débogage",
+    "renderBlur": "Activer le rendu de flou",
+    "enableMultithreading": "Activer le multi-threading",
+    "onlineEnableClientSidePredictions": "Activer les prédictions côté client pour le jeu en ligne",
+    "settingNotAvailable": "Ce paramètre est actuellement indisponible."
   },
   "settings": {
     "title": "Paramètres de la partie :",
@@ -256,7 +262,13 @@ i18next.addResourceBundle("en", "translation", {
     "readme": "Readme file",
     "source": "Download the source",
     "language": "Language:",
-    "enableAnimations": "Enable the animations"
+    "othersSettings": "Others settings",
+    "enableAnimations": "Enable the animations",
+    "showDebugInfo": "Enable debug mode",
+    "renderBlur": "Enable blur rendering",
+    "enableMultithreading": "Enable multithreading",
+    "onlineEnableClientSidePredictions": "Enable client-side predictions for online game",
+    "settingNotAvailable": "This setting is currently unavailable."
   },
   "settings": {
     "title": "Game settings:",

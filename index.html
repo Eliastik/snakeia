@@ -38,8 +38,8 @@
         <div class="row mt-4" id="updateAvailable">
             <div class="col">
                 <div class="alert alert-info">
-                    <strong><span class="fui-info-circle"></span>&nbsp; <span data-i18n="update.updateAvailable">Une mise à jour de l'application est disponible</span> (<span data-i18n="update.version">version</span> <span id="appUpdateVersion">?</span> <span data-i18n="update.of">du</span> <span id="appUpdateDate">?</span><span id="appUpdateDateLocalized">?</span>). <span data-i18n="update.current">Vous disposez actuellement de la version</span> <span id="appVersion">?</span>.</strong>
-                    <div class="vmiddle"><a href="#" class="btn btn-sm btn-primary" id="appDownloadLink"><span class="fui-export"></span>&nbsp; <span data-i18n="update.download">Télécharger la mise à jour</span></a> &nbsp; <a href="#" id="appDownloadURLGet" aria-label="" data-balloon-length="medium" data-balloon-pos="down"><span class="fui-link"></span></a> &nbsp; <a href="#" id="appUpdateChanges" aria-label="" data-balloon-length="medium" data-balloon-pos="down"><span class="fui-info-circle"></span></a></div>
+                    <strong><span class="fui-info-circle mr-2"></span> <span data-i18n="update.updateAvailable">Une mise à jour de l'application est disponible</span> (<span data-i18n="update.version">version</span> <span id="appUpdateVersion">?</span> <span data-i18n="update.of">du</span> <span id="appUpdateDate">?</span><span id="appUpdateDateLocalized">?</span>). <span data-i18n="update.current">Vous disposez actuellement de la version</span> <span id="appVersion">?</span>.</strong>
+                    <div class="vmiddle"><a href="#" class="btn btn-sm btn-primary" id="appDownloadLink"><span class="fui-export mr-2"></span> <span data-i18n="update.download">Télécharger la mise à jour</span></a> &nbsp; <a href="#" id="appDownloadURLGet" aria-label="" data-balloon-length="medium" data-balloon-pos="down"><span class="fui-link mr-2"></span></a> <a href="#" id="appUpdateChanges" aria-label="" data-balloon-length="medium" data-balloon-pos="down"><span class="fui-info-circle"></span></a></div>
                 </div>
             </div>
         </div>
@@ -99,9 +99,48 @@
             </div>
           </div>
           <div class="row justify-content-center">
+            <button class="btn btn-sm btn-secondary" id="othersSettings"><span class="fui-gear mr-2"></span> <span data-i18n="menu.othersSettings">Autres paramètres</span></button>
+          </div>
+        </div>
+      </div>
+      <div id="parameters">
+        <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
+        <h1 class="h3 mb-3 font-weight-normal" data-i18n="menu.othersSettings">Autres paramètres</h1>
+        <div class="mt-2">
+          <div class="row justify-content-center">
             <div class="custom-control custom-checkbox">
-              <input type="checkbox" class="custom-control-input" id="enableAnimations" checked>
+              <input type="checkbox" class="custom-control-input" id="enableAnimations">
               <label class="custom-control-label" for="enableAnimations" data-i18n="menu.enableAnimations">Activer les animations</label>
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="renderBlur">
+              <label class="custom-control-label" for="renderBlur" data-i18n="menu.renderBlur">Activer le rendu de flou</label>
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="enableMultithreading">
+              <label class="custom-control-label" for="enableMultithreading" data-i18n="menu.enableMultithreading">Activer le multi-threading</label>
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="onlineEnableClientSidePredictions">
+              <label class="custom-control-label" for="onlineEnableClientSidePredictions" data-i18n="menu.onlineEnableClientSidePredictions">Activer les prédictions côté client pour le jeu en ligne</label>
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="showDebugInfo">
+              <label class="custom-control-label" for="showDebugInfo" data-i18n="menu.showDebugInfo">Activer le mode de débogage</label>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col text-center">
+              <button class="btn btn-lg btn-default" id="resetParameters"><span class="fui-trash mr-2"></span> <span data-i18n="settings.reset">Réinitialiser</span></button>
+              <button class="btn btn-lg btn-danger" id="backToMenuParameters"><span class="fui-cross mr-2"></span> <span data-i18n="settings.backToMenu">Retour au menu</span></button>
             </div>
           </div>
         </div>
@@ -217,7 +256,7 @@
                 <div class="form-row">
                   <div class="custom-control custom-checkbox">
                     <input type="checkbox" class="custom-control-input" id="aiAssistant">
-                    <label class="custom-control-label" for="aiAssistant" data-i18n="settings.aiAssistant">Activer l'assistant IA</label>&nbsp; <a id="aiAssistantInfos" aria-label="" data-balloon-length="large" data-balloon-pos="down"><span class="fui-question-circle"></span></a>
+                    <label class="custom-control-label" for="aiAssistant" data-i18n="settings.aiAssistant">Activer l'assistant IA</label> <a id="aiAssistantInfos" aria-label="" data-balloon-length="large" data-balloon-pos="down"><span class="ml-2 fui-question-circle"></span></a>
                   </div>
                 </div>
               </div>
@@ -264,7 +303,7 @@
             <div class="form-group row">
               <div class="col text-center">
                 <div class="alert alert-danger medium">
-                  <span class="fui-cross-circle"></span>&nbsp; <span data-i18n="settings.possibleFailInitGame">Il est possible que l'initialisation de la partie échoue avec vos paramètres car il n'y aura pas assez d'espace pour placer tous les Snake. Dans ce cas, un message « Une erreur est survenue » peut s'afficher. Essayez avec d'autres paramètres.</span>
+                  <span class="fui-cross-circle mr-2"></span> <span data-i18n="settings.possibleFailInitGame">Il est possible que l'initialisation de la partie échoue avec vos paramètres car il n'y aura pas assez d'espace pour placer tous les Snake. Dans ce cas, un message « Une erreur est survenue » peut s'afficher. Essayez avec d'autres paramètres.</span>
                 </div>
               </div>
             </div>
@@ -272,13 +311,13 @@
         </form>
         <div class="row">
           <div class="col text-center">
-            <button class="btn btn-lg btn-success" id="validateSettings"><span class="fui-check"></span>&nbsp; <span data-i18n="settings.validate">Valider</span></button>
-            <button class="btn btn-lg btn-default" id="resetSettings"><span class="fui-trash"></span>&nbsp; <span data-i18n="settings.reset">Réinitialiser</span></button>
+            <button class="btn btn-lg btn-success" id="validateSettings"><span class="fui-check mr-2"></span> <span data-i18n="settings.validate">Valider</span></button>
+            <button class="btn btn-lg btn-default" id="resetSettings"><span class="fui-trash mr-2"></span> <span data-i18n="settings.reset">Réinitialiser</span></button>
           </div>
         </div>
         <div class="row mt-2">
           <div class="col text-center">
-            <button class="btn btn-lg btn-danger" id="backToMenu"><span class="fui-cross"></span>&nbsp; <span data-i18n="settings.backToMenu">Retour au menu</span></button>
+            <button class="btn btn-lg btn-danger" id="backToMenu"><span class="fui-cross mr-2"></span> <span data-i18n="settings.backToMenu">Retour au menu</span></button>
           </div>
         </div>
       </div>
@@ -295,18 +334,18 @@
         </div>
         <div class="row mt-2">
           <div class="col text-center">
-            <button class="btn btn-lg btn-danger" id="backToMenuServerList"><span class="fui-cross"></span>&nbsp; <span data-i18n="settings.backToMenu">Retour au menu</span></button>
+            <button class="btn btn-lg btn-danger" id="backToMenuServerList"><span class="fui-cross mr-2"></span> <span data-i18n="settings.backToMenu">Retour au menu</span></button>
           </div>
         </div>
       </div>
       <div id="connectingToServer">
         <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
         <div class="alert alert-info mt-3" role="alert" id="infoConnectingToServer">
-          <span class="fui-info-circle"></span>&nbsp; <span data-i18n="servers.connectingToServer">Connexion au serveur… Veuillez patienter.</span>
+          <span class="fui-info-circle mr-2"></span> <span data-i18n="servers.connectingToServer">Connexion au serveur… Veuillez patienter.</span>
         </div>
         <div class="row mt-2">
           <div class="col text-center">
-            <button class="btn btn-lg btn-danger" id="cancelConnectingToServer"><span class="fui-cross"></span>&nbsp; <span data-i18n="servers.cancel">Annuler</span></button>
+            <button class="btn btn-lg btn-danger" id="cancelConnectingToServer"><span class="fui-cross mr-2"></span> <span data-i18n="servers.cancel">Annuler</span></button>
           </div>
         </div>
       </div>
@@ -317,7 +356,7 @@
         <a href="#" id="linkAuthenticationServer" target="_blank" data-i18n="servers.linkAuthenticationServer">Si le formulaire ne s'affiche pas, cliquez ici</a>
         <div class="row mt-2">
           <div class="col text-center">
-            <button class="btn btn-lg btn-danger" id="cancelAuthenticationToServer"><span class="fui-cross"></span>&nbsp; <span data-i18n="servers.cancel">Annuler</span></button>
+            <button class="btn btn-lg btn-danger" id="cancelAuthenticationToServer"><span class="fui-cross mr-2"></span> <span data-i18n="servers.cancel">Annuler</span></button>
           </div>
         </div>
       </div>
@@ -327,27 +366,27 @@
         <h1 class="h6 mb-3 mt-3 font-weight-normal" data-i18n="servers.roomsListInfos">Sélectionnez une salle :</h1>
         <div class="row mb-2">
           <div class="col text-center">
-            <button class="btn btn-lg btn-success" id="createRoom"><span class="fui-plus-circle"></span>&nbsp; <span data-i18n="servers.createRoom">Créer une salle</span></button> <button class="btn btn-lg btn-info" id="joinPrivateRoom"><span class="fui-export"></span>&nbsp; <span data-i18n="servers.joinPrivateRoom">Rejoindre une salle privée</span></button>
+            <button class="btn btn-lg btn-success" id="createRoom"><span class="fui-plus-circle mr-2"></span> <span data-i18n="servers.createRoom">Créer une salle</span></button> <button class="btn btn-lg btn-info" id="joinPrivateRoom"><span class="fui-export mr-2"></span> <span data-i18n="servers.joinPrivateRoom">Rejoindre une salle privée</span></button>
           </div>
         </div>
         <div class="row mb-2">
           <div class="col text-center">
-            <button class="btn btn-lg btn-secondary" id="refreshRooms"><span class="fui-search"></span>&nbsp; <span data-i18n="servers.refreshRooms">Actualiser</span></button>
+            <button class="btn btn-lg btn-secondary" id="refreshRooms"><span class="fui-search mr-2"></span> <span data-i18n="servers.refreshRooms">Actualiser</span></button>
           </div>
         </div>
         <div id="roomsList" class="mt-4 mb-4">
           <div class="alert alert-danger" role="alert" id="errorServerVersion">
-            <span class="fui-cross-circle"></span>&nbsp; <span id="errorServerVersionText"></span>
+            <span class="fui-cross-circle mr-2"></span> <span id="errorServerVersionText"></span>
           </div>
           <div class="alert alert-danger" role="alert" id="errorRoomsList">
-            <span class="fui-cross-circle"></span>&nbsp; <span data-i18n="servers.errorLoadingRooms">Une erreur est survenue lors du chargement de la liste des salles. Veuillez réessayer.</span>
+            <span class="fui-cross-circle mr-2"></span> <span data-i18n="servers.errorLoadingRooms">Une erreur est survenue lors du chargement de la liste des salles. Veuillez réessayer.</span>
           </div>
           <div class="alert alert-danger" role="alert" id="errorRoomCreation">
-            <span class="fui-cross-circle"></span>&nbsp; <span data-i18n="servers.errorRoomCreation">Une erreur est survenue lors de la création de la salle. Veuillez réessayer.</span><br />
+            <span class="fui-cross-circle mr-2"></span> <span data-i18n="servers.errorRoomCreation">Une erreur est survenue lors de la création de la salle. Veuillez réessayer.</span><br />
             <span><strong data-i18n="servers.errorReason">Raison de l'erreur :</strong> <span id="errorRoomCreationReason"></span></span>
           </div>
           <div class="alert alert-danger" role="alert" id="errorRoomJoin">
-            <span class="fui-cross-circle"></span>&nbsp; <span data-i18n="servers.errorRoomJoin">Une erreur est survenue lors de la connexion à la salle. Veuillez réessayer.</span><br />
+            <span class="fui-cross-circle mr-2"></span> <span data-i18n="servers.errorRoomJoin">Une erreur est survenue lors de la connexion à la salle. Veuillez réessayer.</span><br />
             <span><strong data-i18n="servers.errorReason">Raison de l'erreur :</strong> <span id="errorRoomJoinReason"></span></span>
           </div>
           <strong id="loadingRoomsOnlineList" data-i18n="servers.loadingRooms">Chargement de la liste des salles… Veuillez patienter.</strong>
@@ -355,7 +394,7 @@
         </div>
         <div class="row mt-2">
           <div class="col text-center">
-            <button class="btn btn-lg btn-danger" id="backToServersRoomsList"><span class="fui-cross"></span>&nbsp; <span data-i18n="servers.backToList">Retour à la liste des serveurs</span></button>
+            <button class="btn btn-lg btn-danger" id="backToServersRoomsList"><span class="fui-cross mr-2"></span> <span data-i18n="servers.backToList">Retour à la liste des serveurs</span></button>
           </div>
         </div>
         <div class="row mt-2">
@@ -367,13 +406,13 @@
       <div id="roomsOnlineCreation">
         <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
         <div class="alert alert-info mt-3" role="alert" id="infoRoomsCreate">
-          <span class="fui-info-circle"></span>&nbsp; <span data-i18n="servers.creatingRoom">Création de la salle… Veuillez patienter.</span>
+          <span class="fui-info-circle mr-2"></span> <span data-i18n="servers.creatingRoom">Création de la salle… Veuillez patienter.</span>
         </div>
       </div>
       <div id="roomsOnlineJoin">
         <img src="assets/images/logo/logo.png" width="325px" alt="Logo" />
         <div class="alert alert-info mt-3" role="alert" id="infoJoinRoom">
-          <span class="fui-info-circle"></span>&nbsp; <span data-i18n="servers.joinRoom">Connexion à la salle… Veuillez patienter.</span>
+          <span class="fui-info-circle mr-2"></span> <span data-i18n="servers.joinRoom">Connexion à la salle… Veuillez patienter.</span>
         </div>
       </div>
       <div id="levelContainer">
@@ -381,7 +420,7 @@
         <h1 class="h3 font-weight-normal" id="titleLevelList"></h1>
         <h1 class="h5 mb-3 mt-3 font-weight-normal" data-i18n="levels.default">Niveaux par défaut</h1>
         <div class="alert alert-danger mb-3 medium" id="localstorageDisabled">
-          <span class="fui-cross-circle"></span>&nbsp; <span data-i18n="levels.localstorageDisabled">Les cookies sont désactivés sur votre navigateur. Vous perdrez votre progression au prochain rechargement de la page. Activez-les puis rechargez la page pour éviter cela.</span>
+          <span class="fui-cross-circle mr-2"></span> <span data-i18n="levels.localstorageDisabled">Les cookies sont désactivés sur votre navigateur. Vous perdrez votre progression au prochain rechargement de la page. Activez-les puis rechargez la page pour éviter cela.</span>
         </div>
         <div id="levelListDefault"></div>
         <div id="levelDownload">
@@ -395,7 +434,7 @@
         </div>
         <div class="row mt-2">
           <div class="col text-center">
-            <button class="btn btn-lg btn-danger" id="backToMenuLevelList"><span class="fui-cross"></span>&nbsp; <span data-i18n="settings.backToMenu">Retour au menu</span></button>
+            <button class="btn btn-lg btn-danger" id="backToMenuLevelList"><span class="fui-cross mr-2"></span> <span data-i18n="settings.backToMenu">Retour au menu</span></button>
           </div>
         </div>
       </div>
@@ -405,7 +444,7 @@
             <img src="assets/images/logo/logo.png" width="150px" alt="Logo" />
             <h1 id="titleGame" class="h3 mb-1 mt-3 font-weight-normal"></h1>
             <p class="small text-info mb-0" id="resultLevels"></p>
-            <button class="btn btn-lg btn-inverse mt-2 mb-2" id="backToMenuGame"><span class="fui-cross"></span>&nbsp; <span data-i18n="game.backToMenu">Retour au menu</span></button>
+            <button class="btn btn-lg btn-inverse mt-2 mb-2" id="backToMenuGame"><span class="fui-cross mr-2"></span> <span data-i18n="game.backToMenu">Retour au menu</span></button>
             <p id="gameOrder" class="h6 font-weight-normal text-info"></p>
             <p id="gameStatus" class="h6 font-weight-normal text-primary"></p>
             <p id="gameStatusError" class="h6 mb-1 font-weight-normal text-danger"></p>

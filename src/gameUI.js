@@ -34,7 +34,7 @@ if(typeof(require) !== "undefined") {
   JSGameTools.Constants.Setting.FONT_FAMILY = "DELIUS";
 }
 
-function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation, renderBlur) {
+function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, settings) {
   // Assets loader
   this.imageLoader;
   this.assetsLoaded = false;
@@ -43,8 +43,8 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.appendTo = appendTo;
   this.displayFPS = displayFPS == undefined ? false : displayFPS;
   this.outputType = outputType == undefined ? GameConstants.OutputType.GRAPHICAL : outputType;
-  this.disableAnimation = disableAnimation == undefined ? false : disableAnimation;
-  this.renderBlur = renderBlur == undefined ? false : renderBlur;
+  this.disableAnimation = settings && !settings.enableAnimations;
+  this.renderBlur = settings && settings.renderBlur;
   // UI variables
   this.lastKey = -1;
   this.frame = 0;
