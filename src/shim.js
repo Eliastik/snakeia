@@ -52,6 +52,20 @@ if(!String.prototype.trim) {
   };
 }
 
+// Test if Workerd are supported
+function WorkersAvailable() {
+  try {
+    if(!window.Worker) throw "Worker not supported";
+    var testWorker = new Worker("src/gameEngineWorker.js");
+    if(testWorker) testWorker.terminate();
+    return true;
+  } catch(e) {
+    return false;
+  } finally {
+    return false;
+  }
+}
+
 // Old game API
 function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, disableAnimation, ui) {
   var controller;
@@ -59,11 +73,9 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   var engine = new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed);
   engine.init();
   
-  try { // Test if Worker is supported
-    if(!window.Worker) throw "Worker not supported";
-    new Worker("src/gameEngineWorker.js").terminate();
+  if(WorkersAvailable()) {
     controller = new GameControllerWorker(engine);
-  } catch(e) {
+  } else {
     controller = new GameController(engine);
   }
   
@@ -104,5 +116,8 @@ DATE_VERSION = GameConstants.Setting.DATE_VERSION;
 
 // Export module
 if(typeof(module) !== "undefined") {
-  module.exports = Game;
+  module.exports = {
+    Game: Game,
+    WorkersAvailable: WorkersAvailable
+  }
 }

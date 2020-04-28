@@ -23,7 +23,8 @@ if(typeof(require) !== "undefined") {
   var Snake = require("./snake");
   var Position = require("./position");
   var NotificationMessage = require("jsgametools").NotificationMessage;
-  var Game = require("./shim");
+  var Shim = require("./shim");
+  var Game = Shim.Game;
 }
 
 function GameControllerSocket(socket, ui, enableClientSidePredictions) {

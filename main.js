@@ -18,7 +18,8 @@
  */
 if(typeof(require) !== "undefined") {
   var i18next = require("./libs/i18next.min");
-  var Game = require("./src/shim");
+  var Shim = require("./src/shim");
+  var Game = Shim.Game;
   var GameConstants = require("./src/constants");
   var Snake = require("./src/snake");
   var Grid = require("./src/grid");
