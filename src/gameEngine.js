@@ -289,7 +289,7 @@ GameEngine.prototype.tick = function() {
             if(self.snakes[i].player == GameConstants.PlayerType.HUMAN || self.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
               self.snakes[i].moveTo(self.snakes[i].lastKey);
               self.snakes[i].lastKey = -1;
-            } else if(self.snakes[i].player == GameConstants.PlayerType.AI) {
+            } else if(self.snakes[i].player == GameConstants.PlayerType.AI && (!self.clientSidePredictionsMode || (self.clientSidePredictionsMode && self.snakes[i].aiLevel != GameConstants.AiLevel.RANDOM))) {
               self.snakes[i].moveTo(self.snakes[i].ai());
             }
 

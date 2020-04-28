@@ -114,6 +114,11 @@ function GameControllerSocket(socket, ui, enableClientSidePredictions) {
 
     this.socket.on("update", function(data) {
       self.parseData("update", data, self.enableClientSidePredictions);
+
+      if(!self.enableClientSidePredictions) {
+        self.gameUI.offsetFrame = 0;
+      }
+
       self.reactor.dispatchEvent("onUpdate");
     });
 
