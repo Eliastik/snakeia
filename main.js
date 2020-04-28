@@ -38,8 +38,8 @@ window.AI_VS_AI = "AI_VS_AI";
 window.BATTLE_ROYALE = "BATTLE_ROYALE";
 window.BATTLE_ROYALE_ONLINE = "BATTLE_ROYALE_ONLINE";
 // URIs :
-window.UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update.php";
-window.SERVERS_LIST_URI = "https://www.eliastiksofts.com/snakeia/serversList.php";
+window.UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update/";
+window.SERVERS_LIST_URI = "https://www.eliastiksofts.com/snakeia/serversList/";
 // Levels types :
 window.LEVEL_REACH_SCORE = "LEVEL_REACH_SCORE";
 window.LEVEL_REACH_MAX_SCORE = "LEVEL_REACH_MAX_SCORE";
@@ -77,13 +77,14 @@ window.SOLO_PLAYER_SAVE = "snakeia_solo_player_";
 window.DEFAULT_LEVELS_SOLO_AI = DEFAULT_LEVELS_SOLO_PLAYER;
 window.SOLO_AI_SAVE = "snakeia_solo_ai_";
 // Downloadable levels :
-window.DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLevels.php?player={player}&ver={appVersion}";
+window.DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLevels/?player={player}&ver={appVersion}";
 window.SOLO_PLAYER_DOWNLOAD_LEVELS_TO = "snakeia_solo_player_downloadedLevels";
 window.SOLO_AI_DOWNLOAD_LEVELS_TO = "snakeia_solo_ai_downloadedLevels";
 
 var selectedMode = SOLO_AI;
 var onlineClient = new OnlineClient();
 var customSettings = {};
+var workersAvailable = false;
 
 document.getElementById("versionTxt").innerHTML = GameConstants.Setting.APP_VERSION;
 document.getElementById("appVersion").innerHTML = GameConstants.Setting.APP_VERSION;
@@ -220,6 +221,11 @@ function TimerInterval(callback) {
 }
 
 // Settings handling
+WorkersAvailable(function(result) {
+  workersAvailable = result; 
+  showSettings();
+});
+
 function restoreSettings() {
   customSettings = {
     enableAnimations: true,
@@ -241,7 +247,6 @@ function getSettings() {
 
 function showSettings() {
   var settings = getSettings();
-  var workersAvailable = WorkersAvailable();
 
   document.getElementById("enableAnimations").checked = false;
   document.getElementById("renderBlur").checked = false;
@@ -255,8 +260,10 @@ function showSettings() {
   if(settings.onlineEnableClientSidePredictions) document.getElementById("onlineEnableClientSidePredictions").checked = true;
   if(settings.showDebugInfo) document.getElementById("showDebugInfo").checked = true;
 
-  if(!WorkersAvailable()) {
+  if(!workersAvailable) {
     document.getElementById("enableMultithreading").disabled = true;
+  } else {
+    document.getElementById("enableMultithreading").disabled = false;
   }
 }
 
@@ -2189,6 +2196,8 @@ function translateContent() {
   document.getElementById("appUpdateDateLocalized").innerHTML = i18next.t("update.versionDate", { date: new Intl.DateTimeFormat(i18next.language.substr(0, 2)).format(new Date(document.getElementById("appUpdateDate").innerHTML)) });
 
   document.getElementById("aiAssistantInfos").setAttribute("aria-label", i18next.t("settings.aiAssistantInfos"));
+  document.getElementById("multithreadingInfos").setAttribute("aria-label", i18next.t("menu.multithreadingInfos"));
+  document.getElementById("onlineEnableClientSidePredictionsInfos").setAttribute("aria-label", i18next.t("menu.onlineEnableClientSidePredictionsInfos"));
 }
 
 document.getElementById("languageSelect").onchange = function() {

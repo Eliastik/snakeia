@@ -308,7 +308,7 @@ GameController.prototype.getCurrentPlayer = function() {
     var nbPlayersHybrid = this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI);
   
     for(var i = 0; i < this.snakes.length; i++) {
-      if((this.currentPlayer == null && nbPlayers <= 1 && nbPlayersHybrid <= 1 && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) || this.currentPlayer == (i + 1)) {
+      if((this.currentPlayer == null && nbPlayers <= 1 && nbPlayersHybrid <= 1 && (this.snakes[i] && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) || this.currentPlayer == (i + 1))) {
         return i;
       }
     }
@@ -322,7 +322,7 @@ GameController.prototype.getNBPlayer = function(type) {
 
   if(this.snakes != null) {
     for(var i = 0; i < this.snakes.length; i++) {
-      if(this.snakes[i].player == type) {
+      if(this.snakes[i] && this.snakes[i].player == type) {
         numPlayer++;
       }
     }
@@ -336,7 +336,7 @@ GameController.prototype.getPlayer = function(num, type) {
 
   if(this.snakes != null) {
     for(var i = 0; i < this.snakes.length; i++) {
-      if(this.snakes[i].player == type) {
+      if(this.snakes[i] && this.snakes[i].player == type) {
         numPlayer++;
       }
   
@@ -374,7 +374,7 @@ GameController.prototype.update = function(message, data, updateEngine) {
       }
     }
 
-    if(data.hasOwnProperty("killed") && data.killed) {
+    if(data.hasOwnProperty("killed") && data.killed && this.gameUI && this.gameUI.setKill) {
       this.gameUI.setKill();
     }
   }

@@ -53,18 +53,31 @@ if(!String.prototype.trim) {
 }
 
 // Test if Workerd are supported
-function WorkersAvailable() {
+function WorkersAvailable(callback) {
   try {
-    if(!window.Worker) throw "Worker not supported";
+    if(!window.Worker) throw "Workers not supported";
     var testWorker = new Worker("src/gameEngineWorker.js");
-    if(testWorker) testWorker.terminate();
-    return true;
+
+    if(testWorker) {
+      testWorker.postMessage("ping");
+
+      testWorker.onmessage = function(e) {
+        if(e.data == "pong") {
+          testWorker.terminate();
+          return callback(true);
+        }
+      };
+    }
   } catch(e) {
-    return false;
-  } finally {
-    return false;
+    return callback(false);
   }
 }
+
+var workersAvailable = false;
+
+WorkersAvailable(function(result) {
+  workersAvailable = result; 
+});
 
 // Old game API
 function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, settings, ui) {
@@ -73,7 +86,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   var engine = new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed);
   engine.init();
   
-  if(WorkersAvailable() && settings.enableMultithreading) {
+  if(workersAvailable && settings.enableMultithreading) {
     controller = new GameControllerWorker(engine);
   } else {
     controller = new GameController(engine);

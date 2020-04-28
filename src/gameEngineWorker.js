@@ -270,6 +270,9 @@ onmessage = function(e) {
         game.countBeforePlay = -1;
         game.tick();
         break;
+      case "ping":
+        self.postMessage("pong");
+        break;
       case "exit":
         game.exit();
         break;
@@ -301,5 +304,7 @@ onmessage = function(e) {
         }
         break;
     }
+  } else if(data == "ping") {
+    self.postMessage("pong");
   }
 };

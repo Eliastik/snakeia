@@ -63,7 +63,9 @@ i18next.addResourceBundle("fr", "translation", {
     "renderBlur": "Activer le rendu de flou",
     "enableMultithreading": "Activer le multi-threading",
     "onlineEnableClientSidePredictions": "Activer les prédictions côté client pour le jeu en ligne",
-    "settingNotAvailable": "Ce paramètre est actuellement indisponible."
+    "settingNotAvailable": "Ce paramètre est actuellement indisponible.",
+    "multithreadingInfos": "Si activé, le moteur de jeu et le moteur graphique seront exécutés de manière indépendante ce qui améliorera les performances du jeu.",
+    "onlineEnableClientSidePredictionsInfos": "Si activé, les performances du mode de jeu en ligne seront plus stables. Fonctionnalité expérimentale."
   },
   "settings": {
     "title": "Paramètres de la partie :",
@@ -268,7 +270,9 @@ i18next.addResourceBundle("en", "translation", {
     "renderBlur": "Enable blur rendering",
     "enableMultithreading": "Enable multithreading",
     "onlineEnableClientSidePredictions": "Enable client-side predictions for online game",
-    "settingNotAvailable": "This setting is currently unavailable."
+    "settingNotAvailable": "This setting is currently unavailable.",
+    "multithreadingInfos": "If enabled, the game engine and the graphics engine will run independently which will improve game performance.",
+    "onlineEnableClientSidePredictionsInfos": "If enabled, the performance of the online game mode will be more stable. Experimental functionality."
   },
   "settings": {
     "title": "Game settings:",

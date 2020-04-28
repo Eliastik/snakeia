@@ -27,8 +27,8 @@ if(typeof(require) !== "undefined") {
   var Game = Shim.Game;
 }
 
-function GameControllerSocket(socket, ui, enableClientSidePredictions) {
-  GameController.call(this, new Game(null, null, null, null, null, null, null, null, null, null, null, null, ui), ui);
+function GameControllerSocket(socket, ui, enableClientSidePredictions, settings) {
+  GameController.call(this, new Game(null, null, null, null, null, null, null, null, null, null, null, settings, ui), ui);
 
   this.enableClientSidePredictions = enableClientSidePredictions || false;
   this.socket = socket;
@@ -68,6 +68,7 @@ function GameControllerSocket(socket, ui, enableClientSidePredictions) {
       if(self.enableClientSidePredictions) {
         self.gameEngine.update("update", {"clientSidePredictionsMode": true}, true);
         if(data && data["currentPlayer"]) self.gameEngine.currentPlayer = data["currentPlayer"];
+        if(data && data["countBeforePlay"] < 0) self.gameEngine.forceStart();
       }
     });
 
@@ -116,7 +117,7 @@ function GameControllerSocket(socket, ui, enableClientSidePredictions) {
     this.socket.on("update", function(data) {
       self.parseData("update", data, self.enableClientSidePredictions);
 
-      if(!self.enableClientSidePredictions) {
+      if(!self.gameEngine.clientSidePredictionsMode) {
         self.gameUI.offsetFrame = 0;
       }
 
