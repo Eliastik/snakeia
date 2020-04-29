@@ -247,7 +247,7 @@ Grid.prototype.setFruit = function(numberPlayers, gold) {
     var randomPos;
 
     do {
-      randomPos = this.getRandomPosition();  
+      randomPos = this.getRandomPosition();
 
       var posTop = this.getNextPosition(randomPos, GameConstants.Direction.TOP);
       var posBottom = this.getNextPosition(randomPos, GameConstants.Direction.BOTTOM);

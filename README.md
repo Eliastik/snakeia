@@ -144,6 +144,8 @@ Then to compile:
 
 This will compile the JavaScript code into the sub-directory "dist".
 
+SnakeIA contains some unit tests. To execute them, launch the command `npm run test`.
+
 # Français
 
 Une version du Snake dotée d'une intelligence artificielle. Cette version est dotée de nombreux modes de jeu. Vous pouvez notamment jouer contre l'IA, ou la laisser jouer seule. Un mode Battle Royale est également disponible, ce mode voit s'affronter entre 2 et 100 IA ! De nombreux paramétrages sont disponibles pour varier les parties. Un mode Niveaux (pour le joueur et l'IA) est également disponible, il s'agit d'un série de niveau dotés d'un objectif particulier à accomplir (obtenir un score minimal, obtenir un score en un certain temps, …). Des niveaux téléchargeables sont disponibles.
@@ -287,12 +289,16 @@ Puis pour compiler :
 
 Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 
+SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la commande `npm run test`.
+
 ## TO-DO list
 
-- [ ] Prédictions pour le mode en ligne (améliore la fluidité)
+- [x] Prédictions pour le mode en ligne (améliore la fluidité)
+  Presque OK
 - [ ] Eviter de placer les joueurs trop près des murs
 - [ ] Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
 - [ ] Seeds pour les grilles/jeu
+- [x] Tests unitaires
 - [x] Empêcher les fruits de popper dans des cases entourés de 3 murs
 - [x] Optimiser flood fill
 - [x] Bug avec les workers : les Snake semblent "popper"
