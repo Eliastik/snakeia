@@ -43,6 +43,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.appendTo = appendTo;
   this.displayFPS = displayFPS == undefined ? false : displayFPS;
   this.outputType = outputType == undefined ? GameConstants.OutputType.GRAPHICAL : outputType;
+  this.outputType = settings && settings.textOutput ? GameConstants.OutputType.TEXT : this.outputType;
   this.disableAnimation = settings && !settings.enableAnimations;
   this.renderBlur = settings && settings.renderBlur;
   // UI variables

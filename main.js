@@ -232,7 +232,8 @@ function restoreSettings() {
     onlineEnableClientSidePredictions: true,
     renderBlur: false,
     enableMultithreading: true,
-    showDebugInfo: false
+    showDebugInfo: false,
+    textOutput: false
   };
 }
 
@@ -253,12 +254,14 @@ function showSettings() {
   document.getElementById("enableMultithreading").checked = false;
   document.getElementById("onlineEnableClientSidePredictions").checked = false;
   document.getElementById("showDebugInfo").checked = false;
+  document.getElementById("textOutput").checked = false;
 
   if(settings.enableAnimations) document.getElementById("enableAnimations").checked = true;
   if(settings.renderBlur) document.getElementById("renderBlur").checked = true;
   if(settings.enableMultithreading && workersAvailable) document.getElementById("enableMultithreading").checked = true;
   if(settings.onlineEnableClientSidePredictions) document.getElementById("onlineEnableClientSidePredictions").checked = true;
   if(settings.showDebugInfo) document.getElementById("showDebugInfo").checked = true;
+  if(settings.textOutput) document.getElementById("textOutput").checked = true;
 
   if(!workersAvailable) {
     document.getElementById("enableMultithreading").disabled = true;
@@ -293,6 +296,11 @@ document.getElementById("onlineEnableClientSidePredictions").onchange = function
 
 document.getElementById("showDebugInfo").onchange = function() {
   customSettings.showDebugInfo = this.checked;
+  saveSettings();
+};
+
+document.getElementById("textOutput").onclick = function() {
+  customSettings.textOutput = this.checked;
   saveSettings();
 };
 

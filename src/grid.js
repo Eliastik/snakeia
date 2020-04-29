@@ -244,15 +244,25 @@ Grid.prototype.setFruit = function(numberPlayers, gold) {
   }
 
   if(this.getTotal(GameConstants.CaseType.EMPTY) > 0) {
-    var randomPos = this.getRandomPosition();
+    var randomPos;
 
-    while(this.get(randomPos) != GameConstants.CaseType.EMPTY || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos, tried))) {
+    do {
+      randomPos = this.getRandomPosition();  
+
+      var posTop = this.getNextPosition(randomPos, GameConstants.Direction.TOP);
+      var posBottom = this.getNextPosition(randomPos, GameConstants.Direction.BOTTOM);
+      var posRight = this.getNextPosition(randomPos, GameConstants.Direction.RIGHT);
+      var posLeft = this.getNextPosition(randomPos, GameConstants.Direction.LEFT);
+      var numDeadPositionArround = this.isDeadPosition(posTop, true) + this.isDeadPosition(posBottom, true) + this.isDeadPosition(posRight, true) + this.isDeadPosition(posLeft, true);
+
+      if(numDeadPositionArround >= 3 && this.get(randomPos) == GameConstants.CaseType.EMPTY) {
+        this.set(GameConstants.CaseType.SURROUNDED, randomPos);
+      }
+
       if(this.getTotal(GameConstants.CaseType.EMPTY) <= 0) {
         return false;
       }
-
-      randomPos = this.getRandomPosition();
-    }
+    } while(this.get(randomPos) != GameConstants.CaseType.EMPTY || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos, tried)) || numDeadPositionArround >= 3);
 
     if(gold) {
       this.fruitPosGold = randomPos;
@@ -432,8 +442,8 @@ Grid.prototype.getDirectionTo = function(position, otherPosition) {
   return -1;
 };
 
-Grid.prototype.isDeadPosition = function(position) {
-  return this.get(position) == GameConstants.CaseType.SNAKE || this.get(position) == GameConstants.CaseType.WALL || this.get(position) == GameConstants.CaseType.SNAKE_DEAD;
+Grid.prototype.isDeadPosition = function(position, excludeSnake) {
+  return (!excludeSnake && this.get(position) == GameConstants.CaseType.SNAKE) || this.get(position) == GameConstants.CaseType.WALL || this.get(position) == GameConstants.CaseType.SNAKE_DEAD;
 };
 
 Grid.prototype.toString = function() {

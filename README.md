@@ -290,10 +290,12 @@ Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 ## TO-DO list
 
 - [ ] Prédictions pour le mode en ligne (améliore la fluidité)
-- [x] Optimiser flood fill
 - [ ] Eviter de placer les joueurs trop près des murs
-- [x] Bug avec les workers : les Snake semblent "popper"
 - [ ] Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
+- [ ] Seeds pour les grilles/jeu
+- [x] Empêcher les fruits de popper dans des cases entourés de 3 murs
+- [x] Optimiser flood fill
+- [x] Bug avec les workers : les Snake semblent "popper"
 - [x] Performances lorsque plusieurs Snake sur une seule grille (problème affichage texte drawSnakeInfos et aussi la fonction isCaseSurrounded de la classe Grid corrigés)
 - [x] Correction vitesse démarrage partie si fps > 60
 - [x] Idée type de niveau : atteindre le score avant les adversaires

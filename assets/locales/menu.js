@@ -65,7 +65,8 @@ i18next.addResourceBundle("fr", "translation", {
     "onlineEnableClientSidePredictions": "Activer les prédictions côté client pour le jeu en ligne",
     "settingNotAvailable": "Ce paramètre est actuellement indisponible.",
     "multithreadingInfos": "Si activé, le moteur de jeu et le moteur graphique seront exécutés de manière indépendante ce qui améliorera les performances du jeu.",
-    "onlineEnableClientSidePredictionsInfos": "Si activé, les performances du mode de jeu en ligne seront plus stables. Fonctionnalité expérimentale."
+    "onlineEnableClientSidePredictionsInfos": "Si activé, les performances du mode de jeu en ligne seront plus stables. Fonctionnalité expérimentale.",
+    "textOutput": "Activer le rendu en mode texte"
   },
   "settings": {
     "title": "Paramètres de la partie :",
@@ -272,7 +273,8 @@ i18next.addResourceBundle("en", "translation", {
     "onlineEnableClientSidePredictions": "Enable client-side predictions for online game",
     "settingNotAvailable": "This setting is currently unavailable.",
     "multithreadingInfos": "If enabled, the game engine and the graphics engine will run independently which will improve game performance.",
-    "onlineEnableClientSidePredictionsInfos": "If enabled, the performance of the online game mode will be more stable. Experimental functionality."
+    "onlineEnableClientSidePredictionsInfos": "If enabled, the performance of the online game mode will be more stable. Experimental functionality.",
+    "textOutput": "Enable the text render"
   },
   "settings": {
     "title": "Game settings:",
