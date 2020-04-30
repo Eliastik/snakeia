@@ -193,21 +193,16 @@ Grid.prototype.valToChar = function(value) {
 };
 
 Grid.prototype.getImageCase = function(position) {
-  var imageRes = "";
-
   switch(this.get(position)) {
     case GameConstants.CaseType.WALL:
-      imageRes = "wall.png";
-      break;
+      return "wall.png";
     case GameConstants.CaseType.FRUIT:
-      imageRes = "fruit.png";
-      break;
+      return "fruit.png";
     case GameConstants.CaseType.FRUIT_GOLD:
-      imageRes = "fruit_gold.png";
-      break;
+      return "fruit_gold.png";
   }
 
-  return imageRes;
+  return "";
 };
 
 Grid.prototype.getGraph = function(ignoreSnakePos) {
