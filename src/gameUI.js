@@ -438,6 +438,11 @@ GameUI.prototype.draw = function() {
 
     JSGameTools.Constants.Setting.FONT_SIZE = this.fontSize;
     this.labelMenus.size = this.fontSize;
+    
+    if(this.notificationMessage) {
+      this.notificationMessage.fontSize = this.fontSize;
+      this.notificationMessage.fontSizeInitial = this.fontSize;
+    }
 
     this.btnPause.width = this.headerHeight * 0.85;
     this.btnPause.height = this.btnPause.width;
@@ -647,8 +652,8 @@ GameUI.prototype.draw = function() {
           this.labelMenus.text = i18next.t("engine.ready");
         }
 
-        this.labelMenus.text += (playerHuman != null ? ("\n" + (this.isFilterHueAvailable && colorName != "???" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : "");
-        this.labelMenus.color = (this.isFilterHueAvailable && colorName != "???" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]);
+        this.labelMenus.text += (playerHuman != null ? ("\n" + (this.isFilterHueAvailable && colorName != "???" && this.graphicSkin == "flat" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : "");
+        this.labelMenus.color = (this.isFilterHueAvailable && colorName != "???" && this.graphicSkin == "flat" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]);
       } else {
         if(this.countBeforePlay > 0) {
           this.labelMenus.text = "" + this.countBeforePlay;
