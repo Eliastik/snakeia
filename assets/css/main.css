@@ -80,7 +80,7 @@ body {
   display: none;
 }
 
-#formSettings, #updateAvailable {
+#formSettings, #updateAvailable, #parameters {
   width: 100%;
   max-width: 525px;
   margin: auto;

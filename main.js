@@ -263,6 +263,7 @@ function showSettings() {
   if(settings.onlineEnableClientSidePredictions) document.getElementById("onlineEnableClientSidePredictions").checked = true;
   if(settings.showDebugInfo) document.getElementById("showDebugInfo").checked = true;
   if(settings.textOutput) document.getElementById("textOutput").checked = true;
+  document.getElementById("graphicSkin").value = settings.graphicSkin;
 
   if(!workersAvailable) {
     document.getElementById("enableMultithreading").disabled = true;
@@ -305,6 +306,11 @@ document.getElementById("textOutput").onclick = function() {
   saveSettings();
 };
 
+document.getElementById("graphicSkin").onclick = function() {
+  customSettings.graphicSkin = this.value;
+  saveSettings();
+};
+
 document.getElementById("resetParameters").onclick = function() {
   restoreSettings();
   saveSettings();
@@ -334,7 +340,7 @@ window.updateCallback = function(data) {
 
       document.getElementById("appUpdateDate").textContent = appUpdateDate;
 
-      var downloadURL = "http://eliastiksofts.com/snakeia/downloads/index.php";
+      var downloadURL = "http://eliastiksofts.com/snakeia/downloads/";
 
       if(typeof(data.url) !== "undefined" && data.url !== null) {
           var downloadURL = data.url;

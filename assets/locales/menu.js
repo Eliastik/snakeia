@@ -57,7 +57,7 @@ i18next.addResourceBundle("fr", "translation", {
     "readme": "Fichier Lisez-moi",
     "source": "Télécharger la source",
     "language": "Langue :",
-    "othersSettings": "Autres paramètres",
+    "othersSettings": "Paramètres",
     "enableAnimations": "Activer les animations",
     "showDebugInfo": "Activer le mode de débogage",
     "renderBlur": "Activer le rendu de flou",
@@ -66,7 +66,10 @@ i18next.addResourceBundle("fr", "translation", {
     "settingNotAvailable": "Ce paramètre est actuellement indisponible.",
     "multithreadingInfos": "Si activé, le moteur de jeu et le moteur graphique seront exécutés de manière indépendante ce qui améliorera les performances du jeu.",
     "onlineEnableClientSidePredictionsInfos": "Si activé, les performances du mode de jeu en ligne seront plus stables. Fonctionnalité expérimentale.",
-    "textOutput": "Activer le rendu en mode texte"
+    "textOutput": "Activer le rendu en mode texte",
+    "graphicSkin": "Skin graphique :",
+    "flat": "Flat",
+    "tropical": "Tropical"
   },
   "settings": {
     "title": "Paramètres de la partie :",
@@ -265,7 +268,7 @@ i18next.addResourceBundle("en", "translation", {
     "readme": "Readme file",
     "source": "Download the source",
     "language": "Language:",
-    "othersSettings": "Others settings",
+    "othersSettings": "Settings",
     "enableAnimations": "Enable the animations",
     "showDebugInfo": "Enable debug mode",
     "renderBlur": "Enable blur rendering",
@@ -274,7 +277,10 @@ i18next.addResourceBundle("en", "translation", {
     "settingNotAvailable": "This setting is currently unavailable.",
     "multithreadingInfos": "If enabled, the game engine and the graphics engine will run independently which will improve game performance.",
     "onlineEnableClientSidePredictionsInfos": "If enabled, the performance of the online game mode will be more stable. Experimental functionality.",
-    "textOutput": "Enable the text render"
+    "textOutput": "Enable the text render",
+    "graphicSkin": "Graphic skin:",
+    "flat": "Flat",
+    "tropical": "Tropical"
   },
   "settings": {
     "title": "Game settings:",
