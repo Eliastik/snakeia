@@ -34,7 +34,7 @@ function GameRanking(snakes, fontSize, fontFamily, headerHeight, backgroundColor
   this.forceClosing = this.forceClosing == undefined ? false : this.forceClosing;
   this.overflow = this.overflow == undefined ? false : this.overflow;
   this.back = this.back == undefined ? false : this.back;
-  this.timeLastFrame = this.timeLastFrame == undefined ? Date.now() : this.timeLastFrame;
+  this.timeLastFrame = this.timeLastFrame == undefined ? 0 : this.timeLastFrame;
   this.offsetX = this.offsetX == undefined ? 0 : this.offsetX;
   this.offsetY = this.offsetY == undefined ? 0 : this.offsetY;
   this.totalTimeX = this.totalTimeX == undefined ? 0 : this.totalTimeX;
@@ -116,6 +116,7 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
     var currentY = yTitle + this.fontSize / 1.5;
     this.overflow = false;
 
+    if(this.timeLastFrame <= 0) this.timeLastFrame = Date.now();
     var offsetTime = Date.now() - this.timeLastFrame;
     this.timeLastFrame = Date.now();
 

@@ -711,13 +711,12 @@ function selectMode(mode) {
   if(selectedMode == BATTLE_ROYALE_ONLINE) {
     document.getElementById("sameGridDiv").style.display = "none";
     document.getElementById("mazeGridDiv").style.display = "none";
-    document.getElementById("iaSettings").style.display = "none";
     document.getElementById("autoRetrySettings").style.display = "none";
     document.getElementById("progressiveSpeedDiv").style.display = "none";
     document.getElementById("privateGameDiv").style.display = "block";
     document.getElementById("iaSettings").style.display = "none";
 
-    if(selectedMode == BATTLE_ROYALE_ONLINE && onlineClient.serverSettings && onlineClient.serverSettings.enableAI) {
+    if(onlineClient.serverSettings && onlineClient.serverSettings.enableAI) {
       document.getElementById("enableAIDiv").style.display = "block";
     } else {
       document.getElementById("enableAIDiv").style.display = "none";
@@ -961,12 +960,10 @@ function checkMazeGrid() {
 }
 
 function checkEnableAI() {
-  if(document.getElementById("enableAI").checked && onlineClient.serverSettings && onlineClient.serverSettings.enableAI) {
+  if((selectedMode == BATTLE_ROYALE_ONLINE && document.getElementById("enableAI").checked && onlineClient.serverSettings && onlineClient.serverSettings.enableAI) || (selectedMode != BATTLE_ROYALE_ONLINE && selectedMode != SOLO_PLAYER)) {
     document.getElementById("iaSettings").style.display = "block";
-  } else if(selectedMode == BATTLE_ROYALE_ONLINE) {
-    document.getElementById("iaSettings").style.display = "none";
   } else {
-    document.getElementById("iaSettings").style.display = "block";
+    document.getElementById("iaSettings").style.display = "none";
   }
 }
 

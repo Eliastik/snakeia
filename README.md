@@ -27,7 +27,7 @@ Game written in pure JavaScript and object oriented.
 * Uses the CSS library [balloon.css](https://kazzkiq.github.io/balloon.css/) under [MIT](https://github.com/kazzkiq/balloon.css/blob/master/LICENSE) license
 * Uses graphic elements from [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728), [Trophy](https://www.flaticon.com/free-icon/cup_625398), [Clock](https://www.flaticon.com/free-icon/clock_214288), [Snake](https://www.flaticon.com/free-icon/snake_194210) (changed), [Rank](https://www.flaticon.com/free-icon/ranking_2665632) (changed)
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
-* The "tropical" graphic skin uses as a base a [picture from here](https://commons.wikimedia.org/wiki/File:Gunther%27s_Racer_Coluber_gracilis_Snake_snake_by_Dr._Raju_Kasambe_(23).jpg)
+* The "tropical" graphic skin uses as a base a [picture from here](https://commons.wikimedia.org/wiki/File:Gunther%27s_Racer_Coluber_gracilis_Snake_snake_by_Dr._Raju_Kasambe_(23).jpg) under Creative Commons Attribution-Share Alike 4.0 International license and [this picture](https://www.piqsels.com/fr/public-domain-photo-zbzjp) under [Creative Commons Zero](https://creativecommons.org/publicdomain/zero/1.0/deed.en) license
 
 ## Changelog
 
@@ -173,7 +173,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Utilise la bibliothèque logicielle CSS [balloon.css](https://kazzkiq.github.io/balloon.css/) sous licence [MIT](https://github.com/kazzkiq/balloon.css/blob/master/LICENSE)
 * Utilise des éléments graphiques venant de [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728), [Trophy](https://www.flaticon.com/free-icon/cup_625398), [Clock](https://www.flaticon.com/free-icon/clock_214288), [Snake](https://www.flaticon.com/free-icon/snake_194210) (modifié), [Rank](https://www.flaticon.com/free-icon/ranking_2665632) (modifié)
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
-* Le skin graphique "tropical" utilise comme base une [photo venant d'ici](https://commons.wikimedia.org/wiki/File:Gunther%27s_Racer_Coluber_gracilis_Snake_snake_by_Dr._Raju_Kasambe_(23).jpg)
+* Le skin graphique "tropical" utilise comme base une [photo venant d'ici](https://commons.wikimedia.org/wiki/File:Gunther%27s_Racer_Coluber_gracilis_Snake_snake_by_Dr._Raju_Kasambe_(23).jpg) sous licence Creative Commons Attribution-Share Alike 4.0 International ainsi que [cette photo](https://www.piqsels.com/fr/public-domain-photo-zbzjp) sous licence [Creative Commons Zero](https://creativecommons.org/publicdomain/zero/1.0/deed.en)
 
 ## Journal des changements
 
@@ -318,7 +318,7 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 #### Autres idées
 - [ ] Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
 - [ ] Afficher difficulté niveaux
-- [ ] Skin vrai serpent
+- [x] Skin vrai serpent
 
 ## Déclaration de licence
 

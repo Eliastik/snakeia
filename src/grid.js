@@ -197,13 +197,13 @@ Grid.prototype.getImageCase = function(position) {
 
   switch(this.get(position)) {
     case GameConstants.CaseType.WALL:
-      imageRes = "assets/images/wall.png";
+      imageRes = "wall.png";
       break;
     case GameConstants.CaseType.FRUIT:
-      imageRes = "assets/images/fruit.png";
+      imageRes = "fruit.png";
       break;
     case GameConstants.CaseType.FRUIT_GOLD:
-      imageRes = "assets/images/fruit_gold.png";
+      imageRes = "fruit_gold.png";
       break;
   }
 
