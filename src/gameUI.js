@@ -46,6 +46,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.outputType = settings && settings.textOutput ? GameConstants.OutputType.TEXT : this.outputType;
   this.disableAnimation = settings && !settings.enableAnimations;
   this.renderBlur = settings && settings.renderBlur;
+  this.graphicSkin = (settings && settings.graphicSkin) || "flat";
   // UI variables
   this.lastKey = -1;
   this.frame = 0;
@@ -366,7 +367,7 @@ GameUI.prototype.loadAssets = function() {
   var self = this;
 
   if(!this.errorOccurred && this.outputType != GameConstants.OutputType.TEXT) {
-    this.imageLoader.load(["assets/images/snake_4.png", "assets/images/snake_3.png", "assets/images/snake_2.png", "assets/images/snake.png", "assets/images/body_4_end.png", "assets/images/body_3_end.png", "assets/images/body_2_end.png", "assets/images/body_end.png", "assets/images/body_2.png", "assets/images/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/body_angle_1.png", "assets/images/body_angle_2.png", "assets/images/body_angle_3.png", "assets/images/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/snake_dead_4.png", "assets/images/snake_dead_3.png", "assets/images/snake_dead_2.png", "assets/images/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/trophy.png", "assets/images/trophy_silver.png", "assets/images/trophy_bronze.png", "assets/images/clock.png", "assets/images/fruit_gold.png", "assets/images/ranking.png"], function() {
+    this.imageLoader.load(["assets/images/skin/" + this.graphicSkin + "/snake_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_2.png", "assets/images/skin/" + this.graphicSkin + "/snake.png", "assets/images/skin/" + this.graphicSkin + "/body_4_end.png", "assets/images/skin/" + this.graphicSkin + "/body_3_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2_end.png", "assets/images/skin/" + this.graphicSkin + "/body_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2.png", "assets/images/skin/" + this.graphicSkin + "/body.png", "assets/images/wall.png", "assets/images/fruit.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/trophy.png", "assets/images/trophy_silver.png", "assets/images/trophy_bronze.png", "assets/images/clock.png", "assets/images/fruit_gold.png", "assets/images/ranking.png"], function() {
       if(self.imageLoader.hasError) {
         self.errorOccurred = true;
       } else {
@@ -999,74 +1000,74 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, cu
           if(this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
             switch(direction) {
               case GameConstants.Direction.BOTTOM:
-                imageLoc = "assets/images/snake_dead.png";
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead.png";
                 break;
               case GameConstants.Direction.RIGHT:
-                imageLoc = "assets/images/snake_dead_2.png";
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png";
                 break;
               case GameConstants.Direction.UP:
-                imageLoc = "assets/images/snake_dead_3.png";
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png";
                 break;
               case GameConstants.Direction.LEFT:
-                imageLoc = "assets/images/snake_dead_4.png";
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png";
                 break;
             }
           } else {
             switch(direction) {
               case GameConstants.Direction.BOTTOM:
-                imageLoc = "assets/images/snake.png";
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake.png";
                 break;
               case GameConstants.Direction.RIGHT:
-                imageLoc = "assets/images/snake_2.png";
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_2.png";
                 break;
               case GameConstants.Direction.UP:
-                imageLoc = "assets/images/snake_3.png";
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_3.png";
                 break;
               case GameConstants.Direction.LEFT:
-                imageLoc = "assets/images/snake_4.png";
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_4.png";
                 break;
             }
           }
         } else if(i == -1) {
           switch(direction) {
             case GameConstants.Direction.BOTTOM:
-              imageLoc = "assets/images/body_end.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_end.png";
               break;
             case GameConstants.Direction.RIGHT:
-              imageLoc = "assets/images/body_2_end.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2_end.png";
               break;
             case GameConstants.Direction.UP:
-              imageLoc = "assets/images/body_3_end.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_3_end.png";
               break;
             case GameConstants.Direction.LEFT:
-              imageLoc = "assets/images/body_4_end.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_4_end.png";
               break;
           }
         } else {
           switch(direction) {
             case GameConstants.Direction.UP:
-              imageLoc = "assets/images/body.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
               break;
             case GameConstants.Direction.BOTTOM:
-              imageLoc = "assets/images/body.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
               break;
             case GameConstants.Direction.RIGHT:
-              imageLoc = "assets/images/body_2.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
               break;
             case GameConstants.Direction.LEFT:
-              imageLoc = "assets/images/body_2.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
               break;
             case GameConstants.Direction.ANGLE_1:
-              imageLoc = "assets/images/body_angle_1.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png";
               break;
             case GameConstants.Direction.ANGLE_2:
-              imageLoc = "assets/images/body_angle_2.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png";
               break;
             case GameConstants.Direction.ANGLE_3:
-              imageLoc = "assets/images/body_angle_3.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png";
               break;
             case GameConstants.Direction.ANGLE_4:
-              imageLoc = "assets/images/body_angle_4.png";
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png";
               break;
           }
         }

@@ -233,7 +233,8 @@ function restoreSettings() {
     renderBlur: false,
     enableMultithreading: true,
     showDebugInfo: false,
-    textOutput: false
+    textOutput: false,
+    graphicSkin: "flat"
   };
 }
 
