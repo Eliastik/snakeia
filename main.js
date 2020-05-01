@@ -817,7 +817,7 @@ document.getElementById("backToMenuServerList").onclick = function() {
   displayMenu();
 };
 
-document.getElementById("collapseSeedSettingsBtn").onclick = function() {
+document.getElementById("collapseSeedSettingsBtn").onclick = function(e) {
   var collapse = document.getElementById("collapseSeedSettings");
 
   if(collapse && collapse.classList.contains("show")) {
@@ -825,6 +825,9 @@ document.getElementById("collapseSeedSettingsBtn").onclick = function() {
   } else if(collapse) {
     collapse.classList.add("show");
   }
+
+  e.preventDefault();
+  e.stopPropagation();
 };
 
 function displayServerList() {
@@ -1041,6 +1044,12 @@ document.getElementById("mazeGrid").onchange = function() {
 
 document.getElementById("enableAI").onchange = function() {
   checkEnableAI();
+};
+
+document.getElementById("resetSeeds").onclick = function(e) {
+  resetForm(false, true);
+  e.preventDefault();
+  e.stopPropagation();
 };
 
 function resetForm(resetValues, resetSeeds) {
