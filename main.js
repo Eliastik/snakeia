@@ -28,6 +28,7 @@ if(typeof(require) !== "undefined") {
   var OnlineClient = require("./src/onlineClient");
   var GameUI = require("./src/gameUI.js");
   var NotificationMessage = require("jsgametools").NotificationMessage;
+  var seedrandom = require("seedrandom");
 }
 
 // Modes :
@@ -50,7 +51,7 @@ window.LEVEL_MAZE_WIN = "LEVEL_MAZE_WIN";
 window.DEFAULT_LEVEL = "DEFAULT_LEVEL";
 window.DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
 // Default levels :
-// Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA, generateMaze, customGrid, mazeForceAuto], type: levelType(see below), typeValue: levelTypeValue(score, time, ...), version: (version min to play the level) }
+// Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame], type: levelType(see below), typeValue: levelTypeValue(score, time, ...), version: (version min to play the level) }
 window.DEFAULT_LEVELS_SOLO_PLAYER = {
   1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
   2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
@@ -715,6 +716,7 @@ function selectMode(mode) {
     document.getElementById("progressiveSpeedDiv").style.display = "none";
     document.getElementById("privateGameDiv").style.display = "block";
     document.getElementById("iaSettings").style.display = "none";
+    document.getElementById("seedSettings").style.display = "none";
 
     if(onlineClient.serverSettings && onlineClient.serverSettings.enableAI) {
       document.getElementById("enableAIDiv").style.display = "block";
@@ -723,6 +725,7 @@ function selectMode(mode) {
     }
   } else {
     document.getElementById("progressiveSpeedDiv").style.display = "block";
+    document.getElementById("seedSettings").style.display = "block";
     document.getElementById("privateGameDiv").style.display = "none";
     document.getElementById("enableAIDiv").style.display = "none";
   }
@@ -754,32 +757,6 @@ document.getElementById("createRoom").onclick = function() {
   selectMode(BATTLE_ROYALE_ONLINE);
 };
 
-function displaySettings() {
-  document.getElementById("menu").style.display = "none";
-  document.getElementById("levelContainer").style.display = "none";
-  document.getElementById("gameContainer").style.display = "none";
-  document.getElementById("serverListContainer").style.display = "none";
-  document.getElementById("roomsOnlineListContainer").style.display = "none";
-  document.getElementById("roomsOnlineCreation").style.display = "none";
-  document.getElementById("errorRoomCreation").style.display = "none";
-  document.getElementById("settings").style.display = "block";
-  document.getElementById("connectingToServer").style.display = "none";
-  document.getElementById("roomsOnlineJoin").style.display = "none";
-  document.getElementById("authenticationServer").style.display = "none";
-
-  resetForm(false);
-
-  if(selectedMode == BATTLE_ROYALE_ONLINE) {
-    document.getElementById("backToMenu").onclick = function() {
-      displayRoomsList();
-    };
-  } else {
-    document.getElementById("backToMenu").onclick = function() {
-      displayMenu();
-    };
-  }
-}
-
 function displayMenu() {
   document.getElementById("settings").style.display = "none";
   document.getElementById("levelContainer").style.display = "none";
@@ -793,6 +770,24 @@ function displayMenu() {
   document.getElementById("roomsOnlineJoin").style.display = "none";
   document.getElementById("authenticationServer").style.display = "none";
   document.getElementById("parameters").style.display = "none";
+}
+
+function displaySettings() {
+  displayMenu();
+  document.getElementById("settings").style.display = "block";
+  document.getElementById("menu").style.display = "none";
+
+  resetForm(false, true);
+
+  if(selectedMode == BATTLE_ROYALE_ONLINE) {
+    document.getElementById("backToMenu").onclick = function() {
+      displayRoomsList();
+    };
+  } else {
+    document.getElementById("backToMenu").onclick = function() {
+      displayMenu();
+    };
+  }
 }
 
 function displayOthersSettings() {
@@ -822,19 +817,21 @@ document.getElementById("backToMenuServerList").onclick = function() {
   displayMenu();
 };
 
+document.getElementById("collapseSeedSettingsBtn").onclick = function() {
+  var collapse = document.getElementById("collapseSeedSettings");
+
+  if(collapse && collapse.classList.contains("show")) {
+    collapse.classList.remove("show");
+  } else if(collapse) {
+    collapse.classList.add("show");
+  }
+};
+
 function displayServerList() {
   selectMode(BATTLE_ROYALE_ONLINE);
-  document.getElementById("settings").style.display = "none";
-  document.getElementById("levelContainer").style.display = "none";
-  document.getElementById("gameContainer").style.display = "none";
-  document.getElementById("serverListContainer").style.display = "block";
-  document.getElementById("roomsOnlineListContainer").style.display = "none";
-  document.getElementById("roomsOnlineCreation").style.display = "none";
-  document.getElementById("errorRoomCreation").style.display = "none";
+  displayMenu();
   document.getElementById("menu").style.display = "none";
-  document.getElementById("connectingToServer").style.display = "none";
-  document.getElementById("roomsOnlineJoin").style.display = "none";
-  document.getElementById("authenticationServer").style.display = "none";
+  document.getElementById("serverListContainer").style.display = "block";
   loadServerList();
 }
 
@@ -848,44 +845,23 @@ document.getElementById("backToServersRoomsList").onclick = function() {
 };
 
 function displayRoomsList() {
-  document.getElementById("settings").style.display = "none";
-  document.getElementById("levelContainer").style.display = "none";
-  document.getElementById("gameContainer").style.display = "none";
-  document.getElementById("serverListContainer").style.display = "none";
-  document.getElementById("roomsOnlineListContainer").style.display = "block";
-  document.getElementById("roomsOnlineCreation").style.display = "none";
+  displayMenu();
   document.getElementById("menu").style.display = "none";
-  document.getElementById("connectingToServer").style.display = "none";
-  document.getElementById("roomsOnlineJoin").style.display = "none";
-  document.getElementById("authenticationServer").style.display = "none";
+  document.getElementById("roomsOnlineListContainer").style.display = "block";
   displayRooms();
 }
 
 function displayAuthentication() {
-  document.getElementById("settings").style.display = "none";
-  document.getElementById("levelContainer").style.display = "none";
-  document.getElementById("gameContainer").style.display = "none";
-  document.getElementById("serverListContainer").style.display = "none";
-  document.getElementById("roomsOnlineListContainer").style.display = "none";
-  document.getElementById("roomsOnlineCreation").style.display = "none";
+  displayMenu();
   document.getElementById("menu").style.display = "none";
-  document.getElementById("connectingToServer").style.display = "none";
-  document.getElementById("roomsOnlineJoin").style.display = "none";
   document.getElementById("authenticationServer").style.display = "block";
 }
 
 function displayLevelList(player) {
-  document.getElementById("settings").style.display = "none";
-  document.getElementById("levelContainer").style.display = "block";
-  document.getElementById("gameContainer").style.display = "none";
-  document.getElementById("serverListContainer").style.display = "none";
-  document.getElementById("roomsOnlineListContainer").style.display = "none";
-  document.getElementById("roomsOnlineCreation").style.display = "none";
-  document.getElementById("errorRoomCreation").style.display = "none";
+  displayMenu();
   document.getElementById("menu").style.display = "none";
-  document.getElementById("connectingToServer").style.display = "none";
-  document.getElementById("roomsOnlineJoin").style.display = "none";
-  document.getElementById("authenticationServer").style.display = "none";
+  document.getElementById("levelContainer").style.display = "block";
+
   document.getElementById("levelDownloading").innerHTML = "";
   document.getElementById("btnDeblockDiv").innerHTML = "";
 
@@ -1067,7 +1043,7 @@ document.getElementById("enableAI").onchange = function() {
   checkEnableAI();
 };
 
-function resetForm(resetValues) {
+function resetForm(resetValues, resetSeeds) {
   document.getElementById("invalidHeight").style.display = "none";
   document.getElementById("invalidWidth").style.display = "none";
   document.getElementById("heightGrid").classList.remove("is-invalid");
@@ -1084,6 +1060,11 @@ function resetForm(resetValues) {
   document.getElementById("gameStatus").innerHTML = "";
   document.getElementById("gameOrder").innerHTML = "";
   document.getElementById("gameStatusError").innerHTML = "";
+
+  if(resetSeeds) {
+    document.getElementById("seedGrid").value = new seedrandom(Date.now()).int32();
+    document.getElementById("seedGame").value = new seedrandom(Date.now() + 1).int32();
+  }
 
   if(resetValues) {
     document.getElementById("heightGrid").value = 20;
@@ -1114,12 +1095,12 @@ function resetForm(resetValues) {
 }
 
 document.getElementById("resetSettings").onclick = function() {
-  resetForm(true);
+  resetForm(true, true);
 };
 
 function validateSettings(returnValidation) {
   if(!returnValidation) {
-    resetForm(false);
+    resetForm(false, false);
   }
 
   var heightGrid = document.getElementById("heightGrid").value;
@@ -1135,6 +1116,8 @@ function validateSettings(returnValidation) {
   var autoRetry = document.getElementById("autoRetry").checked;
   var numberIA = document.getElementById("numberIA").value;
   var battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
+  var seedGrid = document.getElementById("seedGrid").value;
+  var seedGame = document.getElementById("seedGame").value;
 
   var minGridSize = 5;
   var maxGridSize = 100;
@@ -1356,38 +1339,38 @@ function validateSettings(returnValidation) {
       var games = [];
 
       if(selectedMode == SOLO_AI) {
-        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
+        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid, null, false, seedGrid, seedGame);
         var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
       } else if(selectedMode == SOLO_PLAYER) {
-        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid);
+        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid, null, false, seedGrid, seedGame);
         var snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
       } else if(selectedMode == PLAYER_VS_AI) {
-        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
         var snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
         if(sameGrid) {
           var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
           games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
-          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
           var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
           games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, null, null, null, null, customSettings));
           games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, null, null, null, null, customSettings));
         }
       } else if(selectedMode == AI_VS_AI) {
-        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
         var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
         if(sameGrid) {
           var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
           games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
-          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
           var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
           games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
@@ -1395,7 +1378,7 @@ function validateSettings(returnValidation) {
         }
       } else if(selectedMode == BATTLE_ROYALE) {
         if(sameGrid) {
-          var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+          var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
           var snakes = [];
 
           if(battleAgainstAIs) {
@@ -1409,14 +1392,14 @@ function validateSettings(returnValidation) {
           games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
           if(battleAgainstAIs) {
-            var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+            var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
             var snake = new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry);
 
             games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, customSettings));
           }
 
           for(var i = 0; i < numberIA; i++) {
-            var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+            var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
             var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
             games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, customSettings));
@@ -1727,10 +1710,12 @@ window.playLevel = function(level, player, type) {
     var generateMaze = levelSettings[9];
     var customGrid = levelSettings[10];
     var mazeForceAuto = levelSettings[11];
+    var seedGrid = levelSettings[12];
+    var seedGame = levelSettings[13];
 
     var games = [];
 
-    var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto);
+    var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame);
 
     if(player == PLAYER_AI) {
       var playerSnake = new Snake(RIGHT, 3, grid, player, AI_LEVEL_HIGH);
@@ -1760,7 +1745,7 @@ window.playLevel = function(level, player, type) {
       games.push(playerGame);
 
       for(var i = 0; i < numberIA; i++) {
-        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls);
+        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame);
         var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, false);
 
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, width, height, null, null, customSettings));

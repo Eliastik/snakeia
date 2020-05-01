@@ -317,6 +317,31 @@
               </div>
             </div>
           </fieldset>
+          <fieldset class="form-group" id="seedSettings">
+            <div id="accordion" class="mb-3">
+              <div class="card">
+                <div class="card-header p-0">
+                  <button class="btn btn-lg btn-link" id="collapseSeedSettingsBtn" data-i18n="settings.advancedSettings">Paramètres avancés…</button>
+                </div>
+                <div id="collapseSeedSettings" class="collapse" data-parent="#accordion">
+                  <div class="card-body">
+                    <div class="form-group row">
+                      <label for="seedGrid" class="col-sm-4 col-form-label" data-i18n="settings.seedGrid">Valeur aléatoire grille :</label>
+                      <div class="col-sm-8">
+                        <input type="text" id="seedGrid" class="form-control">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="seedGame" class="col-sm-4 col-form-label" data-i18n="settings.seedGame">Valeur aléatoire jeu :</label>
+                      <div class="col-sm-8">
+                        <input type="text" id="seedGame" class="form-control">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
           <fieldset class="form-group" id="possibleFailInitGame">
             <div class="form-group row">
               <div class="col text-center">

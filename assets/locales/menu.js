@@ -121,7 +121,10 @@ i18next.addResourceBundle("fr", "translation", {
     "reset": "Réinitialiser",
     "backToMenu": "Retour au menu",
     "privateGame": "Garder la partie privée",
-    "enableAI": "Activer les IA"
+    "enableAI": "Activer les IA",
+    "seedGrid": "Valeur aléatoire grille :",
+    "seedGame": "Valeur aléatoire jeu :",
+    "advancedSettings": "Paramètres avancés…"
   },
   "game": {
     "backToMenu": "Retour au menu",
@@ -332,7 +335,10 @@ i18next.addResourceBundle("en", "translation", {
     "reset": "Reset",
     "backToMenu": "Back to the menu",
     "privateGame": "Keep the game private",
-    "enableAI": "Enable the AIs"
+    "enableAI": "Enable the AIs",
+    "seedGrid": "Grid random value:",
+    "seedGame": "Game random value:",
+    "advancedSettings": "Advanced settings…"
   },
   "game": {
     "backToMenu": "Back to the menu",
