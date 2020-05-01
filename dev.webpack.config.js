@@ -1,16 +1,18 @@
-const webpack = require('webpack');
-const path = require('path');
+const path = require("path");
 
 const config = {
-  entry: './src/index.js',
-  mode: 'development',
+  entry: {
+    SnakeIA: "./src/index.js",
+    GameEngineWorker: "./src/gameEngineWorker.js"
+  },
+  mode: "development",
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'SnakeIA.js'
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js"
   },
   devtool: "inline-source-map",
   devServer: {
-    contentBase: './dist',
+    contentBase: "./dist",
   }
 };
 

@@ -56,7 +56,7 @@ if(!String.prototype.trim) {
 function WorkersAvailable(callback) {
   try {
     if(!window.Worker) throw "Workers not supported";
-    var testWorker = new Worker("src/gameEngineWorker.js");
+    var testWorker = new Worker("dist/GameEngineWorker.js");
 
     if(testWorker) {
       testWorker.postMessage("ping");

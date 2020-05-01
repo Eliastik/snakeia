@@ -16,25 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-importScripts("../libs/lowlight.astar.min.js");
-importScripts("gameUtils.js");
-importScripts("constants.js");
-importScripts("event.js");
-importScripts("reactor.js");
-importScripts("position.js");
-importScripts("grid.js");
-importScripts("snake.js");
-importScripts("gameEngine.js");
+var GameConstants = require("./constants");
+var Position = require("./position");
+var Grid = require("./grid");
+var Snake = require("./snake");
+var GameEngine = require("./gameEngine.js");
+var seedrandom = require("seedrandom");
 
 var game;
 
 function copySnakes(snakes) {
-  const copy = JSON.parse(JSON.stringify(snakes));
+  var copy = JSON.parse(JSON.stringify(snakes));
 
   if(copy) {
     for(var i = 0; i < copy.length; i++) {
       delete copy[i]["grid"];
     }
+  }
+
+  return copy;
+}
+
+function copyGrid(grid) {
+  var copy = JSON.parse(JSON.stringify(grid));
+
+  if(copy) {
+    copy.rngGrid = null;
+    copy.rngGame = null;
   }
 
   return copy;
@@ -46,6 +54,9 @@ function parseSnakes(snakes, grid) {
   }
 
   grid = Object.assign(new Grid(), grid);
+
+  grid.rngGrid = seedrandom(grid.seedGrid);
+  grid.rngGame = seedrandom(grid.seedGame);
 
   if(!snakes && game) {
     snakes = game.snakes;
@@ -78,7 +89,7 @@ onmessage = function(e) {
 
     this.postMessage(["init", {
       "snakes": copySnakes(game.snakes),
-      "grid": game.grid,
+      "grid": copyGrid(game.grid),
       "enablePause": game.enablePause,
       "enableRetry": game.enableRetry,
       "progressiveSpeed": game.progressiveSpeed,
@@ -92,7 +103,7 @@ onmessage = function(e) {
         "isReseted": game.isReseted,
         "exited": game.exited,
         "snakes": copySnakes(game.snakes),
-        "grid": game.grid,
+        "grid": copyGrid(game.grid),
         "numFruit": game.numFruit,
         "ticks": game.ticks,
         "scoreMax": game.scoreMax,
@@ -114,7 +125,7 @@ onmessage = function(e) {
     game.onStart(function() {
       self.postMessage(["start", {
         "snakes": copySnakes(game.snakes),
-        "grid": game.grid,
+        "grid": copyGrid(game.grid),
         "starting": game.starting,
         "countBeforePlay": game.countBeforePlay,
         "paused": game.paused,
@@ -182,7 +193,7 @@ onmessage = function(e) {
         "gameOver": game.gameOver,
         "killed": game.killed,
         "snakes": copySnakes(game.snakes),
-        "grid": game.grid,
+        "grid": copyGrid(game.grid),
         "gameFinished": game.gameFinished,
         "confirmReset": false,
         "confirmExit": false,
@@ -202,7 +213,7 @@ onmessage = function(e) {
         "isReseted": game.isReseted,
         "exited": game.exited,
         "snakes": copySnakes(game.snakes),
-        "grid": game.grid,
+        "grid": copyGrid(game.grid),
         "numFruit": game.numFruit,
         "ticks": game.ticks,
         "scoreMax": game.scoreMax,
@@ -225,7 +236,7 @@ onmessage = function(e) {
         "isReseted": game.isReseted,
         "exited": game.exited,
         "snakes": copySnakes(game.snakes),
-        "grid": game.grid,
+        "grid": copyGrid(game.grid),
         "numFruit": game.numFruit,
         "ticks": game.ticks,
         "scoreMax": game.scoreMax,

@@ -31,7 +31,7 @@ function GameControllerWorker(game, ui) {
   this.init = function() {
     if(window.Worker) {
       try {
-        this.worker = new Worker("src/gameEngineWorker.js");
+        this.worker = new Worker("dist/GameEngineWorker.js");
       } catch(e) {
         this.update("init", {
           "errorOccurred": true
@@ -40,6 +40,9 @@ function GameControllerWorker(game, ui) {
       }
 
       if(this.worker instanceof Worker) {
+        if(game.grid && game.grid.rngGrid) game.grid.rngGrid = null;
+        if(game.grid && game.grid.rngGame) game.grid.rngGame = null;
+        
         this.worker.postMessage(["init", game]);
 
         var self = this;

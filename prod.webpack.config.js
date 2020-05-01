@@ -1,12 +1,14 @@
-const webpack = require('webpack');
-const path = require('path');
+const path = require("path");
 
 const config = {
-  entry: './src/index.js',
-  mode: 'production',
+  entry: {
+    SnakeIA: "./src/index.js",
+    GameEngineWorker: "./src/gameEngineWorker.js"
+  },
+  mode: "production",
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'SnakeIA.js'
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js"
   }
 };
 

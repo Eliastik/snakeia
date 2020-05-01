@@ -365,6 +365,11 @@ GameController.prototype.update = function(message, data, updateEngine) {
             this.lastKey = -1;
           }
 
+          if(data.grid) {
+            data.grid.rngGame = null;
+            data.grid.rngGrid = null;
+          }
+
           this.updateEngine(dataKeys[i], data[dataKeys[i]]);
         }
   
