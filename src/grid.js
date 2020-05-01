@@ -21,9 +21,10 @@ if(typeof(require) !== "undefined") {
   var GameUtils = require("./gameUtils");
   var GameConstants = require("./constants");
   var Position = require("./position");
+  var seedrandom = require("seedrandom");
 }
 
-function Grid(width, height, generateWalls, borderWalls, maze, customGrid, mazeForceAuto) {
+function Grid(width, height, generateWalls, borderWalls, maze, customGrid, mazeForceAuto, seedGrid, seedGame) {
   this.width = width == undefined ? 20 : width;
   this.height = height == undefined ? 20 : height;
   this.generateWalls = generateWalls == undefined ? false : generateWalls;
@@ -35,6 +36,10 @@ function Grid(width, height, generateWalls, borderWalls, maze, customGrid, mazeF
   this.initialGrid;
   this.fruitPos;
   this.fruitPosGold;
+  this.seedGrid = seedGrid;
+  this.seedGame = seedGame;
+  this.rngGrid = seedrandom(this.seedGrid);
+  this.rngGame = seedrandom(this.seedGame);
 
   this.init(customGrid);
 }
@@ -66,7 +71,7 @@ Grid.prototype.init = function(customGrid) {
       this.grid[i] = new Array(this.width);
 
       for(var j = 0; j < this.width; j++) {
-        if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && Math.random() > 0.65) || this.maze) {
+        if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && this.rngGrid() > 0.65) || this.maze) {
           this.grid[i][j] = GameConstants.CaseType.WALL;
         } else {
           this.grid[i][j] = GameConstants.CaseType.EMPTY;
@@ -111,7 +116,7 @@ Grid.prototype.fixWalls = function(borderWalls) {
 };
 
 Grid.prototype.maze_recursion = function(r, c) {
-  var directions = GameUtils.shuffle([GameConstants.Direction.UP, GameConstants.Direction.RIGHT, GameConstants.Direction.BOTTOM, GameConstants.Direction.LEFT]);
+  var directions = GameUtils.shuffle([GameConstants.Direction.UP, GameConstants.Direction.RIGHT, GameConstants.Direction.BOTTOM, GameConstants.Direction.LEFT], this.rngGrid);
 
   for(var i = 0; i < directions.length; i++) {
     switch(directions[i]) {
@@ -228,7 +233,7 @@ Grid.prototype.getGraph = function(ignoreSnakePos) {
 };
 
 Grid.prototype.getRandomPosition = function() {
-  return new Position(GameUtils.randRange(0, this.width - 1), GameUtils.randRange(0, this.height - 1));
+  return new Position(GameUtils.randRange(0, this.width - 1, this.rngGame), GameUtils.randRange(0, this.height - 1, this.rngGame));
 };
 
 Grid.prototype.setFruit = function(numberPlayers, gold) {
@@ -270,7 +275,7 @@ Grid.prototype.setFruit = function(numberPlayers, gold) {
     return false;
   }
 
-  if(!this.maze && this.fruitPosGold == null && GameUtils.randRange(1, numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER) == 1) {
+  if(!this.maze && this.fruitPosGold == null && GameUtils.randRange(1, numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER, this.rngGame) == 1) {
     this.setFruit(numberPlayers, true);
   }
 

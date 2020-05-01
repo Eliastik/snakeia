@@ -333,7 +333,7 @@ Snake.prototype.randomAI = function() {
     var direction = null;
 
     while(direction == null || this.grid.isDeadPosition(this.getNextPosition(currentPosition, direction))) {
-      var r = GameUtils.randRange(1, 4);
+      var r = GameUtils.randRange(1, 4, this.grid ? this.grid.rngGame : null);
 
       switch(r) {
         case 1:

@@ -79,7 +79,7 @@ GameEngine.prototype.init = function() {
       this.errorOccurred = true;
     }
 
-    var startHue = GameUtils.randRange(0, 360);
+    var startHue = GameUtils.randRange(0, 360, this.grid ? this.grid.rngGame : null);
 
     for(var i = 0; i < this.snakes.length; i++) {
       if(this.snakes[i] instanceof Snake == false) {

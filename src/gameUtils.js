@@ -21,8 +21,8 @@ if(typeof(require) !== "undefined") {
 }
 
 var GameUtils = {
-  randRange: function(min, max) { // Return an integer between min (inclusive) and max (inclusive)
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  randRange: function(min, max, rng) { // Return an integer between min (inclusive) and max (inclusive)
+    return Math.floor((rng ? rng() : Math.random()) * (max - min + 1)) + min;
   },
   addHue: function(hue, add) {
     var res = hue + add;
@@ -80,11 +80,11 @@ var GameUtils = {
       return "???";
     }
   },
-  shuffle: function(a) {
+  shuffle: function(a, rng) {
     var j, x;
     
     for(var i = a.length - 1; i > 0; i--) {
-      j = Math.floor(Math.random() * (i + 1));
+      j = Math.floor((rng ? rng() : Math.random()) * (i + 1));
       x = a[i];
       a[i] = a[j];
       a[j] = x;
