@@ -17,9 +17,9 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 if(typeof(require) !== "undefined") {
-  var io = require('../libs/socket.io.js');
-  var GameControllerSocket = require('./gameControllerSocket.js');
-  var GameConstants = require('./constants');
+  var io = require("socket.io-client");
+  var GameControllerSocket = require("./gameControllerSocket.js");
+  var GameConstants = require("./constants");
 }
 
 function OnlineClient() {

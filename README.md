@@ -297,9 +297,9 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 
 - [x] Prédictions pour le mode en ligne (améliore la fluidité)
   Presque OK
-- [ ] Eviter de placer les joueurs trop près des murs
-- [ ] Améliorer l'IA pour l'empêcher de se bloquer -> plus long chemin si bloqué
 - [ ] Seeds pour les grilles/jeu
+- [ ] Eviter de placer les joueurs trop près des murs
+- [ ] Améliorer l'IA
 - [x] Tests unitaires
 - [x] Empêcher les fruits de popper dans des cases entourés de 3 murs
 - [x] Optimiser flood fill

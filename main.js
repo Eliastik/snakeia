@@ -17,7 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 if(typeof(require) !== "undefined") {
-  var i18next = require("./libs/i18next.min");
+  var i18next = require("i18next").default;
   var Shim = require("./src/shim");
   var Game = Shim.Game;
   var WorkersAvailable = Shim.WorkersAvailable;

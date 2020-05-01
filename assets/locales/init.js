@@ -17,8 +17,8 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 if(typeof(require) !== "undefined") {
-  var i18next = require("../../libs/i18next.min");
-  var i18nextBrowserLanguageDetector = require("../../libs/i18nextBrowserLanguageDetector.min");
+  var i18next = require("i18next").default;
+  var i18nextBrowserLanguageDetector = require("i18next-browser-languagedetector").default;
 }
 
 i18next.use(i18nextBrowserLanguageDetector).init({

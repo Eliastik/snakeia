@@ -19,7 +19,7 @@
 if(typeof(require) !== "undefined") {
   var GameConstants = require("./constants");
   var DrawUtils = require("jsgametools").Utils;
-  var i18next = require("../libs/i18next.min");
+  var i18next = require("i18next").default;
 }
 
 function GameRanking(snakes, fontSize, fontFamily, headerHeight, backgroundColor) {
