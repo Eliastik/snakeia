@@ -324,6 +324,7 @@ GameEngine.prototype.tick = function() {
                   self.gameMazeWin = true;
                   self.gameFinished = true;
                 } else if(self.snakes[i].hasMaxScore() && self.snakes.length <= 1) {
+                  self.stop();
                   self.scoreMax = true;
                   self.snakes[i].scoreMax = true;
                 } else {

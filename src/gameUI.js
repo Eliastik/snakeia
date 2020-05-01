@@ -632,7 +632,7 @@ GameUI.prototype.draw = function() {
         self.selectedButton = 0;
       });
     } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
-      if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null) || this.currentPlayer != null)) {
+      if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null) || (this.currentPlayer != null && this.snakes.length > 1))) {
         if(this.currentPlayer != null) {
           var playerHuman = this.getPlayer(this.currentPlayer, GameConstants.PlayerType.HUMAN);
         } else if(this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) {
@@ -719,9 +719,9 @@ GameUI.prototype.draw = function() {
     } else if(this.gameOver && this.snakes.length <= 1) {
       this.labelMenus.text = i18next.t("engine.gameOver") + nextGameText;
       this.labelMenus.color = "#E74C3C";
-      this.enableRetry && !this.snakes[0].autoRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : (this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus));
+      this.enableRetry && this.snakes[0] && !this.snakes[0].autoRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : (this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus));
 
-      if(this.snakes[0].autoRetry && this.timeoutAutoRetry == null) {
+      if(this.snakes[0] && this.snakes[0].autoRetry && this.timeoutAutoRetry == null) {
         this.timeoutAutoRetry = setTimeout(function() {
           self.selectedButton = 0;
           self.reset();
