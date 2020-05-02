@@ -134,11 +134,23 @@ function GameControllerSocket(socket, ui, enableClientSidePredictions, settings)
       self.reactor.dispatchEvent("onUpdateCounter");
     });
 
-    this.socket.on("connect_error", function() {
+    this.socket.on("notification", function(text, duration, textColor, backgroundColor, foreground) {
+      self.gameUI.setNotification(new NotificationMessage(text, textColor, backgroundColor, duration, null, null, null, foreground));
+    });
+
+    this.socket.once("error", function() {
       self.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
     });
 
-    this.socket.on("reconnect_error", function() {
+    this.socket.once("connect_error", function() {
+      self.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
+    });
+
+    this.socket.once("connect_timeout", function() {
+      self.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
+    });
+
+    this.socket.once("reconnect_error", function() {
       self.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
     });
   };

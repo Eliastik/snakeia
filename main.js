@@ -230,7 +230,7 @@ WorkersAvailable(function(result) {
 function restoreSettings() {
   customSettings = {
     enableAnimations: true,
-    onlineEnableClientSidePredictions: true,
+    onlineEnableClientSidePredictions: false,
     renderBlur: false,
     enableMultithreading: true,
     showDebugInfo: false,
