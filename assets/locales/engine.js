@@ -66,10 +66,10 @@ i18next.addResourceBundle("fr", "translation", {
       "versionAndDate": "Version {{version}} ({{date, DD/MM/YYYY}})"
     },
     "debug": {
-      "fps": "IPS",
-      "frames": "Images",
-      "ticks": "Tours",
-      "speed": "Vit.",
+      "fps": "IPS :",
+      "frames": "Images :",
+      "ticks": "Tours :",
+      "speed": "Vit. :",
       "paused": "En pause"
     },
     "colors": {
@@ -99,6 +99,7 @@ i18next.addResourceBundle("fr", "translation", {
     "infosGameAdvanced": "Avancé…",
     "seedGrid": "Valeur aléatoire grille :",
     "seedGame": "Valeur aléatoire jeu :",
+    "ping": "Ping :",
     "servers": {
       "errorConnection": "Une erreur est survenue lors de la connexion au serveur.",
       "waitingPlayers": "En attente de joueurs…",
@@ -156,10 +157,10 @@ i18next.addResourceBundle("en", "translation", {
       "versionAndDate": "Version {{version}} ({{date, MM/DD/YYYY}})"
     },
     "debug": {
-      "fps": "FPS",
-      "frames": "Frames",
-      "ticks": "Ticks",
-      "speed": "Speed",
+      "fps": "FPS:",
+      "frames": "Frames:",
+      "ticks": "Ticks:",
+      "speed": "Speed:",
       "paused": "Paused"
     },
     "colors": {
@@ -189,6 +190,7 @@ i18next.addResourceBundle("en", "translation", {
     "infosGameAdvanced": "Advanced…",
     "seedGrid": "Grid random value:",
     "seedGame": "Game random value:",
+    "ping": "Ping:",
     "servers": {
       "errorConnection": "An error has occurred when connecting to the server.",
       "waitingPlayers": "Waiting for players…",

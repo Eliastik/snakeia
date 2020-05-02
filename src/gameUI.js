@@ -87,6 +87,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.currentPlayer = null;
   this.spectatorMode = null;
   this.onlineMaster = false;
+  this.pingLatency = -1;
   // Menus state variables
   this.menu = new Menu(null, this.renderBlur);
   this.confirmReset = false;
@@ -596,8 +597,8 @@ GameUI.prototype.draw = function() {
         self.exit();
       });
     } else if(this.getInfosGame) {
-      if(this.getAdvancedInfosGame) {
-        this.labelMenus.text = i18next.t("engine.seedGrid") + "\n" + this.grid.seedGrid + "\n" + i18next.t("engine.seedGame") + "\n" + + this.grid.seedGame;
+      if(this.getAdvancedInfosGame && (this.grid.seedGrid || this.grid.seedGame || this.pingLatency > -1)) {
+        this.labelMenus.text = (this.grid.seedGrid ? i18next.t("engine.seedGrid") + "\n" + this.grid.seedGrid : "") + (this.grid.seedGame ? "\n" + i18next.t("engine.seedGame") + "\n" + this.grid.seedGame : "") + (this.pingLatency > -1 ? "\n" + i18next.t("engine.ping") + " " + this.pingLatency + " ms" : "");
         this.menu.set(this.labelMenus, this.btnOK);
         
         this.btnOK.setClickAction(function() {
@@ -606,7 +607,7 @@ GameUI.prototype.draw = function() {
       } else {
         this.labelMenus.text = (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : "");
 
-        (this.grid.seedGrid && this.grid.seedGame) ? this.menu.set(this.labelMenus, this.btnAdvanced, this.btnOK) : this.menu.set(this.labelMenus, this.btnOK);
+        (this.grid.seedGrid || this.grid.seedGame || this.pingLatency > -1) ? this.menu.set(this.labelMenus, this.btnAdvanced, this.btnOK) : this.menu.set(this.labelMenus, this.btnOK);
         
         this.btnOK.setClickAction(function() {
           self.getInfosGame = false;
@@ -818,7 +819,7 @@ GameUI.prototype.draw = function() {
     }
 
     if(this.displayFPS) {
-      DrawUtils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
+      DrawUtils.drawText(ctx, this.getDebugText(), "rgba(0, 0, 0, 0.5)", this.fontSize / 1.5, GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
     }
 
     if(this.spectatorMode) {
@@ -885,7 +886,7 @@ GameUI.prototype.setBestScore = function(score) {
 };
 
 GameUI.prototype.getDebugText = function() {
-  return i18next.t("engine.debug.fps") + " : " + this.currentFPS + " / " + i18next.t("engine.debug.frames") + " : " + this.frame + " / " + i18next.t("engine.debug.ticks") + " : " + this.ticks + " / " + i18next.t("engine.debug.speed") + " : " + this.speed;
+  return i18next.t("engine.debug.fps") + " " + this.currentFPS + " / " + i18next.t("engine.debug.frames") + " " + this.frame + " / " + i18next.t("engine.debug.ticks") + " " + this.ticks + " / " + i18next.t("engine.debug.speed") + " " + this.speed + (this.pingLatency > -1 ? " / " + i18next.t("engine.ping") + " " + this.pingLatency + " ms" : "");
 };
 
 GameUI.prototype.toString = function() {

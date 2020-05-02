@@ -32,6 +32,7 @@ function GameControllerSocket(socket, ui, enableClientSidePredictions, settings)
 
   this.enableClientSidePredictions = enableClientSidePredictions || false;
   this.socket = socket;
+  this.pingLatency = -1;
 
   this.parseData = function(m, d, updateEngine) {
     var data = [m, d];

@@ -6,6 +6,7 @@ const config = {
     GameEngineWorker: "./src/gameEngineWorker.js"
   },
   mode: "development",
+  performance: { hints: false },
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "[name].js"

@@ -38,6 +38,8 @@ function OnlineClient() {
   this.creatingRoom = false;
   this.joiningRoom = false;
   this.loadingRooms = false;
+  this.pingLatency = -1;
+  this.ui;
 }
 
 OnlineClient.prototype.connect = function(url, port, callback) {
@@ -87,6 +89,11 @@ OnlineClient.prototype.connect = function(url, port, callback) {
       self.disconnect();
     }
   });
+
+  this.socket.on("pong", function(ms) {
+    self.pingLatency = ms;
+    if(self.ui) self.ui.pingLatency = ms;
+  });
 };
 
 OnlineClient.prototype.disconnect = function() {
@@ -97,6 +104,7 @@ OnlineClient.prototype.disconnect = function() {
     this.creatingRoom = false;
     this.joiningRoom = false;
     this.loadingRooms = false;
+    this.pingLatency = -1;
   }
 };
 
@@ -104,6 +112,7 @@ OnlineClient.prototype.stopGame = function() {
   if(this.game != null && this.game.gameUI != null) {
     this.game.kill();
     this.game.gameUI.setKill();
+    this.ui = null;
   }
 };
 
@@ -248,6 +257,8 @@ OnlineClient.prototype.getGame = function(ui, settings) {
     this.stopGame();
     this.game = new GameControllerSocket(this.socket, ui, settings && settings.onlineEnableClientSidePredictions && this.engineServerVersion == GameConstants.Setting.APP_VERSION, settings);
     ui.controller = this.game;
+    ui.pingLatency = this.pingLatency;
+    this.ui = ui;
     return this.game;
   }
 };
