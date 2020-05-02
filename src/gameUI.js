@@ -93,6 +93,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.confirmExit = false;
   this.getInfos = false;
   this.getInfosGame = false;
+  this.getAdvancedInfosGame = false;
   this.timeoutAutoRetry = null;
   // Game ranking
   this.gameRanking = new GameRanking();
@@ -119,6 +120,7 @@ function GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, out
   this.btnNo;
   this.btnOK;
   this.btnAbout;
+  this.btnAdvanced;
   this.btnInfosGame;
   this.btnTopArrow;
   this.btnRightArrow;
@@ -164,6 +166,7 @@ GameUI.prototype.init = function() {
     this.btnOK = new Button(i18next.t("engine.ok"), null, null, "center", "#3498db", "#246A99", "#184766");
     this.btnAbout = new Button(i18next.t("engine.about"), null, null, "center", "#3498db", "#246A99", "#184766");
     this.btnInfosGame = new Button(i18next.t("engine.infosGame"), null, null, "center", "#3498db", "#246A99", "#184766");
+    this.btnAdvanced = new Button(i18next.t("engine.infosGameAdvanced"), null, null, "center", "#3498db", "#246A99", "#184766");
     this.btnTopArrow = new ButtonImage("assets/images/up.png", 64, 92, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
     this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
     this.btnLeftArrow = new ButtonImage("assets/images/left.png", 128, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
@@ -590,18 +593,31 @@ GameUI.prototype.draw = function() {
       
       this.btnQuit.setClickAction(function() {
         self.confirmExit = false;
-        self.selectedButton = 0;
         self.exit();
       });
     } else if(this.getInfosGame) {
-      this.labelMenus.text = (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : "");
-      this.labelMenus.color = "white";
-      this.menu.set(this.labelMenus, this.btnOK);
+      if(this.getAdvancedInfosGame) {
+        this.labelMenus.text = i18next.t("engine.seedGrid") + "\n" + this.grid.seedGrid + "\n" + i18next.t("engine.seedGame") + "\n" + + this.grid.seedGame;
+        this.menu.set(this.labelMenus, this.btnOK);
+        
+        this.btnOK.setClickAction(function() {
+          self.getAdvancedInfosGame = false;
+        });
+      } else {
+        this.labelMenus.text = (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : "");
+
+        (this.grid.seedGrid && this.grid.seedGame) ? this.menu.set(this.labelMenus, this.btnAdvanced, this.btnOK) : this.menu.set(this.labelMenus, this.btnOK);
+        
+        this.btnOK.setClickAction(function() {
+          self.getInfosGame = false;
+        });
+  
+        this.btnAdvanced.setClickAction(function() {
+          self.getAdvancedInfosGame = true;
+        });
+      }
       
-      this.btnOK.setClickAction(function() {
-        self.getInfosGame = false;
-        self.selectedButton = 0;
-      });
+      this.labelMenus.color = "white";
     } else if(this.getInfos) {
       this.labelMenus.text = i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + i18next.t("engine.aboutScreen.versionAndDate", { version: GameConstants.Setting.APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(GameConstants.Setting.DATE_VERSION)), interpolation: { escapeValue: false } });
       this.labelMenus.color = "white";
@@ -609,12 +625,10 @@ GameUI.prototype.draw = function() {
       
       this.btnInfosGame.setClickAction(function() {
         self.getInfosGame = true;
-        self.selectedButton = 0;
       });
 
       this.btnOK.setClickAction(function() {
         self.getInfos = false;
-        self.selectedButton = 0;
       });
     } else if(this.confirmExit) {
       this.labelMenus.text = i18next.t("engine.exitConfirm");
@@ -623,13 +637,11 @@ GameUI.prototype.draw = function() {
       
       this.btnYes.setClickAction(function() {
         self.confirmExit = false;
-        self.selectedButton = 0;
         self.exit();
       });
       
       this.btnNo.setClickAction(function() {
         self.confirmExit = false;
-        self.selectedButton = 0;
       });
     } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
       if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null) || (this.currentPlayer != null && this.snakes.length > 1))) {
@@ -676,13 +688,11 @@ GameUI.prototype.draw = function() {
       
       this.btnYes.setClickAction(function() {
         self.confirmReset = false;
-        self.selectedButton = 0;
         self.reset();
       });
 
       this.btnNo.setClickAction(function() {
         self.confirmReset = false;
-        self.selectedButton = 0;
       });
     } else if(this.gameFinished) {
       this.labelMenus.text = (this.grid.maze && this.gameMazeWin) ? i18next.t("engine.mazeWin") : i18next.t("engine.gameFinished") + nextGameText;
@@ -690,13 +700,11 @@ GameUI.prototype.draw = function() {
       this.enableRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : this.menu.set(this.labelMenus, this.btnQuit);
       
       this.btnRetry.setClickAction(function() {
-        self.selectedButton = 0;
         self.reset();
       });
 
       this.btnQuit.setClickAction(function() {
         self.confirmExit = true;
-        self.selectedButton = 0;
       });
     } else if(this.scoreMax && this.snakes.length <= 1) {
       this.labelMenus.text = i18next.t("engine.scoreMax") + nextGameText;
@@ -704,13 +712,11 @@ GameUI.prototype.draw = function() {
       this.enableRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : (this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus));
       
       this.btnRetry.setClickAction(function() {
-        self.selectedButton = 0;
         self.reset();
       });
 
       this.btnQuit.setClickAction(function() {
         self.confirmExit = true;
-        self.selectedButton = 0;
       });
 
       this.btnExitFullScreen.setClickAction(function() {
@@ -723,19 +729,16 @@ GameUI.prototype.draw = function() {
 
       if(this.snakes[0] && this.snakes[0].autoRetry && this.timeoutAutoRetry == null) {
         this.timeoutAutoRetry = setTimeout(function() {
-          self.selectedButton = 0;
           self.reset();
           self.timeoutAutoRetry = null;
         }, 500);
       } else {
         this.btnRetry.setClickAction(function() {
-          self.selectedButton = 0;
           self.reset();
         });
 
         this.btnQuit.setClickAction(function() {
           self.confirmExit = true;
-          self.selectedButton = 0;
         });
 
         this.btnExitFullScreen.setClickAction(function() {
@@ -760,23 +763,19 @@ GameUI.prototype.draw = function() {
       this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ? this.menu.set(this.labelMenus, this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit) : this.menu.set(this.labelMenus, this.btnContinue, this.btnAbout, this.btnQuit)) : (this.menu.set(this.labelMenus, this.btnContinue, this.btnAbout));
       
       this.btnContinue.setClickAction(function() {
-        self.selectedButton = 0;
         self.start();
       });
 
       this.btnRetry.setClickAction(function() {
         self.confirmReset = true;
-        self.selectedButton = 0;
       });
 
       this.btnQuit.setClickAction(function() {
         self.confirmExit = true;
-        self.selectedButton = 0;
       });
 
       this.btnAbout.setClickAction(function() {
         self.getInfos = true;
-        self.selectedButton = 0;
       });
     } else if(this.assetsLoaded) {
       this.btnFullScreen.enable();

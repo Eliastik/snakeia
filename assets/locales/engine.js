@@ -96,6 +96,9 @@ i18next.addResourceBundle("fr", "translation", {
     "mazeModeMin": "Mode labyrinthe",
     "onlineMode": "Jeu en ligne",
     "ranking": "Classement",
+    "infosGameAdvanced": "Avancé…",
+    "seedGrid": "Valeur aléatoire grille :",
+    "seedGame": "Valeur aléatoire jeu :",
     "servers": {
       "errorConnection": "Une erreur est survenue lors de la connexion au serveur.",
       "waitingPlayers": "En attente de joueurs…",
@@ -183,6 +186,9 @@ i18next.addResourceBundle("en", "translation", {
     "mazeModeMin": "Maze mode",
     "onlineMode": "Online game",
     "ranking": "Ranking",
+    "infosGameAdvanced": "Advanced…",
+    "seedGrid": "Grid random value:",
+    "seedGame": "Game random value:",
     "servers": {
       "errorConnection": "An error has occurred when connecting to the server.",
       "waitingPlayers": "Waiting for players…",
