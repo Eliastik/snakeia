@@ -597,17 +597,17 @@ GameUI.prototype.draw = function() {
         self.exit();
       });
     } else if(this.getInfosGame) {
-      if(this.getAdvancedInfosGame && (this.grid.seedGrid || this.grid.seedGame || this.pingLatency > -1)) {
-        this.labelMenus.text = (this.grid.seedGrid ? i18next.t("engine.seedGrid") + "\n" + this.grid.seedGrid : "") + (this.grid.seedGame ? "\n" + i18next.t("engine.seedGame") + "\n" + this.grid.seedGame : "") + (this.pingLatency > -1 ? "\n" + i18next.t("engine.ping") + " " + this.pingLatency + " ms" : "");
+      if(this.getAdvancedInfosGame && (this.grid.seedGrid || this.grid.seedGame)) {
+        this.labelMenus.text = (this.grid.seedGrid ? i18next.t("engine.seedGrid") + "\n" + this.grid.seedGrid : "") + (this.grid.seedGame ? "\n" + i18next.t("engine.seedGame") + "\n" + this.grid.seedGame : "");
         this.menu.set(this.labelMenus, this.btnOK);
         
         this.btnOK.setClickAction(function() {
           self.getAdvancedInfosGame = false;
         });
       } else {
-        this.labelMenus.text = (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : "");
+        this.labelMenus.text = (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText() : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : "") + (this.pingLatency > -1 ? "\n" + i18next.t("engine.ping") + " " + this.pingLatency + " ms" : "");
 
-        (this.grid.seedGrid || this.grid.seedGame || this.pingLatency > -1) ? this.menu.set(this.labelMenus, this.btnAdvanced, this.btnOK) : this.menu.set(this.labelMenus, this.btnOK);
+        (this.grid.seedGrid || this.grid.seedGame) ? this.menu.set(this.labelMenus, this.btnAdvanced, this.btnOK) : this.menu.set(this.labelMenus, this.btnOK);
         
         this.btnOK.setClickAction(function() {
           self.getInfosGame = false;
