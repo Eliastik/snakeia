@@ -821,7 +821,7 @@ GameUI.prototype.draw = function() {
     }
 
     if(this.displayFPS) {
-      DrawUtils.drawText(ctx, this.getDebugText(), "rgba(0, 0, 0, 0.5)", this.fontSize / 1.5, GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
+      DrawUtils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.85)", this.fontSize / 1.5, GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
     }
 
     if(this.spectatorMode) {

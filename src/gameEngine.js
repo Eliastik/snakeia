@@ -326,13 +326,13 @@ GameEngine.prototype.tick = function() {
                 self.snakes[i].insert(headSnakePos);
 
                 if(self.grid.maze) {
-                  self.stop();
                   self.gameMazeWin = true;
                   self.gameFinished = true;
-                } else if(self.snakes[i].hasMaxScore() && self.snakes.length <= 1) {
                   self.stop();
+                } else if(self.snakes[i].hasMaxScore() && self.snakes.length <= 1) {
                   self.scoreMax = true;
                   self.snakes[i].scoreMax = true;
+                  self.stop();
                 } else {
                   self.numFruit++;
                   if(!goldFruit) setFruit = true;

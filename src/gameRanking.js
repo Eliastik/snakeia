@@ -90,7 +90,7 @@ GameRanking.prototype.draw = function(ctx, ui, currentPlayer) {
     ctx.fillRect(-this.offsetX, this.headerHeight, width, height);
     ctx.font = this.fontSize + "px " + this.fontFamily;
 
-    var yTitle = this.headerHeight + this.fontSize - this.offsetY;
+    var yTitle = this.headerHeight + this.fontSize - this.offsetY + 10;
 
     if(yTitle - this.fontSize >= this.headerHeight) {
       DrawUtils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (width / 2) - (ctx.measureText(title).width / 2) - this.offsetX, yTitle, false, true);
