@@ -22,6 +22,7 @@ if(typeof(require) !== "undefined") {
   var Reactor = require("./reactor");
   var Grid = require("./grid");
   var Snake = require("./snake");
+  var seedrandom = require("seedrandom");
 }
 
 function GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed) {
@@ -103,6 +104,11 @@ GameEngine.prototype.reset = function() {
   this.isReseted = true;
   this.exited = false;
   this.clearIntervalPlay();
+
+  if(this.grid.seedGrid) this.grid.seedGrid++;
+  if(this.grid.seedGame) this.grid.seedGame++;
+  if(this.grid.rngGrid) this.grid.rngGrid = seedrandom(this.grid.seedGrid);
+  if(this.grid.rngGame) this.grid.rngGame = seedrandom(this.grid.seedGame);
   this.grid.init();
 
   if(this.snakes != null) {
