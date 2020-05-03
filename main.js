@@ -1065,6 +1065,11 @@ function resetForm(resetValues, resetSeeds) {
   document.getElementById("invalidaiLevel").style.display = "none";
   document.getElementById("numberIA").classList.remove("is-invalid");
   document.getElementById("invalidIANumber").style.display = "none";
+  document.getElementById("seedGrid").classList.remove("is-invalid");
+  document.getElementById("invalidSeedGrid").style.display = "none";
+  document.getElementById("seedGame").classList.remove("is-invalid");
+  document.getElementById("invalidSeedGame").style.display = "none";
+
   document.getElementById("resultLevels").innerHTML = "";
   document.getElementById("gameStatus").innerHTML = "";
   document.getElementById("gameOrder").innerHTML = "";
@@ -1242,6 +1247,24 @@ function validateSettings(returnValidation) {
     numberIA = parseInt(numberIA);
   }
 
+  if(selectedMode != BATTLE_ROYALE_ONLINE && (seedGrid.trim() == "" || isNaN(seedGrid))) {
+    formValidated = false;
+
+    if(!returnValidation) {
+      document.getElementById("seedGrid").classList.add("is-invalid");
+      document.getElementById("invalidSeedGrid").style.display = "block";
+    }
+  }
+
+  if(selectedMode != BATTLE_ROYALE_ONLINE && (seedGame.trim() == "" || isNaN(seedGame))) {
+    formValidated = false;
+
+    if(!returnValidation) {
+      document.getElementById("seedGame").classList.add("is-invalid");
+      document.getElementById("invalidSeedGame").style.display = "block";
+    }
+  }
+
   if(selectedMode != SOLO_AI) {
     autoRetry = false;
   }
@@ -1365,7 +1388,7 @@ function validateSettings(returnValidation) {
           var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
           games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
-          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
+          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid + 1, seedGame + 1);
           var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
           games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, null, null, null, null, customSettings));
@@ -1379,7 +1402,7 @@ function validateSettings(returnValidation) {
           var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
           games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
-          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
+          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid + 1, seedGame + 1);
           var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
           games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
@@ -1408,6 +1431,9 @@ function validateSettings(returnValidation) {
           }
 
           for(var i = 0; i < numberIA; i++) {
+            seedGrid++;
+            seedGame++;
+
             var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
             var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 

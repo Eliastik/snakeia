@@ -14,7 +14,7 @@ Game written in pure JavaScript and object oriented.
 
 ## About this game
 
-* Version: 2.0.1
+* Version: 2.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -31,30 +31,50 @@ Game written in pure JavaScript and object oriented.
 
 ## Changelog
 
-* Version 2.0.1 (3/18/2020) :
+* Version 2.1 (5/3/2020):
+  - Improvement of the online game mode: possibility of enabling AIs in online mode, client-side predictions (improves performance, experimental functionality disabled by default), latency (ping) displayed in the game informations;
+  - Settings menu added to adjust different game settings;
+  - Addition of a new graphic skin (Tropical), this skin can be enabled in the game settings;
+  - Golden apples can appear sometimes in all game modes: these types of apples increase the score by 3 at once;
+  - The game now uses two different pseudo-random number generators that can be initialized by seeds; these seeds can be customized in the Advanced settings when creating a new game (not available in online mode) - the same seed will result in an identical game if the others settings are the same;
+  - Major performance improvement;
+  - Bug fixes and other adjustments:
+    - Apples are no longer placed on a cell surrounded by 3 or more walls;
+    - When there is no more free space available, the game stops only when all the apples have been reached;
+    - A progress bar has been added to the resource loading screen;
+    - The server can now send a notification to the client in the online game mode;
+    - Bug fixes with Safari browser;
+    - Other minor bug fixes.
+  - Technical modifications:
+    - The graphical user interface elements have been moved to the [JSGameTools](https://github.com/Eliastik/JSGameTools) module;
+    - JavaScript dependencies are now managed via npm;
+    - GameEngineWorker build managed by Webpack;
+    - Addition of unit tests.
+
+* Version 2.0.1 (3/18/2020):
   - Fixed online mode authentication
 
-* Version 2.0 (3/18/2020) :
+* Version 2.0 (3/18/2020):
   - Added an online game mode! This is the Battle Royale mode playable online. Servers are already opened and can be used. Check the repository [SnakeIA Server](https://github.com/Eliastik/snakeia-server) for more informations.
   - Many fixes and improvements, although every effort has been made for the online game mode.
 
-* Version 1.5 (1/31/2020) :
+* Version 1.5 (1/31/2020):
   - Performance improvement (multi-threading);
   - Fixed speed management: the game is smoother;
   - Major changes in the architecture of the game code (MVC, other changes);
   - Bug fixes and other adjustments.
 
-* Version 1.4.2 (10/7/2019) :
+* Version 1.4.2 (10/7/2019):
   - Added a labyrinth mode: it's now possible to generate mazes. The goal is to find the path to the apple through the maze. Levels of this type are also possible (to download later).
   - Bug fixes and other adjustments.
 
-* Version 1.4.1 (9/29/2019) :
+* Version 1.4.1 (9/29/2019):
   - The movement of the Snakes is now animated;
   - The player's Snake is indicated by an arrow in a game with several AI opponents;
   - The game can now be played with the ZQSD/WASD keys;
   - Bug fixes, performance improvements and others adjustments.
 
-* Version 1.4.0.1 (9/7/2019) :
+* Version 1.4.0.1 (9/7/2019):
   - Fixed a problem affecting performance;
   - The game is paused when full-screen mode is enabled or exited;
   - Updated software libraries;
@@ -160,7 +180,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## À propos du jeu
 
-* Version du jeu : 2.0.1
+* Version du jeu : 2.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -177,7 +197,27 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## Journal des changements
 
-* Version 2.0.1 (3/18/2020) :
+* Version 2.1 (03/05/2020) :
+  - Amélioration du mode de jeu en ligne : possibilité d'activer les IA en mode en ligne, prédictions côté-client (améliore les performances, fonctionnalité expérimentale désactivée par défaut), latence (ping) affichée dans les informations de la partie ;
+  - Menu Paramètres ajouté afin de régler différents paramètres du jeu ;
+  - Ajout d'un nouveau skin graphique (Tropical), ce skin peut être activé dans les paramètres du jeu ;
+  - Des pommes en or peuvent apparaître à certains moments dans tous les modes de jeu : ces types de pommes augmentent le score de 3 d'un seul coup ;
+  - Le jeu utilise désormais deux générateurs de nombres pseudo-aléatoires différents pouvant être initialisés par des graines ; ces graines peuvent être personnalisées dans les Paramètres avancés lors de la création d'une nouvelle partie (non disponible en mode en ligne) - une même graine résultera en une partie identique si les autres paramètres sont les mêmes ;
+  - Amélioration majeure des performances ;
+  - Corrections de bugs et autres ajustements :
+    - Les pommes ne sont désormais plus placées sur une case entourée de 3 murs ou plus ;
+    - Lorsqu'il n'y a plus d'espace libre disponible, la partie s'arrête uniquement lorsque toutes les pommes ont été atteintes ;
+    - Une barre de progression a été ajoutée à l'écran de chargement des ressources ;
+    - Le serveur peut désormais envoyer une notification au client en mode de jeu en ligne ;
+    - Correction de bugs avec le navigateur Safari ;
+    - Autres corrections de bugs mineurs.
+  - Modifications techniques :
+    - Les éléments graphiques d'interface utilisateur ont été déplacés vers le module [JSGameTools](https://github.com/Eliastik/JSGameTools) ;
+    - Les dépendences JavaScript sont désormais gérées via npm ;
+    - Build du GameEngineWorker géré par Webpack ;
+    - Ajout de tests unitaires.
+
+* Version 2.0.1 (18/03/2020) :
   - Correction de l'authentification au mode de jeu en ligne
 
 * Version 2.0 (18/03/2020) :

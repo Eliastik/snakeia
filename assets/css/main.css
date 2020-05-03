@@ -76,7 +76,7 @@ body {
   font-size: 75%;
 }
 
-#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer, #levelListDownloadPlayer, #levelListDownloadAI, #localstorageDisabled, #serverListContainer, #roomsOnlineListContainer, #errorRoomsList, #roomsOnlineCreation, #errorRoomCreation, #connectingToServer, #roomsOnlineJoin, #errorRoomJoin, #errorServerVersion, #authenticationServer, #enableAIDiv, #parameters {
+#settings, #customSpeedSettings, #numberIASettings, #gameContainer, #updateAvailable, #appUpdateDate, #sameGridDiv, #possibleFailInitGame, #levelContainer, #levelListDownloadPlayer, #levelListDownloadAI, #localstorageDisabled, #serverListContainer, #roomsOnlineListContainer, #errorRoomsList, #roomsOnlineCreation, #errorRoomCreation, #connectingToServer, #roomsOnlineJoin, #errorRoomJoin, #errorServerVersion, #authenticationServer, #enableAIDiv, #parameters, #invalidSeedGrid, #invalidSeedGame {
   display: none;
 }
 

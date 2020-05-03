@@ -807,7 +807,8 @@ GameUI.prototype.draw = function() {
         this.notificationMessage.enableCloseButton();
       }
     }
-  
+
+    this.labelMenus.fontSize = this.fontSize;
     this.menu.draw(this.canvasCtx);
 
     if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1) {

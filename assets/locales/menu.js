@@ -124,7 +124,8 @@ i18next.addResourceBundle("fr", "translation", {
     "enableAI": "Activer les IA",
     "seedGrid": "Valeur aléatoire grille :",
     "seedGame": "Valeur aléatoire jeu :",
-    "advancedSettings": "Paramètres avancés…"
+    "advancedSettings": "Paramètres avancés…",
+    "invalidValue": "Cette valeur est invalide."
   },
   "game": {
     "backToMenu": "Retour au menu",
@@ -338,7 +339,8 @@ i18next.addResourceBundle("en", "translation", {
     "enableAI": "Enable the AIs",
     "seedGrid": "Grid random value:",
     "seedGame": "Game random value:",
-    "advancedSettings": "Advanced settings…"
+    "advancedSettings": "Advanced settings…",
+    "invalidValue": "This value is invalid."
   },
   "game": {
     "backToMenu": "Back to the menu",
