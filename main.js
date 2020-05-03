@@ -307,7 +307,7 @@ document.getElementById("textOutput").onclick = function() {
   saveSettings();
 };
 
-document.getElementById("graphicSkin").onclick = function() {
+document.getElementById("graphicSkin").onchange = function() {
   customSettings.graphicSkin = this.value;
   saveSettings();
 };

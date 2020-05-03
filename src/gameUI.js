@@ -323,6 +323,8 @@ GameUI.prototype.setKill = function() {
       this.textarea = null;
     } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && this.canvas != null) {
       this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.canvas.width = 0;
+      this.canvas.height = 0;
       this.appendTo.removeChild(this.canvas);
       this.canvas = null;
       this.canvasCtx = null;
@@ -894,12 +896,12 @@ GameUI.prototype.toString = function() {
 };
 
 GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, currentPlayer) {
-  var canvasTmp = document.createElement("canvas");
-  canvasTmp.width = this.canvas.width;
-  canvasTmp.height = this.canvas.height;
-  var ctxTmp = canvasTmp.getContext("2d");
-
   if(this.snakes != null) {
+    var canvasTmp = document.createElement("canvas");
+    canvasTmp.width = this.canvas.width;
+    canvasTmp.height = this.canvas.height;
+    var ctxTmp = canvasTmp.getContext("2d");
+  
     for(var j = 0; j < this.snakes.length; j++) {
       ctxTmp.clearRect(0, 0, canvasTmp.width, canvasTmp.height);
 
@@ -1083,6 +1085,9 @@ GameUI.prototype.drawSnake = function(ctx, caseWidth, caseHeight, totalWidth, cu
       DrawUtils.drawImageData(ctx, canvasTmp, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height);
       ctxTmp.filter = "none";
     }
+
+    canvasTmp.width = 0;
+    canvasTmp.height = 0;
 
     if(this.snakes.length > 1) {
       this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight, currentPlayer);

@@ -68,7 +68,7 @@ i18next.addResourceBundle("fr", "translation", {
     "onlineEnableClientSidePredictionsInfos": "Si activé, les performances du mode de jeu en ligne seront plus stables. Fonctionnalité expérimentale.",
     "textOutput": "Activer le rendu en mode texte",
     "graphicSkin": "Skin graphique :",
-    "flat": "Flat",
+    "flat": "Flat (par défaut)",
     "tropical": "Tropical"
   },
   "settings": {
@@ -282,7 +282,7 @@ i18next.addResourceBundle("en", "translation", {
     "onlineEnableClientSidePredictionsInfos": "If enabled, the performance of the online game mode will be more stable. Experimental functionality.",
     "textOutput": "Enable the text render",
     "graphicSkin": "Graphic skin:",
-    "flat": "Flat",
+    "flat": "Flat (by default)",
     "tropical": "Tropical"
   },
   "settings": {
