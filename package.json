@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/Eliastik/snakeia#readme",
   "devDependencies": {
-    "jest": "^25.5.3",
+    "jest": "^25.5.4",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3"
@@ -29,7 +29,7 @@
   "dependencies": {
     "i18next": "^19.4.4",
     "i18next-browser-languagedetector": "^4.1.1",
-    "jsgametools": "git+https://github.com/Eliastik/JSGameTools.git#fe49a35",
+    "jsgametools": "git+https://github.com/Eliastik/JSGameTools.git#01a82a5",
     "seedrandom": "^3.0.5",
     "socket.io-client": "^2.3.0"
   }
