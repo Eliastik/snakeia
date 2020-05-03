@@ -80,7 +80,7 @@ body {
   display: none;
 }
 
-#formSettings, #updateAvailable, #parameters {
+#formSettings, #updateAvailable {
   width: 100%;
   max-width: 525px;
   margin: auto;
@@ -92,7 +92,7 @@ body {
   margin: auto;
 }
 
-#levelListDefault, #levelListDownload, #levelDownload, #localstorageDisabled, #authenticationServer {
+#levelListDefault, #levelListDownload, #levelDownload, #localstorageDisabled, #authenticationServer, #parameters {
   width: 100%;
   max-width: 450px;
   margin: auto;
