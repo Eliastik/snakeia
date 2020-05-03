@@ -315,6 +315,8 @@ GameEngine.prototype.tick = function() {
               if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT || self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
                 if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT) {
                   self.snakes[i].score++;
+                  self.grid.set(GameConstants.CaseType.EMPTY, self.grid.fruitPos);
+                  self.grid.fruitPos = null;
                 } else if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
                   self.snakes[i].score += 3;
                   self.grid.set(GameConstants.CaseType.EMPTY, self.grid.fruitPosGold);

@@ -260,7 +260,11 @@ Grid.prototype.setFruit = function(numberPlayers, gold) {
       }
 
       if(this.getTotal(GameConstants.CaseType.EMPTY) <= 0) {
-        return false;
+        if(this.fruitPosGold) {
+          return true;
+        } else {
+          return false;
+        }
       }
     } while(this.get(randomPos) != GameConstants.CaseType.EMPTY || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos, tried)) || numDeadPositionArround >= 3);
 
@@ -271,6 +275,8 @@ Grid.prototype.setFruit = function(numberPlayers, gold) {
       this.fruitPos = randomPos;
       this.set(GameConstants.CaseType.FRUIT, randomPos);
     }
+  } else if(this.getTotal(GameConstants.CaseType.EMPTY) <= 0 && this.fruitPosGold) {
+    return true;
   } else {
     return false;
   }

@@ -232,7 +232,7 @@ Snake.prototype.getTailPosition = function() {
 };
 
 Snake.prototype.hasMaxScore = function() {
-  return this.grid.getTotal(GameConstants.CaseType.EMPTY) <= 0;
+  return this.grid.getTotal(GameConstants.CaseType.EMPTY) <= 0 && !this.grid.fruitPosGold && !this.grid.fruitPos;
 };
 
 Snake.prototype.setGameOver = function() {
