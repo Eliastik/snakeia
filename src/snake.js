@@ -461,6 +461,10 @@ Snake.prototype.ai = function() {
 
     var path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.x : fruitPos.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.y : fruitPos.y });
 
+    if(path.length < 1) {
+      path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold ? fruitPos.x : fruitPosGold.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold ? fruitPos.y : fruitPosGold.y });
+    }
+
     if(path.length > 1) {
       var nextPosition = new Position(path[1].x, path[1].y);
       res = new Position(null, null, this.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
