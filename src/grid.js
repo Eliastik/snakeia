@@ -23,7 +23,7 @@ import seedrandom from "seedrandom";
 import * as Lowlight from "../libs/lowlight.astar.min";
 
 export default class Grid {
-  constructor (width, height, generateWalls, borderWalls, maze, customGrid, mazeForceAuto, seedGrid, seedGame) {
+  constructor(width, height, generateWalls, borderWalls, maze, customGrid, mazeForceAuto, seedGrid, seedGame) {
     this.width = width == undefined ? 20 : width;
     this.height = height == undefined ? 20 : height;
     this.generateWalls = generateWalls == undefined ? false : generateWalls;
@@ -452,7 +452,7 @@ export default class Grid {
   }
 
   toString() {
-    res = "";
+    let res = "";
 
     for(var i = 0; i < this.height; i++) {
       for(var j = 0; j < this.width; j++) {

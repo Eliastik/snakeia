@@ -77,7 +77,7 @@ function parseSnakes(snakes, grid) {
   };
 }
 
-onmessage = function(e) {
+onmessage = e => {
   var data = e.data;
 
   if(data.length > 1 && data[0] == "init") {
@@ -87,7 +87,7 @@ onmessage = function(e) {
 
     game = new GameEngine(grid, snakes, data[1]["speed"], data[1]["enablePause"], data[1]["enableRetry"], data[1]["progressiveSpeed"]);
 
-    this.postMessage(["init", {
+    self.postMessage(["init", {
       "snakes": copySnakes(game.snakes),
       "grid": copyGrid(game.grid),
       "enablePause": game.enablePause,
@@ -97,7 +97,7 @@ onmessage = function(e) {
       "errorOccurred": game.errorOccurred
     }]);
 
-    game.onReset(function() {
+    game.onReset(() => {
       self.postMessage(["reset", {
         "paused": game.paused,
         "isReseted": game.isReseted,
@@ -122,7 +122,7 @@ onmessage = function(e) {
       }]);
     });
 
-    game.onStart(function() {
+    game.onStart(() => {
       self.postMessage(["start", {
         "snakes": copySnakes(game.snakes),
         "grid": copyGrid(game.grid),
@@ -138,7 +138,7 @@ onmessage = function(e) {
       }]);
     });
 
-    game.onPause(function() {
+    game.onPause(() => {
       self.postMessage(["pause", {
         "paused": game.paused,
         "confirmReset": false,
@@ -149,7 +149,7 @@ onmessage = function(e) {
       }]);
     });
 
-    game.onContinue(function() {
+    game.onContinue(() => {
       self.postMessage(["continue", {
         "confirmReset": false,
         "confirmExit": false,
@@ -159,7 +159,7 @@ onmessage = function(e) {
       }]);
     });
 
-    game.onStop(function() {
+    game.onStop(() => {
       self.postMessage(["stop", {
         "paused": game.paused,
         "scoreMax": game.scoreMax,
@@ -173,7 +173,7 @@ onmessage = function(e) {
       }]);
     });
 
-    game.onExit(function() {
+    game.onExit(() => {
       self.postMessage(["exit", {
         "paused": game.paused,
         "gameOver": game.gameOver,
@@ -187,7 +187,7 @@ onmessage = function(e) {
       }]);
     });
 
-    game.onKill(function() {
+    game.onKill(() => {
       self.postMessage(["kill", {
         "paused": game.paused,
         "gameOver": game.gameOver,
@@ -203,11 +203,11 @@ onmessage = function(e) {
       }]);
     });
 
-    game.onScoreIncreased(function() {
+    game.onScoreIncreased(() => {
       self.postMessage(["scoreIncreased", {}]);
     });
     
-    game.onUpdate(function() {
+    game.onUpdate(() => {
       self.postMessage(["update", {
         "paused": game.paused,
         "isReseted": game.isReseted,
@@ -230,7 +230,7 @@ onmessage = function(e) {
       }]);
     });
 
-    game.onUpdateCounter(function() {
+    game.onUpdateCounter(() => {
       self.postMessage(["updateCounter", {
         "paused": game.paused,
         "isReseted": game.isReseted,

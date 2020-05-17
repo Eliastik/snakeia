@@ -40,10 +40,6 @@ if(typeof(document) !== "undefined") {
   document.exitFullscreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen;
 }
 
-/*if(typeof(screen) !== "undefined") {
-  screen.orientation = screen.msOrientation || screen.mozOrientation || screen.orientation;
-}*/
-
 if(!String.prototype.trim) {
   String.prototype.trim = function () {
     return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
@@ -59,7 +55,7 @@ function WorkersAvailable(callback) {
     if(testWorker) {
       testWorker.postMessage("ping");
 
-      testWorker.onmessage = function(e) {
+      testWorker.onmessage = e => {
         if(e.data == "pong") {
           testWorker.terminate();
           return callback(true);
@@ -73,7 +69,7 @@ function WorkersAvailable(callback) {
 
 var workersAvailable = false;
 
-WorkersAvailable(function(result) {
+WorkersAvailable(result => {
   workersAvailable = result; 
 });
 

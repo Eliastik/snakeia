@@ -134,7 +134,7 @@ export default class GameEngine {
 
   start() {
     this.reactor.dispatchEvent("onUpdateCounter");
-    var self = this;
+    
     if(!this.errorOccurred) {
       if(this.snakes != null) {
         for(var i = 0; i < this.snakes.length; i++) {
@@ -156,11 +156,12 @@ export default class GameEngine {
         this.clearIntervalPlay();
         this.reactor.dispatchEvent("onUpdateCounter");
 
-        this.intervalPlay = setInterval(function() {
-          self.countBeforePlay--;
-          self.reactor.dispatchEvent("onUpdateCounter");
-          if(self.countBeforePlay < 0) {
-            self.forceStart();
+        this.intervalPlay = setInterval(() => {
+          this.countBeforePlay--;
+          this.reactor.dispatchEvent("onUpdateCounter");
+
+          if(this.countBeforePlay < 0) {
+            this.forceStart();
           }
         }, 1000);
       }
@@ -268,125 +269,122 @@ export default class GameEngine {
   }
 
   tick() {
-    var self = this;
-
-    setTimeout(function() {
-      if(!self.paused && !self.killed) {
-        if(self.lastTime == 0) self.lastTime = time;
-        self.ticks++;
+    setTimeout(() => {
+      if(!this.paused && !this.killed) {
+        if(this.lastTime == 0) this.lastTime = time;
+        this.ticks++;
 
         var scoreIncreased = false;
 
-        if(self.grid && (!self.grid.maze || self.grid.mazeForceAuto || ((self.grid.maze && (self.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (self.grid.maze && ((self.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || self.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (self.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) || self.getPlayer(1, GameConstants.PlayerType.HUMAN)).lastKey != -1)))) {
-          for(var i = 0; i < self.snakes.length; i++) {
-            var initialDirection = self.snakes[i].direction;
+        if(this.grid && (!this.grid.maze || this.grid.mazeForceAuto || ((this.grid.maze && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (this.grid.maze && ((this.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) || this.getPlayer(1, GameConstants.PlayerType.HUMAN)).lastKey != -1)))) {
+          for(var i = 0; i < this.snakes.length; i++) {
+            var initialDirection = this.snakes[i].direction;
             var setFruit = false;
             var setFruitError = false;
             var goldFruit = false;
-            self.snakes[i].lastTailMoved = false;
+            this.snakes[i].lastTailMoved = false;
 
-            if(!self.snakes[i].gameOver && !self.snakes[i].scoreMax) {
+            if(!this.snakes[i].gameOver && !this.snakes[i].scoreMax) {
 
-              if(self.snakes[i].player == GameConstants.PlayerType.HUMAN || self.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
-                self.snakes[i].moveTo(self.snakes[i].lastKey);
-                self.snakes[i].lastKey = -1;
-              } else if(self.snakes[i].player == GameConstants.PlayerType.AI && (!self.clientSidePredictionsMode || (self.clientSidePredictionsMode && self.snakes[i].aiLevel != GameConstants.AiLevel.RANDOM))) {
-                self.snakes[i].moveTo(self.snakes[i].ai());
+              if(this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
+                this.snakes[i].moveTo(this.snakes[i].lastKey);
+                this.snakes[i].lastKey = -1;
+              } else if(this.snakes[i].player == GameConstants.PlayerType.AI && (!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && this.snakes[i].aiLevel != GameConstants.AiLevel.RANDOM))) {
+                this.snakes[i].moveTo(this.snakes[i].ai());
               }
 
-              var headSnakePos = self.snakes[i].getHeadPosition();
+              var headSnakePos = this.snakes[i].getHeadPosition();
 
-              if(self.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI && self.grid.isDeadPosition(self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction))) {
-                self.snakes[i].direction = initialDirection;
-                self.snakes[i].moveTo(self.snakes[i].ai());
-                self.snakes[i].lastKey = -1;
+              if(this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI && this.grid.isDeadPosition(this.snakes[i].getNextPosition(headSnakePos, this.snakes[i].direction))) {
+                this.snakes[i].direction = initialDirection;
+                this.snakes[i].moveTo(this.snakes[i].ai());
+                this.snakes[i].lastKey = -1;
               }
 
-              headSnakePos = self.snakes[i].getNextPosition(headSnakePos, self.snakes[i].direction);
+              headSnakePos = this.snakes[i].getNextPosition(headSnakePos, this.snakes[i].direction);
               
-              if(self.grid.isDeadPosition(headSnakePos)) {
-                self.snakes[i].setGameOver();
+              if(this.grid.isDeadPosition(headSnakePos)) {
+                this.snakes[i].setGameOver();
               } else {
-                if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT || self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
-                  if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT) {
-                    self.snakes[i].score++;
-                    self.grid.set(GameConstants.CaseType.EMPTY, self.grid.fruitPos);
-                    self.grid.fruitPos = null;
-                  } else if(self.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
-                    self.snakes[i].score += 3;
-                    self.grid.set(GameConstants.CaseType.EMPTY, self.grid.fruitPosGold);
-                    self.grid.fruitPosGold = null;
+                if(this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT || this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
+                  if(this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT) {
+                    this.snakes[i].score++;
+                    this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPos);
+                    this.grid.fruitPos = null;
+                  } else if(this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
+                    this.snakes[i].score += 3;
+                    this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPosGold);
+                    this.grid.fruitPosGold = null;
                     goldFruit = true;
                   }
 
                   scoreIncreased = true;
-                  self.snakes[i].insert(headSnakePos);
+                  this.snakes[i].insert(headSnakePos);
 
-                  if(self.grid.maze) {
-                    self.gameMazeWin = true;
-                    self.gameFinished = true;
-                    self.stop();
-                  } else if(self.snakes[i].hasMaxScore() && self.snakes.length <= 1) {
-                    self.scoreMax = true;
-                    self.snakes[i].scoreMax = true;
-                    self.stop();
+                  if(this.grid.maze) {
+                    this.gameMazeWin = true;
+                    this.gameFinished = true;
+                    this.stop();
+                  } else if(this.snakes[i].hasMaxScore() && this.snakes.length <= 1) {
+                    this.scoreMax = true;
+                    this.snakes[i].scoreMax = true;
+                    this.stop();
                   } else {
-                    self.numFruit++;
-                    if(!goldFruit)
-                      setFruit = true;
+                    this.numFruit++;
+                    if(!goldFruit) setFruit = true;
                   }
 
-                  if(self.snakes.length <= 1 && self.progressiveSpeed && self.snakes[i].score > 0 && self.initialSpeed > 1) {
-                    self.initialSpeed = Math.ceil(((-self.initialSpeedUntouched / 100) * self.snakes[i].score) + self.initialSpeedUntouched);
-                    self.initialSpeed = self.initialSpeed < 1 ? 1 : self.initialSpeed;
+                  if(this.snakes.length <= 1 && this.progressiveSpeed && this.snakes[i].score > 0 && this.initialSpeed > 1) {
+                    this.initialSpeed = Math.ceil(((-this.initialSpeedUntouched / 100) * this.snakes[i].score) + this.initialSpeedUntouched);
+                    this.initialSpeed = this.initialSpeed < 1 ? 1 : this.initialSpeed;
                   }
                 } else {
-                  self.snakes[i].insert(headSnakePos);
+                  this.snakes[i].insert(headSnakePos);
 
-                  if(!self.grid.maze) {
-                    self.snakes[i].remove();
-                    self.snakes[i].lastTailMoved = true;
+                  if(!this.grid.maze) {
+                    this.snakes[i].remove();
+                    this.snakes[i].lastTailMoved = true;
                   }
                 }
               }
             }
 
-            if(!self.scoreMax && setFruit && !self.clientSidePredictionsMode) {
-              setFruitError = !self.grid.setFruit(self.snakes.length);
+            if(!this.scoreMax && setFruit && !this.clientSidePredictionsMode) {
+              setFruitError = !this.grid.setFruit(this.snakes.length);
             }
           }
 
-          if(!self.scoreMax && !setFruitError && self.grid.isFruitSurrounded(self.grid.fruitPos, true) && !self.clientSidePredictionsMode) {
-            setFruitError = !self.grid.setFruit(self.snakes.length);
+          if(!this.scoreMax && !setFruitError && this.grid.isFruitSurrounded(this.grid.fruitPos, true) && !this.clientSidePredictionsMode) {
+            setFruitError = !this.grid.setFruit(this.snakes.length);
           }
 
-          if(!self.scoreMax && self.grid.fruitPosGold != null && self.grid.isFruitSurrounded(self.grid.fruitPosGold, true)) {
-            self.grid.set(GameConstants.CaseType.EMPTY, self.grid.fruitPosGold);
-            self.grid.fruitPosGold = null;
+          if(!this.scoreMax && this.grid.fruitPosGold != null && this.grid.isFruitSurrounded(this.grid.fruitPosGold, true)) {
+            this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPosGold);
+            this.grid.fruitPosGold = null;
           }
 
           var nbOver = 0;
 
-          for(var j = 0; j < self.snakes.length; j++) {
-            (self.snakes[j].gameOver || self.snakes[j].scoreMax) && nbOver++;
+          for(var j = 0; j < this.snakes.length; j++) {
+            (this.snakes[j].gameOver || this.snakes[j].scoreMax) && nbOver++;
           }
 
-          if(nbOver >= self.snakes.length || setFruitError) {
-            self.stop();
+          if(nbOver >= this.snakes.length || setFruitError) {
+            this.stop();
 
-            if(self.snakes.length > 1) {
-              self.gameFinished = true;
+            if(this.snakes.length > 1) {
+              this.gameFinished = true;
             }
           }
 
-          self.reactor.dispatchEvent("onUpdate");
+          this.reactor.dispatchEvent("onUpdate");
 
           if(scoreIncreased) {
-            self.reactor.dispatchEvent("onScoreIncreased");
+            this.reactor.dispatchEvent("onScoreIncreased");
           }
         }
 
-        self.tick();
+        this.tick();
       }
     }, this.initialSpeed * GameConstants.Setting.TIME_MULTIPLIER);
   }

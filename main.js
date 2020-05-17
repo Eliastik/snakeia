@@ -114,11 +114,11 @@ function storageFactory(storage) {
     }
   }
 
-  this.isSupported = function() {
+  this.isSupported = () => {
     return isSupported();
   };
 
-  this.clear = function() {
+  this.clear = () => {
     if(isSupported()) {
       storage.clear();
     } else {
@@ -162,7 +162,7 @@ function storageFactory(storage) {
     }
   }
 
-  this.length = function() {
+  this.length = () => {
     if(isSupported()) {
       return storage.length;
     } else {
@@ -180,13 +180,13 @@ if(!storageGlobal.isSupported()) {
 function Timer(callback, delay, timerInterval) {
   var timerId, start, remaining = delay;
 
-  this.pause = function() {
+  this.pause = () => {
     window.clearTimeout(timerId);
     timerInterval != null && timerInterval.stop != null && timerInterval.stop();
     remaining -= Date.now() - start;
   };
 
-  this.resume = function() {
+  this.resume = () => {
     start = Date.now();
     window.clearTimeout(timerId);
     timerInterval != null && timerInterval.stop != null && timerInterval.stop();
@@ -194,13 +194,13 @@ function Timer(callback, delay, timerInterval) {
     timerInterval != null && timerInterval.start != null && timerInterval.start();
   };
 
-  this.reset = function() {
+  this.reset = () => {
     window.clearTimeout(timerId);
     timerInterval != null && timerInterval.stop != null && timerInterval.stop();
     remaining = delay;
   };
 
-  this.getTime = function() {
+  this.getTime = () => {
     return remaining - (Date.now() - start);
   };
 }
@@ -208,17 +208,17 @@ function Timer(callback, delay, timerInterval) {
 function TimerInterval(callback) {
   this.interval;
 
-  this.start = function() {
+  this.start = () => {
     this.interval = setInterval(callback, 1000);
   };
 
-  this.stop = function() {
+  this.stop = () => {
     clearInterval(this.interval);
   };
 }
 
 // Settings handling
-WorkersAvailable(function(result) {
+WorkersAvailable(result => {
   workersAvailable = result; 
   showSettings();
 });
@@ -321,7 +321,7 @@ function checkUpdate() {
   document.getElementsByTagName('head')[0].appendChild(script);
 }
 
-window.updateCallback = function(data) {
+window.updateCallback = data => {
   if(typeof(data) !== "undefined" && data !== null && typeof(data.version) !== "undefined" && data.version !== null) {
     var newVersionTest = GameConstants.Setting.APP_VERSION.strcmp(data.version);
 
@@ -343,11 +343,11 @@ window.updateCallback = function(data) {
           var downloadURL = data.url;
       }
 
-      document.getElementById("appDownloadLink").onclick = function() {
+      document.getElementById("appDownloadLink").onclick = () => {
           window.open(downloadURL, '_blank');
       };
 
-      document.getElementById("appDownloadURLGet").onclick = function() {
+      document.getElementById("appDownloadURLGet").onclick = () => {
           prompt(i18next.t("update.URLToDownload"), downloadURL);
       };
 
@@ -357,7 +357,7 @@ window.updateCallback = function(data) {
           var changes = data.changes;
       }
 
-      document.getElementById("appUpdateChanges").onclick = function() {
+      document.getElementById("appUpdateChanges").onclick = () => {
           alert(i18next.t("update.changes") + "\n" + changes);
       };
 
@@ -378,7 +378,7 @@ function loadServerList() {
   document.getElementById("serverListGroup").innerHTML = "";
 }
 
-window.listServersCallback = function(data) {
+window.listServersCallback = data => {
   document.getElementById("serverListGroup").innerHTML = "";
 
   if(data != null && data.length > 0) {
@@ -398,11 +398,9 @@ window.listServersCallback = function(data) {
           linkServer.textContent = i18next.t("servers.untitled");
         }
 
-        linkServer.onclick = (function(u, p) {
-          return function() {
-            connectToServer(u, p);
-          };
-        }(url, port));
+        linkServer.onclick = (((u, p) => {
+          connectToServer(u, p);
+        }).bind(null, url, port));
   
         var serverAddress = document.createElement("div");
         serverAddress.classList.add("small");
@@ -429,7 +427,7 @@ window.listServersCallback = function(data) {
   document.getElementById("loadingServersList").style.display = "none";
 }
 
-document.getElementById("linkCustomServer").onclick = function() {
+document.getElementById("linkCustomServer").onclick = () => {
   var url = prompt(i18next.t("servers.enterCustomServer"), "http://");
 
   if(url != null && url.trim() != "") {
@@ -450,7 +448,7 @@ function connectToServer(url, port) {
   document.getElementById("roomsOnlineJoin").style.display = "none";
   document.getElementById("authenticationServer").style.display = "none";
 
-  onlineClient.connect(url, port, function(success, data, id) {
+  onlineClient.connect(url, port, (success, data, id) => {
     document.getElementById("connectingToServer").style.display = "none";
 
     if(!success) {
@@ -477,13 +475,13 @@ function connectToServer(url, port) {
   });
 }
 
-document.getElementById("cancelConnectingToServer").onclick = function() {
+document.getElementById("cancelConnectingToServer").onclick = () => {
   document.getElementById("connectingToServer").style.display = "none";
   onlineClient.disconnect();
   displayServerList();
 };
 
-document.getElementById("cancelAuthenticationToServer").onclick = function() {
+document.getElementById("cancelAuthenticationToServer").onclick = () => {
   document.getElementById("authenticationServerContainer").innerHTML = "";
   document.getElementById("connectingToServer").style.display = "none";
   onlineClient.disconnect();
@@ -497,7 +495,7 @@ function displayRooms() {
   document.getElementById("errorRoomJoin").style.display = "none";
   document.getElementById("errorServerVersion").style.display = "none";
 
-  onlineClient.displayRooms(function(success, data) { // Request rooms data
+  onlineClient.displayRooms((success, data) => { // Request rooms data
     document.getElementById("roomsOnlineListGroup").innerHTML = "";
     document.getElementById("errorRoomsList").style.display = "none";
     document.getElementById("refreshRooms").disabled = "";
@@ -522,7 +520,7 @@ function displayRooms() {
           room.state == GameConstants.GameState.STARTED ? i18next.t("servers.started") : ""
         ) : "");
   
-        linkRoom.onclick = function() {
+        linkRoom.onclick = () => {
           joinRoom(code);
         };
   
@@ -583,7 +581,7 @@ function displayRooms() {
   });
 }
 
-document.getElementById("refreshRooms").onclick = function() {
+document.getElementById("refreshRooms").onclick = () => {
   displayRooms();
 };
 
@@ -601,7 +599,7 @@ function joinRoom(code) {
   document.getElementById("authenticationServer").style.display = "none";
   document.getElementById("errorRoomJoin").style.display = "none";
 
-  onlineClient.joinRoom(code, function(data) {
+  onlineClient.joinRoom(code, data => {
     document.getElementById("roomsOnlineJoin").style.display = "none";
 
     if(data.success) {
@@ -619,21 +617,20 @@ function joinRoom(code) {
         ui.canvas.scrollIntoView();
       }
 
-      game.onExit(function() {
+      game.onExit(() => {
         onlineClient.stopGame();
         displayRoomsList();
       });
 
-      game.onKill(function() {
+      game.onKill(() => {
         onlineClient.stopGame();
         displayRoomsList();
       });
 
-      document.getElementById("backToMenuGame").onclick = function() {
+      document.getElementById("backToMenuGame").onclick = () => {
         if(confirm(i18next.t("game.confirmQuit"))) {
           onlineClient.stopGame();
           displayRoomsList();
-          group = null;
         }
       };
     } else {
@@ -663,7 +660,7 @@ function joinRoom(code) {
   });
 }
 
-document.getElementById("joinPrivateRoom").onclick = function() {
+document.getElementById("joinPrivateRoom").onclick = () => {
   var code = prompt(i18next.t("servers.enterCode"));
 
   if(code != null) {
@@ -729,27 +726,27 @@ function selectMode(mode) {
   displaySettings();
 }
 
-document.getElementById("soloAi").onclick = function() {
+document.getElementById("soloAi").onclick = () => {
   selectMode(SOLO_AI);
 };
 
-document.getElementById("soloPlayer").onclick = function() {
+document.getElementById("soloPlayer").onclick = () => {
   selectMode(SOLO_PLAYER);
 };
 
-document.getElementById("playerVsAi").onclick = function() {
+document.getElementById("playerVsAi").onclick = () => {
   selectMode(PLAYER_VS_AI);
 };
 
-document.getElementById("aiVsAi").onclick = function() {
+document.getElementById("aiVsAi").onclick = () => {
   selectMode(AI_VS_AI);
 };
 
-document.getElementById("battleRoyale").onclick = function() {
+document.getElementById("battleRoyale").onclick = () => {
   selectMode(BATTLE_ROYALE);
 };
 
-document.getElementById("createRoom").onclick = function() {
+document.getElementById("createRoom").onclick = () => {
   selectMode(BATTLE_ROYALE_ONLINE);
 };
 
@@ -776,11 +773,11 @@ function displaySettings() {
   resetForm(false, true);
 
   if(selectedMode == BATTLE_ROYALE_ONLINE) {
-    document.getElementById("backToMenu").onclick = function() {
+    document.getElementById("backToMenu").onclick = () => {
       displayRoomsList();
     };
   } else {
-    document.getElementById("backToMenu").onclick = function() {
+    document.getElementById("backToMenu").onclick = () => {
       displayMenu();
     };
   }
@@ -792,28 +789,28 @@ function displayOthersSettings() {
   document.getElementById("parameters").style.display = "block";
 }
 
-document.getElementById("backToMenu").onclick = function() {
+document.getElementById("backToMenu").onclick = () => {
   displayMenu();
 };
 
-document.getElementById("backToMenuLevelList").onclick = function() {
+document.getElementById("backToMenuLevelList").onclick = () => {
   displayMenu();
 };
 
-document.getElementById("backToMenuParameters").onclick = function() {
+document.getElementById("backToMenuParameters").onclick = () => {
   displayMenu();
 };
 
-document.getElementById("othersSettings").onclick = function() {
+document.getElementById("othersSettings").onclick = () => {
   displayOthersSettings();
 };
 
-document.getElementById("backToMenuServerList").onclick = function() {
+document.getElementById("backToMenuServerList").onclick = () => {
   onlineClient.disconnect();
   displayMenu();
 };
 
-document.getElementById("collapseSeedSettingsBtn").onclick = function(e) {
+document.getElementById("collapseSeedSettingsBtn").onclick = e => {
   var collapse = document.getElementById("collapseSeedSettings");
 
   if(collapse && collapse.classList.contains("show")) {
@@ -834,11 +831,11 @@ function displayServerList() {
   loadServerList();
 }
 
-document.getElementById("onlineBattleRoyale").onclick = function() {
+document.getElementById("onlineBattleRoyale").onclick = () => {
   displayServerList();
 };
 
-document.getElementById("backToServersRoomsList").onclick = function() {
+document.getElementById("backToServersRoomsList").onclick = () => {
   onlineClient.disconnect();
   displayServerList();
 };
@@ -879,11 +876,11 @@ function displayLevelList(player) {
   }
 }
 
-document.getElementById("levelsSoloPlayer").onclick = function() {
+document.getElementById("levelsSoloPlayer").onclick = () => {
   displayLevelList(PLAYER_HUMAN);
 };
 
-document.getElementById("levelsSoloAI").onclick = function() {
+document.getElementById("levelsSoloAI").onclick = () => {
   displayLevelList(PLAYER_AI);
 };
 
@@ -907,7 +904,7 @@ function checkGameSpeed() {
   }
 }
 
-document.getElementById("gameSpeed").onchange = function() {
+document.getElementById("gameSpeed").onchange = () => {
   checkGameSpeed();
 };
 
@@ -1003,46 +1000,46 @@ function checkFailSettings() {
   }
 }
 
-document.getElementById("heightGrid").onchange = function() {
+document.getElementById("heightGrid").onchange = () => {
   checkFailSettings();
 };
 
-document.getElementById("widthGrid").onchange = function() {
+document.getElementById("widthGrid").onchange = () => {
   checkFailSettings();
 };
 
-document.getElementById("borderWalls").onchange = function() {
+document.getElementById("borderWalls").onchange = () => {
   checkFailSettings();
 };
 
-document.getElementById("generateWalls").onchange = function() {
+document.getElementById("generateWalls").onchange = () => {
   checkFailSettings();
 };
 
-document.getElementById("sameGrid").onchange = function() {
+document.getElementById("sameGrid").onchange = () => {
   checkSameGrid();
   checkGameSpeed();
   checkFailSettings();
 };
 
-document.getElementById("numberIA").onchange = function() {
+document.getElementById("numberIA").onchange = () => {
   checkFailSettings();
 };
 
-document.getElementById("battleAgainstAIs").onchange = function() {
+document.getElementById("battleAgainstAIs").onchange = () => {
   checkPlayer();
   checkFailSettings();
 };
 
-document.getElementById("mazeGrid").onchange = function() {
+document.getElementById("mazeGrid").onchange = () => {
   checkMazeGrid();
 };
 
-document.getElementById("enableAI").onchange = function() {
+document.getElementById("enableAI").onchange = () => {
   checkEnableAI();
 };
 
-document.getElementById("resetSeeds").onclick = function(e) {
+document.getElementById("resetSeeds").onclick = e => {
   resetForm(false, true);
   e.preventDefault();
   e.stopPropagation();
@@ -1104,7 +1101,7 @@ function resetForm(resetValues, resetSeeds) {
   checkEnableAI();
 }
 
-document.getElementById("resetSettings").onclick = function() {
+document.getElementById("resetSettings").onclick = () => {
   resetForm(true, true);
 };
 
@@ -1285,7 +1282,7 @@ function validateSettings(returnValidation) {
         private: document.getElementById("privateGame").checked,
         enableAI: enableAI ? document.getElementById("enableAI").checked : false,
         levelAI: aiLevel
-      }, function(data) {
+      }, data => {
         var errorCode = data.errorCode;
 
         if(data.connection_error) {
@@ -1450,7 +1447,7 @@ function validateSettings(returnValidation) {
         group.setNotification(new NotificationMessage(i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, null, null, null, true));
       }
 
-      document.getElementById("backToMenuGame").onclick = function() {
+      document.getElementById("backToMenuGame").onclick = () => {
         if(confirm(i18next.t("game.confirmQuit"))) {
           group.killAll();
           displayMenu();
@@ -1458,7 +1455,7 @@ function validateSettings(returnValidation) {
         }
       };
 
-      group.onStop(function() {
+      group.onStop(() => {
         if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE && !group.errorOccurred()) {
           var resultMessage = "";
           var winners = group.getWinners();
@@ -1519,14 +1516,14 @@ function validateSettings(returnValidation) {
         }
       });
 
-      group.onExit(function() {
+      group.onExit(() => {
         if(selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER || selectedMode == AI_VS_AI || (selectedMode == PLAYER_VS_AI && sameGrid) || (selectedMode == BATTLE_ROYALE && sameGrid)) {
           group.killAll();
           displayMenu();
         }
       });
 
-      group.onReset(function() {
+      group.onReset(() => {
         document.getElementById("resultLevels").innerHTML = "";
         document.getElementById("gameStatus").innerHTML = "";
         document.getElementById("gameOrder").innerHTML = "";
@@ -1537,7 +1534,7 @@ function validateSettings(returnValidation) {
   }
 }
 
-document.getElementById("validateSettings").onclick = function() {
+document.getElementById("validateSettings").onclick = () => {
   validateSettings();
 };
 
@@ -1705,7 +1702,7 @@ function printResultLevel(level, player, levelType, type, shortVersion) {
   return val;
 }
 
-window.playLevel = function(level, player, type) {
+window.playLevel = (level, player, type) => {
   var levels = getLevels(player, type);
 
   if(levels == null) {
@@ -1817,7 +1814,7 @@ window.playLevel = function(level, player, type) {
     var notifInfo;
     var textToDisplayGoal;
 
-    document.getElementById("backToMenuGame").onclick = function() {
+    document.getElementById("backToMenuGame").onclick = () => {
       if(confirm(i18next.t("game.confirmQuit"))) {
         levelTimer.pause();
         group.killAll();
@@ -1828,7 +1825,7 @@ window.playLevel = function(level, player, type) {
 
     function initGoal() {
       if(levelType == LEVEL_REACH_SCORE) {
-        playerGame.onScoreIncreased(function() {
+        playerGame.onScoreIncreased(() => {
           if(playerGame.snakes[0].score >= levelTypeValue) {
             setLevelSave([true, playerGame.snakes[0].score], level, player, type);
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
@@ -1840,7 +1837,7 @@ window.playLevel = function(level, player, type) {
           }
         });
 
-        playerGame.onStop(function() {
+        playerGame.onStop(() => {
           if(playerGame.snakes[0].score < levelTypeValue) {
             if(!notificationEndDisplayed) {
               playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
@@ -1849,7 +1846,7 @@ window.playLevel = function(level, player, type) {
           }
         });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
-        levelTimer = new Timer(function() {
+        levelTimer = new Timer(() => {
           playerGame.setTimeToDisplay(0);
           document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: 0 });
 
@@ -1859,28 +1856,28 @@ window.playLevel = function(level, player, type) {
           }
 
           group.stopAll(true);
-        }, levelTypeValue[1] * 1000 - 1, new TimerInterval(function() {
+        }, levelTypeValue[1] * 1000 - 1, new TimerInterval(() => {
           document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: Math.round(levelTimer.getTime() / 1000) });
           playerGame.setTimeToDisplay(Math.round(levelTimer.getTime() / 1000));
         }));
 
-        playerGame.onStart(function() {
+        playerGame.onStart(() => {
           levelTimer.resume();
         });
 
-        playerGame.onPause(function() {
+        playerGame.onPause(() => {
           levelTimer.pause();
         });
 
-        playerGame.onReset(function() {
+        playerGame.onReset(() => {
           levelTimer.reset();
         });
 
-        playerGame.onStop(function() {
+        playerGame.onStop(() => {
           levelTimer.pause();
         });
 
-        playerGame.onScoreIncreased(function() {
+        playerGame.onScoreIncreased(() => {
           if(playerGame.snakes[0].score >= levelTypeValue[0]) {
             var stop = (levelTypeValue[1] * 1000) - levelTimer.getTime();
             levelTimer.reset();
@@ -1895,7 +1892,7 @@ window.playLevel = function(level, player, type) {
           }
         });
       } else if(levelType == LEVEL_REACH_MAX_SCORE) {
-        playerGame.onStop(function() {
+        playerGame.onStop(() => {
           if(playerGame.scoreMax) {
             setLevelSave([true, playerGame.snakes[0].score], level, player, type);
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
@@ -1912,7 +1909,7 @@ window.playLevel = function(level, player, type) {
           }
         });
       } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
-        group.onStop(function() {
+        group.onStop(() => {
           var winners = group.getWinners();
           var won = false;
 
@@ -1937,28 +1934,28 @@ window.playLevel = function(level, player, type) {
       } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
         var time = 0;
 
-        var timerInterval = new TimerInterval(function() {
+        var timerInterval = new TimerInterval(() => {
           time++;
         });
 
-        playerGame.onStart(function() {
+        playerGame.onStart(() => {
           timerInterval.start();
         });
 
-        playerGame.onPause(function() {
+        playerGame.onPause(() => {
           timerInterval.stop();
         });
 
-        playerGame.onReset(function() {
+        playerGame.onReset(() => {
           time = 0;
           timerInterval.stop();
         });
 
-        playerGame.onStop(function() {
+        playerGame.onStop(() => {
           timerInterval.stop();
         });
 
-        group.onScoreIncreased(function() {
+        group.onScoreIncreased(() => {
           for(var i = 0; i < group.games.length; i++) {
             for(var j = 0; j < group.games[i].snakes.length; j++) {
               if(group.games[i].snakes[j].score >= levelTypeValue) {
@@ -1986,28 +1983,28 @@ window.playLevel = function(level, player, type) {
       } else if(levelType == LEVEL_MAZE_WIN) {
         var time = 0;
 
-        var timerInterval = new TimerInterval(function() {
+        var timerInterval = new TimerInterval(() => {
           time++;
         });
 
-        playerGame.onStart(function() {
+        playerGame.onStart(() => {
           timerInterval.start();
         });
 
-        playerGame.onPause(function() {
+        playerGame.onPause(() => {
           timerInterval.stop();
         });
 
-        playerGame.onReset(function() {
+        playerGame.onReset(() => {
           time = 0;
           timerInterval.stop();
         });
 
-        playerGame.onStop(function() {
+        playerGame.onStop(() => {
           timerInterval.stop();
         });
 
-        playerGame.onScoreIncreased(function() {
+        playerGame.onScoreIncreased(() => {
           if(playerGame.snakes[0].score >= 1) {
             setLevelSave([true, time], level, player, type);
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
@@ -2046,13 +2043,13 @@ window.playLevel = function(level, player, type) {
     initGoal();
     displayInfosGoal();
 
-    group.onExit(function() {
+    group.onExit(() => {
       levelTimer.pause();
       group.killAll();
       displayLevelList(player);
     });
 
-    group.onReset(function() {
+    group.onReset(() => {
       document.getElementById("resultLevels").innerHTML = "";
       document.getElementById("gameStatus").innerHTML = "";
       document.getElementById("gameOrder").innerHTML = "";
@@ -2062,7 +2059,7 @@ window.playLevel = function(level, player, type) {
       displayInfosGoal();
     });
 
-    playerGame.onStart(function() {
+    playerGame.onStart(() => {
       if(!notificationEndDisplayed && !notificationStartDisplayed) {
         notifInfo = new NotificationMessage(textToDisplayGoal, null, notifInfosColor, 10);
         playerGame.setNotification(notifInfo);
@@ -2074,7 +2071,7 @@ window.playLevel = function(level, player, type) {
   }
 }
 
-window.editDownloadURL = function() {
+window.editDownloadURL = () => {
   var value = window.prompt(i18next.t("levels.editDownloadURLPrompt"), DOWNLOAD_DEFAULT_URI);
 
   if(value != null) {
@@ -2082,7 +2079,7 @@ window.editDownloadURL = function() {
   }
 }
 
-window.downloadLevels = function(player, button) {
+window.downloadLevels = (player, button) => {
   var url = DOWNLOAD_DEFAULT_URI;
   url = url.replace("{player}", player);
   url = url.replace("{appVersion}", GameConstants.Setting.APP_VERSION);
@@ -2092,7 +2089,7 @@ window.downloadLevels = function(player, button) {
 
   var canceled = false;
 
-  window["callbackDownloadLevels"] = function(player, data) {
+  window["callbackDownloadLevels"] = (player, data) => {
     if(!canceled) {
       if(player == PLAYER_HUMAN) {
         storageGlobal.setItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
@@ -2117,7 +2114,7 @@ window.downloadLevels = function(player, button) {
 
   document.getElementsByTagName('head')[0].appendChild(script);
 
-  buttonDeblock.onclick = function() {
+  buttonDeblock.onclick = () => {
     canceled = true;
     deblockButton(button, script, "callbackDownloadLevels");
   };
@@ -2228,14 +2225,14 @@ function translateContent() {
   document.getElementById("onlineEnableClientSidePredictionsInfos").setAttribute("aria-label", i18next.t("menu.onlineEnableClientSidePredictionsInfos"));
 }
 
-document.getElementById("languageSelect").onchange = function() {
-  i18next.changeLanguage(document.getElementById("languageSelect").value, function(err, t) {
+document.getElementById("languageSelect").onchange = () => {
+  i18next.changeLanguage(document.getElementById("languageSelect").value, (err, t) => {
     translateContent();
   });
 };
 
-window.addEventListener("load", function() {
-  setTimeout(function() {
+window.addEventListener("load", () => {
+  setTimeout(() => {
     translateContent();
   }, 250);
 });

@@ -95,7 +95,7 @@ export default class GameRanking {
         Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (width / 2) - (ctx.measureText(title).width / 2) - this.offsetX, yTitle, false, true);
       }
 
-      var ranking = scores.sort(function(a, b) {
+      var ranking = scores.sort((a, b) => {
         return b.score - a.score;
       });
 

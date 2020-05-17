@@ -54,43 +54,41 @@ export default class OnlineClient {
     
     this.socket = new io(this.getURL() + (this.token ? "?token=" + this.token : ""));
 
-    var self = this;
-
-    this.socket.once("connect", function() {
-      self.socket.once("authent", function(data) {
+    this.socket.once("connect", () => {
+      this.socket.once("authent", data => {
         if(data == GameConstants.GameState.AUTHENTICATION_SUCCESS) {
           callback(true);
         } else {
-          callback(false, data, self.socket.id);
+          callback(false, data, this.socket.id);
         }
       });
     
-      self.socket.once("token", function(token) {
-        self.token = token;
-        self.connect(self.url, self.port, callback);
+      this.socket.once("token", (token) => {
+        this.token = token;
+        this.connect(this.url, this.port, callback);
       });
     });
 
-    this.socket.on("error", function(data) {
+    this.socket.on("error", data => {
       callback(false, data);
-      self.disconnect();
+      this.disconnect();
     });
 
-    this.socket.on("connect_error", function(data) {
+    this.socket.on("connect_error", data => {
       callback(false, data);
-      self.disconnect();
+      this.disconnect();
     });
 
-    this.socket.once("disconnect", function() {
-      if(!self.disconnected) {
+    this.socket.once("disconnect", () => {
+      if(!this.disconnected) {
         callback(false, GameConstants.Error.DISCONNECTED);
-        self.disconnect();
+        this.disconnect();
       }
     });
 
-    this.socket.on("pong", function(ms) {
-      self.pingLatency = ms;
-      if(self.ui) self.ui.pingLatency = ms;
+    this.socket.on("pong", ms => {
+      this.pingLatency = ms;
+      if(this.ui) this.ui.pingLatency = ms;
     });
   }
 
@@ -117,35 +115,34 @@ export default class OnlineClient {
   displayRooms(callback) {
     if(!this.loadingRooms) {
       this.loadingRooms = true;
-      var self = this;
 
       var ioRooms = new io(this.getURL() + "/rooms" + (this.token ? "?token=" + this.token : ""));
     
-      ioRooms.once("rooms", function(data) {
+      ioRooms.once("rooms", data => {
         callback(true, data);
         ioRooms.close();
-        self.loadingRooms = false;
-        self.serverSettings = data.settings;
+        this.loadingRooms = false;
+        this.serverSettings = data.settings;
       });
     
-      ioRooms.once("error", function(data) {
+      ioRooms.once("error", data => {
         callback(false, data);
         ioRooms.close();
-        self.loadingRooms = false;
+        this.loadingRooms = false;
       });
       
-      ioRooms.once("authent", function(data) {
+      ioRooms.once("authent", data => {
         if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
           callback(false, data);
           ioRooms.close();
-          self.loadingRooms = false;
+          this.loadingRooms = false;
         }
       });
     
-      ioRooms.once("connect_error", function() {
+      ioRooms.once("connect_error", () => {
         callback(false, data);
         ioRooms.close();
-        self.loadingRooms = false;
+        this.loadingRooms = false;
       });
     } else {
       callback(false, null);
@@ -155,15 +152,14 @@ export default class OnlineClient {
   createRoom(data, callback) {
     if(!this.creatingRoom) {
       this.creatingRoom = true;
-      var self = this;
       
       var ioCreate = new io(this.getURL() + "/createRoom" + (this.token ? "?token=" + this.token : ""));
 
-      ioCreate.once("connect", function() {
+      ioCreate.once("connect", () => {
         ioCreate.emit("create", data);
       });
 
-      ioCreate.once("process", function(data) {
+      ioCreate.once("process", data => {
         if(data.success != null) {
           callback({
             success: data.success,
@@ -181,39 +177,42 @@ export default class OnlineClient {
         }
 
         ioCreate.close();
-        self.creatingRoom = false;
+        this.creatingRoom = false;
       });
 
-      ioCreate.once("error", function(data) {
+      ioCreate.once("error", data => {
         callback({
           success: false,
           connection_error: true,
           errorCode: (data != null ? data : null)
         });
+
         ioCreate.close();
-        self.creatingRoom = false;
+        this.creatingRoom = false;
       });
       
-      ioCreate.once("authent", function(data) {
+      ioCreate.once("authent", data => {
         if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
           callback({
             success: false,
             connection_error: true,
             errorCode: (data != null ? data : null)
           });
+
           ioCreate.close();
-          self.creatingRoom = false;
+          this.creatingRoom = false;
         }
       });
 
-      ioCreate.once("connect_error", function(data) {
+      ioCreate.once("connect_error", data => {
         callback({
           success: false,
           connection_error: true,
           errorCode: (data != null ? data : null)
         });
+
         ioCreate.close();
-        self.creatingRoom = false;
+        this.creatingRoom = false;
       });
     } else {
       callback({
@@ -233,12 +232,10 @@ export default class OnlineClient {
           version: GameConstants.Setting.APP_VERSION
         });
 
-        var self = this;
-
-        this.socket.once("join-room", function(data) {
-          self.currentRoom = code;
+        this.socket.once("join-room", data => {
+          this.currentRoom = code;
           callback(data);
-          self.joiningRoom = false;
+          this.joiningRoom = false;
         });
       }
     } else {

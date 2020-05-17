@@ -34,48 +34,34 @@ export default class GameGroup {
   }
 
   init() {
-    var self = this;
-
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       if(i == 0) {
-        self.games[i].enableKeyMenu = true;
+        this.games[i].enableKeyMenu = true;
       }
       
-      this.games[i].onPause(function(v) {
-        return function() {
-          self.pauseAll(v);
-        };
-      }(i));
+      this.games[i].onPause((i => {
+        this.pauseAll(i);
+      }).bind(null, i));
 
-      this.games[i].onContinue(function(v) {
-        return function() {
-          self.startAll(v);
-        };
-      }(i));
+      this.games[i].onContinue((i => {
+        this.startAll(i);
+      }).bind(null, i));
 
-      this.games[i].onExit(function(v) {
-        return function() {
-          self.checkExit(v);
-        };
-      }(i));
+      this.games[i].onExit((i => {
+        this.checkExit(i);
+      }).bind(null, i));
 
-      this.games[i].onStop(function(v) {
-        return function() {
-          self.checkStop(v);
-        };
-      }(i));
+      this.games[i].onStop((i => {
+        this.checkStop(i);
+      }).bind(null, i));
 
-      this.games[i].onReset(function(v) {
-        return function() {
-          self.resetAll(v);
-        };
-      }(i));
+      this.games[i].onReset((i => {
+        this.resetAll(i);
+      }).bind(null, i));
 
-      this.games[i].onScoreIncreased(function(v) {
-        return function() {
-          self.checkOnScoreIncreased(v);
-        };
-      }(i));
+      this.games[i].onScoreIncreased((i => {
+        this.checkOnScoreIncreased(i);
+      }).bind(null, i));
     }
   }
 
