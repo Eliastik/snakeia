@@ -17,14 +17,13 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import i18next from "i18next";
-import GameUtils from "./gameUtils";
 import GameConstants from "./constants";
 import Position from "./position";
 import Grid from "./grid";
-import * as Lowlight from "../libs/lowlight.astar.min";
+import { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh } from "./ai/index";
 
 export default class Snake {
-  constructor(direction, length, grid, player, aiLevel, autoRetry, name) {
+  constructor(direction, length, grid, player, aiLevel, autoRetry, name, ai) {
     this.direction = direction == undefined ? GameConstants.Direction.RIGHT : direction;
     this.initialDirection = direction == undefined ? GameConstants.Direction.RIGHT : direction;
     this.initialLength = length == undefined ? 3 : length;
@@ -43,7 +42,31 @@ export default class Snake {
     this.scoreMax = false;
     this.color;
     this.name = name == undefined ? "Snake" : name;
-    this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+    this.snakeAI = new SnakeAI(this);
+
+    if(!ai) {
+      switch(this.aiLevel) {
+        case GameConstants.AiLevel.RANDOM:
+          this.snakeAI = new SnakeAIRandom(this);
+          break;
+        case GameConstants.AiLevel.LOW:
+          this.snakeAI = new SnakeAILow(this);
+          break;
+        case GameConstants.AiLevel.DEFAULT:
+          this.snakeAI = new SnakeAINormal(this);
+          break;
+        case GameConstants.AiLevel.HIGH:
+          this.snakeAI = new SnakeAIHigh(this);
+          break;
+        case GameConstants.AiLevel.ULTRA:
+          this.snakeAI = new SnakeAIHigh(this);
+          break;
+      }
+    } else {
+      this.snakeAI = ai;
+      this.snakeAI.snake = this;
+      this.aiLevel = GameConstants.AiLevel.CUSTOM;
+    }
 
     this.init();
   }
@@ -315,162 +338,8 @@ export default class Snake {
     return snake;
   }
 
-  randomAI() {
-    const currentPosition = this.getHeadPosition();
-    const top = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.UP));
-    const left = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.LEFT));
-    const bottom = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.BOTTOM));
-    const right = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.RIGHT));
-
-    if(top && left && bottom && right) {
-      return GameConstants.Key.UP;
-    } else {
-      let direction = null;
-
-      while(direction == null || this.grid.isDeadPosition(this.getNextPosition(currentPosition, direction))) {
-        const r = GameUtils.randRange(1, 4, this.grid ? this.grid.rngGame : null);
-
-        switch(r) {
-          case 1:
-            direction = GameConstants.Key.UP;
-            break;
-          case 2:
-            direction = GameConstants.Key.LEFT;
-            break;
-          case 3:
-            direction = GameConstants.Key.BOTTOM;
-            break;
-          case 4:
-            direction = GameConstants.Key.RIGHT;
-            break;
-        }
-      }
-
-      return direction;
-    }
-  }
-
-  simpleAI() {
-    if(this.grid.fruitPos != null) {
-      const currentPosition = this.getHeadPosition();
-      const fruitPos = this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? this.grid.fruitPosGold : this.grid.fruitPos;
-      let directionNext = GameConstants.Key.RIGHT;
-
-      if(fruitPos.x > currentPosition.x) {
-        if(fruitPos.x - currentPosition.x > this.grid.width / 2) {
-          directionNext = GameConstants.Key.LEFT;
-        } else {
-          directionNext = GameConstants.Key.RIGHT;
-        }
-      } else if(fruitPos.x < currentPosition.x) {
-        if(currentPosition.x - fruitPos.x > this.grid.width / 2) {
-          directionNext = GameConstants.Key.RIGHT;
-        } else {
-          directionNext = GameConstants.Key.LEFT;
-        }
-      } else if(fruitPos.y < currentPosition.y) {
-        if(currentPosition.y - fruitPos.y > this.grid.height / 2) {
-          directionNext = GameConstants.Key.BOTTOM;
-        } else {
-          directionNext = GameConstants.Key.UP;
-        }
-      } else if(fruitPos.y > currentPosition.y) {
-        if(fruitPos.y - currentPosition.y > this.grid.height / 2) {
-          directionNext = GameConstants.Key.UP;
-        } else {
-          directionNext = GameConstants.Key.BOTTOM;
-        }
-      }
-
-      let nextPosition = this.getNextPosition(currentPosition, directionNext);
-
-      if(this.grid.isDeadPosition(nextPosition)) {
-        const currentDirection = this.direction;
-        let firstDifferentDirection = null;
-
-        for(let i = 1; i < this.queue.length; i++) {
-          if(this.get(i).direction != currentDirection) {
-            firstDifferentDirection = this.get(i).direction;
-            break;
-          }
-        }
-
-        nextPosition = this.getNextPosition(currentPosition, firstDifferentDirection);
-
-        if(this.grid.isDeadPosition(nextPosition)) {
-          if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.UP))) {
-            directionNext = GameConstants.Key.UP;
-          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.RIGHT))) {
-            directionNext = GameConstants.Key.RIGHT;
-          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.BOTTOM))) {
-            directionNext = GameConstants.Key.BOTTOM;
-          } else if(!this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.LEFT))) {
-            directionNext = GameConstants.Key.LEFT;
-          }
-        } else {
-          directionNext = nextPosition.convertToKeyDirection();
-        }
-      }
-
-      return directionNext;
-    }
-  }
-
   ai() {
-    let res = null;
-    
-    const currentPosition = this.getHeadPosition();
-    const fruitPos = this.grid.fruitPos;
-    const fruitPosGold = this.grid.fruitPosGold;
-
-    if(fruitPos != null) {
-      const distFruit = Math.abs(fruitPos.x - currentPosition.x) + Math.abs(fruitPos.y - currentPosition.y);
-      const distFruitGold = fruitPosGold != null ? Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y) : -1;
-    
-      if(fruitPosGold != null && this.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD && this.aiFruitGoal == GameConstants.CaseType.FRUIT) {
-        if(distFruitGold < distFruit) {
-          this.aiFruitGoal = GameConstants.CaseType.FRUIT_GOLD;
-        } else {
-          this.aiFruitGoal = GameConstants.CaseType.FRUIT;
-        }
-      } else if(fruitPosGold == null || this.grid.get(fruitPosGold) != GameConstants.CaseType.FRUIT_GOLD) {
-        this.aiFruitGoal = GameConstants.CaseType.FRUIT;
-      }
-    }
-
-    if(this.aiLevel == GameConstants.AiLevel.RANDOM) {
-      res = this.randomAI();
-    } else if(this.aiLevel == GameConstants.AiLevel.LOW) {
-      res = this.simpleAI();
-    } else if(fruitPos != null) {
-      const grid = this.grid.getGraph(false);
-
-      const graph = new Lowlight.Astar.Configuration(grid, {
-        order: "yx",
-        torus: (this.aiLevel == GameConstants.AiLevel.HIGH || this.aiLevel == GameConstants.AiLevel.ULTRA) ? true : false,
-        diagonals: false,
-        cutting: false,
-        static: true,
-        cost(a, b) { return b == 1 ? null : 1 }
-      });
-
-      let path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.x : fruitPos.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.y : fruitPos.y });
-
-      if(path.length < 1) {
-        path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold ? fruitPos.x : fruitPosGold.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold ? fruitPos.y : fruitPosGold.y });
-      }
-
-      if(path.length > 1) {
-        const nextPosition = new Position(path[1].x, path[1].y);
-        res = new Position(null, null, this.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
-      } else if(this.aiLevel == GameConstants.AiLevel.HIGH || this.aiLevel == GameConstants.AiLevel.ULTRA) {
-        res = this.simpleAI();
-      }
-
-      grid, graph, path = null;
-    }
-
-    return res;
+    return this.snakeAI.ai();
   }
 
   getAILevelText() {
@@ -485,8 +354,10 @@ export default class Snake {
         return i18next.t("engine.aiLevelList.high");
       case GameConstants.AiLevel.ULTRA:
         return i18next.t("engine.aiLevelList.ultra");
+      case GameConstants.AiLevel.CUSTOM:
+        return i18next.t("engine.aiLevelList.custom");
       default:
-        return i18next.t("engine.aiLevelList.normal");
+        return "???";
     }
   }
 }

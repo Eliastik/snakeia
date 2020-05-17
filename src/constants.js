@@ -37,7 +37,8 @@ export default {
     LOW: "AI_LEVEL_LOW",
     DEFAULT: "AI_LEVEL_DEFAULT",
     HIGH: "AI_LEVEL_HIGH",
-    ULTRA: "AI_LEVEL_ULTRA"
+    ULTRA: "AI_LEVEL_ULTRA",
+    CUSTOM: "AI_LEVEL_CUSTOM"
   },
   OutputType: {
     TEXT: "OUTPUT_TEXT",
