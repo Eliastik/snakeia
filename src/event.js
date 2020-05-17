@@ -16,16 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-function Event(name) {
-  this.name = name;
-  this.callbacks = [];
-}
+export default class Event {
+  constructor(name) {
+    this.name = name;
+    this.callbacks = [];
+  }
 
-Event.prototype.registerCallback = function(callback) {
-  this.callbacks.push(callback);
-};
-
-// Export module
-if(typeof(module) !== "undefined") {
-  module.exports = Event;
+  registerCallback(callback) {
+    this.callbacks.push(callback);
+  }
 }

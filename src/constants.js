@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-var GameConstants = {
+export default {
   CaseType: {
     EMPTY: 0,
     SNAKE: 1,
@@ -96,8 +96,3 @@ var GameConstants = {
     AUTHENTICATION_SUCCESS: "AUTHENTICATION_SUCCESS"
   }
 };
-
-// Export module
-if(typeof(module) !== "undefined") {
-  module.exports = GameConstants;
-}

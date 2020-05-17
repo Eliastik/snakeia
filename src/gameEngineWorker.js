@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-var GameConstants = require("./constants");
-var Position = require("./position");
-var Grid = require("./grid");
-var Snake = require("./snake");
-var GameEngine = require("./gameEngine.js");
-var seedrandom = require("seedrandom");
+import GameConstants from "./constants";
+import Position from "./position";
+import Grid from "./grid";
+import Snake from "./snake";
+import GameEngine from "./gameEngine.js";
+import seedrandom from "seedrandom";
 
-var game;
+let game;
 
 function copySnakes(snakes) {
   var copy = JSON.parse(JSON.stringify(snakes));

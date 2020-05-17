@@ -16,19 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-if(typeof(require) !== "undefined") {
-  var GameController = require('./gameController');
-  var Grid = require('./grid');
-  var Snake = require('./snake');
-  var Position = require('./position');
-}
+import GameController from "./gameController";
+import Grid from "./grid";
+import Snake from "./snake";
+import Position from "./position";
 
-function GameControllerWorker(game, ui) {
-  GameController.call(this, game, ui);
+export default class GameControllerWorker extends GameController {
+  constructor (game, ui) {
+    super(game, ui);
+    this.worker;
+  }
 
-  this.worker;
-
-  this.init = function() {
+  init() {
     if(window.Worker) {
       try {
         this.worker = new Worker("dist/GameEngineWorker.js");
@@ -120,61 +119,52 @@ function GameControllerWorker(game, ui) {
         });
       }
     }
-  };
+  }
 
-  this.reset = function() {
+  reset() {
     if(this.worker instanceof Worker) this.worker.postMessage(["reset"]);
-  };
+  }
 
-  this.start = function() {
+  start() {
     if(this.worker instanceof Worker) this.worker.postMessage(["start"]);
-  };
+  }
 
-  this.stop = function() {
+  stop() {
     if(this.worker instanceof Worker) this.worker.postMessage(["stop"]);
-  };
+  }
 
-  this.finish = function(finish) {
+  finish(finish) {
     if(this.worker instanceof Worker) this.worker.postMessage([finish ? "finish" : "stop"]);
-  };
+  }
 
-  this.pause = function() {
+  pause() {
     if(this.worker instanceof Worker) this.worker.postMessage(["pause"]);
-  };
+  }
 
-  this.kill = function() {
+  kill() {
     if(this.worker instanceof Worker) this.worker.postMessage(["kill"]);
-  };
+  }
 
-  this.tick = function() {
+  tick() {
     if(this.worker instanceof Worker) this.worker.postMessage(["tick"]);
-  };
+  }
 
-  this.exit = function() {
+  exit() {
     if(this.worker instanceof Worker) this.worker.postMessage(["exit"]);
-  };
+  }
 
-  this.key = function(key) {
+  key(key) {
     if(this.worker instanceof Worker) this.worker.postMessage(["key", key]);
-  };
+  }
 
-  this.forceStart = function() {
+  forceStart() {
     if(this.worker instanceof Worker) this.worker.postMessage(["forceStart"]);
-  };
+  }
 
-  this.updateEngine = function(key, data) {
+  updateEngine(key, data) {
     if(this.worker instanceof Worker) this.worker.postMessage(["update", {
       "key": key,
       "data": data
     }]);
-  };
-}
-
- // extends GameController
-GameControllerWorker.prototype = Object.create(GameController).prototype;
-GameControllerWorker.prototype.constructor = GameControllerWorker;
-
-// Export module
-if(typeof(module) !== "undefined") {
-  module.exports = GameControllerWorker;
+  }
 }

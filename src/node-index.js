@@ -17,15 +17,15 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 // Exports engine classes
-module.exports = {
-    GameConstants: require("./constants"),
-    Event: require("./event"),
-    Reactor: require("./reactor"),
-    Grid: require("./grid"),
-    Snake: require("./snake"),
-    GameGroup: require("./gameGroup"),
-    GameUtils: require("./gameUtils"),
-    Position: require("./position"),
-    GameEngine: require('./gameEngine'),
-    GameGroup: require("./gameGroup")
-};
+import GameConstants from "./constants";
+import Event from "./event";
+import Reactor from "./reactor";
+import Grid from "./grid";
+import Snake from "./snake";
+import GameGroup from "./gameGroup";
+import GameUtils from "./gameUtils";
+import Position from "./position";
+import GameEngine from './gameEngine';
+import { Game } from "./shim";
+
+export { GameConstants, Event, Reactor, Grid, Snake, GameGroup, GameUtils, Position, GameEngine, Game };

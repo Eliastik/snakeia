@@ -16,25 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-if(typeof(require) !== "undefined") {
-  var i18next = require("i18next").default;
-  var GameController = require("./gameController");
-  var Grid = require("./grid");
-  var Snake = require("./snake");
-  var Position = require("./position");
-  var NotificationMessage = require("jsgametools").NotificationMessage;
-  var Shim = require("./shim");
-  var Game = Shim.Game;
-}
+import i18next from "i18next";
+import GameController from "./gameController";
+import Grid from "./grid";
+import Snake from "./snake";
+import Position from "./position";
+import { NotificationMessage } from "jsgametools";
+import { Game } from "./shim";
 
-function GameControllerSocket(socket, ui, enableClientSidePredictions, settings) {
-  GameController.call(this, new Game(null, null, null, null, null, null, null, null, null, null, null, settings, ui), ui);
+export default class GameControllerSocket extends GameController {
+  constructor(socket, ui, enableClientSidePredictions, settings) {
+    super(new Game(null, null, null, null, null, null, null, null, null, null, null, settings, ui), ui);
+    this.enableClientSidePredictions = enableClientSidePredictions || false;
+    this.socket = socket;
+    this.pingLatency = -1;
+  }
 
-  this.enableClientSidePredictions = enableClientSidePredictions || false;
-  this.socket = socket;
-  this.pingLatency = -1;
-
-  this.parseData = function(m, d, updateEngine) {
+  parseData(m, d, updateEngine) {
     var data = [m, d];
 
     if(data.length > 1) {
@@ -44,32 +42,32 @@ function GameControllerSocket(socket, ui, enableClientSidePredictions, settings)
         grid = Object.assign(new Grid(), data[1]["grid"]);
         data[1]["grid"] = grid;
       }
-      
+
       if(data[1].hasOwnProperty("snakes") && data[1]["snakes"] != null) {
         for(var i = 0; i < data[1]["snakes"].length; i++) {
           data[1]["snakes"][i].grid = grid;
           data[1]["snakes"][i] = Object.assign(new Snake(), data[1]["snakes"][i]);
-
           for(var j = 0; j < data[1]["snakes"][i].queue.length; j++) {
             data[1]["snakes"][i].queue[j] = Object.assign(new Position(), data[1]["snakes"][i].queue[j]);
           }
         }
       }
-      
       this.update(data[0], data[1], updateEngine);
     }
   };
 
-  this.init = function() {
+  init() {
     var self = this;
 
     this.socket.on("init", function(data) {
       self.parseData("init", data, self.enableClientSidePredictions);
 
       if(self.enableClientSidePredictions) {
-        self.gameEngine.update("update", {"clientSidePredictionsMode": true}, true);
-        if(data && data["currentPlayer"]) self.gameEngine.currentPlayer = data["currentPlayer"];
-        if(data && data["countBeforePlay"] < 0) self.gameEngine.forceStart();
+        self.gameEngine.update("update", { "clientSidePredictionsMode": true }, true);
+        if(data && data["currentPlayer"])
+          self.gameEngine.currentPlayer = data["currentPlayer"];
+        if(data && data["countBeforePlay"] < 0)
+          self.gameEngine.forceStart();
       }
     });
 
@@ -154,60 +152,51 @@ function GameControllerSocket(socket, ui, enableClientSidePredictions, settings)
     this.socket.once("reconnect_error", function() {
       self.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
     });
-  };
+  }
 
-  this.reset = function() {
+  reset() {
     this.socket.emit("reset");
-  };
-
-  this.start = function() {
+  }
+  
+  start() {
     this.socket.emit("start");
-  };
-
-  this.stop = function() {
+  }
+  
+  stop() {
     this.socket.emit("stop");
-  };
+  }
 
-  this.finish = function(finish) {
+  finish(finish) {
     this.socket.emit(finish ? "finish" : "stop");
-  };
-
-  this.pause = function() {
+  }
+  
+  pause() {
     this.socket.emit("pause");
-  };
+  }
 
-  this.kill = function() {
+  kill() {
     this.socket.emit("kill");
-  };
+  }
 
-  this.tick = function() {
+  tick() {
     this.socket.emit("tick");
-  };
+  }
 
-  this.exit = function() {
+  exit() {
     this.socket.emit("exit");
-  };
+  }
 
-  this.key = function(key) {
+  key(key) {
     this.socket.emit("key", key);
     this.gameEngine.key(key);
     this.lastKey = this.gameEngine.lastKey;
-  };
+  }
 
-  this.forceStart = function() {
+  forceStart() {
     this.socket.emit("forceStart");
-  };
+  }
 
-  this.updateEngine = function(key, value) {
+  updateEngine(key, value) {
     this.gameEngine.updateEngine(key, value);
-  };
-}
-
-// extends GameController
-GameControllerSocket.prototype = Object.create(GameController).prototype;
-GameControllerSocket.prototype.constructor = GameControllerSocket;
-
-// Export module
-if(typeof(module) !== "undefined") {
-  module.exports = GameControllerSocket;
+  }
 }

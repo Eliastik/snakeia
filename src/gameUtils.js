@@ -16,11 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-if(typeof(require) !== "undefined") {
-  var i18next = require("i18next").default;
-}
+import i18next from "i18next";
 
-var GameUtils = {
+export default {
   randRange: function(min, max, rng) { // Return an integer between min (inclusive) and max (inclusive)
     return Math.floor((rng ? rng() : Math.random()) * (max - min + 1)) + min;
   },
@@ -99,9 +97,4 @@ var GameUtils = {
   secondsFormat: function(seconds) {
     return this.millisecondsFormat(seconds * 1000);
   }
-};
-
-// Export module
-if(typeof(module) !== "undefined") {
-  module.exports = GameUtils;
 }

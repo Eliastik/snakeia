@@ -16,9 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-if(typeof(require) !== "undefined") {
-  var i18next = require("i18next").default;
-}
+import i18next from "i18next";
 
 // French
 i18next.addResourceBundle("fr", "translation", {

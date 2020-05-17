@@ -16,32 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-if(typeof(require) !== "undefined") {
-  var Event = require("./event");
-}
+import Event from "./event";
 
-function Reactor() {
-  this.events = {};
-}
-
-Reactor.prototype.registerEvent = function(eventName) {
-  var event = new Event(eventName);
-  this.events[eventName] = event;
-};
-
-Reactor.prototype.dispatchEvent = function(eventName, eventArgs) {
-  var callbacks = this.events[eventName].callbacks;
-  
-  for(var i = 0, l = callbacks.length; i < l; i++) {
-    callbacks[i](eventArgs);
+export default class Reactor {
+  constructor() {
+    this.events = {};
   }
-};
 
-Reactor.prototype.addEventListener = function(eventName, callback) {
-  this.events[eventName].registerCallback(callback);
-};
+  registerEvent(eventName) {
+    var event = new Event(eventName);
+    this.events[eventName] = event;
+  }
 
-// Export module
-if(typeof(module) !== "undefined") {
-  module.exports = Reactor;
+  dispatchEvent(eventName, eventArgs) {
+    var callbacks = this.events[eventName].callbacks;
+    
+    for(var i = 0, l = callbacks.length; i < l; i++) {
+      callbacks[i](eventArgs);
+    }
+  }
+
+  addEventListener(eventName, callback) {
+    this.events[eventName].registerCallback(callback);
+  }
 }

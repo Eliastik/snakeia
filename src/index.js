@@ -17,25 +17,24 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 // Exports engine classes
-module.exports = {
-    LocalesInit: require("../assets/locales/init"),
-    LocalesMenu: require("../assets/locales/menu"),
-    LocalesEngine: require("../assets/locales/engine"),
-    Main: require("../main"),
-    GameConstants: require("./constants"),
-    Event: require("./event"),
-    Reactor: require("./reactor"),
-    Grid: require("./grid"),
-    Snake: require("./snake"),
-    GameGroup: require("./gameGroup"),
-    GameUtils: require("./gameUtils"),
-    Position: require("./position"),
-    GameEngine: require('./gameEngine'),
-    Game: require("./shim"),
-    GameController: require("./gameController"),
-    GameControllerWorker: require("./gameControllerWorker"),
-    GameControllerSocket: require("./gameControllerSocket"),
-    GameGroup: require("./gameGroup"),
-    GameUI: require("./gameUI"),
-    OnlineClient: require("./onlineClient")
-};
+import "../assets/locales/init.js";
+import "../assets/locales/menu.js";
+import "../assets/locales/engine.js";
+import "../main.js";
+import GameConstants from "./constants";
+import Event from "./event";
+import Reactor from "./reactor";
+import Grid from "./grid";
+import Snake from "./snake";
+import GameGroup from "./gameGroup";
+import GameUtils from "./gameUtils";
+import Position from "./position";
+import GameEngine from './gameEngine';
+import { Game } from "./shim";
+import GameController from "./gameController";
+import GameControllerWorker from "./gameControllerWorker";
+import GameControllerSocket from "./gameControllerSocket";
+import GameUI from "./gameUI";
+import OnlineClient from "./onlineClient";
+
+export { GameConstants, Event, Reactor, Grid, Snake, GameGroup, GameUtils, Position, GameEngine, Game, GameController, GameControllerWorker, GameControllerSocket, GameUI, OnlineClient };

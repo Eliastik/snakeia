@@ -16,20 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-if(typeof(require) !== "undefined") {
-  var i18next = require("i18next").default;
-  var Shim = require("./src/shim");
-  var Game = Shim.Game;
-  var WorkersAvailable = Shim.WorkersAvailable;
-  var GameConstants = require("./src/constants");
-  var Snake = require("./src/snake");
-  var Grid = require("./src/grid");
-  var GameGroup = require("./src/gameGroup");
-  var OnlineClient = require("./src/onlineClient");
-  var GameUI = require("./src/gameUI.js");
-  var NotificationMessage = require("jsgametools").NotificationMessage;
-  var seedrandom = require("seedrandom");
-}
+import i18next from "i18next";
+import { Game, WorkersAvailable } from "./src/shim";
+import GameConstants from "./src/constants";
+import Snake from "./src/snake";
+import Grid from "./src/grid";
+import GameGroup from "./src/gameGroup";
+import OnlineClient from "./src/onlineClient";
+import GameUI from "./src/gameUI.js";
+import { NotificationMessage } from "jsgametools";
+import seedrandom from "seedrandom";
 
 // Modes :
 window.SOLO_AI = "SOLO_AI";

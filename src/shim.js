@@ -16,13 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-if(typeof(require) !== "undefined") {
-  var GameConstants = require("./constants");
-  var GameController = require("./gameController");
-  var GameControllerWorker = require("./gameControllerWorker");
-  var GameUI = require("./gameUI");
-  var GameEngine = require("./gameEngine");
-}
+import GameConstants from "./constants";
+import GameController from "./gameController";
+import GameControllerWorker from "./gameControllerWorker";
+import GameUI from "./gameUI";
+import GameEngine from "./gameEngine";
 
 // Polyfills
 if(typeof(window) !== "undefined") {
@@ -42,9 +40,9 @@ if(typeof(document) !== "undefined") {
   document.exitFullscreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen;
 }
 
-if(typeof(screen) !== "undefined") {
+/*if(typeof(screen) !== "undefined") {
   screen.orientation = screen.msOrientation || screen.mozOrientation || screen.orientation;
-}
+}*/
 
 if(!String.prototype.trim) {
   String.prototype.trim = function () {
@@ -105,32 +103,26 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
 // Constants shim
 // Player type
-PLAYER_AI = GameConstants.PlayerType.AI;
-PLAYER_HUMAN = GameConstants.PlayerType.HUMAN;
-PLAYER_HYBRID_HUMAN_AI = GameConstants.PlayerType.HYBRID_HUMAN_AI;
+window.PLAYER_AI = GameConstants.PlayerType.AI;
+window.PLAYER_HUMAN = GameConstants.PlayerType.HUMAN;
+window.PLAYER_HYBRID_HUMAN_AI = GameConstants.PlayerType.HYBRID_HUMAN_AI;
 // AI level
-AI_LEVEL_RANDOM = GameConstants.AiLevel.RANDOM;
-AI_LEVEL_LOW = GameConstants.AiLevel.LOW;
-AI_LEVEL_DEFAULT = GameConstants.AiLevel.DEFAULT;
-AI_LEVEL_HIGH = GameConstants.AiLevel.HIGH;
-AI_LEVEL_ULTRA = GameConstants.AiLevel.ULTRA;
+window.AI_LEVEL_RANDOM = GameConstants.AiLevel.RANDOM;
+window.AI_LEVEL_LOW = GameConstants.AiLevel.LOW;
+window.AI_LEVEL_DEFAULT = GameConstants.AiLevel.DEFAULT;
+window.AI_LEVEL_HIGH = GameConstants.AiLevel.HIGH;
+window.AI_LEVEL_ULTRA = GameConstants.AiLevel.ULTRA;
 // Directions
-UP = GameConstants.Direction.UP;
-RIGHT = GameConstants.Direction.RIGHT;
-BOTTOM = GameConstants.Direction.BOTTOM;
-LEFT = GameConstants.Direction.LEFT;
-ANGLE_1 = GameConstants.Direction.ANGLE_1;
-ANGLE_2 = GameConstants.Direction.ANGLE_2;
-ANGLE_3 = GameConstants.Direction.ANGLE_3;
-ANGLE_4 = GameConstants.Direction.ANGLE_4;
+window.UP = GameConstants.Direction.UP;
+window.RIGHT = GameConstants.Direction.RIGHT;
+window.BOTTOM = GameConstants.Direction.BOTTOM;
+window.LEFT = GameConstants.Direction.LEFT;
+window.ANGLE_1 = GameConstants.Direction.ANGLE_1;
+window.ANGLE_2 = GameConstants.Direction.ANGLE_2;
+window.ANGLE_3 = GameConstants.Direction.ANGLE_3;
+window.ANGLE_4 = GameConstants.Direction.ANGLE_4;
 // Infos
-APP_VERSION = GameConstants.Setting.APP_VERSION;
-DATE_VERSION = GameConstants.Setting.DATE_VERSION;
+window.APP_VERSION = GameConstants.Setting.APP_VERSION;
+window.DATE_VERSION = GameConstants.Setting.DATE_VERSION;
 
-// Export module
-if(typeof(module) !== "undefined") {
-  module.exports = {
-    Game: Game,
-    WorkersAvailable: WorkersAvailable
-  }
-}
+export { Game, WorkersAvailable }

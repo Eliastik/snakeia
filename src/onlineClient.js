@@ -16,188 +16,175 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-if(typeof(require) !== "undefined") {
-  var io = require("socket.io-client");
-  var GameControllerSocket = require("./gameControllerSocket.js");
-  var GameConstants = require("./constants");
-}
+import io from "socket.io-client";
+import GameControllerSocket from "./gameControllerSocket";
+import GameConstants from "./constants";
 
-function OnlineClient() {
-  this.url;
-  this.port;
-  this.socket;
-  this.token;
-  this.id;
-  this.serverSettings;
-  this.currentRoom;
-  this.game;
-  this.serverVersion;
-  this.engineServerVersion;
-  this.intervalReconnect;
-  this.disconnected = false;
-  this.creatingRoom = false;
-  this.joiningRoom = false;
-  this.loadingRooms = false;
-  this.pingLatency = -1;
-  this.ui;
-}
-
-OnlineClient.prototype.connect = function(url, port, callback) {
-  this.disconnect();
-  this.disconnected = false;
-
-  this.url = url;
-  this.port = port;
-
-  if(this.url != null && this.url.charAt(this.url.length - 1) == "/") {
-    this.url = this.url.substring(0, this.url.length - 1);
-  }
-  
-  this.socket = new io(this.getURL() + (this.token ? "?token=" + this.token : ""));
-
-  var self = this;
-
-  this.socket.once("connect", function() {
-    self.socket.once("authent", function(data) {
-      if(data == GameConstants.GameState.AUTHENTICATION_SUCCESS) {
-        callback(true);
-      } else {
-        callback(false, data, self.socket.id);
-      }
-    });
-  
-    self.socket.once("token", function(token) {
-      self.token = token;
-      successConnect = true;
-      self.connect(self.url, self.port, callback);
-    });
-  });
-
-  this.socket.on("error", function(data) {
-    callback(false, data);
-    self.disconnect();
-  });
-
-  this.socket.on("connect_error", function(data) {
-    callback(false, data);
-    self.disconnect();
-  });
-
-  this.socket.once("disconnect", function() {
-    if(!self.disconnected) {
-      callback(false, GameConstants.Error.DISCONNECTED);
-      self.disconnect();
-    }
-  });
-
-  this.socket.on("pong", function(ms) {
-    self.pingLatency = ms;
-    if(self.ui) self.ui.pingLatency = ms;
-  });
-};
-
-OnlineClient.prototype.disconnect = function() {
-  if(this.socket != null) {
-    this.disconnected = true;
-    this.stopGame();
-    this.socket.close();
+export default class OnlineClient {
+  constructor() {
+    this.url;
+    this.port;
+    this.socket;
+    this.token;
+    this.id;
+    this.serverSettings;
+    this.currentRoom;
+    this.game;
+    this.serverVersion;
+    this.engineServerVersion;
+    this.intervalReconnect;
+    this.disconnected = false;
     this.creatingRoom = false;
     this.joiningRoom = false;
     this.loadingRooms = false;
     this.pingLatency = -1;
+    this.ui;
   }
-};
 
-OnlineClient.prototype.stopGame = function() {
-  if(this.game != null && this.game.gameUI != null) {
-    this.game.kill();
-    this.game.gameUI.setKill();
-    this.ui = null;
-  }
-};
+  connect(url, port, callback) {
+    this.disconnect();
+    this.disconnected = false;
 
-OnlineClient.prototype.displayRooms = function(callback) {
-  if(!this.loadingRooms) {
-    this.loadingRooms = true;
+    this.url = url;
+    this.port = port;
+
+    if(this.url != null && this.url.charAt(this.url.length - 1) == "/") {
+      this.url = this.url.substring(0, this.url.length - 1);
+    }
+    
+    this.socket = new io(this.getURL() + (this.token ? "?token=" + this.token : ""));
+
     var self = this;
 
-    var ioRooms = new io(this.getURL() + "/rooms" + (this.token ? "?token=" + this.token : ""));
-  
-    ioRooms.once("rooms", function(data) {
-      callback(true, data);
-      ioRooms.close();
-      self.loadingRooms = false;
-      self.serverSettings = data.settings;
-    });
-  
-    ioRooms.once("error", function(data) {
-      callback(false, data);
-      ioRooms.close();
-      self.loadingRooms = false;
-    });
+    this.socket.once("connect", function() {
+      self.socket.once("authent", function(data) {
+        if(data == GameConstants.GameState.AUTHENTICATION_SUCCESS) {
+          callback(true);
+        } else {
+          callback(false, data, self.socket.id);
+        }
+      });
     
-    ioRooms.once("authent", function(data) {
-      if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+      self.socket.once("token", function(token) {
+        self.token = token;
+        self.connect(self.url, self.port, callback);
+      });
+    });
+
+    this.socket.on("error", function(data) {
+      callback(false, data);
+      self.disconnect();
+    });
+
+    this.socket.on("connect_error", function(data) {
+      callback(false, data);
+      self.disconnect();
+    });
+
+    this.socket.once("disconnect", function() {
+      if(!self.disconnected) {
+        callback(false, GameConstants.Error.DISCONNECTED);
+        self.disconnect();
+      }
+    });
+
+    this.socket.on("pong", function(ms) {
+      self.pingLatency = ms;
+      if(self.ui) self.ui.pingLatency = ms;
+    });
+  }
+
+  disconnect() {
+    if(this.socket != null) {
+      this.disconnected = true;
+      this.stopGame();
+      this.socket.close();
+      this.creatingRoom = false;
+      this.joiningRoom = false;
+      this.loadingRooms = false;
+      this.pingLatency = -1;
+    }
+  }
+
+  stopGame() {
+    if(this.game != null && this.game.gameUI != null) {
+      this.game.kill();
+      this.game.gameUI.setKill();
+      this.ui = null;
+    }
+  }
+
+  displayRooms(callback) {
+    if(!this.loadingRooms) {
+      this.loadingRooms = true;
+      var self = this;
+
+      var ioRooms = new io(this.getURL() + "/rooms" + (this.token ? "?token=" + this.token : ""));
+    
+      ioRooms.once("rooms", function(data) {
+        callback(true, data);
+        ioRooms.close();
+        self.loadingRooms = false;
+        self.serverSettings = data.settings;
+      });
+    
+      ioRooms.once("error", function(data) {
         callback(false, data);
         ioRooms.close();
         self.loadingRooms = false;
-      }
-    });
-  
-    ioRooms.once("connect_error", function() {
-      callback(false, data);
-      ioRooms.close();
-      self.loadingRooms = false;
-    });
-  } else {
-    callback(false, null);
-  }
-};
-
-OnlineClient.prototype.createRoom = function(data, callback) {
-  if(!this.creatingRoom) {
-    this.creatingRoom = true;
-    var self = this;
-    
-    var ioCreate = new io(this.getURL() + "/createRoom" + (this.token ? "?token=" + this.token : ""));
-
-    ioCreate.once("connect", function() {
-      ioCreate.emit("create", data);
-    });
-
-    ioCreate.once("process", function(data) {
-      if(data.success != null) {
-        callback({
-          success: data.success,
-          connection_error: false,
-          code: data.code,
-          errorCode: data.errorCode
-        });
-      } else {
-        callback({
-          success: false,
-          connection_error: true,
-          code: null,
-          errorCode: (data != null ? data : null)
-        });
-      }
-
-      ioCreate.close();
-      self.creatingRoom = false;
-    });
-
-    ioCreate.once("error", function(data) {
-      callback({
-        success: false,
-        connection_error: true,
-        errorCode: (data != null ? data : null)
       });
-      ioCreate.close();
-      self.creatingRoom = false;
-    });
+      
+      ioRooms.once("authent", function(data) {
+        if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+          callback(false, data);
+          ioRooms.close();
+          self.loadingRooms = false;
+        }
+      });
     
-    ioCreate.once("authent", function(data) {
-      if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+      ioRooms.once("connect_error", function() {
+        callback(false, data);
+        ioRooms.close();
+        self.loadingRooms = false;
+      });
+    } else {
+      callback(false, null);
+    }
+  }
+
+  createRoom(data, callback) {
+    if(!this.creatingRoom) {
+      this.creatingRoom = true;
+      var self = this;
+      
+      var ioCreate = new io(this.getURL() + "/createRoom" + (this.token ? "?token=" + this.token : ""));
+
+      ioCreate.once("connect", function() {
+        ioCreate.emit("create", data);
+      });
+
+      ioCreate.once("process", function(data) {
+        if(data.success != null) {
+          callback({
+            success: data.success,
+            connection_error: false,
+            code: data.code,
+            errorCode: data.errorCode
+          });
+        } else {
+          callback({
+            success: false,
+            connection_error: true,
+            code: null,
+            errorCode: (data != null ? data : null)
+          });
+        }
+
+        ioCreate.close();
+        self.creatingRoom = false;
+      });
+
+      ioCreate.once("error", function(data) {
         callback({
           success: false,
           connection_error: true,
@@ -205,73 +192,79 @@ OnlineClient.prototype.createRoom = function(data, callback) {
         });
         ioCreate.close();
         self.creatingRoom = false;
-      }
-    });
+      });
+      
+      ioCreate.once("authent", function(data) {
+        if(data == GameConstants.Error.AUTHENTICATION_REQUIRED) {
+          callback({
+            success: false,
+            connection_error: true,
+            errorCode: (data != null ? data : null)
+          });
+          ioCreate.close();
+          self.creatingRoom = false;
+        }
+      });
 
-    ioCreate.once("connect_error", function(data) {
+      ioCreate.once("connect_error", function(data) {
+        callback({
+          success: false,
+          connection_error: true,
+          errorCode: (data != null ? data : null)
+        });
+        ioCreate.close();
+        self.creatingRoom = false;
+      });
+    } else {
       callback({
         success: false,
-        connection_error: true,
-        errorCode: (data != null ? data : null)
-      });
-      ioCreate.close();
-      self.creatingRoom = false;
-    });
-  } else {
-    callback({
-      success: false,
-      connection_error: false
-    });
-  }
-};
-
-OnlineClient.prototype.joinRoom = function(code, callback) {
-  if(!this.joiningRoom) {
-    this.joiningRoom = true;
-
-    if(this.socket != null) {
-      this.socket.emit("join-room", {
-        code: code,
-        version: GameConstants.Setting.APP_VERSION
-      });
-
-      var self = this;
-
-      this.socket.once("join-room", function(data) {
-        self.currentRoom = code;
-        successConnect = true;
-        callback(data);
-        self.joiningRoom = false;
+        connection_error: false
       });
     }
-  } else {
-    callback({
-      success: false
-    });
   }
-};
 
-OnlineClient.prototype.getGame = function(ui, settings) {
-  if(this.socket != null && this.currentRoom && ui != null) {
-    this.game = null;
-    this.stopGame();
-    this.game = new GameControllerSocket(this.socket, ui, settings && settings.onlineEnableClientSidePredictions && this.engineServerVersion == GameConstants.Setting.APP_VERSION, settings);
-    ui.controller = this.game;
-    ui.pingLatency = this.pingLatency;
-    this.ui = ui;
-    return this.game;
+  joinRoom(code, callback) {
+    if(!this.joiningRoom) {
+      this.joiningRoom = true;
+
+      if(this.socket != null) {
+        this.socket.emit("join-room", {
+          code: code,
+          version: GameConstants.Setting.APP_VERSION
+        });
+
+        var self = this;
+
+        this.socket.once("join-room", function(data) {
+          self.currentRoom = code;
+          callback(data);
+          self.joiningRoom = false;
+        });
+      }
+    } else {
+      callback({
+        success: false
+      });
+    }
   }
-};
 
-OnlineClient.prototype.getURL = function() {
-  if(this.port != null && this.port.trim() != "") {
-    return this.url + ":" + this.port;
-  } 
-  
-  return this.url;
-};
+  getGame(ui, settings) {
+    if(this.socket != null && this.currentRoom && ui != null) {
+      this.game = null;
+      this.stopGame();
+      this.game = new GameControllerSocket(this.socket, ui, settings && settings.onlineEnableClientSidePredictions && this.engineServerVersion == GameConstants.Setting.APP_VERSION, settings);
+      ui.controller = this.game;
+      ui.pingLatency = this.pingLatency;
+      this.ui = ui;
+      return this.game;
+    }
+  }
 
-// Export module
-if(typeof(module) !== "undefined") {
-  module.exports = OnlineClient;
+  getURL() {
+    if(this.port != null && this.port.trim() != "") {
+      return this.url + ":" + this.port;
+    } 
+    
+    return this.url;
+  }
 }
