@@ -17,11 +17,12 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import GameConstants from "./constants";
-import { Utils } from "jsgametools";
+import { Component, Utils } from "jsgametools";
 import i18next from "i18next";
 
-export default class GameRanking {
+export default class GameRanking extends Component {
   constructor(snakes, fontSize, fontFamily, headerHeight, backgroundColor) {
+    super();
     this.snakes = snakes;
     this.fontSize = fontSize || Math.floor(GameConstants.Setting.FONT_SIZE / 1.25);
     this.fontFamily = fontFamily || GameConstants.Setting.FONT_FAMILY;
@@ -40,11 +41,15 @@ export default class GameRanking {
     this.totalTime = this.totalTime == undefined ? 0 : this.totalTime;
   }
 
-  draw(ctx, ui, currentPlayer) {
+  draw(context, ui, currentPlayer) {
     if(this.snakes != null && !this.closed) {
-      const imageLoader = ui.imageLoader;
-      const canvas = ctx.canvas;
+      super.draw(context);
+  
+      const canvas = context.canvas;
+      const ctx = context;
       ctx.save();
+
+      const imageLoader = ui.imageLoader;
 
       const title = i18next.t("engine.ranking");
       let maxSizeName = ctx.measureText(title).width;
@@ -231,6 +236,8 @@ export default class GameRanking {
   }
 
   set(snakes, fontSize, headerHeight) {
-    GameRanking.apply(this, [snakes, fontSize, null, headerHeight]);
+    this.snakes = snakes;
+    this.fontSize = fontSize;
+    this.headerHeight = headerHeight;
   }
 }

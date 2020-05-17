@@ -19,12 +19,18 @@
   "bugs": {
     "url": "https://github.com/Eliastik/snakeia/issues"
   },
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
+  },
   "homepage": "https://github.com/Eliastik/snakeia#readme",
   "devDependencies": {
     "@babel/core": "^7.9.6",
     "@babel/plugin-transform-runtime": "^7.9.6",
     "@babel/preset-env": "^7.9.6",
     "@babel/runtime": "^7.9.6",
+    "babel-jest": "^26.0.1",
     "babel-loader": "^8.1.0",
     "jest": "^25.5.4",
     "webpack": "^4.43.0",
