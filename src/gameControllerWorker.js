@@ -39,10 +39,10 @@ export default class GameControllerWorker extends GameController {
       }
 
       if(this.worker instanceof Worker) {
-        if(game.grid && game.grid.rngGrid) game.grid.rngGrid = null;
-        if(game.grid && game.grid.rngGame) game.grid.rngGame = null;
+        if(this.gameEngine && this.gameEngine.grid && this.gameEngine.grid.rngGrid) this.gameEngine.grid.rngGrid = null;
+        if(this.gameEngine && this.gameEngine.grid && this.gameEngine.grid.rngGame) this.gameEngine.grid.rngGame = null;
         
-        this.worker.postMessage(["init", game]);
+        this.worker.postMessage(["init", this.gameEngine]);
 
         var self = this;
 

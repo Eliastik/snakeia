@@ -17,11 +17,11 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import i18next from "i18next";
-import "../libs/lowlight.astar.min";
 import GameUtils from "./gameUtils";
 import GameConstants from "./constants";
 import Position from "./position";
 import Grid from "./grid";
+import * as Lowlight from "../libs/lowlight.astar.min";
 
 export default class Snake {
   constructor(direction, length, grid, player, aiLevel, autoRetry, name) {

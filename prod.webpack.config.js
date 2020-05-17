@@ -1,15 +1,13 @@
 const path = require("path");
 
-const config = {
-  entry: {
-    SnakeIA: "./src/index.js",
-    GameEngineWorker: "./src/gameEngineWorker.js"
-  },
+const config = [
+{
+  entry: "./src/index.js",
   mode: "production",
   performance: { hints: false },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].js",
+    filename: "SnakeIA.js",
     library: "SnakeIA",
     libraryTarget: "umd"
   },
@@ -17,7 +15,7 @@ const config = {
     rules: [
       {
         test: /\.m?js$/,
-        exclude: /(node_modules)/,
+        exclude: /(node_modules|libs)/,
         use: {
           loader: "babel-loader",
           options: {
@@ -28,6 +26,30 @@ const config = {
       }
     ]
   }
-};
+},
+{
+  entry: "./src/gameEngineWorker.js",
+  mode: "production",
+  performance: { hints: false },
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "GameEngineWorker.js"
+  },
+  module: {
+    rules: [
+      {
+        test: /\.m?js$/,
+        exclude: /(node_modules|libs)/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env"],
+            plugins: ["@babel/plugin-transform-runtime"]
+          }
+        }
+      }
+    ]
+  }
+}];
 
 module.exports = config;

@@ -51,8 +51,6 @@ export default class GameController {
   }
   
   init() {
-    var self = this;
-    
     this.update("init", {
       "snakes": this.gameEngine.snakes,
       "grid": this.gameEngine.grid,
@@ -63,168 +61,172 @@ export default class GameController {
       "errorOccurred": this.gameEngine.errorOccurred
     });
 
-    this.gameEngine.onReset(function() {
-      self.update("reset", {
-        "paused": self.gameEngine.paused,
-        "isReseted": self.gameEngine.isReseted,
-        "exited": self.gameEngine.exited,
-        "grid": self.gameEngine.grid,
-        "numFruit": self.gameEngine.numFruit,
-        "ticks": self.gameEngine.ticks,
-        "scoreMax": self.gameEngine.scoreMax,
-        "gameOver": self.gameEngine.gameOver,
-        "gameFinished": self.gameEngine.gameFinished,
-        "gameMazeWin": self.gameEngine.gameMazeWin,
-        "starting": self.gameEngine.starting,
-        "initialSpeed": self.gameEngine.initialSpeed,
-        "speed": self.gameEngine.speed,
-        "snakes": self.gameEngine.snakes,
+    this.gameEngine.onReset(() => {
+      this.update("reset", {
+        "paused": this.gameEngine.paused,
+        "isReseted": this.gameEngine.isReseted,
+        "exited": this.gameEngine.exited,
+        "grid": this.gameEngine.grid,
+        "numFruit": this.gameEngine.numFruit,
+        "ticks": this.gameEngine.ticks,
+        "scoreMax": this.gameEngine.scoreMax,
+        "gameOver": this.gameEngine.gameOver,
+        "gameFinished": this.gameEngine.gameFinished,
+        "gameMazeWin": this.gameEngine.gameMazeWin,
+        "starting": this.gameEngine.starting,
+        "initialSpeed": this.gameEngine.initialSpeed,
+        "speed": this.gameEngine.speed,
+        "snakes": this.gameEngine.snakes,
         "confirmReset": false,
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": self.gameEngine.errorOccurred,
-        "offsetFrame": self.gameEngine.speed * GameConstants.Setting.TIME_MULTIPLIER
+        "errorOccurred": this.gameEngine.errorOccurred,
+        "offsetFrame": this.gameEngine.speed * GameConstants.Setting.TIME_MULTIPLIER
       });
-      self.reactor.dispatchEvent("onReset");
+
+      this.reactor.dispatchEvent("onReset");
     });
 
-    this.gameEngine.onStart(function() {
-      self.update("start", {
-        "snakes": self.gameEngine.snakes,
-        "grid": self.gameEngine.grid,
-        "starting": self.gameEngine.starting,
-        "countBeforePlay": self.gameEngine.countBeforePlay,
-        "paused": self.gameEngine.paused,
-        "isReseted": self.gameEngine.isReseted,
+    this.gameEngine.onStart(() => {
+      this.update("start", {
+        "snakes": this.gameEngine.snakes,
+        "grid": this.gameEngine.grid,
+        "starting": this.gameEngine.starting,
+        "countBeforePlay": this.gameEngine.countBeforePlay,
+        "paused": this.gameEngine.paused,
+        "isReseted": this.gameEngine.isReseted,
         "confirmReset": false,
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": self.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred
       });
-      self.reactor.dispatchEvent("onStart");
+      this.reactor.dispatchEvent("onStart");
     });
 
-    this.gameEngine.onPause(function() {
-      self.update("pause", {
-        "paused": self.gameEngine.paused,
+    this.gameEngine.onPause(() => {
+      this.update("pause", {
+        "paused": this.gameEngine.paused,
         "confirmReset": false,
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": self.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred
       });
-      self.reactor.dispatchEvent("onPause");
+      this.reactor.dispatchEvent("onPause");
     });
 
-    this.gameEngine.onContinue(function() {
-      self.update("continue", {
+    this.gameEngine.onContinue(() => {
+      this.update("continue", {
         "confirmReset": false,
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": self.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred
       });
-      self.reactor.dispatchEvent("onContinue");
+      this.reactor.dispatchEvent("onContinue");
     });
 
-    this.gameEngine.onStop(function() {
-      self.update("stop", {
-        "paused": self.gameEngine.paused,
-        "scoreMax": self.gameEngine.scoreMax,
-        "gameOver": self.gameEngine.gameOver,
-        "gameFinished": self.gameEngine.gameFinished,
+    this.gameEngine.onStop(() => {
+      this.update("stop", {
+        "paused": this.gameEngine.paused,
+        "scoreMax": this.gameEngine.scoreMax,
+        "gameOver": this.gameEngine.gameOver,
+        "gameFinished": this.gameEngine.gameFinished,
         "confirmReset": false,
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": self.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred
       });
-      self.reactor.dispatchEvent("onStop");
+      this.reactor.dispatchEvent("onStop");
     });
 
-    this.gameEngine.onExit(function() {
-      self.update("exit", {
-        "paused": self.gameEngine.paused,
-        "gameOver": self.gameEngine.gameOver,
-        "gameFinished": self.gameEngine.gameFinished,
-        "exited": self.gameEngine.exited,
+    this.gameEngine.onExit(() => {
+      this.update("exit", {
+        "paused": this.gameEngine.paused,
+        "gameOver": this.gameEngine.gameOver,
+        "gameFinished": this.gameEngine.gameFinished,
+        "exited": this.gameEngine.exited,
         "confirmReset": false,
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": self.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred
       });
-      self.reactor.dispatchEvent("onExit");
+      this.reactor.dispatchEvent("onExit");
     });
 
-    this.gameEngine.onKill(function() {
-      self.update("kill", {
-        "paused": self.gameEngine.paused,
-        "gameOver": self.gameEngine.gameOver,
-        "killed": self.gameEngine.killed,
-        "snakes": self.gameEngine.snakes,
-        "gameFinished": self.gameEngine.gameFinished,
-        "grid": self.gameEngine.grid,
+    this.gameEngine.onKill(() => {
+      this.update("kill", {
+        "paused": this.gameEngine.paused,
+        "gameOver": this.gameEngine.gameOver,
+        "killed": this.gameEngine.killed,
+        "snakes": this.gameEngine.snakes,
+        "gameFinished": this.gameEngine.gameFinished,
+        "grid": this.gameEngine.grid,
         "confirmReset": false,
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": self.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred
       });
-      self.reactor.dispatchEvent("onKill");
+
+      this.reactor.dispatchEvent("onKill");
     });
 
-    this.gameEngine.onScoreIncreased(function() {
-      self.reactor.dispatchEvent("onScoreIncreased");
+    this.gameEngine.onScoreIncreased(() => {
+      this.reactor.dispatchEvent("onScoreIncreased");
     });
 
-    this.gameEngine.onUpdate(function() {
-      self.update("update", {
-        "paused": self.gameEngine.paused,
-        "isReseted": self.gameEngine.isReseted,
-        "exited": self.gameEngine.exited,
-        "grid": self.gameEngine.grid,
-        "numFruit": self.gameEngine.numFruit,
-        "ticks": self.gameEngine.ticks,
-        "scoreMax": self.gameEngine.scoreMax,
-        "gameOver": self.gameEngine.gameOver,
-        "gameFinished": self.gameEngine.gameFinished,
-        "gameMazeWin": self.gameEngine.gameMazeWin,
-        "starting": self.gameEngine.starting,
-        "initialSpeed": self.gameEngine.initialSpeed,
-        "speed": self.gameEngine.speed,
-        "snakes": self.gameEngine.snakes,
-        "countBeforePlay": self.gameEngine.countBeforePlay,
-        "numFruit": self.gameEngine.numFruit,
+    this.gameEngine.onUpdate(() => {
+      this.update("update", {
+        "paused": this.gameEngine.paused,
+        "isReseted": this.gameEngine.isReseted,
+        "exited": this.gameEngine.exited,
+        "grid": this.gameEngine.grid,
+        "numFruit": this.gameEngine.numFruit,
+        "ticks": this.gameEngine.ticks,
+        "scoreMax": this.gameEngine.scoreMax,
+        "gameOver": this.gameEngine.gameOver,
+        "gameFinished": this.gameEngine.gameFinished,
+        "gameMazeWin": this.gameEngine.gameMazeWin,
+        "starting": this.gameEngine.starting,
+        "initialSpeed": this.gameEngine.initialSpeed,
+        "speed": this.gameEngine.speed,
+        "snakes": this.gameEngine.snakes,
+        "countBeforePlay": this.gameEngine.countBeforePlay,
+        "numFruit": this.gameEngine.numFruit,
         "offsetFrame": 0,
-        "errorOccurred": self.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred
       });
-      self.reactor.dispatchEvent("onUpdate");
+
+      this.reactor.dispatchEvent("onUpdate");
     });
 
-    this.gameEngine.onUpdateCounter(function() {
-      self.update("updateCounter", {
-        "paused": self.gameEngine.paused,
-        "isReseted": self.gameEngine.isReseted,
-        "exited": self.gameEngine.exited,
-        "grid": self.gameEngine.grid,
-        "numFruit": self.gameEngine.numFruit,
-        "ticks": self.gameEngine.ticks,
-        "scoreMax": self.gameEngine.scoreMax,
-        "gameOver": self.gameEngine.gameOver,
-        "gameFinished": self.gameEngine.gameFinished,
-        "gameMazeWin": self.gameEngine.gameMazeWin,
-        "starting": self.gameEngine.starting,
-        "initialSpeed": self.gameEngine.initialSpeed,
-        "speed": self.gameEngine.speed,
-        "snakes": self.gameEngine.snakes,
-        "countBeforePlay": self.gameEngine.countBeforePlay,
-        "numFruit": self.gameEngine.numFruit,
-        "errorOccurred": self.gameEngine.errorOccurred
+    this.gameEngine.onUpdateCounter(() => {
+      this.update("updateCounter", {
+        "paused": this.gameEngine.paused,
+        "isReseted": this.gameEngine.isReseted,
+        "exited": this.gameEngine.exited,
+        "grid": this.gameEngine.grid,
+        "numFruit": this.gameEngine.numFruit,
+        "ticks": this.gameEngine.ticks,
+        "scoreMax": this.gameEngine.scoreMax,
+        "gameOver": this.gameEngine.gameOver,
+        "gameFinished": this.gameEngine.gameFinished,
+        "gameMazeWin": this.gameEngine.gameMazeWin,
+        "starting": this.gameEngine.starting,
+        "initialSpeed": this.gameEngine.initialSpeed,
+        "speed": this.gameEngine.speed,
+        "snakes": this.gameEngine.snakes,
+        "countBeforePlay": this.gameEngine.countBeforePlay,
+        "numFruit": this.gameEngine.numFruit,
+        "errorOccurred": this.gameEngine.errorOccurred
       });
-      self.reactor.dispatchEvent("onUpdateCounter");
+      
+      this.reactor.dispatchEvent("onUpdateCounter");
     });
   }
 

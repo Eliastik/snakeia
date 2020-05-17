@@ -1,8 +1,8 @@
 // SnakeIA grid test
-const Grid = require("../src/grid");
-const Position = require("../src/position");
-const Constants = require("../src/constants");
-const GameUtils = require("../src/gameUtils");
+import Grid from "../src/grid";
+import Position from "../src/position";
+import Constants from "../src/constants";
+import GameUtils from "../src/gameUtils";
 
 const theGrid = new Grid(10, 5, false, false, false,
   [
