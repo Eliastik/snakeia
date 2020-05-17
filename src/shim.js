@@ -50,7 +50,7 @@ if(!String.prototype.trim) {
 function WorkersAvailable(callback) {
   try {
     if(!window.Worker) throw "Workers not supported";
-    var testWorker = new Worker("dist/GameEngineWorker.js");
+    const testWorker = new Worker("dist/GameEngineWorker.js");
 
     if(testWorker) {
       testWorker.postMessage("ping");
@@ -67,7 +67,7 @@ function WorkersAvailable(callback) {
   }
 }
 
-var workersAvailable = false;
+let workersAvailable = false;
 
 WorkersAvailable(result => {
   workersAvailable = result; 
@@ -75,9 +75,9 @@ WorkersAvailable(result => {
 
 // Old game API
 function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, settings, ui) {
-  var controller;
+  let controller;
 
-  var engine = new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed);
+  const engine = new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed);
   engine.init();
   
   if(workersAvailable && settings.enableMultithreading) {

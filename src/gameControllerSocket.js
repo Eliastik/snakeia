@@ -33,10 +33,10 @@ export default class GameControllerSocket extends GameController {
   }
 
   parseData(m, d, updateEngine) {
-    var data = [m, d];
+    const data = [m, d];
 
     if(data.length > 1) {
-      var grid = this.gameUI.grid;
+      let grid = this.gameUI.grid;
 
       if(data[1].hasOwnProperty("grid") && data[1]["grid"] != null) {
         grid = Object.assign(new Grid(), data[1]["grid"]);
@@ -44,14 +44,16 @@ export default class GameControllerSocket extends GameController {
       }
 
       if(data[1].hasOwnProperty("snakes") && data[1]["snakes"] != null) {
-        for(var i = 0; i < data[1]["snakes"].length; i++) {
+        for(let i = 0; i < data[1]["snakes"].length; i++) {
           data[1]["snakes"][i].grid = grid;
           data[1]["snakes"][i] = Object.assign(new Snake(), data[1]["snakes"][i]);
-          for(var j = 0; j < data[1]["snakes"][i].queue.length; j++) {
+
+          for(let j = 0; j < data[1]["snakes"][i].queue.length; j++) {
             data[1]["snakes"][i].queue[j] = Object.assign(new Position(), data[1]["snakes"][i].queue[j]);
           }
         }
       }
+      
       this.update(data[0], data[1], updateEngine);
     }
   };

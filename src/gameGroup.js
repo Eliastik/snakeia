@@ -70,7 +70,7 @@ export default class GameGroup {
   }
 
   startAll(game) {
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       if(this.games[i].paused && !this.games[i].starting && (game == null || i != game)) {
         this.games[i].start();
       }
@@ -84,7 +84,7 @@ export default class GameGroup {
   }
 
   pauseAll(game) {
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       if(!this.games[i].paused && (game == null || i != game)) {
         this.games[i].pause();
       }
@@ -98,7 +98,7 @@ export default class GameGroup {
   }
 
   resetAll(game) {
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       if(!this.games[i].isReseted && (game == null || i != game)) {
         this.games[i].reset();
       }
@@ -114,7 +114,7 @@ export default class GameGroup {
   checkExit(game) {
     let allExited = true;
 
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       if(!this.games[i].exited) {
         allExited = false;
       }
@@ -134,7 +134,7 @@ export default class GameGroup {
   checkStop() {
     let allStopped = true;
 
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       if(!this.games[i].gameOver) {
         allStopped = false;
       }
@@ -150,7 +150,7 @@ export default class GameGroup {
   }
 
   stopAll(finished) {
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       if(finished) {
         this.games[i].finish(true);
       } else {
@@ -160,7 +160,7 @@ export default class GameGroup {
   }
 
   killAll() {
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       this.games[i].kill();
     }
   }
@@ -174,25 +174,25 @@ export default class GameGroup {
   }
 
   setDisplayFPS(value) {
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       this.games[i].setDisplayFPS(value);
     }
   }
 
   setNotification(notification) {
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       this.games[i].setNotification(notification.copy());
     }
   }
 
   closeNotification() {
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       this.games[i].setNotification(null);
     }
   }
 
   errorOccurred() {
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       if(this.games[i].errorOccurred) return true;
     }
 
@@ -200,7 +200,7 @@ export default class GameGroup {
   }
 
   closeRanking() {
-    for(var i = 0; i < this.games.length; i++) {
+    for(let i = 0; i < this.games.length; i++) {
       this.games[i].closeRanking();
     }
 
@@ -212,8 +212,8 @@ export default class GameGroup {
     const index = [];
     let maxScore = -1;
 
-    for(var i = 0; i < this.games.length; i++) {
-      for(var j = 0; j < this.games[i].snakes.length; j++) {
+    for(let i = 0; i < this.games.length; i++) {
+      for(let j = 0; j < this.games[i].snakes.length; j++) {
         if(this.games[i].snakes[j].score > maxScore) {
           maxScore = this.games[i].snakes[j].score;
         }
@@ -221,10 +221,10 @@ export default class GameGroup {
     }
 
     if(maxScore >= 0) {
-      var idx = 0;
+      let idx = 0;
 
-      for(var i = 0; i < this.games.length; i++) {
-        for(var j = 0; j < this.games[i].snakes.length; j++) {
+      for(let i = 0; i < this.games.length; i++) {
+        for(let j = 0; j < this.games[i].snakes.length; j++) {
           if(this.games[i].snakes[j].score >= maxScore) {
             winners.push(this.games[i].snakes[j]);
             index.push(idx);

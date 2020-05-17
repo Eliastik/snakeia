@@ -23,18 +23,18 @@ export default {
     return Math.floor((rng ? rng() : Math.random()) * (max - min + 1)) + min;
   },
   addHue: function(hue, add) {
-    var res = hue + add;
+    const res = hue + add;
   
     if(res > 360) {
-      res = (res - 360);
+      return (res - 360);
     } else if(res < 0) {
-      res = (360 + res);
+      return (360 + res);
     }
   
     return res;
   },
   hsvToRgb: function(h, s, v) {
-    var r, g, b, i, f, p, q, t;
+    let r, g, b, i, f, p, q, t;
   
     i = Math.floor(h * 6);
     f = h * 6 - i;
@@ -79,9 +79,9 @@ export default {
     }
   },
   shuffle: function(a, rng) {
-    var j, x;
+    let j, x;
     
-    for(var i = a.length - 1; i > 0; i--) {
+    for(let i = a.length - 1; i > 0; i--) {
       j = Math.floor((rng ? rng() : Math.random()) * (i + 1));
       x = a[i];
       a[i] = a[j];

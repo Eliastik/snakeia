@@ -296,7 +296,7 @@ export default class GameController {
     this.gameEngine.lastKey = key;
     this.lastKey = key;
 
-    var playerSnake = this.snakes[this.getCurrentPlayer()];
+    const playerSnake = this.snakes[this.getCurrentPlayer()];
 
     if(playerSnake != null && playerSnake.lastKey != null) {
       playerSnake.lastKey = key;
@@ -305,10 +305,10 @@ export default class GameController {
 
   getCurrentPlayer() {
     if(this.snakes != null) {
-      var nbPlayers = this.getNBPlayer(GameConstants.PlayerType.HUMAN);
-      var nbPlayersHybrid = this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI);
+      const nbPlayers = this.getNBPlayer(GameConstants.PlayerType.HUMAN);
+      const nbPlayersHybrid = this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI);
     
-      for(var i = 0; i < this.snakes.length; i++) {
+      for(let i = 0; i < this.snakes.length; i++) {
         if((this.currentPlayer == null && nbPlayers <= 1 && nbPlayersHybrid <= 1 && (this.snakes[i] && (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) || this.currentPlayer == (i + 1))) {
           return i;
         }
@@ -319,10 +319,10 @@ export default class GameController {
   }
 
   getNBPlayer(type) {
-    var numPlayer = 0;
+    let numPlayer = 0;
 
     if(this.snakes != null) {
-      for(var i = 0; i < this.snakes.length; i++) {
+      for(let i = 0; i < this.snakes.length; i++) {
         if(this.snakes[i] && this.snakes[i].player == type) {
           numPlayer++;
         }
@@ -333,10 +333,10 @@ export default class GameController {
   }
 
   getPlayer(num, type) {
-    var numPlayer = 0;
+    let numPlayer = 0;
 
     if(this.snakes != null) {
-      for(var i = 0; i < this.snakes.length; i++) {
+      for(let i = 0; i < this.snakes.length; i++) {
         if(this.snakes[i] && this.snakes[i].player == type) {
           numPlayer++;
         }
@@ -352,9 +352,9 @@ export default class GameController {
 
   update(message, data, updateEngine) {
     if(this.gameUI != null && data != null) {
-      var dataKeys = Object.keys(data);
+      const dataKeys = Object.keys(data);
 
-      for(var i = 0; i < dataKeys.length; i++) {
+      for(let i = 0; i < dataKeys.length; i++) {
         if(!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && (dataKeys[i] == "snakes" || dataKeys[i] == "grid" || dataKeys[i] == "offsetFrame" || dataKeys[i] == "gameOver"))) {
           if(Object.prototype.hasOwnProperty.call(this.gameUI, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this.gameUI[dataKeys[i]]) !== "function") {
             this.gameUI[dataKeys[i]] = data[dataKeys[i]];

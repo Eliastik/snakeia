@@ -45,7 +45,7 @@ export default class Grid {
 
   init(customGrid) {
     if(customGrid != undefined || this.initialGrid != undefined) {
-      var gridToCopy;
+      let gridToCopy;
 
       if(this.initialGrid != undefined) {
         gridToCopy = this.initialGrid;
@@ -59,17 +59,17 @@ export default class Grid {
       this.initialGrid = new Array(this.height);
       this.grid = new Array(this.height);
 
-      for(var i = 0; i < this.height; i++) {
+      for(let i = 0; i < this.height; i++) {
         this.initialGrid[i] = gridToCopy[i].slice();
         this.grid[i] = gridToCopy[i].slice();
       }
     } else {
       this.grid = new Array(this.height);
 
-      for(var i = 0; i < this.height; i++) {
+      for(let i = 0; i < this.height; i++) {
         this.grid[i] = new Array(this.width);
 
-        for(var j = 0; j < this.width; j++) {
+        for(let j = 0; j < this.width; j++) {
           if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && this.rngGrid() > 0.65) || this.maze) {
             this.grid[i][j] = GameConstants.CaseType.WALL;
           } else {
@@ -89,23 +89,25 @@ export default class Grid {
   }
 
   fixWalls(borderWalls) {
+    let startY, startX, endY, endX;
+
     if(borderWalls) {
-      var startY = 1; var endY = this.height - 1;
-      var startX = 1; var endX = this.width - 1;
+      startY = 1; endY = this.height - 1;
+      startX = 1; endX = this.width - 1;
     } else {
-      var startY = 0; var endY = this.height;
-      var startX = 0; var endX = this.width;
+      startY = 0; endY = this.height;
+      startX = 0; endX = this.width;
     }
 
-    for(var i = startY; i < endY; i++) {
-      for(var j = startX; j < endX; j++) {
-        var currentPos = new Position(j, i);
-        var upperCase = this.getNextPosition(currentPos, GameConstants.Direction.UP);
-        var upperLeftCase = this.getNextPosition(upperCase, GameConstants.Direction.LEFT);
-        var upperRightCase = this.getNextPosition(upperCase, GameConstants.Direction.RIGHT);
-        var downCase = this.getNextPosition(currentPos, GameConstants.Direction.BOTTOM);
-        var downLeftCase = this.getNextPosition(downCase, GameConstants.Direction.LEFT);
-        var downRightCase = this.getNextPosition(downCase, GameConstants.Direction.RIGHT);
+    for(let i = startY; i < endY; i++) {
+      for(let j = startX; j < endX; j++) {
+        const currentPos = new Position(j, i);
+        const upperCase = this.getNextPosition(currentPos, GameConstants.Direction.UP);
+        const upperLeftCase = this.getNextPosition(upperCase, GameConstants.Direction.LEFT);
+        const upperRightCase = this.getNextPosition(upperCase, GameConstants.Direction.RIGHT);
+        const downCase = this.getNextPosition(currentPos, GameConstants.Direction.BOTTOM);
+        const downLeftCase = this.getNextPosition(downCase, GameConstants.Direction.LEFT);
+        const downRightCase = this.getNextPosition(downCase, GameConstants.Direction.RIGHT);
 
         if(this.get(upperLeftCase) == GameConstants.CaseType.WALL || this.get(upperRightCase) == GameConstants.CaseType.WALL || this.get(downLeftCase) == GameConstants.CaseType.WALL || this.get(downRightCase) == GameConstants.CaseType.WALL) {
           this.set(GameConstants.CaseType.EMPTY, currentPos);
@@ -115,9 +117,9 @@ export default class Grid {
   }
 
   maze_recursion(r, c) {
-    var directions = GameUtils.shuffle([GameConstants.Direction.UP, GameConstants.Direction.RIGHT, GameConstants.Direction.BOTTOM, GameConstants.Direction.LEFT], this.rngGrid);
+    const directions = GameUtils.shuffle([GameConstants.Direction.UP, GameConstants.Direction.RIGHT, GameConstants.Direction.BOTTOM, GameConstants.Direction.LEFT], this.rngGrid);
 
-    for(var i = 0; i < directions.length; i++) {
+    for(let i = 0; i < directions.length; i++) {
       switch(directions[i]) {
         case GameConstants.Direction.UP:
           if(r - 2 <= 0) continue;
@@ -210,13 +212,13 @@ export default class Grid {
   }
 
   getGraph(ignoreSnakePos) {
-    var res = new Array(this.height);
+    const res = new Array(this.height);
 
-    for(var i = 0; i < this.height; i++) {
+    for(let i = 0; i < this.height; i++) {
       res[i] = new Array(this.width);
 
-      for(var j = 0; j < this.width; j++) {
-        var currentPos = new Position(j, i);
+      for(let j = 0; j < this.width; j++) {
+        const currentPos = new Position(j, i);
 
         if(ignoreSnakePos && this.get(currentPos) == GameConstants.CaseType.SNAKE) {
           res[i][j] = 0;
@@ -236,23 +238,23 @@ export default class Grid {
   }
 
   setFruit(numberPlayers, gold) {
-    var tried = [1];
+    const tried = [1];
 
     if(!gold && this.fruitPos != null && this.get(this.fruitPos) == GameConstants.CaseType.FRUIT) {
       this.set(GameConstants.CaseType.EMPTY, this.fruitPos);
     }
 
     if(this.getTotal(GameConstants.CaseType.EMPTY) > 0) {
-      var randomPos;
+      let randomPos, numDeadPositionArround;
 
       do {
         randomPos = this.getRandomPosition();
 
-        var posTop = this.getNextPosition(randomPos, GameConstants.Direction.TOP);
-        var posBottom = this.getNextPosition(randomPos, GameConstants.Direction.BOTTOM);
-        var posRight = this.getNextPosition(randomPos, GameConstants.Direction.RIGHT);
-        var posLeft = this.getNextPosition(randomPos, GameConstants.Direction.LEFT);
-        var numDeadPositionArround = this.isDeadPosition(posTop, true) + this.isDeadPosition(posBottom, true) + this.isDeadPosition(posRight, true) + this.isDeadPosition(posLeft, true);
+        const posTop = this.getNextPosition(randomPos, GameConstants.Direction.TOP);
+        const posBottom = this.getNextPosition(randomPos, GameConstants.Direction.BOTTOM);
+        const posRight = this.getNextPosition(randomPos, GameConstants.Direction.RIGHT);
+        const posLeft = this.getNextPosition(randomPos, GameConstants.Direction.LEFT);
+        numDeadPositionArround = this.isDeadPosition(posTop, true) + this.isDeadPosition(posBottom, true) + this.isDeadPosition(posRight, true) + this.isDeadPosition(posLeft, true);
 
         if(numDeadPositionArround >= 3 && this.get(randomPos) == GameConstants.CaseType.EMPTY) {
           this.set(GameConstants.CaseType.SURROUNDED, randomPos);
@@ -288,15 +290,15 @@ export default class Grid {
   }
 
   testFruitMaze(position, tried) { // Maze mode: avoid putting the fruit too close to the Snake
-    var grid = this.getGraph(true);
-    var graph = new Lowlight.Astar.Configuration(grid, {
+    const grid = this.getGraph(true);
+    const graph = new Lowlight.Astar.Configuration(grid, {
       order: "yx",
       torus: false,
       diagonals: false,
       cutting: false,
       cost(a, b) { return b == 1 ? null : 1 }
     });
-    var path = graph.path({x: this.mazeFirstPosition.x, y: this.mazeFirstPosition.y}, {x: position.x, y: position.y});
+    const path = graph.path({x: this.mazeFirstPosition.x, y: this.mazeFirstPosition.y}, {x: position.x, y: position.y});
 
     if(path.length < Math.ceil(this.getTotal(GameConstants.CaseType.EMPTY) / (1 * Math.ceil(tried[0] / 4)))) {
       tried[0]++;
@@ -312,18 +314,16 @@ export default class Grid {
       return false;
     }
 
-    var fill = fill == undefined ? false : fill;
-
-    var gridCopy = JSON.parse(JSON.stringify(this.grid));
-    var checkList = [position];
+    const gridCopy = JSON.parse(JSON.stringify(this.grid));
+    const checkList = [position];
 
     while(checkList.length > 0) {
-      var currentPosition = checkList[0];
+      const currentPosition = checkList[0];
       checkList.shift();
 
-      var directions = [this.getNextPosition(currentPosition, GameConstants.Direction.UP), this.getNextPosition(currentPosition, GameConstants.Direction.BOTTOM), this.getNextPosition(currentPosition, GameConstants.Direction.LEFT), this.getNextPosition(currentPosition, GameConstants.Direction.RIGHT)]; // UP, DOWN, LEFT, RIGHT
+      const directions = [this.getNextPosition(currentPosition, GameConstants.Direction.UP), this.getNextPosition(currentPosition, GameConstants.Direction.BOTTOM), this.getNextPosition(currentPosition, GameConstants.Direction.LEFT), this.getNextPosition(currentPosition, GameConstants.Direction.RIGHT)]; // UP, DOWN, LEFT, RIGHT
 
-      for(var i = 0; i < directions.length; i++) {
+      for(let i = 0; i < directions.length; i++) {
         if(gridCopy[directions[i].y][directions[i].x] != GameConstants.CaseType.CROSSED && forbiddenVals.indexOf(this.get(directions[i])) > -1) {
           checkList.push(directions[i]);
 
@@ -349,7 +349,7 @@ export default class Grid {
   }
 
   isFruitSurrounded(position, fill) {
-    var surrounded = this.isCaseSurrounded(position, false, [GameConstants.CaseType.SNAKE], [GameConstants.CaseType.EMPTY, GameConstants.CaseType.SNAKE]);
+    const surrounded = this.isCaseSurrounded(position, false, [GameConstants.CaseType.SNAKE], [GameConstants.CaseType.EMPTY, GameConstants.CaseType.SNAKE]);
 
     if(surrounded && fill) {
       this.isCaseSurrounded(position, true, [GameConstants.CaseType.SNAKE], [GameConstants.CaseType.EMPTY, GameConstants.CaseType.SNAKE]);
@@ -359,9 +359,9 @@ export default class Grid {
   }
 
   getOnLine(type, line) {
-    var tot = 0;
+    let tot = 0;
 
-    for(var j = 0; j < this.width; j++) {
+    for(let j = 0; j < this.width; j++) {
       if(this.get(new Position(j, line)) == type) {
         tot++;
       }
@@ -371,9 +371,9 @@ export default class Grid {
   }
 
   getTotal(type) {
-    var tot = 0;
+    let tot = 0;
 
-    for(var i = 0; i < this.height; i++) {
+    for(let i = 0; i < this.height; i++) {
       tot += this.getOnLine(type, i);
     }
 
@@ -381,7 +381,7 @@ export default class Grid {
   }
 
   getNextPosition(oldPos, newDirection) {
-    var position = new Position(oldPos.x, oldPos.y, newDirection);
+    const position = new Position(oldPos.x, oldPos.y, newDirection);
 
     switch(newDirection) {
       case GameConstants.Direction.LEFT:
@@ -454,8 +454,8 @@ export default class Grid {
   toString() {
     let res = "";
 
-    for(var i = 0; i < this.height; i++) {
-      for(var j = 0; j < this.width; j++) {
+    for(let i = 0; i < this.height; i++) {
+      for(let j = 0; j < this.width; j++) {
         res += this.valToChar(this.get(new Position(j, i))) + " ";
       }
 

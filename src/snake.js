@@ -59,14 +59,14 @@ export default class Snake {
       this.direction = this.initialDirection;
     }
 
-    var spaceLineAvailable = 0;
-    var spaceColAvailable = 0;
+    let spaceLineAvailable = 0;
+    let spaceColAvailable = 0;
 
     if((this.initialDirection == GameConstants.Direction.RIGHT && this.initTriedDirections.indexOf(GameConstants.Direction.RIGHT) == -1) || (this.initialDirection == GameConstants.Direction.LEFT && this.initTriedDirections.indexOf(GameConstants.Direction.LEFT) == -1)) {
-      for(var i = 0; i < this.grid.height; i++) {
-        var emptyOnLine = 0;
+      for(let i = 0; i < this.grid.height; i++) {
+        let emptyOnLine = 0;
 
-        for(var j = 0; j < this.grid.width; j++) {
+        for(let j = 0; j < this.grid.width; j++) {
           if(this.grid.get(new Position(j, i)) == GameConstants.CaseType.EMPTY) {
             emptyOnLine++;
           } else {
@@ -80,10 +80,10 @@ export default class Snake {
         }
       }
     } else if((this.initialDirection == GameConstants.Direction.UP && this.initTriedDirections.indexOf(GameConstants.Direction.UP) == -1) || (this.initialDirection == GameConstants.Direction.BOTTOM && this.initTriedDirections.indexOf(GameConstants.Direction.BOTTOM) == -1)) {
-      for(var i = 0; i < this.grid.width; i++) {
-        var emptyOnCol = 0;
+      for(let i = 0; i < this.grid.width; i++) {
+        let emptyOnCol = 0;
 
-        for(var j = 0; j < this.grid.height; j++) {
+        for(let j = 0; j < this.grid.height; j++) {
           if(this.grid.get(new Position(i, j)) == GameConstants.CaseType.EMPTY) {
             emptyOnCol++;
           } else {
@@ -123,9 +123,9 @@ export default class Snake {
       return false;
     }
 
-    var posNotValidated = true;
-    var positionsToAdd = [];
-    var startPos, currentPos;
+    let posNotValidated = true;
+    let positionsToAdd = [];
+    let startPos, currentPos;
 
     while(posNotValidated) {
       posNotValidated = false;
@@ -139,7 +139,7 @@ export default class Snake {
       currentPos = new Position(startPos.x, startPos.y, this.initialDirection);
       positionsToAdd = [];
 
-      for(var i = this.initialLength - 1; i >= 0; i--) {
+      for(let i = this.initialLength - 1; i >= 0; i--) {
         if(i < this.initialLength - 1) {
           if(this.initialDirection == GameConstants.Direction.RIGHT) {
             currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), GameConstants.Direction.RIGHT);
@@ -164,7 +164,7 @@ export default class Snake {
       }
     }
 
-    for(var i = 0; i < positionsToAdd.length; i++) {
+    for(let i = 0; i < positionsToAdd.length; i++) {
       this.insert(positionsToAdd[i]);
     }
 
@@ -199,7 +199,7 @@ export default class Snake {
   }
 
   remove() {
-    var last = this.queue.pop();
+    const last = this.queue.pop();
     this.grid.set(GameConstants.CaseType.EMPTY, last);
     this.lastTail = last;
   }
@@ -237,7 +237,7 @@ export default class Snake {
   setGameOver() {
     this.gameOver = true;
 
-    for(var i = 0; i < this.length(); i++) {
+    for(let i = 0; i < this.length(); i++) {
       this.grid.set(GameConstants.CaseType.SNAKE_DEAD, this.get(i));
     }
   }
@@ -277,24 +277,20 @@ export default class Snake {
   getGraphicDirectionFor(current, next, prec) {
     if(next == undefined || prec == undefined) return current.direction;
 
-    var directionToPrec = this.getDirectionTo(current, prec);
-    var directionToNext = this.getDirectionTo(current, next);
-
-    var direction = GameConstants.Direction.UP;
+    const directionToPrec = this.getDirectionTo(current, prec);
+    const directionToNext = this.getDirectionTo(current, next);
 
     if(directionToPrec == GameConstants.Direction.LEFT && directionToNext == GameConstants.Direction.BOTTOM || directionToPrec == GameConstants.Direction.BOTTOM && directionToNext == GameConstants.Direction.LEFT) {
-      direction = GameConstants.Direction.ANGLE_1;
+      return GameConstants.Direction.ANGLE_1;
     } else if(directionToPrec == GameConstants.Direction.RIGHT && directionToNext == GameConstants.Direction.BOTTOM || directionToPrec == GameConstants.Direction.BOTTOM && directionToNext == GameConstants.Direction.RIGHT) {
-      direction = GameConstants.Direction.ANGLE_2;
+      return GameConstants.Direction.ANGLE_2;
     } else if(directionToPrec == GameConstants.Direction.UP && directionToNext == GameConstants.Direction.RIGHT || directionToPrec == GameConstants.Direction.RIGHT && directionToNext == GameConstants.Direction.UP) {
-      direction = GameConstants.Direction.ANGLE_3;
+      return GameConstants.Direction.ANGLE_3;
     } else if(directionToPrec == GameConstants.Direction.UP && directionToNext == GameConstants.Direction.LEFT || directionToPrec == GameConstants.Direction.LEFT && directionToNext == GameConstants.Direction.UP) {
-      direction = GameConstants.Direction.ANGLE_4;
+      return GameConstants.Direction.ANGLE_4;
     } else {
-      direction = current.direction;
+      return current.direction;
     }
-
-    return direction;
   }
 
   getGraphicDirection(index) {
@@ -302,17 +298,17 @@ export default class Snake {
   }
 
   copy() {
-    var snake = new Snake(direction, 3, new Grid(this.grid.width, this.grid.height, false, false), this.player, this.aiLevel, false);
+    const snake = new Snake(direction, 3, new Grid(this.grid.width, this.grid.height, false, false), this.player, this.aiLevel, false);
 
-    for(var i = 0; i < snake.grid.height; i++) {
-      for(var j = 0; j < snake.grid.width; j++) {
+    for(let i = 0; i < snake.grid.height; i++) {
+      for(let j = 0; j < snake.grid.width; j++) {
         snake.grid.set(this.grid.get(new Position(j, i)), new Position(j, i));
       }
     }
 
     snake.queue = [];
 
-    for(var i = 0; i < this.queue.length; i++) {
+    for(let i = 0; i < this.queue.length; i++) {
       snake.queue.push(elem.copy());
     }
 
@@ -320,19 +316,19 @@ export default class Snake {
   }
 
   randomAI() {
-    var currentPosition = this.getHeadPosition();
-    var top = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.UP));
-    var left = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.LEFT));
-    var bottom = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.BOTTOM));
-    var right = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.RIGHT));
+    const currentPosition = this.getHeadPosition();
+    const top = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.UP));
+    const left = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.LEFT));
+    const bottom = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.BOTTOM));
+    const right = this.grid.isDeadPosition(this.getNextPosition(currentPosition, GameConstants.Key.RIGHT));
 
     if(top && left && bottom && right) {
       return GameConstants.Key.UP;
     } else {
-      var direction = null;
+      let direction = null;
 
       while(direction == null || this.grid.isDeadPosition(this.getNextPosition(currentPosition, direction))) {
-        var r = GameUtils.randRange(1, 4, this.grid ? this.grid.rngGame : null);
+        const r = GameUtils.randRange(1, 4, this.grid ? this.grid.rngGame : null);
 
         switch(r) {
           case 1:
@@ -356,9 +352,9 @@ export default class Snake {
 
   simpleAI() {
     if(this.grid.fruitPos != null) {
-      var currentPosition = this.getHeadPosition();
-      var fruitPos = this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? this.grid.fruitPosGold : this.grid.fruitPos;
-      var directionNext = GameConstants.Key.RIGHT;
+      const currentPosition = this.getHeadPosition();
+      const fruitPos = this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? this.grid.fruitPosGold : this.grid.fruitPos;
+      let directionNext = GameConstants.Key.RIGHT;
 
       if(fruitPos.x > currentPosition.x) {
         if(fruitPos.x - currentPosition.x > this.grid.width / 2) {
@@ -386,13 +382,13 @@ export default class Snake {
         }
       }
 
-      var nextPosition = this.getNextPosition(currentPosition, directionNext);
+      let nextPosition = this.getNextPosition(currentPosition, directionNext);
 
       if(this.grid.isDeadPosition(nextPosition)) {
-        var currentDirection = this.direction;
-        var firstDifferentDirection = null;
+        const currentDirection = this.direction;
+        let firstDifferentDirection = null;
 
-        for(var i = 1; i < this.queue.length; i++) {
+        for(let i = 1; i < this.queue.length; i++) {
           if(this.get(i).direction != currentDirection) {
             firstDifferentDirection = this.get(i).direction;
             break;
@@ -421,15 +417,15 @@ export default class Snake {
   }
 
   ai() {
-    var res = null;
+    let res = null;
     
-    var currentPosition = this.getHeadPosition();
-    var fruitPos = this.grid.fruitPos;
-    var fruitPosGold = this.grid.fruitPosGold;
+    const currentPosition = this.getHeadPosition();
+    const fruitPos = this.grid.fruitPos;
+    const fruitPosGold = this.grid.fruitPosGold;
 
     if(fruitPos != null) {
-      var distFruit = Math.abs(fruitPos.x - currentPosition.x) + Math.abs(fruitPos.y - currentPosition.y);
-      var distFruitGold = fruitPosGold != null ? Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y) : -1;
+      const distFruit = Math.abs(fruitPos.x - currentPosition.x) + Math.abs(fruitPos.y - currentPosition.y);
+      const distFruitGold = fruitPosGold != null ? Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y) : -1;
     
       if(fruitPosGold != null && this.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD && this.aiFruitGoal == GameConstants.CaseType.FRUIT) {
         if(distFruitGold < distFruit) {
@@ -447,9 +443,9 @@ export default class Snake {
     } else if(this.aiLevel == GameConstants.AiLevel.LOW) {
       res = this.simpleAI();
     } else if(fruitPos != null) {
-      var grid = this.grid.getGraph(false);
+      const grid = this.grid.getGraph(false);
 
-      var graph = new Lowlight.Astar.Configuration(grid, {
+      const graph = new Lowlight.Astar.Configuration(grid, {
         order: "yx",
         torus: (this.aiLevel == GameConstants.AiLevel.HIGH || this.aiLevel == GameConstants.AiLevel.ULTRA) ? true : false,
         diagonals: false,
@@ -458,14 +454,14 @@ export default class Snake {
         cost(a, b) { return b == 1 ? null : 1 }
       });
 
-      var path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.x : fruitPos.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.y : fruitPos.y });
+      let path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.x : fruitPos.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.y : fruitPos.y });
 
       if(path.length < 1) {
         path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold ? fruitPos.x : fruitPosGold.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold ? fruitPos.y : fruitPosGold.y });
       }
 
       if(path.length > 1) {
-        var nextPosition = new Position(path[1].x, path[1].y);
+        const nextPosition = new Position(path[1].x, path[1].y);
         res = new Position(null, null, this.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
       } else if(this.aiLevel == GameConstants.AiLevel.HIGH || this.aiLevel == GameConstants.AiLevel.ULTRA) {
         res = this.simpleAI();

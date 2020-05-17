@@ -79,9 +79,9 @@ export default class GameEngine {
         this.errorOccurred = true;
       }
 
-      var startHue = GameUtils.randRange(0, 360, this.grid ? this.grid.rngGame : null);
+      let startHue = GameUtils.randRange(0, 360, this.grid ? this.grid.rngGame : null);
 
-      for(var i = 0; i < this.snakes.length; i++) {
+      for(let i = 0; i < this.snakes.length; i++) {
         if(this.snakes[i] instanceof Snake == false) {
           this.errorOccurred = true;
         } else {
@@ -111,7 +111,7 @@ export default class GameEngine {
     this.grid.init();
 
     if(this.snakes != null) {
-      for(var i = 0; i < this.snakes.length; i++) {
+      for(let i = 0; i < this.snakes.length; i++) {
         this.snakes[i].reset();
       }
     }
@@ -137,7 +137,7 @@ export default class GameEngine {
     
     if(!this.errorOccurred) {
       if(this.snakes != null) {
-        for(var i = 0; i < this.snakes.length; i++) {
+        for(let i = 0; i < this.snakes.length; i++) {
           if(this.snakes[i].errorInit) {
             this.errorOccurred = true;
             this.stop();
@@ -215,7 +215,7 @@ export default class GameEngine {
       this.killed = true;
 
       if(this.snakes != null) {
-        for(var i = 0; i < this.snakes.length; i++) {
+        for(let i = 0; i < this.snakes.length; i++) {
           this.snakes[i].kill();
           this.snakes[i] = null;
         }
@@ -237,10 +237,10 @@ export default class GameEngine {
   }
 
   getNBPlayer(type) {
-    var numPlayer = 0;
+    let numPlayer = 0;
 
     if(this.snakes != null) {
-      for(var i = 0; i < this.snakes.length; i++) {
+      for(let i = 0; i < this.snakes.length; i++) {
         if(this.snakes[i].player == type) {
           numPlayer++;
         }
@@ -251,10 +251,10 @@ export default class GameEngine {
   }
 
   getPlayer(num, type) {
-    var numPlayer = 0;
+    let numPlayer = 0;
 
     if(this.snakes != null) {
-      for(var i = 0; i < this.snakes.length; i++) {
+      for(let i = 0; i < this.snakes.length; i++) {
         if(this.snakes[i].player == type) {
           numPlayer++;
         }
@@ -274,14 +274,14 @@ export default class GameEngine {
         if(this.lastTime == 0) this.lastTime = time;
         this.ticks++;
 
-        var scoreIncreased = false;
+        let scoreIncreased, setFruitError = false;
 
         if(this.grid && (!this.grid.maze || this.grid.mazeForceAuto || ((this.grid.maze && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (this.grid.maze && ((this.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) || this.getPlayer(1, GameConstants.PlayerType.HUMAN)).lastKey != -1)))) {
-          for(var i = 0; i < this.snakes.length; i++) {
-            var initialDirection = this.snakes[i].direction;
-            var setFruit = false;
-            var setFruitError = false;
-            var goldFruit = false;
+          for(let i = 0; i < this.snakes.length; i++) {
+            const initialDirection = this.snakes[i].direction;
+            let setFruit = false;
+            let goldFruit = false;
+            setFruitError = false;
             this.snakes[i].lastTailMoved = false;
 
             if(!this.snakes[i].gameOver && !this.snakes[i].scoreMax) {
@@ -293,7 +293,7 @@ export default class GameEngine {
                 this.snakes[i].moveTo(this.snakes[i].ai());
               }
 
-              var headSnakePos = this.snakes[i].getHeadPosition();
+              let headSnakePos = this.snakes[i].getHeadPosition();
 
               if(this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI && this.grid.isDeadPosition(this.snakes[i].getNextPosition(headSnakePos, this.snakes[i].direction))) {
                 this.snakes[i].direction = initialDirection;
@@ -363,9 +363,9 @@ export default class GameEngine {
             this.grid.fruitPosGold = null;
           }
 
-          var nbOver = 0;
+          let nbOver = 0;
 
-          for(var j = 0; j < this.snakes.length; j++) {
+          for(let j = 0; j < this.snakes.length; j++) {
             (this.snakes[j].gameOver || this.snakes[j].scoreMax) && nbOver++;
           }
 

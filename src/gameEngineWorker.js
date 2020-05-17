@@ -26,10 +26,10 @@ import seedrandom from "seedrandom";
 let game;
 
 function copySnakes(snakes) {
-  var copy = JSON.parse(JSON.stringify(snakes));
+  const copy = JSON.parse(JSON.stringify(snakes));
 
   if(copy) {
-    for(var i = 0; i < copy.length; i++) {
+    for(let i = 0; i < copy.length; i++) {
       delete copy[i]["grid"];
     }
   }
@@ -38,7 +38,7 @@ function copySnakes(snakes) {
 }
 
 function copyGrid(grid) {
-  var copy = JSON.parse(JSON.stringify(grid));
+  const copy = JSON.parse(JSON.stringify(grid));
 
   if(copy) {
     copy.rngGrid = null;
@@ -50,7 +50,7 @@ function copyGrid(grid) {
 
 function parseSnakes(snakes, grid) {
   if(game) {
-    var grid = grid || game.grid;
+    let grid = grid || game.grid;
   }
 
   grid = Object.assign(new Grid(), grid);
@@ -62,11 +62,11 @@ function parseSnakes(snakes, grid) {
     snakes = game.snakes;
   }
   
-  for(var i = 0; i < snakes.length; i++) {
+  for(let i = 0; i < snakes.length; i++) {
     snakes[i].grid = grid;
     snakes[i] = Object.assign(new Snake(), snakes[i]);
 
-    for(var j = 0; j < snakes[i].queue.length; j++) {
+    for(let j = 0; j < snakes[i].queue.length; j++) {
       snakes[i].queue[j] = Object.assign(new Position(), snakes[i].queue[j]);
     }
   }
@@ -78,12 +78,12 @@ function parseSnakes(snakes, grid) {
 }
 
 onmessage = e => {
-  var data = e.data;
+  const data = e.data;
 
   if(data.length > 1 && data[0] == "init") {
-    var parsed = parseSnakes(data[1]["snakes"], data[1]["grid"]);
-    var grid = parsed["grid"];
-    var snakes = parsed["snakes"];
+    const parsed = parseSnakes(data[1]["snakes"], data[1]["grid"]);
+    const grid = parsed["grid"];
+    const snakes = parsed["snakes"];
 
     game = new GameEngine(grid, snakes, data[1]["speed"], data[1]["enablePause"], data[1]["enableRetry"], data[1]["progressiveSpeed"]);
 
@@ -252,7 +252,7 @@ onmessage = e => {
       }]);
     });
 } else if(game != null) {
-    var message = data[0];
+    const message = data[0];
 
     switch(message) {
       case "reset":
@@ -294,7 +294,7 @@ onmessage = e => {
         if(data.length > 1) {
           game.lastKey = data[1];
 
-          var playerSnake = game.getPlayer(1, GameConstants.PlayerType.HUMAN) || game.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+          const playerSnake = game.getPlayer(1, GameConstants.PlayerType.HUMAN) || game.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
 
           if(playerSnake != null && playerSnake.lastKey != null) {
             playerSnake.lastKey = data[1];
@@ -304,10 +304,10 @@ onmessage = e => {
       case "update":
         if(data.length > 1) {
           if(data[1]["key"] == "snakes") {
-            var d = parseSnakes(data[1]["data"]);
+            const d = parseSnakes(data[1]["data"]);
             game.snakes = d.snakes;
           } else if(data[1]["key"] == "grid") {
-            var d = parseSnakes(null, data[1]["data"]);
+            const d = parseSnakes(null, data[1]["data"]);
             game.grid = d.grid;
           } else {
             game[data[1]["key"]] = data[1]["data"];

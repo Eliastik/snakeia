@@ -42,22 +42,22 @@ export default class GameRanking {
 
   draw(ctx, ui, currentPlayer) {
     if(this.snakes != null && !this.closed) {
-      var imageLoader = ui.imageLoader;
-      var canvas = ctx.canvas;
+      const imageLoader = ui.imageLoader;
+      const canvas = ctx.canvas;
       ctx.save();
 
-      var title = i18next.t("engine.ranking");
-      var maxSizeName = ctx.measureText(title).width;
+      const title = i18next.t("engine.ranking");
+      let maxSizeName = ctx.measureText(title).width;
 
-      var scores = [];
-      var numPlayer = 0;
-      var numAI = 0;
+      const scores = [];
+      let numPlayer = 0;
+      let numAI = 0;
 
       ctx.font = (this.fontSize / 1.5) + "px " + this.fontFamily;
-      var sizeNumber = ctx.measureText("" + this.snakes.length).width + 15;
+      const sizeNumber = ctx.measureText("" + this.snakes.length).width + 15;
 
-      for(var i = 0; i < this.snakes.length; i++) {
-        var snake = this.snakes[i];
+      for(let i = 0; i < this.snakes.length; i++) {
+        const snake = this.snakes[i];
 
         if(snake.player == GameConstants.PlayerType.HUMAN || snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
           numPlayer++;
@@ -65,8 +65,8 @@ export default class GameRanking {
           numAI++;
         }
 
-        var text = snake.name + " × " + snake.score + " (" + ((currentPlayer == i ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
-        var sizeText = ctx.measureText(text).width + 30;
+        const text = snake.name + " × " + snake.score + " (" + ((currentPlayer == i ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
+        const sizeText = ctx.measureText(text).width + 30;
 
         if(sizeText > maxSizeName) maxSizeName = sizeText;
 
@@ -82,27 +82,27 @@ export default class GameRanking {
         lastScore = snake.score;
       }
 
-      var width = maxSizeName + sizeNumber + 15;
-      var height = canvas.height - this.headerHeight;
+      const width = maxSizeName + sizeNumber + 15;
+      const height = canvas.height - this.headerHeight;
 
       ctx.fillStyle = "rgba(75, 75, 75, 0.35)";
       ctx.fillRect(-this.offsetX, this.headerHeight, width, height);
       ctx.font = this.fontSize + "px " + this.fontFamily;
 
-      var yTitle = this.headerHeight + this.fontSize - this.offsetY + 10;
+      const yTitle = this.headerHeight + this.fontSize - this.offsetY + 10;
 
       if(yTitle - this.fontSize >= this.headerHeight) {
         Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (width / 2) - (ctx.measureText(title).width / 2) - this.offsetX, yTitle, false, true);
       }
 
-      var ranking = scores.sort((a, b) => {
+      const ranking = scores.sort((a, b) => {
         return b.score - a.score;
       });
 
-      var rank = 0;
-      var lastScore = 0;
+      let rank = 0;
+      let lastScore = 0;
 
-      for(var i = 0; i < ranking.length; i++) {
+      for(let i = 0; i < ranking.length; i++) {
         if(ranking[i].score < lastScore) {
           rank++;
         }
@@ -112,14 +112,14 @@ export default class GameRanking {
         lastScore = ranking[i].score;
       }
       
-      var currentY = yTitle + this.fontSize / 1.5;
+      let currentY = yTitle + this.fontSize / 1.5;
       this.overflow = false;
 
       if(this.timeLastFrame <= 0) this.timeLastFrame = Date.now();
-      var offsetTime = Date.now() - this.timeLastFrame;
+      const offsetTime = Date.now() - this.timeLastFrame;
       this.timeLastFrame = Date.now();
 
-      for(var i = 0; i < ranking.length; i++) {
+      for(let i = 0; i < ranking.length; i++) {
         if(currentY > this.headerHeight) {
           if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
             switch(ranking[i].rank) {

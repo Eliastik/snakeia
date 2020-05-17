@@ -24,14 +24,13 @@ export default class Reactor {
   }
 
   registerEvent(eventName) {
-    var event = new Event(eventName);
-    this.events[eventName] = event;
+    this.events[eventName] = new Event(eventName);
   }
 
   dispatchEvent(eventName, eventArgs) {
-    var callbacks = this.events[eventName].callbacks;
+    const callbacks = this.events[eventName].callbacks;
     
-    for(var i = 0, l = callbacks.length; i < l; i++) {
+    for(let i = 0, l = callbacks.length; i < l; i++) {
       callbacks[i](eventArgs);
     }
   }

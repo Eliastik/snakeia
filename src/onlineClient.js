@@ -116,7 +116,7 @@ export default class OnlineClient {
     if(!this.loadingRooms) {
       this.loadingRooms = true;
 
-      var ioRooms = new io(this.getURL() + "/rooms" + (this.token ? "?token=" + this.token : ""));
+      const ioRooms = new io(this.getURL() + "/rooms" + (this.token ? "?token=" + this.token : ""));
     
       ioRooms.once("rooms", data => {
         callback(true, data);
@@ -153,7 +153,7 @@ export default class OnlineClient {
     if(!this.creatingRoom) {
       this.creatingRoom = true;
       
-      var ioCreate = new io(this.getURL() + "/createRoom" + (this.token ? "?token=" + this.token : ""));
+      const ioCreate = new io(this.getURL() + "/createRoom" + (this.token ? "?token=" + this.token : ""));
 
       ioCreate.once("connect", () => {
         ioCreate.emit("create", data);

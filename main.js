@@ -26,6 +26,8 @@ import OnlineClient from "./src/onlineClient";
 import GameUI from "./src/gameUI.js";
 import { NotificationMessage } from "jsgametools";
 import seedrandom from "seedrandom";
+import StorageFactory from "./src/storageFactory";
+import { Timer, TimerInterval } from "./src/timers";
 
 // Modes :
 window.SOLO_AI = "SOLO_AI";
@@ -78,10 +80,12 @@ window.DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLev
 window.SOLO_PLAYER_DOWNLOAD_LEVELS_TO = "snakeia_solo_player_downloadedLevels";
 window.SOLO_AI_DOWNLOAD_LEVELS_TO = "snakeia_solo_ai_downloadedLevels";
 
-var selectedMode = SOLO_AI;
-var onlineClient = new OnlineClient();
-var customSettings = {};
-var workersAvailable = false;
+const onlineClient = new OnlineClient();
+const storageGlobal = new StorageFactory();
+
+let selectedMode = SOLO_AI;
+let customSettings = {};
+let workersAvailable = false;
 
 document.getElementById("versionTxt").innerHTML = GameConstants.Setting.APP_VERSION;
 document.getElementById("appVersion").innerHTML = GameConstants.Setting.APP_VERSION;
@@ -93,128 +97,8 @@ String.prototype.strcmp = function(str) {
   return ((this == str) ? 0 : ((this > str) ? 1 : -1));
 };
 
-// https://github.com/MichalZalecki/storage-factory
-function storageFactory(storage) {
-  var inMemoryStorage = {};
-
-  try {
-    var storage = storage || window.localStorage;
-  } catch(e) {
-    var storage = null;
-  }
-
-  function isSupported() {
-    try {
-      var testKey = "__some_random_key_you_are_not_going_to_use__";
-      storage.setItem(testKey, testKey);
-      storage.removeItem(testKey);
-      return true;
-    } catch(e) {
-      return false;
-    }
-  }
-
-  this.isSupported = () => {
-    return isSupported();
-  };
-
-  this.clear = () => {
-    if(isSupported()) {
-      storage.clear();
-    } else {
-      inMemoryStorage = {};
-    }
-  }
-
-  this.getItem = function(name) {
-    if(isSupported()) {
-      return storage.getItem(name);
-    }
-
-    if(inMemoryStorage.hasOwnProperty(name)) {
-      return inMemoryStorage[name];
-    }
-
-    return null;
-  }
-
-  this.key = function(index) {
-    if(isSupported()) {
-      return storage.key(index);
-    } else {
-      return Object.keys(inMemoryStorage)[index] || null;
-    }
-  }
-
-  this.removeItem = function(name) {
-    if(isSupported()) {
-      storage.removeItem(name);
-    } else {
-      delete inMemoryStorage[name];
-    }
-  }
-
-  this.setItem = function(name, value) {
-    if(isSupported()) {
-      storage.setItem(name, value);
-    } else {
-      inMemoryStorage[name] = String(value);
-    }
-  }
-
-  this.length = () => {
-    if(isSupported()) {
-      return storage.length;
-    } else {
-      return Object.keys(inMemoryStorage).length;
-    }
-  }
-}
-
-var storageGlobal = new storageFactory();
-
-if(!storageGlobal.isSupported()) {
+if(!storageGlobal.isSupported) {
   document.getElementById("localstorageDisabled").style.display = "block";
-}
-
-function Timer(callback, delay, timerInterval) {
-  var timerId, start, remaining = delay;
-
-  this.pause = () => {
-    window.clearTimeout(timerId);
-    timerInterval != null && timerInterval.stop != null && timerInterval.stop();
-    remaining -= Date.now() - start;
-  };
-
-  this.resume = () => {
-    start = Date.now();
-    window.clearTimeout(timerId);
-    timerInterval != null && timerInterval.stop != null && timerInterval.stop();
-    timerId = window.setTimeout(callback, remaining);
-    timerInterval != null && timerInterval.start != null && timerInterval.start();
-  };
-
-  this.reset = () => {
-    window.clearTimeout(timerId);
-    timerInterval != null && timerInterval.stop != null && timerInterval.stop();
-    remaining = delay;
-  };
-
-  this.getTime = () => {
-    return remaining - (Date.now() - start);
-  };
-}
-
-function TimerInterval(callback) {
-  this.interval;
-
-  this.start = () => {
-    this.interval = setInterval(callback, 1000);
-  };
-
-  this.stop = () => {
-    clearInterval(this.interval);
-  };
 }
 
 // Settings handling
@@ -245,7 +129,7 @@ function getSettings() {
 }
 
 function showSettings() {
-  var settings = getSettings();
+  const settings = getSettings();
 
   document.getElementById("enableAnimations").checked = false;
   document.getElementById("renderBlur").checked = false;
@@ -315,7 +199,7 @@ document.getElementById("resetParameters").onclick = function() {
 
 // Updater
 function checkUpdate() {
-  var script = document.createElement("script");
+  const script = document.createElement("script");
   script.src = UPDATER_URI;
 
   document.getElementsByTagName('head')[0].appendChild(script);
@@ -323,24 +207,24 @@ function checkUpdate() {
 
 window.updateCallback = data => {
   if(typeof(data) !== "undefined" && data !== null && typeof(data.version) !== "undefined" && data.version !== null) {
-    var newVersionTest = GameConstants.Setting.APP_VERSION.strcmp(data.version);
+    const newVersionTest = GameConstants.Setting.APP_VERSION.strcmp(data.version);
 
     if(newVersionTest < 0) {
       document.getElementById("updateAvailable").style.display = "block";
       document.getElementById("appUpdateVersion").textContent = data.version;
 
-      var appUpdateDate = DATE_VERSION;
+      let appUpdateDate = DATE_VERSION;
 
       if(typeof(data.date) !== "undefined" && data.date !== null) {
-          var appUpdateDate = data.date;
+          appUpdateDate = data.date;
       }
 
       document.getElementById("appUpdateDate").textContent = appUpdateDate;
 
-      var downloadURL = "http://eliastiksofts.com/snakeia/downloads/";
+      let downloadURL = "http://eliastiksofts.com/snakeia/downloads/";
 
       if(typeof(data.url) !== "undefined" && data.url !== null) {
-          var downloadURL = data.url;
+          downloadURL = data.url;
       }
 
       document.getElementById("appDownloadLink").onclick = () => {
@@ -351,10 +235,10 @@ window.updateCallback = data => {
           prompt(i18next.t("update.URLToDownload"), downloadURL);
       };
 
-      var changes = i18next.t("update.noChanges");
+      let changes = i18next.t("update.noChanges");
 
       if(typeof(data.changes) !== "undefined" && data.changes !== null) {
-          var changes = data.changes;
+          changes = data.changes;
       }
 
       document.getElementById("appUpdateChanges").onclick = () => {
@@ -370,7 +254,7 @@ checkUpdate();
 
 // Load server list
 function loadServerList() {
-  var script = document.createElement("script");
+  const script = document.createElement("script");
   script.src = SERVERS_LIST_URI;
 
   document.getElementsByTagName('head')[0].appendChild(script);
@@ -382,13 +266,13 @@ window.listServersCallback = data => {
   document.getElementById("serverListGroup").innerHTML = "";
 
   if(data != null && data.length > 0) {
-    for(var i = 0; i < data.length; i++) {
+    for(let i = 0; i < data.length; i++) {
       if(data[i]["url"] != null) {
-        var url = data[i]["url"];
-        var port = data[i]["port"];
-        var name = data[i]["name"];
+        const url = data[i]["url"];
+        const port = data[i]["port"];
+        const name = data[i]["name"];
 
-        var linkServer = document.createElement("a");
+        const linkServer = document.createElement("a");
         linkServer.classList.add("list-group-item");
         linkServer.classList.add("list-group-item-action");
 
@@ -402,7 +286,7 @@ window.listServersCallback = data => {
           connectToServer(u, p);
         }).bind(null, url, port));
   
-        var serverAddress = document.createElement("div");
+        const serverAddress = document.createElement("div");
         serverAddress.classList.add("small");
         serverAddress.classList.add("text-muted");
 
@@ -418,7 +302,7 @@ window.listServersCallback = data => {
       }
     }
   } else {
-    var noServerFound = document.createElement("strong");
+    const noServerFound = document.createElement("strong");
     noServerFound.textContent = i18next.t("servers.noServerFound");
 
     document.getElementById("serverListGroup").appendChild(noServerFound);
@@ -428,7 +312,7 @@ window.listServersCallback = data => {
 }
 
 document.getElementById("linkCustomServer").onclick = () => {
-  var url = prompt(i18next.t("servers.enterCustomServer"), "http://");
+  const url = prompt(i18next.t("servers.enterCustomServer"), "http://");
 
   if(url != null && url.trim() != "") {
     connectToServer(url);
@@ -454,7 +338,7 @@ function connectToServer(url, port) {
     if(!success) {
       if(data == GameConstants.Error.AUTHENTICATION_REQUIRED || data == GameConstants.Error.BANNED) {
         document.getElementById("authenticationServerContainer").innerHTML = "";
-        var authent_frame = document.createElement("iframe");
+        const authent_frame = document.createElement("iframe");
         authent_frame.id = "authent_frame";
         authent_frame.src = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2) + (id ? "&id=" + id : "");
         authent_frame.classList.add("frame-responsive");
@@ -507,11 +391,11 @@ function displayRooms() {
         document.getElementById("errorRoomsList").style.display = "block";
       }
     } else if(data.rooms != null && Object.keys(data.rooms).length > 0) {
-      for(var i = 0; i < Object.keys(data.rooms).length; i++) {
-        var room = data.rooms[Object.keys(data.rooms)[i]];
-        var code = room["code"];
+      for(let i = 0; i < Object.keys(data.rooms).length; i++) {
+        const room = data.rooms[Object.keys(data.rooms)[i]];
+        const code = room["code"];
   
-        var linkRoom = document.createElement("a");
+        const linkRoom = document.createElement("a");
         linkRoom.classList.add("list-group-item");
         linkRoom.classList.add("list-group-item-action");
         linkRoom.textContent = i18next.t("servers.room", { number: (i + 1) }) + (room.state != null ? " " + (
@@ -524,22 +408,22 @@ function displayRooms() {
           joinRoom(code);
         };
   
-        var gameInfos = document.createElement("div");
+        const gameInfos = document.createElement("div");
         gameInfos.classList.add("small");
         gameInfos.classList.add("text-muted");
         gameInfos.textContent = i18next.t("servers.infos", { width : room.width, height: room.height, speed: room.speed });
   
-        var gameInfosSecond = document.createElement("div");
+        const gameInfosSecond = document.createElement("div");
         gameInfosSecond.classList.add("small");
         gameInfosSecond.classList.add("text-muted");
         gameInfosSecond.textContent = room.borderWalls ? i18next.t("servers.infosBorderWalls") : "";
         
-        var gameInfosThird = document.createElement("div");
+        const gameInfosThird = document.createElement("div");
         gameInfosThird.classList.add("small");
         gameInfosThird.classList.add("text-muted");
         gameInfosThird.textContent = room.generateWalls ? i18next.t("servers.infosGenerateWalls") : "";
   
-        var gameInfosPlayers = document.createElement("div");
+        const gameInfosPlayers = document.createElement("div");
         gameInfosPlayers.classList.add("small");
         gameInfosPlayers.classList.add("text-muted");
         gameInfosPlayers.textContent = i18next.t("servers.infosPlayers", { count : room.players, max: room.maxPlayers });
@@ -550,7 +434,7 @@ function displayRooms() {
         linkRoom.appendChild(gameInfosPlayers);
   
         if(room.spectators > 0) {
-          var gameInfosSpectators = document.createElement("div");
+          const gameInfosSpectators = document.createElement("div");
           gameInfosSpectators.classList.add("small");
           gameInfosSpectators.classList.add("text-muted");
           gameInfosSpectators.textContent = i18next.t("servers.infosSpectators", { count : room.spectators });
@@ -560,7 +444,7 @@ function displayRooms() {
         document.getElementById("roomsOnlineListGroup").appendChild(linkRoom);
       }
     } else {
-      var noRoomFound = document.createElement("strong");
+      const noRoomFound = document.createElement("strong");
       noRoomFound.textContent = i18next.t("servers.noRoomound");
   
       document.getElementById("roomsOnlineListGroup").appendChild(noRoomFound);
@@ -603,8 +487,8 @@ function joinRoom(code) {
     document.getElementById("roomsOnlineJoin").style.display = "none";
 
     if(data.success) {
-      var ui = new GameUI(null, document.getElementById("gameContainer"), null, null, (customSettings.showDebugInfo ? true : false), null, customSettings);
-      var game = onlineClient.getGame(ui, customSettings);
+      const ui = new GameUI(null, document.getElementById("gameContainer"), null, null, (customSettings.showDebugInfo ? true : false), null, customSettings);
+      const game = onlineClient.getGame(ui, customSettings);
       game.init();
 
       document.getElementById("gameContainer").style.display = "block";
@@ -634,8 +518,8 @@ function joinRoom(code) {
         }
       };
     } else {
-      var errorCode = data.errorCode;
-      var errorCode_text = "";
+      const errorCode = data.errorCode;
+      let errorCode_text = "";
 
       switch(errorCode) {
         case GameConstants.Error.ROOM_NOT_FOUND:
@@ -661,7 +545,7 @@ function joinRoom(code) {
 }
 
 document.getElementById("joinPrivateRoom").onclick = () => {
-  var code = prompt(i18next.t("servers.enterCode"));
+  const code = prompt(i18next.t("servers.enterCode"));
 
   if(code != null) {
     joinRoom(code);
@@ -811,7 +695,7 @@ document.getElementById("backToMenuServerList").onclick = () => {
 };
 
 document.getElementById("collapseSeedSettingsBtn").onclick = e => {
-  var collapse = document.getElementById("collapseSeedSettings");
+  const collapse = document.getElementById("collapseSeedSettings");
 
   if(collapse && collapse.classList.contains("show")) {
     collapse.classList.remove("show");
@@ -940,10 +824,10 @@ function checkEnableAI() {
 }
 
 function gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, numberPlayers) {
-  var heightGrid = parseInt(heightGrid);
-  var widthGrid = parseInt(widthGrid);
+  heightGrid = parseInt(heightGrid);
+  widthGrid = parseInt(widthGrid);
 
-  var numberEmptyCases = heightGrid * widthGrid;
+  let numberEmptyCases = heightGrid * widthGrid;
 
   if(borderWalls) {
     numberEmptyCases -= (((widthGrid + heightGrid) * 2) - 4);
@@ -957,7 +841,7 @@ function gameCanFailToInit(heightGrid, widthGrid, borderWalls, generateWalls, nu
     }
   }
 
-  var neededCases = numberPlayers * 5;
+  const neededCases = numberPlayers * 5;
 
   if(numberEmptyCases >= neededCases) {
     return false;
@@ -970,15 +854,15 @@ function checkFailSettings() {
   document.getElementById("possibleFailInitGame").style.display = "none";
 
   if(validateSettings(true)) {
-    var heightGrid = document.getElementById("heightGrid").value;
-    var widthGrid = document.getElementById("widthGrid").value;
-    var borderWalls = document.getElementById("borderWalls").checked;
-    var generateWalls = document.getElementById("generateWalls").checked;
-    var sameGrid = document.getElementById("sameGrid").checked;
-    var numberIA = document.getElementById("numberIA").value;
-    var battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
+    const heightGrid = document.getElementById("heightGrid").value;
+    const widthGrid = document.getElementById("widthGrid").value;
+    const borderWalls = document.getElementById("borderWalls").checked;
+    const generateWalls = document.getElementById("generateWalls").checked;
+    const sameGrid = document.getElementById("sameGrid").checked;
+    const numberIA = document.getElementById("numberIA").value;
+    const battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
 
-    var numberPlayers = 1;
+    let numberPlayers = 1;
 
     if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI) {
       if(sameGrid) {
@@ -1110,30 +994,31 @@ function validateSettings(returnValidation) {
     resetForm(false, false);
   }
 
-  var heightGrid = document.getElementById("heightGrid").value;
-  var widthGrid = document.getElementById("widthGrid").value;
-  var borderWalls = document.getElementById("borderWalls").checked;
-  var generateWalls = document.getElementById("generateWalls").checked;
-  var mazeGrid = document.getElementById("mazeGrid").checked;
-  var sameGrid = document.getElementById("sameGrid").checked;
-  var speed = document.getElementById("gameSpeed").value;
-  var progressiveSpeed = document.getElementById("progressiveSpeed").checked;
-  var customSpeed = document.getElementById("customSpeed").value;
-  var aiLevel = document.getElementById("aiLevel").value;
-  var autoRetry = document.getElementById("autoRetry").checked;
-  var numberIA = document.getElementById("numberIA").value;
-  var battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
-  var seedGrid = document.getElementById("seedGrid").value;
-  var seedGame = document.getElementById("seedGame").value;
+  let heightGrid = document.getElementById("heightGrid").value;
+  let widthGrid = document.getElementById("widthGrid").value;
+  let borderWalls = document.getElementById("borderWalls").checked;
+  let generateWalls = document.getElementById("generateWalls").checked;
+  let mazeGrid = document.getElementById("mazeGrid").checked;
+  let sameGrid = document.getElementById("sameGrid").checked;
+  let speed = document.getElementById("gameSpeed").value;
+  let progressiveSpeed = document.getElementById("progressiveSpeed").checked;
+  let customSpeed = document.getElementById("customSpeed").value;
+  let aiLevel = document.getElementById("aiLevel").value;
+  let autoRetry = document.getElementById("autoRetry").checked;
+  let numberIA = document.getElementById("numberIA").value;
+  let battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
+  let seedGrid = document.getElementById("seedGrid").value;
+  let seedGame = document.getElementById("seedGame").value;
+  let playerHumanType;
 
-  var minGridSize = 5;
-  var maxGridSize = 100;
-  var minSpeed = 1;
-  var maxSpeed = 100;
-  var enableAI = true;
+  let minGridSize = 5;
+  let maxGridSize = 100;
+  let minSpeed = 1;
+  let maxSpeed = 100;
+  let enableAI = true;
 
   if(selectedMode == BATTLE_ROYALE_ONLINE && onlineClient.serverSettings) {
-    var serverSettings = onlineClient.serverSettings;
+    const serverSettings = onlineClient.serverSettings;
 
     minGridSize = serverSettings.minGridSize != undefined ? serverSettings.minGridSize : minGridSize;
     maxGridSize = serverSettings.maxGridSize != undefined ? serverSettings.maxGridSize : maxGridSize;
@@ -1148,12 +1033,12 @@ function validateSettings(returnValidation) {
   document.getElementById("invalidCustomSpeed").textContent = i18next.t("settings.invalidSpeed", { min: minSpeed, max: maxSpeed });
 
   if(document.getElementById("aiAssistant").checked) {
-    var playerHumanType = PLAYER_HYBRID_HUMAN_AI;
+    playerHumanType = PLAYER_HYBRID_HUMAN_AI;
   } else {
-    var playerHumanType = PLAYER_HUMAN;
+    playerHumanType = PLAYER_HUMAN;
   }
 
-  var formValidated = true;
+  let formValidated = true;
 
   if(heightGrid.trim() == "" || isNaN(heightGrid) || heightGrid < minGridSize || heightGrid > maxGridSize) {
     formValidated = false;
@@ -1283,7 +1168,7 @@ function validateSettings(returnValidation) {
         enableAI: enableAI ? document.getElementById("enableAI").checked : false,
         levelAI: aiLevel
       }, data => {
-        var errorCode = data.errorCode;
+        const errorCode = data.errorCode;
 
         if(data.connection_error) {
           if(errorCode == GameConstants.Error.AUTHENTICATION_REQUIRED) {
@@ -1302,7 +1187,7 @@ function validateSettings(returnValidation) {
             if(errorCode == GameConstants.Error.AUTHENTICATION_REQUIRED) {
               connectToServer(onlineClient.url, onlineClient.port);
             } else {
-              var errorCode_text = "";
+              let errorCode_text = "";
   
               switch(errorCode) {
                 case GameConstants.Error.INVALID_SETTINGS:
@@ -1339,7 +1224,7 @@ function validateSettings(returnValidation) {
       document.getElementById("roomsOnlineJoin").style.display = "none";
       document.getElementById("authenticationServer").style.display = "none";
 
-      var titleGame = "";
+      let titleGame = "";
 
       switch(selectedMode) {
         case SOLO_AI:
@@ -1361,81 +1246,81 @@ function validateSettings(returnValidation) {
 
       document.getElementById("titleGame").innerHTML = i18next.t("game.currentMode") + " " + titleGame;
 
-      var games = [];
+      const games = [];
 
       if(selectedMode == SOLO_AI) {
-        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid, null, false, seedGrid, seedGame);
-        var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+        const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid, null, false, seedGrid, seedGame);
+        const snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
       } else if(selectedMode == SOLO_PLAYER) {
-        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid, null, false, seedGrid, seedGame);
-        var snake = new Snake(RIGHT, 3, grid, playerHumanType);
+        const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, mazeGrid, null, false, seedGrid, seedGame);
+        const snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
       } else if(selectedMode == PLAYER_VS_AI) {
-        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
-        var snake = new Snake(RIGHT, 3, grid, playerHumanType);
+        const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
+        const snake = new Snake(RIGHT, 3, grid, playerHumanType);
 
         if(sameGrid) {
-          var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+          const snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
           games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
-          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid + 1, seedGame + 1);
-          var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
+          const grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid + 1, seedGame + 1);
+          const snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
           games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, null, null, null, null, customSettings));
           games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, null, null, null, null, customSettings));
         }
       } else if(selectedMode == AI_VS_AI) {
-        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
-        var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+        const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
+        const snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
         if(sameGrid) {
-          var snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+          const snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
           games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
-          var grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid + 1, seedGame + 1);
-          var snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
+          const grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid + 1, seedGame + 1);
+          const snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
           games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
           games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         }
       } else if(selectedMode == BATTLE_ROYALE) {
         if(sameGrid) {
-          var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
-          var snakes = [];
+          const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
+          const snakes = [];
 
           if(battleAgainstAIs) {
             snakes.push(new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry));
           }
 
-          for(var i = 0; i < numberIA; i++) {
+          for(let i = 0; i < numberIA; i++) {
             snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry));
           }
 
           games.push(new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
           if(battleAgainstAIs) {
-            var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
-            var snake = new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry);
+            const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
+            const snake = new Snake(RIGHT, 3, grid, playerHumanType, aiLevel, autoRetry);
 
             games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, customSettings));
           }
 
-          for(var i = 0; i < numberIA; i++) {
+          for(let i = 0; i < numberIA; i++) {
             seedGrid++;
             seedGame++;
 
-            var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
-            var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
+            const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid, seedGame);
+            const snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
 
             games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, 350, 250, null, null, customSettings));
           }
         }
       }
 
-      var group = new GameGroup(games);
+      const group = new GameGroup(games);
       group.setDisplayFPS(customSettings.showDebugInfo ? true : false);
       group.start();
 
@@ -1451,14 +1336,13 @@ function validateSettings(returnValidation) {
         if(confirm(i18next.t("game.confirmQuit"))) {
           group.killAll();
           displayMenu();
-          group = null;
         }
       };
 
       group.onStop(() => {
         if(selectedMode == PLAYER_VS_AI || selectedMode == AI_VS_AI || selectedMode == BATTLE_ROYALE && !group.errorOccurred()) {
-          var resultMessage = "";
-          var winners = group.getWinners();
+          let resultMessage = "";
+          const winners = group.getWinners();
 
           if(selectedMode == PLAYER_VS_AI) {
             if(winners.index.length == 2) {
@@ -1484,12 +1368,12 @@ function validateSettings(returnValidation) {
             } else if(battleAgainstAIs && winners.index.length == 2 && winners.index[0] == 0) {
               resultMessage = i18next.t("game.winnerAIBattleRoyale") + " " + i18next.t("game.winnersNumBattleRoyale", { numWinner: winners.index[1] }) + " " + i18next.t("game.andPlayerWinnersBattleRoyale") + " " + i18next.t("game.winPlayerScoreBattleRoyale", { score: winners.score });
             } else if(winners.index.length > 1) {
-              var playerWinnerBattleRoyale = false;
+              let playerWinnerBattleRoyale = false;
               resultMessage = i18next.t("game.winnersBattleRoyale") + " ";
 
-              for(var i = 0; i < winners.index.length; i++) {
+              for(let i = 0; i < winners.index.length; i++) {
                 if(battleAgainstAIs && winners.index[i] == 0) {
-                  var playerWinnerBattleRoyale = true;
+                  playerWinnerBattleRoyale = true;
                 } else {
                   resultMessage = resultMessage + i18next.t("game.winnersNumBattleRoyale", { numWinner: (battleAgainstAIs ? winners.index[i] : winners.index[i] + 1) });
 
@@ -1542,19 +1426,19 @@ document.getElementById("validateSettings").onclick = () => {
 function getTitleSave(player, type) {
   if(type == DEFAULT_LEVEL) {
     if(player == PLAYER_HUMAN) {
-      var save = SOLO_PLAYER_SAVE + "defautLevelsSave";
+      return SOLO_PLAYER_SAVE + "defautLevelsSave";
     } else if(player == PLAYER_AI) {
-      var save = SOLO_AI_SAVE + "defautLevelsSave";
+      return SOLO_AI_SAVE + "defautLevelsSave";
     }
   } else if(type == DOWNLOADED_LEVEL) {
     if(player == PLAYER_HUMAN) {
-      var save = SOLO_PLAYER_SAVE + "downloadedLevelsSave";
+      return SOLO_PLAYER_SAVE + "downloadedLevelsSave";
     } else if(player == PLAYER_AI) {
-      var save = SOLO_AI_SAVE + "downloadedLevelsSave";
+      return SOLO_AI_SAVE + "downloadedLevelsSave";
     }
   }
 
-  return save;
+  return null;
 }
 
 function getSave(player, type) {
@@ -1563,7 +1447,7 @@ function getSave(player, type) {
   }
 
   try {
-    var res = JSON.parse(storageGlobal.getItem(getTitleSave(player, type)));
+    const res = JSON.parse(storageGlobal.getItem(getTitleSave(player, type)));
     return res;
   } catch(e) {
     initSaveLevel(player, type, true);
@@ -1576,9 +1460,9 @@ function getLevelSave(level, player, type) {
 }
 
 function setLevelSave(value, level, player, type) {
-    var save = getTitleSave(player, type);
-    var item = getSave(player, type);
-    var levels = getLevels(player, type);
+    const save = getTitleSave(player, type);
+    const item = getSave(player, type);
+    const levels = getLevels(player, type);
 
     if(item != null) {
       if(Array.isArray(value) && value.length >= 2 && Array.isArray(item[level]) && item[level].length >= 2 && item[level][0] == true) {
@@ -1604,8 +1488,8 @@ function setLevelSave(value, level, player, type) {
 
 function initSaveLevel(player, type, force) {
   if(typeof(Storage) !== "undefined") {
-    var save = getTitleSave(player, type);
-    var item = storageGlobal.getItem(save);
+    const save = getTitleSave(player, type);
+    const item = storageGlobal.getItem(save);
 
     if(item == null || force) {
       storageGlobal.setItem(save, JSON.stringify({ version: GameConstants.Setting.APP_VERSION }));
@@ -1645,15 +1529,15 @@ function getLevels(player, type) {
 }
 
 function canPlay(level, player, type) {
-  var res = true;
-  var levels = getLevels(player, type);
+  let res = true;
+  const levels = getLevels(player, type);
 
   if(levels == null) {
     return false;
   }
 
-  for(var i = 1; i < level; i++) {
-    var save = getLevelSave(i, player, type);
+  for(let i = 1; i < level; i++) {
+    const save = getLevelSave(i, player, type);
 
     if(save == null || (!save[0] && levelCompatible(levels[i]["type"], levels[i]["version"]))) {
       res = false;
@@ -1672,14 +1556,14 @@ function levelCompatible(levelType, version) {
 }
 
 function printResultLevel(level, player, levelType, type, shortVersion) {
-  var val = "";
-  var resultLevel = getLevelSave(level, player, type);
+  let val = "";
+  let resultLevel = getLevelSave(level, player, type);
 
   if(resultLevel == null) {
     return "";
   }
 
-  var resultLevel = resultLevel[1];
+  resultLevel = resultLevel[1];
 
   if(resultLevel <= 0) {
     return "";
@@ -1703,18 +1587,18 @@ function printResultLevel(level, player, levelType, type, shortVersion) {
 }
 
 window.playLevel = (level, player, type) => {
-  var levels = getLevels(player, type);
+  const levels = getLevels(player, type);
 
   if(levels == null) {
     return false;
   }
 
   if(levels[level] != null) {
-    var levelSelected = levels[level];
-    var levelSettings = levelSelected["settings"];
-    var levelType = levelSelected["type"];
-    var levelTypeValue = levelSelected["typeValue"];
-    var levelVersion = levelSelected["version"];
+    const levelSelected = levels[level];
+    const levelSettings = levelSelected["settings"];
+    const levelType = levelSelected["type"];
+    const levelTypeValue = levelSelected["typeValue"];
+    const levelVersion = levelSelected["version"];
 
     if(!levelCompatible(levelType, levelVersion)) {
       alert(i18next.t("levels.notCompatible"));
@@ -1726,55 +1610,59 @@ window.playLevel = (level, player, type) => {
       return false;
     }
 
-    var heightGrid = levelSettings[0];
-    var widthGrid = levelSettings[1];
-    var borderWalls = levelSettings[2];
-    var generateWalls = levelSettings[3];
-    var sameGrid = levelSettings[4];
-    var speed = levelSettings[5];
-    var progressiveSpeed = levelSettings[6];
-    var aiLevel = levelSettings[7];
-    var numberIA = levelSettings[8];
-    var generateMaze = levelSettings[9];
-    var customGrid = levelSettings[10];
-    var mazeForceAuto = levelSettings[11];
-    var seedGrid = levelSettings[12];
-    var seedGame = levelSettings[13];
+    const heightGrid = levelSettings[0];
+    const widthGrid = levelSettings[1];
+    const borderWalls = levelSettings[2];
+    const generateWalls = levelSettings[3];
+    const sameGrid = levelSettings[4];
+    const speed = levelSettings[5];
+    const progressiveSpeed = levelSettings[6];
+    const aiLevel = levelSettings[7];
+    const numberIA = levelSettings[8];
+    const generateMaze = levelSettings[9];
+    const customGrid = levelSettings[10];
+    const mazeForceAuto = levelSettings[11];
+    const seedGrid = levelSettings[12];
+    const seedGame = levelSettings[13];
 
-    var games = [];
+    const games = [];
 
-    var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame);
+    const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame);
+    let playerSnake;
+    let playerGame;
 
     if(player == PLAYER_AI) {
-      var playerSnake = new Snake(RIGHT, 3, grid, player, AI_LEVEL_HIGH);
+      playerSnake = new Snake(RIGHT, 3, grid, player, AI_LEVEL_HIGH);
     } else if(player == PLAYER_HUMAN) {
-      var playerSnake = new Snake(RIGHT, 3, grid, player);
+      playerSnake = new Snake(RIGHT, 3, grid, player);
     }
 
     if(sameGrid) {
-      var snakes = [playerSnake];
+      const snakes = [playerSnake];
 
-      for(var i = 0; i < numberIA; i++) {
+      for(let i = 0; i < numberIA; i++) {
         snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel));
       }
 
-      var playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings);
+      playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings);
       games.push(playerGame);
     } else {
+      let width, height;
+
       if(numberIA + 1 <= 2) {
-        var width = null;
-        var height = null;
+        width = null;
+        height = null;
       } else {
-        var width = 350;
-        var height = 250;
+        width = 350;
+        height = 250;
       }
 
-      var playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height, null, null, customSettings);
+      playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height, null, null, customSettings);
       games.push(playerGame);
 
-      for(var i = 0; i < numberIA; i++) {
-        var grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame);
-        var snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, false);
+      for(let i = 0; i < numberIA; i++) {
+        const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame);
+        const snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, false);
 
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, width, height, null, null, customSettings));
       }
@@ -1799,27 +1687,26 @@ window.playLevel = (level, player, type) => {
 
     document.getElementById("titleGame").innerHTML = i18next.t("levels.level") + " " + level;
 
-    var group = new GameGroup(games);
+    const group = new GameGroup(games);
     group.setDisplayFPS(customSettings.showDebugInfo ? true : false);
     group.start();
     group.closeRanking();
 
     document.getElementById("gameOrder").scrollIntoView();
 
-    var levelTimer = new Timer(null, 0);
-    var notificationEndDisplayed = false;
-    var notificationStartDisplayed = false;
-    var notifErrorColor = "rgba(231, 76, 60, 0.5)";
-    var notifInfosColor = "rgba(52, 152, 219, 0.5)";
-    var notifInfo;
-    var textToDisplayGoal;
+    let levelTimer = new Timer(null, 0);
+    let notificationEndDisplayed = false;
+    let notificationStartDisplayed = false;
+    const notifErrorColor = "rgba(231, 76, 60, 0.5)";
+    const notifInfosColor = "rgba(52, 152, 219, 0.5)";
+    let notifInfo;
+    let textToDisplayGoal;
 
     document.getElementById("backToMenuGame").onclick = () => {
       if(confirm(i18next.t("game.confirmQuit"))) {
         levelTimer.pause();
         group.killAll();
         displayLevelList(player);
-        group = null;
       }
     };
 
@@ -1879,7 +1766,7 @@ window.playLevel = (level, player, type) => {
 
         playerGame.onScoreIncreased(() => {
           if(playerGame.snakes[0].score >= levelTypeValue[0]) {
-            var stop = (levelTypeValue[1] * 1000) - levelTimer.getTime();
+            const stop = (levelTypeValue[1] * 1000) - levelTimer.getTime();
             levelTimer.reset();
             group.stopAll(true);
             setLevelSave([true, stop / 1000], level, player, type);
@@ -1910,10 +1797,10 @@ window.playLevel = (level, player, type) => {
         });
       } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
         group.onStop(() => {
-          var winners = group.getWinners();
-          var won = false;
+          const winners = group.getWinners();
+          let won = false;
 
-          for(var i = 0; i < winners.winners.length; i++) {
+          for(let i = 0; i < winners.winners.length; i++) {
             if(winners.winners[i] == playerGame.snakes[0]) {
               won = true;
               setLevelSave([true, playerGame.snakes[0].score], level, player, type);
@@ -1932,9 +1819,9 @@ window.playLevel = (level, player, type) => {
           }
         });
       } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
-        var time = 0;
+        let time = 0;
 
-        var timerInterval = new TimerInterval(() => {
+        const timerInterval = new TimerInterval(() => {
           time++;
         });
 
@@ -1956,8 +1843,8 @@ window.playLevel = (level, player, type) => {
         });
 
         group.onScoreIncreased(() => {
-          for(var i = 0; i < group.games.length; i++) {
-            for(var j = 0; j < group.games[i].snakes.length; j++) {
+          for(let i = 0; i < group.games.length; i++) {
+            for(let j = 0; j < group.games[i].snakes.length; j++) {
               if(group.games[i].snakes[j].score >= levelTypeValue) {
                 if(group.games[i].snakes[j] == playerGame.snakes[0]) {
                   group.stopAll(true);
@@ -1981,9 +1868,9 @@ window.playLevel = (level, player, type) => {
           }
         });
       } else if(levelType == LEVEL_MAZE_WIN) {
-        var time = 0;
+        let time = 0;
 
-        var timerInterval = new TimerInterval(() => {
+        const timerInterval = new TimerInterval(() => {
           time++;
         });
 
@@ -2072,7 +1959,7 @@ window.playLevel = (level, player, type) => {
 }
 
 window.editDownloadURL = () => {
-  var value = window.prompt(i18next.t("levels.editDownloadURLPrompt"), DOWNLOAD_DEFAULT_URI);
+  const value = window.prompt(i18next.t("levels.editDownloadURLPrompt"), DOWNLOAD_DEFAULT_URI);
 
   if(value != null) {
     DOWNLOAD_DEFAULT_URI = value;
@@ -2080,14 +1967,14 @@ window.editDownloadURL = () => {
 }
 
 window.downloadLevels = (player, button) => {
-  var url = DOWNLOAD_DEFAULT_URI;
+  let url = DOWNLOAD_DEFAULT_URI;
   url = url.replace("{player}", player);
   url = url.replace("{appVersion}", GameConstants.Setting.APP_VERSION);
 
-  var script = document.createElement("script");
+  const script = document.createElement("script");
   script.src = url;
 
-  var canceled = false;
+  let canceled = false;
 
   window["callbackDownloadLevels"] = (player, data) => {
     if(!canceled) {
@@ -2105,11 +1992,12 @@ window.downloadLevels = (player, button) => {
   };
 
   button.disabled = true;
-  var buttonDeblock = document.createElement("button");
+
+  const buttonDeblock = document.createElement("button");
   buttonDeblock.classList = "btn btn-lg btn-warning";
   buttonDeblock.innerHTML = i18next.t("levels.buttonDeblock");
 
-  document.getElementById("levelDownloading").innerHTML = '<strong>' + i18next.t("levels.downloading") + '</strong>';
+  document.getElementById("levelDownloading").innerHTML = "<strong>" + i18next.t("levels.downloading") + "</strong>";
   document.getElementById("btnDeblockDiv").innerHTML = "";
 
   document.getElementsByTagName('head')[0].appendChild(script);
@@ -2131,8 +2019,8 @@ function deblockButton(button, script) {
 }
 
 function getListLevel(player, type) {
-  var levels = getLevels(player, type);
-  var res = "";
+  const levels = getLevels(player, type);
+  let res = "";
 
   if(type == DOWNLOADED_LEVEL) {
     res += '<div class="row mb-3"><div class="col text-center"><button class="btn btn-lg btn-warning" onclick="downloadLevels(' + player + ', this);"><span class="fui-plus-circle"></span>&nbsp; ' + i18next.t("levels.download") + '</button><br /><a href="#null" onclick="editDownloadURL();" class="small"><span class="fui-new"></span>&nbsp; ' + i18next.t("levels.editDownloadURL") + '</a></div></div>';
@@ -2142,19 +2030,21 @@ function getListLevel(player, type) {
     return res + "<strong>" + i18next.t("levels.emptyList") + "</strong>";
   }
 
-  var index = 1;
-  var empty = true;
+  let index = 1;
+  let empty = true;
 
-  for(var key in levels) {
+  for(let key in levels) {
+    let button;
+
     if(levels.hasOwnProperty(key)) {
       if(!canPlay(key, player, type)) {
-        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + i18next.t("levels.disabledLevel") + '" data-balloon-length="fit" data-balloon-pos="up">' + i18next.t("levels.level") + ' ' + index + '</button>';
+        button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + i18next.t("levels.disabledLevel") + '" data-balloon-length="fit" data-balloon-pos="up">' + i18next.t("levels.level") + ' ' + index + '</button>';
       } else if(!levelCompatible(levels[key]["type"], levels[key]["version"])) {
-        var button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + i18next.t("levels.notCompatible") + '" data-balloon-length="fit" data-balloon-pos="up">' + i18next.t("levels.level") + ' ' + index + '</button>';
+        button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + i18next.t("levels.notCompatible") + '" data-balloon-length="fit" data-balloon-pos="up">' + i18next.t("levels.level") + ' ' + index + '</button>';
       } else {
-        var resultLevel = printResultLevel(key, player, levels[key]["type"], type);
+        const resultLevel = printResultLevel(key, player, levels[key]["type"], type);
 
-        var button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');" ' + (resultLevel.trim() != "" ? 'aria-label="' + printResultLevel(key, player, levels[key]["type"], type) + '" data-balloon-length="fit" data-balloon-pos="up"' : '') + '>' + i18next.t("levels.level") + ' ' + index + '</button>';
+        button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');" ' + (resultLevel.trim() != "" ? 'aria-label="' + printResultLevel(key, player, levels[key]["type"], type) + '" data-balloon-length="fit" data-balloon-pos="up"' : '') + '>' + i18next.t("levels.level") + ' ' + index + '</button>';
       }
 
       if(index == 1) {
@@ -2190,7 +2080,7 @@ function listTranslations(languages) {
     document.getElementById("languageSelect").disabled = true;
     document.getElementById("languageSelect").innerHTML = "";
 
-    for(var i = 0; i < languages.length; i++) {
+    for(let i = 0; i < languages.length; i++) {
       document.getElementById("languageSelect").innerHTML = document.getElementById("languageSelect").innerHTML + '<option data-i18n="lang.' + languages[i] + '" value="'+ languages[i] +'"></option>';
     }
 
@@ -2202,9 +2092,9 @@ function listTranslations(languages) {
 function translateContent() {
   listTranslations(i18next.languages);
 
-  var i18nList = document.querySelectorAll("[data-i18n]");
+  const i18nList = document.querySelectorAll("[data-i18n]");
 
-  for(var i = 0, l = i18nList.length; i < l; i++) {
+  for(let i = 0, l = i18nList.length; i < l; i++) {
     i18nList[i].innerHTML = i18next.t(i18nList[i].dataset.i18n);
   }
 
