@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import i18next from "i18next";
 import GameConstants from "./constants";
 import Position from "./position";
 import Grid from "./grid";
@@ -343,21 +342,6 @@ export default class Snake {
   }
 
   getAILevelText() {
-    switch(this.aiLevel) {
-      case GameConstants.AiLevel.RANDOM:
-        return i18next.t("engine.aiLevelList.random");
-      case GameConstants.AiLevel.LOW:
-        return i18next.t("engine.aiLevelList.low");
-      case GameConstants.AiLevel.DEFAULT:
-        return i18next.t("engine.aiLevelList.normal");
-      case GameConstants.AiLevel.HIGH:
-        return i18next.t("engine.aiLevelList.high");
-      case GameConstants.AiLevel.ULTRA:
-        return i18next.t("engine.aiLevelList.ultra");
-      case GameConstants.AiLevel.CUSTOM:
-        return i18next.t("engine.aiLevelList.custom");
-      default:
-        return "???";
-    }
+    return this.snakeAI.aiLevelText;
   }
 }

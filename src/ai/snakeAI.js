@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+import i18next from "i18next";
 import GameConstants from "../constants";
 
 export default class SnakeAI {
@@ -45,5 +46,9 @@ export default class SnakeAI {
     }
 
     return null;
+  }
+
+  get aiLevelText() {
+    return i18next.t("engine.aiLevelList.custom");
   }
 }

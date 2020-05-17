@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+import i18next from "i18next";
 import SnakeAILow from "./snakeAINormal";
 import SnakeAINormal from "./snakeAINormal";
 
@@ -34,5 +35,9 @@ export default class SnakeAIHigh extends SnakeAINormal {
     }
     
     return res;
+  }
+
+  get aiLevelText() {
+    return i18next.t("engine.aiLevelList.high");
   }
 }
