@@ -31,6 +31,7 @@ function copySnakes(snakes) {
   if(copy) {
     for(let i = 0; i < copy.length; i++) {
       delete copy[i]["grid"];
+      if(snakes[i].snakeAI && snakes[i].snakeAI.aiLevelText) copy[i]["snakeAI"]["aiLevelText"] = snakes[i].snakeAI.aiLevelText;
     }
   }
 
@@ -69,6 +70,8 @@ function parseSnakes(snakes, grid) {
     for(let j = 0; j < snakes[i].queue.length; j++) {
       snakes[i].queue[j] = Object.assign(new Position(), snakes[i].queue[j]);
     }
+
+    snakes[i].initAI();
   }
 
   return {

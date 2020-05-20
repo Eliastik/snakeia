@@ -17,26 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import i18next from "i18next";
 import SnakeAI from "./snakeAI";
 import GameConstants from "../constants";
 import Position from "../position";
+import * as Lowlight from "../../libs/lowlight.astar.min";
 
 export default class SnakeAINormal extends SnakeAI {
-  constructor(snake, enableTorus) {
-    super(snake);
+  constructor(enableTorus) {
+    super();
     this.enableTorus = enableTorus;
+    this._aiLevelText = "normal";
   }
 
-  ai() {
-    super.ai();
+  ai(snake) {
+    super.ai(snake);
 
-    const currentPosition = this.snake.getHeadPosition();
-    const fruitPos = this.snake.grid.fruitPos;
-    const fruitPosGold = this.snake.grid.fruitPosGold;
+    const currentPosition = snake.getHeadPosition();
+    const fruitPos = snake.grid.fruitPos;
+    const fruitPosGold = snake.grid.fruitPosGold;
 
-    if(this.snake.grid.fruitPos) {
-      const grid = this.snake.grid.getGraph(false);
+    if(snake.grid.fruitPos) {
+      const grid = snake.grid.getGraph(false);
 
       const graph = new Lowlight.Astar.Configuration(grid, {
         order: "yx",
@@ -55,16 +56,12 @@ export default class SnakeAINormal extends SnakeAI {
 
       if(path.length > 1) {
         const nextPosition = new Position(path[1].x, path[1].y);
-        return new Position(null, null, this.snake.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
+        return new Position(null, null, snake.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
       }
 
       grid, graph, path = null;
     }
 
     return null;
-  }
-
-  get aiLevelText() {
-    return i18next.t("engine.aiLevelList.normal");
   }
 }

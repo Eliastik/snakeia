@@ -17,32 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import i18next from "i18next";
 import SnakeAI from "./snakeAI";
 import GameConstants from "../constants";
 import GameUtils from "../gameUtils";
 
 export default class SnakeAIRandom extends SnakeAI {
-  constructor(snake) {
-    super(snake);
+  constructor() {
+    super();
+    this._aiLevelText = "random";
   }
 
-  ai() {
-    super.ai();
+  ai(snake) {
+    super.ai(snake);
 
-    const currentPosition = this.snake.getHeadPosition();
-    const top = this.snake.grid.isDeadPosition(this.snake.getNextPosition(currentPosition, GameConstants.Key.UP));
-    const left = this.snake.grid.isDeadPosition(this.snake.getNextPosition(currentPosition, GameConstants.Key.LEFT));
-    const bottom = this.snake.grid.isDeadPosition(this.snake.getNextPosition(currentPosition, GameConstants.Key.BOTTOM));
-    const right = this.snake.grid.isDeadPosition(this.snake.getNextPosition(currentPosition, GameConstants.Key.RIGHT));
+    const currentPosition = snake.getHeadPosition();
+    const top = snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.UP));
+    const left = snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.LEFT));
+    const bottom = snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.BOTTOM));
+    const right = snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.RIGHT));
 
     if(top && left && bottom && right) {
       return GameConstants.Key.UP;
     } else {
       let direction = null;
 
-      while(direction == null || this.snake.grid.isDeadPosition(this.snake.getNextPosition(currentPosition, direction))) {
-        const r = GameUtils.randRange(1, 4, this.snake.grid ? this.snake.grid.rngGame : null);
+      while(direction == null || snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, direction))) {
+        const r = GameUtils.randRange(1, 4, snake.grid ? snake.grid.rngGame : null);
 
         switch(r) {
           case 1:
@@ -62,9 +62,5 @@ export default class SnakeAIRandom extends SnakeAI {
 
       return direction;
     }
-  }
-
-  get aiLevelText() {
-    return i18next.t("engine.aiLevelList.random");
   }
 }

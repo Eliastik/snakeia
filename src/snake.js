@@ -22,7 +22,7 @@ import Grid from "./grid";
 import { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh } from "./ai/index";
 
 export default class Snake {
-  constructor(direction, length, grid, player, aiLevel, autoRetry, name, ai) {
+  constructor(direction, length, grid, player, aiLevel, autoRetry, name, customAI) {
     this.direction = direction == undefined ? GameConstants.Direction.RIGHT : direction;
     this.initialDirection = direction == undefined ? GameConstants.Direction.RIGHT : direction;
     this.initialLength = length == undefined ? 3 : length;
@@ -41,33 +41,11 @@ export default class Snake {
     this.scoreMax = false;
     this.color;
     this.name = name == undefined ? "Snake" : name;
-    this.snakeAI = new SnakeAI(this);
-
-    if(!ai) {
-      switch(this.aiLevel) {
-        case GameConstants.AiLevel.RANDOM:
-          this.snakeAI = new SnakeAIRandom(this);
-          break;
-        case GameConstants.AiLevel.LOW:
-          this.snakeAI = new SnakeAILow(this);
-          break;
-        case GameConstants.AiLevel.DEFAULT:
-          this.snakeAI = new SnakeAINormal(this);
-          break;
-        case GameConstants.AiLevel.HIGH:
-          this.snakeAI = new SnakeAIHigh(this);
-          break;
-        case GameConstants.AiLevel.ULTRA:
-          this.snakeAI = new SnakeAIHigh(this);
-          break;
-      }
-    } else {
-      this.snakeAI = ai;
-      this.snakeAI.snake = this;
-      this.aiLevel = GameConstants.AiLevel.CUSTOM;
-    }
+    this.snakeAI = new SnakeAI();
+    this.customAI = customAI;
 
     this.init();
+    this.initAI();
   }
 
   init() {
@@ -200,6 +178,31 @@ export default class Snake {
 
     this.lastTail = this.get(this.queue.length - 1);
     return true;
+  }
+
+  initAI() {
+    if(!this.customAI) {
+      switch(this.aiLevel) {
+        case GameConstants.AiLevel.RANDOM:
+          this.snakeAI = new SnakeAIRandom();
+          break;
+        case GameConstants.AiLevel.LOW:
+          this.snakeAI = new SnakeAILow();
+          break;
+        case GameConstants.AiLevel.DEFAULT:
+          this.snakeAI = new SnakeAINormal();
+          break;
+        case GameConstants.AiLevel.HIGH:
+          this.snakeAI = new SnakeAIHigh();
+          break;
+        case GameConstants.AiLevel.ULTRA:
+          this.snakeAI = new SnakeAIHigh();
+          break;
+      }
+    } else {
+      this.snakeAI = this.customAI;
+      this.aiLevel = GameConstants.AiLevel.CUSTOM;
+    }
   }
 
   reset() {
@@ -338,10 +341,10 @@ export default class Snake {
   }
 
   ai() {
-    return this.snakeAI.ai();
+    return this.snakeAI && this.snakeAI.ai ? this.snakeAI.ai(this) : null;
   }
 
   getAILevelText() {
-    return this.snakeAI.aiLevelText;
+    return this.snakeAI ? this.snakeAI.aiLevelText : "???";
   }
 }

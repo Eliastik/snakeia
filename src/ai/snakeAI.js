@@ -16,31 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import i18next from "i18next";
 import GameConstants from "../constants";
 
 export default class SnakeAI {
-  constructor(snake) {
-    this.snake = snake;
+  constructor() {
     this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+    this._aiLevelText = "custom";
   }
 
-  ai() {
-    const currentPosition = this.snake.getHeadPosition();
-    const fruitPos = this.snake.grid.fruitPos;
-    const fruitPosGold = this.snake.grid.fruitPosGold;
+  ai(snake) {
+    const currentPosition = snake.getHeadPosition();
+    const fruitPos = snake.grid.fruitPos;
+    const fruitPosGold = snake.grid.fruitPosGold;
 
     if(fruitPos != null) {
       const distFruit = Math.abs(fruitPos.x - currentPosition.x) + Math.abs(fruitPos.y - currentPosition.y);
       const distFruitGold = fruitPosGold != null ? Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y) : -1;
     
-      if(fruitPosGold != null && this.snake.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD && this.aiFruitGoal == GameConstants.CaseType.FRUIT) {
+      if(fruitPosGold != null && snake.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD && this.aiFruitGoal == GameConstants.CaseType.FRUIT) {
         if(distFruitGold < distFruit) {
           this.aiFruitGoal = GameConstants.CaseType.FRUIT_GOLD;
         } else {
           this.aiFruitGoal = GameConstants.CaseType.FRUIT;
         }
-      } else if(fruitPosGold == null || this.snake.grid.get(fruitPosGold) != GameConstants.CaseType.FRUIT_GOLD) {
+      } else if(fruitPosGold == null || snake.grid.get(fruitPosGold) != GameConstants.CaseType.FRUIT_GOLD) {
         this.aiFruitGoal = GameConstants.CaseType.FRUIT;
       }
     }
@@ -49,6 +48,6 @@ export default class SnakeAI {
   }
 
   get aiLevelText() {
-    return i18next.t("engine.aiLevelList.custom");
+    return this._aiLevelText;
   }
 }
