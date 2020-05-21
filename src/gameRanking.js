@@ -39,6 +39,7 @@ export default class GameRanking extends Component {
     this.offsetX = this.offsetX == undefined ? 0 : this.offsetX;
     this.totalTimeX = this.totalTimeX == undefined ? 0 : this.totalTimeX;
     this.totalTime = this.totalTime == undefined ? 0 : this.totalTime;
+    this.canvasTmp = document.createElement("canvas");
 
     this.addScrollAction((deltaX, deltaY) => {
       if(this.lastLine && deltaY > 0) {
@@ -56,11 +57,16 @@ export default class GameRanking extends Component {
     if(this.snakes != null && !this.closed) {
       super.draw(context);
   
-      const canvas = context.canvas;
-      const ctx = context;
+      this.canvasTmp.width = context.canvas.width;
+      this.canvasTmp.height = context.canvas.height;
+
+      const canvas = this.canvasTmp;
+      const ctx = this.canvasTmp.getContext("2d");
+
       ctx.save();
 
       const imageLoader = ui.imageLoader;
+      if(ui && ui.headerHeight) this.headerHeight = ui.headerHeight;
 
       const title = i18next.t("engine.ranking");
       let maxSizeName = ctx.measureText(title).width;
@@ -114,7 +120,7 @@ export default class GameRanking extends Component {
         this.offsetScrollY = 0;
       }
 
-      if(yTitle - this.fontSize >= this.headerHeight) {
+      if(yTitle + this.fontSize - 10 >= this.headerHeight) {
         Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (this.width / 2) - (ctx.measureText(title).width / 2) - this.offsetX, yTitle, false, true);
       }
 
@@ -139,11 +145,13 @@ export default class GameRanking extends Component {
       this.overflow = false;
 
       if(this.timeLastFrame <= 0) this.timeLastFrame = Date.now();
-      const offsetTime = Date.now() - this.timeLastFrame;
+      let offsetTime = Date.now() - this.timeLastFrame;
       this.timeLastFrame = Date.now();
 
+      let numberRankDrawn = 0;
+
       for(let i = 0; i < ranking.length; i++) {
-        if(currentY > this.headerHeight) {
+        if(currentY + this.fontSize > this.headerHeight) {
           if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
             switch(ranking[i].rank) {
               case 0:
@@ -161,11 +169,13 @@ export default class GameRanking extends Component {
           }
 
           Utils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.5)" : "rgba(255, 255, 255, 0.5)"), this.fontSize / 1.5, this.fontFamily, null, null, 5 + sizeNumber + this.fontSize / 1.5 - this.offsetX, currentY + (this.fontSize / 1.5));
+
+          numberRankDrawn++;
         }
 
         currentY += this.fontSize + 5;
 
-        if(currentY + this.fontSize + 5 > canvas.height && !this.back) {
+        if(currentY > canvas.height && !this.back) {
           this.lastLine = false;
           this.totalTime += offsetTime;
 
@@ -179,6 +189,12 @@ export default class GameRanking extends Component {
           this.back = true;
           this.lastLine = true;
         }
+      }
+
+      if(numberRankDrawn <= 0) {
+        this.offsetScrollY = 0;
+        this.timeLastFrame = Date.now();
+        offsetTime = 0;
       }
 
       if(this.back) {
@@ -226,6 +242,8 @@ export default class GameRanking extends Component {
         }
       }
       
+
+      Utils.drawImageData(context, this.canvasTmp, 0, this.headerHeight, this.width, this.height, 0, this.headerHeight, this.width, this.height);
       ctx.restore();
     } else {
       this.overflow = false;

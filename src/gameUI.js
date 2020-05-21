@@ -430,6 +430,10 @@ export default class GameUI {
         this.notificationMessage.fontSizeInitial = this.fontSize;
       }
 
+      if(this.gameRanking) {
+        this.gameRanking.fontSize = this.fontSize;
+      }
+
       this.btnPause.width = this.headerHeight * 0.85;
       this.btnPause.height = this.btnPause.width;
       this.btnPause.y = (this.headerHeight / 2) - (this.btnPause.height / 2);
