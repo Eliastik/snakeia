@@ -34,11 +34,22 @@ export default class GameRanking extends Component {
     this.forceClosing = this.forceClosing == undefined ? false : this.forceClosing;
     this.overflow = this.overflow == undefined ? false : this.overflow;
     this.back = this.back == undefined ? false : this.back;
+    this.lastLine = this.lastLine == undefined ? false : this.lastLine;
     this.timeLastFrame = this.timeLastFrame == undefined ? 0 : this.timeLastFrame;
     this.offsetX = this.offsetX == undefined ? 0 : this.offsetX;
-    this.offsetY = this.offsetY == undefined ? 0 : this.offsetY;
     this.totalTimeX = this.totalTimeX == undefined ? 0 : this.totalTimeX;
     this.totalTime = this.totalTime == undefined ? 0 : this.totalTime;
+
+    this.addScrollAction((deltaX, deltaY) => {
+      if(this.lastLine && deltaY > 0) {
+        this.offsetScrollY -= deltaY;
+        this.back = false;
+        this.overflow = false;
+      }
+
+      this.totalTime = 0;
+      this.timeLastFrame = 0;
+    });
   }
 
   draw(context, ui, currentPlayer) {
@@ -87,17 +98,24 @@ export default class GameRanking extends Component {
         lastScore = snake.score;
       }
 
-      const width = maxSizeName + sizeNumber + 15;
-      const height = canvas.height - this.headerHeight;
+      this.x = -this.offsetX;
+      this.y = this.headerHeight;
+      this.width = maxSizeName + sizeNumber + 15;
+      this.height = canvas.height - this.headerHeight;
 
       ctx.fillStyle = "rgba(75, 75, 75, 0.35)";
-      ctx.fillRect(-this.offsetX, this.headerHeight, width, height);
+      ctx.fillRect(-this.offsetX, this.headerHeight, this.width, this.height);
       ctx.font = this.fontSize + "px " + this.fontFamily;
 
-      const yTitle = this.headerHeight + this.fontSize - this.offsetY + 10;
+      let yTitle = this.headerHeight + this.fontSize - this.offsetScrollY + 10;
+
+      if(yTitle > this.headerHeight + this.fontSize + 10) {
+        yTitle = this.headerHeight + this.fontSize + 10;
+        this.offsetScrollY = 0;
+      }
 
       if(yTitle - this.fontSize >= this.headerHeight) {
-        Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (width / 2) - (ctx.measureText(title).width / 2) - this.offsetX, yTitle, false, true);
+        Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (this.width / 2) - (ctx.measureText(title).width / 2) - this.offsetX, yTitle, false, true);
       }
 
       const ranking = scores.sort((a, b) => {
@@ -147,7 +165,8 @@ export default class GameRanking extends Component {
 
         currentY += this.fontSize + 5;
 
-        if(currentY > canvas.height && !this.back) {
+        if(currentY + this.fontSize + 5 > canvas.height && !this.back) {
+          this.lastLine = false;
           this.totalTime += offsetTime;
 
           if(this.totalTime > 5000) {
@@ -158,6 +177,7 @@ export default class GameRanking extends Component {
         } else if(i == this.snakes.length - 1) {
           if(!this.back) this.totalTime = 0;
           this.back = true;
+          this.lastLine = true;
         }
       }
 
@@ -165,15 +185,15 @@ export default class GameRanking extends Component {
         this.totalTime += offsetTime;
 
         if(this.totalTime > 5000) {
-          if(this.offsetY > 0) {
-            this.offsetY -= offsetTime / 20;
+          if(this.offsetScrollY > 0) {
+            this.offsetScrollY -= offsetTime / 20;
           } else {
             this.back = false;
             this.totalTime = 0;
           }
         }
       } else if(this.overflow) {
-        this.offsetY += offsetTime / 20;
+        this.offsetScrollY += offsetTime / 20;
       }
 
       if(ui.disableAnimation && this.closing) {
@@ -185,12 +205,12 @@ export default class GameRanking extends Component {
       } else {
         if(this.closing) {
           if(this.forceClosing) {
-            this.offsetX = width;
+            this.offsetX = this.width;
           } else {
             this.offsetX += offsetTime / 3;
           }
     
-          if(this.offsetX >= width) {
+          if(this.offsetX >= this.width) {
             this.closing = false;
             this.closed = true;
             this.forceClosing = false;
@@ -205,13 +225,13 @@ export default class GameRanking extends Component {
           }
         }
       }
-
+      
       ctx.restore();
     } else {
       this.overflow = false;
       this.back = false;
       this.timeLastFrame = Date.now();
-      this.offsetY = 0;
+      this.offsetScrollY = 0;
       this.totalTime = 0;
     }
   }

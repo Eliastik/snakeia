@@ -764,6 +764,7 @@ export default class GameUI {
         });
       } else if(this.assetsLoaded) {
         this.btnFullScreen.enable();
+        this.gameRanking.enable();
 
         if(this.snakes != null) {
           for(let i = 0; i < this.snakes.length; i++) {
@@ -795,6 +796,7 @@ export default class GameUI {
 
       if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1) {
         this.gameRanking.open();
+        this.gameRanking.enable();
         this.gameRanking.draw(this.canvasCtx, this, currentPlayer);
       }
     
@@ -834,6 +836,7 @@ export default class GameUI {
       this.btnExitFullScreen.disable();
       this.btnEnterFullScreen.disable();
       this.btnStartGame.disable();
+      this.gameRanking.disable();
 
       if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
         this.notificationMessage.disableCloseButton();
