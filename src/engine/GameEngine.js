@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */  
-import GameUtils from "./gameUtils";
-import GameConstants from "./constants";
-import Reactor from "./reactor";
-import Grid from "./grid";
-import Snake from "./snake";
+import GameUtils from "./GameUtils";
+import GameConstants from "./Constants";
+import Reactor from "./Reactor";
+import Grid from "./Grid";
+import Snake from "./Snake";
 import seedrandom from "seedrandom";
 
 export default class GameEngine {

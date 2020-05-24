@@ -17,11 +17,12 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import i18next from "i18next";
-import GameUtils from "./gameUtils";
-import GameConstants from "./constants";
-import Position from "./position";
-import GameRanking from "./gameRanking";
+import GameUtils from "../engine/GameUtils";
+import GameConstants from "../engine/Constants";
+import GameRanking from "./GameRanking";
 import { ImageLoader, Button, ButtonImage, NotificationMessage, Utils, Menu, Label, ProgressBar, Constants } from "jsgametools";
+import GridUI from "./GridUI";
+import Header from "./Header";
 Constants.Setting.FONT_FAMILY = "DELIUS";
 
 export default class GameUI {
@@ -87,8 +88,14 @@ export default class GameUI {
     this.getInfosGame = false;
     this.getAdvancedInfosGame = false;
     this.timeoutAutoRetry = null;
-    // Game ranking
-    this.gameRanking = new GameRanking();
+    // Components
+    this.isFilterHueAvailable = Utils.isFilterHueAvailable();
+    this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
+    this.gameRanking = new GameRanking(this.snakes, null, null, null, this.header.height, null, this.disableAnimation, this.imageLoader);
+    this.gridUI = new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader);
+    this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, null, null, null, 0.5, this.disableAnimation, "center");
+    this.notificationMessage;
+    this.labelMenus;
     // DOM elements and others settings
     this.textarea;
     this.canvas;
@@ -96,10 +103,8 @@ export default class GameUI {
     this.canvasWidth = canvasWidth == undefined ? GameConstants.Setting.CANVAS_WIDTH : canvasWidth;
     this.canvasHeight = canvasHeight == undefined ? GameConstants.Setting.CANVAS_HEIGHT : canvasHeight;
     this.fontSize = GameConstants.Setting.FONT_SIZE;
-    this.headerHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
     this.timerToDisplay = null;
     this.bestScoreToDisplay = null;
-    this.isFilterHueAvailable = Utils.isFilterHueAvailable();
     // Intervals, timeouts, frames
     this.intervalCountFPS;
     // Buttons
@@ -122,12 +127,6 @@ export default class GameUI {
     this.btnEnterFullScreen;
     this.btnStartGame;
     this.btnRank;
-    // Notification
-    this.notificationMessage;
-    // Label
-    this.labelMenus;
-    // Progress bar
-    this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, null, null, null, 0.5, this.disableAnimation, "center");
 
     this.init();
   }
@@ -165,6 +164,8 @@ export default class GameUI {
       this.btnEnterFullScreen = new Button(i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnStartGame = new Button(i18next.t("engine.servers.startGame"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.labelMenus = new Label("", null, null, GameConstants.Setting.FONT_SIZE, GameConstants.Setting.FONT_FAMILY, "white", "center");
+
+      this.header.setButtons(this.btnFullScreen, this.btnPause, this.btnRank);
 
       this.btnFullScreen.setClickAction(() => {
         this.toggleFullscreen();
@@ -408,18 +409,17 @@ export default class GameUI {
       this.textarea.innerHTML = this.toString();
     } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
       const ctx = this.canvasCtx;
-      let displayBestScore = false;
-      const currentPlayer = this.controller.getCurrentPlayer();
+      this.currentPlayer = this.controller.getCurrentPlayer();
 
       this.fontSize = GameConstants.Setting.FONT_SIZE;
-      this.headerHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
+      this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
 
       if(this.canvas.width <= GameConstants.Setting.CANVAS_WIDTH / 1.25) {
         this.fontSize /= 1.25;
-        this.headerHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25;
+        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25;
       } else if(this.canvas.width >= GameConstants.Setting.CANVAS_WIDTH * 1.5) {
         this.fontSize *= 1.25;
-        this.headerHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25;
+        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25;
       }
 
       Constants.Setting.FONT_SIZE = this.fontSize;
@@ -434,97 +434,25 @@ export default class GameUI {
         this.gameRanking.fontSize = this.fontSize;
       }
 
-      this.btnPause.width = this.headerHeight * 0.85;
-      this.btnPause.height = this.btnPause.width;
-      this.btnPause.y = (this.headerHeight / 2) - (this.btnPause.height / 2);
-
-      this.btnFullScreen.width = this.headerHeight * 0.85;
-      this.btnFullScreen.height = this.btnFullScreen.width;
-      this.btnFullScreen.y = (this.headerHeight / 2) - (this.btnFullScreen.height / 2);
-
-      this.btnRank.width = this.headerHeight * 0.85;
-      this.btnRank.height = this.btnRank.width;
-      this.btnRank.y = (this.headerHeight / 2) - (this.btnRank.height / 2);
-
       this.menu.disable();
 
       Utils.clear(ctx);
       ctx.fillStyle = "rgba(204, 207, 211, 1)";
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-      ctx.fillStyle = "#27AE60";
-      ctx.fillRect(0, 0, this.canvas.width, this.headerHeight);
       ctx.font = this.fontSize + "px " + GameConstants.Setting.FONT_FAMILY;
-      ctx.fillStyle = "black";
-
-      this.btnFullScreen.draw(this.canvasCtx);
-
-      if(this.enablePause) {
-        this.btnPause.x = this.btnFullScreen.x - this.btnPause.width - 10;
-        this.btnPause.draw(this.canvasCtx);
-
-        if(this.snakes != null && this.snakes.length > 1) {
-          this.btnRank.x = this.btnPause.x - this.btnPause.width - 10;
-          this.btnRank.draw(this.canvasCtx);
-        }
-      } else if(this.snakes != null && this.snakes.length > 1) {
-        this.btnRank.x = this.btnPause.x - this.btnFullScreen.width - 10;
-        this.btnRank.draw(this.canvasCtx);
-      }
-
-      if((this.gameRanking.closing || this.gameRanking.closed) && this.assetsLoaded) {
-        this.btnRank.color = "rgba(0, 0, 0, 0)";
-      } else if(this.assetsLoaded) {
-        this.btnRank.color = this.btnRank.colorHover;
-      }
 
       if(this.assetsLoaded && !this.errorOccurred) {
-        if(this.bestScoreToDisplay != undefined && this.bestScoreToDisplay != null) {
-          displayBestScore = true;
-        }
-
-        Utils.drawImage(ctx, this.imageLoader.get("assets/images/skin/flat/fruit.png"), 5, 5, this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1), this.headerHeight * 0.85 * (displayBestScore ? 0.5 : 1));
-
-        if(this.snakes != null && this.snakes.length == 1) {
-          Utils.drawText(ctx, "× " + this.snakes[0].score, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
-        } else {
-          Utils.drawText(ctx, i18next.t("engine.num") + (this.numFruit != null ? this.numFruit : "???"), "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
-        }
-
-        if(displayBestScore) {
-          Utils.drawImage(ctx, this.imageLoader.get("assets/images/trophy.png"), 5, 8 + this.headerHeight * 0.425, this.headerHeight * 0.425, this.headerHeight * 0.425);
-          Utils.drawText(ctx, this.bestScoreToDisplay, "black", this.headerHeight * 0.43 * (displayBestScore ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.headerHeight * 0.9 * (displayBestScore ? 0.58 : 1), this.headerHeight * 0.425 + this.headerHeight * 0.67 * (displayBestScore ? 0.63 : 1));
-        }
+        this.header.set(this.snakes, this.imageLoader, this.bestScoreToDisplay, this.header.height, this.numFruit, this.enablePause);
+        this.header.draw(ctx);
 
         if(this.grid != null && (!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished)))) {
-          let caseHeight = Math.floor((this.canvas.height - this.headerHeight) / this.grid.height);
-          let caseWidth = Math.floor(this.canvas.width / this.grid.width);
-          caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
-          caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
-
-          const totalWidth = caseWidth * this.grid.width;
-
-          for(let i = 0; i < this.grid.height; i++) {
-            for(let j = 0; j < this.grid.width; j++) {
-              const caseX = Math.floor(j * caseWidth + ((this.canvas.width - totalWidth) / 2));
-              const caseY = this.headerHeight + i * caseHeight;
-
-              if((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
-                ctx.fillStyle = "rgba(127, 140, 141, 0.75)";
-              } else {
-                ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
-              }
-
-              ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
-              Utils.drawImage(ctx, this.imageLoader.get("assets/images/skin/" + this.graphicSkin + "/" + this.grid.getImageCase(new Position(j, i))), caseX, caseY, caseWidth, caseHeight);
-            }
-          }
-
-          this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, currentPlayer);
+          this.gridUI.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.currentPlayer, this.gameFinished);
+          this.gridUI.draw(ctx);
         }
 
         if(this.timerToDisplay != undefined && this.timerToDisplay != null && !isNaN(this.timerToDisplay) && this.timerToDisplay >= 0) {
-          const sizesTimer = Utils.drawText(ctx, "" + GameUtils.secondsFormat(this.timerToDisplay), "rgba(0, 0, 0, 0.5)", this.fontSize, GameConstants.Setting.FONT_FAMILY, "right", "default", null, this.headerHeight + 15 + this.headerHeight * 0.475);
-          Utils.drawImage(ctx, this.imageLoader.get("assets/images/clock.png"), sizesTimer["x"] - this.headerHeight * 0.64 - 10, this.headerHeight + 15, this.headerHeight * 0.64, this.headerHeight * 0.64);
+          const sizesTimer = Utils.drawText(ctx, "" + GameUtils.secondsFormat(this.timerToDisplay), "rgba(0, 0, 0, 0.5)", this.fontSize, GameConstants.Setting.FONT_FAMILY, "right", "default", null, this.header.height + 15 + this.header.height * 0.475);
+          Utils.drawImage(ctx, this.imageLoader.get("assets/images/clock.png"), sizesTimer["x"] - this.header.height * 0.64 - 10, this.header.height + 15, this.header.height * 0.64, this.header.height * 0.64);
         }
       } else if(!this.assetsLoaded) {
         const percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
@@ -551,8 +479,8 @@ export default class GameUI {
       }
 
       if(!this.gameFinished && !this.gameOver && this.assetsLoaded) {
-        this.gameRanking.set(this.snakes, this.fontSize, this.headerHeight);
-        this.gameRanking.draw(this.canvasCtx, this, currentPlayer);
+        this.gameRanking.set(this.snakes, this.fontSize, this.header.height, this.currentPlayer, this.imageLoader);
+        this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
       }
 
       this.disableAllButtons();
@@ -654,7 +582,10 @@ export default class GameUI {
           }
 
           this.labelMenus.text += (playerHuman != null ? ("\n" + (this.isFilterHueAvailable && colorName != "???" && this.graphicSkin == "flat" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : "");
-          this.labelMenus.color = (this.isFilterHueAvailable && colorName != "???" && this.graphicSkin == "flat" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]);
+
+          if(colorRgb && colorRgb.length >= 3) {
+            this.labelMenus.color = (this.isFilterHueAvailable && colorName != "???" && this.graphicSkin == "flat" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]);
+          }
         } else {
           if(this.countBeforePlay > 0) {
             this.labelMenus.text = "" + this.countBeforePlay;
@@ -801,7 +732,7 @@ export default class GameUI {
       if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1) {
         this.gameRanking.open();
         this.gameRanking.enable();
-        this.gameRanking.draw(this.canvasCtx, this, currentPlayer);
+        this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
       }
     
       if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {
@@ -883,258 +814,5 @@ export default class GameUI {
 
   toString() {
     return (this.grid != null ? this.grid.toString() : "") + "\n" + (this.snakes != null && this.snakes.length <= 1 ? i18next.t("engine.score") + " : " + (this.snakes != null ? this.snakes[0].score : "") : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
-  }
-
-  drawSnake(ctx, caseWidth, caseHeight, totalWidth, currentPlayer) {
-    if(this.snakes != null) {
-      const canvasTmp = document.createElement("canvas");
-      canvasTmp.width = this.canvas.width;
-      canvasTmp.height = this.canvas.height;
-      const ctxTmp = canvasTmp.getContext("2d");
-    
-      for(let j = 0; j < this.snakes.length; j++) {
-        ctxTmp.clearRect(0, 0, canvasTmp.width, canvasTmp.height);
-
-        if(this.snakes[j].color != undefined) {
-          ctxTmp.filter = "hue-rotate(" + this.snakes[j].color + "deg)";
-        }
-
-        for(let i = this.snakes[j].length() - 1; (i >= -1 && this.snakes[j].length() > 1) || i >= 0; i--) { // -1 == tail
-          let position;
-
-          if(i == -1) {
-            position = this.snakes[j].get(this.snakes[j].length() - 1);
-          } else {
-            position = this.snakes[j].get(i);
-          }
-
-          let caseX = 0;
-          let caseY = 0;
-          let direction = position.direction;
-          let angle = 0;
-          let imageLoc = "";
-          let eraseBelow = true;
-
-          if(i == 0) {
-            direction = this.snakes[j].getHeadPosition().direction;
-          } else if(i == -1) {
-            if(!this.disableAnimation && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished && this.snakes[j].lastTailMoved) {
-              direction = this.snakes[j].getTailPosition().direction;
-            } else {
-              direction = this.snakes[j].get(this.snakes[j].length() - 2).direction;
-            }
-          } else {
-            direction = this.snakes[j].getGraphicDirection(i);
-          }
-
-          // Animation
-          if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
-            let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER); // percentage of the animation
-            offset = (offset > 1 ? 1 : offset);
-            const offsetX = (caseWidth * offset) - caseWidth;
-            const offsetY = (caseHeight * offset) - caseHeight;
-
-            let currentPosition = position;
-            let graphicDirection;
-
-            if(i == 0) {
-              if(this.snakes[j].length() > 1) {
-                graphicDirection = this.snakes[j].getGraphicDirection(1);
-              } else {
-                graphicDirection = this.snakes[j].getGraphicDirection(0);
-              }
-            } else if(i == -1) {
-              graphicDirection = this.snakes[j].getGraphicDirectionFor(this.snakes[j].getTailPosition(), this.snakes[j].lastTail, this.snakes[j].get(this.snakes[j].length() - 2));
-            }
-
-            if(i == -1 && this.snakes[j].length() > 1) {
-              currentPosition = this.snakes[j].get(this.snakes[j].length() - 1);
-            }
-
-            if((i == 0 || i == -1) && (graphicDirection == GameConstants.Direction.ANGLE_1 || graphicDirection == GameConstants.Direction.ANGLE_2 || graphicDirection == GameConstants.Direction.ANGLE_3 || graphicDirection == GameConstants.Direction.ANGLE_4)) {
-              if(i == 0) {
-                angle = -90;
-              }
-
-              if(i == 0) {
-                angle += -128.073 * Math.pow(offset, 2) + 222.332 * offset - 5.47066;
-              } else if(i == -1) {
-                angle += 126.896 * Math.pow(offset, 2) + -33.6471 * offset + 1.65942;
-              }
-
-              if(i == 0 && ((graphicDirection == GameConstants.Direction.ANGLE_4 && direction == GameConstants.Direction.UP) || (graphicDirection == GameConstants.Direction.ANGLE_1 && direction == GameConstants.Direction.LEFT) || (graphicDirection == GameConstants.Direction.ANGLE_2 && direction == GameConstants.Direction.BOTTOM) || (graphicDirection == GameConstants.Direction.ANGLE_3 && direction == GameConstants.Direction.RIGHT))) {
-                angle = -angle;
-              } else if(i == -1 && ((graphicDirection == GameConstants.Direction.ANGLE_4 && direction == GameConstants.Direction.RIGHT) || (graphicDirection == GameConstants.Direction.ANGLE_3 && direction == GameConstants.Direction.BOTTOM) || (graphicDirection == GameConstants.Direction.ANGLE_1 && direction == GameConstants.Direction.UP) || (graphicDirection == GameConstants.Direction.ANGLE_2 && direction == GameConstants.Direction.LEFT))) {
-                angle = - angle;
-              }
-
-              eraseBelow = false;
-            }
-
-            switch(currentPosition.direction) {
-              case GameConstants.Direction.UP:
-                caseY -= offsetY;
-                break;
-              case GameConstants.Direction.BOTTOM:
-                caseY += offsetY;
-                break;
-              case GameConstants.Direction.RIGHT:
-                caseX += offsetX;
-                break;
-              case GameConstants.Direction.LEFT:
-                caseX -= offsetX;
-                break;
-            }
-          }
-
-          if(i == this.snakes[j].length() - 1) {
-            direction = this.snakes[j].getGraphicDirectionFor(position, this.snakes[j].get(i - 1), this.snakes[j].lastTail);
-          }
-
-          const posX = position.x;
-          const posY = position.y;
-          caseX += Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
-          caseY += this.headerHeight + posY * caseHeight;
-
-          if(i == 0) {
-            if(this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
-              switch(direction) {
-                case GameConstants.Direction.BOTTOM:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead.png";
-                  break;
-                case GameConstants.Direction.RIGHT:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png";
-                  break;
-                case GameConstants.Direction.UP:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png";
-                  break;
-                case GameConstants.Direction.LEFT:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png";
-                  break;
-              }
-            } else {
-              switch(direction) {
-                case GameConstants.Direction.BOTTOM:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake.png";
-                  break;
-                case GameConstants.Direction.RIGHT:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_2.png";
-                  break;
-                case GameConstants.Direction.UP:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_3.png";
-                  break;
-                case GameConstants.Direction.LEFT:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_4.png";
-                  break;
-              }
-            }
-          } else if(i == -1) {
-            switch(direction) {
-              case GameConstants.Direction.BOTTOM:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_end.png";
-                break;
-              case GameConstants.Direction.RIGHT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2_end.png";
-                break;
-              case GameConstants.Direction.UP:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_3_end.png";
-                break;
-              case GameConstants.Direction.LEFT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_4_end.png";
-                break;
-            }
-          } else {
-            switch(direction) {
-              case GameConstants.Direction.UP:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
-                break;
-              case GameConstants.Direction.BOTTOM:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
-                break;
-              case GameConstants.Direction.RIGHT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
-                break;
-              case GameConstants.Direction.LEFT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
-                break;
-              case GameConstants.Direction.ANGLE_1:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png";
-                break;
-              case GameConstants.Direction.ANGLE_2:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png";
-                break;
-              case GameConstants.Direction.ANGLE_3:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png";
-                break;
-              case GameConstants.Direction.ANGLE_4:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png";
-                break;
-            }
-          }
-
-          Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc), caseX, caseY, caseWidth, caseHeight, null, null, null, null, eraseBelow, angle);
-        }
-
-        Utils.drawImageData(ctx, canvasTmp, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height, Math.floor((this.canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height);
-        ctxTmp.filter = "none";
-      }
-
-      canvasTmp.width = 0;
-      canvasTmp.height = 0;
-
-      if(this.snakes.length > 1) {
-        this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight, currentPlayer);
-      }
-    }
-  }
-
-  drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight, currentPlayer) {
-    let numPlayer = 0;
-    let numAI = 0;
-
-    for(let i = 0; i < this.snakes.length; i++) {
-      if(this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
-        numPlayer++;
-      } else {
-        numAI++;
-      }
-
-      const position = this.snakes[i].get(0);
-
-      if(position != null) {
-        const posX = position.x;
-        const posY = position.y;
-        let caseX = Math.floor(posX * caseWidth + ((this.canvas.width - totalWidth) / 2));
-        let caseY = this.headerHeight + posY * caseHeight;
-    
-        if(!this.disableAnimation && !this.snakes[i].gameOver) {
-          let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
-          offset = (offset > 1 ? 1 : offset);
-          const offsetX = (caseWidth * offset) - caseWidth;
-          const offsetY = (caseHeight * offset) - caseHeight;
-    
-          switch(position.direction) {
-            case GameConstants.Direction.UP:
-              caseY -= offsetY;
-              break;
-            case GameConstants.Direction.BOTTOM:
-              caseY += offsetY;
-              break;
-            case GameConstants.Direction.RIGHT:
-              caseX += offsetX;
-              break;
-            case GameConstants.Direction.LEFT:
-              caseX -= offsetX;
-              break;
-          }
-        }
-    
-        Utils.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
-    
-        if(currentPlayer == i && this.countBeforePlay >= 0 && (currentPlayer != null || (this.isFilterHueAvailable && this.snakes.length > 2) || (!this.isFilterHueAvailable && this.snakes.length > 1))) {
-          Utils.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
-        }
-      }
-    }
   }
 }

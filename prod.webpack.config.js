@@ -28,7 +28,7 @@ const config = [
   }
 },
 {
-  entry: "./src/gameEngineWorker.js",
+  entry: "./src/engine/GameEngineWorker.js",
   mode: "production",
   performance: { hints: false },
   output: {

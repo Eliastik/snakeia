@@ -17,17 +17,17 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import i18next from "i18next";
-import { Game, WorkersAvailable } from "./src/shim";
-import GameConstants from "./src/constants";
-import Snake from "./src/snake";
-import Grid from "./src/grid";
-import GameGroup from "./src/gameGroup";
-import OnlineClient from "./src/onlineClient";
-import GameUI from "./src/gameUI.js";
+import { Game, WorkersAvailable } from "./src/Shim";
+import GameConstants from "./src/engine/Constants";
+import Snake from "./src/engine/Snake";
+import Grid from "./src/engine/Grid";
+import GameGroup from "./src/engine/GameGroup";
+import OnlineClient from "./src/engine/OnlineClient";
+import GameUI from "./src/ui/GameUI.js";
 import { NotificationMessage } from "jsgametools";
 import seedrandom from "seedrandom";
-import StorageFactory from "./src/storageFactory";
-import { Timer, TimerInterval } from "./src/timers";
+import StorageFactory from "./src/StorageFactory";
+import { Timer, TimerInterval } from "./src/Timers";
 
 // Modes :
 window.SOLO_AI = "SOLO_AI";

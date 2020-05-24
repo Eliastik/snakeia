@@ -32,7 +32,7 @@ const config = [
   }
 },
 {
-  entry: "./src/gameEngineWorker.js",
+  entry: "./src/engine/GameEngineWorker.js",
   mode: "development",
   performance: { hints: false },
   output: {

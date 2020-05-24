@@ -17,12 +17,12 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import i18next from "i18next";
-import GameController from "./gameController";
-import Grid from "./grid";
-import Snake from "./snake";
-import Position from "./position";
+import GameController from "./GameController";
+import Grid from "./Grid";
+import Snake from "./Snake";
+import Position from "./Position";
 import { NotificationMessage } from "jsgametools";
-import { Game } from "./shim";
+import { Game } from "../Shim";
 
 export default class GameControllerSocket extends GameController {
   constructor(socket, ui, enableClientSidePredictions, settings) {

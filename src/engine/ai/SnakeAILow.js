@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import SnakeAI from "./snakeAI";
-import GameConstants from "../constants";
+import SnakeAI from "./SnakeAI";
+import GameConstants from "../Constants";
 
 export default class SnakeAILow extends SnakeAI {
   constructor() {

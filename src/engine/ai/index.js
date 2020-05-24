@@ -16,26 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import Event from "./event";
+import SnakeAI from "./SnakeAI";
+import SnakeAIRandom from "./SnakeAIRandom";
+import SnakeAILow from "./SnakeAILow";
+import SnakeAINormal from "./SnakeAINormal";
+import SnakeAIHigh from "./SnakeAIHigh";
 
-export default class Reactor {
-  constructor() {
-    this.events = {};
-  }
-
-  registerEvent(eventName) {
-    this.events[eventName] = new Event(eventName);
-  }
-
-  dispatchEvent(eventName, eventArgs) {
-    const callbacks = this.events[eventName].callbacks;
-    
-    for(let i = 0, l = callbacks.length; i < l; i++) {
-      callbacks[i](eventArgs);
-    }
-  }
-
-  addEventListener(eventName, callback) {
-    this.events[eventName].registerCallback(callback);
-  }
-}
+export { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh }

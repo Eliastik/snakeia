@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
  *
@@ -17,23 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import SnakeAILow from "./snakeAINormal";
-import SnakeAINormal from "./snakeAINormal";
+import Event from "./Event";
 
-export default class SnakeAIHigh extends SnakeAINormal {
-  constructor(snake) {
-    super(true);
-    this.aiLow = new SnakeAILow(snake);
-    this._aiLevelText = "high";
+export default class Reactor {
+  constructor() {
+    this.events = {};
   }
 
-  ai(snake) {
-    const res = super.ai(snake);
+  registerEvent(eventName) {
+    this.events[eventName] = new Event(eventName);
+  }
 
-    if(!res) {
-      return this.aiLow.ai(snake);
-    }
+  dispatchEvent(eventName, eventArgs) {
+    const callbacks = this.events[eventName].callbacks;
     
-    return res;
+    for(let i = 0, l = callbacks.length; i < l; i++) {
+      callbacks[i](eventArgs);
+    }
+  }
+
+  addEventListener(eventName, callback) {
+    this.events[eventName].registerCallback(callback);
   }
 }

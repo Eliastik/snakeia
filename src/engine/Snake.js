@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import GameConstants from "./constants";
-import Position from "./position";
-import Grid from "./grid";
+import GameConstants from "./Constants";
+import Position from "./Position";
+import Grid from "./Grid";
 import { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh } from "./ai/index";
 
 export default class Snake {

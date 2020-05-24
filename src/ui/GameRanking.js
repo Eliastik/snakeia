@@ -16,13 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import GameConstants from "./constants";
+import GameConstants from "../engine/Constants";
 import { Component, Utils } from "jsgametools";
 import i18next from "i18next";
 
 export default class GameRanking extends Component {
-  constructor(snakes, fontSize, fontFamily, headerHeight, backgroundColor) {
+  constructor(snakes, currentPlayer, fontSize, fontFamily, headerHeight, backgroundColor, disableAnimation, imageLoader) {
     super();
+
     this.snakes = snakes;
     this.fontSize = fontSize || Math.floor(GameConstants.Setting.FONT_SIZE / 1.25);
     this.fontFamily = fontFamily || GameConstants.Setting.FONT_FAMILY;
@@ -40,6 +41,9 @@ export default class GameRanking extends Component {
     this.totalTimeX = this.totalTimeX == undefined ? 0 : this.totalTimeX;
     this.totalTime = this.totalTime == undefined ? 0 : this.totalTime;
     this.canvasTmp = document.createElement("canvas");
+    this.disableAnimation = disableAnimation;
+    this.imageLoader = imageLoader;
+    this.currentPlayer = currentPlayer;
 
     this.addScrollAction((deltaX, deltaY) => {
       if(this.lastLine && deltaY > 0) {
@@ -53,7 +57,7 @@ export default class GameRanking extends Component {
     });
   }
 
-  draw(context, ui, currentPlayer) {
+  draw(context) {
     if(this.snakes != null && !this.closed) {
       super.draw(context);
   
@@ -64,9 +68,6 @@ export default class GameRanking extends Component {
       const ctx = this.canvasTmp.getContext("2d");
 
       ctx.save();
-
-      const imageLoader = ui.imageLoader;
-      if(ui && ui.headerHeight) this.headerHeight = ui.headerHeight;
 
       const title = i18next.t("engine.ranking");
       let maxSizeName = ctx.measureText(title).width;
@@ -87,7 +88,7 @@ export default class GameRanking extends Component {
           numAI++;
         }
 
-        const text = snake.name + " × " + snake.score + " (" + ((currentPlayer == i ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
+        const text = snake.name + " × " + snake.score + " (" + ((this.currentPlayer == i ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
         const sizeText = ctx.measureText(text).width + 30;
 
         if(sizeText > maxSizeName) maxSizeName = sizeText;
@@ -155,13 +156,13 @@ export default class GameRanking extends Component {
           if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
             switch(ranking[i].rank) {
               case 0:
-                Utils.drawImage(ctx, imageLoader.get("assets/images/trophy.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
+                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy.png") : null, 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
                 break;
               case 1:
-                Utils.drawImage(ctx, imageLoader.get("assets/images/trophy_silver.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
+                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_silver.png") : null, 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
                 break;
               case 2:
-                Utils.drawImage(ctx, imageLoader.get("assets/images/trophy_bronze.png"), 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
+                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_bronze.png") : null, 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
                 break;
             }
           } else {
@@ -212,10 +213,10 @@ export default class GameRanking extends Component {
         this.offsetScrollY += offsetTime / 20;
       }
 
-      if(ui.disableAnimation && this.closing) {
+      if(this.disableAnimation && this.closing) {
         this.closing = false;
         this.closed = true;
-      } else if(ui.disableAnimation && this.closing) {
+      } else if(this.disableAnimation && this.closing) {
         this.opening = false;
         this.closed = false;
       } else {
@@ -273,9 +274,11 @@ export default class GameRanking extends Component {
     this.forceClosing = false;
   }
 
-  set(snakes, fontSize, headerHeight) {
+  set(snakes, fontSize, headerHeight, currentPlayer, imageLoader) {
     this.snakes = snakes;
     this.fontSize = fontSize;
     this.headerHeight = headerHeight;
+    this.currentPlayer = currentPlayer;
+    this.imageLoader = imageLoader;
   }
 }

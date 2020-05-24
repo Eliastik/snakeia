@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import GameController from "./gameController";
-import Grid from "./grid";
-import Snake from "./snake";
-import Position from "./position";
+import GameController from "./GameController";
+import Grid from "./Grid";
+import Snake from "./Snake";
+import Position from "./Position";
 
 export default class GameControllerWorker extends GameController {
   constructor (game, ui) {
