@@ -91,7 +91,7 @@ export default class GameUI {
     // Components
     this.isFilterHueAvailable = Utils.isFilterHueAvailable();
     this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
-    this.gameRanking = new GameRanking(this.snakes, null, null, null, this.header.height, null, this.disableAnimation, this.imageLoader);
+    this.gameRanking = new GameRanking(this.snakes, null, null, null, this.header.height, null, null, this.disableAnimation, this.imageLoader);
     this.gridUI = new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader);
     this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, null, null, null, 0.5, this.disableAnimation, "center");
     this.notificationMessage;

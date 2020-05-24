@@ -337,10 +337,10 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 
 - [x] Prédictions pour le mode en ligne (améliore la fluidité)
   Presque OK
-- [ ] Barre défilement classement
 - [ ] Contrôles sur mobile via défilement doigt
 - [ ] Eviter de placer les joueurs trop près des murs
 - [ ] Améliorer l'IA
+- [x] Barre défilement classement
 - [x] Séparer le code de la méthode draw de GameUI en plusieurs classes Component
 - [x] Défilement classement roulette/glisser
 - [x] Seeds pour les grilles/jeu

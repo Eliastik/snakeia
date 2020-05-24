@@ -21,25 +21,26 @@ import { Component, Utils } from "jsgametools";
 import i18next from "i18next";
 
 export default class GameRanking extends Component {
-  constructor(snakes, currentPlayer, fontSize, fontFamily, headerHeight, backgroundColor, disableAnimation, imageLoader) {
+  constructor(snakes, currentPlayer, fontSize, fontFamily, headerHeight, backgroundColor, scrollBarColor, disableAnimation, imageLoader) {
     super();
 
     this.snakes = snakes;
     this.fontSize = fontSize || Math.floor(GameConstants.Setting.FONT_SIZE / 1.25);
     this.fontFamily = fontFamily || GameConstants.Setting.FONT_FAMILY;
-    this.backgroundColor = backgroundColor == undefined ? "rgba(44, 62, 80, 0.75)" : backgroundColor;
-    this.headerHeight = headerHeight == undefined ? GameConstants.Setting.HEADER_HEIGHT_DEFAULT : headerHeight;
-    this.closed = this.closed == undefined ? false : this.closed;
-    this.closing = this.closing == undefined ? false : this.closing;
-    this.opening = this.opening == undefined ? false : this.opening;
-    this.forceClosing = this.forceClosing == undefined ? false : this.forceClosing;
-    this.overflow = this.overflow == undefined ? false : this.overflow;
-    this.back = this.back == undefined ? false : this.back;
-    this.lastLine = this.lastLine == undefined ? false : this.lastLine;
-    this.timeLastFrame = this.timeLastFrame == undefined ? 0 : this.timeLastFrame;
-    this.offsetX = this.offsetX == undefined ? 0 : this.offsetX;
-    this.totalTimeX = this.totalTimeX == undefined ? 0 : this.totalTimeX;
-    this.totalTime = this.totalTime == undefined ? 0 : this.totalTime;
+    this.backgroundColor = backgroundColor || "rgba(44, 62, 80, 0.75)";
+    this.scrollBarColor = scrollBarColor || "rgba(44, 62, 80, 0.8)";
+    this.headerHeight = headerHeight || GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
+    this.closed = false;
+    this.closing = false;
+    this.opening = false;
+    this.forceClosing = false;
+    this.overflow = false;
+    this.back = false;
+    this.lastLine = false;
+    this.timeLastFrame = 0;
+    this.offsetX = 0;
+    this.totalTimeX = 0;
+    this.totalTime = 0;
     this.canvasTmp = document.createElement("canvas");
     this.disableAnimation = disableAnimation;
     this.imageLoader = imageLoader;
@@ -243,6 +244,16 @@ export default class GameRanking extends Component {
         }
       }
       
+      // Scrollbar
+      const maxHeight = this.snakes.length * (this.fontSize + 5) + this.fontSize + 10;
+      const clientHeight = this.height * (this.height / maxHeight);
+      const percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
+      const scrollAreaSize = this.height - clientHeight;
+
+      if(clientHeight <= this.height) {
+        ctx.fillStyle = this.scrollBarColor;
+        ctx.fillRect(this.x + this.width - 15, this.headerHeight + scrollAreaSize * percentScrollbar, 15, clientHeight);
+      }
 
       Utils.drawImageData(context, this.canvasTmp, 0, this.headerHeight, this.width, this.height, 0, this.headerHeight, this.width, this.height);
       ctx.restore();
