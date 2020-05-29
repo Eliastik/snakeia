@@ -46,6 +46,21 @@ const config = [
   devtool: "inline-source-map",
   devServer: {
     contentBase: "./dist",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.m?js$/,
+        exclude: /(node_modules|libs)/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env"],
+            plugins: ["@babel/plugin-transform-runtime"]
+          }
+        }
+      }
+    ]
   }
 },
 {
