@@ -206,9 +206,19 @@ export default class Grid {
         return "fruit.png";
       case GameConstants.CaseType.FRUIT_GOLD:
         return "fruit_gold.png";
+      case GameConstants.CaseType.EMPTY:
+        return "";
+      case GameConstants.CaseType.SNAKE:
+        return "";
+      case GameConstants.CaseType.SNAKE_DEAD:
+        return "";
+      case GameConstants.CaseType.SURROUNDED:
+        return "";
+      case GameConstants.CaseType.CROSSED:
+        return "";
     }
 
-    return "";
+    return "unknown.png";
   }
 
   getGraph(ignoreSnakePos) {
