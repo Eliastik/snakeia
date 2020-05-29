@@ -198,6 +198,9 @@ export default class Snake {
         case GameConstants.AiLevel.ULTRA:
           this.snakeAI = new SnakeAIHigh();
           break;
+        default:
+          this.snakeAI = new SnakeAINormal();
+          break;
       }
     } else {
       this.snakeAI = this.customAI;

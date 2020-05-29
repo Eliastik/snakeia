@@ -285,7 +285,6 @@ export default class GameEngine {
             this.snakes[i].lastTailMoved = false;
 
             if(!this.snakes[i].gameOver && !this.snakes[i].scoreMax) {
-
               if(this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
                 this.snakes[i].moveTo(this.snakes[i].lastKey);
                 this.snakes[i].lastKey = -1;
