@@ -9,7 +9,8 @@ const config = [
     path: path.resolve(__dirname, "dist"),
     filename: "SnakeIA.js",
     library: "SnakeIA",
-    libraryTarget: "umd"
+    libraryTarget: "umd",
+    globalObject: "typeof self !== \"undefined\" ? self : this"
   },
   devtool: "inline-source-map",
   devServer: {
