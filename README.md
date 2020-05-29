@@ -14,7 +14,7 @@ Game written in pure JavaScript and object oriented.
 
 ## About this game
 
-* Version: 2.1
+* Version: 2.1.1-dev
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -180,7 +180,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## À propos du jeu
 
-* Version du jeu : 2.1
+* Version du jeu : 2.1.1-dev
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
