@@ -38,21 +38,6 @@ const config = [
     library: "SnakeIA",
     libraryTarget: "umd",
     globalObject: "typeof self !== \"undefined\" ? self : this"
-  },
-  module: {
-    rules: [
-      {
-        test: /\.m?js$/,
-        exclude: /(node_modules|libs)/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env"],
-            plugins: ["@babel/plugin-transform-runtime"]
-          }
-        }
-      }
-    ]
   }
 },
 {
