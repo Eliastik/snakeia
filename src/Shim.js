@@ -48,22 +48,24 @@ if(!String.prototype.trim) {
 
 // Test if Workerd are supported
 function WorkersAvailable(callback) {
-  try {
-    if(!window.Worker) throw "Workers not supported";
-    const testWorker = new Worker("dist/GameEngineWorker.js");
+  if(typeof(window) !== "undefined") {
+    try {
+      if(!window.Worker) throw "Workers not supported";
+      const testWorker = new Worker("dist/GameEngineWorker.js");
 
-    if(testWorker) {
-      testWorker.postMessage("ping");
+      if(testWorker) {
+        testWorker.postMessage("ping");
 
-      testWorker.onmessage = e => {
-        if(e.data == "pong") {
-          testWorker.terminate();
-          return callback(true);
-        }
-      };
+        testWorker.onmessage = e => {
+          if(e.data == "pong") {
+            testWorker.terminate();
+            return callback(true);
+          }
+        };
+      }
+    } catch(e) {
+      return callback(false);
     }
-  } catch(e) {
-    return callback(false);
   }
 }
 
@@ -99,26 +101,28 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
 // Constants shim
 // Player type
-window.PLAYER_AI = GameConstants.PlayerType.AI;
-window.PLAYER_HUMAN = GameConstants.PlayerType.HUMAN;
-window.PLAYER_HYBRID_HUMAN_AI = GameConstants.PlayerType.HYBRID_HUMAN_AI;
-// AI level
-window.AI_LEVEL_RANDOM = GameConstants.AiLevel.RANDOM;
-window.AI_LEVEL_LOW = GameConstants.AiLevel.LOW;
-window.AI_LEVEL_DEFAULT = GameConstants.AiLevel.DEFAULT;
-window.AI_LEVEL_HIGH = GameConstants.AiLevel.HIGH;
-window.AI_LEVEL_ULTRA = GameConstants.AiLevel.ULTRA;
-// Directions
-window.UP = GameConstants.Direction.UP;
-window.RIGHT = GameConstants.Direction.RIGHT;
-window.BOTTOM = GameConstants.Direction.BOTTOM;
-window.LEFT = GameConstants.Direction.LEFT;
-window.ANGLE_1 = GameConstants.Direction.ANGLE_1;
-window.ANGLE_2 = GameConstants.Direction.ANGLE_2;
-window.ANGLE_3 = GameConstants.Direction.ANGLE_3;
-window.ANGLE_4 = GameConstants.Direction.ANGLE_4;
-// Infos
-window.APP_VERSION = GameConstants.Setting.APP_VERSION;
-window.DATE_VERSION = GameConstants.Setting.DATE_VERSION;
+if(typeof(window) !== "undefined") {
+  window.PLAYER_AI = GameConstants.PlayerType.AI;
+  window.PLAYER_HUMAN = GameConstants.PlayerType.HUMAN;
+  window.PLAYER_HYBRID_HUMAN_AI = GameConstants.PlayerType.HYBRID_HUMAN_AI;
+  // AI level
+  window.AI_LEVEL_RANDOM = GameConstants.AiLevel.RANDOM;
+  window.AI_LEVEL_LOW = GameConstants.AiLevel.LOW;
+  window.AI_LEVEL_DEFAULT = GameConstants.AiLevel.DEFAULT;
+  window.AI_LEVEL_HIGH = GameConstants.AiLevel.HIGH;
+  window.AI_LEVEL_ULTRA = GameConstants.AiLevel.ULTRA;
+  // Directions
+  window.UP = GameConstants.Direction.UP;
+  window.RIGHT = GameConstants.Direction.RIGHT;
+  window.BOTTOM = GameConstants.Direction.BOTTOM;
+  window.LEFT = GameConstants.Direction.LEFT;
+  window.ANGLE_1 = GameConstants.Direction.ANGLE_1;
+  window.ANGLE_2 = GameConstants.Direction.ANGLE_2;
+  window.ANGLE_3 = GameConstants.Direction.ANGLE_3;
+  window.ANGLE_4 = GameConstants.Direction.ANGLE_4;
+  // Infos
+  window.APP_VERSION = GameConstants.Setting.APP_VERSION;
+  window.DATE_VERSION = GameConstants.Setting.DATE_VERSION;
+}
 
 export { Game, WorkersAvailable }
