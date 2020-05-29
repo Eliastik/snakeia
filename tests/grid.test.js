@@ -1,8 +1,8 @@
 // SnakeIA grid test
-import Grid from "../src/grid";
-import Position from "../src/position";
-import Constants from "../src/constants";
-import GameUtils from "../src/gameUtils";
+import Grid from "../src/engine/Grid";
+import Position from "../src/engine/Position";
+import Constants from "../src/engine/Constants";
+import GameUtils from "../src/engine/GameUtils";
 
 const theGrid = new Grid(10, 5, false, false, false,
   [

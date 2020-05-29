@@ -22,7 +22,7 @@ import i18next from "i18next";
 import Position from "../engine/Position";
 
 export default class GridUI extends Component {
-  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, currentPlayer, gameFinished) {
+  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode) {
     super();
 
     this.snakes = snakes;
@@ -36,6 +36,8 @@ export default class GridUI extends Component {
     this.currentPlayer = currentPlayer;
     this.gameFinished = gameFinished;
     this.offsetFrame = 0;
+    this.countBeforePlay = countBeforePlay;
+    this.spectatorMode = spectatorMode;
 
     this.canvasTmp = document.createElement("canvas");
   }
@@ -332,14 +334,14 @@ export default class GridUI extends Component {
     
         Utils.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
     
-        if(currentPlayer == i && this.countBeforePlay >= 0 && (currentPlayer != null || (this.isFilterHueAvailable && this.snakes.length > 2) || (!this.isFilterHueAvailable && this.snakes.length > 1))) {
+        if(!this.spectatorMode && (currentPlayer == i && this.countBeforePlay >= 0 && (currentPlayer != null || (this.isFilterHueAvailable && this.snakes.length > 2) || (!this.isFilterHueAvailable && this.snakes.length > 1)))) {
           Utils.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
         }
       }
     }
   }
 
-  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, currentPlayer, gameFinished) {
+  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode) {
     this.snakes = snakes;
     this.grid = grid;
     this.speed = speed;
@@ -348,5 +350,7 @@ export default class GridUI extends Component {
     this.currentPlayer = currentPlayer;
     this.gameFinished = gameFinished;
     this.offsetFrame = offsetFrame;
+    this.countBeforePlay = countBeforePlay;
+    this.spectatorMode = spectatorMode;
   }
 }

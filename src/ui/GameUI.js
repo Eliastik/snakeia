@@ -90,8 +90,8 @@ export default class GameUI {
     this.timeoutAutoRetry = null;
     // Components
     this.isFilterHueAvailable = Utils.isFilterHueAvailable();
+    this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader);
     this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
-    this.gameRanking = new GameRanking(this.snakes, null, null, null, this.header.height, null, null, this.disableAnimation, this.imageLoader);
     this.gridUI = new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader);
     this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, null, null, null, 0.5, this.disableAnimation, "center");
     this.notificationMessage;
@@ -446,7 +446,7 @@ export default class GameUI {
         this.header.draw(ctx);
 
         if(this.grid != null && (!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished)))) {
-          this.gridUI.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.currentPlayer, this.gameFinished);
+          this.gridUI.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.currentPlayer, this.gameFinished, this.countBeforePlay, this.spectatorMode);
           this.gridUI.draw(ctx);
         }
 
@@ -479,7 +479,7 @@ export default class GameUI {
       }
 
       if(!this.gameFinished && !this.gameOver && this.assetsLoaded) {
-        this.gameRanking.set(this.snakes, this.fontSize, this.header.height, this.currentPlayer, this.imageLoader);
+        this.gameRanking.set(this.snakes, this.fontSize, this.header.height, this.currentPlayer, this.imageLoader, this.spectatorMode);
         this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
       }
 
@@ -562,12 +562,14 @@ export default class GameUI {
         if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null) || (this.currentPlayer != null && this.snakes.length > 1))) {
           let playerHuman, colorName, colorRgb;
 
-          if(this.currentPlayer != null) {
-            playerHuman = this.getPlayer(this.currentPlayer, GameConstants.PlayerType.HUMAN);
-          } else if(this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) {
-            playerHuman = this.getPlayer(1, GameConstants.PlayerType.HUMAN);
-          } else {
-            playerHuman = this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+          if(!this.spectatorMode) {
+            if(this.currentPlayer != null && this.currentPlayer > -1) {
+              playerHuman = this.getPlayer(this.currentPlayer + 1, GameConstants.PlayerType.HUMAN) || this.getPlayer(this.currentPlayer + 1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+            } else if(this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) {
+              playerHuman = this.getPlayer(1, GameConstants.PlayerType.HUMAN);
+            } else {
+              playerHuman = this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+            }
           }
 
           if(playerHuman != null) {

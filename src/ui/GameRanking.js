@@ -21,7 +21,7 @@ import { Component, Utils } from "jsgametools";
 import i18next from "i18next";
 
 export default class GameRanking extends Component {
-  constructor(snakes, currentPlayer, fontSize, fontFamily, headerHeight, backgroundColor, scrollBarColor, disableAnimation, imageLoader) {
+  constructor(snakes, currentPlayer, fontSize, fontFamily, headerHeight, backgroundColor, scrollBarColor, disableAnimation, imageLoader, spectatorMode) {
     super();
 
     this.snakes = snakes;
@@ -45,6 +45,7 @@ export default class GameRanking extends Component {
     this.disableAnimation = disableAnimation;
     this.imageLoader = imageLoader;
     this.currentPlayer = currentPlayer;
+    this.spectatorMode = spectatorMode;
 
     this.addScrollAction((deltaX, deltaY) => {
       if(this.lastLine && deltaY > 0) {
@@ -89,7 +90,7 @@ export default class GameRanking extends Component {
           numAI++;
         }
 
-        const text = snake.name + " × " + snake.score + " (" + ((this.currentPlayer == i ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
+        const text = snake.name + " × " + snake.score + " (" + ((this.currentPlayer == i && !this.spectatorMode ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
         const sizeText = ctx.measureText(text).width + 30;
 
         if(sizeText > maxSizeName) maxSizeName = sizeText;
@@ -285,11 +286,12 @@ export default class GameRanking extends Component {
     this.forceClosing = false;
   }
 
-  set(snakes, fontSize, headerHeight, currentPlayer, imageLoader) {
+  set(snakes, fontSize, headerHeight, currentPlayer, imageLoader, spectatorMode) {
     this.snakes = snakes;
     this.fontSize = fontSize;
     this.headerHeight = headerHeight;
     this.currentPlayer = currentPlayer;
     this.imageLoader = imageLoader;
+    this.spectatorMode = spectatorMode;
   }
 }
