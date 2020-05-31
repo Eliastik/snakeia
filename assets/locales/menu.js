@@ -67,7 +67,8 @@ i18next.addResourceBundle("fr", "translation", {
     "textOutput": "Activer le rendu en mode texte",
     "graphicSkin": "Skin graphique :",
     "flat": "Flat (par défaut)",
-    "tropical": "Tropical"
+    "tropical": "Tropical",
+    "pixel": "Pixel"
   },
   "settings": {
     "title": "Paramètres de la partie :",
@@ -282,7 +283,8 @@ i18next.addResourceBundle("en", "translation", {
     "textOutput": "Enable the text render",
     "graphicSkin": "Graphic skin:",
     "flat": "Flat (by default)",
-    "tropical": "Tropical"
+    "tropical": "Tropical",
+    "pixel": "Pixel"
   },
   "settings": {
     "title": "Game settings:",

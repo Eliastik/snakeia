@@ -584,10 +584,10 @@ export default class GameUI {
             this.labelMenus.text = i18next.t("engine.ready");
           }
 
-          this.labelMenus.text += (playerHuman != null ? ("\n" + (this.isFilterHueAvailable && colorName != "???" && this.graphicSkin == "flat" ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : "");
+          this.labelMenus.text += (playerHuman != null ? ("\n" + (this.isFilterHueAvailable && colorName != "???" && (this.graphicSkin == "flat" || this.graphicSkin == "pixel") ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : "");
 
           if(colorRgb && colorRgb.length >= 3) {
-            this.labelMenus.color = (this.isFilterHueAvailable && colorName != "???" && this.graphicSkin == "flat" ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]);
+            this.labelMenus.color = (this.isFilterHueAvailable && colorName != "???" && (this.graphicSkin == "flat" || this.graphicSkin == "pixel") ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]);
           } else {
             this.labelMenus.color = "white";
           }
