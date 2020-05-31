@@ -75,6 +75,7 @@ export default class GameRanking extends Component {
       let maxSizeName = ctx.measureText(title).width;
 
       const scores = [];
+      const maxHeight = this.snakes.length * (this.fontSize + 5) + this.fontSize + 10;
       let numPlayer = 0;
       let numAI = 0;
 
@@ -246,7 +247,6 @@ export default class GameRanking extends Component {
       }
       
       // Scrollbar
-      const maxHeight = this.snakes.length * (this.fontSize + 5) + this.fontSize + 10;
       const clientHeight = this.height * (this.height / maxHeight);
       const percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
       const scrollAreaSize = this.height - clientHeight;
