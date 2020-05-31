@@ -48,7 +48,7 @@ export default class GameRanking extends Component {
     this.spectatorMode = spectatorMode;
 
     this.addScrollAction((deltaX, deltaY) => {
-      if(this.lastLine && deltaY > 0) {
+      if((this.lastLine && deltaY > 0)) {
         this.offsetScrollY -= deltaY;
         this.back = false;
         this.overflow = false;
@@ -75,7 +75,6 @@ export default class GameRanking extends Component {
       let maxSizeName = ctx.measureText(title).width;
 
       const scores = [];
-      const maxHeight = this.snakes.length * (this.fontSize + 5) + this.fontSize + 10;
       let numPlayer = 0;
       let numAI = 0;
 
@@ -117,9 +116,20 @@ export default class GameRanking extends Component {
       ctx.fillRect(-this.offsetX, this.headerHeight, this.width, this.height);
       ctx.font = this.fontSize + "px " + this.fontFamily;
 
+      // Scroll variables
+      const maxHeight = this.snakes.length * (this.fontSize + 5) + this.fontSize + 10 + (this.fontSize / 1.5);
+      const clientHeight = this.height * (this.height / maxHeight);
+      const scrollAreaSize = this.height - clientHeight;
+      let percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
+
+      if(scrollAreaSize * percentScrollbar + clientHeight > this.height) { // Limit max scroll
+        this.offsetScrollY += (this.height - (scrollAreaSize * percentScrollbar + clientHeight));
+        percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
+      }
+
       let yTitle = this.headerHeight + this.fontSize - this.offsetScrollY + 10;
 
-      if(yTitle > this.headerHeight + this.fontSize + 10) {
+      if(yTitle > this.headerHeight + this.fontSize + 10) { // Limit min scroll
         yTitle = this.headerHeight + this.fontSize + 10;
         this.offsetScrollY = 0;
       }
@@ -246,11 +256,7 @@ export default class GameRanking extends Component {
         }
       }
       
-      // Scrollbar
-      const clientHeight = this.height * (this.height / maxHeight);
-      const percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
-      const scrollAreaSize = this.height - clientHeight;
-
+      // Scrollbar drawing
       if(clientHeight <= this.height) {
         ctx.fillStyle = this.scrollBarColor;
         ctx.fillRect(this.x + this.width - 15, this.headerHeight + scrollAreaSize * percentScrollbar, 15, clientHeight);
