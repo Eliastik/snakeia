@@ -116,6 +116,8 @@ export default class GameRanking extends Component {
       ctx.fillRect(-this.offsetX, this.headerHeight, this.width, this.height);
       ctx.font = this.fontSize + "px " + this.fontFamily;
 
+      let yTitle = this.headerHeight + this.fontSize - this.offsetScrollY + 10;
+
       // Scroll variables
       const maxHeight = this.snakes.length * (this.fontSize + 5) + this.fontSize + 10 + (this.fontSize / 1.5);
       const clientHeight = this.height * (this.height / maxHeight);
@@ -124,15 +126,14 @@ export default class GameRanking extends Component {
 
       if(scrollAreaSize * percentScrollbar + clientHeight > this.height) { // Limit max scroll
         this.offsetScrollY += (this.height - (scrollAreaSize * percentScrollbar + clientHeight));
-        percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
       }
-
-      let yTitle = this.headerHeight + this.fontSize - this.offsetScrollY + 10;
 
       if(yTitle > this.headerHeight + this.fontSize + 10) { // Limit min scroll
         yTitle = this.headerHeight + this.fontSize + 10;
         this.offsetScrollY = 0;
       }
+      
+      percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
 
       if(yTitle + this.fontSize - 10 >= this.headerHeight) {
         Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (this.width / 2) - (ctx.measureText(title).width / 2) - this.offsetX, yTitle, false, true);
