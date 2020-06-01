@@ -142,7 +142,7 @@ export default class GridUI extends Component {
             if(this.snakes[j].gameOver && this.snakes[j].ticksDead) {
               if(this.ticks <= this.snakes[j].ticksDead) {
                 offset = 1 - offset; // Dead animation
-                offset = GraphicsUtils.easeOutCubic(offset);
+                offset = GraphicsUtils.easeInCubic(offset);
               } else {
                 offset = GraphicsUtils.easeOutBounce(offset);
               }

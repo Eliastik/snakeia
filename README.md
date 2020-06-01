@@ -360,9 +360,9 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 - [x] Jeu multi-joueur en ligne (création d'un programme serveur avec socket.io)
 
 #### Autres idées
-- [ ] Animation mort Snake
 - [ ] Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
 - [ ] Afficher difficulté niveaux
+- [x] Animation mort Snake
 - [x] Skin vrai serpent
 
 ## Déclaration de licence

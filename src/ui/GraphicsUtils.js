@@ -64,8 +64,8 @@ export default {
       return "???";
     }
   },
-  easeOutCubic(x) {
-    return 1 - Math.pow(1 - x, 3);
+  easeInCubic(x) {
+    return x * x * x;
   },
   easeOutBounce(x) {
     const n1 = 7.5625;
@@ -80,5 +80,8 @@ export default {
     } else {
       return n1 * (x -= 2.625 / d1) * x + 0.984375;
     }
+  },
+  easeInOutCubic(x) {
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
   }
 }

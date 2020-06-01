@@ -17,6 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import GameConstants from "../engine/Constants";
+import GraphicsUtils from "./GraphicsUtils";
 import { Component, Utils } from "jsgametools";
 import i18next from "i18next";
 
@@ -106,14 +107,14 @@ export default class GameRanking extends Component {
 
         lastScore = snake.score;
       }
-
-      this.x = -this.offsetX;
+      
+      this.x = -(GraphicsUtils.easeInOutCubic(this.offsetX / this.width) * this.width);
       this.y = this.headerHeight;
       this.width = maxSizeName + sizeNumber + 15;
       this.height = canvas.height - this.headerHeight;
 
       ctx.fillStyle = "rgba(75, 75, 75, 0.35)";
-      ctx.fillRect(-this.offsetX, this.headerHeight, this.width, this.height);
+      ctx.fillRect(this.x, this.headerHeight, this.width, this.height);
       ctx.font = this.fontSize + "px " + this.fontFamily;
 
       let yTitle = this.headerHeight + this.fontSize - this.offsetScrollY + 10;
@@ -136,7 +137,7 @@ export default class GameRanking extends Component {
       percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
 
       if(yTitle + this.fontSize - 10 >= this.headerHeight) {
-        Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (this.width / 2) - (ctx.measureText(title).width / 2) - this.offsetX, yTitle, false, true);
+        Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (this.width / 2) - (ctx.measureText(title).width / 2) + this.x, yTitle, false, true);
       }
 
       const ranking = scores.sort((a, b) => {
@@ -170,20 +171,20 @@ export default class GameRanking extends Component {
           if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
             switch(ranking[i].rank) {
               case 0:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy.png") : null, 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
+                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy.png") : null, 5 + this.x, currentY, this.fontSize, this.fontSize);
                 break;
               case 1:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_silver.png") : null, 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
+                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_silver.png") : null, 5 + this.x, currentY, this.fontSize, this.fontSize);
                 break;
               case 2:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_bronze.png") : null, 5 - this.offsetX, currentY, this.fontSize, this.fontSize);
+                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_bronze.png") : null, 5 + this.x, currentY, this.fontSize, this.fontSize);
                 break;
             }
           } else {
-            Utils.drawText(ctx, "" + (ranking[i].rank + 1), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, this.fontFamily, null, null, (this.fontSize / 1.5) / 2 + 5 - this.offsetX, currentY + (this.fontSize / 1.5));
+            Utils.drawText(ctx, "" + (ranking[i].rank + 1), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, this.fontFamily, null, null, (this.fontSize / 1.5) / 2 + 5 + this.x, currentY + (this.fontSize / 1.5));
           }
 
-          Utils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.5)" : "rgba(255, 255, 255, 0.5)"), this.fontSize / 1.5, this.fontFamily, null, null, 5 + sizeNumber + this.fontSize / 1.5 - this.offsetX, currentY + (this.fontSize / 1.5));
+          Utils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.5)" : "rgba(255, 255, 255, 0.5)"), this.fontSize / 1.5, this.fontFamily, null, null, 5 + sizeNumber + this.fontSize / 1.5 + this.x, currentY + (this.fontSize / 1.5));
 
           numberRankDrawn++;
         }
