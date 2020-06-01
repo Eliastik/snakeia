@@ -399,8 +399,8 @@ export default class GameUI {
       this.frame++;
 
       if((!this.paused && !this.onlineMode) || this.onlineMode) {
-        this.offsetFrame += (Date.now() - this.lastFrameTime);
-        this.lastFrameTime = Date.now();
+        this.offsetFrame += (performance.now() - this.lastFrameTime);
+        this.lastFrameTime = performance.now();
       }
 
       this.startDraw();

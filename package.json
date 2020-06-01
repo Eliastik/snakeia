@@ -40,7 +40,7 @@
   "dependencies": {
     "i18next": "^19.4.5",
     "i18next-browser-languagedetector": "^4.2.0",
-    "jsgametools": "git+https://github.com/Eliastik/JSGameTools.git#da486b6",
+    "jsgametools": "git+https://github.com/Eliastik/JSGameTools.git#2bb6c11",
     "seedrandom": "^3.0.5",
     "socket.io-client": "^2.3.0"
   }

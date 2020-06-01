@@ -159,9 +159,9 @@ export default class GameRanking extends Component {
       let currentY = yTitle + this.fontSize / 1.5;
       this.overflow = false;
 
-      if(this.timeLastFrame <= 0) this.timeLastFrame = Date.now();
-      let offsetTime = Date.now() - this.timeLastFrame;
-      this.timeLastFrame = Date.now();
+      if(this.timeLastFrame <= 0) this.timeLastFrame = performance.now();
+      let offsetTime = performance.now() - this.timeLastFrame;
+      this.timeLastFrame = performance.now();
 
       let numberRankDrawn = 0;
 
@@ -208,7 +208,7 @@ export default class GameRanking extends Component {
 
       if(numberRankDrawn <= 0) {
         this.offsetScrollY = 0;
-        this.timeLastFrame = Date.now();
+        this.timeLastFrame = performance.now();
         offsetTime = 0;
       }
 
@@ -268,7 +268,7 @@ export default class GameRanking extends Component {
     } else {
       this.overflow = false;
       this.back = false;
-      this.timeLastFrame = Date.now();
+      this.timeLastFrame = performance.now();
       this.offsetScrollY = 0;
       this.totalTime = 0;
     }
