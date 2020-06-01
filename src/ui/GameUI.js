@@ -48,6 +48,10 @@ export default class GameUI {
     this.offsetFrame = 0;
     this.lastFrameTime = 0;
     this.currentFPS = 0;
+    // Swipe detection variables
+    this.touchEventStartX;
+    this.touchEventStartY;
+    this.touchEventStartTimestamp;
     // Copy of engine variables
     this.grid = null;
     this.snakes = null;
@@ -201,6 +205,45 @@ export default class GameUI {
       this.btnRightArrow.setClickAction(() => {
         this.controller.key(GameConstants.Key.RIGHT);
       });
+      
+      if(this.canvas) {
+        this.canvas.addEventListener("touchstart", event => {
+          const changedTouches = event.changedTouches[0];
+          const position = this.getTouchPos(this.canvas, changedTouches);
+
+          if(!this.gameRanking.hovered) {
+            this.touchEventStartX = position.x;
+            this.touchEventStartY = position.y;
+            this.touchEventStartTimestamp = event.timestamp;
+          }
+        });
+
+        const touchSwipeEvent =  event => {
+          const changedTouches = event.changedTouches[0];
+          const position = this.getTouchPos(this.canvas, changedTouches);
+
+          if(!this.gameRanking.hovered) {
+            const offsetX = position.x - this.touchEventStartX;
+            const offsetY = position.y - this.touchEventStartY;
+
+            if(offsetX < 0 && Math.abs(offsetX) > this.canvas.width / 6) {
+              this.controller.key(GameConstants.Key.LEFT);
+            } else if(offsetX > 0 && Math.abs(offsetX) > this.canvas.width / 6) {
+              this.controller.key(GameConstants.Key.RIGHT);
+            } else if(offsetY < 0 && Math.abs(offsetY) > this.canvas.height / 6) {
+              this.controller.key(GameConstants.Key.UP);
+            } else if(offsetY > 0 && Math.abs(offsetY) > this.canvas.height / 6) {
+              this.controller.key(GameConstants.Key.BOTTOM);
+            }
+
+            this.touchEventStartX = position.x;
+            this.touchEventStartY = position.y;
+          }
+        };
+
+        this.canvas.addEventListener("touchend", touchSwipeEvent);
+        this.canvas.addEventListener("touchmove", event => event.preventDefault());
+      }
     }
     
     this.setIntervalCountFPS();
@@ -235,6 +278,15 @@ export default class GameUI {
     this.autoResizeCanvas();
     this.loadAssets();
     this.startDraw();
+  }
+  
+  getTouchPos(canvas, event) {
+    const rect = canvas.getBoundingClientRect();
+    
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
+    };
   }
 
   autoResizeCanvas() {
