@@ -17,7 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 const CACHE_BASENAME = "snake-ia";
-const CACHE_VER = "-v2.1";
+const CACHE_VER = "-v2.1.1.0";
 const CACHE = CACHE_BASENAME + CACHE_VER;
 
 const CACHE_URLS = [
@@ -65,6 +65,7 @@ const CACHE_URLS = [
   "assets/images/skin/flat/fruit.png",
   "assets/images/skin/flat/fruit_gold.png",
   "assets/images/skin/flat/wall.png",
+  "assets/images/skin/flat/unknown.png",
   "assets/images/skin/tropical/snake_4.png",
   "assets/images/skin/tropical/snake_3.png",
   "assets/images/skin/tropical/snake_2.png",
@@ -86,6 +87,29 @@ const CACHE_URLS = [
   "assets/images/skin/tropical/fruit.png",
   "assets/images/skin/tropical/fruit_gold.png",
   "assets/images/skin/tropical/wall.png",
+  "assets/images/skin/tropical/unknown.png",
+  "assets/images/skin/pixel/snake_4.png",
+  "assets/images/skin/pixel/snake_3.png",
+  "assets/images/skin/pixel/snake_2.png",
+  "assets/images/skin/pixel/snake.png",
+  "assets/images/skin/pixel/body_4_end.png",
+  "assets/images/skin/pixel/body_3_end.png",
+  "assets/images/skin/pixel/body_2_end.png",
+  "assets/images/skin/pixel/body_end.png",
+  "assets/images/skin/pixel/body_2.png",
+  "assets/images/skin/pixel/body.png",
+  "assets/images/skin/pixel/body_angle_1.png",
+  "assets/images/skin/pixel/body_angle_2.png",
+  "assets/images/skin/pixel/body_angle_3.png",
+  "assets/images/skin/pixel/body_angle_4.png",
+  "assets/images/skin/pixel/snake_dead_4.png",
+  "assets/images/skin/pixel/snake_dead_3.png",
+  "assets/images/skin/pixel/snake_dead_2.png",
+  "assets/images/skin/pixel/snake_dead.png",
+  "assets/images/skin/pixel/fruit.png",
+  "assets/images/skin/pixel/fruit_gold.png",
+  "assets/images/skin/pixel/wall.png",
+  "assets/images/skin/pixel/unknown.png",
   "assets/images/pause.png",
   "assets/images/fullscreen.png",
   "assets/images/up.png",

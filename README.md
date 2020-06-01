@@ -14,7 +14,7 @@ Game written in pure JavaScript and object oriented.
 
 ## About this game
 
-* Version: 2.1.1-dev
+* Version: 2.1.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -30,6 +30,21 @@ Game written in pure JavaScript and object oriented.
 * The "tropical" graphic skin uses as a base a [picture from here](https://commons.wikimedia.org/wiki/File:Gunther%27s_Racer_Coluber_gracilis_Snake_snake_by_Dr._Raju_Kasambe_(23).jpg) under Creative Commons Attribution-Share Alike 4.0 International license, [this picture](https://www.piqsels.com/fr/public-domain-photo-zbzjp) under [Creative Commons Zero](https://creativecommons.org/publicdomain/zero/1.0/deed.en) license and [this picture](https://commons.wikimedia.org/wiki/File:Red_brick_wall_texture.JPG) under Creative Commons Attribution-Share Alike 3.0 Unported license
 
 ## Changelog
+
+* Version 2.1.1 (01/06/2020) :
+  - Added an animation when a Snake loses (it bounces on the obstacle);
+  - It's now possible to move the Snake by sliding your finger in the desired direction;
+  - The ranking can now be scrolled using the mouse wheel or via the finger on mobile devices, and a scrollbar is now displayed;
+  - Added a new graphic skin (Pixel);
+  - Improvement of the animations;
+  - It's now possible to limit the FPS (frames per second) in the settings;
+  - The unknown cell type will now display a "?";
+  - Bug fixes and other adjustments;
+  - Technical improvements:
+    - The classes have been converted to ES6+ classes, the build script now uses Babel;
+    - The functions of the game UI have been separated into several classes inheriting from JSGameTools.Component;
+    - The different AI levels now have their own classes, it's possible to pass a custom AI class to the Snake constructor;
+    - performance.now used instead of Date.now for animation calculations.
 
 * Version 2.1 (5/3/2020):
   - Improvement of the online game mode: possibility of enabling AIs in online mode, client-side predictions (improves performance, experimental functionality disabled by default), latency (ping) displayed in the game informations;
@@ -180,7 +195,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## À propos du jeu
 
-* Version du jeu : 2.1.1-dev
+* Version du jeu : 2.1.1
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -196,6 +211,21 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Le skin graphique "tropical" utilise comme base une [photo venant d'ici](https://commons.wikimedia.org/wiki/File:Gunther%27s_Racer_Coluber_gracilis_Snake_snake_by_Dr._Raju_Kasambe_(23).jpg) sous licence Creative Commons Attribution-Share Alike 4.0 International, [cette photo](https://www.piqsels.com/fr/public-domain-photo-zbzjp) sous licence [Creative Commons Zero](https://creativecommons.org/publicdomain/zero/1.0/deed.en) et [cette photo](https://commons.wikimedia.org/wiki/File:Red_brick_wall_texture.JPG) sous licence Creative Commons Attribution-Share Alike 3.0 Unported
 
 ## Journal des changements
+
+* Version 2.1.1 (01/06/2020) :
+  - Ajout d'une animation lorsqu'un Snake perd (il rebondi sur l'obstacle) ;
+  - Il est désormais possible de déplacer le Snake en glissant le doigt dans la direction voulue ;
+  - Le classement peut désormais être défilé à l'aide de la molette de la souris ou via le doigt sur les appareils mobiles, et une barre de défilement est désormais affichée ;
+  - Ajout d'un nouveau skin graphique (Pixel) ;
+  - Amélioration des animations ;
+  - Il est désormais possible de limiter les FPS (images par seconde) dans les paramètres ;
+  - Les types de cases inconnues afficheront désormais une image "?" ;
+  - Corrections de bugs et autres ajustements ;
+  - Améliorations techniques :
+    - Les classes ont été converties en classes ES6+, le script de build utilise désormais Babel ;
+    - Les fonctions de l'interface utilisateur du jeu ont été séparées en plusieurs classes héritant de JSGameTools.Component ;
+    - Les différents niveaux d'IA ont désormais leurs propres classes, il est possible de passer une classe d'IA personnalisée au constructeur de Snake ;
+    - Utilisation de performance.now au lieu de Date.now pour les calculs d'animation.
 
 * Version 2.1 (03/05/2020) :
   - Amélioration du mode de jeu en ligne : possibilité d'activer les IA en mode en ligne, prédictions côté-client (améliore les performances, fonctionnalité expérimentale désactivée par défaut), latence (ping) affichée dans les informations de la partie ;
@@ -335,8 +365,9 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 
 ## TO-DO list
 
-- [ ] Améliorer l'IA
+- [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning)
 - [ ] Eviter de placer les joueurs trop près des murs
+- [ ] Eviter de placer une pomme dans un cul-de-sac peu importe sa taille (acutellement uniquement les cul-de-sac d'une case sont évités)
 - [x] Prédictions pour le mode en ligne (améliore la fluidité) - Pas vraiment OK, à revoir si possible
 - [x] Correction animation mort Snake quand partie terminée
 - [x] Contrôles sur mobile via défilement doigt
