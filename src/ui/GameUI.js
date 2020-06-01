@@ -381,26 +381,27 @@ export default class GameUI {
   }
 
   startDraw() {
-    if(this.maxFPS < 1) {
-      requestAnimationFrame(() => this.beforeDraw());
-    } else {
-      setTimeout(() => this.beforeDraw(), 1000 / this.maxFPS);
-    }
+    requestAnimationFrame(time => this.beforeDraw(time));
   }
 
-  beforeDraw() {
+  beforeDraw(time) {
     if(!this.killed) {
       if(!document.hasFocus() && !this.paused) {
         this.controller.pause();
       }
-  
-      this.draw();
-      this.lastTime = Date.now();
-      this.frame++;
 
-      if((!this.paused && !this.onlineMode) || this.onlineMode) {
-        this.offsetFrame += (performance.now() - this.lastFrameTime);
-        this.lastFrameTime = performance.now();
+      const offsetFrame = time - this.lastFrameTime;
+
+      if(this.maxFPS < 1 || offsetFrame > 1000 / this.maxFPS) {
+        this.lastTime = Date.now();
+        this.lastFrameTime = time;
+        this.frame++;
+  
+        if((!this.paused && !this.onlineMode) || this.onlineMode) {
+          this.offsetFrame += offsetFrame;
+        }
+  
+        this.draw();
       }
 
       this.startDraw();
