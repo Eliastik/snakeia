@@ -26,10 +26,10 @@
   },
   "homepage": "https://github.com/Eliastik/snakeia#readme",
   "devDependencies": {
-    "@babel/core": "^7.10.1",
+    "@babel/core": "^7.10.2",
     "@babel/plugin-transform-runtime": "^7.10.1",
-    "@babel/preset-env": "^7.10.1",
-    "@babel/runtime": "^7.10.1",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/runtime": "^7.10.2",
     "babel-jest": "^26.0.1",
     "babel-loader": "^8.1.0",
     "jest": "^25.5.4",
@@ -40,7 +40,7 @@
   "dependencies": {
     "i18next": "^19.4.5",
     "i18next-browser-languagedetector": "^4.2.0",
-    "jsgametools": "git+https://github.com/Eliastik/JSGameTools.git#a61d954f",
+    "jsgametools": "git+https://github.com/Eliastik/JSGameTools.git#da486b6",
     "seedrandom": "^3.0.5",
     "socket.io-client": "^2.3.0"
   }

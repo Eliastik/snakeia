@@ -337,6 +337,7 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 
 - [x] Prédictions pour le mode en ligne (améliore la fluidité)
   Presque OK
+- [ ] Correction animation mort Snake quand partie terminé
 - [ ] Contrôles sur mobile via défilement doigt
 - [ ] Eviter de placer les joueurs trop près des murs
 - [ ] Améliorer l'IA

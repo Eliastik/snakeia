@@ -17,8 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import GameConstants from "../engine/Constants";
-import GraphicsUtils from "./GraphicsUtils";
-import { Component, Utils } from "jsgametools";
+import { Component, Utils, EasingFunctions } from "jsgametools";
 import i18next from "i18next";
 
 export default class GameRanking extends Component {
@@ -108,7 +107,7 @@ export default class GameRanking extends Component {
         lastScore = snake.score;
       }
       
-      this.x = -(GraphicsUtils.easeInOutCubic(this.offsetX / this.width) * this.width);
+      this.x = -(EasingFunctions.easeInOutCubic(this.offsetX / this.width) * this.width);
       this.y = this.headerHeight;
       this.width = maxSizeName + sizeNumber + 15;
       this.height = canvas.height - this.headerHeight;

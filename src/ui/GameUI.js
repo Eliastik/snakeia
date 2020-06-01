@@ -21,7 +21,7 @@ import GameUtils from "../engine/GameUtils";
 import GraphicsUtils from "./GraphicsUtils";
 import GameConstants from "../engine/Constants";
 import GameRanking from "./GameRanking";
-import { ImageLoader, Button, ButtonImage, NotificationMessage, Utils, Menu, Label, ProgressBar, Constants } from "jsgametools";
+import { ImageLoader, Button, ButtonImage, NotificationMessage, Utils, Menu, Label, ProgressBar, Constants, EasingFunctions } from "jsgametools";
 import GridUI from "./GridUI";
 import Header from "./Header";
 Constants.Setting.FONT_FAMILY = "DELIUS";
@@ -429,6 +429,7 @@ export default class GameUI {
       if(this.notificationMessage) {
         this.notificationMessage.fontSize = this.fontSize;
         this.notificationMessage.fontSizeInitial = this.fontSize;
+        this.notificationMessage.easingFunction = EasingFunctions.easeInOutCubic;
       }
 
       if(this.gameRanking) {
