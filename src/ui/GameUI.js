@@ -40,6 +40,7 @@ export default class GameUI {
     this.disableAnimation = settings && !settings.enableAnimations;
     this.renderBlur = settings && settings.renderBlur;
     this.graphicSkin = (settings && settings.graphicSkin) || "flat";
+    this.maxFPS = (settings && settings.maxFPS) || -1;
     // UI variables
     this.lastKey = -1;
     this.frame = 0;
@@ -380,24 +381,30 @@ export default class GameUI {
   }
 
   startDraw() {
-    requestAnimationFrame(() => {
-      if(!this.killed) {
-        if(!document.hasFocus() && !this.paused) {
-          this.controller.pause();
-        }
-    
-        this.draw();
-        this.lastTime = Date.now();
-        this.frame++;
+    if(this.maxFPS < 1) {
+      requestAnimationFrame(() => this.beforeDraw());
+    } else {
+      setTimeout(() => this.beforeDraw(), 1000 / this.maxFPS);
+    }
+  }
 
-        if((!this.paused && !this.onlineMode) || this.onlineMode) {
-          this.offsetFrame += (Date.now() - this.lastFrameTime);
-          this.lastFrameTime = Date.now();
-        }
-
-        this.startDraw();
+  beforeDraw() {
+    if(!this.killed) {
+      if(!document.hasFocus() && !this.paused) {
+        this.controller.pause();
       }
-    });
+  
+      this.draw();
+      this.lastTime = Date.now();
+      this.frame++;
+
+      if((!this.paused && !this.onlineMode) || this.onlineMode) {
+        this.offsetFrame += (Date.now() - this.lastFrameTime);
+        this.lastFrameTime = Date.now();
+      }
+
+      this.startDraw();
+    }
   }
 
   draw() {

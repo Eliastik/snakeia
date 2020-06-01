@@ -68,7 +68,8 @@ i18next.addResourceBundle("fr", "translation", {
     "graphicSkin": "Skin graphique :",
     "flat": "Flat (par défaut)",
     "tropical": "Tropical",
-    "pixel": "Pixel"
+    "pixel": "Pixel",
+    "maxFPS": "FPS maximum :"
   },
   "settings": {
     "title": "Paramètres de la partie :",
@@ -284,7 +285,8 @@ i18next.addResourceBundle("en", "translation", {
     "graphicSkin": "Graphic skin:",
     "flat": "Flat (by default)",
     "tropical": "Tropical",
-    "pixel": "Pixel"
+    "pixel": "Pixel",
+    "maxFPS": "Maximum FPS:"
   },
   "settings": {
     "title": "Game settings:",

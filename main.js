@@ -115,7 +115,8 @@ function restoreSettings() {
     enableMultithreading: true,
     showDebugInfo: false,
     textOutput: false,
-    graphicSkin: "flat"
+    graphicSkin: "flat",
+    maxFPS: -1
   };
 }
 
@@ -150,6 +151,12 @@ function showSettings() {
     document.getElementById("enableMultithreading").disabled = true;
   } else {
     document.getElementById("enableMultithreading").disabled = false;
+  }
+
+  if(settings.maxFPS && !isNaN(settings.maxFPS)) {
+    document.getElementById("maxFPS").value = settings.maxFPS;
+  } else {
+    document.getElementById("maxFPS").value = -1;
   }
 }
 
@@ -189,6 +196,11 @@ document.getElementById("textOutput").onclick = function() {
 
 document.getElementById("graphicSkin").onchange = function() {
   customSettings.graphicSkin = this.value;
+  saveSettings();
+};
+
+document.getElementById("maxFPS").oninput = function() {
+  customSettings.maxFPS = this.value;
   saveSettings();
 };
 
