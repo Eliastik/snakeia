@@ -303,7 +303,7 @@ export default class GameEngine {
               headSnakePos = this.snakes[i].getNextPosition(headSnakePos, this.snakes[i].direction);
               
               if(this.grid.isDeadPosition(headSnakePos)) {
-                this.snakes[i].setGameOver();
+                this.snakes[i].setGameOver(this.ticks);
               } else {
                 if(this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT || this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
                   if(this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT) {
@@ -346,8 +346,6 @@ export default class GameEngine {
                   }
                 }
               }
-            } else if(this.snakes[i].gameOver) {
-              this.snakes[i].animationDeadEnd = true;
             }
 
             if(!this.scoreMax && setFruit && !this.clientSidePredictionsMode) {

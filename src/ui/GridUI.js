@@ -22,7 +22,7 @@ import i18next from "i18next";
 import Position from "../engine/Position";
 
 export default class GridUI extends Component {
-  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode) {
+  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks) {
     super();
 
     this.snakes = snakes;
@@ -38,6 +38,7 @@ export default class GridUI extends Component {
     this.offsetFrame = 0;
     this.countBeforePlay = countBeforePlay;
     this.spectatorMode = spectatorMode;
+    this.ticks = ticks;
 
     this.canvasTmp = document.createElement("canvas");
   }
@@ -134,11 +135,13 @@ export default class GridUI extends Component {
           }
 
           // Animation
-          if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].scoreMax && !this.gameFinished && !this.snakes[j].animationDeadEnd) {
-            let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER); // percentage of the animation
+          if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].scoreMax && (!this.gameFinished || this.snakes[j].gameOver) && (!this.snakes[j].gameOver || (this.snakes[j].gameOver && this.ticks < this.snakes[j].ticksDead + 2))) {
+            let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER); // Percentage of the animation
 
-            if(this.snakes[j].gameOver) {
-              offset = 1.00714 - 2.85714 * offset + 2.85714 * Math.pow(offset, 2); // Interpolated dead animation
+            if(this.snakes[j].gameOver && this.snakes[j].ticksDead) {
+              if(this.ticks <= this.snakes[j].ticksDead) {
+                offset = 1 - offset; // Dead animation
+              }
             }
 
             offset = (offset > 1 ? 1 : offset);
@@ -346,7 +349,7 @@ export default class GridUI extends Component {
     }
   }
 
-  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode) {
+  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks) {
     this.snakes = snakes;
     this.grid = grid;
     this.speed = speed;
@@ -357,5 +360,6 @@ export default class GridUI extends Component {
     this.offsetFrame = offsetFrame;
     this.countBeforePlay = countBeforePlay;
     this.spectatorMode = spectatorMode;
+    this.ticks = ticks;
   }
 }
