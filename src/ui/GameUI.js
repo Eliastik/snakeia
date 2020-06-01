@@ -52,6 +52,8 @@ export default class GameUI {
     this.touchEventStartX;
     this.touchEventStartY;
     this.touchEventStartTimestamp;
+    this.touchEventOffsetX = 0;
+    this.touchEventOffsetY = 0;
     // Copy of engine variables
     this.grid = null;
     this.snakes = null;
@@ -214,7 +216,7 @@ export default class GameUI {
           if(!this.gameRanking.hovered) {
             this.touchEventStartX = position.x;
             this.touchEventStartY = position.y;
-            this.touchEventStartTimestamp = event.timestamp;
+            this.touchEventStartTimestamp = performance.now();
           }
         });
 
@@ -223,16 +225,21 @@ export default class GameUI {
           const position = this.getTouchPos(this.canvas, changedTouches);
 
           if(!this.gameRanking.hovered) {
-            const offsetX = position.x - this.touchEventStartX;
-            const offsetY = position.y - this.touchEventStartY;
+            this.touchEventOffsetX += (position.x - this.touchEventStartX);
+            this.touchEventOffsetY += (position.y - this.touchEventStartY);
 
-            if(offsetX < 0 && Math.abs(offsetX) > this.canvas.width / 6) {
+            if(performance.now() - this.touchEventStartTimestamp >= 250) {
+              this.touchEventOffsetX = 0;
+              this.touchEventOffsetY = 0;
+            }
+
+            if(this.touchEventOffsetX < 0 && Math.abs(this.touchEventOffsetX) > 50) {
               this.controller.key(GameConstants.Key.LEFT);
-            } else if(offsetX > 0 && Math.abs(offsetX) > this.canvas.width / 6) {
+            } else if(this.touchEventOffsetX > 0 && Math.abs(this.touchEventOffsetX) > 50) {
               this.controller.key(GameConstants.Key.RIGHT);
-            } else if(offsetY < 0 && Math.abs(offsetY) > this.canvas.height / 6) {
+            } else if(this.touchEventOffsetY < 0 && Math.abs(this.touchEventOffsetY) > 50) {
               this.controller.key(GameConstants.Key.UP);
-            } else if(offsetY > 0 && Math.abs(offsetY) > this.canvas.height / 6) {
+            } else if(this.touchEventOffsetY > 0 && Math.abs(this.touchEventOffsetY) > 50) {
               this.controller.key(GameConstants.Key.BOTTOM);
             }
 
@@ -241,8 +248,15 @@ export default class GameUI {
           }
         };
 
-        this.canvas.addEventListener("touchend", touchSwipeEvent);
-        this.canvas.addEventListener("touchmove", event => event.preventDefault());
+        this.canvas.addEventListener("touchend", () => {
+          this.touchEventOffsetX = 0;
+          this.touchEventOffsetY = 0;
+        });
+
+        this.canvas.addEventListener("touchmove", event => {
+          touchSwipeEvent(event);
+          event.preventDefault();
+        });
       }
     }
     
