@@ -134,8 +134,13 @@ export default class GridUI extends Component {
           }
 
           // Animation
-          if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished) {
+          if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].scoreMax && !this.gameFinished && !this.snakes[j].animationDeadEnd) {
             let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER); // percentage of the animation
+
+            if(this.snakes[j].gameOver) {
+              offset = 1.00714 - 2.85714 * offset + 2.85714 * Math.pow(offset, 2); // Interpolated dead animation
+            }
+
             offset = (offset > 1 ? 1 : offset);
             const offsetX = (caseWidth * offset) - caseWidth;
             const offsetY = (caseHeight * offset) - caseHeight;
@@ -163,9 +168,9 @@ export default class GridUI extends Component {
               }
 
               if(i == 0) {
-                angle += -128.073 * Math.pow(offset, 2) + 222.332 * offset - 5.47066;
+                angle += -128.073 * Math.pow(offset, 2) + 222.332 * offset - 5.47066; // Interpolated rotation animation
               } else if(i == -1) {
-                angle += 126.896 * Math.pow(offset, 2) + -33.6471 * offset + 1.65942;
+                angle += 126.896 * Math.pow(offset, 2) + -33.6471 * offset + 1.65942; // Interpolated rotation animation tail
               }
 
               if(i == 0 && ((graphicDirection == GameConstants.Direction.ANGLE_4 && direction == GameConstants.Direction.UP) || (graphicDirection == GameConstants.Direction.ANGLE_1 && direction == GameConstants.Direction.LEFT) || (graphicDirection == GameConstants.Direction.ANGLE_2 && direction == GameConstants.Direction.BOTTOM) || (graphicDirection == GameConstants.Direction.ANGLE_3 && direction == GameConstants.Direction.RIGHT))) {

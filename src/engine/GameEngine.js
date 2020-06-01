@@ -346,6 +346,8 @@ export default class GameEngine {
                   }
                 }
               }
+            } else if(this.snakes[i].gameOver) {
+              this.snakes[i].animationDeadEnd = true;
             }
 
             if(!this.scoreMax && setFruit && !this.clientSidePredictionsMode) {

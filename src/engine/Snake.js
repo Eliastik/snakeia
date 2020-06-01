@@ -33,6 +33,7 @@ export default class Snake {
     this.lastKey = -1;
     this.lastTail;
     this.lastTailMoved;
+    this.animationDeadEnd = false;
     this.player = player == undefined ? GameConstants.PlayerType.HUMAN : player;
     this.aiLevel = aiLevel == undefined ? GameConstants.AiLevel.DEFAULT : aiLevel;
     this.autoRetry = autoRetry == undefined ? false : autoRetry;
@@ -218,6 +219,7 @@ export default class Snake {
     this.lastTailMoved = true;
     this.lastKey = -1;
     this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+    this.animationDeadEnd = false;
     this.init();
   }
 
