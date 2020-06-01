@@ -463,8 +463,14 @@ export default class GameUI {
         this.lastFrameTime = time;
         this.frame++;
   
-        if((!this.paused && !this.onlineMode) || this.onlineMode) {
+        if((!this.paused && !this.onlineMode) || this.onlineMode || this.gameOver || this.gameFinished) {
           this.offsetFrame += offsetFrame;
+          let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
+
+          if((this.gameOver || this.gameFinished) && offset >= 0.95) {
+            this.offsetFrame = 0;
+            this.ticks++;
+          }
         }
   
         this.draw();
@@ -522,7 +528,7 @@ export default class GameUI {
         this.header.draw(ctx);
 
         if(this.grid != null && (!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished)))) {
-          this.gridUI.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.currentPlayer, this.gameFinished, this.countBeforePlay, this.spectatorMode, this.ticks);
+          this.gridUI.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.currentPlayer, this.gameFinished, this.countBeforePlay, this.spectatorMode, this.ticks, this.gameOver);
           this.gridUI.draw(ctx);
         }
 

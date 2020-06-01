@@ -335,11 +335,10 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 
 ## TO-DO list
 
-- [x] Prédictions pour le mode en ligne (améliore la fluidité)
-  Presque OK
-- [ ] Correction animation mort Snake quand partie terminée
-- [ ] Eviter de placer les joueurs trop près des murs
 - [ ] Améliorer l'IA
+- [ ] Eviter de placer les joueurs trop près des murs
+- [x] Prédictions pour le mode en ligne (améliore la fluidité) - Pas vraiment OK, à revoir si possible
+- [x] Correction animation mort Snake quand partie terminée
 - [x] Contrôles sur mobile via défilement doigt
 - [x] Barre défilement classement
 - [x] Séparer le code de la méthode draw de GameUI en plusieurs classes Component

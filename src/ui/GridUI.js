@@ -22,7 +22,7 @@ import i18next from "i18next";
 import Position from "../engine/Position";
 
 export default class GridUI extends Component {
-  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks) {
+  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver) {
     super();
 
     this.snakes = snakes;
@@ -39,6 +39,7 @@ export default class GridUI extends Component {
     this.countBeforePlay = countBeforePlay;
     this.spectatorMode = spectatorMode;
     this.ticks = ticks;
+    this.gameOver = gameOver;
 
     this.canvasTmp = document.createElement("canvas");
   }
@@ -135,7 +136,7 @@ export default class GridUI extends Component {
           }
 
           // Animation
-          if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].scoreMax && (!this.gameFinished || this.snakes[j].gameOver) && (!this.snakes[j].gameOver || (this.snakes[j].gameOver && this.ticks < this.snakes[j].ticksDead + 2))) {
+          if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].scoreMax && ((!this.gameFinished && !this.gameOver) || this.snakes[j].gameOver) && (!this.snakes[j].gameOver || (this.snakes[j].gameOver && this.ticks < this.snakes[j].ticksDead + 2))) {
             let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER); // Percentage of the animation
 
             if(this.snakes[j].gameOver && this.snakes[j].ticksDead) {
@@ -321,7 +322,7 @@ export default class GridUI extends Component {
         let caseX = Math.floor(posX * caseWidth + ((this.canvasTmp.width - totalWidth) / 2));
         let caseY = this.headerHeight + posY * caseHeight;
     
-        if(!this.disableAnimation && !this.snakes[i].gameOver) {
+        if(!this.disableAnimation && !this.snakes[i].gameOver && !this.gameFinished && !this.gameOver) {
           let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
           offset = (offset > 1 ? 1 : offset);
           const offsetX = (caseWidth * offset) - caseWidth;
@@ -352,7 +353,7 @@ export default class GridUI extends Component {
     }
   }
 
-  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks) {
+  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver) {
     this.snakes = snakes;
     this.grid = grid;
     this.speed = speed;
@@ -364,5 +365,6 @@ export default class GridUI extends Component {
     this.countBeforePlay = countBeforePlay;
     this.spectatorMode = spectatorMode;
     this.ticks = ticks;
+    this.gameOver = gameOver;
   }
 }
