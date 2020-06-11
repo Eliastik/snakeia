@@ -366,6 +366,7 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 ## TO-DO list
 
 - [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning)
+- [ ] Améliorer les performances graphiques
 - [ ] Eviter de placer les joueurs trop près des murs
 - [ ] Eviter de placer une pomme dans un cul-de-sac peu importe sa taille (acutellement uniquement les cul-de-sac d'une case sont évités)
 - [x] Prédictions pour le mode en ligne (améliore la fluidité) - Pas vraiment OK, à revoir si possible

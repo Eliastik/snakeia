@@ -533,8 +533,8 @@ export default class GameUI {
         }
 
         if(this.timerToDisplay != undefined && this.timerToDisplay != null && !isNaN(this.timerToDisplay) && this.timerToDisplay >= 0) {
-          const sizesTimer = Utils.drawText(ctx, "" + GameUtils.secondsFormat(this.timerToDisplay), "rgba(0, 0, 0, 0.5)", this.fontSize, GameConstants.Setting.FONT_FAMILY, "right", "default", null, this.header.height + 15 + this.header.height * 0.475);
-          Utils.drawImage(ctx, this.imageLoader.get("assets/images/clock.png"), sizesTimer["x"] - this.header.height * 0.64 - 10, this.header.height + 15, this.header.height * 0.64, this.header.height * 0.64);
+          const sizesTimer = Utils.drawText(ctx, "" + GameUtils.secondsFormat(this.timerToDisplay), "rgba(0, 0, 0, 0.5)", Math.round(this.fontSize), GameConstants.Setting.FONT_FAMILY, "right", "default", null, Math.round(this.header.height + 15 + this.header.height * 0.475));
+          Utils.drawImage(ctx, this.imageLoader.get("assets/images/clock.png", Math.round(this.header.height * 0.64), Math.round(this.header.height * 0.64)), Math.round(sizesTimer["x"] - this.header.height * 0.64 - 10), Math.round(this.header.height + 15), Math.round(this.header.height * 0.64), Math.round(this.header.height * 0.64));
         }
       } else if(!this.assetsLoaded) {
         const percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
@@ -827,11 +827,11 @@ export default class GameUI {
       }
 
       if(this.displayFPS) {
-        Utils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.85)", this.fontSize / 1.5, GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
+        Utils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.85)", Math.round(this.fontSize / 1.5), GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
       }
 
       if(this.spectatorMode) {
-        Utils.drawText(ctx, i18next.t("engine.servers.spectatorMode"), "rgba(255, 255, 255, 0.5)", this.fontSize, GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
+        Utils.drawText(ctx, i18next.t("engine.servers.spectatorMode"), "rgba(255, 255, 255, 0.5)", Math.round(this.fontSize), GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
       }
     }
   }

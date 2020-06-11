@@ -87,17 +87,17 @@ export default class Header extends Component {
       this.btnRank.color = this.btnRank.colorHover;
     }
 
-    Utils.drawImage(ctx, this.imageLoader.get("assets/images/skin/flat/fruit.png"), 5, 5, this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1), this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1));
+    Utils.drawImage(ctx, this.imageLoader.get("assets/images/skin/flat/fruit.png", Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1)), Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1))), 5, 5, Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1)), Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1)));
 
     if(this.snakes != null && this.snakes.length == 1) {
-      Utils.drawText(ctx, "× " + this.snakes[0].score, "black", this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.height * 0.9 * (this.bestScoreToDisplay ? 0.58 : 1), this.height * 0.67 * (this.bestScoreToDisplay ? 0.63 : 1));
+      Utils.drawText(ctx, "× " + this.snakes[0].score, "black", Math.round(this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1)), GameConstants.Setting.FONT_FAMILY, "default", "default", Math.round(this.height * 0.9 * (this.bestScoreToDisplay ? 0.58 : 1)), Math.round(this.height * 0.67 * (this.bestScoreToDisplay ? 0.63 : 1)));
     } else {
-      Utils.drawText(ctx, i18next.t("engine.num") + (this.numFruit != null ? this.numFruit : "???"), "black", this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.height * 0.9 * (this.bestScoreToDisplay ? 0.58 : 1), this.height * 0.67 * (this.bestScoreToDisplay ? 0.63 : 1));
+      Utils.drawText(ctx, i18next.t("engine.num") + (this.numFruit != null ? this.numFruit : "???"), "black", Math.round(this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1)), GameConstants.Setting.FONT_FAMILY, "default", "default", Math.round(this.height * 0.9 * (this.bestScoreToDisplay ? 0.58 : 1)), Math.round(this.height * 0.67 * (this.bestScoreToDisplay ? 0.63 : 1)));
     }
 
     if(this.bestScoreToDisplay) {
-      Utils.drawImage(ctx, this.imageLoader.get("assets/images/trophy.png"), 5, 8 + this.height * 0.425, this.height * 0.425, this.height * 0.425);
-      Utils.drawText(ctx, this.bestScoreToDisplay, "black", this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1), GameConstants.Setting.FONT_FAMILY, "default", "default", this.height * 0.9 * (this.bestScoreToDisplay ? 0.58 : 1), this.height * 0.425 + this.height * 0.67 * (this.bestScoreToDisplay ? 0.63 : 1));
+      Utils.drawImage(ctx, this.imageLoader.get("assets/images/trophy.png", Math.round(this.height * 0.425), Math.round(this.height * 0.425)), 5, Math.round(8 + this.height * 0.425), Math.round(this.height * 0.425), Math.round(this.height * 0.425));
+      Utils.drawText(ctx, this.bestScoreToDisplay, "black", Math.round(this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1)), GameConstants.Setting.FONT_FAMILY, "default", "default", Math.round(this.height * 0.9 * (this.bestScoreToDisplay ? 0.58 : 1)), Math.round(this.height * 0.425 + this.height * 0.67 * (this.bestScoreToDisplay ? 0.63 : 1)));
     }
 
     ctx.restore();

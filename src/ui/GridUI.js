@@ -83,7 +83,7 @@ export default class GridUI extends Component {
         }
 
         ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
-        Utils.drawImage(ctx, this.imageLoader.get("assets/images/skin/" + this.graphicSkin + "/" + this.grid.getImageCase(new Position(j, i))), caseX, caseY, caseWidth, caseHeight);
+        Utils.drawImage(ctx, this.imageLoader.get("assets/images/skin/" + this.graphicSkin + "/" + this.grid.getImageCase(new Position(j, i)), Math.round(caseWidth), Math.round(caseHeight)), Math.round(caseX), Math.round(caseY), Math.round(caseWidth), Math.round(caseHeight));
       }
     }
 
@@ -290,10 +290,10 @@ export default class GridUI extends Component {
             }
           }
 
-          Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc), caseX, caseY, caseWidth, caseHeight, null, null, null, null, eraseBelow, angle);
+          Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc, Math.round(caseWidth), Math.round(caseHeight)), Math.round(caseX), Math.round(caseY), Math.round(caseWidth), Math.round(caseHeight), null, null, null, null, eraseBelow, Math.round(angle));
         }
 
-        Utils.drawImageData(ctx, this.canvasTmp, Math.floor((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height, Math.floor((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, caseHeight * this.grid.height);
+        Utils.drawImageData(ctx, this.canvasTmp, Math.round((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height), Math.floor((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height));
         ctxTmp.filter = "none";
       }
 
@@ -347,7 +347,7 @@ export default class GridUI extends Component {
         Utils.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
     
         if(!this.spectatorMode && (currentPlayer == i && this.countBeforePlay >= 0 && (currentPlayer != null || (this.isFilterHueAvailable && this.snakes.length > 2) || (!this.isFilterHueAvailable && this.snakes.length > 1)))) {
-          Utils.drawArrow(ctx, caseX + (caseWidth / 2), caseY - caseHeight * 2, caseX + (caseWidth / 2), caseY - 5);
+          Utils.drawArrow(ctx, Math.round(caseX + (caseWidth / 2)), Math.round(caseY - caseHeight * 2), Math.round(caseX + (caseWidth / 2)), Math.round(caseY - 5));
         }
       }
     }

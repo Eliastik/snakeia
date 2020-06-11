@@ -136,7 +136,7 @@ export default class GameRanking extends Component {
       percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
 
       if(yTitle + this.fontSize - 10 >= this.headerHeight) {
-        Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", this.fontSize, this.fontFamily, "default", null, (this.width / 2) - (ctx.measureText(title).width / 2) + this.x, yTitle, false, true);
+        Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", Math.round(this.fontSize), this.fontFamily, "default", null, Math.round((this.width / 2) - (ctx.measureText(title).width / 2) + this.x), Math.round(yTitle), false, true);
       }
 
       const ranking = scores.sort((a, b) => {
@@ -170,25 +170,25 @@ export default class GameRanking extends Component {
           if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
             switch(ranking[i].rank) {
               case 0:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy.png") : null, 5 + this.x, currentY, this.fontSize, this.fontSize);
+                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
                 break;
               case 1:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_silver.png") : null, 5 + this.x, currentY, this.fontSize, this.fontSize);
+                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_silver.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
                 break;
               case 2:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_bronze.png") : null, 5 + this.x, currentY, this.fontSize, this.fontSize);
+                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_bronze.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
                 break;
             }
           } else {
-            Utils.drawText(ctx, "" + (ranking[i].rank + 1), "rgba(255, 255, 255, 0.5)", this.fontSize / 1.5, this.fontFamily, null, null, (this.fontSize / 1.5) / 2 + 5 + this.x, currentY + (this.fontSize / 1.5));
+            Utils.drawText(ctx, "" + (ranking[i].rank + 1), "rgba(255, 255, 255, 0.5)", Math.round(this.fontSize / 1.5), this.fontFamily, null, null, Math.round((this.fontSize / 1.5) / 2 + 5 + this.x), Math.round(currentY + (this.fontSize / 1.5)));
           }
 
-          Utils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.5)" : "rgba(255, 255, 255, 0.5)"), this.fontSize / 1.5, this.fontFamily, null, null, 5 + sizeNumber + this.fontSize / 1.5 + this.x, currentY + (this.fontSize / 1.5));
+          Utils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.5)" : "rgba(255, 255, 255, 0.5)"), Math.round(this.fontSize / 1.5), this.fontFamily, null, null, Math.round(5 + sizeNumber + this.fontSize / 1.5 + this.x), Math.round(currentY + (this.fontSize / 1.5)));
 
           numberRankDrawn++;
         }
 
-        currentY += this.fontSize + 5;
+        currentY += Math.round(this.fontSize) + 5;
 
         if(currentY > canvas.height && !this.back) {
           this.lastLine = false;
