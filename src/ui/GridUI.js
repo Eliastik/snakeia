@@ -148,7 +148,7 @@ export default class GridUI extends Component {
               }
             }
 
-            offset = (offset > 1 ? 1 : offset);
+            offset = Math.max(0, Math.min(1, offset));
             const offsetX = (caseWidth * offset) - caseWidth;
             const offsetY = (caseHeight * offset) - caseHeight;
 
