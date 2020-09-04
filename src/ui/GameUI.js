@@ -264,7 +264,7 @@ export default class GameUI {
 
     document.addEventListener("keydown", (evt) => {
       if(!this.killed) {
-        const keyCode = evt.keyCode;
+        let keyCode = evt.keyCode;
     
         if(keyCode == 90 || keyCode == 87) keyCode = GameConstants.Key.UP; // W or Z
         if(keyCode == 65 || keyCode == 81) keyCode = GameConstants.Key.LEFT; // A or Q
