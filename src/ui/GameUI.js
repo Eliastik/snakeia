@@ -73,6 +73,7 @@ export default class GameUI {
     this.enablePause = false;
     this.enableRetry = false;
     this.progressiveSpeed = false;
+    this.aiStuck = false;
     // Game state variables
     this.errorOccurred = false;
     this.fullscreen = false;

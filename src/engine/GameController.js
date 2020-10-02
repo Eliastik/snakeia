@@ -199,7 +199,8 @@ export default class GameController {
         "countBeforePlay": this.gameEngine.countBeforePlay,
         "numFruit": this.gameEngine.numFruit,
         "offsetFrame": 0,
-        "errorOccurred": this.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred,
+        "aiStuck": this.gameEngine.aiStuck
       });
 
       this.reactor.dispatchEvent("onUpdate");

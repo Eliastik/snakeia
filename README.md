@@ -365,10 +365,12 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 
 ## TO-DO list
 
-- [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning)
-- [ ] Améliorer les performances graphiques
+- [ ] Détection du blocage des IAs (exemple de partie avec IA bloquée - seed grille : -1086054751 ; seed jeu : -1687945108 ; IA normale ; 15x15 ; 5 IAs en Battle Royale)
 - [ ] Eviter de placer les joueurs trop près des murs
 - [ ] Eviter de placer une pomme dans un cul-de-sac peu importe sa taille (acutellement uniquement les cul-de-sac d'une case sont évités)
+- [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning)
+- [ ] Améliorer les performances graphiques
+- [x] Correction bug des seeds ne donnant pas les mêmes parties (seed d'une partie recommencée sur une partie initiale)
 - [x] Prédictions pour le mode en ligne (améliore la fluidité) - Pas vraiment OK, à revoir si possible
 - [x] Correction animation mort Snake quand partie terminée
 - [x] Contrôles sur mobile via défilement doigt

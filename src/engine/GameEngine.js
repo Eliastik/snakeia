@@ -52,6 +52,7 @@ export default class GameEngine {
     this.scoreMax = false;
     this.errorOccurred = false;
     this.clientSidePredictionsMode = false; // Enable client-side predictions mode for the online game (disable some functions)
+    this.aiStuck = false; // true if one AI is stuck - disabled if an human player is playing
     // Intervals, timeouts, frames
     this.intervalPlay;
     // Events
@@ -79,23 +80,41 @@ export default class GameEngine {
         this.errorOccurred = true;
       }
 
-      let startHue = GameUtils.randRange(0, 360, this.grid ? this.grid.rngGame : null);
-
-      for(let i = 0; i < this.snakes.length; i++) {
-        if(this.snakes[i] instanceof Snake == false) {
-          this.errorOccurred = true;
-        } else {
-          startHue = GameUtils.addHue(startHue, Math.round(360 / (this.snakes.length)));
-          this.snakes[i].color = startHue;
-        }
-      }
-
       if(this.grid instanceof Grid == false) {
         this.errorOccurred = true;
       } else if(!this.errorOccurred) {
-        this.grid.setFruit(this.snakes.length);
+        this.initGridAndSnakes();
+
+        // Init Snake colors
+        let startHue = GameUtils.randRange(0, 360, this.grid ? new seedrandom(this.grid.seedGame) : null);
+  
+        for(let i = 0; i < this.snakes.length; i++) {
+          if(this.snakes[i] instanceof Snake == false) {
+            this.errorOccurred = true;
+          } else {
+            startHue = GameUtils.addHue(startHue, Math.round(360 / (this.snakes.length)));
+            this.snakes[i].color = startHue;
+          }
+        }
       }
     }
+  }
+
+  initGridAndSnakes() {
+    this.grid.reset();
+    this.grid.init(this.grid.customGrid);
+
+    if(this.snakes != null) {
+      for(let i = 0; i < this.snakes.length; i++) {
+        this.snakes[i].reset();
+      }
+      
+      for(let i = 0; i < this.snakes.length; i++) {
+        this.snakes[i].init();
+      }
+    }
+
+    this.grid.setFruit(this.snakes.length);
   }
 
   reset() {
@@ -103,18 +122,6 @@ export default class GameEngine {
     this.isReseted = true;
     this.exited = false;
     this.clearIntervalPlay();
-
-    if(this.grid.seedGrid) this.grid.seedGrid++;
-    if(this.grid.seedGame) this.grid.seedGame++;
-    if(this.grid.rngGrid) this.grid.rngGrid = seedrandom(this.grid.seedGrid);
-    if(this.grid.rngGame) this.grid.rngGame = seedrandom(this.grid.seedGame);
-    this.grid.init();
-
-    if(this.snakes != null) {
-      for(let i = 0; i < this.snakes.length; i++) {
-        this.snakes[i].reset();
-      }
-    }
 
     this.numFruit = 1;
     this.ticks = 0;
@@ -127,7 +134,17 @@ export default class GameEngine {
     this.starting = false;
     this.initialSpeed = this.initialSpeedUntouched;
     this.speed = this.initialSpeedUntouched;
-    this.grid.setFruit(this.snakes.length);
+
+    if(this.grid.seedGrid) {
+      this.grid.seedGrid = "" + (parseInt(this.grid.seedGrid) + 1);
+    }
+
+    if(this.grid.seedGame) {
+      this.grid.seedGame = "" + (parseInt(this.grid.seedGame) + 1);
+    }
+
+    this.initGridAndSnakes();
+
     this.reactor.dispatchEvent("onReset");
     this.start();
   }
@@ -373,6 +390,18 @@ export default class GameEngine {
 
             if(this.snakes.length > 1) {
               this.gameFinished = true;
+            }
+          }
+
+          // Checking if the AIs are all stuck (disalbed if an human player is playing)
+          if(this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0) {
+            for(let k = 0; k < this.snakes.length; k++) {
+              if(!this.snakes[k].gameOver && this.snakes[k].isAIStuck()) {
+                this.aiStuck = true;
+              } else if(!this.snakes[k].gameOver) {
+                this.aiStuck = false;
+                break;
+              }
             }
           }
 

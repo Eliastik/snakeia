@@ -24,7 +24,7 @@ import { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh } from "
 export default class Snake {
   constructor(direction, length, grid, player, aiLevel, autoRetry, name, customAI) {
     this.direction = direction == undefined ? GameConstants.Direction.RIGHT : direction;
-    this.initialDirection = direction == undefined ? GameConstants.Direction.RIGHT : direction;
+    this.initialDirection = this.direction;
     this.initialLength = length == undefined ? 3 : length;
     this.initTriedDirections = [];
     this.errorInit = false;
@@ -44,8 +44,8 @@ export default class Snake {
     this.name = name == undefined ? "Snake" : name;
     this.snakeAI = new SnakeAI();
     this.customAI = customAI;
+    this.ticksWithoutAction = 0;
 
-    this.init();
     this.initAI();
   }
 
@@ -212,15 +212,17 @@ export default class Snake {
   reset() {
     this.direction = this.initialDirection;
     this.initTriedDirections = [];
+    this.errorInit = false;
     this.queue = [];
     this.score = 0;
     this.gameOver = false;
     this.scoreMax = false;
     this.lastTailMoved = true;
+    this.lastTail = undefined;
     this.lastKey = -1;
     this.aiFruitGoal = GameConstants.CaseType.FRUIT;
     this.ticksDead = 0;
-    this.init();
+    this.ticksWithoutAction = 0;
   }
 
   insert(position) {
@@ -279,21 +281,31 @@ export default class Snake {
     this.queue = null;
   }
 
-  moveTo(direction) {
-    if(direction == GameConstants.Key.LEFT && this.direction != GameConstants.Direction.RIGHT && this.direction != GameConstants.Direction.LEFT) {
-      this.direction = GameConstants.Direction.LEFT;
+  keyToDirection(key) {
+    if(key == GameConstants.Key.LEFT && this.direction != GameConstants.Direction.RIGHT && this.direction != GameConstants.Direction.LEFT) {
+      return GameConstants.Direction.LEFT;
     }
 
-    if(direction == GameConstants.Key.UP && this.direction != GameConstants.Direction.BOTTOM && this.direction != GameConstants.Direction.UP) {
-      this.direction = GameConstants.Direction.UP;
+    if(key == GameConstants.Key.UP && this.direction != GameConstants.Direction.BOTTOM && this.direction != GameConstants.Direction.UP) {
+      return GameConstants.Direction.UP;
     }
 
-    if(direction == GameConstants.Key.RIGHT && this.direction != GameConstants.Direction.LEFT && this.direction != GameConstants.Direction.RIGHT) {
-      this.direction = GameConstants.Direction.RIGHT;
+    if(key == GameConstants.Key.RIGHT && this.direction != GameConstants.Direction.LEFT && this.direction != GameConstants.Direction.RIGHT) {
+      return GameConstants.Direction.RIGHT;
     }
 
-    if(direction == GameConstants.Key.BOTTOM && this.direction != GameConstants.Direction.UP && this.direction != GameConstants.Direction.BOTTOM) {
-      this.direction = GameConstants.Direction.BOTTOM;
+    if(key == GameConstants.Key.BOTTOM && this.direction != GameConstants.Direction.UP && this.direction != GameConstants.Direction.BOTTOM) {
+      return GameConstants.Direction.BOTTOM;
+    }
+
+    return null;
+  }
+
+  moveTo(key) {
+    const direction = this.keyToDirection(key);
+
+    if(direction != null) {
+      this.direction = direction;
     }
   }
 
@@ -347,7 +359,31 @@ export default class Snake {
   }
 
   ai() {
-    return this.snakeAI && this.snakeAI.ai ? this.snakeAI.ai(this) : null;
+    if(this.snakeAI && this.snakeAI.ai) {
+      const action = this.snakeAI.ai(this);
+
+      if(!action || this.keyToDirection(action) == this.direction) {
+        this.ticksWithoutAction++;
+      } else {
+        this.ticksWithoutAction = 0;
+      }
+
+      return action;
+    }
+    
+    return null;
+  }
+
+  isAIStuck() {
+    if(this.snakeAI && this.snakeAI.ai) {
+      if((this.direction == GameConstants.Direction.LEFT || this.direction == GameConstants.Direction.RIGHT) && this.ticksWithoutAction >= this.grid.width) {
+        return true;
+      } else if((this.direction == GameConstants.Direction.UP || this.direction == GameConstants.Direction.BOTTOM) && this.ticksWithoutAction >= this.grid.height) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   getAILevelText() {

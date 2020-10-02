@@ -13,6 +13,7 @@ const theGrid = new Grid(10, 5, false, false, false,
     [0, 0, 0, 4, 4, 4, 0, 0, 0, 0]
   ], // Custom grid
 false);
+theGrid.init();
 
 const theGrid2 = new Grid(10, 5, false, false, false,
   [
@@ -23,6 +24,7 @@ const theGrid2 = new Grid(10, 5, false, false, false,
     [4, 4, 4, 3, 3, 0, 0, 0, 0, 0]
   ], // Custom grid
 false);
+theGrid2.init();
 
 const theGrid3 = new Grid(10, 5, false, false, false,
   [
@@ -33,6 +35,7 @@ const theGrid3 = new Grid(10, 5, false, false, false,
     [0, 0, 0, 4, 4, 4, 0, 0, 0, 0]
   ], // Custom grid
 false);
+theGrid3.init();
 
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);

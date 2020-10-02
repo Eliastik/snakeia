@@ -35,12 +35,11 @@ export default class Grid {
     this.initialGrid;
     this.fruitPos;
     this.fruitPosGold;
-    this.seedGrid = seedGrid;
-    this.seedGame = seedGame;
-    this.rngGrid = seedrandom(this.seedGrid);
-    this.rngGame = seedrandom(this.seedGame);
-
-    this.init(customGrid);
+    this.customGrid = customGrid;
+    this.seedGrid = "" + parseInt(seedGrid);
+    this.seedGame = "" + parseInt(seedGame);
+    this.rngGrid;
+    this.rngGame;
   }
 
   init(customGrid) {
@@ -86,6 +85,15 @@ export default class Grid {
     }
 
     this.fruitPosGold = null;
+  }
+
+  reset() {
+    this.grid = undefined;
+    this.initialGrid = undefined;
+    this.fruitPos = undefined;
+    this.fruitPosGold = undefined;
+    this.rngGrid = new seedrandom(this.seedGrid);
+    this.rngGame = new seedrandom(this.seedGame);
   }
 
   fixWalls(borderWalls) {

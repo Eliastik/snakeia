@@ -56,9 +56,6 @@ function parseSnakes(snakes, grid) {
 
   grid = Object.assign(new Grid(), grid);
 
-  grid.rngGrid = seedrandom(grid.seedGrid);
-  grid.rngGame = seedrandom(grid.seedGame);
-
   if(!snakes && game) {
     snakes = game.snakes;
   }
@@ -89,6 +86,7 @@ onmessage = e => {
     const snakes = parsed["snakes"];
 
     game = new GameEngine(grid, snakes, data[1]["speed"], data[1]["enablePause"], data[1]["enableRetry"], data[1]["progressiveSpeed"]);
+    game.init();
 
     self.postMessage(["init", {
       "snakes": copySnakes(game.snakes),
@@ -229,7 +227,8 @@ onmessage = e => {
         "countBeforePlay": game.countBeforePlay,
         "numFruit": game.numFruit,
         "offsetFrame": 0,
-        "errorOccurred": game.errorOccurred
+        "errorOccurred": game.errorOccurred,
+        "aiStuck": game.aiStuck
       }]);
     });
 
