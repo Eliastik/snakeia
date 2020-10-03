@@ -374,11 +374,11 @@ export default class Snake {
     return null;
   }
 
-  isAIStuck() {
+  isAIStuck(widthLimit, heightLimit) {
     if(this.snakeAI && this.snakeAI.ai) {
-      if((this.direction == GameConstants.Direction.LEFT || this.direction == GameConstants.Direction.RIGHT) && this.ticksWithoutAction >= this.grid.width) {
+      if((this.direction == GameConstants.Direction.LEFT || this.direction == GameConstants.Direction.RIGHT) && this.ticksWithoutAction >= this.grid.width * widthLimit) {
         return true;
-      } else if((this.direction == GameConstants.Direction.UP || this.direction == GameConstants.Direction.BOTTOM) && this.ticksWithoutAction >= this.grid.height) {
+      } else if((this.direction == GameConstants.Direction.UP || this.direction == GameConstants.Direction.BOTTOM) && this.ticksWithoutAction >= this.grid.height * heightLimit) {
         return true;
       }
     }

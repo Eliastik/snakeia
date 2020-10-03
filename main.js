@@ -1341,7 +1341,7 @@ function validateSettings(returnValidation) {
       }
 
       if(mazeGrid && (selectedMode == SOLO_AI || selectedMode == SOLO_PLAYER)) {
-        group.setNotification(new NotificationMessage(i18next.t("engine.mazeMode"), null, "rgba(52, 152, 219, 0.5)", 5, null, null, null, true));
+        group.setNotification(new NotificationMessage(i18next.t("engine.mazeMode"), null, GameConstants.Setting.INFO_NOTIF_COLOR, 5, null, null, null, true));
       }
 
       document.getElementById("backToMenuGame").onclick = () => {
@@ -1407,7 +1407,7 @@ function validateSettings(returnValidation) {
 
           if(resultMessage.trim() != "") {
             document.getElementById("gameOrder").innerHTML = resultMessage;
-            group.setNotification(new NotificationMessage(resultMessage, null, "rgba(52, 152, 219, 0.5)", 15, null, null, null, true));
+            group.setNotification(new NotificationMessage(resultMessage, null, GameConstants.Setting.INFO_NOTIF_COLOR, 15, null, null, null, true));
           }
         }
       });
@@ -1709,8 +1709,8 @@ window.playLevel = (level, player, type) => {
     let levelTimer = new Timer(null, 0);
     let notificationEndDisplayed = false;
     let notificationStartDisplayed = false;
-    const notifErrorColor = "rgba(231, 76, 60, 0.5)";
-    const notifInfosColor = "rgba(52, 152, 219, 0.5)";
+    const notifErrorColor = GameConstants.Setting.ERROR_NOTIF_COLOR;
+    const notifInfosColor = GameConstants.Setting.INFO_NOTIF_COLOR;
     let notifInfo;
     let textToDisplayGoal;
 

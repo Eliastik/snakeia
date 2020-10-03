@@ -22,6 +22,7 @@ import Reactor from "./Reactor";
 import Grid from "./Grid";
 import Snake from "./Snake";
 import seedrandom from "seedrandom";
+import { Game } from "../Shim";
 
 export default class GameEngine {
   constructor(grid, snake, speed, enablePause, enableRetry, progressiveSpeed) {
@@ -134,6 +135,7 @@ export default class GameEngine {
     this.starting = false;
     this.initialSpeed = this.initialSpeedUntouched;
     this.speed = this.initialSpeedUntouched;
+    this.aiStuck = false;
 
     if(this.grid.seedGrid) {
       this.grid.seedGrid = "" + (parseInt(this.grid.seedGrid) + 1);
@@ -385,23 +387,30 @@ export default class GameEngine {
             (this.snakes[j].gameOver || this.snakes[j].scoreMax) && nbOver++;
           }
 
-          if(nbOver >= this.snakes.length || setFruitError) {
+          // Checking if the AIs are all stuck
+          let endGameAIStuck = false;
+
+          for(let k = 0; k < this.snakes.length; k++) {
+            if(!this.snakes[k].gameOver && this.snakes[k].isAIStuck(1, 1)) {
+              this.aiStuck = true;
+
+              if(this.snakes[k].isAIStuck(5, 5)) { // Limit of 5 loops - end the game
+                endGameAIStuck = true;
+              } else {
+                endGameAIStuck = false;
+              }
+            } else if(((this.snakes[k].player == GameConstants.PlayerType.HUMAN || this.snakes[k].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) && !this.snakes[k].gameOver) || (this.snakes[k].player == GameConstants.PlayerType.AI && !this.snakes[k].gameOver)) {
+              this.aiStuck = false;
+              endGameAIStuck = false;
+              break;
+            } 
+          }
+
+          if(nbOver >= this.snakes.length || setFruitError || endGameAIStuck) {
             this.stop();
 
             if(this.snakes.length > 1) {
               this.gameFinished = true;
-            }
-          }
-
-          // Checking if the AIs are all stuck (disalbed if an human player is playing)
-          if(this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0) {
-            for(let k = 0; k < this.snakes.length; k++) {
-              if(!this.snakes[k].gameOver && this.snakes[k].isAIStuck()) {
-                this.aiStuck = true;
-              } else if(!this.snakes[k].gameOver) {
-                this.aiStuck = false;
-                break;
-              }
             }
           }
 

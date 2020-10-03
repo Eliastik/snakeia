@@ -74,6 +74,7 @@ export default class GameUI {
     this.enableRetry = false;
     this.progressiveSpeed = false;
     this.aiStuck = false;
+    this.precAiStuck = false;
     // Game state variables
     this.errorOccurred = false;
     this.fullscreen = false;
@@ -544,6 +545,11 @@ export default class GameUI {
         this.progressBarLoading.percent = percentLoaded / 100;
         this.progressBarLoading.width = this.canvas.width / 4;
         this.menu.set(this.labelMenus, this.progressBarLoading);
+      }
+
+      if(this.aiStuck && !this.precAiStuck) {
+        this.precAiStuck = true;
+        this.setNotification(new NotificationMessage(i18next.t("engine.aiStuck"), null, GameConstants.Setting.ERROR_NOTIF_COLOR, 10));
       }
 
       if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {

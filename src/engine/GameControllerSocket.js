@@ -138,19 +138,19 @@ export default class GameControllerSocket extends GameController {
     });
 
     this.socket.once("error", () => {
-      this.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
+      this.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, GameConstants.Setting.ERROR_NOTIF_COLOR, null, null, null, null, true));
     });
 
     this.socket.once("connect_error", () => {
-      this.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
+      this.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, GameConstants.Setting.ERROR_NOTIF_COLOR, null, null, null, null, true));
     });
 
     this.socket.once("connect_timeout", () => {
-      this.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
+      this.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, GameConstants.Setting.ERROR_NOTIF_COLOR, null, null, null, null, true));
     });
 
     this.socket.once("reconnect_error", () => {
-      this.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, "rgba(231, 76, 60, 0.5)", null, null, null, null, true));
+      this.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, GameConstants.Setting.ERROR_NOTIF_COLOR, null, null, null, null, true));
     });
   }
 

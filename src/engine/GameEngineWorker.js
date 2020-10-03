@@ -119,7 +119,9 @@ onmessage = e => {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": game.errorOccurred
+        "errorOccurred": game.errorOccurred,
+        "aiStuck": game.aiStuck,
+        "precAiStuck": false
       }]);
     });
 

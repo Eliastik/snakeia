@@ -99,6 +99,7 @@ i18next.addResourceBundle("fr", "translation", {
     "seedGrid": "Valeur aléatoire grille :",
     "seedGame": "Valeur aléatoire jeu :",
     "ping": "Ping :",
+    "aiStuck": "Toutes les IAs sont bloquées. La partie se terminera si les IAs restent bloquées.",
     "servers": {
       "errorConnection": "Une erreur est survenue lors de la connexion au serveur.",
       "waitingPlayers": "En attente de joueurs…",
@@ -124,7 +125,7 @@ i18next.addResourceBundle("en", "translation", {
     "no": "No",
     "ok": "OK",
     "about": "About…",
-    "infosGame": "Current game infos",
+    "infosGame": "Game infos",
     "player": "Player:",
     "playerHuman": "You",
     "playerAI": "AI",
@@ -191,6 +192,7 @@ i18next.addResourceBundle("en", "translation", {
     "seedGrid": "Grid random value:",
     "seedGame": "Game random value:",
     "ping": "Ping:",
+    "aiStuck": "All the AIs are stuck. The game will end if the AIs remain stuck.",
     "servers": {
       "errorConnection": "An error has occurred when connecting to the server.",
       "waitingPlayers": "Waiting for players…",

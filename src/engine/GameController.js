@@ -82,7 +82,9 @@ export default class GameController {
         "getInfos": false,
         "getInfosGame": false,
         "errorOccurred": this.gameEngine.errorOccurred,
-        "offsetFrame": this.gameEngine.speed * GameConstants.Setting.TIME_MULTIPLIER
+        "offsetFrame": this.gameEngine.speed * GameConstants.Setting.TIME_MULTIPLIER,
+        "aiStuck": this.gameEngine.aiStuck,
+        "precAiStuck": false
       });
 
       this.reactor.dispatchEvent("onReset");

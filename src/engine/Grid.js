@@ -36,8 +36,8 @@ export default class Grid {
     this.fruitPos;
     this.fruitPosGold;
     this.customGrid = customGrid;
-    this.seedGrid = "" + parseInt(seedGrid);
-    this.seedGame = "" + parseInt(seedGame);
+    this.seedGrid = seedGrid ? "" + parseInt(seedGrid) : undefined;
+    this.seedGame = seedGrid ? "" + parseInt(seedGame) : undefined;
     this.rngGrid;
     this.rngGame;
   }

@@ -59,7 +59,9 @@ export default {
     APP_VERSION: "2.1.1",
     DATE_VERSION: "06/01/2020",
     PROB_GOLD_FRUIT_1_PLAYER: 100,
-    PROB_GOLD_FRUIT_MULTIPLE_PLAYERS: 50
+    PROB_GOLD_FRUIT_MULTIPLE_PLAYERS: 50,
+    INFO_NOTIF_COLOR: "rgba(52, 152, 219, 0.5)",
+    ERROR_NOTIF_COLOR: "rgba(231, 76, 60, 0.5)"
   },
   Direction: {
     UP: 0,
