@@ -376,7 +376,7 @@ export default class GameEngine {
             setFruitError = !this.grid.setFruit(this.snakes.length);
           }
 
-          if(!this.scoreMax && this.grid.fruitPosGold != null && (this.grid.isFruitSurrounded(this.grid.fruitPosGold, true) || this.grid.detectCorridor(this.grid.fruitPos))) {
+          if(!this.scoreMax && this.grid.fruitPosGold != null && (this.grid.isFruitSurrounded(this.grid.fruitPosGold, true) || this.grid.detectCorridor(this.grid.fruitPosGold))) {
             this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPosGold);
             this.grid.fruitPosGold = null;
           }

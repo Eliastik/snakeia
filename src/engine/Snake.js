@@ -220,9 +220,9 @@ export default class Snake {
     this.lastTailMoved = true;
     this.lastTail = undefined;
     this.lastKey = -1;
-    this.aiFruitGoal = GameConstants.CaseType.FRUIT;
     this.ticksDead = 0;
     this.ticksWithoutAction = 0;
+    if(this.snakeAI) this.snakeAI.aiFruitGoal = GameConstants.CaseType.FRUIT;
   }
 
   insert(position) {
