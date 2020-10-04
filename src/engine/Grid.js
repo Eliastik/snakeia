@@ -387,7 +387,7 @@ export default class Grid {
 
     if(numDeadPositionArround >= 3) {
       return true;
-    } else if(numDeadPositionArround <= 1 || this.get(position) != GameConstants.CaseType.EMPTY) {
+    } else if(numDeadPositionArround <= 1 || this.isDeadPosition(position, true)) {
       return false;
     }
 
