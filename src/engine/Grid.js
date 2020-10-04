@@ -323,9 +323,7 @@ export default class Grid {
   }
 
   isCaseSurrounded(position, fill, foundVals, forbiddenVals) {
-    if(position == null || position == undefined) {
-      return false;
-    }
+    if(!position) return false;
 
     const gridCopy = JSON.parse(JSON.stringify(this.grid));
     const checkList = [position];
@@ -373,6 +371,7 @@ export default class Grid {
 
   detectCorridor(position, gridCopy = JSON.parse(JSON.stringify(this.grid))) {
     if(this.maze) return false;
+    if(!position) return false;
 
     const posTop = this.getNextPosition(position, GameConstants.Direction.TOP);
     const posBottom = this.getNextPosition(position, GameConstants.Direction.BOTTOM);

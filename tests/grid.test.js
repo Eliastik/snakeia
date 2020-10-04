@@ -83,6 +83,17 @@ const theGrid7 = new Grid(10, 6, false, false, false,
 false);
 theGrid7.init();
 
+const theGrid8 = new Grid(5, 5, true, false, false,
+  [
+    [3, 3, 3, 3, 3],
+    [3, 0, 0, 0, 3],
+    [3, 1, 1, 1, 3],
+    [3, 0, 6, 1, 3],
+    [3, 3, 3, 3, 3]
+  ], // Custom grid
+false);
+theGrid8.init();
+
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);
 });
@@ -164,4 +175,15 @@ test("corridor detection fruit test 4", () => {
   expect(theGrid7.detectCorridor(new Position(7, 0))).toBe(false);
   expect(theGrid7.detectCorridor(new Position(0, 0))).toBe(false);
   expect(theGrid7.detectCorridor(new Position(5, 0))).toBe(false);
+});
+
+test("corridor detection fruit test 5", () => {
+  const mockRandom = jest.fn();
+  mockRandom.mockReturnValueOnce(new Position(2, 1)).mockReturnValueOnce(new Position(1, 3));
+  jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+
+  expect(theGrid8.get(new Position(2, 1))).toBe(Constants.CaseType.FRUIT);
+  expect(theGrid8.get(new Position(1, 3))).toBe(Constants.CaseType.FRUIT);
+  expect(theGrid8.detectCorridor(new Position(2, 3))).toBe(false);
+  expect(theGrid8.get(new Position(2, 3))).toBe(Constants.CaseType.FRUIT_GOLD);
 });
