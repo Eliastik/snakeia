@@ -372,11 +372,11 @@ export default class GameEngine {
             }
           }
 
-          if(!this.scoreMax && !setFruitError && (this.grid.isFruitSurrounded(this.grid.fruitPos, true) || this.grid.detectCorridor(this.grid.fruitPos)) && !this.clientSidePredictionsMode) {
+          if(!this.scoreMax && !setFruitError && (this.grid.detectCorridor(this.grid.fruitPos) || this.grid.isFruitSurrounded(this.grid.fruitPos, true)) && !this.clientSidePredictionsMode) {
             setFruitError = !this.grid.setFruit(this.snakes.length);
           }
 
-          if(!this.scoreMax && this.grid.fruitPosGold != null && (this.grid.isFruitSurrounded(this.grid.fruitPosGold, true) || this.grid.detectCorridor(this.grid.fruitPosGold))) {
+          if(!this.scoreMax && this.grid.fruitPosGold != null && (this.grid.detectCorridor(this.grid.fruitPosGold) || this.grid.isFruitSurrounded(this.grid.fruitPosGold, true))) {
             this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPosGold);
             this.grid.fruitPosGold = null;
           }

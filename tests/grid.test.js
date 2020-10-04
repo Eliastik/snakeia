@@ -59,6 +59,18 @@ const theGrid5 = new Grid(10, 5, false, false, false,
 false);
 theGrid5.init();
 
+const theGrid6 = new Grid(10, 6, false, false, false,
+  [
+    [4, 4, 4, 0, 3, 3, 3, 1, 1, 1],
+    [4, 0, 4, 0, 3, 0, 3, 0, 0, 0],
+    [4, 0, 4, 0, 3, 0, 3, 0, 0, 0],
+    [4, 0, 4, 0, 3, 0, 3, 0, 0, 0],
+    [4, 0, 4, 0, 3, 0, 3, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  ], // Custom grid
+false);
+theGrid6.init();
+
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);
 });
@@ -116,4 +128,18 @@ test("corridor detection fruit test 2", () => {
   theGrid5.setFruit();
   expect(theGrid5.get(new Position(3, 1))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid5.get(new Position(5, 0))).toBe(Constants.CaseType.FRUIT);
+});
+
+test("corridor detection fruit test 3", () => {
+  const mockRandom = jest.fn();
+  mockRandom.mockReturnValueOnce(new Position(5, 3)).mockReturnValueOnce(new Position(5, 4)).mockReturnValueOnce(new Position(1, 3)).mockReturnValueOnce(new Position(1, 4)).mockReturnValue(new Position(7, 1));
+  jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+
+  theGrid6.setFruit();
+  console.log(theGrid6.toString());
+  expect(theGrid6.get(new Position(5, 3))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid6.get(new Position(5, 4))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid6.get(new Position(1, 3))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid6.get(new Position(1, 4))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid6.get(new Position(7, 1))).toBe(Constants.CaseType.FRUIT);
 });
