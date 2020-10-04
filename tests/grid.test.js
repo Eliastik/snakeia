@@ -28,7 +28,7 @@ theGrid2.init();
 
 const theGrid3 = new Grid(10, 5, false, false, false,
   [
-    [3, 3, 0, 0, 0, 0, 0, 0, 0, 0],
+    [3, 3, 0, 0, 0, 0, 0, 1, 1, 1],
     [3, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [3, 3, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 4, 0, 4, 0, 0, 0, 0],
@@ -36,6 +36,17 @@ const theGrid3 = new Grid(10, 5, false, false, false,
   ], // Custom grid
 false);
 theGrid3.init();
+
+const theGrid4 = new Grid(10, 5, false, false, false,
+  [
+    [3, 3, 3, 3, 0, 0, 0, 1, 1, 1],
+    [3, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [3, 3, 3, 4, 0, 4, 0, 0, 0, 0],
+    [0, 0, 0, 4, 0, 4, 0, 0, 0, 0],
+    [0, 0, 0, 4, 4, 4, 0, 0, 0, 0]
+  ], // Custom grid
+false);
+theGrid4.init();
 
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);
@@ -63,10 +74,25 @@ test("surrounded fruit test 2", () => {
 
 test("surrounded by 3 walls fruit test", () => {
   const mockRandom = jest.fn();
-  mockRandom.mockReturnValueOnce(new Position(1, 1)).mockReturnValueOnce(new Position(4, 3)).mockReturnValue(new Position(2, 0));
+  mockRandom.mockReturnValueOnce(new Position(1, 1)).mockReturnValueOnce(new Position(4, 3)).mockReturnValueOnce(new Position(4, 1)).mockReturnValue(new Position(2, 0));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
   theGrid3.setFruit();
   expect(theGrid3.get(new Position(1, 1))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid3.get(new Position(4, 3))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid3.get(new Position(4, 1))).toBe(Constants.CaseType.FRUIT);
+});
+
+test("corridor detection fruit test", () => {
+  const mockRandom = jest.fn();
+  mockRandom.mockReturnValueOnce(new Position(2, 1)).mockReturnValueOnce(new Position(4, 2)).mockReturnValueOnce(new Position(3, 1)).mockReturnValueOnce(new Position(1, 1)).mockReturnValueOnce(new Position(4, 3)).mockReturnValueOnce(new Position(2, 0)).mockReturnValue(new Position(5, 0));
+  jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+
+  theGrid4.setFruit();
+  expect(theGrid4.get(new Position(2, 1))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid4.get(new Position(4, 2))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid4.get(new Position(3, 1))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid4.get(new Position(1, 1))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid4.get(new Position(4, 3))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid4.get(new Position(5, 0))).toBe(Constants.CaseType.FRUIT);
 });

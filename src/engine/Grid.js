@@ -42,14 +42,14 @@ export default class Grid {
     this.rngGame;
   }
 
-  init(customGrid) {
-    if(customGrid != undefined || this.initialGrid != undefined) {
+  init() {
+    if(this.customGrid != undefined || this.initialGrid != undefined) {
       let gridToCopy;
 
       if(this.initialGrid != undefined) {
         gridToCopy = this.initialGrid;
       } else {
-        gridToCopy = customGrid;
+        gridToCopy = this.customGrid;
       }
 
       this.height = gridToCopy.length;
@@ -263,18 +263,13 @@ export default class Grid {
     }
 
     if(this.getTotal(GameConstants.CaseType.EMPTY) > 0) {
-      let randomPos, numDeadPositionArround;
+      let randomPos, isCorridor;
 
       do {
         randomPos = this.getRandomPosition();
+        isCorridor = this.detectCorridor(randomPos);
 
-        const posTop = this.getNextPosition(randomPos, GameConstants.Direction.TOP);
-        const posBottom = this.getNextPosition(randomPos, GameConstants.Direction.BOTTOM);
-        const posRight = this.getNextPosition(randomPos, GameConstants.Direction.RIGHT);
-        const posLeft = this.getNextPosition(randomPos, GameConstants.Direction.LEFT);
-        numDeadPositionArround = this.isDeadPosition(posTop, true) + this.isDeadPosition(posBottom, true) + this.isDeadPosition(posRight, true) + this.isDeadPosition(posLeft, true);
-
-        if(numDeadPositionArround >= 3 && this.get(randomPos) == GameConstants.CaseType.EMPTY) {
+        if(isCorridor && this.get(randomPos) == GameConstants.CaseType.EMPTY) {
           this.set(GameConstants.CaseType.SURROUNDED, randomPos);
         }
 
@@ -285,7 +280,7 @@ export default class Grid {
             return false;
           }
         }
-      } while(this.get(randomPos) != GameConstants.CaseType.EMPTY || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos, tried)) || numDeadPositionArround >= 3);
+      } while(this.get(randomPos) != GameConstants.CaseType.EMPTY || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos, tried)) || isCorridor);
 
       if(gold) {
         this.fruitPosGold = randomPos;
@@ -374,6 +369,40 @@ export default class Grid {
     }
 
     return surrounded;
+  }
+
+  detectCorridor(position, gridCopy = JSON.parse(JSON.stringify(this.grid))) {
+    if(this.maze) return false;
+
+    const posTop = this.getNextPosition(position, GameConstants.Direction.TOP);
+    const posBottom = this.getNextPosition(position, GameConstants.Direction.BOTTOM);
+    const posRight = this.getNextPosition(position, GameConstants.Direction.RIGHT);
+    const posLeft = this.getNextPosition(position, GameConstants.Direction.LEFT);
+
+    const isDeadPositionTop = this.isDeadPosition(posTop, true, true);
+    const isDeadPositionBottom = this.isDeadPosition(posBottom, true, true);
+    const isDeadPositionRight = this.isDeadPosition(posRight, true, true);
+    const isDeadPositionLeft = this.isDeadPosition(posLeft, true, true);
+    const numDeadPositionArround = isDeadPositionTop + isDeadPositionBottom + isDeadPositionRight + isDeadPositionLeft;
+
+    if(numDeadPositionArround >= 3) {
+      return true;
+    } else if(numDeadPositionArround <= 1 || this.get(position) != GameConstants.CaseType.EMPTY) {
+      return false;
+    }
+
+    gridCopy[position.y][position.x] = GameConstants.CaseType.CROSSED;
+
+    const corridorTop = gridCopy[posTop.y][posTop.x] != GameConstants.CaseType.CROSSED ? this.detectCorridor(posTop, gridCopy) : false;
+    const corridorBottom = gridCopy[posBottom.y][posBottom.x] != GameConstants.CaseType.CROSSED ? this.detectCorridor(posBottom, gridCopy) : false;
+    const corridorLeft = gridCopy[posLeft.y][posLeft.x] != GameConstants.CaseType.CROSSED ? this.detectCorridor(posLeft, gridCopy) : false;
+    const corridorRight = gridCopy[posRight.y][posRight.x] != GameConstants.CaseType.CROSSED ? this.detectCorridor(posRight, gridCopy) : false;
+
+    if(corridorBottom || corridorTop || corridorLeft || corridorRight) {
+      return true;
+    }
+
+    return false;
   }
 
   getOnLine(type, line) {
@@ -465,8 +494,8 @@ export default class Grid {
     return -1;
   }
 
-  isDeadPosition(position, excludeSnake) {
-    return (!excludeSnake && this.get(position) == GameConstants.CaseType.SNAKE) || this.get(position) == GameConstants.CaseType.WALL || this.get(position) == GameConstants.CaseType.SNAKE_DEAD;
+  isDeadPosition(position, excludeSnake, includeSurrounded) {
+    return (!excludeSnake && this.get(position) == GameConstants.CaseType.SNAKE) || this.get(position) == GameConstants.CaseType.WALL || this.get(position) == GameConstants.CaseType.SNAKE_DEAD || (includeSurrounded && this.get(position)  == GameConstants.CaseType.SURROUNDED);
   }
 
   toString() {

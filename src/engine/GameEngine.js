@@ -103,7 +103,7 @@ export default class GameEngine {
 
   initGridAndSnakes() {
     this.grid.reset();
-    this.grid.init(this.grid.customGrid);
+    this.grid.init();
 
     if(this.snakes != null) {
       for(let i = 0; i < this.snakes.length; i++) {
