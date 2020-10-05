@@ -179,11 +179,12 @@ test("corridor detection fruit test 4", () => {
 
 test("corridor detection fruit test 5", () => {
   const mockRandom = jest.fn();
-  mockRandom.mockReturnValueOnce(new Position(2, 1)).mockReturnValueOnce(new Position(1, 3));
+  mockRandom.mockReturnValueOnce(new Position(1, 3)).mockReturnValueOnce(new Position(2, 1));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
-  expect(theGrid8.get(new Position(2, 1))).toBe(Constants.CaseType.FRUIT);
+  theGrid8.setFruit();
   expect(theGrid8.get(new Position(1, 3))).toBe(Constants.CaseType.FRUIT);
+  expect(theGrid8.get(new Position(2, 1))).toBe(Constants.CaseType.EMPTY);
   expect(theGrid8.detectCorridor(new Position(2, 3))).toBe(false);
   expect(theGrid8.get(new Position(2, 3))).toBe(Constants.CaseType.FRUIT_GOLD);
 });

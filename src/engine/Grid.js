@@ -384,10 +384,10 @@ export default class Grid {
     const isDeadPositionLeft = this.isDeadPosition(posLeft, true, true);
     const numDeadPositionArround = isDeadPositionTop + isDeadPositionBottom + isDeadPositionRight + isDeadPositionLeft;
 
-    if(numDeadPositionArround >= 3) {
-      return true;
-    } else if(numDeadPositionArround <= 1 || this.isDeadPosition(position, true)) {
+    if(numDeadPositionArround <= 1 || this.isDeadPosition(position, true)) {
       return false;
+    } else if(numDeadPositionArround >= 3) {
+      return true;
     }
 
     gridCopy[position.y][position.x] = GameConstants.CaseType.CROSSED;
