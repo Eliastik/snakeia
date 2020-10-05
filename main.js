@@ -116,7 +116,8 @@ function restoreSettings() {
     showDebugInfo: false,
     textOutput: false,
     graphicSkin: "flat",
-    maxFPS: -1
+    maxFPS: -1,
+    unlockAllLevels: false
   };
 }
 
@@ -1541,6 +1542,8 @@ function getLevels(player, type) {
 }
 
 function canPlay(level, player, type) {
+  if(customSettings.unlockAllLevels) return true;
+
   let res = true;
   const levels = getLevels(player, type);
 

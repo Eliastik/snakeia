@@ -94,6 +94,30 @@ const theGrid8 = new Grid(5, 5, true, false, false,
 false);
 theGrid8.init();
 
+const theGrid9 = new Grid(10, 6, false, false, false,
+  [
+    [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    [3, 1, 1, 1, 0, 0, 0, 4, 0, 3],
+    [3, 0, 0, 0, 0, 0, 0, 4, 0, 3],
+    [3, 0, 0, 0, 0, 0, 0, 4, 0, 3],
+    [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+    [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+  ], // Custom grid
+false);
+theGrid9.init();
+
+const theGrid10 = new Grid(10, 6, false, false, false,
+  [
+    [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    [3, 4, 4, 4, 0, 0, 0, 1, 0, 3],
+    [3, 0, 0, 0, 0, 0, 0, 1, 0, 3],
+    [3, 0, 0, 0, 0, 0, 0, 1, 0, 3],
+    [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+    [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+  ], // Custom grid
+false);
+theGrid10.init();
+
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);
 });
@@ -187,4 +211,26 @@ test("corridor detection fruit test 5", () => {
   expect(theGrid8.get(new Position(2, 1))).toBe(Constants.CaseType.EMPTY);
   expect(theGrid8.detectCorridor(new Position(2, 3))).toBe(false);
   expect(theGrid8.get(new Position(2, 3))).toBe(Constants.CaseType.FRUIT_GOLD);
+});
+
+test("corridor detection fruit test 6", () => {
+  const mockRandom = jest.fn();
+  mockRandom.mockReturnValueOnce(new Position(8, 2)).mockReturnValueOnce(new Position(7, 4)).mockReturnValue(new Position(2, 4));
+  jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+
+  theGrid9.setFruit();
+  expect(theGrid9.get(new Position(8, 2))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid9.get(new Position(7, 4))).toBe(Constants.CaseType.SURROUNDED);
+  expect(theGrid9.detectCorridor(new Position(2, 4))).toBe(false);
+  expect(theGrid9.get(new Position(2, 4))).toBe(Constants.CaseType.FRUIT);
+});
+
+test("corridor detection fruit test 7", () => {
+  const mockRandom = jest.fn();
+  mockRandom.mockReturnValueOnce(new Position(8, 2));
+  jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+
+  theGrid10.setFruit();
+  expect(theGrid10.get(new Position(8, 2))).toBe(Constants.CaseType.FRUIT);
+  expect(theGrid10.detectCorridor(new Position(8, 2))).toBe(false);
 });

@@ -459,9 +459,7 @@ export default class GameUI {
       }
 
       const offsetFrame = time - this.lastFrameTime;
-
       if(this.maxFPS < 1 || offsetFrame > 1000 / this.maxFPS) {
-        this.lastTime = Date.now();
         this.lastFrameTime = time;
         this.frame++;
   
@@ -476,6 +474,7 @@ export default class GameUI {
         }
   
         this.draw();
+        this.lastTime = Date.now();  
       }
 
       this.startDraw();

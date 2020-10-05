@@ -22,7 +22,6 @@ import Reactor from "./Reactor";
 import Grid from "./Grid";
 import Snake from "./Snake";
 import seedrandom from "seedrandom";
-import { Game } from "../Shim";
 
 export default class GameEngine {
   constructor(grid, snake, speed, enablePause, enableRetry, progressiveSpeed) {
