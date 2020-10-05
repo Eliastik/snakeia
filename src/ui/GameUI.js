@@ -567,7 +567,7 @@ export default class GameUI {
         this.gameRanking.forceClose();
       }
 
-      if(!this.gameFinished && !this.gameOver && this.assetsLoaded) {
+      if(!this.gameFinished && !this.gameOver && this.assetsLoaded && !this.errorOccurred) {
         this.gameRanking.set(this.snakes, this.fontSize, this.header.height, this.currentPlayer, this.imageLoader, this.spectatorMode);
         this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
       }
@@ -722,7 +722,7 @@ export default class GameUI {
       } else if(this.scoreMax && this.snakes.length <= 1) {
         this.labelMenus.text = i18next.t("engine.scoreMax") + nextGameText;
         this.labelMenus.color = "#2ecc71";
-        this.enableRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : (this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus));
+        this.enableRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : (this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus, this.btnQuit));
         
         this.btnRetry.setClickAction(() => {
           this.reset();
@@ -738,7 +738,7 @@ export default class GameUI {
       } else if(this.gameOver && this.snakes.length <= 1) {
         this.labelMenus.text = i18next.t("engine.gameOver") + nextGameText;
         this.labelMenus.color = "#E74C3C";
-        this.enableRetry && this.snakes[0] && !this.snakes[0].autoRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : (this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus));
+        this.enableRetry && this.snakes[0] && !this.snakes[0].autoRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : (this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus, this.btnQuit));
 
         if(this.snakes[0] && this.snakes[0].autoRetry && this.timeoutAutoRetry == null) {
           this.timeoutAutoRetry = setTimeout(() => {

@@ -369,9 +369,8 @@ export default class Grid {
     return surrounded;
   }
 
-  detectCorridor(position, gridCopy = JSON.parse(JSON.stringify(this.grid))) {
-    if(this.maze) return false;
-    if(!position) return false;
+  detectCorridor(position, gridCopy = this.grid ? JSON.parse(JSON.stringify(this.grid)) : null) {
+    if(this.maze || !position  || !gridCopy) return false;
 
     const posTop = this.getNextPosition(position, GameConstants.Direction.TOP);
     const posBottom = this.getNextPosition(position, GameConstants.Direction.BOTTOM);

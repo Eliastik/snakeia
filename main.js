@@ -1278,10 +1278,10 @@ function validateSettings(returnValidation) {
           const snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
           games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
-          const grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid + 1, seedGame + 1);
+          const grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, parseInt(seedGrid) + 1, parseInt(seedGame) + 1);
           const snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
-          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, false, progressiveSpeed, null, null, null, null, customSettings));
+          games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
           games.push(new Game(grid2, snake2, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, null, null, null, null, customSettings));
         }
       } else if(selectedMode == AI_VS_AI) {
@@ -1292,7 +1292,7 @@ function validateSettings(returnValidation) {
           const snake2 = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, autoRetry);
           games.push(new Game(grid, [snake, snake2], speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));
         } else {
-          const grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, seedGrid + 1, seedGame + 1);
+          const grid2 = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, false, null, false, parseInt(seedGrid) + 1, parseInt(seedGame) + 1);
           const snake2 = new Snake(RIGHT, 3, grid2, PLAYER_AI, aiLevel, autoRetry);
 
           games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings));

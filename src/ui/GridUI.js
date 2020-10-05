@@ -45,54 +45,56 @@ export default class GridUI extends Component {
   }
 
   draw(context) {
-    super.draw(context);
+    if(this.grid && this.grid.grid) {
+      super.draw(context);
 
-    const canvas = context.canvas;
-    const ctx = canvas.getContext("2d");
-
-    this.canvasTmp.width = canvas.width;
-    this.canvasTmp.height = canvas.height;
-
-    ctx.save();
-
-    let caseHeight = Math.floor((canvas.height - this.headerHeight) / this.grid.height);
-    let caseWidth = Math.floor(canvas.width / this.grid.width);
-    caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
-    caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
-
-    const totalWidth = caseWidth * this.grid.width;
-    const totalHeight = caseHeight * this.grid.height;
-
-    this.width = totalWidth;
-    this.height = totalHeight;
-
-    for(let i = 0; i < this.grid.height; i++) {
-      for(let j = 0; j < this.grid.width; j++) {
-        const caseX = Math.floor(j * caseWidth + ((canvas.width - totalWidth) / 2));
-        const caseY = this.headerHeight + i * caseHeight;
-
-        if(i == 0 && j == 0) {
-          this.x = caseX;
-          this.y = caseY;
+      const canvas = context.canvas;
+      const ctx = canvas.getContext("2d");
+  
+      this.canvasTmp.width = canvas.width;
+      this.canvasTmp.height = canvas.height;
+  
+      ctx.save();
+  
+      let caseHeight = Math.floor((canvas.height - this.headerHeight) / this.grid.height);
+      let caseWidth = Math.floor(canvas.width / this.grid.width);
+      caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
+      caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
+  
+      const totalWidth = caseWidth * this.grid.width;
+      const totalHeight = caseHeight * this.grid.height;
+  
+      this.width = totalWidth;
+      this.height = totalHeight;
+  
+      for(let i = 0; i < this.grid.height; i++) {
+        for(let j = 0; j < this.grid.width; j++) {
+          const caseX = Math.floor(j * caseWidth + ((canvas.width - totalWidth) / 2));
+          const caseY = this.headerHeight + i * caseHeight;
+  
+          if(i == 0 && j == 0) {
+            this.x = caseX;
+            this.y = caseY;
+          }
+  
+          if((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
+            ctx.fillStyle = "rgba(127, 140, 141, 0.75)";
+          } else {
+            ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+          }
+  
+          ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
+          Utils.drawImage(ctx, this.imageLoader.get("assets/images/skin/" + this.graphicSkin + "/" + this.grid.getImageCase(new Position(j, i)), Math.round(caseWidth), Math.round(caseHeight)), Math.round(caseX), Math.round(caseY), Math.round(caseWidth), Math.round(caseHeight));
         }
-
-        if((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
-          ctx.fillStyle = "rgba(127, 140, 141, 0.75)";
-        } else {
-          ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
-        }
-
-        ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
-        Utils.drawImage(ctx, this.imageLoader.get("assets/images/skin/" + this.graphicSkin + "/" + this.grid.getImageCase(new Position(j, i)), Math.round(caseWidth), Math.round(caseHeight)), Math.round(caseX), Math.round(caseY), Math.round(caseWidth), Math.round(caseHeight));
       }
+  
+      this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, this.currentPlayer);
+  
+      this.canvasTmp.width = 0;
+      this.canvasTmp.height = 0;
+  
+      ctx.restore();
     }
-
-    this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, this.currentPlayer);
-
-    this.canvasTmp.width = 0;
-    this.canvasTmp.height = 0;
-
-    ctx.restore();
   }
   
   drawSnake(ctx, caseWidth, caseHeight, totalWidth, currentPlayer) {
