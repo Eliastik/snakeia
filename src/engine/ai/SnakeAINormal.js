@@ -35,8 +35,9 @@ export default class SnakeAINormal extends SnakeAI {
     const currentPosition = snake.getHeadPosition();
     const fruitPos = snake.grid.fruitPos;
     const fruitPosGold = snake.grid.fruitPosGold;
+    let fruitTarget = fruitPos;
 
-    if(snake.grid.fruitPos) {
+    if(currentPosition && (fruitPos || fruitPosGold)) {
       const grid = snake.grid.getGraph(false);
 
       const graph = new Lowlight.Astar.Configuration(grid, {
@@ -48,10 +49,18 @@ export default class SnakeAINormal extends SnakeAI {
         cost(a, b) { return b == 1 ? null : 1 }
       });
 
-      let path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.x : fruitPos.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? fruitPosGold.y : fruitPos.y });
+      if(fruitPosGold && this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD) {
+        fruitTarget = fruitPosGold;
+      }
+
+      let path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: fruitTarget ? fruitTarget.x : null, y: fruitTarget ? fruitTarget.y : null });
 
       if(path.length < 1) {
-        path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold ? fruitPos.x : fruitPosGold.x, y: this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold ? fruitPos.y : fruitPosGold.y });
+        if(this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold) {
+          fruitTarget = fruitPos;
+        }
+
+        path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: fruitTarget ? fruitTarget.x : null, y: fruitTarget ? fruitTarget.y : null });
       }
 
       if(path.length > 1) {

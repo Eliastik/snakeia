@@ -29,19 +29,21 @@ export default class SnakeAI {
     const fruitPos = snake.grid.fruitPos;
     const fruitPosGold = snake.grid.fruitPosGold;
 
-    if(fruitPos != null) {
+    if(fruitPos && snake.grid.get(fruitPos) == GameConstants.CaseType.FRUIT) {
       const distFruit = Math.abs(fruitPos.x - currentPosition.x) + Math.abs(fruitPos.y - currentPosition.y);
-      const distFruitGold = fruitPosGold != null ? Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y) : -1;
+      const distFruitGold = fruitPosGold ? Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y) : -1;
     
-      if(fruitPosGold != null && snake.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD && this.aiFruitGoal == GameConstants.CaseType.FRUIT) {
-        if(distFruitGold < distFruit) {
+      if(fruitPosGold && snake.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD && this.aiFruitGoal == GameConstants.CaseType.FRUIT) {
+        if(distFruitGold <= distFruit) {
           this.aiFruitGoal = GameConstants.CaseType.FRUIT_GOLD;
         } else {
           this.aiFruitGoal = GameConstants.CaseType.FRUIT;
         }
-      } else if(fruitPosGold == null || snake.grid.get(fruitPosGold) != GameConstants.CaseType.FRUIT_GOLD) {
+      } else if(!fruitPosGold || snake.grid.get(fruitPosGold) != GameConstants.CaseType.FRUIT_GOLD) {
         this.aiFruitGoal = GameConstants.CaseType.FRUIT;
       }
+    } else if((!fruitPos || snake.grid.get(fruitPos) != GameConstants.CaseType.FRUIT) && fruitPosGold && snake.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD) {
+      this.aiFruitGoal = GameConstants.CaseType.FRUIT_GOLD;
     }
 
     return null;
