@@ -21,7 +21,6 @@ import Position from "./Position";
 import Grid from "./Grid";
 import Snake from "./Snake";
 import GameEngine from "./GameEngine.js";
-import seedrandom from "seedrandom";
 
 let game;
 
@@ -323,3 +322,5 @@ onmessage = e => {
     self.postMessage("pong");
   }
 };
+
+self.postMessage("ready");

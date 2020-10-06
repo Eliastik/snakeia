@@ -107,7 +107,8 @@ i18next.addResourceBundle("fr", "translation", {
       "nextGameStart": "Prochaine partie\ndans",
       "spectatorMode": "Mode spectateur",
       "startGame": "Commencer la partie"
-    }
+    },
+    "loadingWorker": "Chargement…"
   }
 }, true, false);
 
@@ -200,6 +201,7 @@ i18next.addResourceBundle("en", "translation", {
       "nextGameStart": "Next game\nin",
       "spectatorMode": "Spectator mode",
       "startGame": "Start the game"
-    }
+    },
+    "loadingWorker": "Loading…"
   }
 }, true, false);

@@ -48,6 +48,7 @@ export default class GameUI {
     this.offsetFrame = 0;
     this.lastFrameTime = 0;
     this.currentFPS = 0;
+    this.engineLoading = false;
     // Swipe detection variables
     this.touchEventStartX;
     this.touchEventStartY;
@@ -454,7 +455,7 @@ export default class GameUI {
 
   beforeDraw(time) {
     if(!this.killed) {
-      if(!document.hasFocus() && !this.paused) {
+      if(!document.hasFocus() && !this.paused && this.outputType != GameConstants.OutputType.TEXT) {
         this.controller.pause();
       }
 
@@ -816,6 +817,12 @@ export default class GameUI {
         if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
           this.notificationMessage.enableCloseButton();
         }
+      }
+
+      if(this.assetsLoaded && this.engineLoading) {
+        this.labelMenus.text = i18next.t("engine.loadingWorker");
+        this.labelMenus.color = "white";
+        this.menu.set(this.labelMenus);
       }
 
       this.labelMenus.fontSize = this.fontSize;
