@@ -150,8 +150,10 @@ function showSettings() {
 
   if(!workersAvailable) {
     document.getElementById("enableMultithreading").disabled = true;
+    document.getElementById("multithreadingNotAvailable").style.display = "inline-block";
   } else {
     document.getElementById("enableMultithreading").disabled = false;
+    document.getElementById("multithreadingNotAvailable").style.display = "none";
   }
 
   if(settings.maxFPS && !isNaN(settings.maxFPS)) {
@@ -2128,6 +2130,9 @@ function translateContent() {
   document.getElementById("aiAssistantInfos").setAttribute("aria-label", i18next.t("settings.aiAssistantInfos"));
   document.getElementById("multithreadingInfos").setAttribute("aria-label", i18next.t("menu.multithreadingInfos"));
   document.getElementById("onlineEnableClientSidePredictionsInfos").setAttribute("aria-label", i18next.t("menu.onlineEnableClientSidePredictionsInfos"));
+  document.querySelectorAll(".settingNotAvailable").forEach(e => {
+    e.setAttribute("aria-label", i18next.t("menu.settingNotAvailable"));
+  });
 }
 
 document.getElementById("languageSelect").onchange = () => {
