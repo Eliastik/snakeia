@@ -50,11 +50,11 @@ function copyGrid(grid) {
 
 function parseSnakes(snakes, grid) {
   if(game) {
-    let grid = grid || game.grid;
+    grid = grid != null ? grid : game.grid;
   }
-
+  
   grid = Object.assign(new Grid(), grid);
-
+  
   if(!snakes && game) {
     snakes = game.snakes;
   }
@@ -308,10 +308,10 @@ onmessage = e => {
         if(data.length > 1) {
           if(data[1]["key"] == "snakes") {
             const d = parseSnakes(data[1]["data"]);
-            game.snakes = d.snakes;
+            if(d) game.snakes = d.snakes;
           } else if(data[1]["key"] == "grid") {
             const d = parseSnakes(null, data[1]["data"]);
-            game.grid = d.grid;
+            if(d) game.grid = d.grid;
           } else {
             game[data[1]["key"]] = data[1]["data"];
           }

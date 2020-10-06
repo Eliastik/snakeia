@@ -36,9 +36,9 @@ export default class GameControllerSocket extends GameController {
     const data = [m, d];
 
     if(data.length > 1) {
-      let grid = this.gameUI.grid;
+      let grid = this.grid;
 
-      if(data[1].hasOwnProperty("grid") && data[1]["grid"] != null) {
+      if(data[1].hasOwnProperty("grid") && data[1]["grid"] != null && data[1]["grid"]["grid"] != null) {
         grid = Object.assign(new Grid(), data[1]["grid"]);
         data[1]["grid"] = grid;
       }
@@ -56,7 +56,7 @@ export default class GameControllerSocket extends GameController {
       
       this.update(data[0], data[1], updateEngine);
     }
-  };
+  }
 
   init() {
     this.socket.on("init", data => {

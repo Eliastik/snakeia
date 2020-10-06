@@ -24,6 +24,7 @@ export default class GameController {
     this.gameUI = ui;
     this.gameEngine = engine;
     // Copy of game engine variables
+    this.grid = null;
     this.snakes = null;
     this.lastKey = -1;
     this.paused = false;

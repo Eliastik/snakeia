@@ -365,10 +365,12 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 
 ## TO-DO list
 
+- [ ] Bug lors de la création d'une partie en mode en ligne (quelquefois) : message "Erreur est survenue" ou "Chargement" et partie bloquée
 - [ ] Corriger message "Une erreur est survenue" lors du lancement d'une partie en mode en ligne
 - [ ] Eviter de placer les joueurs trop près des murs
 - [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning)
 - [ ] Améliorer les performances graphiques
+- [x] Plantage en utilisation le mode de prédictions côté clients
 - [x] Eviter de placer une pomme dans un cul-de-sac peu importe sa taille (actuellement uniquement les cul-de-sac d'une case sont évités)
 - [x] Détection du blocage des IAs
   Encore quelques tests à effectuer (exemple de partie avec IA bloquée - seed grille : 748210976 ou 1819770042 ou -1785934037 ; seed jeu : 2122383493 ou 1503377920 ou 1757735119 ; IA normale ; 20x2 ; 20 IAs en Battle Royale)
