@@ -26,7 +26,7 @@ import { Game } from "../Shim";
 
 export default class GameControllerSocket extends GameController {
   constructor(socket, ui, enableClientSidePredictions, settings) {
-    super(new Game(null, null, null, null, null, null, null, null, null, null, null, settings, ui), ui);
+    super(new Game(null, null, null, null, null, null, null, null, null, null, null, settings, ui, true), ui);
     this.enableClientSidePredictions = enableClientSidePredictions || false;
     this.socket = socket;
     this.pingLatency = -1;

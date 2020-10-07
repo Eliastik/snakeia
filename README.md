@@ -365,11 +365,11 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 
 ## TO-DO list
 
-- [ ] Bug lors de la création d'une partie en mode en ligne (quelquefois) : message "Erreur est survenue" ou "Chargement" et partie bloquée
-- [ ] Corriger message "Une erreur est survenue" lors du lancement d'une partie en mode en ligne
 - [ ] Eviter de placer les joueurs trop près des murs
 - [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning)
 - [ ] Améliorer les performances graphiques
+- [x] Bug lors de la création d'une partie en mode en ligne (quelquefois) : message "Erreur est survenue" ou "Chargement" et partie bloquée
+- [x] Corriger message "Une erreur est survenue" lors du lancement d'une partie en mode en ligne
 - [x] Plantage en utilisant le mode de prédictions côté clients
 - [x] Eviter de placer une pomme dans un cul-de-sac peu importe sa taille (actuellement uniquement les cul-de-sac d'une case sont évités)
 - [x] Détection du blocage des IAs

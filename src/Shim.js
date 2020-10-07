@@ -76,7 +76,7 @@ WorkersAvailable(result => {
 });
 
 // Old game API
-function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, settings, ui) {
+function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, settings, ui, onlineMode) {
   let controller;
 
   const engine = new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed);
@@ -94,6 +94,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
     controller.gameUI = new GameUI(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, settings);
   }
   
+  if(onlineMode) controller.onlineMode = true;
   controller.init();
   
   return controller;
