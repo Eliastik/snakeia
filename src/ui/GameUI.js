@@ -828,7 +828,7 @@ export default class GameUI {
       this.labelMenus.fontSize = this.fontSize;
       this.menu.draw(this.canvasCtx);
 
-      if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1) {
+      if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1 && !this.errorOccurred) {
         this.gameRanking.open();
         this.gameRanking.enable();
         this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
