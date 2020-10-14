@@ -69,7 +69,7 @@ export default class Grid {
         this.grid[i] = new Array(this.width);
 
         for(let j = 0; j < this.width; j++) {
-          if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && this.rngGrid() > 0.65) || this.maze) {
+          if((this.borderWalls && (i == 0 || i == this.height - 1 || j == 0 || j == this.width - 1)) || (this.generateWalls && this.rngGrid && this.rngGrid() > 0.65) || this.maze) {
             this.grid[i][j] = GameConstants.CaseType.WALL;
           } else {
             this.grid[i][j] = GameConstants.CaseType.EMPTY;
