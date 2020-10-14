@@ -137,6 +137,11 @@ export default class Snake {
         startPos = this.grid.getRandomPosition();
       }
 
+      if(!startPos) {
+        this.errorInit = true;
+        return false;
+      }
+
       currentPos = new Position(startPos.x, startPos.y, this.initialDirection);
       positionsToAdd = [];
 

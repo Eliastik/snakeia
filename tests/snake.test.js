@@ -11,6 +11,28 @@ theGrid.init();
 const theGrid2 = new Grid(3, 3, false, true);
 theGrid2.init();
 
+const theGrid3 = new Grid(5, 5, true, false, false,
+  [
+    [3, 3, 3, 3, 3],
+    [3, 0, 3, 3, 3],
+    [3, 0, 3, 3, 3],
+    [3, 0, 3, 3, 3],
+    [3, 3, 3, 3, 3]
+  ], // Custom grid
+false);
+theGrid3.init();
+
+const theGrid4 = new Grid(5, 5, true, false, false,
+  [
+    [3, 3, 3, 3, 3],
+    [3, 0, 0, 0, 3],
+    [3, 3, 3, 3, 3],
+    [3, 3, 3, 3, 3],
+    [3, 3, 3, 3, 3]
+  ], // Custom grid
+false);
+theGrid4.init();
+
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);
 });
@@ -42,6 +64,29 @@ test("not enough free space to put a snake", () => {
   const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid2);
   theSnake.init();
 
-  expect(theSnake.init()).toBe(false);
   expect(theSnake.errorInit).toBe(true);
+});
+
+test("not enough free space to put a snake horizontally - auto detection", () => {
+  const mockRandom = jest.fn();
+  mockRandom.mockReturnValueOnce(new Position(1, 3));
+  jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+
+  const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid3);
+  theSnake.init();
+
+  expect(theSnake.errorInit).toBe(false);
+  expect(theSnake.getHeadPosition().direction).toBe(Constants.Direction.DOWN);
+});
+
+test("not enough free space to put a snake vertically - auto detection", () => {
+  const mockRandom = jest.fn();
+  mockRandom.mockReturnValueOnce(new Position(1, 1));
+  jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+
+  const theSnake = new Snake(Constants.Direction.DOWN, 3, theGrid4);
+  theSnake.init();
+
+  expect(theSnake.errorInit).toBe(false);
+  expect(theSnake.getHeadPosition().direction).toBe(Constants.Direction.LEFT);
 });
