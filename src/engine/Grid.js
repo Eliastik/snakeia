@@ -492,8 +492,22 @@ export default class Grid {
     return -1;
   }
 
+  invertDirection(direction) {
+    if(direction == GameConstants.Direction.UP) {
+      return GameConstants.Direction.BOTTOM;
+    } else if(direction == GameConstants.Direction.BOTTOM) {
+      return GameConstants.Direction.UP;
+    } else if(direction == GameConstants.Direction.RIGHT) {
+      return GameConstants.Direction.LEFT;
+    } else if(direction == GameConstants.Direction.LEFT) {
+      return GameConstants.Direction.RIGHT;
+    }
+
+    return null;
+  }
+
   isDeadPosition(position, excludeSnake, includeSurrounded) {
-    return (!excludeSnake && this.get(position) == GameConstants.CaseType.SNAKE) || this.get(position) == GameConstants.CaseType.WALL || this.get(position) == GameConstants.CaseType.SNAKE_DEAD || (includeSurrounded && this.get(position)  == GameConstants.CaseType.SURROUNDED);
+    return (!excludeSnake && this.get(position) == GameConstants.CaseType.SNAKE) || (this.get(position) == GameConstants.CaseType.WALL) || (this.get(position) == GameConstants.CaseType.SNAKE_DEAD) || (!!includeSurrounded && this.get(position) == GameConstants.CaseType.SURROUNDED);
   }
 
   toString() {

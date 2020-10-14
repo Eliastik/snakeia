@@ -127,8 +127,10 @@ export default class GameControllerSocket extends GameController {
     this.socket.on("updateCounter", data => {
       this.parseData("updateCounter", data);
 
-      if(this.enableClientSidePredictions && data && data.countBeforePlay < 0) {
-        this.gameEngine.forceStart();
+      if(data && data.countBeforePlay < 0) {
+        if(this.enableClientSidePredictions) {
+          this.gameEngine.forceStart();
+        }
       }
 
       this.reactor.dispatchEvent("onUpdateCounter");
