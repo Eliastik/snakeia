@@ -22,7 +22,10 @@
   "jest": {
     "transform": {
       "^.+\\.[t|j]sx?$": "babel-jest"
-    }
+    },
+    "restoreMocks": true,
+    "clearMocks": true,
+    "resetMocks": true
   },
   "homepage": "https://github.com/Eliastik/snakeia#readme",
   "devDependencies": {

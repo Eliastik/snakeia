@@ -38,7 +38,8 @@ export default {
     DEFAULT: "AI_LEVEL_DEFAULT",
     HIGH: "AI_LEVEL_HIGH",
     ULTRA: "AI_LEVEL_ULTRA",
-    CUSTOM: "AI_LEVEL_CUSTOM"
+    CUSTOM: "AI_LEVEL_CUSTOM",
+    MOCK: "AI_LEVEL_MOCK"
   },
   OutputType: {
     TEXT: "OUTPUT_TEXT",

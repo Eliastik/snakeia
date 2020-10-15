@@ -4,6 +4,7 @@ import Position from "../src/engine/Position";
 import Constants from "../src/engine/Constants";
 import GameUtils from "../src/engine/GameUtils";
 import Snake from "../src/engine/Snake";
+import GameEngine from "../src/engine/GameEngine";
 
 const theGrid = new Grid(10, 10, false, true);
 theGrid.init();
@@ -32,10 +33,6 @@ const theGrid4 = new Grid(5, 5, true, false, false,
   ], // Custom grid
 false);
 theGrid4.init();
-
-beforeAll(() => {
-  jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);
-});
 
 test("snakes put next to a wall/dead position", () => {
   const mockRandom = jest.fn();
@@ -89,4 +86,36 @@ test("not enough free space to put a snake vertically - auto detection", () => {
 
   expect(theSnake.errorInit).toBe(false);
   expect(theSnake.getHeadPosition().direction).toBe(Constants.Direction.LEFT);
+});
+
+test("snake stuck horizontally - auto detection", () => {
+  const theGrid5 = new Grid(5, 5, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid5, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
+  const engine = new GameEngine(theGrid5, [theSnake]);
+  engine.init();
+  engine.paused = false;
+  engine.started = true;
+
+  for(let i = 0; i < theGrid5.width * engine.aiStuckLimit + 1; i++) {
+    engine.doTick();
+  }
+
+  expect(engine.gameOver).toBe(true);
+  expect(theSnake.isAIStuck(engine.aiStuckLimit, engine.aiStuckLimit)).toBe(true);
+});
+
+test("snake stuck vertically - auto detection", () => {
+  const theGrid6 = new Grid(5, 5, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid6, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
+  const engine = new GameEngine(theGrid6, [theSnake]);
+  engine.init();
+  engine.paused = false;
+  engine.started = true;
+
+  for(let i = 0; i < theGrid6.height * engine.aiStuckLimit + 1; i++) {
+    engine.doTick();
+  }
+
+  expect(engine.gameOver).toBe(true);
+  expect(theSnake.isAIStuck(engine.aiStuckLimit, engine.aiStuckLimit)).toBe(true);
 });

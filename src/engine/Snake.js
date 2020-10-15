@@ -19,7 +19,7 @@
 import GameConstants from "./Constants";
 import Position from "./Position";
 import Grid from "./Grid";
-import { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh } from "./ai/index";
+import { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh, SnakeAIMock } from "./ai/index";
 
 export default class Snake {
   constructor(direction, length, grid, player, aiLevel, autoRetry, name, customAI) {
@@ -218,6 +218,9 @@ export default class Snake {
           break;
         case GameConstants.AiLevel.ULTRA:
           this.snakeAI = new SnakeAIHigh();
+          break;
+        case GameConstants.AiLevel.MOCK:
+          this.snakeAI = new SnakeAIMock();
           break;
         default:
           this.snakeAI = new SnakeAINormal();

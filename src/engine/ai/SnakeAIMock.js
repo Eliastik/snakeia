@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
  *
@@ -17,10 +18,14 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import SnakeAI from "./SnakeAI";
-import SnakeAIRandom from "./SnakeAIRandom";
-import SnakeAILow from "./SnakeAILow";
-import SnakeAINormal from "./SnakeAINormal";
-import SnakeAIHigh from "./SnakeAIHigh";
-import SnakeAIMock from "./SnakeAIMock";
 
-export { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh, SnakeAIMock }
+export default class SnakeAIMock extends SnakeAI {
+  constructor() {
+    super();
+    this._aiLevelText = "mock";
+  }
+
+  ai() {
+    return null;
+  }
+}

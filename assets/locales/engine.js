@@ -43,7 +43,8 @@ i18next.addResourceBundle("fr", "translation", {
       "normal": "Normal",
       "high": "Élevé",
       "ultra": "Ultra",
-      "custom": "Personnalisé"
+      "custom": "Personnalisé",
+      "mock": "Mock"
     },
     "sizeGrid": "Taille de la grille :",
     "currentSpeed": "Vitesse actuelle :",
@@ -137,7 +138,8 @@ i18next.addResourceBundle("en", "translation", {
       "normal": "Normal",
       "high": "High",
       "ultra": "Ultra",
-      "custom": "Custom"
+      "custom": "Custom",
+      "mock": "Mock"
     },
     "sizeGrid": "Grid size:",
     "currentSpeed": "Current speed:",
