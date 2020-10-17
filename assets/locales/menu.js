@@ -196,7 +196,9 @@ i18next.addResourceBundle("fr", "translation", {
       "aiAssistant": "Mode assistant IA",
       "aiAssistantInfo": "Ce bonus permet d'activer le mode assistant IA. Achetez-le, puis sélectionnez un niveau : le mode assistant IA sera activé. Ne fonctionne pas pour certains niveaux, comme les labyrinthes.",
       "unlockAllLevels": "Débloquer tous les niveaux",
-      "unlockAllLevelsInfo": "Ce bonus vous permet de débloquer tous les niveaux, qu'ils soient présents ou futurs."
+      "unlockAllLevelsInfo": "Ce bonus vous permet de débloquer tous les niveaux, qu'ils soient présents ou futurs.",
+      "increaseGoldFruits": "Augmenter la fréquence d'apparition des pommes dorées",
+      "increaseGoldFruitsInfo": "Ce bonus vous permet d'augmenter la fréquence d'apparition des pommes dorées : la chance d'apparition passe de 1 chance sur 100 à 1 chance sur 3."
     }
   },
   "servers": {
@@ -429,7 +431,9 @@ i18next.addResourceBundle("en", "translation", {
       "aiAssistant": "Assistant AI mode",
       "aiAssistantInfo": "This bonus enables the AI ​​assistant mode to be activated. Buy it, then select a level: AI assistant mode will be activated. Does not work for some levels, like mazes.",
       "unlockAllLevels": "Unlock all levels",
-      "unlockAllLevelsInfo": "This bonus allows you to unlock all levels, whether present or future."
+      "unlockAllLevelsInfo": "This bonus allows you to unlock all levels, whether present or future.",
+      "increaseGoldFruits": "Increase the frequency of appearance of golden apples",
+      "increaseGoldFruitsInfo": "This bonus allows you to increase the frequency of appearance of golden apples: the chance of appearing is reduced from 1 in 100 to 1 in 3."
     }
   },
   "servers": {

@@ -23,7 +23,7 @@ import seedrandom from "seedrandom";
 import * as Lowlight from "../../libs/lowlight.astar.min";
 
 export default class Grid {
-  constructor(width, height, generateWalls, borderWalls, maze, customGrid, mazeForceAuto, seedGrid, seedGame) {
+  constructor(width, height, generateWalls, borderWalls, maze, customGrid, mazeForceAuto, seedGrid, seedGame, probGoldFruitIncrease) {
     this.width = width == undefined ? 20 : width;
     this.height = height == undefined ? 20 : height;
     this.generateWalls = generateWalls == undefined ? false : generateWalls;
@@ -40,6 +40,7 @@ export default class Grid {
     this.seedGame = seedGrid ? "" + parseInt(seedGame) : undefined;
     this.rngGrid;
     this.rngGame;
+    this.probGoldFruitIncrease = probGoldFruitIncrease == undefined ? false : probGoldFruitIncrease;
   }
 
   init() {
@@ -295,7 +296,7 @@ export default class Grid {
       return false;
     }
 
-    if(!this.maze && this.fruitPosGold == null && GameUtils.randRange(1, numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER, this.rngGame) == 1) {
+    if(!this.maze && this.fruitPosGold == null && GameUtils.randRange(1, (this.probGoldFruitIncrease ? 3 : (numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER)), this.rngGame) == 1) {
       this.setFruit(numberPlayers, true);
     }
 

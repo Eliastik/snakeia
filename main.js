@@ -1460,8 +1460,14 @@ const levelsBonusData = {
   "BONUS_AI_ASSISTANT": {
     "text": "levels.bonus.aiAssistant",
     "information": "levels.bonus.aiAssistantInfo",
-    "price": 50,
+    "price": 25,
     "applicableTo": [GameConstants.PlayerType.HUMAN]
+  },
+  "BONUS_INCREASE_GOLD_FRUIT_PROB": {
+    "text": "levels.bonus.increaseGoldFruits",
+    "information": "levels.bonus.increaseGoldFruitsInfo",
+    "price": 50,
+    "applicableTo": [GameConstants.PlayerType.AI, GameConstants.PlayerType.HUMAN]
   },
   "BONUS_PASS_LEVEL": {
     "text": "levels.bonus.passLevel",
@@ -1711,9 +1717,13 @@ window.playLevel = (level, player, type) => {
 
     const games = [];
 
-    const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame);
+    const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame, bonus == "BONUS_INCREASE_GOLD_FRUIT_PROB");
     let playerSnake;
     let playerGame;
+
+    if(bonus == "BONUS_INCREASE_GOLD_FRUIT_PROB") {
+      buyBonus(null, player);
+    }
 
     if(player == PLAYER_AI) {
       playerSnake = new Snake(RIGHT, 3, grid, player, AI_LEVEL_HIGH);
