@@ -92,7 +92,7 @@ body {
   margin: auto;
 }
 
-#levelListDefault, #levelListDownload, #levelDownload, #localstorageDisabled, #authenticationServer, #parameters {
+#levelListDefault, #levelListDownload, #levelDownload, #localstorageDisabled, #authenticationServer, #parameters, #levelBonusShop {
   width: 100%;
   max-width: 450px;
   margin: auto;
@@ -156,4 +156,8 @@ textarea {
 .frame-responsive {
   border: none;
   width: 100%;
+}
+
+.image-text-bottom {
+  vertical-align: text-bottom;
 }

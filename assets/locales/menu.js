@@ -181,7 +181,23 @@ i18next.addResourceBundle("fr", "translation", {
     "timerRemaining": "Il reste {{count}} seconde",
     "timerRemaining_plural": "Il reste {{count}} secondes",
     "localstorageDisabled": "Les cookies sont désactivés sur votre navigateur. Vous perdrez votre progression au prochain rechargement de la page. Activez-les puis rechargez la page pour éviter cela.",
-    "difficulty": "Difficulté :"
+    "difficulty": "Difficulté :",
+    "levelBonusShop": "Boutique des bonus",
+    "displayBonusShop": "Afficher la boutique…",
+    "bonusNotApplicable": "Ce bonus n'est pas applicable.",
+    "notEnoughFruits": "Vous n'avez pas assez de crédit pour acheter ce bonus.",
+    "bonusAlreadyEquipped": "Vous êtes déjà équipé d'un bonus. Utilisez-le en jouant à un niveau ou vendez-le.",
+    "bonusEquipped": "Bonus équipé :",
+    "none": "aucun",
+    "sellBonus": "Vendre le bonus",
+    "bonus": {
+      "passLevel": "Passer un niveau",
+      "passLevelInfo": "Ce bonus vous permet de passer un niveau. Achetez-le, puis sélectionnez un niveau : celui-ci sera automatiquement passé, comme si vous l'aviez réussi.",
+      "aiAssistant": "Mode assistant IA",
+      "aiAssistantInfo": "Ce bonus permet d'activer le mode assistant IA. Achetez-le, puis sélectionnez un niveau : le mode assistant IA sera activé. Ne fonctionne pas pour certains niveaux, comme les labyrinthes.",
+      "unlockAllLevels": "Débloquer tous les niveaux",
+      "unlockAllLevelsInfo": "Ce bonus vous permet de débloquer tous les niveaux, qu'ils soient présents ou futurs."
+    }
   },
   "servers": {
     "serverList": "Liste des serveurs",
@@ -398,7 +414,23 @@ i18next.addResourceBundle("en", "translation", {
     "bestTimeShort": "{{count}} second",
     "bestTimeShort_plural": "{{count}} seconds",
     "localstorageDisabled": "Cookies are disabled on your browser. You will lose your progress the next time you reload the page. Activate them and reload the page to avoid this.",
-    "difficulty": "Difficulty :"
+    "difficulty": "Difficulty :",
+    "levelBonusShop": "Bonus shop",
+    "displayBonusShop": "Display the shop…",
+    "bonusNotApplicable": "This bonus is not applicable.",
+    "notEnoughFruits": "You don't have enough credit to buy this bonus.",
+    "bonusAlreadyEquipped": "You are already equipped with a bonus. Use it while playing a level or sell it.",
+    "bonusEquipped": "Equipped bonus:",
+    "none": "none",
+    "sellBonus": "Sell the bonus",
+    "bonus": {
+      "passLevel": "Pass a level",
+      "passLevelInfo": "This bonus allows you to pass a level. Buy it, then select a level: it will be automatically passed, as if you had succeeded it.",
+      "aiAssistant": "Assistant AI mode",
+      "aiAssistantInfo": "This bonus enables the AI ​​assistant mode to be activated. Buy it, then select a level: AI assistant mode will be activated. Does not work for some levels, like mazes.",
+      "unlockAllLevels": "Unlock all levels",
+      "unlockAllLevelsInfo": "This bonus allows you to unlock all levels, whether present or future."
+    }
   },
   "servers": {
     "serverList": "Servers list",

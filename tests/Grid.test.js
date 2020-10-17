@@ -1,4 +1,4 @@
-// SnakeIA grid test
+// SnakeIA Grid test
 import Grid from "../src/engine/Grid";
 import Position from "../src/engine/Position";
 import Constants from "../src/engine/Constants";

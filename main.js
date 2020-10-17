@@ -722,6 +722,19 @@ document.getElementById("collapseSeedSettingsBtn").onclick = e => {
   e.stopPropagation();
 };
 
+document.getElementById("collapseLevelBonusShopLink").onclick = e => {
+  const collapse = document.getElementById("collapseLevelBonusShop");
+
+  if(collapse && collapse.classList.contains("show")) {
+    collapse.classList.remove("show");
+  } else if(collapse) {
+    collapse.classList.add("show");
+  }
+
+  e.preventDefault();
+  e.stopPropagation();
+};
+
 function displayServerList() {
   selectMode(BATTLE_ROYALE_ONLINE);
   displayMenu();
@@ -759,6 +772,7 @@ function displayLevelList(player) {
 
   document.getElementById("levelDownloading").innerHTML = "";
   document.getElementById("btnDeblockDiv").innerHTML = "";
+  document.getElementById("bonusList").innerHTML = "";
 
   if(player == PLAYER_HUMAN) {
     document.getElementById("titleLevelList").innerHTML = i18next.t("levels.titlePlayer");
@@ -766,12 +780,16 @@ function displayLevelList(player) {
     document.getElementById("levelListDownloadAI").style.display = "none";
     document.getElementById("levelListDownloadPlayer").style.display = "block";
     document.getElementById("levelListDownloadPlayer").innerHTML = getListLevel(PLAYER_HUMAN, DOWNLOADED_LEVEL);
+    document.getElementById("fruitNumberCount").innerHTML = getNumberFruits(PLAYER_HUMAN);
+    document.getElementById("bonusList").appendChild(getListBonus(PLAYER_HUMAN));
   } else if(player == PLAYER_AI) {
     document.getElementById("titleLevelList").innerHTML = i18next.t("levels.titleAI");
     document.getElementById("levelListDefault").innerHTML = getListLevel(PLAYER_AI, DEFAULT_LEVEL);
     document.getElementById("levelListDownloadAI").style.display = "block";
     document.getElementById("levelListDownloadPlayer").style.display = "none";
     document.getElementById("levelListDownloadAI").innerHTML = getListLevel(PLAYER_AI, DOWNLOADED_LEVEL);
+    document.getElementById("fruitNumberCount").innerHTML = getNumberFruits(PLAYER_AI);
+    document.getElementById("bonusList").appendChild(getListBonus(PLAYER_AI));
   }
 }
 
@@ -1438,6 +1456,27 @@ document.getElementById("validateSettings").onclick = () => {
 };
 
 // Levels
+const levelsBonusData = {
+  "BONUS_AI_ASSISTANT": {
+    "text": "levels.bonus.aiAssistant",
+    "information": "levels.bonus.aiAssistantInfo",
+    "price": 50,
+    "applicableTo": [GameConstants.PlayerType.HUMAN]
+  },
+  "BONUS_PASS_LEVEL": {
+    "text": "levels.bonus.passLevel",
+    "information": "levels.bonus.passLevelInfo",
+    "price": 100,
+    "applicableTo": [GameConstants.PlayerType.AI, GameConstants.PlayerType.HUMAN]
+  },
+  "BONUS_UNLOCK_ALL_LEVELS": {
+    "text": "levels.bonus.unlockAllLevels",
+    "information": "levels.bonus.unlockAllLevelsInfo",
+    "price": 1000,
+    "applicableTo": [GameConstants.PlayerType.AI, GameConstants.PlayerType.HUMAN]
+  }
+};
+
 function getTitleSave(player, type) {
   if(type == DEFAULT_LEVEL) {
     if(player == PLAYER_HUMAN) {
@@ -1474,31 +1513,49 @@ function getLevelSave(level, player, type) {
   return getSave(player, type)[level];
 }
 
-function setLevelSave(value, level, player, type) {
-    const save = getTitleSave(player, type);
-    const item = getSave(player, type);
-    const levels = getLevels(player, type);
+function setLevelSave(value, level, player, type, score) {
+  const save = getTitleSave(player, type);
+  const item = getSave(player, type);
+  const levels = getLevels(player, type);
 
-    if(item != null) {
-      if(Array.isArray(value) && value.length >= 2 && Array.isArray(item[level]) && item[level].length >= 2 && item[level][0] == true) {
-        if(levels[level]["type"] != LEVEL_REACH_SCORE_ON_TIME && levels[level]["type"] != LEVEL_MULTI_REACH_SCORE_FIRST && levels[level]["type"] != LEVEL_MAZE_WIN) {
-          if(value[1] < item[level][1]) {
-            value[1] = item[level][1];
-          }
-        } else {
-          if(value[1] > item[level][1]) {
-            value[1] = item[level][1];
-          }
+  if(item != null) {
+    if(Array.isArray(value) && value.length >= 2 && Array.isArray(item[level]) && item[level].length >= 2 && item[level][0] == true) {
+      if(levels[level]["type"] != LEVEL_REACH_SCORE_ON_TIME && levels[level]["type"] != LEVEL_MULTI_REACH_SCORE_FIRST && levels[level]["type"] != LEVEL_MAZE_WIN) {
+        if(value[1] < item[level][1]) {
+          value[1] = item[level][1];
+        }
+      } else {
+        if(value[1] > item[level][1]) {
+          value[1] = item[level][1];
         }
       }
-
-      item[level] = value;
-      storageGlobal.setItem(save, JSON.stringify(item));
-
-      return true;
     }
 
-    return false;
+    item[level] = value;
+    storageGlobal.setItem(save, JSON.stringify(item));
+
+    return true;
+  }
+
+  return false;
+}
+
+function setAddFruitLevelSave(player, score) {
+  const save = getTitleSave(player, DEFAULT_LEVEL);
+  const item = getSave(player, DEFAULT_LEVEL);
+
+  if(item != null) {
+    if(!item["numFruits"] || isNaN(item["numFruits"])) {
+      item["numFruits"] = 0;
+    }
+
+    item["numFruits"] += score;
+    storageGlobal.setItem(save, JSON.stringify(item));
+
+    return true;
+  }
+
+  return false;
 }
 
 function initSaveLevel(player, type, force) {
@@ -1507,7 +1564,7 @@ function initSaveLevel(player, type, force) {
     const item = storageGlobal.getItem(save);
 
     if(item == null || force) {
-      storageGlobal.setItem(save, JSON.stringify({ version: GameConstants.Setting.APP_VERSION }));
+      storageGlobal.setItem(save, JSON.stringify({ version: GameConstants.Setting.APP_VERSION, numFruits: 0, currentBonus: null, unlockAllLevels: false }));
       setLevelSave([false, 0], 1, player, type);
     }
 
@@ -1545,6 +1602,7 @@ function getLevels(player, type) {
 
 function canPlay(level, player, type) {
   if(customSettings.unlockAllLevels) return true;
+  if(getSave(player, DEFAULT_LEVEL).unlockAllLevels) return true;
 
   let res = true;
   const levels = getLevels(player, type);
@@ -1604,6 +1662,8 @@ function printResultLevel(level, player, levelType, type, shortVersion) {
 }
 
 window.playLevel = (level, player, type) => {
+  const levelSave = getLevelSave(level, player, type);
+  const bonus = getSave(player, DEFAULT_LEVEL)["currentBonus"];
   const levels = getLevels(player, type);
 
   if(levels == null) {
@@ -1625,6 +1685,13 @@ window.playLevel = (level, player, type) => {
     if(!canPlay(level, player, type)) {
       alert(i18next.t("levels.disabledLevel"));
       return false;
+    }
+
+    if(bonus == "BONUS_PASS_LEVEL" && (!levelSave || levelSave[0] != true)) {
+      setLevelSave([true, levelTypeValue], level, player, type);
+      buyBonus(null, player);
+      displayLevelList(player);
+      return true;
     }
 
     const heightGrid = levelSettings[0];
@@ -1651,7 +1718,12 @@ window.playLevel = (level, player, type) => {
     if(player == PLAYER_AI) {
       playerSnake = new Snake(RIGHT, 3, grid, player, AI_LEVEL_HIGH);
     } else if(player == PLAYER_HUMAN) {
-      playerSnake = new Snake(RIGHT, 3, grid, player);
+      if(bonus == "BONUS_AI_ASSISTANT" && !generateMaze) {
+        playerSnake = new Snake(RIGHT, 3, grid, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+        buyBonus(null, player);
+      } else {
+        playerSnake = new Snake(RIGHT, 3, grid, player);
+      }
     }
 
     if(sameGrid) {
@@ -1748,6 +1820,8 @@ window.playLevel = (level, player, type) => {
               notificationEndDisplayed = true;
             }
           }
+
+          setAddFruitLevelSave(player, playerGame.snakes[0].score);
         });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
         levelTimer = new Timer(() => {
@@ -1787,6 +1861,7 @@ window.playLevel = (level, player, type) => {
             levelTimer.reset();
             group.stopAll(true);
             setLevelSave([true, stop / 1000], level, player, type);
+            setAddFruitLevelSave(player, playerGame.snakes[0].score);
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
@@ -1799,6 +1874,7 @@ window.playLevel = (level, player, type) => {
         playerGame.onStop(() => {
           if(playerGame.scoreMax) {
             setLevelSave([true, playerGame.snakes[0].score], level, player, type);
+            setAddFruitLevelSave(player, playerGame.snakes[0].score);
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
@@ -1821,6 +1897,7 @@ window.playLevel = (level, player, type) => {
             if(winners.winners[i] == playerGame.snakes[0]) {
               won = true;
               setLevelSave([true, playerGame.snakes[0].score], level, player, type);
+              setAddFruitLevelSave(player, playerGame.snakes[0].score);
               playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
               if(!notificationEndDisplayed) {
@@ -1866,6 +1943,7 @@ window.playLevel = (level, player, type) => {
                 if(group.games[i].snakes[j] == playerGame.snakes[0]) {
                   group.stopAll(true);
                   setLevelSave([true, time], level, player, type);
+                  setAddFruitLevelSave(player, playerGame.snakes[0].score);
                   playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
                   if(!notificationEndDisplayed) {
@@ -1911,6 +1989,7 @@ window.playLevel = (level, player, type) => {
         playerGame.onScoreIncreased(() => {
           if(playerGame.snakes[0].score >= 1) {
             setLevelSave([true, time], level, player, type);
+            setAddFruitLevelSave(player, Math.round((playerGame.grid.width * playerGame.grid.height) / 50));
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
 
             if(!notificationEndDisplayed) {
@@ -2035,6 +2114,20 @@ function deblockButton(button, script) {
   document.getElementsByTagName('head')[0].removeChild(script);
 }
 
+function getNumberFruits(player) {
+  const item = getSave(player, DEFAULT_LEVEL);
+
+  if(item != null) {
+    if(!item["numFruits"] || isNaN(item["numFruits"])) {
+      item["numFruits"] = 0;
+    }
+
+    return item["numFruits"];
+  }
+
+  return false;
+}
+
 function getListLevel(player, type) {
   const levels = getLevels(player, type);
   let res = "";
@@ -2089,6 +2182,144 @@ function getListLevel(player, type) {
   }
 
   return res + "</div>";
+}
+
+function getListBonus(player) {
+  const item = getSave(player, DEFAULT_LEVEL);
+  const div = document.createElement("div");
+
+  const p = document.createElement("p");
+  p.classList.add("mb-1");
+  const pStrong = document.createElement("strong");
+  pStrong.textContent = i18next.t("levels.bonusEquipped") + " ";
+  const bonus = document.createElement("span");
+  bonus.textContent = item["currentBonus"] ? i18next.t(levelsBonusData[item["currentBonus"]].text) : i18next.t("levels.none");
+
+  p.appendChild(pStrong);
+  p.appendChild(bonus);
+
+  if(item["currentBonus"]) {
+    const sellBonusLink = document.createElement("a");
+    sellBonusLink.addEventListener("click", () => sellBonus(player));
+    sellBonusLink.setAttribute("aria-label", i18next.t("levels.sellBonus"));
+    sellBonusLink.setAttribute("data-balloon-length", "medium");
+    sellBonusLink.classList.add("text-danger", "ml-2");
+    sellBonusLink.style.cursor = "pointer";
+
+    const sellBonusSpan = document.createElement("span");
+    sellBonusSpan.classList.add("fui-cross");
+
+    sellBonusLink.appendChild(sellBonusSpan);
+    p.appendChild(sellBonusLink);
+  }
+
+  div.appendChild(p);
+
+  for(let key in levelsBonusData) {
+    const subDiv = document.createElement("div");
+    subDiv.classList.add("m-2");
+
+    const divBtnGroup = document.createElement("div");
+    divBtnGroup.classList.add("btn-group", "flex-wrap");
+
+    const button = document.createElement("button");
+    button.classList.add("btn", "btn-primary");
+    button.textContent = i18next.t(levelsBonusData[key].text);
+    button.style.width = "250px";
+    button.setAttribute("data-balloon-length", "large");
+
+    if(levelsBonusData[key].applicableTo.indexOf(player) < 0 || (item["unlockAllLevels"] && (key == "BONUS_UNLOCK_ALL_LEVELS" || key == "BONUS_PASS_LEVEL"))) {
+      button.disabled = true;
+      button.classList.add("disabled");
+      button.setAttribute("aria-label", i18next.t("levels.bonusNotApplicable"));
+    } else if(levelsBonusData[key].price > item["numFruits"]) {
+      button.disabled = true;
+      button.classList.add("disabled");
+      button.setAttribute("aria-label", i18next.t("levels.notEnoughFruits"));
+    } else if(item["currentBonus"] != null) {
+      button.disabled = true;
+      button.classList.add("disabled");
+      button.setAttribute("aria-label", i18next.t("levels.bonusAlreadyEquipped"));
+    } else {
+      button.addEventListener("click", () => buyBonus(key, player));
+    }
+
+    const buttonInfo = document.createElement("div");
+    buttonInfo.classList.add("btn", "btn-info");
+    buttonInfo.setAttribute("aria-label", i18next.t(levelsBonusData[key].information));
+    buttonInfo.setAttribute("data-balloon-length", "large");
+    const iconInfo = document.createElement("span");
+    iconInfo.classList.add("fui-question-circle");
+    buttonInfo.appendChild(iconInfo);
+
+    const buttonPrice = document.createElement("div");
+    buttonPrice.style.width = "125px";
+    const image = document.createElement("img");
+    image.classList.add("image-text-bottom");
+    image.src = "assets/images/skin/flat/fruit.png";
+    image.width = 24;
+    image.height = 24;
+    const span2 = document.createElement("span");
+    span2.textContent = " × " + levelsBonusData[key].price;
+    buttonPrice.appendChild(image);
+    buttonPrice.appendChild(span2);
+
+    divBtnGroup.appendChild(button);
+    divBtnGroup.appendChild(buttonInfo);
+    divBtnGroup.appendChild(buttonPrice);
+
+    subDiv.appendChild(divBtnGroup);
+    div.appendChild(subDiv);
+  }
+
+  return div;
+}
+
+function buyBonus(bonus, player) {
+  const save = getTitleSave(player, DEFAULT_LEVEL);
+  const item = getSave(player, DEFAULT_LEVEL);
+
+  if(bonus == null) {
+    item["currentBonus"] = null;
+    storageGlobal.setItem(save, JSON.stringify(item));
+  } else if(levelsBonusData[bonus].applicableTo.indexOf(player) < 0 || (item["unlockAllLevels"] && (bonus == "BONUS_UNLOCK_ALL_LEVELS" || bonus == "BONUS_PASS_LEVEL"))) {
+    alert(i18next.t("levels.bonusNotApplicable"));
+  } else if(levelsBonusData[bonus].price > item["numFruits"]) {
+    alert(i18next.t("levels.notEnoughFruits"));
+  } else if(item["currentBonus"] != null) {
+    alert(i18next.t("levels.bonusAlreadyEquipped"));
+  } else {
+    item["numFruits"] -= levelsBonusData[bonus].price;
+
+    if(bonus == "BONUS_UNLOCK_ALL_LEVELS") {
+      item["unlockAllLevels"] = true;
+    } else {
+      item["currentBonus"] = bonus;
+    }
+
+    storageGlobal.setItem(save, JSON.stringify(item));
+    displayLevelList(player);
+
+    return true;
+  }
+
+  return false;
+}
+
+function sellBonus(player) {
+  const save = getTitleSave(player, DEFAULT_LEVEL);
+  const item = getSave(player, DEFAULT_LEVEL);
+
+  if(item["currentBonus"] != null) {
+    item["numFruits"] += levelsBonusData[item["currentBonus"]].price;
+    item["currentBonus"] = null;
+    storageGlobal.setItem(save, JSON.stringify(item));
+    displayLevelList(player);
+
+    return true;
+  }
+
+  return false;
 }
 
 // Localization

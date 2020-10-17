@@ -171,14 +171,17 @@ export default class Snake {
     }
 
     // If the Snake is near a dead position
-    const firstPosition = new Position(positionsToAdd[positionsToAdd.length - 1].x, positionsToAdd[positionsToAdd.length - 1].y, this.direction);
     let nearDeadPosition = false;
 
-    if((this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.UP), false) && this.direction == GameConstants.Direction.UP) || (this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.BOTTOM), false) && this.direction == GameConstants.Direction.BOTTOM) || (this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.LEFT), false) && this.direction == GameConstants.Direction.LEFT) || (this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.RIGHT), false) && this.direction == GameConstants.Direction.RIGHT)) {
-      nearDeadPosition = true;
-      this.direction = this.grid.invertDirection(this.direction);
+    if(!this.grid.maze) {
+      const firstPosition = new Position(positionsToAdd[positionsToAdd.length - 1].x, positionsToAdd[positionsToAdd.length - 1].y, this.direction);
+  
+      if((this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.UP), false) && this.direction == GameConstants.Direction.UP) || (this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.BOTTOM), false) && this.direction == GameConstants.Direction.BOTTOM) || (this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.LEFT), false) && this.direction == GameConstants.Direction.LEFT) || (this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.RIGHT), false) && this.direction == GameConstants.Direction.RIGHT)) {
+        nearDeadPosition = true;
+        this.direction = this.grid.invertDirection(this.direction);
+      }
     }
-
+  
     for(let i = 0; i < positionsToAdd.length; i++) {
       if(nearDeadPosition) {
         const position = positionsToAdd[positionsToAdd.length - i - 1];
