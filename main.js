@@ -1692,7 +1692,7 @@ window.playLevel = (level, player, type) => {
     const levelSelected = levels[level];
     const levelSettings = levelSelected["settings"];
     const levelType = levelSelected["type"];
-    const levelTypeValue = levelSelected["typeValue"];
+    let levelTypeValue = levelSelected["typeValue"];
     const levelVersion = levelSelected["version"];
 
     if(!levelCompatible(levelType, levelVersion)) {
@@ -1712,8 +1712,8 @@ window.playLevel = (level, player, type) => {
       return true;
     }
 
-    if(bonus == "BONUS_NO_TIME_LIMIT" && (levelType == LEVEL_REACH_SCORE_ON_TIME)) {
-      levelTypeValue[1] = -1;
+    if(bonus == "BONUS_NO_TIME_LIMIT" && levelType == LEVEL_REACH_SCORE_ON_TIME) {
+      levelTypeValue = [levelTypeValue[0], -1];
       buyBonus(null, player);
     }
 
