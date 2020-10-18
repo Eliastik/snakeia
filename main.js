@@ -2278,7 +2278,7 @@ function getListBonus(player) {
       button.disabled = true;
       button.classList.add("disabled");
       button.setAttribute("aria-label", i18next.t("levels.bonusNotApplicable"));
-    } else if(levelsBonusData[key].price > item["numFruits"]) {
+    } else if(levelsBonusData[key].price > getNumberFruits(player)) {
       button.disabled = true;
       button.classList.add("disabled");
       button.setAttribute("aria-label", i18next.t("levels.notEnoughFruits"));
@@ -2295,7 +2295,7 @@ function getListBonus(player) {
     buttonInfo.setAttribute("aria-label", i18next.t(levelsBonusData[key].information));
     buttonInfo.setAttribute("data-balloon-length", "large");
     const iconInfo = document.createElement("span");
-    iconInfo.classList.add("fui-question-circle", "align-middle");
+    iconInfo.classList.add("fui-question-circle");
     buttonInfo.appendChild(iconInfo);
 
     const buttonPrice = document.createElement("div");
@@ -2330,7 +2330,7 @@ function buyBonus(bonus, player) {
     storageGlobal.setItem(save, JSON.stringify(item));
   } else if(levelsBonusData[bonus].applicableTo.indexOf(player) < 0 || (item["unlockAllLevels"] && (bonus == "BONUS_UNLOCK_ALL_LEVELS" || bonus == "BONUS_PASS_LEVEL"))) {
     alert(i18next.t("levels.bonusNotApplicable"));
-  } else if(levelsBonusData[bonus].price > item["numFruits"]) {
+  } else if(levelsBonusData[bonus].price > getNumberFruits(player)) {
     alert(i18next.t("levels.notEnoughFruits"));
   } else if(item["currentBonus"] != null) {
     alert(i18next.t("levels.bonusAlreadyEquipped"));

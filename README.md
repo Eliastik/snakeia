@@ -14,7 +14,7 @@ Game written in pure JavaScript and object oriented.
 
 ## About this game
 
-* Version: 2.1.1
+* Version: 2.2
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -30,6 +30,24 @@ Game written in pure JavaScript and object oriented.
 * The "tropical" graphic skin uses as a base a [picture from here](https://commons.wikimedia.org/wiki/File:Gunther%27s_Racer_Coluber_gracilis_Snake_snake_by_Dr._Raju_Kasambe_(23).jpg) under Creative Commons Attribution-Share Alike 4.0 International license, [this picture](https://www.piqsels.com/fr/public-domain-photo-zbzjp) under [Creative Commons Zero](https://creativecommons.org/publicdomain/zero/1.0/deed.en) license and [this picture](https://commons.wikimedia.org/wiki/File:Red_brick_wall_texture.JPG) under Creative Commons Attribution-Share Alike 3.0 Unported license
 
 ## Changelog
+
+* Version 2.2 (10/18/2020):
+  - Addition of a bonus shop for the Levels game mode: this store allows you to buy bonuses among 6 available, in exchange for apples (which can be collected in the levels);
+  - The apples are no longer placed in the corridors (zone where only one row/col of the grid is empty) whatever their size;
+  - The game now detects when Snakes are placed near a wall or another Snake: in this case, the Snake is flipped the other way;
+  - The game now detects if the last AIs are blocked: in this case, if the AIs remain blocked, the game ends (unless one or more human players are still playing);
+  - AIs now better detect golden apples;
+  - Bug fixes and adjustments:
+    - Fixed an animation bug;
+    - The ZQSD/WASD keys are recognized again;
+    - Fixed a bug with random values ​​that did not give the same results depending on whether they came from a game that had been restarted or not;
+    - Fixed a bug with the counter before a new game in the online game mode;
+    - Fixed a crash in the online game mode when the client side predictions mode was enabled;
+    - Removed the message "An error has occurred" that appeared stealthily in the online game mode when a room was joined and which could block the game for the user;
+    - Fixed a possible bug when multi-threading was enabled in the settings and which could prevent a game from starting;
+    - Fixed other minor bugs;
+    - Addition of new unit tests related to the new features added;
+    - Small corrections of the English translation.
 
 * Version 2.1.1 (01/06/2020) :
   - Added an animation when a Snake loses (it bounces on the obstacle);
@@ -195,7 +213,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 ## À propos du jeu
 
-* Version du jeu : 2.1.1
+* Version du jeu : 2.2
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -211,6 +229,24 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Le skin graphique "tropical" utilise comme base une [photo venant d'ici](https://commons.wikimedia.org/wiki/File:Gunther%27s_Racer_Coluber_gracilis_Snake_snake_by_Dr._Raju_Kasambe_(23).jpg) sous licence Creative Commons Attribution-Share Alike 4.0 International, [cette photo](https://www.piqsels.com/fr/public-domain-photo-zbzjp) sous licence [Creative Commons Zero](https://creativecommons.org/publicdomain/zero/1.0/deed.en) et [cette photo](https://commons.wikimedia.org/wiki/File:Red_brick_wall_texture.JPG) sous licence Creative Commons Attribution-Share Alike 3.0 Unported
 
 ## Journal des changements
+
+* Version 2.2 (18/10/2020) :
+  - Ajout d'une boutique de bonus pour le mode de jeu Niveaux : cette boutique permet d'acheter des bonus parmi 6 disponibles, en échange de pommes (qui peuvent être ramassées dans les niveaux) ;
+  - Les pommes ne sont plus placées dans les couloirs (zone où une seule ligne/colonne de la grille est vide) quelque soit leur taille ;
+  - Le jeu détecte désormais lorsque les Snake sont placés près d'un mur ou d'un autre Snake : dans ce cas, le Snake est retourné dans l'autre sens ;
+  - Le jeu détecte désormais si les dernières IAs sont bloquées : dans ce cas, si les IAs restent bloquées, la partie se termine (sauf si un ou plusieurs joueurs humains jouent encore) ;
+  - Les IAs détectent désormais mieux les pommes dorées ;
+  - Correction de bugs et ajustements :
+    - Correction d'un bug d'animation ;
+    - Les touches ZQSD/WASD sont à nouveau reconnues ;
+    - Correction d'un bug avec les valeurs aléatoires qui ne donnaient pas les mêmes résultats selon s'ils venaient d'une partie qui avait été recommencée ou non ;
+    - Correction d'un bug avec le compteur avant une nouvelle partie dans le mode de jeu en ligne ;
+    - Détection d'un plantage dans le mode de jeu en ligne lorsque le mode Prédictions côté client était activé ;
+    - Suppression du message "Une erreur est survenue" qui apparaissait furtivement dans le mode de jeu en ligne lorsqu'une salle était rejointe et qui pouvait bloquer la partie pour l'utilisateur ;
+    - Correction d'un possible bug lorsque le multi-threading était activé dans les paramètres et qui pouvait empêcher le démarrage d'une partie ;
+    - Correction d'autres bugs mineurs ;
+    - Ajout de nouveaux tests unitaires en rapport avec les nouvelles fonctionnalités ajoutées ;
+    - Petites corrections de la traduction en anglais.
 
 * Version 2.1.1 (01/06/2020) :
   - Ajout d'une animation lorsqu'un Snake perd (il rebondi sur l'obstacle) ;
@@ -397,6 +433,7 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 - [x] Jeu multi-joueur en ligne (création d'un programme serveur avec socket.io)
 
 #### Autres idées
+- [ ] (Menu affichant les contrôles du jeu)
 - [-] (Afficher difficulté niveaux)
 - [x] Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
 - [x] Animation mort Snake
