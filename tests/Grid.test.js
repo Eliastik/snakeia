@@ -203,7 +203,7 @@ test("corridor detection fruit test 4", () => {
 
 test("corridor detection fruit test 5", () => {
   const mockRandom = jest.fn();
-  mockRandom.mockReturnValueOnce(new Position(1, 3)).mockReturnValueOnce(new Position(2, 1));
+  mockRandom.mockReturnValueOnce(new Position(1, 3)).mockReturnValueOnce(new Position(2, 1)).mockReturnValueOnce(new Position(2, 1));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
   theGrid8.setFruit();
