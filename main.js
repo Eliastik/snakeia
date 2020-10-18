@@ -1469,6 +1469,12 @@ const levelsBonusData = {
     "price": 50,
     "applicableTo": [GameConstants.PlayerType.AI, GameConstants.PlayerType.HUMAN]
   },
+  "BONUS_NO_TIME_LIMIT": {
+    "text": "levels.bonus.noTimeLimit",
+    "information": "levels.bonus.noTimeLimitInfo",
+    "price": 75,
+    "applicableTo": [GameConstants.PlayerType.AI, GameConstants.PlayerType.HUMAN]
+  },
   "BONUS_DESTROY_AIS": {
     "text": "levels.bonus.destroyAis",
     "information": "levels.bonus.destroyAisInfo",
@@ -1706,6 +1712,11 @@ window.playLevel = (level, player, type) => {
       return true;
     }
 
+    if(bonus == "BONUS_NO_TIME_LIMIT" && (levelType == LEVEL_REACH_SCORE_ON_TIME)) {
+      levelTypeValue[1] = -1;
+      buyBonus(null, player);
+    }
+
     const heightGrid = levelSettings[0];
     const widthGrid = levelSettings[1];
     const borderWalls = levelSettings[2];
@@ -1852,20 +1863,22 @@ window.playLevel = (level, player, type) => {
           lastScorePlayer = 0;
         });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
-        levelTimer = new Timer(() => {
-          playerGame.setTimeToDisplay(0);
-          document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: 0 });
-
-          if(!notificationEndDisplayed) {
-            playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
-            notificationEndDisplayed = true;
-          }
-
-          group.stopAll(true);
-        }, levelTypeValue[1] * 1000 - 1, new TimerInterval(() => {
-          document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: Math.round(levelTimer.getTime() / 1000) });
-          playerGame.setTimeToDisplay(Math.round(levelTimer.getTime() / 1000));
-        }));
+        if(levelTypeValue[1] >= 0) {
+          levelTimer = new Timer(() => {
+            playerGame.setTimeToDisplay(0);
+            document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: 0 });
+  
+            if(!notificationEndDisplayed) {
+              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
+              notificationEndDisplayed = true;
+            }
+  
+            group.stopAll(true);
+          }, levelTypeValue[1] * 1000 - 1, new TimerInterval(() => {
+            document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: Math.round(levelTimer.getTime() / 1000) });
+            playerGame.setTimeToDisplay(Math.round(levelTimer.getTime() / 1000));
+          }));
+        }
 
         playerGame.onStart(() => {
           levelTimer.resume();
@@ -2036,7 +2049,7 @@ window.playLevel = (level, player, type) => {
         textToDisplayGoal = i18next.t("levels.reachScore", { value: levelTypeValue });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
         textToDisplayGoal = i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
-        document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: levelTypeValue[1] });
+        if(levelTypeValue[1] >= 0) document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: levelTypeValue[1] });
         playerGame.setTimeToDisplay(levelTypeValue[1]);
       } else if(levelType == LEVEL_REACH_MAX_SCORE) {
         textToDisplayGoal = i18next.t("levels.reachMaxScore");
@@ -2348,7 +2361,7 @@ function sellBonus(player) {
       if(levelsBonusData[item["currentBonus"]]) {
         item["numFruits"] += levelsBonusData[item["currentBonus"]].price;
       }
-      
+
       item["currentBonus"] = null;
       storageGlobal.setItem(save, JSON.stringify(item));
       displayLevelList(player);
