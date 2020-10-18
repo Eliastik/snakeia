@@ -297,6 +297,10 @@ export default class GameController {
     this.gameUI.setBestScore(score);
   }
 
+  destroySnakes(exceptionIds, types) {
+    this.gameEngine.destroySnakes(exceptionIds, types);
+  }
+
   key(key) {
     this.gameEngine.lastKey = key;
     this.lastKey = key;

@@ -1469,6 +1469,12 @@ const levelsBonusData = {
     "price": 50,
     "applicableTo": [GameConstants.PlayerType.AI, GameConstants.PlayerType.HUMAN]
   },
+  "BONUS_DESTROY_AIS": {
+    "text": "levels.bonus.destroyAis",
+    "information": "levels.bonus.destroyAisInfo",
+    "price": 75,
+    "applicableTo": [GameConstants.PlayerType.AI, GameConstants.PlayerType.HUMAN]
+  },
   "BONUS_PASS_LEVEL": {
     "text": "levels.bonus.passLevel",
     "information": "levels.bonus.passLevelInfo",
@@ -1694,7 +1700,7 @@ window.playLevel = (level, player, type) => {
     }
 
     if(bonus == "BONUS_PASS_LEVEL" && (!levelSave || levelSave[0] != true)) {
-      setLevelSave([true, levelTypeValue], level, player, type);
+      setLevelSave([true, Array.isArray(levelTypeValue) && levelTypeValue.length >= 2 ? levelTypeValue[1] : levelTypeValue], level, player, type);
       buyBonus(null, player);
       displayLevelList(player);
       return true;
@@ -1714,14 +1720,15 @@ window.playLevel = (level, player, type) => {
     const mazeForceAuto = levelSettings[11];
     const seedGrid = levelSettings[12];
     const seedGame = levelSettings[13];
+    let destroyAis = false;
 
     const games = [];
 
-    const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame, bonus == "BONUS_INCREASE_GOLD_FRUIT_PROB");
+    const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame, !generateMaze && bonus == "BONUS_INCREASE_GOLD_FRUIT_PROB");
     let playerSnake;
     let playerGame;
 
-    if(bonus == "BONUS_INCREASE_GOLD_FRUIT_PROB") {
+    if(!generateMaze && bonus == "BONUS_INCREASE_GOLD_FRUIT_PROB") {
       buyBonus(null, player);
     }
 
@@ -1741,6 +1748,7 @@ window.playLevel = (level, player, type) => {
 
       for(let i = 0; i < numberIA; i++) {
         snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel));
+        destroyAis = bonus == "BONUS_DESTROY_AIS";
       }
 
       playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings);
@@ -1762,6 +1770,7 @@ window.playLevel = (level, player, type) => {
       for(let i = 0; i < numberIA; i++) {
         const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame);
         const snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, false);
+        destroyAis = bonus == "BONUS_DESTROY_AIS";
 
         games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, width, height, null, null, customSettings));
       }
@@ -2058,6 +2067,11 @@ window.playLevel = (level, player, type) => {
         playerGame.setNotification(notifInfo);
         notificationStartDisplayed = true;
       }
+      
+      if(destroyAis) {
+        group.destroySnakes([0], [GameConstants.PlayerType.AI]);
+        buyBonus(null, player);
+      }
     });
   } else {
     return false;
@@ -2259,13 +2273,13 @@ function getListBonus(player) {
     buttonInfo.setAttribute("aria-label", i18next.t(levelsBonusData[key].information));
     buttonInfo.setAttribute("data-balloon-length", "large");
     const iconInfo = document.createElement("span");
-    iconInfo.classList.add("fui-question-circle");
+    iconInfo.classList.add("fui-question-circle", "align-middle");
     buttonInfo.appendChild(iconInfo);
 
     const buttonPrice = document.createElement("div");
     buttonPrice.style.width = "125px";
     const image = document.createElement("img");
-    image.classList.add("image-text-bottom");
+    image.classList.add("align-text-bottom");
     image.src = "assets/images/skin/flat/fruit.png";
     image.width = 24;
     image.height = 24;

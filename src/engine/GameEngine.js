@@ -255,6 +255,12 @@ export default class GameEngine {
     }
   }
 
+  destroySnakes(exceptionIds, types) {
+    for(let i = 0; i < this.snakes.length; i++) {
+      if(exceptionIds && Array.isArray(exceptionIds) && exceptionIds.indexOf(i) < 0 && types.indexOf(this.snakes[i].player) > -1) this.snakes[i].setGameOver(this.ticks);
+    }
+  }
+
   getNBPlayer(type) {
     let numPlayer = 0;
 

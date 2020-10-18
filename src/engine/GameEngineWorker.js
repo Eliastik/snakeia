@@ -317,6 +317,9 @@ onmessage = e => {
           }
         }
         break;
+      case "destroySnakes":
+        if(data[1] && data[2]) game.destroySnakes(data[1], data[2]);
+        break;
     }
   } else if(data == "ping") {
     self.postMessage("pong");

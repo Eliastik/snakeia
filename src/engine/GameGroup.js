@@ -207,6 +207,18 @@ export default class GameGroup {
     return false;
   }
 
+  destroySnakes(exceptionIds, types) {
+    for(let i = 0; i < this.games.length; i++) {
+      this.games[i].destroySnakes(exceptionIds, types);
+
+      if(exceptionIds && Array.isArray(exceptionIds)) {
+        for(let j = 0; j < exceptionIds.length; j++) {
+          exceptionIds[j] -= 1;
+        }
+      }
+    }
+  }
+
   getWinners() {
     const winners = [];
     const index = [];

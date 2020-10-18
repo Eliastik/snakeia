@@ -198,7 +198,11 @@ i18next.addResourceBundle("fr", "translation", {
       "unlockAllLevels": "Débloquer tous les niveaux",
       "unlockAllLevelsInfo": "Ce bonus vous permet de débloquer tous les niveaux, qu'ils soient présents ou futurs.",
       "increaseGoldFruits": "Augmenter la fréquence d'apparition des pommes dorées",
-      "increaseGoldFruitsInfo": "Ce bonus vous permet d'augmenter la fréquence d'apparition des pommes dorées : la chance d'apparition passe de 1 chance sur 100 à 1 chance sur 3."
+      "increaseGoldFruitsInfo": "Ce bonus vous permet d'augmenter la fréquence d'apparition des pommes dorées : la chance d'apparition passe de 1 chance sur 100 à 1 chance sur 3.",
+      "destroyAis": "Détruire les IAs adverses",
+      "destroyAisInfo": "Ce bonus vous permet de détruire les IAs adverses, ce qui rend les niveaux contenant des IAs plus faciles.",
+      "unknown": "Bonus inconnu",
+      "unknownInfo": "Ce bonus est inconnu. Peut-être a-t-il été acheté sur une version plus récente du jeu."
     }
   },
   "servers": {
@@ -433,7 +437,11 @@ i18next.addResourceBundle("en", "translation", {
       "unlockAllLevels": "Unlock all levels",
       "unlockAllLevelsInfo": "This bonus allows you to unlock all levels, whether present or future.",
       "increaseGoldFruits": "Increase the frequency of appearance of golden apples",
-      "increaseGoldFruitsInfo": "This bonus allows you to increase the frequency of appearance of golden apples: the chance of appearing is reduced from 1 in 100 to 1 in 3."
+      "increaseGoldFruitsInfo": "This bonus allows you to increase the frequency of appearance of golden apples: the chance of appearing is reduced from 1 in 100 to 1 in 3.",
+      "destroyAis": "Destroy opponent AIss",
+      "destroyAisInfo": "This bonus allows you to destroy enemy AIs, which makes levels with AIs easier.",
+      "unknown": "Unknown bonus",
+      "unknownInfo": "This bonus is unknown. Perhaps it was purchased on a newer version of the game."
     }
   },
   "servers": {

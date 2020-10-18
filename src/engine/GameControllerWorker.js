@@ -177,6 +177,10 @@ export default class GameControllerWorker extends GameController {
     }]);
   }
 
+  destroySnakes(exceptionIds, types) {
+    this.passMessage(["destroySnakes", exceptionIds, types]);
+  }
+
   passMessage(message) {
     if(this.workerReady && this.worker instanceof Worker) {
       this.worker.postMessage(message);
