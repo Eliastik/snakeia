@@ -1819,8 +1819,13 @@ window.playLevel = (level, player, type) => {
     };
 
     function initGoal() {
+      let lastScorePlayer = 0;
+
       if(levelType == LEVEL_REACH_SCORE) {
         playerGame.onScoreIncreased(() => {
+          setAddFruitLevelSave(player, playerGame.snakes[0].score - lastScorePlayer);
+          lastScorePlayer = playerGame.snakes[0].score;
+
           if(playerGame.snakes[0].score >= levelTypeValue) {
             setLevelSave([true, playerGame.snakes[0].score], level, player, type);
             playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
@@ -1833,14 +1838,18 @@ window.playLevel = (level, player, type) => {
         });
 
         playerGame.onStop(() => {
+          lastScorePlayer = 0;
+
           if(playerGame.snakes[0].score < levelTypeValue) {
             if(!notificationEndDisplayed) {
               playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
               notificationEndDisplayed = true;
             }
           }
+        });
 
-          setAddFruitLevelSave(player, playerGame.snakes[0].score);
+        playerGame.onReset(() => {
+          lastScorePlayer = 0;
         });
       } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
         levelTimer = new Timer(() => {
@@ -2217,7 +2226,7 @@ function getListBonus(player) {
   const pStrong = document.createElement("strong");
   pStrong.textContent = i18next.t("levels.bonusEquipped") + " ";
   const bonus = document.createElement("span");
-  bonus.textContent = item["currentBonus"] ? i18next.t(levelsBonusData[item["currentBonus"]].text) : i18next.t("levels.none");
+  bonus.textContent = item["currentBonus"] ? (levelsBonusData[item["currentBonus"]] ? i18next.t(levelsBonusData[item["currentBonus"]].text) : i18next.t("levels.bonus.unknown")) : i18next.t("levels.none");
 
   p.appendChild(pStrong);
   p.appendChild(bonus);
@@ -2335,12 +2344,17 @@ function sellBonus(player) {
   const item = getSave(player, DEFAULT_LEVEL);
 
   if(item["currentBonus"] != null) {
-    item["numFruits"] += levelsBonusData[item["currentBonus"]].price;
-    item["currentBonus"] = null;
-    storageGlobal.setItem(save, JSON.stringify(item));
-    displayLevelList(player);
-
-    return true;
+    if(levelsBonusData[item["currentBonus"]] || confirm(i18next.t("levels.bonus.unknownInfo"))) {
+      if(levelsBonusData[item["currentBonus"]]) {
+        item["numFruits"] += levelsBonusData[item["currentBonus"]].price;
+      }
+      
+      item["currentBonus"] = null;
+      storageGlobal.setItem(save, JSON.stringify(item));
+      displayLevelList(player);
+  
+      return true;
+    }
   }
 
   return false;

@@ -202,7 +202,7 @@ i18next.addResourceBundle("fr", "translation", {
       "destroyAis": "Détruire les IAs adverses",
       "destroyAisInfo": "Ce bonus vous permet de détruire les IAs adverses, ce qui rend les niveaux contenant des IAs plus faciles.",
       "unknown": "Bonus inconnu",
-      "unknownInfo": "Ce bonus est inconnu. Peut-être a-t-il été acheté sur une version plus récente du jeu."
+      "unknownInfo": "Ce bonus est inconnu. Peut-être a-t-il été acheté sur une version plus récente du jeu. Voulez-vous le vendre quand même, sachant que son prix est inconnu ? Autrement dit, vous ne serez pas remboursé."
     }
   },
   "servers": {
@@ -441,7 +441,7 @@ i18next.addResourceBundle("en", "translation", {
       "destroyAis": "Destroy opponent AIss",
       "destroyAisInfo": "This bonus allows you to destroy enemy AIs, which makes levels with AIs easier.",
       "unknown": "Unknown bonus",
-      "unknownInfo": "This bonus is unknown. Perhaps it was purchased on a newer version of the game."
+      "unknownInfo": "This bonus is unknown. Perhaps it was purchased on a newer version of the game. Do you want to sell it anyway, knowing that its price is unknown? In other words, you will not be refunded."
     }
   },
   "servers": {
