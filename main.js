@@ -265,8 +265,6 @@ window.updateCallback = data => {
   }
 }
 
-checkUpdate();
-
 // Load server list
 function loadServerList() {
   const script = document.createElement("script");
@@ -2426,6 +2424,7 @@ document.getElementById("languageSelect").onchange = () => {
 window.addEventListener("load", () => {
   setTimeout(() => {
     translateContent();
+    checkUpdate();
   }, 250);
 });
 
