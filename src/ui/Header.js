@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import { Row, Utils, Style, ImageContainer, Label } from "jsgametools";
+import { Row, Utils, Style, ImageContainer, Label, Col } from "jsgametools";
 import GameConstants from "../engine/Constants";
 import i18next from "i18next";
 
@@ -25,11 +25,22 @@ export default class Header extends Row {
     super(0, 0, null, null, new Style({ "backgroundColor": backgroundColor || "#27AE60" }));
 
     this.rowButtons = new Row(null, null, null, null, new Style({ "alignement": "right", "spaceBetweenComponents": 5, "verticalAlignement": "center" }));
-    this.fruitImage = new ImageContainer("assets/images/skin/flat/fruit.png", null, null, null, null, new Style({ "alignement": "left", "verticalAlignement": "center" }), imageLoader);
+    this.colScores = new Col(null, null, null, null, new Style({ "alignement": "left", "spaceBetweenComponents": 5, "verticalAlignement": "center" }));
+
+    this.fruitImage = new ImageContainer("assets/images/skin/flat/fruit.png");
     this.labelScore = new Label("", null, null, new Style({ "verticalAlignement": "center" }));
+    this.rowScore = new Row();
+    this.rowScore.addAll(this.fruitImage, this.labelScore);
+
+    this.trophyImage = new ImageContainer("assets/images/trophy.png");
+    this.labelBestScore = new Label("", null, null, new Style({ "verticalAlignement": "center" }));
+    this.rowBestScore = new Row();
+    this.rowBestScore.addAll(this.trophyImage, this.labelBestScore);
+
+    this.colScores.addAll(this.rowScore, this.rowBestScore);
 
     this.setButtons(btnFullScreen, btnPause, btnRank);
-    super.addAll(this.fruitImage, this.labelScore, this.rowButtons);
+    super.addAll(this.colScores, this.rowButtons);
 
     this.minHeight = height;
     this.snakes = snakes;
@@ -52,7 +63,8 @@ export default class Header extends Row {
     this.minWidth = canvas.width;
 
     if(this.fruitImage) {
-      this.fruitImage.width = this.height;
+      this.fruitImage.width = Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1));
+      this.trophyImage.width = Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1));
     }
 
     if(this.btnPause) {
@@ -80,20 +92,22 @@ export default class Header extends Row {
     }
 
     this.fruitImage.loadImage(this.imageLoader);
+    this.trophyImage.loadImage(this.imageLoader);
 
-    /*Utils.drawImage(ctx, this.imageLoader.get("assets/images/skin/flat/fruit.png", Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1)), Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1))), 5, 5, Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1)), Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1)));*/
+    this.labelBestScore.text = this.bestScoreToDisplay;
+    this.labelScore.style.set("fontSize", Math.round(this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1)));
+    this.labelBestScore.style.set("fontSize", Math.round(this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1)));
 
     if(this.snakes != null && this.snakes.length == 1) {
       this.labelScore.text = "× " + this.snakes[0].score;
-      this.labelScore.style.set("fontSize", Math.round(this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1)));
     } else {
       this.labelScore.text = i18next.t("engine.num") + (this.numFruit != null ? this.numFruit : "???");
-      this.labelScore.style.set("fontSize", Math.round(this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1)));
     }
 
     if(this.bestScoreToDisplay) {
-      Utils.drawImage(ctx, this.imageLoader.get("assets/images/trophy.png", Math.round(this.height * 0.425), Math.round(this.height * 0.425)), 5, Math.round(8 + this.height * 0.425), Math.round(this.height * 0.425), Math.round(this.height * 0.425));
-      Utils.drawText(ctx, this.bestScoreToDisplay, "black", Math.round(this.height * 0.43 * (this.bestScoreToDisplay ? 0.75 : 1)), GameConstants.Setting.FONT_FAMILY, "default", "default", Math.round(this.height * 0.9 * (this.bestScoreToDisplay ? 0.58 : 1)), Math.round(this.height * 0.425 + this.height * 0.67 * (this.bestScoreToDisplay ? 0.63 : 1)));
+      this.rowBestScore.hidden = false;
+    } else {
+      this.rowBestScore.hidden = true;
     }
 
     super.draw(context);
@@ -127,5 +141,12 @@ export default class Header extends Row {
 
   get height() {
     return this.minHeight || this.maxHeight || super.height || 0;
+  }
+
+  get defaultStyle() {
+    return new Style({
+      "backgroundColor": "#27AE60",
+      "padding": 5
+    });
   }
 }
