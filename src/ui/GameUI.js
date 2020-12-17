@@ -165,7 +165,7 @@ export default class GameUI {
       this.btnRank = new ButtonImage("assets/images/ranking.png", null, null, null, null, 64, 64);
 
       const buttonStyle = new Style({ "alignement": "center", "backgroundColor": "#3498db", "backgroundColorHover": "#246A99", "backgroundColorClick": "#184766", "padding": 10 })
-      const labelStyle = new Style({ "fontColor": "white", "fontSize": GameConstants.Setting.FONT_SIZE, "fontFamily": GameConstants.Setting.FONT_FAMILY, "alignement": "center" });
+      const labelStyle = new Style({ "fontColor": "white", "alignement": "center" });
 
       this.btnContinue = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.continue"), null, null, labelStyle));
       this.btnRetry = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.reset"), null, null, labelStyle));
@@ -546,7 +546,7 @@ export default class GameUI {
       } else if(!this.assetsLoaded) {
         const percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
         this.labelMenus.text = i18next.t("engine.loading") + "\n" + percentLoaded + "%";
-        this.labelMenus.color = "white";
+        this.labelMenus.style.set("fontColor",  "white");
         this.progressBarLoading.percent = percentLoaded / 100;
         this.progressBarLoading.width = this.canvas.width / 4;
         this.menu.set(this.labelMenus, this.progressBarLoading);
@@ -576,8 +576,6 @@ export default class GameUI {
         this.gameRanking.set(this.snakes, this.fontSize, this.header.height, this.currentPlayer, this.imageLoader, this.spectatorMode);
       }
 
-      this.disableAllButtons();
-
       if(this.searchingPlayers && this.lastTime > 0) {
         this.timeStart -= Math.max(0, Date.now() - this.lastTime);
       } else {
@@ -588,7 +586,7 @@ export default class GameUI {
 
       if(this.exited) {
         this.labelMenus.text = i18next.t("engine.exited");
-        this.labelMenus.color = "white";
+        this.labelMenus.style.set("fontColor",  "white");
         this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus);
         
         this.btnExitFullScreen.setClickAction(() => {
@@ -596,7 +594,7 @@ export default class GameUI {
         });
       } else if(this.errorOccurred) {
         this.labelMenus.text = this.imageLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error");
-        this.labelMenus.color = "#E74C3C";
+        this.labelMenus.style.set("fontColor", "#E74C3C");
         this.menu.set(this.labelMenus, this.btnQuit);
         
         this.btnQuit.setClickAction(() => {
@@ -625,10 +623,10 @@ export default class GameUI {
           });
         }
         
-        this.labelMenus.color = "white";
+        this.labelMenus.style.set("fontColor",  "white");
       } else if(this.getInfos) {
         this.labelMenus.text = i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + i18next.t("engine.aboutScreen.versionAndDate", { version: GameConstants.Setting.APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(GameConstants.Setting.DATE_VERSION)), interpolation: { escapeValue: false } });
-        this.labelMenus.color = "white";
+        this.labelMenus.style.set("fontColor",  "white");
         this.menu.set(this.labelMenus, this.btnInfosGame, this.btnOK);
         
         this.btnInfosGame.setClickAction(() => {
@@ -640,7 +638,7 @@ export default class GameUI {
         });
       } else if(this.confirmExit) {
         this.labelMenus.text = i18next.t("engine.exitConfirm");
-        this.labelMenus.color = "#E74C3C";
+        this.labelMenus.style.set("fontColor",  "#E74C3C");
         this.menu.set(this.labelMenus, this.btnNo, this.btnYes);
         
         this.btnYes.setClickAction(() => {
@@ -679,9 +677,9 @@ export default class GameUI {
           this.labelMenus.text += (playerHuman != null ? ("\n" + (this.isFilterHueAvailable && colorName != "???" && (this.graphicSkin == "flat" || this.graphicSkin == "pixel") ? i18next.t("engine.colorPlayer", { color: colorName }) : i18next.t("engine.arrowPlayer"))) : "");
 
           if(colorRgb && colorRgb.length >= 3) {
-            this.labelMenus.color = (this.isFilterHueAvailable && colorName != "???" && (this.graphicSkin == "flat" || this.graphicSkin == "pixel") ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]);
+            this.labelMenus.style.set("fontColor",  (this.isFilterHueAvailable && colorName != "???" && (this.graphicSkin == "flat" || this.graphicSkin == "pixel") ? ["white", "rgb(" + colorRgb[0] + ", " + colorRgb[1] + ", " + colorRgb[2] + ")"] : ["white", "#3498db"]));
           } else {
-            this.labelMenus.color = "white";
+            this.labelMenus.style.set("fontColor",  "white");
           }
         } else {
           if(this.countBeforePlay > 0) {
@@ -690,7 +688,7 @@ export default class GameUI {
             this.labelMenus.text = i18next.t("engine.ready");
           }
 
-          this.labelMenus.color = "white";
+          this.labelMenus.style.set("fontColor",  "white");
         }
 
         !this.fullscreen ? this.menu.set(this.labelMenus, this.btnEnterFullScreen) : this.menu.set(this.labelMenus);
@@ -700,7 +698,7 @@ export default class GameUI {
         });
       } else if(this.confirmReset && !this.gameOver) {
         this.labelMenus.text = i18next.t("engine.resetConfirm");
-        this.labelMenus.color = "#E74C3C";
+        this.labelMenus.style.set("fontColor",  "#E74C3C");
         this.menu.set(this.labelMenus, this.btnNo, this.btnYes);
         
         this.btnYes.setClickAction(() => {
@@ -713,7 +711,7 @@ export default class GameUI {
         });
       } else if(this.gameFinished) {
         this.labelMenus.text = (this.grid.maze && this.gameMazeWin) ? i18next.t("engine.mazeWin") : i18next.t("engine.gameFinished") + nextGameText;
-        this.labelMenus.color = (this.grid.maze && this.gameMazeWin) ? "#2ecc71" : "white";
+        this.labelMenus.style.set("fontColor",  (this.grid.maze && this.gameMazeWin) ? "#2ecc71" : "white");
         this.enableRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : this.menu.set(this.labelMenus, this.btnQuit);
         
         this.btnRetry.setClickAction(() => {
@@ -725,7 +723,7 @@ export default class GameUI {
         });
       } else if(this.scoreMax && this.snakes.length <= 1) {
         this.labelMenus.text = i18next.t("engine.scoreMax") + nextGameText;
-        this.labelMenus.color = "#2ecc71";
+        this.labelMenus.style.set("fontColor",  "#2ecc71");
         this.enableRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : (this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus, this.btnQuit));
         
         this.btnRetry.setClickAction(() => {
@@ -741,7 +739,7 @@ export default class GameUI {
         });
       } else if(this.gameOver && this.snakes.length <= 1) {
         this.labelMenus.text = i18next.t("engine.gameOver") + nextGameText;
-        this.labelMenus.color = "#E74C3C";
+        this.labelMenus.style.set("fontColor",  "#E74C3C");
         this.enableRetry && this.snakes[0] && !this.snakes[0].autoRetry ? this.menu.set(this.labelMenus, this.btnRetry, this.btnQuit) : (this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus, this.btnQuit));
 
         if(this.snakes[0] && this.snakes[0].autoRetry && this.timeoutAutoRetry == null) {
@@ -764,7 +762,7 @@ export default class GameUI {
         }
       } else if(this.assetsLoaded && this.searchingPlayers) {
         this.labelMenus.text = i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : "");
-        this.labelMenus.color = "white";
+        this.labelMenus.style.set("fontColor",  "white");
         this.onlineMaster ? this.menu.set(this.labelMenus, this.btnStartGame, this.btnQuit) : this.menu.set(this.labelMenus, this.btnQuit);
         
         this.btnQuit.setClickAction(() => {
@@ -776,7 +774,7 @@ export default class GameUI {
         });
       } else if(this.paused && !this.gameOver && this.assetsLoaded) {
         this.labelMenus.text = i18next.t("engine.pause");
-        this.labelMenus.color = "white";
+        this.labelMenus.style.set("fontColor",  "white");
         this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ? this.menu.set(this.labelMenus, this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit) : this.menu.set(this.labelMenus, this.btnContinue, this.btnAbout, this.btnQuit)) : (this.menu.set(this.labelMenus, this.btnContinue, this.btnAbout));
         
         this.btnContinue.setClickAction(() => {
@@ -825,7 +823,7 @@ export default class GameUI {
 
       if(this.assetsLoaded && this.engineLoading) {
         this.labelMenus.text = i18next.t("engine.loadingWorker");
-        this.labelMenus.color = "white";
+        this.labelMenus.style.set("fontColor",  "white");
         this.menu.set(this.labelMenus);
       }
 
@@ -854,36 +852,6 @@ export default class GameUI {
 
   setDisplayFPS(display) {
     this.displayFPS = display;
-  }
-
-  disableAllButtons() {
-    if(this.outputType == GameConstants.OutputType.GRAPHICAL) {
-      this.btnContinue.disable();
-      this.btnRetry.disable();
-      this.btnQuit.disable();
-      this.btnYes.disable();
-      this.btnNo.disable();
-      this.btnOK.disable();
-      this.btnOK.disable();
-      this.btnAbout.disable();
-      this.btnInfosGame.disable();
-      this.btnFullScreen.disable();
-      this.btnPause.disable();
-      this.btnRank.disable();
-      this.btnExitFullScreen.disable();
-      this.btnEnterFullScreen.disable();
-      this.btnStartGame.disable();
-      this.gameRanking.disable();
-
-      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
-        this.notificationMessage.disableCloseButton();
-      }
-
-      this.btnTopArrow.disable();
-      this.btnBottomArrow.disable();
-      this.btnRightArrow.disable();
-      this.btnLeftArrow.disable();
-    }
   }
 
   setNotification(notification) {

@@ -100,8 +100,10 @@ export default class Header extends Row {
 
     if(this.snakes != null && this.snakes.length == 1) {
       this.labelScore.text = "× " + this.snakes[0].score;
+      this.btnRank.hidden = true;
     } else {
       this.labelScore.text = i18next.t("engine.num") + (this.numFruit != null ? this.numFruit : "???");
+      this.btnRank.hidden = false;
     }
 
     if(this.bestScoreToDisplay) {
