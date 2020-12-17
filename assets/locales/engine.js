@@ -109,7 +109,9 @@ i18next.addResourceBundle("fr", "translation", {
       "spectatorMode": "Mode spectateur",
       "startGame": "Commencer la partie"
     },
-    "loadingWorker": "Chargement…"
+    "loadingWorker": "Chargement…",
+    "errorJSGameToolsConsole": "Une erreur fatale est survenue au niveau du moteur JSGameTools.",
+    "errorJSGameTools": ":'(\nUne erreur fatale est survenue au niveau du moteur JSGameTools."
   }
 }, true, false);
 
@@ -204,6 +206,8 @@ i18next.addResourceBundle("en", "translation", {
       "spectatorMode": "Spectator mode",
       "startGame": "Start the game"
     },
-    "loadingWorker": "Loading…"
+    "loadingWorker": "Loading…",
+    "errorJSGameToolsConsole": "A fatal error has occurred at the JSGameTools engine level.",
+    "errorJSGameTools": ":'(\nA fatal error has occurred at the JSGameTools engine level."
   }
 }, true, false);

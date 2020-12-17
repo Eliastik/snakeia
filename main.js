@@ -17,14 +17,13 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import i18next from "i18next";
-import { Game, WorkersAvailable } from "./src/Shim";
+import { Game, WorkersAvailable, NotificationMessage } from "./src/Shim";
 import GameConstants from "./src/engine/Constants";
 import Snake from "./src/engine/Snake";
 import Grid from "./src/engine/Grid";
 import GameGroup from "./src/engine/GameGroup";
 import OnlineClient from "./src/engine/OnlineClient";
 import GameUI from "./src/ui/GameUI.js";
-import { NotificationMessage } from "jsgametools";
 import seedrandom from "seedrandom";
 import StorageFactory from "./src/StorageFactory";
 import { Timer, TimerInterval } from "./src/Timers";

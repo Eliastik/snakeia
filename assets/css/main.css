@@ -29,7 +29,7 @@ canvas {
   margin: 8px;
 }
 
-canvas:-webkit-full-screen  {
+div:-webkit-full-screen > canvas {
   width: 100%;
   height: 100%;
   margin: 0;

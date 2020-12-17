@@ -21,6 +21,7 @@ import GameController from "./engine/GameController";
 import GameControllerWorker from "./engine/GameControllerWorker";
 import GameUI from "./ui/GameUI";
 import GameEngine from "./engine/GameEngine";
+import { NotificationMessage as Notification, Style, Label } from "jsgametools";
 
 // Polyfills
 if(typeof(window) !== "undefined") {
@@ -100,6 +101,21 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   return controller;
 }
 
+// Old NotificationMessage API
+function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround, disableAnimation, closeButton) {
+  return new Notification(new Style({
+    "backgroundColor": backgroundColor,
+    "foreGround": foreGround,
+    "disableAnimation": disableAnimation
+  }), delayBeforeClosing, null, new Label(text, null, null, new Style({
+    "fontSize": fontSize,
+    "fontFamily": fontFamily,
+    "fontColor": textColor || "white",
+    "alignement": "center",
+    "verticalAlignement": "center"
+  })));
+}
+
 // Constants shim
 // Player type
 if(typeof(window) !== "undefined") {
@@ -126,4 +142,4 @@ if(typeof(window) !== "undefined") {
   window.DATE_VERSION = GameConstants.Setting.DATE_VERSION;
 }
 
-export { Game, WorkersAvailable }
+export { Game, WorkersAvailable, NotificationMessage }

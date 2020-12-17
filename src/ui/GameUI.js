@@ -21,15 +21,18 @@ import GameUtils from "../engine/GameUtils";
 import GraphicsUtils from "./GraphicsUtils";
 import GameConstants from "../engine/Constants";
 import GameRanking from "./GameRanking";
-import { ImageLoader, Button, ButtonImage, NotificationMessage, Utils, Menu, Label, ProgressBar, Constants, EasingFunctions } from "jsgametools";
+import { ImageLoader, Button, ButtonImage, NotificationMessage, Utils, Menu, Label, ProgressBar, Constants, EasingFunctions, Scene, Canvas, Style, Box } from "jsgametools";
 import GridUI from "./GridUI";
 import Header from "./Header";
-Constants.Setting.FONT_FAMILY = "DELIUS";
+
+Constants.Setting.FONT_FAMILY = GameConstants.Setting.FONT_FAMILY;
+Constants.Setting.DISABLE_EXPERIMENTAL_OPTIMIZATIONS = false;
+Constants.Setting.FONT_SIZE = GameConstants.Setting.FONT_SIZE;
 
 export default class GameUI {
   constructor(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, settings) {
     // Assets loader
-    this.imageLoader;
+    this.imageLoader = new ImageLoader();
     this.assetsLoaded = false;
     // Game settings
     this.controller = controller;
@@ -92,7 +95,7 @@ export default class GameUI {
     this.onlineMaster = false;
     this.pingLatency = -1;
     // Menus state variables
-    this.menu = new Menu(null, this.renderBlur);
+    this.menu = new Menu(new Style({ "blur": this.renderBlur }));
     this.confirmReset = false;
     this.confirmExit = false;
     this.getInfos = false;
@@ -104,7 +107,10 @@ export default class GameUI {
     this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader);
     this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
     this.gridUI = new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader);
-    this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, null, null, null, 0.5, this.disableAnimation, "center");
+    this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, new Style({ "alignement": "center", "disableAnimation": this.disableAnimation }), 0.5);
+    this.box = new Box(0, 0, null, null, new Style({ "backgroundColor": "rgba(204, 207, 211, 1)" }));
+    this.scene = new Scene(this.box, this.gridUI, this.gameRanking, this.header, this.menu);
+    this.canvas;
     this.notificationMessage;
     this.labelMenus;
     // DOM elements and others settings
@@ -143,38 +149,41 @@ export default class GameUI {
   }
 
   init() {
-    this.imageLoader = new ImageLoader();
-
     if(this.outputType == GameConstants.OutputType.TEXT) {
       this.textarea = document.createElement("textarea");
       this.appendTo.appendChild(this.textarea);
       this.assetsLoaded = true;
     } else if(this.outputType == GameConstants.OutputType.GRAPHICAL) {
-      this.canvas = document.createElement("canvas");
-      this.canvas.width = this.canvasWidth;
-      this.canvas.height = this.canvasHeight;
-      this.canvasCtx = this.canvas.getContext("2d");
-      this.appendTo.appendChild(this.canvas);
-      this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", null, 64, 64);
-      this.btnPause = new ButtonImage("assets/images/pause.png", null, 5, null, null, 64, 64);
-      this.btnRank = new ButtonImage("assets/images/ranking.png", null, 5, null, null, 64, 64);
-      this.btnContinue = new Button(i18next.t("engine.continue"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnRetry = new Button(i18next.t("engine.reset"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnQuit = new Button(i18next.t("engine.exit"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnYes = new Button(i18next.t("engine.yes"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnNo = new Button(i18next.t("engine.no"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnOK = new Button(i18next.t("engine.ok"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnAbout = new Button(i18next.t("engine.about"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnInfosGame = new Button(i18next.t("engine.infosGame"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnAdvanced = new Button(i18next.t("engine.infosGameAdvanced"), null, null, "center", "#3498db", "#246A99", "#184766");
+      Constants.String.ERROR_MESSAGE_CANVAS = i18next.t("engine.errorJSGameToolsConsole");
+      Constants.String.ERROR_MESSAGE_CANVAS_LABEL = i18next.t("engine.errorJSGameTools");
+      Constants.String.RETRY = i18next.t("engine.retryInit");
+      
+      this.canvas = new Canvas(this.scene, document.createElement("canvas"), this.canvasWidth, this.canvasHeight, true, this.maxFPS);
+      this.canvas.appendTo(this.appendTo);
+      this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, null, null, null, 64, 64);
+      this.btnPause = new ButtonImage("assets/images/pause.png", null, null, null, null, 64, 64);
+      this.btnRank = new ButtonImage("assets/images/ranking.png", null, null, null, null, 64, 64);
+
+      const buttonStyle = new Style({ "alignement": "center", "backgroundColor": "#3498db", "backgroundColorHover": "#246A99", "backgroundColorClick": "#184766", "padding": 10 })
+      const labelStyle = new Style({ "fontColor": "white", "fontSize": GameConstants.Setting.FONT_SIZE, "fontFamily": GameConstants.Setting.FONT_FAMILY, "alignement": "center" });
+
+      this.btnContinue = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.continue"), null, null, labelStyle));
+      this.btnRetry = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.reset"), null, null, labelStyle));
+      this.btnQuit = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.exit"), null, null, labelStyle));
+      this.btnYes = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.yes"), null, null, labelStyle));
+      this.btnNo = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.no"), null, null, labelStyle));
+      this.btnOK = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.ok"), null, null, labelStyle));
+      this.btnAbout = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.about"), null, null, labelStyle));
+      this.btnInfosGame = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.infosGame"), null, null, labelStyle));
+      this.btnAdvanced = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.infosGameAdvanced"), null, null, labelStyle));
       this.btnTopArrow = new ButtonImage("assets/images/up.png", 64, 92, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
       this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
       this.btnLeftArrow = new ButtonImage("assets/images/left.png", 128, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
       this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 64, 0, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
-      this.btnExitFullScreen = new Button(i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnEnterFullScreen = new Button(i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnStartGame = new Button(i18next.t("engine.servers.startGame"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.labelMenus = new Label("", null, null, GameConstants.Setting.FONT_SIZE, GameConstants.Setting.FONT_FAMILY, "white", "center");
+      this.btnExitFullScreen = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.exitFullScreen"), null, null, labelStyle));
+      this.btnEnterFullScreen = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.enterFullScreen"), null, null, labelStyle));
+      this.btnStartGame = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.servers.startGame"), null, null, labelStyle));
+      this.labelMenus = new Label("", null, null, labelStyle);
 
       this.header.setButtons(this.btnFullScreen, this.btnPause, this.btnRank);
 
@@ -384,7 +393,7 @@ export default class GameUI {
         this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.canvas.width = 0;
         this.canvas.height = 0;
-        this.appendTo.removeChild(this.canvas);
+        this.canvas.remove(this.appendTo);
         this.canvas = null;
         this.canvasCtx = null;
         this.imageLoader.clear();
@@ -394,7 +403,7 @@ export default class GameUI {
 
   toggleFullscreen() {
     if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
-      Utils.toggleFullscreen(this.canvas);
+      this.canvas.toggleFullscreen();
     
       const onfullscreenchange = () => {
         if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
@@ -495,14 +504,14 @@ export default class GameUI {
       this.currentPlayer = this.controller.getCurrentPlayer();
 
       this.fontSize = GameConstants.Setting.FONT_SIZE;
-      this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
+      this.header.minHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
 
       if(this.canvas.width <= GameConstants.Setting.CANVAS_WIDTH / 1.25) {
         this.fontSize /= 1.25;
-        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25;
+        this.header.minHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25;
       } else if(this.canvas.width >= GameConstants.Setting.CANVAS_WIDTH * 1.5) {
         this.fontSize *= 1.25;
-        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25;
+        this.header.minHeight = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25;
       }
 
       Constants.Setting.FONT_SIZE = this.fontSize;
@@ -520,18 +529,14 @@ export default class GameUI {
 
       this.menu.disable();
 
-      Utils.clear(ctx);
-      ctx.fillStyle = "rgba(204, 207, 211, 1)";
-      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-      ctx.font = this.fontSize + "px " + GameConstants.Setting.FONT_FAMILY;
+      this.box.width = this.canvas.width;
+      this.box.height = this.canvas.height;
 
       if(this.assetsLoaded && !this.errorOccurred) {
         this.header.set(this.snakes, this.imageLoader, this.bestScoreToDisplay, this.header.height, this.numFruit, this.enablePause);
-        this.header.draw(ctx);
 
         if(this.grid != null && (!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished)))) {
           this.gridUI.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.currentPlayer, this.gameFinished, this.countBeforePlay, this.spectatorMode, this.ticks, this.gameOver);
-          this.gridUI.draw(ctx);
         }
 
         if(this.timerToDisplay != undefined && this.timerToDisplay != null && !isNaN(this.timerToDisplay) && this.timerToDisplay >= 0) {
@@ -556,12 +561,12 @@ export default class GameUI {
         this.notificationMessage.draw(this);
       }
 
-      if(this.snakes != null && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 || this.currentPlayer != null) && !this.spectatorMode) {
+      /*if(this.snakes != null && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 || this.currentPlayer != null) && !this.spectatorMode) {
         this.btnTopArrow.draw(this.canvasCtx);
         this.btnBottomArrow.draw(this.canvasCtx);
         this.btnRightArrow.draw(this.canvasCtx);
         this.btnLeftArrow.draw(this.canvasCtx);
-      }
+      }*/
 
       if(this.snakes != null && this.snakes.length <= 1) {
         this.gameRanking.forceClose();
@@ -569,7 +574,6 @@ export default class GameUI {
 
       if(!this.gameFinished && !this.gameOver && this.assetsLoaded && !this.errorOccurred) {
         this.gameRanking.set(this.snakes, this.fontSize, this.header.height, this.currentPlayer, this.imageLoader, this.spectatorMode);
-        this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
       }
 
       this.disableAllButtons();
@@ -826,17 +830,14 @@ export default class GameUI {
       }
 
       this.labelMenus.fontSize = this.fontSize;
-      this.menu.draw(this.canvasCtx);
 
       if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1 && !this.errorOccurred) {
         this.gameRanking.open();
         this.gameRanking.enable();
-        this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
       }
     
       if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {
         this.notificationMessage.enableCloseButton();
-        this.notificationMessage.draw(this.canvasCtx);
       }
 
       if(this.displayFPS) {
@@ -846,6 +847,8 @@ export default class GameUI {
       if(this.spectatorMode) {
         Utils.drawText(ctx, i18next.t("engine.servers.spectatorMode"), "rgba(255, 255, 255, 0.5)", Math.round(this.fontSize), GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
       }
+
+      this.canvas.draw();
     }
   }
 
@@ -886,6 +889,7 @@ export default class GameUI {
   setNotification(notification) {
     if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage) {
       this.notificationMessage.close();
+      this.scene.remove(this.notificationMessage);
     }
 
     this.notificationMessage = notification;
@@ -894,7 +898,10 @@ export default class GameUI {
       this.notificationMessage.disableAnimation = true;
     }
 
-    if(this.notificationMessage) this.notificationMessage.open();
+    if(this.notificationMessage) {
+      this.scene.add(this.notificationMessage);
+      this.notificationMessage.open();
+    }
   }
 
   setTimeToDisplay(time) {
