@@ -17,18 +17,19 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import GameConstants from "../engine/Constants";
-import { Component, Utils, EasingFunctions } from "jsgametools";
+import { Col, Row, EasingFunctions, Style, Label, ImageContainer } from "jsgametools";
 import i18next from "i18next";
 
-export default class GameRanking extends Component {
+export default class GameRanking extends Col {
   constructor(snakes, currentPlayer, fontSize, fontFamily, headerHeight, backgroundColor, scrollBarColor, disableAnimation, imageLoader, spectatorMode) {
-    super();
+    super(null, null, null, null, new Style({
+      "backgroundColor": backgroundColor || "rgba(75, 75, 75, 0.35)",
+      "scrollbarColor": scrollBarColor || "rgba(44, 62, 80, 0.8)",
+      "fontFamily": fontFamily || GameConstants.Setting.FONT_FAMILY,
+      "fontSize": fontSize || Math.floor(GameConstants.Setting.FONT_SIZE / 1.25)
+    }));
 
     this.snakes = snakes;
-    this.fontSize = fontSize || Math.floor(GameConstants.Setting.FONT_SIZE / 1.25);
-    this.fontFamily = fontFamily || GameConstants.Setting.FONT_FAMILY;
-    this.backgroundColor = backgroundColor || "rgba(44, 62, 80, 0.75)";
-    this.scrollBarColor = scrollBarColor || "rgba(44, 62, 80, 0.8)";
     this.headerHeight = headerHeight || GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
     this.closed = false;
     this.closing = false;
@@ -61,156 +62,19 @@ export default class GameRanking extends Component {
 
   draw(context) {
     if(this.snakes != null && !this.closed) {
+      this.update();
       super.draw(context);
-  
-      this.canvasTmp.width = context.canvas.width;
-      this.canvasTmp.height = context.canvas.height;
 
       const canvas = this.canvasTmp;
       const ctx = this.canvasTmp.getContext("2d");
 
       ctx.save();
 
-      const title = i18next.t("engine.ranking");
-      let maxSizeName = ctx.measureText(title).width;
-
-      const scores = [];
-      let numPlayer = 0;
-      let numAI = 0;
-
-      ctx.font = (this.fontSize / 1.5) + "px " + this.fontFamily;
-      const sizeNumber = ctx.measureText("" + this.snakes.length).width + 15;
-
-      for(let i = 0; i < this.snakes.length; i++) {
-        const snake = this.snakes[i];
-
-        if(snake.player == GameConstants.PlayerType.HUMAN || snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
-          numPlayer++;
-        } else {
-          numAI++;
-        }
-
-        const text = snake.name + " × " + snake.score + " (" + ((this.currentPlayer == i && !this.spectatorMode ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
-        const sizeText = ctx.measureText(text).width + 30;
-
-        if(sizeText > maxSizeName) maxSizeName = sizeText;
-
-        scores[i] = {
-          username: snake.name,
-          score: snake.score,
-          gameOver: snake.gameOver,
-          text: text,
-          rank: 0,
-          id: i
-        };
-
-        lastScore = snake.score;
-      }
-      
-      this.x = -(EasingFunctions.easeInOutCubic(this.offsetX / this.width) * this.width);
-      this.y = this.headerHeight;
-      this.width = maxSizeName + sizeNumber + 15;
-      this.height = canvas.height - this.headerHeight;
-
-      ctx.fillStyle = "rgba(75, 75, 75, 0.35)";
-      ctx.fillRect(this.x, this.headerHeight, this.width, this.height);
-      ctx.font = this.fontSize + "px " + this.fontFamily;
-
-      let yTitle = this.headerHeight + this.fontSize - this.offsetScrollY;
-
-      // Scroll variables
-      const maxHeight = this.snakes.length * (this.fontSize + 5) + this.fontSize + (this.fontSize / 1.5);
-      const clientHeight = this.height * (this.height / maxHeight);
-      const scrollAreaSize = this.height - clientHeight;
-      let percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
-
-      if(scrollAreaSize * percentScrollbar + clientHeight > this.height) { // Limit max scroll
-        this.offsetScrollY += (this.height - (scrollAreaSize * percentScrollbar + clientHeight));
-      }
-
-      if(yTitle > this.headerHeight + this.fontSize) { // Limit min scroll
-        yTitle = this.headerHeight + this.fontSize;
-        this.offsetScrollY = 0;
-      }
-      
-      percentScrollbar = this.offsetScrollY / (maxHeight - this.height);
-
-      if(yTitle + this.fontSize - 10 >= this.headerHeight) {
-        Utils.drawText(ctx, i18next.t("engine.ranking"), "rgba(255, 255, 255, 0.5)", Math.round(this.fontSize), this.fontFamily, "default", null, Math.round((this.width / 2) - (ctx.measureText(title).width / 2) + this.x), Math.round(yTitle), false, true);
-      }
-
-      const ranking = scores.sort((a, b) => {
-        return b.score - a.score;
-      });
-
-      let rank = 0;
-      let lastScore = 0;
-
-      for(let i = 0; i < ranking.length; i++) {
-        if(ranking[i].score < lastScore) {
-          rank++;
-        }
-
-        ranking[i].rank = rank;
-
-        lastScore = ranking[i].score;
-      }
-      
-      let currentY = yTitle + this.fontSize / 1.5;
-      this.overflow = false;
-
       if(this.timeLastFrame <= 0) this.timeLastFrame = performance.now();
       let offsetTime = performance.now() - this.timeLastFrame;
       this.timeLastFrame = performance.now();
 
-      let numberRankDrawn = 0;
-
-      for(let i = 0; i < ranking.length; i++) {
-        if(currentY + this.fontSize > this.headerHeight) {
-          if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
-            switch(ranking[i].rank) {
-              case 0:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
-                break;
-              case 1:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_silver.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
-                break;
-              case 2:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_bronze.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
-                break;
-            }
-          } else {
-            Utils.drawText(ctx, "" + (ranking[i].rank + 1), "rgba(255, 255, 255, 0.5)", Math.round(this.fontSize / 1.5), this.fontFamily, null, null, Math.round((this.fontSize / 1.5) / 2 + 5 + this.x), Math.round(currentY + (this.fontSize / 1.5)));
-          }
-
-          Utils.drawText(ctx, ranking[i].text, (ranking[i].gameOver ? "rgba(231, 76, 60, 0.5)" : "rgba(255, 255, 255, 0.5)"), Math.round(this.fontSize / 1.5), this.fontFamily, null, null, Math.round(5 + sizeNumber + this.fontSize / 1.5 + this.x), Math.round(currentY + (this.fontSize / 1.5)));
-
-          numberRankDrawn++;
-        }
-
-        currentY += Math.round(this.fontSize) + 5;
-
-        if(currentY > canvas.height && !this.back) {
-          this.lastLine = false;
-          this.totalTime += offsetTime;
-
-          if(this.totalTime > 5000) {
-            this.overflow = true;
-          }
-
-          break;
-        } else if(i == this.snakes.length - 1) {
-          if(!this.back) this.totalTime = 0;
-          this.back = true;
-          this.lastLine = true;
-        }
-      }
-
-      if(numberRankDrawn <= 0) {
-        this.offsetScrollY = 0;
-        this.timeLastFrame = performance.now();
-        offsetTime = 0;
-      }
+      // TODO: auto scroll
 
       if(this.back) {
         this.totalTime += offsetTime;
@@ -256,14 +120,7 @@ export default class GameRanking extends Component {
           }
         }
       }
-      
-      // Scrollbar drawing
-      if(clientHeight <= this.height) {
-        ctx.fillStyle = this.scrollBarColor;
-        ctx.fillRect(this.x + this.width - 15, this.headerHeight + scrollAreaSize * percentScrollbar, 15, clientHeight);
-      }
 
-      Utils.drawImageData(context, this.canvasTmp, 0, this.headerHeight, this.width, this.height, 0, this.headerHeight, this.width, this.height);
       ctx.restore();
     } else {
       this.overflow = false;
@@ -295,10 +152,138 @@ export default class GameRanking extends Component {
 
   set(snakes, fontSize, headerHeight, currentPlayer, imageLoader, spectatorMode) {
     this.snakes = snakes;
-    this.fontSize = fontSize;
+    this.style.set("fontSize", fontSize);
     this.headerHeight = headerHeight;
     this.currentPlayer = currentPlayer;
     this.imageLoader = imageLoader;
     this.spectatorMode = spectatorMode;
+  }
+
+  get scores() {
+    const scores = [];
+    const ctx = this.canvas.getContext("2d");
+
+    let numPlayer = 0;
+    let numAI = 0;
+
+    for(let i = 0; i < this.snakes.length; i++) {
+      const snake = this.snakes[i];
+
+      if(snake.player == GameConstants.PlayerType.HUMAN || snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
+        numPlayer++;
+      } else {
+        numAI++;
+      }
+
+      const text = snake.name + " × " + snake.score + " (" + ((this.currentPlayer == i && !this.spectatorMode ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
+      const sizeText = ctx.measureText(text).width + 30;
+
+      scores[i] = {
+        username: snake.name,
+        score: snake.score,
+        gameOver: snake.gameOver,
+        sizeText: sizeText,
+        text: text,
+        rank: 0,
+        id: i
+      };
+    }
+
+    return scores;
+  }
+
+  get rank() {
+    const scores = this.scores;
+    const ranking = scores.sort((a, b) => {
+      return b.score - a.score;
+    });
+
+    let rank = 0;
+    let lastScore = 0;
+
+    for(let i = 0; i < ranking.length; i++) {
+      if(ranking[i].score < lastScore) {
+        rank++;
+      }
+
+      ranking[i].rank = rank;
+
+      lastScore = ranking[i].score;
+    }
+
+    return ranking;
+  }
+
+  update() {
+    this.clear();
+    
+    const ranking = this.rank;
+    this.add(new Label(i18next.t("engine.ranking"), null, null, new Style({ "fontColor": "rgba(255, 255, 255, 0.5)", "fontSize": this.style.fontSize, "fontFamily": this.style.fontFamily, "alignement": "center", "bold": true })));
+
+    for(let i = 0; i < ranking.length; i++) {
+      const labelStyle = new Style({ "fontColor": "rgba(255, 255, 255, 0.5)", "fontSize": this.style.fontSize / 1.5, "fontFamily": this.style.FONT_FAMILY, "verticalAlignement": "center" });
+      const row = new Row(null, null, null, null, new Style({
+        "spaceBetweenComponents": 15,
+        "alignement": "left"
+      }));
+
+      if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
+        switch(ranking[i].rank) {
+          case 0:
+            row.add(new ImageContainer("assets/images/trophy.png", null, null, Math.round(this.style.fontSize), Math.round(this.style.fontSize), null, this.imageLoader));
+            break;
+          case 1:
+            row.add(new ImageContainer("assets/images/trophy_silver.png", null, null, Math.round(this.style.fontSize), Math.round(this.style.fontSize), null, this.imageLoader));
+            break;
+          case 2:
+            row.add(new ImageContainer("assets/images/trophy_bronze.png", null, null, Math.round(this.style.fontSize), Math.round(this.style.fontSize), null, this.imageLoader));
+            break;
+          }
+      } else {
+        const labelRank = new Label("" + ranking[i].rank, null, null, labelStyle);
+        labelRank.style.set("fontSize", this.style.fontSize);
+        row.add(labelRank);
+      }
+
+      const labelName = new Label(ranking[i].text, null, null, labelStyle);
+      row.add(labelName);
+
+      this.add(row);
+    }
+  }
+
+  get minHeight() {
+    return this.maxHeight;
+  }
+
+  get maxHeight() {
+    return this.canvas.height - this.headerHeight;
+  }
+
+  get minWidth() {
+    return this.innerWidth;
+  }
+
+  get maxWidth() {
+    return this.innerWidth;
+  }
+
+  get x() {
+    return -(EasingFunctions.easeInOutCubic(this.offsetX / this.width) * this.width);
+  }
+
+  get y() {
+    return this.headerHeight;
+  }
+
+  get defaultStyle() {
+    return new Style({
+      "backgroundColor": "rgba(75, 75, 75, 0.35)",
+      "scrollbarColor": "rgba(44, 62, 80, 0.8)",
+      "fontFamily": GameConstants.Setting.FONT_FAMILY,
+      "fontSize": Math.floor(GameConstants.Setting.FONT_SIZE / 1.25),
+      "padding": 20,
+      "spaceBetweenComponents": 5
+    });
   }
 }
