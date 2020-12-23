@@ -42,11 +42,14 @@ export default class GameRanking extends Col {
     this.offsetX = 0;
     this.totalTimeX = 0;
     this.totalTime = 0;
-    this.canvasTmp = document.createElement("canvas");
     this.disableAnimation = disableAnimation;
     this.imageLoader = imageLoader;
     this.currentPlayer = currentPlayer;
     this.spectatorMode = spectatorMode;
+
+    this.title = new Label(i18next.t("engine.ranking"), null, null, new Style({ "fontColor": "rgba(255, 255, 255, 0.5)", "fontSize": this.style.fontSize, "fontFamily": this.style.fontFamily, "alignement": "center", "bold": true }));
+    this.add(this.title);
+    this.createdComponents = [];
 
     this.addScrollAction((deltaX, deltaY) => {
       if((this.lastLine && deltaY > 0)) {
@@ -62,13 +65,8 @@ export default class GameRanking extends Col {
 
   draw(context) {
     if(this.snakes != null && !this.closed) {
-      this.update();
+      if(this.createdComponents.length <= 0) this.update();
       super.draw(context);
-
-      const canvas = this.canvasTmp;
-      const ctx = this.canvasTmp.getContext("2d");
-
-      ctx.save();
 
       if(this.timeLastFrame <= 0) this.timeLastFrame = performance.now();
       let offsetTime = performance.now() - this.timeLastFrame;
@@ -120,8 +118,6 @@ export default class GameRanking extends Col {
           }
         }
       }
-
-      ctx.restore();
     } else {
       this.overflow = false;
       this.back = false;
@@ -152,11 +148,15 @@ export default class GameRanking extends Col {
 
   set(snakes, fontSize, headerHeight, currentPlayer, imageLoader, spectatorMode) {
     this.snakes = snakes;
-    this.style.set("fontSize", fontSize);
     this.headerHeight = headerHeight;
     this.currentPlayer = currentPlayer;
     this.imageLoader = imageLoader;
     this.spectatorMode = spectatorMode;
+
+    if(fontSize != this.style.fontSize) {
+      this.style.set("fontSize", fontSize);
+      this.update();
+    }
   }
 
   get scores() {
@@ -214,42 +214,95 @@ export default class GameRanking extends Col {
     return ranking;
   }
 
-  update() {
-    this.clear();
-    
-    const ranking = this.rank;
-    this.add(new Label(i18next.t("engine.ranking"), null, null, new Style({ "fontColor": "rgba(255, 255, 255, 0.5)", "fontSize": this.style.fontSize, "fontFamily": this.style.fontFamily, "alignement": "center", "bold": true })));
+  createComponents(number) {
+    for(let i = 0; i < number; i++) {
+      const obj = {};
 
-    for(let i = 0; i < ranking.length; i++) {
       const labelStyle = new Style({ "fontColor": "rgba(255, 255, 255, 0.5)", "fontSize": this.style.fontSize / 1.5, "fontFamily": this.style.FONT_FAMILY, "verticalAlignement": "center" });
       const row = new Row(null, null, null, null, new Style({
         "spaceBetweenComponents": 15,
-        "alignement": "left"
+        "padding": 0
       }));
+
+      obj.row = row;
+      
+      const trophy = new ImageContainer("assets/images/trophy.png", null, null, this.style.fontSize, this.style.fontSize, null, this.imageLoader);
+      trophy.hidden = true;
+      obj.trophy = trophy;
+      row.add(trophy);
+        
+      const trophySilver = new ImageContainer("assets/images/trophy_silver.png", null, null, this.style.fontSize, this.style.fontSize, null, this.imageLoader);
+      trophySilver.hidden = true;
+      obj.trophySilver = trophySilver;
+      row.add(trophySilver);
+        
+      const trophyBronze = new ImageContainer("assets/images/trophy_bronze.png", null, null, this.style.fontSize, this.style.fontSize, null, this.imageLoader);
+      trophyBronze.hidden = true;
+      obj.trophyBronze = trophyBronze;
+      row.add(trophyBronze);
+
+      const labelRank = new Label("", null, null, labelStyle);
+      labelRank.style.set("fontSize", this.style.fontSize);
+      obj.labelRank = labelRank;
+      row.add(labelRank);
+
+      const labelName = new Label("", null, null, labelStyle);
+      obj.labelName = labelName;
+      row.add(labelName);
+
+      this.add(row);
+      this.createdComponents.push(obj);
+    }
+  }
+
+  update() {
+    const ranking = this.rank;
+
+    if(ranking.length > this.createdComponents.length) {
+      this.createComponents(ranking.length - this.createdComponents.length);
+    }
+    
+    this.title.style.set("fontSize", this.style.fontSize);
+
+    for(let i = 0; i < ranking.length; i++) {
+      const currentComponent = this.createdComponents[i];
+
+      currentComponent.trophy.hidden = true;
+      currentComponent.trophySilver.hidden = true;
+      currentComponent.trophyBronze.hidden = true;
+      currentComponent.labelRank.hidden = true;
+      
+      currentComponent.trophy.width = this.style.fontSize;
+      currentComponent.trophy.height = this.style.fontSize;
+      currentComponent.trophySilver.width = this.style.fontSize;
+      currentComponent.trophySilver.height = this.style.fontSize;
+      currentComponent.trophyBronze.width = this.style.fontSize;
+      currentComponent.trophyBronze.height = this.style.fontSize;
 
       if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
         switch(ranking[i].rank) {
           case 0:
-            row.add(new ImageContainer("assets/images/trophy.png", null, null, Math.round(this.style.fontSize), Math.round(this.style.fontSize), null, this.imageLoader));
+            currentComponent.trophy.hidden = false;
             break;
           case 1:
-            row.add(new ImageContainer("assets/images/trophy_silver.png", null, null, Math.round(this.style.fontSize), Math.round(this.style.fontSize), null, this.imageLoader));
+            currentComponent.trophySilver.hidden = false;
             break;
           case 2:
-            row.add(new ImageContainer("assets/images/trophy_bronze.png", null, null, Math.round(this.style.fontSize), Math.round(this.style.fontSize), null, this.imageLoader));
+            currentComponent.trophyBronze.hidden = false;
             break;
           }
       } else {
-        const labelRank = new Label("" + ranking[i].rank, null, null, labelStyle);
-        labelRank.style.set("fontSize", this.style.fontSize);
-        row.add(labelRank);
+        currentComponent.labelRank.hidden = false;
+        currentComponent.labelRank.text = "" + (ranking[i].rank + 1);
+        currentComponent.labelRank.style.set("fontSize", this.style.fontSize);
       }
 
-      const labelName = new Label(ranking[i].text, null, null, labelStyle);
-      row.add(labelName);
-
-      this.add(row);
+      currentComponent.labelName.hidden = false;
+      currentComponent.labelName.text = ranking[i].text;
+      currentComponent.labelName.style.set("fontSize", this.style.fontSize / 1.5);
     }
+
+    this.reactor.dispatchEvent("onUpdate", this);
   }
 
   get minHeight() {
@@ -258,14 +311,6 @@ export default class GameRanking extends Col {
 
   get maxHeight() {
     return this.canvas.height - this.headerHeight;
-  }
-
-  get minWidth() {
-    return this.innerWidth;
-  }
-
-  get maxWidth() {
-    return this.innerWidth;
   }
 
   get x() {

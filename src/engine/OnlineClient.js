@@ -245,16 +245,19 @@ export default class OnlineClient {
     }
   }
 
-  getGame(ui, settings) {
-    if(this.socket != null && this.currentRoom && ui != null) {
+  getGame(settings) {
+    if(this.socket != null && this.currentRoom) {
       this.game = null;
       this.stopGame();
-      this.game = new GameControllerSocket(this.socket, ui, settings && settings.onlineEnableClientSidePredictions && this.engineServerVersion == GameConstants.Setting.APP_VERSION, settings);
-      ui.controller = this.game;
-      ui.pingLatency = this.pingLatency;
-      this.ui = ui;
+      this.game = new GameControllerSocket(this.socket, null, settings && settings.onlineEnableClientSidePredictions && this.engineServerVersion == GameConstants.Setting.APP_VERSION, settings);
       return this.game;
     }
+  }
+
+  setUI(ui) {
+    ui.pingLatency = this.pingLatency;
+    this.game.gameUI = ui;
+    this.ui = ui;
   }
 
   getURL() {

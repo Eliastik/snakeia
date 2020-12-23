@@ -107,7 +107,7 @@ export default class GameUI {
     this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader);
     this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
     this.gridUI = new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader);
-    this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, new Style({ "alignement": "center", "disableAnimation": this.disableAnimation }), 0.5);
+    this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, new Style({ "alignement": "center", "disableAnimation": this.disableAnimation }));
     this.box = new Box(0, 0, null, null, new Style({ "backgroundColor": "rgba(204, 207, 211, 1)" }));
     this.scene = new Scene(this.box, this.gridUI, this.gameRanking, this.header, this.menu);
     this.canvas;
@@ -159,7 +159,7 @@ export default class GameUI {
       Constants.String.RETRY = i18next.t("engine.retryInit");
       
       this.canvas = new Canvas(this.scene, document.createElement("canvas"), this.canvasWidth, this.canvasHeight, true, this.maxFPS);
-      this.canvas.appendTo(this.appendTo);
+      if(this.appendTo) this.canvas.appendTo(this.appendTo);
       this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, null, null, null, 64, 64);
       this.btnPause = new ButtonImage("assets/images/pause.png", null, null, null, null, 64, 64);
       this.btnRank = new ButtonImage("assets/images/ranking.png", null, null, null, null, 64, 64);
@@ -219,6 +219,11 @@ export default class GameUI {
       this.btnRightArrow.setClickAction(() => {
         this.controller.key(GameConstants.Key.RIGHT);
       });
+
+      // Update ranking
+      this.controller.onStart(() => this.gameRanking.update());
+      this.controller.onReset(() => this.gameRanking.update());
+      this.controller.onScoreIncreased(() => this.gameRanking.update());
       
       if(this.canvas) {
         this.canvas.addEventListener("touchstart", event => {
@@ -795,33 +800,6 @@ export default class GameUI {
         this.btnAbout.setClickAction(() => {
           this.getInfos = true;
         });
-      } else if(this.assetsLoaded) {
-        this.btnFullScreen.enable();
-        this.gameRanking.enable();
-
-        if(this.snakes != null) {
-          for(let i = 0; i < this.snakes.length; i++) {
-            if(this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
-              this.btnTopArrow.enable();
-              this.btnBottomArrow.enable();
-              this.btnLeftArrow.enable();
-              this.btnRightArrow.enable();
-              break;
-            }
-          }
-        }
-
-        if(this.enablePause) {
-          this.btnPause.enable();
-        }
-
-        if(this.snakes != null && this.snakes.length > 1) {
-          this.btnRank.enable();
-        }
-
-        if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
-          this.notificationMessage.enableCloseButton();
-        }
       }
 
       if(this.assetsLoaded && this.engineLoading) {
@@ -834,7 +812,6 @@ export default class GameUI {
 
       if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1 && !this.errorOccurred) {
         this.gameRanking.open();
-        this.gameRanking.enable();
       }
     
       if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {

@@ -499,8 +499,9 @@ function joinRoom(code) {
     document.getElementById("roomsOnlineJoin").style.display = "none";
 
     if(data.success) {
-      const ui = new GameUI(null, document.getElementById("gameContainer"), null, null, (customSettings.showDebugInfo ? true : false), null, customSettings);
-      const game = onlineClient.getGame(ui, customSettings);
+      const game = onlineClient.getGame(customSettings);
+      const ui = new GameUI(game, document.getElementById("gameContainer"), null, null, (customSettings.showDebugInfo ? true : false), null, customSettings);
+      onlineClient.setUI(ui);
       game.init();
 
       document.getElementById("gameContainer").style.display = "block";
@@ -509,8 +510,8 @@ function joinRoom(code) {
       document.getElementById("gameStatus").textContent = "";
       document.getElementById("gameStatusError").textContent = "";
 
-      if(ui.canvas != undefined) {
-        ui.canvas.scrollIntoView();
+      if(ui.canvas != undefined && ui.canvas.canvas) {
+        ui.canvas.canvas.scrollIntoView();
       }
 
       game.onExit(() => {
