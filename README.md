@@ -432,12 +432,16 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 - [x] MVC (architecture client-serveur)
 - [x] Jeu multi-joueur en ligne (création d'un programme serveur avec socket.io)
 
-#### Autres idées
+### Autres idées
 - [ ] (Menu affichant les contrôles du jeu)
 - [-] (Afficher difficulté niveaux)
 - [x] Bonus dans le mode niveaux (pièces obtenues en fonction du score/temps (1.75 fois ce qui est demandé dans l'objectif) permettant d'acheter des bonus (passer dernier niveau ou activer le mode assistant IA))
 - [x] Animation mort Snake
 - [x] Skin vrai serpent
+
+## Notes
+### Seeds avec blocages d'IAs
+* Valeur aléatoire jeu : -923666617, valeur aléatoire grille : 399318332, mode Battle Royale par défaut
 
 ## Déclaration de licence
 

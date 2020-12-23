@@ -104,7 +104,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 // Old NotificationMessage API
 function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround, disableAnimation, closeButton) {
   return new Notification(new Style({
-    "backgroundColor": backgroundColor,
+    "backgroundColor": backgroundColor || "rgba(46, 204, 113, 0.5)",
     "foreground": foreGround,
     "disableAnimation": disableAnimation
   }), delayBeforeClosing, null, new Label(text, null, null, new Style({

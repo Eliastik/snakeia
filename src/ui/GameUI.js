@@ -21,9 +21,10 @@ import GameUtils from "../engine/GameUtils";
 import GraphicsUtils from "./GraphicsUtils";
 import GameConstants from "../engine/Constants";
 import GameRanking from "./GameRanking";
-import { ImageLoader, Button, ButtonImage, NotificationMessage, Utils, Menu, Label, ProgressBar, Constants, EasingFunctions, Scene, Canvas, Style, Box } from "jsgametools";
+import { ImageLoader, Button, ButtonImage, Utils, Menu, Label, ProgressBar, Constants, EasingFunctions, Scene, Canvas, Style, Box, Col, Row, ImageContainer } from "jsgametools";
 import GridUI from "./GridUI";
 import Header from "./Header";
+import { NotificationMessage } from "../Shim";
 
 Constants.Setting.FONT_FAMILY = GameConstants.Setting.FONT_FAMILY;
 Constants.Setting.DISABLE_EXPERIMENTAL_OPTIMIZATIONS = false;
@@ -109,7 +110,13 @@ export default class GameUI {
     this.gridUI = new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader);
     this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, new Style({ "alignement": "center", "disableAnimation": this.disableAnimation }));
     this.box = new Box(0, 0, null, null, new Style({ "backgroundColor": "rgba(204, 207, 211, 1)" }));
-    this.scene = new Scene(this.box, this.gridUI, this.gameRanking, this.header, this.menu);
+    this.fpsCounter = new Label("", null, null, new Style({ "fontColor": "rgba(255, 255, 255, 0.85)", "alignement": "right", "verticalAlignement": "bottom", "foreground": true }));
+    this.spectatorModeLabel = new Label(i18next.t("engine.servers.spectatorMode"), null, null, new Style({ "fontColor": "rgba(255, 255, 255, 0.85)", "alignement": "left", "verticalAlignement": "bottom" }));
+    this.colArrowButtons = new Col(null, null, null, null, new Style({ "alignement": "right", "verticalAlignement": "bottom", "spaceBetweenComponents": 0 }));
+    this.timerToDisplayLabel = new Label("", null, null, new Style({ "fontColor": "rgba(0, 0, 0, 0.5)", "verticalAlignement": "center" }));
+    this.timerToDisplayImage = new ImageContainer("assets/images/clock.png", null, null, this.fontSize, this.fontSize, new Style({ "verticalAlignement": "center" }), this.imageLoader);
+    this.timerToDisplayElement = new Row(null, null, null, null, new Style({ "alignement": "right" }), this.timerToDisplayImage, this.timerToDisplayLabel);
+    this.scene = new Scene(this.box, this.gridUI, this.gameRanking, this.header, this.timerToDisplayElement, this.spectatorModeLabel, this.colArrowButtons, this.menu, this.fpsCounter);
     this.canvas;
     this.notificationMessage;
     this.labelMenus;
@@ -176,10 +183,13 @@ export default class GameUI {
       this.btnAbout = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.about"), null, null, labelStyle));
       this.btnInfosGame = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.infosGame"), null, null, labelStyle));
       this.btnAdvanced = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.infosGameAdvanced"), null, null, labelStyle));
-      this.btnTopArrow = new ButtonImage("assets/images/up.png", 64, 92, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
-      this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
-      this.btnLeftArrow = new ButtonImage("assets/images/left.png", 128, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
-      this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 64, 0, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
+
+      this.btnTopArrow = new ButtonImage("assets/images/up.png", null, null, "center", "center", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
+      this.btnRightArrow = new ButtonImage("assets/images/right.png", null, null, "right", "center", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
+      this.btnLeftArrow = new ButtonImage("assets/images/left.png", null, null, "left", "center", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
+      this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", null, null, "center", "center", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
+      this.colArrowButtons.addAll(new Row(null, null, null, null, new Style({ "alignement": "center" }), this.btnTopArrow), new Row(null, null, null, null, new Style({ "alignement": "center", "spaceBetweenComponents": 32 }), this.btnRightArrow, this.btnLeftArrow), new Row(null, null, null, null, new Style({ "alignement": "center" }), this.btnBottomArrow));
+
       this.btnExitFullScreen = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.exitFullScreen"), null, null, labelStyle));
       this.btnEnterFullScreen = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.enterFullScreen"), null, null, labelStyle));
       this.btnStartGame = new Button(null, null, null, null, buttonStyle, new Label(i18next.t("engine.servers.startGame"), null, null, labelStyle));
@@ -441,7 +451,8 @@ export default class GameUI {
   }
 
   loadAssets() {
-    this.menu.style.set("backgroundColor", "rgba(44, 62, 80, 1)");
+    this.header.hidden = true;
+    this.colArrowButtons.hidden = true;
 
     if(!this.errorOccurred && this.outputType != GameConstants.OutputType.TEXT) {
       this.imageLoader.load(["assets/images/skin/" + this.graphicSkin + "/snake_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_2.png", "assets/images/skin/" + this.graphicSkin + "/snake.png", "assets/images/skin/" + this.graphicSkin + "/body_4_end.png", "assets/images/skin/" + this.graphicSkin + "/body_3_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2_end.png", "assets/images/skin/" + this.graphicSkin + "/body_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2.png", "assets/images/skin/" + this.graphicSkin + "/body.png", "assets/images/skin/" + this.graphicSkin + "/wall.png", "assets/images/skin/" + this.graphicSkin + "/fruit.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/trophy.png", "assets/images/trophy_silver.png", "assets/images/trophy_bronze.png", "assets/images/clock.png", "assets/images/skin/" + this.graphicSkin + "/fruit_gold.png", "assets/images/ranking.png", "assets/images/skin/flat/fruit.png", "assets/images/skin/" + this.graphicSkin + "/unknown.png"], () => {
@@ -456,7 +467,8 @@ export default class GameUI {
           this.btnBottomArrow.loadImage(this.imageLoader);
           this.btnLeftArrow.loadImage(this.imageLoader);
           this.btnRightArrow.loadImage(this.imageLoader);
-          this.menu.style.set("backgroundColor", Constants.Setting.MENU_DEFAULT_BACKGROUND);
+          this.header.hidden = false;
+          this.colArrowButtons.hidden = false;
           this.start();
         }
       }, this);
@@ -548,8 +560,13 @@ export default class GameUI {
         }
 
         if(this.timerToDisplay != undefined && this.timerToDisplay != null && !isNaN(this.timerToDisplay) && this.timerToDisplay >= 0) {
-          const sizesTimer = Utils.drawText(ctx, "" + GameUtils.secondsFormat(this.timerToDisplay), "rgba(0, 0, 0, 0.5)", Math.round(this.fontSize), GameConstants.Setting.FONT_FAMILY, "right", "default", null, Math.round(this.header.height + 15 + this.header.height * 0.475));
-          Utils.drawImage(ctx, this.imageLoader.get("assets/images/clock.png", Math.round(this.header.height * 0.64), Math.round(this.header.height * 0.64)), Math.round(sizesTimer["x"] - this.header.height * 0.64 - 10), Math.round(this.header.height + 15), Math.round(this.header.height * 0.64), Math.round(this.header.height * 0.64));
+          this.timerToDisplayLabel.text = "" + GameUtils.secondsFormat(this.timerToDisplay);
+          this.timerToDisplayImage.width = this.fontSize * 1.5;
+          this.timerToDisplayImage.height = this.fontSize + 1.5;
+          this.timerToDisplayElement.hidden = false;
+          this.timerToDisplayElement.y = Math.round(this.header.height + 15);
+        } else {
+          this.timerToDisplayElement.hidden = true;
         }
       } else if(!this.assetsLoaded) {
         const percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
@@ -565,16 +582,11 @@ export default class GameUI {
         this.setNotification(new NotificationMessage(i18next.t("engine.aiStuck"), null, GameConstants.Setting.ERROR_NOTIF_COLOR, 10));
       }
 
-      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
-        this.notificationMessage.draw(this);
+      if(this.snakes != null && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 || this.currentPlayer != null) && !this.spectatorMode) {
+        this.colArrowButtons.hidden = false;
+      } else {
+        this.colArrowButtons.hidden = true;
       }
-
-      /*if(this.snakes != null && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 || this.currentPlayer != null) && !this.spectatorMode) {
-        this.btnTopArrow.draw(this.canvasCtx);
-        this.btnBottomArrow.draw(this.canvasCtx);
-        this.btnRightArrow.draw(this.canvasCtx);
-        this.btnLeftArrow.draw(this.canvasCtx);
-      }*/
 
       if(this.snakes != null && this.snakes.length <= 1) {
         this.gameRanking.forceClose();
@@ -812,18 +824,24 @@ export default class GameUI {
 
       if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1 && !this.errorOccurred) {
         this.gameRanking.open();
-      }
-    
-      if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {
-        this.notificationMessage.enableCloseButton();
+        this.gameRanking.style.set("foreground", true);
+      } else {
+        this.gameRanking.style.set("foreground", false);
       }
 
       if(this.displayFPS) {
-        Utils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.85)", Math.round(this.fontSize / 1.5), GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
+        this.fpsCounter.text = this.getDebugText();
+        this.fpsCounter.style.set("fontSize", this.fontSize / 1.5);
+        this.fpsCounter.hidden = false;
+      } else {
+        this.fpsCounter.hidden = true;
       }
 
       if(this.spectatorMode) {
-        Utils.drawText(ctx, i18next.t("engine.servers.spectatorMode"), "rgba(255, 255, 255, 0.5)", Math.round(this.fontSize), GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
+        this.spectatorModeLabel.hidden = false;
+        this.spectatorModeLabel.fontSize = this.fontSize;;
+      } else {
+        this.spectatorModeLabel.hidden = true;
       }
 
       this.canvas.draw();

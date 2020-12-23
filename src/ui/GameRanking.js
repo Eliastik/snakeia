@@ -166,52 +166,57 @@ export default class GameRanking extends Col {
     let numPlayer = 0;
     let numAI = 0;
 
-    for(let i = 0; i < this.snakes.length; i++) {
-      const snake = this.snakes[i];
-
-      if(snake.player == GameConstants.PlayerType.HUMAN || snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
-        numPlayer++;
-      } else {
-        numAI++;
+    if(this.snakes) {
+      for(let i = 0; i < this.snakes.length; i++) {
+        const snake = this.snakes[i];
+  
+        if(snake.player == GameConstants.PlayerType.HUMAN || snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
+          numPlayer++;
+        } else {
+          numAI++;
+        }
+  
+        const text = snake.name + " × " + snake.score + " (" + ((this.currentPlayer == i && !this.spectatorMode ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
+        const sizeText = ctx.measureText(text).width + 30;
+  
+        scores[i] = {
+          username: snake.name,
+          score: snake.score,
+          gameOver: snake.gameOver,
+          sizeText: sizeText,
+          text: text,
+          rank: 0,
+          id: i
+        };
       }
-
-      const text = snake.name + " × " + snake.score + " (" + ((this.currentPlayer == i && !this.spectatorMode ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
-      const sizeText = ctx.measureText(text).width + 30;
-
-      scores[i] = {
-        username: snake.name,
-        score: snake.score,
-        gameOver: snake.gameOver,
-        sizeText: sizeText,
-        text: text,
-        rank: 0,
-        id: i
-      };
+  
+      return scores;
     }
-
-    return scores;
   }
 
   get rank() {
     const scores = this.scores;
-    const ranking = scores.sort((a, b) => {
-      return b.score - a.score;
-    });
 
-    let rank = 0;
-    let lastScore = 0;
-
-    for(let i = 0; i < ranking.length; i++) {
-      if(ranking[i].score < lastScore) {
-        rank++;
+    if(scores) {
+      const ranking = scores.sort((a, b) => {
+        return b.score - a.score;
+      });
+  
+      let rank = 0;
+      let lastScore = 0;
+  
+      for(let i = 0; i < ranking.length; i++) {
+        if(ranking[i].score < lastScore) {
+          rank++;
+        }
+  
+        ranking[i].rank = rank;
+  
+        lastScore = ranking[i].score;
       }
-
-      ranking[i].rank = rank;
-
-      lastScore = ranking[i].score;
+  
+      return ranking;
     }
-
-    return ranking;
   }
 
   createComponents(number) {
@@ -258,51 +263,53 @@ export default class GameRanking extends Col {
   update() {
     const ranking = this.rank;
 
-    if(ranking.length > this.createdComponents.length) {
-      this.createComponents(ranking.length - this.createdComponents.length);
-    }
-    
-    this.title.style.set("fontSize", this.style.fontSize);
-
-    for(let i = 0; i < ranking.length; i++) {
-      const currentComponent = this.createdComponents[i];
-
-      currentComponent.trophy.hidden = true;
-      currentComponent.trophySilver.hidden = true;
-      currentComponent.trophyBronze.hidden = true;
-      currentComponent.labelRank.hidden = true;
-      
-      currentComponent.trophy.width = this.style.fontSize;
-      currentComponent.trophy.height = this.style.fontSize;
-      currentComponent.trophySilver.width = this.style.fontSize;
-      currentComponent.trophySilver.height = this.style.fontSize;
-      currentComponent.trophyBronze.width = this.style.fontSize;
-      currentComponent.trophyBronze.height = this.style.fontSize;
-
-      if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
-        switch(ranking[i].rank) {
-          case 0:
-            currentComponent.trophy.hidden = false;
-            break;
-          case 1:
-            currentComponent.trophySilver.hidden = false;
-            break;
-          case 2:
-            currentComponent.trophyBronze.hidden = false;
-            break;
-          }
-      } else {
-        currentComponent.labelRank.hidden = false;
-        currentComponent.labelRank.text = "" + (ranking[i].rank + 1);
-        currentComponent.labelRank.style.set("fontSize", this.style.fontSize);
+    if(ranking) {
+      if(ranking.length > this.createdComponents.length) {
+        this.createComponents(ranking.length - this.createdComponents.length);
       }
-
-      currentComponent.labelName.hidden = false;
-      currentComponent.labelName.text = ranking[i].text;
-      currentComponent.labelName.style.set("fontSize", this.style.fontSize / 1.5);
+      
+      this.title.style.set("fontSize", this.style.fontSize);
+  
+      for(let i = 0; i < ranking.length; i++) {
+        const currentComponent = this.createdComponents[i];
+  
+        currentComponent.trophy.hidden = true;
+        currentComponent.trophySilver.hidden = true;
+        currentComponent.trophyBronze.hidden = true;
+        currentComponent.labelRank.hidden = true;
+  
+        currentComponent.trophy.width = this.style.fontSize;
+        currentComponent.trophy.height = this.style.fontSize;
+        currentComponent.trophySilver.width = this.style.fontSize;
+        currentComponent.trophySilver.height = this.style.fontSize;
+        currentComponent.trophyBronze.width = this.style.fontSize;
+        currentComponent.trophyBronze.height = this.style.fontSize;
+  
+        if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
+          switch(ranking[i].rank) {
+            case 0:
+              currentComponent.trophy.hidden = false;
+              break;
+            case 1:
+              currentComponent.trophySilver.hidden = false;
+              break;
+            case 2:
+              currentComponent.trophyBronze.hidden = false;
+              break;
+            }
+        } else {
+          currentComponent.labelRank.hidden = false;
+          currentComponent.labelRank.text = "" + (ranking[i].rank + 1);
+          currentComponent.labelRank.style.set("fontSize", this.style.fontSize);
+        }
+  
+        currentComponent.labelName.hidden = false;
+        currentComponent.labelName.text = ranking[i].text;
+        currentComponent.labelName.style.set("fontSize", this.style.fontSize / 1.5);
+      }
+  
+      this.reactor.dispatchEvent("onUpdate", this);
     }
-
-    this.reactor.dispatchEvent("onUpdate", this);
   }
 
   get minHeight() {
