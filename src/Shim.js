@@ -102,18 +102,35 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 }
 
 // Old NotificationMessage API
-function NotificationMessage(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround, disableAnimation, closeButton) {
-  return new Notification(new Style({
-    "backgroundColor": backgroundColor || "rgba(46, 204, 113, 0.5)",
-    "foreground": foreGround,
-    "disableAnimation": disableAnimation
-  }), delayBeforeClosing, null, new Label(text, null, null, new Style({
-    "fontSize": fontSize,
-    "fontFamily": fontFamily,
-    "fontColor": textColor || "white",
-    "alignement": "center",
-    "verticalAlignement": "center"
-  })));
+class NotificationMessage extends Notification {
+  constructor(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround, disableAnimation, closeButton) {
+    super(new Style({
+      "backgroundColor": backgroundColor || "rgba(46, 204, 113, 0.5)",
+      "foreground": foreGround,
+      "disableAnimation": disableAnimation
+    }), delayBeforeClosing);
+
+    this.label = new Label(text, null, null, new Style({
+      "fontSize": fontSize,
+      "fontFamily": fontFamily,
+      "fontColor": textColor || "white",
+      "alignement": "center",
+      "verticalAlignement": "center"
+    }));
+    this.add(this.label);
+  }
+
+  set fontSize(fontSize) {
+    if(this.label) {
+      this.label.style.set("fontSize", fontSize);
+    }
+  }
+
+  get fontSize() {
+    if(this.label) {
+      return this.label.style.fontSize;
+    }
+  }
 }
 
 // Constants shim

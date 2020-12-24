@@ -49,7 +49,7 @@ export default {
     CANVAS_WIDTH: 800,
     CANVAS_HEIGHT: 600,
     FONT_FAMILY: "Delius",
-    FONT_SIZE: 32,
+    FONT_SIZE: 28,
     HEADER_HEIGHT_DEFAULT: 75,
     TARGET_FPS: 60,
     TIME_MULTIPLIER: 15,

@@ -27,8 +27,6 @@ import Header from "./Header";
 import { NotificationMessage } from "../Shim";
 
 Constants.Setting.FONT_FAMILY = GameConstants.Setting.FONT_FAMILY;
-Constants.Setting.DISABLE_EXPERIMENTAL_OPTIMIZATIONS = false;
-Constants.Setting.FONT_SIZE = GameConstants.Setting.FONT_SIZE;
 
 export default class GameUI {
   constructor(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, settings) {
@@ -520,7 +518,6 @@ export default class GameUI {
 
       this.textarea.innerHTML = this.toString();
     } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
-      const ctx = this.canvasCtx;
       this.currentPlayer = this.controller.getCurrentPlayer();
 
       this.fontSize = GameConstants.Setting.FONT_SIZE;
@@ -535,11 +532,10 @@ export default class GameUI {
       }
 
       Constants.Setting.FONT_SIZE = this.fontSize;
-      this.labelMenus.size = this.fontSize;
+      this.labelMenus.style.set("fontSize", this.fontSize);
       
       if(this.notificationMessage) {
         this.notificationMessage.fontSize = this.fontSize;
-        this.notificationMessage.fontSizeInitial = this.fontSize;
         this.notificationMessage.easingFunction = EasingFunctions.easeInOutCubic;
       }
 
@@ -820,8 +816,6 @@ export default class GameUI {
         this.menu.set(this.labelMenus);
       }
 
-      this.labelMenus.fontSize = this.fontSize;
-
       if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1 && !this.errorOccurred) {
         this.gameRanking.open();
         this.gameRanking.style.set("foreground", true);
@@ -839,7 +833,7 @@ export default class GameUI {
 
       if(this.spectatorMode) {
         this.spectatorModeLabel.hidden = false;
-        this.spectatorModeLabel.fontSize = this.fontSize;;
+        this.spectatorModeLabel.style.set("fontSize", this.fontSize);
       } else {
         this.spectatorModeLabel.hidden = true;
       }
