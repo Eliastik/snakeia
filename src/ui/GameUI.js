@@ -310,11 +310,6 @@ export default class GameUI {
       }
     });
 
-    window.addEventListener("resize", () => {
-      this.autoResizeCanvas();
-    }, true);
-
-    this.autoResizeCanvas();
     this.loadAssets();
     this.startDraw();
   }
@@ -326,12 +321,6 @@ export default class GameUI {
       x: event.clientX - rect.left,
       y: event.clientY - rect.top
     };
-  }
-
-  autoResizeCanvas() {
-    if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
-      Utils.autoResizeCanvas(this.canvas, this.canvasWidth, this.canvasHeight);
-    }
   }
 
   setIntervalCountFPS() {
@@ -420,7 +409,7 @@ export default class GameUI {
     
       const onfullscreenchange = () => {
         if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
-          if(document.fullscreenElement == this.canvas) {
+          if(document.fullscreenElement == this.canvas.canvas || document.fullscreenElement == this.canvas.container) {
             this.fullscreen = true;
           } else {
             this.fullscreen = false;
@@ -490,6 +479,20 @@ export default class GameUI {
       if(this.maxFPS < 1 || offsetFrame > 1000 / this.maxFPS) {
         this.lastFrameTime = time;
         this.frame++;
+
+        if(Constants.Setting.ENABLE_PIXEL_RATIO_RESIZING) {
+          Constants.Setting.PIXEL_RATIO = window.devicePixelRatio; // Update the device pixel ratio, only in fullscreen mode/fullpage mode
+        } else {
+          Constants.Setting.PIXEL_RATIO = 1;
+        }
+
+        const rect = this.canvas.canvas.getBoundingClientRect();
+
+        this.canvas.canvas.width = rect.width * Constants.Setting.PIXEL_RATIO;
+        this.canvas.canvas.height = rect.height * Constants.Setting.PIXEL_RATIO;
+        
+        this.canvas.canvas.style.width = rect.width + "px";
+        this.canvas.canvas.style.height = rect.height + "px";
   
         if((!this.paused && !this.onlineMode) || this.onlineMode || this.gameOver || this.gameFinished) {
           this.offsetFrame += offsetFrame;

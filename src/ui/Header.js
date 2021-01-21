@@ -17,7 +17,6 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import { Row, Utils, Style, ImageContainer, Label, Col } from "jsgametools";
-import GameConstants from "../engine/Constants";
 import i18next from "i18next";
 
 export default class Header extends Row {
@@ -60,7 +59,7 @@ export default class Header extends Row {
 
     ctx.save();
 
-    this.minWidth = canvas.width;
+    this.minWidth = Utils.getCanvasWidth(canvas);
 
     if(this.fruitImage) {
       this.fruitImage.width = Math.round(this.height * 0.85 * (this.bestScoreToDisplay ? 0.5 : 1));

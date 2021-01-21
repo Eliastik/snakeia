@@ -51,13 +51,13 @@ export default class GridUI extends Component {
       const canvas = context.canvas;
       const ctx = canvas.getContext("2d");
   
-      this.canvasTmp.width = canvas.width;
-      this.canvasTmp.height = canvas.height;
+      this.canvasTmp.width = Utils.getCanvasWidth(canvas);
+      this.canvasTmp.height = Utils.getCanvasHeight(canvas);
   
       ctx.save();
   
-      let caseHeight = Math.floor((canvas.height - this.headerHeight) / this.grid.height);
-      let caseWidth = Math.floor(canvas.width / this.grid.width);
+      let caseHeight = Math.floor((Utils.getCanvasHeight(canvas) - this.headerHeight) / this.grid.height);
+      let caseWidth = Math.floor(Utils.getCanvasWidth(canvas) / this.grid.width);
       caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
       caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
   
@@ -69,7 +69,7 @@ export default class GridUI extends Component {
   
       for(let i = 0; i < this.grid.height; i++) {
         for(let j = 0; j < this.grid.width; j++) {
-          const caseX = Math.floor(j * caseWidth + ((canvas.width - totalWidth) / 2));
+          const caseX = Math.floor(j * caseWidth + ((Utils.getCanvasWidth(canvas) - totalWidth) / 2));
           const caseY = this.headerHeight + i * caseHeight;
   
           if(i == 0 && j == 0) {
@@ -213,7 +213,7 @@ export default class GridUI extends Component {
 
           const posX = position.x;
           const posY = position.y;
-          caseX += Math.floor(posX * caseWidth + ((canvas.width - totalWidth) / 2));
+          caseX += Math.floor(posX * caseWidth + ((Utils.getCanvasWidth(canvas) - totalWidth) / 2));
           caseY += this.headerHeight + posY * caseHeight;
 
           if(i == 0) {
@@ -295,7 +295,7 @@ export default class GridUI extends Component {
           Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc, Math.round(caseWidth), Math.round(caseHeight)), Math.round(caseX), Math.round(caseY), Math.round(caseWidth), Math.round(caseHeight), null, null, null, null, eraseBelow, Math.round(angle));
         }
 
-        Utils.drawImageData(ctx, this.canvasTmp, Math.round((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height), Math.floor((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height));
+        Utils.drawImageData(ctx, this.canvasTmp, Math.round((Utils.getCanvasWidth(canvas) - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height), Math.floor((Utils.getCanvasWidth(canvas) - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height));
         ctxTmp.filter = "none";
       }
 
