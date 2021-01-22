@@ -521,6 +521,7 @@ export default class GameUI {
 
       this.textarea.innerHTML = this.toString();
     } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
+      let enableMenu = true;
       this.currentPlayer = this.controller.getCurrentPlayer();
 
       this.fontSize = GameConstants.Setting.FONT_SIZE;
@@ -546,8 +547,6 @@ export default class GameUI {
         this.gameRanking.fontSize = this.fontSize;
       }
 
-      this.menu.disable();
-
       this.box.width = this.canvas.width;
       this.box.height = this.canvas.height;
 
@@ -567,14 +566,7 @@ export default class GameUI {
         } else {
           this.timerToDisplayElement.hidden = true;
         }
-      } else if(!this.assetsLoaded) {
-        const percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
-        this.labelMenus.text = i18next.t("engine.loading") + "\n" + percentLoaded + "%";
-        this.labelMenus.style.set("fontColor",  "white");
-        this.progressBarLoading.percent = percentLoaded / 100;
-        this.progressBarLoading.width = this.canvas.width / 4;
-        this.menu.set(this.labelMenus, this.progressBarLoading);
-      }
+      } 
 
       if(this.aiStuck && !this.precAiStuck) {
         this.precAiStuck = true;
@@ -603,7 +595,14 @@ export default class GameUI {
 
       const nextGameText = (this.timeStart > 0 ? ("\n\n" + i18next.t("engine.servers.nextGameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : "");
 
-      if(this.exited) {
+      if(!this.assetsLoaded) {
+        const percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
+        this.labelMenus.text = i18next.t("engine.loading") + "\n" + percentLoaded + "%";
+        this.labelMenus.style.set("fontColor",  "white");
+        this.progressBarLoading.percent = percentLoaded / 100;
+        this.progressBarLoading.width = this.canvas.width / 4;
+        this.menu.set(this.labelMenus, this.progressBarLoading);
+      } else if(this.exited) {
         this.labelMenus.text = i18next.t("engine.exited");
         this.labelMenus.style.set("fontColor",  "white");
         this.fullscreen ? this.menu.set(this.labelMenus, this.btnExitFullScreen) : this.menu.set(this.labelMenus);
@@ -811,12 +810,15 @@ export default class GameUI {
         this.btnAbout.setClickAction(() => {
           this.getInfos = true;
         });
+      } else {
+        enableMenu = false;
       }
 
       if(this.assetsLoaded && this.engineLoading) {
         this.labelMenus.text = i18next.t("engine.loadingWorker");
         this.labelMenus.style.set("fontColor",  "white");
         this.menu.set(this.labelMenus);
+        enableMenu = true;
       }
 
       if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1 && !this.errorOccurred) {
@@ -839,6 +841,12 @@ export default class GameUI {
         this.spectatorModeLabel.style.set("fontSize", this.fontSize);
       } else {
         this.spectatorModeLabel.hidden = true;
+      }
+
+      if(enableMenu) {
+        this.menu.enable();
+      } else {
+        this.menu.disable();
       }
 
       this.canvas.draw();
