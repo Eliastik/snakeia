@@ -17,7 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import GameConstants from "../engine/Constants";
-import { Component, Utils, EasingFunctions } from "jsgametools";
+import { Component, Utils, EasingFunctions, Constants } from "jsgametools";
 import i18next from "i18next";
 import Position from "../engine/Position";
 
@@ -51,8 +51,10 @@ export default class GridUI extends Component {
       const canvas = context.canvas;
       const ctx = canvas.getContext("2d");
   
-      this.canvasTmp.width = Utils.getCanvasWidth(canvas);
-      this.canvasTmp.height = Utils.getCanvasHeight(canvas);
+      this.canvasTmp.width = Utils.getCanvasWidth(canvas) * Constants.Setting.PIXEL_RATIO;
+      this.canvasTmp.height = Utils.getCanvasHeight(canvas) * Constants.Setting.PIXEL_RATIO;
+      this.canvasTmp.style.width = Utils.getCanvasWidth(canvas);
+      this.canvasTmp.style.height = Utils.getCanvasHeight(canvas);
   
       ctx.save();
   
@@ -99,8 +101,9 @@ export default class GridUI extends Component {
   
   drawSnake(ctx, caseWidth, caseHeight, totalWidth, currentPlayer) {
     if(this.snakes != null) {
-      const canvas = this.canvasTmp;
+      const canvasPrincipal = ctx.canvas;
       const ctxTmp = this.canvasTmp.getContext("2d");
+      ctxTmp.scale(Constants.Setting.PIXEL_RATIO, Constants.Setting.PIXEL_RATIO);
     
       for(let j = 0; j < this.snakes.length; j++) {
         ctxTmp.clearRect(0, 0, this.canvasTmp.width, this.canvasTmp.height);
@@ -213,7 +216,7 @@ export default class GridUI extends Component {
 
           const posX = position.x;
           const posY = position.y;
-          caseX += Math.floor(posX * caseWidth + ((Utils.getCanvasWidth(canvas) - totalWidth) / 2));
+          caseX += Math.floor(posX * caseWidth + ((Utils.getCanvasWidth(canvasPrincipal) - totalWidth) / 2));
           caseY += this.headerHeight + posY * caseHeight;
 
           if(i == 0) {
@@ -295,7 +298,7 @@ export default class GridUI extends Component {
           Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc, Math.round(caseWidth), Math.round(caseHeight)), Math.round(caseX), Math.round(caseY), Math.round(caseWidth), Math.round(caseHeight), null, null, null, null, eraseBelow, Math.round(angle));
         }
 
-        Utils.drawImageData(ctx, this.canvasTmp, Math.round((Utils.getCanvasWidth(canvas) - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height), Math.floor((Utils.getCanvasWidth(canvas) - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height));
+        Utils.drawImageData(ctx, this.canvasTmp, Math.round((Utils.getCanvasWidth(canvasPrincipal) - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height), Math.floor((Utils.getCanvasWidth(canvasPrincipal) - totalWidth) / 2) * Constants.Setting.PIXEL_RATIO, this.headerHeight * Constants.Setting.PIXEL_RATIO, totalWidth * Constants.Setting.PIXEL_RATIO, Math.round(caseHeight * this.grid.height) * Constants.Setting.PIXEL_RATIO);
         ctxTmp.filter = "none";
       }
 
@@ -306,6 +309,7 @@ export default class GridUI extends Component {
   }
 
   drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight, currentPlayer) {
+    let canvasPrincipal = ctx.canvas;
     let numPlayer = 0;
     let numAI = 0;
 
@@ -321,7 +325,7 @@ export default class GridUI extends Component {
       if(position != null) {
         const posX = position.x;
         const posY = position.y;
-        let caseX = Math.floor(posX * caseWidth + ((this.canvasTmp.width - totalWidth) / 2));
+        let caseX = Math.floor(posX * caseWidth + ((Utils.getCanvasWidth(canvasPrincipal) - totalWidth) / 2));
         let caseY = this.headerHeight + posY * caseHeight;
     
         if(!this.disableAnimation && !this.snakes[i].gameOver && !this.gameFinished && !this.gameOver) {
