@@ -306,6 +306,12 @@ export default class GameRanking extends Col {
         currentComponent.labelName.hidden = false;
         currentComponent.labelName.text = ranking[i].text;
         currentComponent.labelName.style.set("fontSize", this.style.fontSize / 1.5);
+
+        if(ranking[i].gameOver) {
+          currentComponent.labelName.style.set("fontColor", "rgba(231, 76, 60, 0.5)");
+        } else {
+          currentComponent.labelName.style.set("fontColor", "rgba(255, 255, 255, 0.5)");
+        }
       }
   
       this.reactor.dispatchEvent("onUpdate", this);

@@ -41,7 +41,7 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "i18next": "^19.8.4",
+    "i18next": "^19.8.5",
     "i18next-browser-languagedetector": "^4.3.1",
     "jsgametools": "git+https://github.com/Eliastik/JSGameTools.git",
     "seedrandom": "^3.0.5",
