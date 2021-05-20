@@ -94,7 +94,7 @@ export default class GameUI {
     this.onlineMaster = false;
     this.pingLatency = -1;
     // Menus state variables
-    this.menu = new Menu(new Style({ "blur": this.renderBlur }));
+    this.menu = new Menu(new Style({ "blurBackground": this.renderBlur }));
     this.confirmReset = false;
     this.confirmExit = false;
     this.getInfos = false;
