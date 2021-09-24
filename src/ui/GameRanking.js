@@ -69,7 +69,7 @@ export default class GameRanking extends Col {
       super.draw(context);
 
       if(this.timeLastFrame <= 0) this.timeLastFrame = performance.now();
-      let offsetTime = performance.now() - this.timeLastFrame;
+      const offsetTime = performance.now() - this.timeLastFrame;
       this.timeLastFrame = performance.now();
 
       // TODO: auto scroll
@@ -92,9 +92,6 @@ export default class GameRanking extends Col {
       if(this.disableAnimation && this.closing) {
         this.closing = false;
         this.closed = true;
-      } else if(this.disableAnimation && this.closing) {
-        this.opening = false;
-        this.closed = false;
       } else {
         if(this.closing) {
           if(this.forceClosing) {
@@ -192,6 +189,8 @@ export default class GameRanking extends Col {
   
       return scores;
     }
+
+    return null;
   }
 
   get rank() {
@@ -217,6 +216,8 @@ export default class GameRanking extends Col {
   
       return ranking;
     }
+
+    return null;
   }
 
   createComponents(number) {
@@ -287,16 +288,16 @@ export default class GameRanking extends Col {
   
         if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
           switch(ranking[i].rank) {
-            case 0:
-              currentComponent.trophy.hidden = false;
-              break;
-            case 1:
-              currentComponent.trophySilver.hidden = false;
-              break;
-            case 2:
-              currentComponent.trophyBronze.hidden = false;
-              break;
-            }
+          case 0:
+            currentComponent.trophy.hidden = false;
+            break;
+          case 1:
+            currentComponent.trophySilver.hidden = false;
+            break;
+          case 2:
+            currentComponent.trophyBronze.hidden = false;
+            break;
+          }
         } else {
           currentComponent.labelRank.hidden = false;
           currentComponent.labelRank.text = "" + (ranking[i].rank + 1);

@@ -21,6 +21,7 @@ import GameController from "./GameController";
 import Grid from "./Grid";
 import Snake from "./Snake";
 import Position from "./Position";
+import GameConstants from "./Constants";
 import { NotificationMessage } from "jsgametools";
 import { Game } from "../Shim";
 
@@ -38,12 +39,12 @@ export default class GameControllerSocket extends GameController {
     if(data.length > 1) {
       let grid = this.grid;
 
-      if(data[1].hasOwnProperty("grid") && data[1]["grid"] != null && data[1]["grid"]["grid"] != null) {
+      if(Object.prototype.hasOwnProperty.call(data[1], "grid") && data[1]["grid"] != null && data[1]["grid"]["grid"] != null) {
         grid = Object.assign(new Grid(), data[1]["grid"]);
         data[1]["grid"] = grid;
       }
 
-      if(data[1].hasOwnProperty("snakes") && data[1]["snakes"] != null) {
+      if(Object.prototype.hasOwnProperty.call(data[1], "snakes") && data[1]["snakes"] != null) {
         for(let i = 0; i < data[1]["snakes"].length; i++) {
           data[1]["snakes"][i].grid = grid;
           data[1]["snakes"][i] = Object.assign(new Snake(), data[1]["snakes"][i]);

@@ -67,4 +67,4 @@ class TimerInterval {
   }
 }
 
-export { Timer, TimerInterval }
+export { Timer, TimerInterval };

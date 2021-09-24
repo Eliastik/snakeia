@@ -201,7 +201,6 @@ export default class GameController {
         "speed": this.gameEngine.speed,
         "snakes": this.gameEngine.snakes,
         "countBeforePlay": this.gameEngine.countBeforePlay,
-        "numFruit": this.gameEngine.numFruit,
         "offsetFrame": 0,
         "errorOccurred": this.gameEngine.errorOccurred,
         "aiStuck": this.gameEngine.aiStuck
@@ -227,7 +226,6 @@ export default class GameController {
         "speed": this.gameEngine.speed,
         "snakes": this.gameEngine.snakes,
         "countBeforePlay": this.gameEngine.countBeforePlay,
-        "numFruit": this.gameEngine.numFruit,
         "errorOccurred": this.gameEngine.errorOccurred
       });
       
@@ -389,7 +387,7 @@ export default class GameController {
         }
       }
 
-      if(data.hasOwnProperty("killed") && data.killed && this.gameUI && this.gameUI.setKill) {
+      if(Object.prototype.hasOwnProperty.call(data, "killed") && data.killed && this.gameUI && this.gameUI.setKill) {
         this.gameUI.setKill();
       }
     }

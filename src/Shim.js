@@ -43,7 +43,7 @@ if(typeof(document) !== "undefined") {
 
 if(!String.prototype.trim) {
   String.prototype.trim = function () {
-    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
   };
 }
 
@@ -103,7 +103,7 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
 
 // Old NotificationMessage API
 class NotificationMessage extends Notification {
-  constructor(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround, disableAnimation, closeButton) {
+  constructor(text, textColor, backgroundColor, delayBeforeClosing, animationDelay, fontSize, fontFamily, foreGround, disableAnimation) {
     super(new Style({
       "backgroundColor": backgroundColor || "rgba(46, 204, 113, 0.5)",
       "foreground": foreGround,
@@ -130,6 +130,8 @@ class NotificationMessage extends Notification {
     if(this.label) {
       return this.label.style.fontSize;
     }
+
+    return 0;
   }
 }
 
@@ -159,4 +161,4 @@ if(typeof(window) !== "undefined") {
   window.DATE_VERSION = GameConstants.Setting.DATE_VERSION;
 }
 
-export { Game, WorkersAvailable, NotificationMessage }
+export { Game, WorkersAvailable, NotificationMessage };

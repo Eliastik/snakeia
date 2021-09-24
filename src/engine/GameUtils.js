@@ -50,4 +50,4 @@ export default {
   secondsFormat: function(seconds) {
     return this.millisecondsFormat(seconds * 1000);
   }
-}
+};

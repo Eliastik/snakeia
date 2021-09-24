@@ -46,7 +46,7 @@ export default class SnakeAINormal extends SnakeAI {
         diagonals: false,
         cutting: false,
         static: true,
-        cost(a, b) { return b == 1 ? null : 1 }
+        cost(a, b) { return b == 1 ? null : 1; }
       });
 
       if(fruitPosGold && this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD) {

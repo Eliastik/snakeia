@@ -496,7 +496,7 @@ export default class GameUI {
   
         if((!this.paused && !this.onlineMode) || this.onlineMode || this.gameOver || this.gameFinished) {
           this.offsetFrame += offsetFrame;
-          let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
+          const offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
 
           if((this.gameOver || this.gameFinished) && offset >= 0.95) {
             this.offsetFrame = 0;

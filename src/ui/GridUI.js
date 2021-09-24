@@ -195,18 +195,18 @@ export default class GridUI extends Component {
             }
 
             switch(currentPosition.direction) {
-              case GameConstants.Direction.UP:
-                caseY -= offsetY;
-                break;
-              case GameConstants.Direction.BOTTOM:
-                caseY += offsetY;
-                break;
-              case GameConstants.Direction.RIGHT:
-                caseX += offsetX;
-                break;
-              case GameConstants.Direction.LEFT:
-                caseX -= offsetX;
-                break;
+            case GameConstants.Direction.UP:
+              caseY -= offsetY;
+              break;
+            case GameConstants.Direction.BOTTOM:
+              caseY += offsetY;
+              break;
+            case GameConstants.Direction.RIGHT:
+              caseX += offsetX;
+              break;
+            case GameConstants.Direction.LEFT:
+              caseX -= offsetX;
+              break;
             }
           }
 
@@ -222,76 +222,76 @@ export default class GridUI extends Component {
           if(i == 0) {
             if(this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
               switch(direction) {
-                case GameConstants.Direction.BOTTOM:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead.png";
-                  break;
-                case GameConstants.Direction.RIGHT:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png";
-                  break;
-                case GameConstants.Direction.UP:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png";
-                  break;
-                case GameConstants.Direction.LEFT:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png";
-                  break;
+              case GameConstants.Direction.BOTTOM:
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead.png";
+                break;
+              case GameConstants.Direction.RIGHT:
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png";
+                break;
+              case GameConstants.Direction.UP:
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png";
+                break;
+              case GameConstants.Direction.LEFT:
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png";
+                break;
               }
             } else {
               switch(direction) {
-                case GameConstants.Direction.BOTTOM:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake.png";
-                  break;
-                case GameConstants.Direction.RIGHT:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_2.png";
-                  break;
-                case GameConstants.Direction.UP:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_3.png";
-                  break;
-                case GameConstants.Direction.LEFT:
-                  imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_4.png";
-                  break;
+              case GameConstants.Direction.BOTTOM:
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake.png";
+                break;
+              case GameConstants.Direction.RIGHT:
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_2.png";
+                break;
+              case GameConstants.Direction.UP:
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_3.png";
+                break;
+              case GameConstants.Direction.LEFT:
+                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_4.png";
+                break;
               }
             }
           } else if(i == -1) {
             switch(direction) {
-              case GameConstants.Direction.BOTTOM:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_end.png";
-                break;
-              case GameConstants.Direction.RIGHT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2_end.png";
-                break;
-              case GameConstants.Direction.UP:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_3_end.png";
-                break;
-              case GameConstants.Direction.LEFT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_4_end.png";
-                break;
+            case GameConstants.Direction.BOTTOM:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_end.png";
+              break;
+            case GameConstants.Direction.RIGHT:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2_end.png";
+              break;
+            case GameConstants.Direction.UP:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_3_end.png";
+              break;
+            case GameConstants.Direction.LEFT:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_4_end.png";
+              break;
             }
           } else {
             switch(direction) {
-              case GameConstants.Direction.UP:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
-                break;
-              case GameConstants.Direction.BOTTOM:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
-                break;
-              case GameConstants.Direction.RIGHT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
-                break;
-              case GameConstants.Direction.LEFT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
-                break;
-              case GameConstants.Direction.ANGLE_1:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png";
-                break;
-              case GameConstants.Direction.ANGLE_2:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png";
-                break;
-              case GameConstants.Direction.ANGLE_3:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png";
-                break;
-              case GameConstants.Direction.ANGLE_4:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png";
-                break;
+            case GameConstants.Direction.UP:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
+              break;
+            case GameConstants.Direction.BOTTOM:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
+              break;
+            case GameConstants.Direction.RIGHT:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
+              break;
+            case GameConstants.Direction.LEFT:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
+              break;
+            case GameConstants.Direction.ANGLE_1:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png";
+              break;
+            case GameConstants.Direction.ANGLE_2:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png";
+              break;
+            case GameConstants.Direction.ANGLE_3:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png";
+              break;
+            case GameConstants.Direction.ANGLE_4:
+              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png";
+              break;
             }
           }
 
@@ -335,18 +335,18 @@ export default class GridUI extends Component {
           const offsetY = (caseHeight * offset) - caseHeight;
     
           switch(position.direction) {
-            case GameConstants.Direction.UP:
-              caseY -= offsetY;
-              break;
-            case GameConstants.Direction.BOTTOM:
-              caseY += offsetY;
-              break;
-            case GameConstants.Direction.RIGHT:
-              caseX += offsetX;
-              break;
-            case GameConstants.Direction.LEFT:
-              caseX -= offsetX;
-              break;
+          case GameConstants.Direction.UP:
+            caseY -= offsetY;
+            break;
+          case GameConstants.Direction.BOTTOM:
+            caseY += offsetY;
+            break;
+          case GameConstants.Direction.RIGHT:
+            caseX += offsetX;
+            break;
+          case GameConstants.Direction.LEFT:
+            caseX -= offsetX;
+            break;
           }
         }
     

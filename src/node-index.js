@@ -25,6 +25,6 @@ import Snake from "./engine/Snake";
 import GameGroup from "./engine/GameGroup";
 import GameUtils from "./engine/GameUtils";
 import Position from "./engine/Position";
-import GameEngine from './engine/GameEngine';
+import GameEngine from "./engine/GameEngine";
 
 export { GameConstants, Event, Reactor, Grid, Snake, GameGroup, GameUtils, Position, GameEngine };
