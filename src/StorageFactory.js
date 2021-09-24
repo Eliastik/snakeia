@@ -55,7 +55,7 @@ export default class StorageFactory {
       return this.storage.getItem(name);
     }
 
-    if(this.inMemoryStorage.hasOwnProperty(name)) {
+    if(Object.prototype.hasOwnProperty.call(this.inMemoryStorage, name)) {
       return this.inMemoryStorage[name];
     }
 

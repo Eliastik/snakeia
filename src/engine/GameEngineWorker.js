@@ -226,7 +226,6 @@ onmessage = e => {
         "initialSpeed": game.initialSpeed,
         "speed": game.speed,
         "countBeforePlay": game.countBeforePlay,
-        "numFruit": game.numFruit,
         "offsetFrame": 0,
         "errorOccurred": game.errorOccurred,
         "aiStuck": game.aiStuck
@@ -250,76 +249,72 @@ onmessage = e => {
         "initialSpeed": game.initialSpeed,
         "speed": game.speed,
         "countBeforePlay": game.countBeforePlay,
-        "numFruit": game.numFruit,
         "errorOccurred": game.errorOccurred
       }]);
     });
-} else if(game != null) {
+  } else if(game != null) {
     const message = data[0];
 
     switch(message) {
-      case "reset":
-        game.reset();
-        break;
-      case "start":
-        game.start();
-        break;
-      case "stop":
-        game.stop();
-        break;
-      case "finish":
-        game.stop(true);
-        break;
-      case "stop":
-        game.stop(false);
-        break;
-      case "pause":
-        game.pause();
-        break;
-      case "kill":
-        game.kill();
-        break;
-      case "tick":
-        game.paused = false;
-        game.countBeforePlay = -1;
-        game.tick();
-        break;
-      case "ping":
-        self.postMessage("pong");
-        break;
-      case "exit":
-        game.exit();
-        break;
-      case "forceStart":
-        game.forceStart();
-        break;
-      case "key":
-        if(data.length > 1) {
-          game.lastKey = data[1];
+    case "reset":
+      game.reset();
+      break;
+    case "start":
+      game.start();
+      break;
+    case "stop":
+      game.stop(false);
+      break;
+    case "finish":
+      game.stop(true);
+      break;
+    case "pause":
+      game.pause();
+      break;
+    case "kill":
+      game.kill();
+      break;
+    case "tick":
+      game.paused = false;
+      game.countBeforePlay = -1;
+      game.tick();
+      break;
+    case "ping":
+      self.postMessage("pong");
+      break;
+    case "exit":
+      game.exit();
+      break;
+    case "forceStart":
+      game.forceStart();
+      break;
+    case "key":
+      if(data.length > 1) {
+        game.lastKey = data[1];
 
-          const playerSnake = game.getPlayer(1, GameConstants.PlayerType.HUMAN) || game.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+        const playerSnake = game.getPlayer(1, GameConstants.PlayerType.HUMAN) || game.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
 
-          if(playerSnake != null && playerSnake.lastKey != null) {
-            playerSnake.lastKey = data[1];
-          }
+        if(playerSnake != null && playerSnake.lastKey != null) {
+          playerSnake.lastKey = data[1];
         }
-        break;
-      case "update":
-        if(data.length > 1) {
-          if(data[1]["key"] == "snakes") {
-            const d = parseSnakes(data[1]["data"]);
-            if(d) game.snakes = d.snakes;
-          } else if(data[1]["key"] == "grid") {
-            const d = parseSnakes(null, data[1]["data"]);
-            if(d) game.grid = d.grid;
-          } else {
-            game[data[1]["key"]] = data[1]["data"];
-          }
+      }
+      break;
+    case "update":
+      if(data.length > 1) {
+        if(data[1]["key"] == "snakes") {
+          const d = parseSnakes(data[1]["data"]);
+          if(d) game.snakes = d.snakes;
+        } else if(data[1]["key"] == "grid") {
+          const d = parseSnakes(null, data[1]["data"]);
+          if(d) game.grid = d.grid;
+        } else {
+          game[data[1]["key"]] = data[1]["data"];
         }
-        break;
-      case "destroySnakes":
-        if(data[1] && data[2]) game.destroySnakes(data[1], data[2]);
-        break;
+      }
+      break;
+    case "destroySnakes":
+      if(data[1] && data[2]) game.destroySnakes(data[1], data[2]);
+      break;
     }
   } else if(data == "ping") {
     self.postMessage("pong");

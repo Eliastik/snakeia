@@ -29,7 +29,7 @@ import Snake from "./engine/Snake";
 import GameGroup from "./engine/GameGroup";
 import GameUtils from "./engine/GameUtils";
 import Position from "./engine/Position";
-import GameEngine from './engine/GameEngine';
+import GameEngine from "./engine/GameEngine";
 import { Game } from "./Shim";
 import GameController from "./engine/GameController";
 import GameControllerWorker from "./engine/GameControllerWorker";

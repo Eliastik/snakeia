@@ -140,7 +140,7 @@ export default class OnlineClient {
       });
     
       ioRooms.once("connect_error", () => {
-        callback(false, data);
+        callback(false, null);
         ioRooms.close();
         this.loadingRooms = false;
       });

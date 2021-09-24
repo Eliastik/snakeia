@@ -42,7 +42,7 @@ if(typeof(document) !== "undefined") {
 
 if(!String.prototype.trim) {
   String.prototype.trim = function () {
-    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
   };
 }
 
@@ -126,4 +126,4 @@ if(typeof(window) !== "undefined") {
   window.DATE_VERSION = GameConstants.Setting.DATE_VERSION;
 }
 
-export { Game, WorkersAvailable }
+export { Game, WorkersAvailable };

@@ -169,15 +169,15 @@ export default class GameRanking extends Component {
         if(currentY + this.fontSize > this.headerHeight) {
           if(ranking[i].rank >= 0 && ranking[i].rank < 3 && ranking[i].score > 0) {
             switch(ranking[i].rank) {
-              case 0:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
-                break;
-              case 1:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_silver.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
-                break;
-              case 2:
-                Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_bronze.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
-                break;
+            case 0:
+              Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
+              break;
+            case 1:
+              Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_silver.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
+              break;
+            case 2:
+              Utils.drawImage(ctx, this.imageLoader ? this.imageLoader.get("assets/images/trophy_bronze.png", Math.round(this.fontSize), Math.round(this.fontSize)) : null, 5 + this.x, currentY, Math.round(this.fontSize), Math.round(this.fontSize));
+              break;
             }
           } else {
             Utils.drawText(ctx, "" + (ranking[i].rank + 1), "rgba(255, 255, 255, 0.5)", Math.round(this.fontSize / 1.5), this.fontFamily, null, null, Math.round((this.fontSize / 1.5) / 2 + 5 + this.x), Math.round(currentY + (this.fontSize / 1.5)));
@@ -230,9 +230,6 @@ export default class GameRanking extends Component {
       if(this.disableAnimation && this.closing) {
         this.closing = false;
         this.closed = true;
-      } else if(this.disableAnimation && this.closing) {
-        this.opening = false;
-        this.closed = false;
       } else {
         if(this.closing) {
           if(this.forceClosing) {

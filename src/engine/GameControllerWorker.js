@@ -60,12 +60,12 @@ export default class GameControllerWorker extends GameController {
             if(data.length > 1) {
               let grid = this.gameUI.grid;
   
-              if(data[1].hasOwnProperty("grid") && data[1]["grid"] != null) {
+              if(Object.prototype.hasOwnProperty.call(data[1], "grid") && data[1]["grid"] != null) {
                 grid = Object.assign(new Grid(), data[1]["grid"]);
                 data[1]["grid"] = grid;
               }
               
-              if(data[1].hasOwnProperty("snakes") && data[1]["snakes"] != null) {
+              if(Object.prototype.hasOwnProperty.call(data[1], "snakes") && data[1]["snakes"] != null) {
                 for(let i = 0; i < data[1]["snakes"].length; i++) {
                   data[1]["snakes"][i].grid = grid;
                   data[1]["snakes"][i] = Object.assign(new Snake(), data[1]["snakes"][i]);
@@ -79,37 +79,37 @@ export default class GameControllerWorker extends GameController {
               this.update(data[0], data[1]);
               
               switch(data[0]) {
-                case "reset":
-                  this.reactor.dispatchEvent("onReset");
-                  break;
-                case "start":
-                  this.reactor.dispatchEvent("onStart");
-                  break;
-                case "pause":
-                  this.reactor.dispatchEvent("onPause");
-                  break;
-                case "continue":
-                  this.reactor.dispatchEvent("onContinue");
-                  break;
-                case "stop":
-                  this.reactor.dispatchEvent("onStop");
-                  break;
-                case "exit":
-                  this.reactor.dispatchEvent("onExit");
-                  break;
-                case "kill":
-                  this.reactor.dispatchEvent("onKill");
-                  this.worker.terminate();
-                  break;
-                case "scoreIncreased":
-                  this.reactor.dispatchEvent("onScoreIncreased");
-                  break;
-                case "update":
-                  this.reactor.dispatchEvent("onUpdate");
-                  break;
-                case "updateCounter":
-                  this.reactor.dispatchEvent("onUpdateCounter");
-                  break;
+              case "reset":
+                this.reactor.dispatchEvent("onReset");
+                break;
+              case "start":
+                this.reactor.dispatchEvent("onStart");
+                break;
+              case "pause":
+                this.reactor.dispatchEvent("onPause");
+                break;
+              case "continue":
+                this.reactor.dispatchEvent("onContinue");
+                break;
+              case "stop":
+                this.reactor.dispatchEvent("onStop");
+                break;
+              case "exit":
+                this.reactor.dispatchEvent("onExit");
+                break;
+              case "kill":
+                this.reactor.dispatchEvent("onKill");
+                this.worker.terminate();
+                break;
+              case "scoreIncreased":
+                this.reactor.dispatchEvent("onScoreIncreased");
+                break;
+              case "update":
+                this.reactor.dispatchEvent("onUpdate");
+                break;
+              case "updateCounter":
+                this.reactor.dispatchEvent("onUpdateCounter");
+                break;
               }
             }
           }

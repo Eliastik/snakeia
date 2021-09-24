@@ -207,27 +207,27 @@ export default class Snake {
   initAI() {
     if(!this.customAI) {
       switch(this.aiLevel) {
-        case GameConstants.AiLevel.RANDOM:
-          this.snakeAI = new SnakeAIRandom();
-          break;
-        case GameConstants.AiLevel.LOW:
-          this.snakeAI = new SnakeAILow();
-          break;
-        case GameConstants.AiLevel.DEFAULT:
-          this.snakeAI = new SnakeAINormal();
-          break;
-        case GameConstants.AiLevel.HIGH:
-          this.snakeAI = new SnakeAIHigh();
-          break;
-        case GameConstants.AiLevel.ULTRA:
-          this.snakeAI = new SnakeAIHigh();
-          break;
-        case GameConstants.AiLevel.MOCK:
-          this.snakeAI = new SnakeAIMock();
-          break;
-        default:
-          this.snakeAI = new SnakeAINormal();
-          break;
+      case GameConstants.AiLevel.RANDOM:
+        this.snakeAI = new SnakeAIRandom();
+        break;
+      case GameConstants.AiLevel.LOW:
+        this.snakeAI = new SnakeAILow();
+        break;
+      case GameConstants.AiLevel.DEFAULT:
+        this.snakeAI = new SnakeAINormal();
+        break;
+      case GameConstants.AiLevel.HIGH:
+        this.snakeAI = new SnakeAIHigh();
+        break;
+      case GameConstants.AiLevel.ULTRA:
+        this.snakeAI = new SnakeAIHigh();
+        break;
+      case GameConstants.AiLevel.MOCK:
+        this.snakeAI = new SnakeAIMock();
+        break;
+      default:
+        this.snakeAI = new SnakeAINormal();
+        break;
       }
     } else {
       this.snakeAI = this.customAI;
@@ -367,7 +367,7 @@ export default class Snake {
   }
 
   copy() {
-    const snake = new Snake(direction, 3, new Grid(this.grid.width, this.grid.height, false, false), this.player, this.aiLevel, false);
+    const snake = new Snake(this.direction, 3, new Grid(this.grid.width, this.grid.height, false, false), this.player, this.aiLevel, false);
 
     for(let i = 0; i < snake.grid.height; i++) {
       for(let j = 0; j < snake.grid.width; j++) {
@@ -378,7 +378,7 @@ export default class Snake {
     snake.queue = [];
 
     for(let i = 0; i < this.queue.length; i++) {
-      snake.queue.push(elem.copy());
+      snake.queue.push(JSON.parse(JSON.stringify(this.queue[i])));
     }
 
     return snake;

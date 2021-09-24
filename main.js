@@ -1,3 +1,5 @@
+/* eslint-disable no-inner-declarations */
+/* eslint-disable no-undef */
 /*
  * Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
  *
@@ -217,7 +219,7 @@ function checkUpdate() {
   const script = document.createElement("script");
   script.src = UPDATER_URI;
 
-  document.getElementsByTagName('head')[0].appendChild(script);
+  document.getElementsByTagName("head")[0].appendChild(script);
 }
 
 window.updateCallback = data => {
@@ -231,7 +233,7 @@ window.updateCallback = data => {
       let appUpdateDate = DATE_VERSION;
 
       if(typeof(data.date) !== "undefined" && data.date !== null) {
-          appUpdateDate = data.date;
+        appUpdateDate = data.date;
       }
 
       document.getElementById("appUpdateDate").textContent = appUpdateDate;
@@ -239,38 +241,38 @@ window.updateCallback = data => {
       let downloadURL = "http://eliastiksofts.com/snakeia/downloads/";
 
       if(typeof(data.url) !== "undefined" && data.url !== null) {
-          downloadURL = data.url;
+        downloadURL = data.url;
       }
 
       document.getElementById("appDownloadLink").onclick = () => {
-          window.open(downloadURL, '_blank');
+        window.open(downloadURL, "_blank");
       };
 
       document.getElementById("appDownloadURLGet").onclick = () => {
-          prompt(i18next.t("update.URLToDownload"), downloadURL);
+        prompt(i18next.t("update.URLToDownload"), downloadURL);
       };
 
       let changes = i18next.t("update.noChanges");
 
       if(typeof(data.changes) !== "undefined" && data.changes !== null) {
-          changes = data.changes;
+        changes = data.changes;
       }
 
       document.getElementById("appUpdateChanges").onclick = () => {
-          alert(i18next.t("update.changes") + "\n" + changes);
+        alert(i18next.t("update.changes") + "\n" + changes);
       };
 
       translateContent();
     }
   }
-}
+};
 
 // Load server list
 function loadServerList() {
   const script = document.createElement("script");
   script.src = SERVERS_LIST_URI;
 
-  document.getElementsByTagName('head')[0].appendChild(script);
+  document.getElementsByTagName("head")[0].appendChild(script);
   document.getElementById("loadingServersList").style.display = "inline-block";
   document.getElementById("serverListGroup").innerHTML = "";
 }
@@ -322,7 +324,7 @@ window.listServersCallback = data => {
   }
 
   document.getElementById("loadingServersList").style.display = "none";
-}
+};
 
 document.getElementById("linkCustomServer").onclick = () => {
   const url = prompt(i18next.t("servers.enterCustomServer"), "http://");
@@ -413,8 +415,8 @@ function displayRooms() {
         linkRoom.classList.add("list-group-item-action");
         linkRoom.textContent = i18next.t("servers.room", { number: (i + 1) }) + (room.state != null ? " " + (
           room.state == GameConstants.GameState.SEARCHING_PLAYERS ? i18next.t("servers.searchingPlayers") :
-          room.state == GameConstants.GameState.STARTING ? i18next.t("servers.starting") :
-          room.state == GameConstants.GameState.STARTED ? i18next.t("servers.started") : ""
+            room.state == GameConstants.GameState.STARTING ? i18next.t("servers.starting") :
+              room.state == GameConstants.GameState.STARTED ? i18next.t("servers.started") : ""
         ) : "");
   
         linkRoom.onclick = () => {
@@ -535,18 +537,18 @@ function joinRoom(code) {
       let errorCode_text = "";
 
       switch(errorCode) {
-        case GameConstants.Error.ROOM_NOT_FOUND:
-          errorCode_text = i18next.t("servers.errorRoomJoinReason_roomNotFound");
-          break;
-        case GameConstants.Error.ROOM_ALREADY_JOINED:
-          errorCode_text = i18next.t("servers.errorRoomJoinReason_roomAlreadyJoined");
-          break;
-        case GameConstants.Error.ALREADY_CREATED_ROOM:
-          errorCode_text = i18next.t("servers.errorRoomCreationReason_alreadyCreatedRoom");
-          break;
-        default:
-          errorCode_text = i18next.t("servers.errorReason_unknown");
-          break;
+      case GameConstants.Error.ROOM_NOT_FOUND:
+        errorCode_text = i18next.t("servers.errorRoomJoinReason_roomNotFound");
+        break;
+      case GameConstants.Error.ROOM_ALREADY_JOINED:
+        errorCode_text = i18next.t("servers.errorRoomJoinReason_roomAlreadyJoined");
+        break;
+      case GameConstants.Error.ALREADY_CREATED_ROOM:
+        errorCode_text = i18next.t("servers.errorRoomCreationReason_alreadyCreatedRoom");
+        break;
+      default:
+        errorCode_text = i18next.t("servers.errorReason_unknown");
+        break;
       }
 
       document.getElementById("errorRoomJoinReason").textContent = errorCode_text;
@@ -1027,17 +1029,17 @@ function validateSettings(returnValidation) {
 
   let heightGrid = document.getElementById("heightGrid").value;
   let widthGrid = document.getElementById("widthGrid").value;
-  let borderWalls = document.getElementById("borderWalls").checked;
-  let generateWalls = document.getElementById("generateWalls").checked;
-  let mazeGrid = document.getElementById("mazeGrid").checked;
-  let sameGrid = document.getElementById("sameGrid").checked;
+  const borderWalls = document.getElementById("borderWalls").checked;
+  const generateWalls = document.getElementById("generateWalls").checked;
+  const mazeGrid = document.getElementById("mazeGrid").checked;
+  const sameGrid = document.getElementById("sameGrid").checked;
   let speed = document.getElementById("gameSpeed").value;
-  let progressiveSpeed = document.getElementById("progressiveSpeed").checked;
-  let customSpeed = document.getElementById("customSpeed").value;
+  const progressiveSpeed = document.getElementById("progressiveSpeed").checked;
+  const customSpeed = document.getElementById("customSpeed").value;
   let aiLevel = document.getElementById("aiLevel").value;
   let autoRetry = document.getElementById("autoRetry").checked;
   let numberIA = document.getElementById("numberIA").value;
-  let battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
+  const battleAgainstAIs = document.getElementById("battleAgainstAIs").checked;
   let seedGrid = document.getElementById("seedGrid").value;
   let seedGame = document.getElementById("seedGame").value;
   let playerHumanType;
@@ -1124,24 +1126,24 @@ function validateSettings(returnValidation) {
     }
   } else if((selectedMode != SOLO_PLAYER && selectedMode != BATTLE_ROYALE_ONLINE) || (selectedMode == BATTLE_ROYALE_ONLINE && document.getElementById("enableAI").checked)) {
     switch(aiLevel) {
-      case "random":
-        aiLevel = AI_LEVEL_RANDOM;
-        break;
-      case "low":
-        aiLevel = AI_LEVEL_LOW;
-        break;
-      case "normal":
-        aiLevel = AI_LEVEL_DEFAULT;
-        break;
-      case "high":
-        aiLevel = AI_LEVEL_HIGH;
-        break;
-      case "ultra":
-        aiLevel = AI_LEVEL_ULTRA;
-        break;
-      default:
-        aiLevel = AI_LEVEL_DEFAULT;
-        break;
+    case "random":
+      aiLevel = AI_LEVEL_RANDOM;
+      break;
+    case "low":
+      aiLevel = AI_LEVEL_LOW;
+      break;
+    case "normal":
+      aiLevel = AI_LEVEL_DEFAULT;
+      break;
+    case "high":
+      aiLevel = AI_LEVEL_HIGH;
+      break;
+    case "ultra":
+      aiLevel = AI_LEVEL_ULTRA;
+      break;
+    default:
+      aiLevel = AI_LEVEL_DEFAULT;
+      break;
     }
   }
 
@@ -1221,18 +1223,18 @@ function validateSettings(returnValidation) {
               let errorCode_text = "";
   
               switch(errorCode) {
-                case GameConstants.Error.INVALID_SETTINGS:
-                  errorCode_text = i18next.t("servers.errorRoomCreationReason_invalidSettings");
-                  break;
-                case GameConstants.Error.MAX_ROOM_LIMIT_REACHED:
-                  errorCode_text = i18next.t("servers.errorRoomCreationReason_maxRoomLimitReached");
-                  break;
-                case GameConstants.Error.ALREADY_CREATED_ROOM:
-                  errorCode_text = i18next.t("servers.errorRoomCreationReason_alreadyCreatedRoom");
-                  break;
-                default:
-                  errorCode_text = i18next.t("servers.errorReason_unknown");
-                  break;
+              case GameConstants.Error.INVALID_SETTINGS:
+                errorCode_text = i18next.t("servers.errorRoomCreationReason_invalidSettings");
+                break;
+              case GameConstants.Error.MAX_ROOM_LIMIT_REACHED:
+                errorCode_text = i18next.t("servers.errorRoomCreationReason_maxRoomLimitReached");
+                break;
+              case GameConstants.Error.ALREADY_CREATED_ROOM:
+                errorCode_text = i18next.t("servers.errorRoomCreationReason_alreadyCreatedRoom");
+                break;
+              default:
+                errorCode_text = i18next.t("servers.errorReason_unknown");
+                break;
               }
   
               document.getElementById("errorRoomCreation").style.display = "block";
@@ -1258,21 +1260,21 @@ function validateSettings(returnValidation) {
       let titleGame = "";
 
       switch(selectedMode) {
-        case SOLO_AI:
-          titleGame = i18next.t("menu.soloAi");
-          break;
-        case SOLO_PLAYER:
-          titleGame = i18next.t("menu.soloPlayer");
-          break;
-        case PLAYER_VS_AI:
-          titleGame = i18next.t("menu.playerVsAi");
-          break;
-        case AI_VS_AI:
-          titleGame = i18next.t("menu.aiVsAi");
-          break;
-        case BATTLE_ROYALE:
-          titleGame = i18next.t("menu.battleRoyale");
-          break;
+      case SOLO_AI:
+        titleGame = i18next.t("menu.soloAi");
+        break;
+      case SOLO_PLAYER:
+        titleGame = i18next.t("menu.soloPlayer");
+        break;
+      case PLAYER_VS_AI:
+        titleGame = i18next.t("menu.playerVsAi");
+        break;
+      case AI_VS_AI:
+        titleGame = i18next.t("menu.aiVsAi");
+        break;
+      case BATTLE_ROYALE:
+        titleGame = i18next.t("menu.battleRoyale");
+        break;
       }
 
       document.getElementById("titleGame").innerHTML = i18next.t("game.currentMode") + " " + titleGame;
@@ -1529,7 +1531,7 @@ function getLevelSave(level, player, type) {
   return getSave(player, type)[level];
 }
 
-function setLevelSave(value, level, player, type, score) {
+function setLevelSave(value, level, player, type) {
   const save = getTitleSave(player, type);
   const item = getSave(player, type);
   const levels = getLevels(player, type);
@@ -2096,7 +2098,7 @@ window.playLevel = (level, player, type) => {
   } else {
     return false;
   }
-}
+};
 
 window.editDownloadURL = () => {
   const value = window.prompt(i18next.t("levels.editDownloadURLPrompt"), DOWNLOAD_DEFAULT_URI);
@@ -2104,7 +2106,7 @@ window.editDownloadURL = () => {
   if(value != null) {
     DOWNLOAD_DEFAULT_URI = value;
   }
-}
+};
 
 window.downloadLevels = (player, button) => {
   let url = DOWNLOAD_DEFAULT_URI;
@@ -2140,7 +2142,7 @@ window.downloadLevels = (player, button) => {
   document.getElementById("levelDownloading").innerHTML = "<strong>" + i18next.t("levels.downloading") + "</strong>";
   document.getElementById("btnDeblockDiv").innerHTML = "";
 
-  document.getElementsByTagName('head')[0].appendChild(script);
+  document.getElementsByTagName("head")[0].appendChild(script);
 
   buttonDeblock.onclick = () => {
     canceled = true;
@@ -2148,14 +2150,14 @@ window.downloadLevels = (player, button) => {
   };
 
   document.getElementById("btnDeblockDiv").appendChild(buttonDeblock);
-}
+};
 
 function deblockButton(button, script) {
   button.disabled = false;
   script.src = null;
   document.getElementById("levelDownloading").innerHTML = "";
   document.getElementById("btnDeblockDiv").innerHTML = "";
-  document.getElementsByTagName('head')[0].removeChild(script);
+  document.getElementsByTagName("head")[0].removeChild(script);
 }
 
 function getNumberFruits(player) {
@@ -2177,7 +2179,7 @@ function getListLevel(player, type) {
   let res = "";
 
   if(type == DOWNLOADED_LEVEL) {
-    res += '<div class="row mb-3"><div class="col text-center"><button class="btn btn-lg btn-warning" onclick="downloadLevels(' + player + ', this);"><span class="fui-plus-circle"></span>&nbsp; ' + i18next.t("levels.download") + '</button><br /><a href="#null" onclick="editDownloadURL();" class="small"><span class="fui-new"></span>&nbsp; ' + i18next.t("levels.editDownloadURL") + '</a></div></div>';
+    res += "<div class=\"row mb-3\"><div class=\"col text-center\"><button class=\"btn btn-lg btn-warning\" onclick=\"downloadLevels(" + player + ", this);\"><span class=\"fui-plus-circle\"></span>&nbsp; " + i18next.t("levels.download") + "</button><br /><a href=\"#null\" onclick=\"editDownloadURL();\" class=\"small\"><span class=\"fui-new\"></span>&nbsp; " + i18next.t("levels.editDownloadURL") + "</a></div></div>";
   }
 
   if(levels == null) {
@@ -2187,28 +2189,28 @@ function getListLevel(player, type) {
   let index = 1;
   let empty = true;
 
-  for(let key in levels) {
+  for(const key in levels) {
     let button;
 
-    if(levels.hasOwnProperty(key)) {
+    if(Object.prototype.hasOwnProperty.call(levels, key)) {
       if(!canPlay(key, player, type)) {
-        button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + i18next.t("levels.disabledLevel") + '" data-balloon-length="fit" data-balloon-pos="up">' + i18next.t("levels.level") + ' ' + index + '</button>';
+        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" disabled aria-label=\"" + i18next.t("levels.disabledLevel") + "\" data-balloon-length=\"fit\" data-balloon-pos=\"up\">" + i18next.t("levels.level") + " " + index + "</button>";
       } else if(!levelCompatible(levels[key]["type"], levels[key]["version"])) {
-        button = '<button class="btn btn-lg btn-primary btn-block-85" disabled aria-label="' + i18next.t("levels.notCompatible") + '" data-balloon-length="fit" data-balloon-pos="up">' + i18next.t("levels.level") + ' ' + index + '</button>';
+        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" disabled aria-label=\"" + i18next.t("levels.notCompatible") + "\" data-balloon-length=\"fit\" data-balloon-pos=\"up\">" + i18next.t("levels.level") + " " + index + "</button>";
       } else {
         const resultLevel = printResultLevel(key, player, levels[key]["type"], type);
 
-        button = '<button class="btn btn-lg btn-primary btn-block-85" onclick="playLevel(' + key + ', ' + player  + ', ' + type + ');" ' + (resultLevel.trim() != "" ? 'aria-label="' + printResultLevel(key, player, levels[key]["type"], type) + '" data-balloon-length="fit" data-balloon-pos="up"' : '') + '>' + i18next.t("levels.level") + ' ' + index + '</button>';
+        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" onclick=\"playLevel(" + key + ", " + player  + ", " + type + ");\" " + (resultLevel.trim() != "" ? "aria-label=\"" + printResultLevel(key, player, levels[key]["type"], type) + "\" data-balloon-length=\"fit\" data-balloon-pos=\"up\"" : "") + ">" + i18next.t("levels.level") + " " + index + "</button>";
       }
 
       if(index == 1) {
-        res += '<div class="row mb-2">';
+        res += "<div class=\"row mb-2\">";
       }
 
       if(index % 2 == 0) {
-        res += '<div class="col pl-0 justify-content-center">' + button + '</div></div><div class="row mb-2">';
+        res += "<div class=\"col pl-0 justify-content-center\">" + button + "</div></div><div class=\"row mb-2\">";
       } else {
-        res += '<div class="col pr-0 justify-content-center">' + button + '</div>';
+        res += "<div class=\"col pr-0 justify-content-center\">" + button + "</div>";
       }
 
       empty = false;
@@ -2222,7 +2224,7 @@ function getListLevel(player, type) {
   }
 
   if(index % 2 == 0) {
-    res += '<div class="col pr-0 justify-content-center"></div>';
+    res += "<div class=\"col pr-0 justify-content-center\"></div>";
   }
 
   return res + "</div>";
@@ -2259,7 +2261,7 @@ function getListBonus(player) {
 
   div.appendChild(p);
 
-  for(let key in levelsBonusData) {
+  for(const key in levelsBonusData) {
     const subDiv = document.createElement("div");
     subDiv.classList.add("m-2");
 
@@ -2378,7 +2380,7 @@ function listTranslations(languages) {
     document.getElementById("languageSelect").innerHTML = "";
 
     for(let i = 0; i < languages.length; i++) {
-      document.getElementById("languageSelect").innerHTML = document.getElementById("languageSelect").innerHTML + '<option data-i18n="lang.' + languages[i] + '" value="'+ languages[i] +'"></option>';
+      document.getElementById("languageSelect").innerHTML = document.getElementById("languageSelect").innerHTML + "<option data-i18n=\"lang." + languages[i] + "\" value=\""+ languages[i] +"\"></option>";
     }
 
     document.getElementById("languageSelect").value = i18next.language.substr(0, 2);
@@ -2416,7 +2418,7 @@ function translateContent() {
 }
 
 document.getElementById("languageSelect").onchange = () => {
-  i18next.changeLanguage(document.getElementById("languageSelect").value, (err, t) => {
+  i18next.changeLanguage(document.getElementById("languageSelect").value, () => {
     translateContent();
   });
 };

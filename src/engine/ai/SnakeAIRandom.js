@@ -45,18 +45,18 @@ export default class SnakeAIRandom extends SnakeAI {
         const r = GameUtils.randRange(1, 4, snake.grid ? snake.grid.rngGame : null);
 
         switch(r) {
-          case 1:
-            direction = GameConstants.Key.UP;
-            break;
-          case 2:
-            direction = GameConstants.Key.LEFT;
-            break;
-          case 3:
-            direction = GameConstants.Key.BOTTOM;
-            break;
-          case 4:
-            direction = GameConstants.Key.RIGHT;
-            break;
+        case 1:
+          direction = GameConstants.Key.UP;
+          break;
+        case 2:
+          direction = GameConstants.Key.LEFT;
+          break;
+        case 3:
+          direction = GameConstants.Key.BOTTOM;
+          break;
+        case 4:
+          direction = GameConstants.Key.RIGHT;
+          break;
         }
       }
 

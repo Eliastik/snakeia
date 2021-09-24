@@ -301,7 +301,6 @@ export default class GameEngine {
 
   doTick() {
     if(!this.paused && !this.killed) {
-      if(this.lastTime == 0) this.lastTime = time;
       this.ticks++;
 
       let scoreIncreased, setFruitError = false;

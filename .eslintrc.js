@@ -2,7 +2,8 @@ module.exports = {
   "env": {
     "browser": true,
     "es2021": true,
-    "es6": true
+    "es6": true,
+    "commonjs": true
   },
   "extends": "eslint:recommended",
   "parser": "@babel/eslint-parser",
@@ -29,6 +30,21 @@ module.exports = {
     "semi": [
       "error",
       "always"
+    ],
+    "no-var": [
+      "error"
+    ],
+    "no-eval": [
+      "error"
+    ],
+    "prefer-const": [
+      "error"
+    ],
+    "no-implicit-globals": [
+      "error"
+    ],
+    "prefer-arrow-callback": [
+      "error"
     ]
   }
 };

@@ -31,31 +31,31 @@ export default class Position {
 
   convertToKeyDirection() {
     switch(this.direction) {
-      case GameConstants.Direction.UP:
-        return GameConstants.Key.UP;
-      case GameConstants.Direction.RIGHT:
-        return GameConstants.Key.RIGHT;
-      case GameConstants.Direction.LEFT:
-        return GameConstants.Key.LEFT;
-      case GameConstants.Direction.BOTTOM:
-        return GameConstants.Key.BOTTOM;
-      default:
-        return this.direction;
+    case GameConstants.Direction.UP:
+      return GameConstants.Key.UP;
+    case GameConstants.Direction.RIGHT:
+      return GameConstants.Key.RIGHT;
+    case GameConstants.Direction.LEFT:
+      return GameConstants.Key.LEFT;
+    case GameConstants.Direction.BOTTOM:
+      return GameConstants.Key.BOTTOM;
+    default:
+      return this.direction;
     }
   }
 
   convertToSimpleDirection() {
     switch(this.direction) {
-      case GameConstants.Key.UP:
-        return GameConstants.Direction.UP;
-      case GameConstants.Key.RIGHT:
-        return GameConstants.Direction.RIGHT;
-      case GameConstants.Key.LEFT:
-        return GameConstants.Direction.LEFT;
-      case GameConstants.Key.BOTTOM:
-        return GameConstants.Direction.BOTTOM;
-      default:
-        return this.direction;
+    case GameConstants.Key.UP:
+      return GameConstants.Direction.UP;
+    case GameConstants.Key.RIGHT:
+      return GameConstants.Direction.RIGHT;
+    case GameConstants.Key.LEFT:
+      return GameConstants.Direction.LEFT;
+    case GameConstants.Key.BOTTOM:
+      return GameConstants.Direction.BOTTOM;
+    default:
+      return this.direction;
     }
   }
 

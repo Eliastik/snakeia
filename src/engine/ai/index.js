@@ -23,4 +23,4 @@ import SnakeAINormal from "./SnakeAINormal";
 import SnakeAIHigh from "./SnakeAIHigh";
 import SnakeAIMock from "./SnakeAIMock";
 
-export { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh, SnakeAIMock }
+export { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh, SnakeAIMock };

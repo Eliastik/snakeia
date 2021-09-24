@@ -251,6 +251,6 @@ export default class GameGroup {
       winners: winners,
       score: maxScore,
       index: index
-    }
+    };
   }
 }

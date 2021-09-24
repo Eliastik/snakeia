@@ -130,46 +130,46 @@ export default class Grid {
 
     for(let i = 0; i < directions.length; i++) {
       switch(directions[i]) {
-        case GameConstants.Direction.UP:
-          if(r - 2 <= 0) continue;
+      case GameConstants.Direction.UP:
+        if(r - 2 <= 0) continue;
 
-          if(this.get(new Position(c, r - 2)) != GameConstants.CaseType.EMPTY) {
-            this.set(GameConstants.CaseType.EMPTY, new Position(c, r - 2));
-            this.set(GameConstants.CaseType.EMPTY, new Position(c, r - 1));
-            this.maze_recursion(r - 2, c);
-          }
+        if(this.get(new Position(c, r - 2)) != GameConstants.CaseType.EMPTY) {
+          this.set(GameConstants.CaseType.EMPTY, new Position(c, r - 2));
+          this.set(GameConstants.CaseType.EMPTY, new Position(c, r - 1));
+          this.maze_recursion(r - 2, c);
+        }
 
-          break;
-        case GameConstants.Direction.RIGHT:
-          if(c + 2 >= this.width - 1) continue;
+        break;
+      case GameConstants.Direction.RIGHT:
+        if(c + 2 >= this.width - 1) continue;
 
-          if(this.get(new Position(c + 2, r)) != GameConstants.CaseType.EMPTY) {
-            this.set(GameConstants.CaseType.EMPTY, new Position(c + 2, r));
-            this.set(GameConstants.CaseType.EMPTY, new Position(c + 1, r));
-            this.maze_recursion(r, c + 2);
-          }
+        if(this.get(new Position(c + 2, r)) != GameConstants.CaseType.EMPTY) {
+          this.set(GameConstants.CaseType.EMPTY, new Position(c + 2, r));
+          this.set(GameConstants.CaseType.EMPTY, new Position(c + 1, r));
+          this.maze_recursion(r, c + 2);
+        }
 
-          break;
-        case GameConstants.Direction.BOTTOM:
-          if(r + 2 >= this.height - 1) continue;
+        break;
+      case GameConstants.Direction.BOTTOM:
+        if(r + 2 >= this.height - 1) continue;
 
-          if(this.get(new Position(c, r + 2)) != GameConstants.CaseType.EMPTY) {
-            this.set(GameConstants.CaseType.EMPTY, new Position(c, r + 2));
-            this.set(GameConstants.CaseType.EMPTY, new Position(c, r + 1));
-            this.maze_recursion(r + 2, c);
-          }
+        if(this.get(new Position(c, r + 2)) != GameConstants.CaseType.EMPTY) {
+          this.set(GameConstants.CaseType.EMPTY, new Position(c, r + 2));
+          this.set(GameConstants.CaseType.EMPTY, new Position(c, r + 1));
+          this.maze_recursion(r + 2, c);
+        }
 
-          break;
-        case GameConstants.Direction.LEFT:
-          if(c - 2 <= 0) continue;
+        break;
+      case GameConstants.Direction.LEFT:
+        if(c - 2 <= 0) continue;
 
-          if(this.get(new Position(c - 2, r)) != GameConstants.CaseType.EMPTY) {
-            this.set(GameConstants.CaseType.EMPTY, new Position(c - 2, r));
-            this.set(GameConstants.CaseType.EMPTY, new Position(c - 1, r));
-            this.maze_recursion(r, c - 2);
-          }
+        if(this.get(new Position(c - 2, r)) != GameConstants.CaseType.EMPTY) {
+          this.set(GameConstants.CaseType.EMPTY, new Position(c - 2, r));
+          this.set(GameConstants.CaseType.EMPTY, new Position(c - 1, r));
+          this.maze_recursion(r, c - 2);
+        }
 
-          break;
+        break;
       }
     }
   }
@@ -190,41 +190,41 @@ export default class Grid {
 
   valToChar(value) {
     switch(value) {
-      case GameConstants.CaseType.EMPTY:
-        return "-";
-      case GameConstants.CaseType.SNAKE:
-        return "o";
-      case GameConstants.CaseType.SNAKE_DEAD:
-        return "O";
-      case GameConstants.CaseType.FRUIT:
-        return "x";
-      case GameConstants.CaseType.WALL:
-        return "#";
-      case GameConstants.CaseType.SURROUNDED:
-        return "/";
-      case GameConstants.CaseType.FRUIT_GOLD:
-        return "X";
+    case GameConstants.CaseType.EMPTY:
+      return "-";
+    case GameConstants.CaseType.SNAKE:
+      return "o";
+    case GameConstants.CaseType.SNAKE_DEAD:
+      return "O";
+    case GameConstants.CaseType.FRUIT:
+      return "x";
+    case GameConstants.CaseType.WALL:
+      return "#";
+    case GameConstants.CaseType.SURROUNDED:
+      return "/";
+    case GameConstants.CaseType.FRUIT_GOLD:
+      return "X";
     }
   }
 
   getImageCase(position) {
     switch(this.get(position)) {
-      case GameConstants.CaseType.WALL:
-        return "wall.png";
-      case GameConstants.CaseType.FRUIT:
-        return "fruit.png";
-      case GameConstants.CaseType.FRUIT_GOLD:
-        return "fruit_gold.png";
-      case GameConstants.CaseType.EMPTY:
-        return "";
-      case GameConstants.CaseType.SNAKE:
-        return "";
-      case GameConstants.CaseType.SNAKE_DEAD:
-        return "";
-      case GameConstants.CaseType.SURROUNDED:
-        return "";
-      case GameConstants.CaseType.CROSSED:
-        return "";
+    case GameConstants.CaseType.WALL:
+      return "wall.png";
+    case GameConstants.CaseType.FRUIT:
+      return "fruit.png";
+    case GameConstants.CaseType.FRUIT_GOLD:
+      return "fruit_gold.png";
+    case GameConstants.CaseType.EMPTY:
+      return "";
+    case GameConstants.CaseType.SNAKE:
+      return "";
+    case GameConstants.CaseType.SNAKE_DEAD:
+      return "";
+    case GameConstants.CaseType.SURROUNDED:
+      return "";
+    case GameConstants.CaseType.CROSSED:
+      return "";
     }
 
     return "unknown.png";
@@ -310,7 +310,7 @@ export default class Grid {
       torus: false,
       diagonals: false,
       cutting: false,
-      cost(a, b) { return b == 1 ? null : 1 }
+      cost(a, b) { return b == 1 ? null : 1; }
     });
     const path = graph.path({x: this.mazeFirstPosition.x, y: this.mazeFirstPosition.y}, {x: position.x, y: position.y});
 
@@ -430,38 +430,38 @@ export default class Grid {
     const position = new Position(oldPos.x, oldPos.y, newDirection);
 
     switch(newDirection) {
-      case GameConstants.Direction.LEFT:
-        position.x--;
-        position.direction = GameConstants.Direction.LEFT;
-        break;
-      case GameConstants.Direction.UP:
-        position.y--;
-        position.direction = GameConstants.Direction.UP;
-        break;
-      case GameConstants.Direction.RIGHT:
-        position.x++;
-        position.direction = GameConstants.Direction.RIGHT;
-        break;
-      case GameConstants.Direction.BOTTOM:
-        position.y++;
-        position.direction = GameConstants.Direction.BOTTOM;
-        break;
-      case GameConstants.Key.LEFT:
-        position.x--;
-        position.direction = GameConstants.Key.LEFT;
-        break;
-      case GameConstants.Key.UP:
-        position.y--;
-        position.direction = GameConstants.Key.UP;
-        break;
-      case GameConstants.Key.RIGHT:
-        position.x++;
-        position.direction = GameConstants.Direction.RIGHT;
-        break;
-      case GameConstants.Key.BOTTOM:
-        position.y++;
-        position.direction = GameConstants.Direction.BOTTOM;
-        break;
+    case GameConstants.Direction.LEFT:
+      position.x--;
+      position.direction = GameConstants.Direction.LEFT;
+      break;
+    case GameConstants.Direction.UP:
+      position.y--;
+      position.direction = GameConstants.Direction.UP;
+      break;
+    case GameConstants.Direction.RIGHT:
+      position.x++;
+      position.direction = GameConstants.Direction.RIGHT;
+      break;
+    case GameConstants.Direction.BOTTOM:
+      position.y++;
+      position.direction = GameConstants.Direction.BOTTOM;
+      break;
+    case GameConstants.Key.LEFT:
+      position.x--;
+      position.direction = GameConstants.Key.LEFT;
+      break;
+    case GameConstants.Key.UP:
+      position.y--;
+      position.direction = GameConstants.Key.UP;
+      break;
+    case GameConstants.Key.RIGHT:
+      position.x++;
+      position.direction = GameConstants.Direction.RIGHT;
+      break;
+    case GameConstants.Key.BOTTOM:
+      position.y++;
+      position.direction = GameConstants.Direction.BOTTOM;
+      break;
     }
 
     if(position.x < 0) {
