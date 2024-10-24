@@ -41,6 +41,7 @@ export default class GameUI {
     this.renderBlur = settings && settings.renderBlur;
     this.graphicSkin = (settings && settings.graphicSkin) || "flat";
     this.maxFPS = (settings && settings.maxFPS) || -1;
+    this.enableHighDpiRendering = (settings && settings.enableHighDpiRendering) || false;
     // UI variables
     this.lastKey = -1;
     this.frame = 0;
@@ -91,6 +92,7 @@ export default class GameUI {
     this.spectatorMode = null;
     this.onlineMaster = false;
     this.pingLatency = -1;
+    this.pixelRatio = 1;
     // Menus state variables
     this.menu = new Menu(null, this.renderBlur);
     this.confirmReset = false;
@@ -381,7 +383,7 @@ export default class GameUI {
         this.appendTo.removeChild(this.textarea);
         this.textarea = null;
       } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && this.canvas != null) {
-        this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.canvas.width = 0;
         this.canvas.height = 0;
         this.appendTo.removeChild(this.canvas);
@@ -460,6 +462,7 @@ export default class GameUI {
       }
 
       const offsetFrame = time - this.lastFrameTime;
+
       if(this.maxFPS < 1 || offsetFrame > 1000 / this.maxFPS) {
         this.lastFrameTime = time;
         this.frame++;
@@ -473,7 +476,14 @@ export default class GameUI {
             this.ticks++;
           }
         }
+
+        if(this.enableHighDpiRendering) {
+          this.pixelRatio = window.devicePixelRatio;
+        } else {
+          this.pixelRatio = 1;
+        }
   
+        GraphicsUtils.autoDPI(this.canvas, this.pixelRatio);
         this.draw();
         this.lastTime = Date.now();  
       }
@@ -492,6 +502,8 @@ export default class GameUI {
       this.textarea.innerHTML = this.toString();
     } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
       const ctx = this.canvasCtx;
+      this.canvasCtx.scale(this.pixelRatio, this.pixelRatio);
+  
       this.currentPlayer = this.controller.getCurrentPlayer();
 
       this.fontSize = GameConstants.Setting.FONT_SIZE;
@@ -831,7 +843,7 @@ export default class GameUI {
       if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1 && !this.errorOccurred) {
         this.gameRanking.open();
         this.gameRanking.enable();
-        this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
+        this.gameRanking.draw(this.canvasCtx);
       }
     
       if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && this.notificationMessage.foreGround) {

@@ -63,5 +63,14 @@ export default {
     } else {
       return "???";
     }
+  },
+  autoDPI(canvas, pixelRatio) {
+    const rect = canvas.getBoundingClientRect();
+
+    canvas.width = rect.width * pixelRatio;
+    canvas.height = rect.height * pixelRatio;
+    
+    canvas.style.width = rect.width + "px";
+    canvas.style.height =  rect.height + "px";
   }
 };
