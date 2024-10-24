@@ -43,6 +43,7 @@ export default class GameUI {
     this.renderBlur = settings && settings.renderBlur;
     this.graphicSkin = (settings && settings.graphicSkin) || "flat";
     this.maxFPS = (settings && settings.maxFPS) || -1;
+    this.enableHighDpiRendering = (settings && settings.enableHighDpiRendering) || false;
     // UI variables
     this.lastKey = -1;
     this.frame = 0;
@@ -392,12 +393,10 @@ export default class GameUI {
         this.appendTo.removeChild(this.textarea);
         this.textarea = null;
       } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && this.canvas != null) {
-        this.canvas.getContext("2d").clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.canvas.width = 0;
         this.canvas.height = 0;
         this.canvas.remove(this.appendTo);
         this.canvas = null;
-        this.canvasCtx = null;
         this.imageLoader.clear();
       }
     }
@@ -476,23 +475,26 @@ export default class GameUI {
       }
 
       const offsetFrame = time - this.lastFrameTime;
+
       if(this.maxFPS < 1 || offsetFrame > 1000 / this.maxFPS) {
         this.lastFrameTime = time;
         this.frame++;
 
-        if(Constants.Setting.ENABLE_PIXEL_RATIO_RESIZING) {
-          Constants.Setting.PIXEL_RATIO = window.devicePixelRatio; // Update the device pixel ratio, only in fullscreen mode/fullpage mode
+        if(this.enableHighDpiRendering) {
+          Constants.Setting.ENABLE_PIXEL_RATIO_RESIZING = true;
+          Constants.Setting.PIXEL_RATIO = window.devicePixelRatio;
+
+          const rect = this.canvas.canvas.getBoundingClientRect();
+
+          this.canvas.canvas.width = rect.width * Constants.Setting.PIXEL_RATIO;
+          this.canvas.canvas.height = rect.height * Constants.Setting.PIXEL_RATIO;
+        
+          this.canvas.canvas.style.width = rect.width + "px";
+          this.canvas.canvas.style.height = rect.height + "px";
         } else {
+          Constants.Setting.ENABLE_PIXEL_RATIO_RESIZING = false;
           Constants.Setting.PIXEL_RATIO = 1;
         }
-
-        const rect = this.canvas.canvas.getBoundingClientRect();
-
-        this.canvas.canvas.width = rect.width * Constants.Setting.PIXEL_RATIO;
-        this.canvas.canvas.height = rect.height * Constants.Setting.PIXEL_RATIO;
-        
-        this.canvas.canvas.style.width = rect.width + "px";
-        this.canvas.canvas.style.height = rect.height + "px";
   
         if((!this.paused && !this.onlineMode) || this.onlineMode || this.gameOver || this.gameFinished) {
           this.offsetFrame += offsetFrame;
@@ -522,6 +524,7 @@ export default class GameUI {
       this.textarea.innerHTML = this.toString();
     } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
       let enableMenu = true;
+
       this.currentPlayer = this.controller.getCurrentPlayer();
 
       this.fontSize = GameConstants.Setting.FONT_SIZE;

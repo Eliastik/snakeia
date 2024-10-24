@@ -53,9 +53,8 @@ export default class Header extends Row {
     this.imageLoader = imageLoader;
   }
 
-  draw(context) {
-    const canvas = context.canvas;
-    const ctx = canvas.getContext("2d");
+  draw(ctx) {
+    const canvas = ctx.canvas;
 
     ctx.save();
 
@@ -111,7 +110,7 @@ export default class Header extends Row {
       this.rowBestScore.hidden = true;
     }
 
-    super.draw(context);
+    super.draw(ctx);
     ctx.restore();
   }
 

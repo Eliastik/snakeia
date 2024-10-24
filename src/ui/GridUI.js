@@ -44,12 +44,11 @@ export default class GridUI extends Component {
     this.canvasTmp = document.createElement("canvas");
   }
 
-  draw(context) {
+  draw(ctx) {
     if(this.grid && this.grid.grid) {
-      super.draw(context);
+      super.draw(ctx);
 
-      const canvas = context.canvas;
-      const ctx = canvas.getContext("2d");
+      const canvas = ctx.canvas;
   
       this.canvasTmp.width = Utils.getCanvasWidth(canvas) * Constants.Setting.PIXEL_RATIO;
       this.canvasTmp.height = Utils.getCanvasHeight(canvas) * Constants.Setting.PIXEL_RATIO;
