@@ -142,7 +142,6 @@ function showSettings() {
   document.getElementById("onlineEnableClientSidePredictions").checked = false;
   document.getElementById("showDebugInfo").checked = false;
   document.getElementById("textOutput").checked = false;
-  document.getElementById("highDpi").checked = false;
 
   if(settings.enableAnimations) document.getElementById("enableAnimations").checked = true;
   if(settings.renderBlur) document.getElementById("renderBlur").checked = true;
@@ -150,7 +149,6 @@ function showSettings() {
   if(settings.onlineEnableClientSidePredictions) document.getElementById("onlineEnableClientSidePredictions").checked = true;
   if(settings.showDebugInfo) document.getElementById("showDebugInfo").checked = true;
   if(settings.textOutput) document.getElementById("textOutput").checked = true;
-  if(settings.enableHighDpiRendering) document.getElementById("highDpi").checked = true;
   document.getElementById("graphicSkin").value = settings.graphicSkin;
 
   if(!workersAvailable) {
@@ -199,11 +197,6 @@ document.getElementById("showDebugInfo").onchange = function() {
 
 document.getElementById("textOutput").onclick = function() {
   customSettings.textOutput = this.checked;
-  saveSettings();
-};
-
-document.getElementById("highDpi").onclick = function() {
-  customSettings.enableHighDpiRendering = this.checked;
   saveSettings();
 };
 
@@ -2420,7 +2413,6 @@ function translateContent() {
   document.getElementById("aiAssistantInfos").setAttribute("aria-label", i18next.t("settings.aiAssistantInfos"));
   document.getElementById("multithreadingInfos").setAttribute("aria-label", i18next.t("menu.multithreadingInfos"));
   document.getElementById("onlineEnableClientSidePredictionsInfos").setAttribute("aria-label", i18next.t("menu.onlineEnableClientSidePredictionsInfos"));
-  document.getElementById("highDpiInfos").setAttribute("aria-label", i18next.t("menu.highDpiInfos"));
   document.querySelectorAll(".settingNotAvailable").forEach(e => {
     e.setAttribute("aria-label", i18next.t("menu.settingNotAvailable"));
   });
