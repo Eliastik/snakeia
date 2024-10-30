@@ -132,6 +132,8 @@
 
 /*! exports provided: default */
 
+/*! https://mths.be/utf8js v2.1.2 by @mathias */
+
 /*! no static exports found */
 
 /*!********************!*\
