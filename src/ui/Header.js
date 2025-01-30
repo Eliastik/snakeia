@@ -37,8 +37,9 @@ export default class Header extends Component {
     this.imageLoader = imageLoader;
   }
 
-  draw(ctx) {
-    const canvas = ctx.canvas;
+  draw(context) {
+    const canvas = context.canvas;
+    const ctx = canvas.getContext("2d");
 
     ctx.save();
 

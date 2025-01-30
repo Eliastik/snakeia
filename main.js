@@ -119,8 +119,7 @@ function restoreSettings() {
     textOutput: false,
     graphicSkin: "flat",
     maxFPS: -1,
-    unlockAllLevels: false,
-    enableHighDpiRendering: false
+    unlockAllLevels: false
   };
 }
 
