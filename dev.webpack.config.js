@@ -1,4 +1,10 @@
-const path = require("path");
+const path         = require("path");
+const ESLintPlugin = require('eslint-webpack-plugin');
+
+const estlintOptions = {
+  overrideConfigFile: "eslint.config.mjs",
+  configType: "flat"
+};
 
 const config = [
   {
@@ -17,6 +23,7 @@ const config = [
     devServer: {
       contentBase: "./dist",
     },
+    plugins: [new ESLintPlugin(estlintOptions)],
     module: {
       rules: [
         {
@@ -49,6 +56,7 @@ const config = [
     devServer: {
       contentBase: "./dist",
     },
+    plugins: [new ESLintPlugin(estlintOptions)],
     module: {
       rules: [
         {
@@ -78,6 +86,7 @@ const config = [
     devServer: {
       contentBase: "./dist",
     },
+    plugins: [new ESLintPlugin(estlintOptions)],
     module: {
       rules: [
         {

@@ -1,4 +1,10 @@
-const path = require("path");
+const path         = require("path");
+const ESLintPlugin = require('eslint-webpack-plugin');
+
+const estlintOptions = {
+  overrideConfigFile: "eslint.config.mjs",
+  configType: "flat"
+};
 
 const config = [
   {
@@ -13,6 +19,7 @@ const config = [
       libraryTarget: "umd",
       globalObject: "typeof self !== \"undefined\" ? self : this"
     },
+    plugins: [new ESLintPlugin(estlintOptions)],
     module: {
       rules: [
         {
@@ -41,6 +48,7 @@ const config = [
       libraryTarget: "umd",
       globalObject: "typeof self !== \"undefined\" ? self : this"
     },
+    plugins: [new ESLintPlugin(estlintOptions)],
     module: {
       rules: [
         {
@@ -66,6 +74,7 @@ const config = [
       path: path.resolve(__dirname, "dist"),
       filename: "GameEngineWorker.js"
     },
+    plugins: [new ESLintPlugin(estlintOptions)],
     module: {
       rules: [
         {
