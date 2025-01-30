@@ -44,5 +44,5 @@ export default [...compat.extends("eslint:recommended"), {
         "no-unused-vars": ["warn"]
     }
 }, {
-    ignores: ["**/libs/*"]
+    ignores: ["**/libs/*", "**/tests/*", "service-worker.js", "eslint.config.mjs", "**/dist/*"]
 }];
