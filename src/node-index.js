@@ -17,14 +17,14 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 // Exports engine classes
-import GameConstants from "./engine/Constants";
-import Event from "./engine/Event";
-import Reactor from "./engine/Reactor";
-import Grid from "./engine/Grid";
-import Snake from "./engine/Snake";
-import GameGroup from "./engine/GameGroup";
-import GameUtils from "./engine/GameUtils";
-import Position from "./engine/Position";
-import GameEngine from "./engine/GameEngine";
+import GameConstants from "./engine/Constants.js";
+import Event from "./engine/Event.js";
+import Reactor from "./engine/Reactor.js";
+import Grid from "./engine/Grid.js";
+import Snake from "./engine/Snake.js";
+import GameGroup from "./engine/GameGroup.js";
+import GameUtils from "./engine/GameUtils.js";
+import Position from "./engine/Position.js";
+import GameEngine from "./engine/GameEngine.js";
 
 export { GameConstants, Event, Reactor, Grid, Snake, GameGroup, GameUtils, Position, GameEngine };

@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import SnakeAI from "./SnakeAI";
-import GameConstants from "../Constants";
+import SnakeAI from "./SnakeAI.js";
+import GameConstants from "../Constants.js";
 
 export default class SnakeAILow extends SnakeAI {
   constructor() {
@@ -26,8 +26,8 @@ export default class SnakeAILow extends SnakeAI {
     this._aiLevelText = "low";
   }
 
-  ai(snake) {
-    super.ai(snake);
+  async ai(snake) {
+    await super.ai(snake);
 
     if(snake.grid.fruitPos != null) {
       const currentPosition = snake.getHeadPosition();

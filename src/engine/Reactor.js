@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import Event from "./Event";
+import Event from "./Event.js";
 
 export default class Reactor {
   constructor() {

@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import GameUtils from "./GameUtils";
-import GameConstants from "./Constants";
-import Position from "./Position";
+import GameUtils from "./GameUtils.js";
+import GameConstants from "./Constants.js";
+import Position from "./Position.js";
 import seedrandom from "seedrandom";
-import * as Lowlight from "../../libs/lowlight.astar.min";
+import * as Lowlight from "../../libs/lowlight.astar.min.js";
 
 export default class Grid {
   constructor(width, height, generateWalls, borderWalls, maze, customGrid, mazeForceAuto, seedGrid, seedGame, probGoldFruitIncrease) {

@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import SnakeAI from "./SnakeAI";
-import GameConstants from "../Constants";
-import Position from "../Position";
-import * as Lowlight from "../../../libs/lowlight.astar.min";
+import SnakeAI from "./SnakeAI.js";
+import GameConstants from "../Constants.js";
+import Position from "../Position.js";
+import * as Lowlight from "../../../libs/lowlight.astar.min.js";
 
 export default class SnakeAINormal extends SnakeAI {
   constructor(enableTorus) {
@@ -29,8 +29,8 @@ export default class SnakeAINormal extends SnakeAI {
     this._aiLevelText = "normal";
   }
 
-  ai(snake) {
-    super.ai(snake);
+  async ai(snake) {
+    await super.ai(snake);
 
     const currentPosition = snake.getHeadPosition();
     const fruitPos = snake.grid.fruitPos;

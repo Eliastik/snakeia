@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import GameConstants from "./engine/Constants";
-import GameController from "./engine/GameController";
-import GameControllerWorker from "./engine/GameControllerWorker";
-import GameUI from "./ui/GameUI";
-import GameEngine from "./engine/GameEngine";
+import GameConstants from "./engine/Constants.js";
+import GameController from "./engine/GameController.js";
+import GameControllerWorker from "./engine/GameControllerWorker.js";
+import GameUI from "./ui/GameUI.js";
+import GameEngine from "./engine/GameEngine.js";
 
 // Polyfills
 if(typeof(window) !== "undefined") {

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import SnakeAI from "./SnakeAI";
+import SnakeAI from "./SnakeAI.js";
 
 export default class SnakeAIMock extends SnakeAI {
   constructor() {
@@ -25,7 +25,7 @@ export default class SnakeAIMock extends SnakeAI {
     this._aiLevelText = "mock";
   }
 
-  ai() {
+  async ai() {
     return null;
   }
 }

@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */  
-import GameUtils from "./GameUtils";
-import GameConstants from "./Constants";
-import Reactor from "./Reactor";
-import Grid from "./Grid";
-import Snake from "./Snake";
+import GameUtils from "./GameUtils.js";
+import GameConstants from "./Constants.js";
+import Reactor from "./Reactor.js";
+import Grid from "./Grid.js";
+import Snake from "./Snake.js";
 import seedrandom from "seedrandom";
 
 export default class GameEngine {
@@ -299,12 +299,13 @@ export default class GameEngine {
     }, this.initialSpeed * GameConstants.Setting.TIME_MULTIPLIER);
   }
 
-  doTick() {
+  async doTick() {
     if(!this.paused && !this.killed) {
       this.ticks++;
 
       let scoreIncreased, setFruitError = false;
 
+      // TODO simplify this condition
       if(this.grid && (!this.grid.maze || this.grid.mazeForceAuto || ((this.grid.maze && (this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 0 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 0))) || (this.grid.maze && ((this.getNBPlayer(GameConstants.PlayerType.HUMAN) > 0 || this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) > 0) && (this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) || this.getPlayer(1, GameConstants.PlayerType.HUMAN)).lastKey != -1)))) {
         for(let i = 0; i < this.snakes.length; i++) {
           const initialDirection = this.snakes[i].direction;
@@ -318,14 +319,14 @@ export default class GameEngine {
               this.snakes[i].moveTo(this.snakes[i].lastKey);
               this.snakes[i].lastKey = -1;
             } else if(this.snakes[i].player == GameConstants.PlayerType.AI && (!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && this.snakes[i].aiLevel != GameConstants.AiLevel.RANDOM))) {
-              this.snakes[i].moveTo(this.snakes[i].ai());
+              this.snakes[i].moveTo(await this.snakes[i].ai());
             }
 
             let headSnakePos = this.snakes[i].getHeadPosition();
 
             if(this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI && this.grid.isDeadPosition(this.snakes[i].getNextPosition(headSnakePos, this.snakes[i].direction))) {
               this.snakes[i].direction = initialDirection;
-              this.snakes[i].moveTo(this.snakes[i].ai());
+              this.snakes[i].moveTo(await this.snakes[i].ai());
               this.snakes[i].lastKey = -1;
             }
 

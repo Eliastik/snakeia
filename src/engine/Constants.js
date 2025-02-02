@@ -83,6 +83,18 @@ export default {
     LEFT: 37,
     ENTER: 13
   },
+  ActionMapping: {
+    38: 0,
+    39: 1,
+    40: 2,
+    37: 3
+  },
+  ActionMappingInverse: {
+    0: 38,
+    1: 39,
+    2: 40,
+    3: 37
+  },
   Error: {
     ROOM_NOT_FOUND: "ROOM_NOT_FOUND",
     ROOM_ALREADY_JOINED: "ROOM_ALREADY_JOINED",

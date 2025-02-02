@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import SnakeAILow from "./SnakeAILow";
-import SnakeAINormal from "./SnakeAINormal";
+import SnakeAILow from "./SnakeAILow.js";
+import SnakeAINormal from "./SnakeAINormal.js";
 
 export default class SnakeAIHigh extends SnakeAINormal {
   constructor(snake) {
@@ -27,8 +27,8 @@ export default class SnakeAIHigh extends SnakeAINormal {
     this._aiLevelText = "high";
   }
 
-  ai(snake) {
-    const res = super.ai(snake);
+  async ai(snake) {
+    const res = await super.ai(snake);
 
     if(!res) {
       return this.aiLow.ai(snake);

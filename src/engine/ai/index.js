@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import SnakeAI from "./SnakeAI";
-import SnakeAIRandom from "./SnakeAIRandom";
-import SnakeAILow from "./SnakeAILow";
-import SnakeAINormal from "./SnakeAINormal";
-import SnakeAIHigh from "./SnakeAIHigh";
-import SnakeAIMock from "./SnakeAIMock";
+import SnakeAI from "./SnakeAI.js";
+import SnakeAIRandom from "./SnakeAIRandom.js";
+import SnakeAILow from "./SnakeAILow.js";
+import SnakeAINormal from "./SnakeAINormal.js";
+import SnakeAIHigh from "./SnakeAIHigh.js";
+import SnakeAIUltra from "./SnakeAIUltra.js";
+import SnakeAIMock from "./SnakeAIMock.js";
 
-export { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh, SnakeAIMock };
+export { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh, SnakeAIMock, SnakeAIUltra };

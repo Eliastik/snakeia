@@ -17,8 +17,8 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import io from "socket.io-client";
-import GameControllerSocket from "./GameControllerSocket";
-import GameConstants from "./Constants";
+import GameControllerSocket from "./GameControllerSocket.js";
+import GameConstants from "./Constants.js";
 
 export default class OnlineClient {
   constructor() {

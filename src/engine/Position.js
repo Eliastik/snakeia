@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import GameConstants from "./Constants";
+import GameConstants from "./Constants.js";
 
 export default class Position {
   constructor(x, y, direction) {

@@ -1,8 +1,8 @@
 // SnakeIA Snake test
-import Grid from "../src/engine/Grid";
-import Position from "../src/engine/Position";
-import Constants from "../src/engine/Constants";
-import Snake from "../src/engine/Snake";
+import Grid from "../src/engine/Grid.js";
+import Position from "../src/engine/Position.js";
+import Constants from "../src/engine/Constants.js";
+import Snake from "../src/engine/Snake.js";
 
 const theGrid = new Grid(10, 10, false, true);
 theGrid.init();

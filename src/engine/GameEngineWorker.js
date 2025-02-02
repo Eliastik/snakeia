@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import GameConstants from "./Constants";
-import Position from "./Position";
-import Grid from "./Grid";
-import Snake from "./Snake";
+import GameConstants from "./Constants.js";
+import Position from "./Position.js";
+import Grid from "./Grid.js";
+import Snake from "./Snake.js";
 import GameEngine from "./GameEngine.js";
 
 let game;

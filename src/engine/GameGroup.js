@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import Reactor from "./Reactor";
+import Reactor from "./Reactor.js";
 
 export default class GameGroup {
   constructor(games) {

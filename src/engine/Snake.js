@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import GameConstants from "./Constants";
-import Position from "./Position";
-import Grid from "./Grid";
-import { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh, SnakeAIMock } from "./ai/index";
+import GameConstants from "./Constants.js";
+import Position from "./Position.js";
+import Grid from "./Grid.js";
+import { SnakeAI, SnakeAIRandom, SnakeAILow, SnakeAINormal, SnakeAIHigh, SnakeAIMock, SnakeAIUltra } from "./ai/index.js";
 
 export default class Snake {
   constructor(direction, length, grid, player, aiLevel, autoRetry, name, customAI) {
@@ -220,7 +220,7 @@ export default class Snake {
         this.snakeAI = new SnakeAIHigh();
         break;
       case GameConstants.AiLevel.ULTRA:
-        this.snakeAI = new SnakeAIHigh();
+        this.snakeAI = new SnakeAIUltra();
         break;
       case GameConstants.AiLevel.MOCK:
         this.snakeAI = new SnakeAIMock();
@@ -267,7 +267,7 @@ export default class Snake {
   }
 
   get(index) {
-    if(this.queue[index] != null) {
+    if(this.queue && this.queue[index] != null) {
       return this.queue[index].copy();
     } else {
       return null;
@@ -384,9 +384,9 @@ export default class Snake {
     return snake;
   }
 
-  ai() {
+  async ai() {
     if(this.snakeAI && this.snakeAI.ai) {
-      const action = this.snakeAI.ai(this);
+      const action = await this.snakeAI.ai(this);
 
       if(!action || this.keyToDirection(action) == this.direction) {
         this.ticksWithoutAction++;
