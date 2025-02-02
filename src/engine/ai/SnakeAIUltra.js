@@ -17,50 +17,76 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import GameConstants from "../Constants.js";
-import SnakeAIRandom from "./SnakeAIRandom.js";
+import Position from "../Position.js";
+import GameUtils from "../GameUtils.js";
 import * as tf from "@tensorflow/tfjs";
 
 export default class SnakeAIUltra {
   constructor(enableTrainingMode) {
     this.aiFruitGoal = GameConstants.CaseType.FRUIT;
-    this.aiRandom = new SnakeAIRandom();
     this._aiLevelText = "Ultra";
-    this.model = this.createModel();
+    this.model = this.createModel(10, 10); // Height / width
     this.memory = [];
     this.gamma = 0.95;
-    this.epsilon = 1.0;
-    this.epsilonDecay = 0.995; // 0.995
+    this.epsilon = 0.99;
+    this.epsilonDecay = 0.995;
     this.epsilonMin = 0.01;
-    this.learningRate = 0.001; // 0.001
+    this.learningRate = 0.001;
     this.batchSize = 32;
     this.lastAction = null;
 
     this.enableTrainingMode = enableTrainingMode;
   }
 
-  createModel() {
+  createModel(height, width) {
     const model = tf.sequential();
-    model.add(tf.layers.dense({ inputShape: [14], units: 32, activation: "relu" }));
-    model.add(tf.layers.dense({ units: 32, activation: "relu" }));
-    model.add(tf.layers.dense({ units: 4, activation: "linear" }));
-    model.compile({ optimizer: tf.train.adam(this.learningRate), loss: "meanSquaredError" });
+  
+    model.add(tf.layers.conv2d({
+      inputShape: [height, width, 1],
+      filters: 32,
+      kernelSize: 3,
+      activation: "relu",
+      padding: "same"
+    }));
+  
+    model.add(tf.layers.conv2d({
+      filters: 64,                   
+      kernelSize: 3,                 
+      activation: "relu",            
+      padding: "same"
+    }));
+  
+    model.add(tf.layers.flatten());
+  
+    model.add(tf.layers.dense({
+      units: 128,
+      activation: "relu"
+    }));
+  
+    model.add(tf.layers.dense({
+      units: 4, // Number of possible actions
+      activation: "linear"
+    }));
+  
+    model.compile({
+      optimizer: tf.train.adam(this.learningRate),
+      loss: "meanSquaredError"
+    });
+  
     return model;
   }
 
-  async ai(snake) {
-    const currentState = this.getState(snake);
+  loadModel() {
+    // TODO
+  }
 
+  async ai(snake) {
     let action = null;
 
     if(Math.random() < this.epsilon && this.enableTrainingMode) {
-      action = await this.aiRandom.ai(snake);
+      action = this.getRandomAction();
     } else {
-      const qValues = this.model.predict(tf.tensor([currentState]));
-      const qValuesArray = qValues.arraySync()[0];
-
-      const actionIndex = qValuesArray.indexOf(Math.max(...qValuesArray));
-
-      action = GameConstants.ActionMappingInverse[actionIndex];
+      action = this.getBestAction(snake);
     }
 
     this.lastAction = action;
@@ -68,32 +94,66 @@ export default class SnakeAIUltra {
     return action;
   }
 
-  getState(snake) {
-    const { grid, direction } = snake;
-    const head = snake.getHeadPosition();
-    const top = snake.grid.isDeadPosition(snake.getNextPosition(head, GameConstants.Key.UP));
-    const left = snake.grid.isDeadPosition(snake.getNextPosition(head, GameConstants.Key.LEFT));
-    const bottom = snake.grid.isDeadPosition(snake.getNextPosition(head, GameConstants.Key.BOTTOM));
-    const right = snake.grid.isDeadPosition(snake.getNextPosition(head, GameConstants.Key.RIGHT));
-    const fruit = grid.fruitPos;
-    const fruitGold = grid.fruitPosGold;
+  getRandomAction() {
+    const r = GameUtils.randRange(1, 4);
+    
+    switch(r) {
+    case 1:
+      return GameConstants.Key.UP;
+    case 2:
+      return GameConstants.Key.LEFT;
+    case 3:
+      return GameConstants.Key.BOTTOM;
+    case 4:
+      return GameConstants.Key.RIGHT;
+    }
+  }
 
-    return [
-      head.x,
-      head.y,
-      fruit ? fruit.x : -1,
-      fruit ? fruit.y : -1,
-      fruitGold ? fruitGold.x : -1,
-      fruitGold ? fruitGold.y : -1,
-      direction === GameConstants.Direction.UP ? 1 : 0,
-      direction === GameConstants.Direction.DOWN ? 1 : 0,
-      direction === GameConstants.Direction.LEFT ? 1 : 0,
-      direction === GameConstants.Direction.RIGHT ? 1 : 0,
-      top ? 1 : 0,
-      bottom ? 1 : 0,
-      left ? 1 : 0,
-      right ? 1 : 0
-    ];
+  getBestAction(snake) {
+    const currentState = this.getState(snake);
+    const currentStateTensor = currentState.expandDims(0);
+
+    const qValues = this.model.predict(currentStateTensor);
+    const qValuesArray = qValues.arraySync()[0];
+
+    const actionIndex = qValuesArray.indexOf(Math.max(...qValuesArray));
+
+    return GameConstants.ActionMappingInverse[actionIndex];
+  }
+
+  getState(snake) {
+    const grid = snake.grid;
+    const state = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
+    
+    for(let i = 0; i < grid.height; i++) {
+      for(let j = 0; j < grid.width; j++) {
+        const position = new Position(j, i);
+
+        if(snake.positionInQueue(position)) {
+          state[i][j] = 1;
+        } else {
+          state[i][j] = this.cellToStateValue(grid.get(position));
+        }
+      }
+    }
+
+    return tf.tensor(state).expandDims(-1);
+  }
+
+  cellToStateValue(cellValue) {
+    return GameConstants.CaseTypeAIValue[cellValue];
+  }
+
+  findPositionInState(stateArray, targetValue) {
+    for(let i = 0; i < stateArray.length; i++) {
+      for(let j = 0; j < stateArray[i].length; j++) {
+        if(stateArray[i][j] === GameConstants.CaseTypeAIValue[targetValue]) {
+          return { x: j, y: i };
+        }
+      }
+    }
+
+    return null;
   }
 
   remember(state, action, reward, nextState, done) {
@@ -121,11 +181,11 @@ export default class SnakeAIUltra {
       let target = reward;
 
       if(!done) {
-        const qNext = this.model.predict(tf.tensor([nextState])).arraySync()[0];
+        const qNext = this.model.predict(nextState.expandDims(0)).arraySync()[0];
         target += this.gamma * Math.max(...qNext);
       }
 
-      const qValues = this.model.predict(tf.tensor([state])).arraySync()[0];
+      const qValues = this.model.predict(state.expandDims(0)).arraySync()[0];
 
       const actionIndex = GameConstants.ActionMapping[action];
 
@@ -134,8 +194,11 @@ export default class SnakeAIUltra {
       inputs.push(state);
       targets.push(qValues);
     }
+
+    const inputTensors = tf.stack(inputs);
+    const targetTensors = tf.stack(targets);
     
-    await this.model.fit(tf.tensor(inputs), tf.tensor(targets), { epochs: 1, verbose: 0 });
+    await this.model.fit(inputTensors, targetTensors, { epochs: 1, verbose: 0 });
 
     if(this.epsilon > this.epsilonMin) {
       this.epsilon *= this.epsilonDecay;
@@ -145,8 +208,12 @@ export default class SnakeAIUltra {
   calculateReward(snake, currentState) {
     const { gameOver } = snake;
     const head = snake.getHeadPosition();
-    const fruit = { x: currentState[2], y: currentState[3] };
-    const fruitGold = { x: currentState[4], y: currentState[5] };
+    const currentStateArray = currentState.arraySync().map(row => 
+      row.map(cell => Math.round(cell[0] * 1000) / 1000)
+    );
+
+    const fruit = this.findPositionInState(currentStateArray, GameConstants.CaseType.FRUIT);
+    const fruitGold = this.findPositionInState(currentStateArray, GameConstants.CaseType.FRUIT_GOLD);
 
     if(gameOver) return -10;
 
@@ -165,7 +232,7 @@ export default class SnakeAIUltra {
     const nextState = this.getState(snake);
     
     const reward = this.calculateReward(snake, currentState);
-    const done = !snake.gameOver;
+    const done = snake.gameOver;
 
     this.remember(currentState, this.lastAction, reward, nextState, done);
   }

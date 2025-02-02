@@ -125,7 +125,7 @@ export default class Grid {
     }
   }
 
-  maze_recursion(r, c) {
+  mazeRecursion(r, c) {
     const directions = GameUtils.shuffle([GameConstants.Direction.UP, GameConstants.Direction.RIGHT, GameConstants.Direction.BOTTOM, GameConstants.Direction.LEFT], this.rngGrid);
 
     for(let i = 0; i < directions.length; i++) {
@@ -136,7 +136,7 @@ export default class Grid {
         if(this.get(new Position(c, r - 2)) != GameConstants.CaseType.EMPTY) {
           this.set(GameConstants.CaseType.EMPTY, new Position(c, r - 2));
           this.set(GameConstants.CaseType.EMPTY, new Position(c, r - 1));
-          this.maze_recursion(r - 2, c);
+          this.mazeRecursion(r - 2, c);
         }
 
         break;
@@ -146,7 +146,7 @@ export default class Grid {
         if(this.get(new Position(c + 2, r)) != GameConstants.CaseType.EMPTY) {
           this.set(GameConstants.CaseType.EMPTY, new Position(c + 2, r));
           this.set(GameConstants.CaseType.EMPTY, new Position(c + 1, r));
-          this.maze_recursion(r, c + 2);
+          this.mazeRecursion(r, c + 2);
         }
 
         break;
@@ -156,7 +156,7 @@ export default class Grid {
         if(this.get(new Position(c, r + 2)) != GameConstants.CaseType.EMPTY) {
           this.set(GameConstants.CaseType.EMPTY, new Position(c, r + 2));
           this.set(GameConstants.CaseType.EMPTY, new Position(c, r + 1));
-          this.maze_recursion(r + 2, c);
+          this.mazeRecursion(r + 2, c);
         }
 
         break;
@@ -166,7 +166,7 @@ export default class Grid {
         if(this.get(new Position(c - 2, r)) != GameConstants.CaseType.EMPTY) {
           this.set(GameConstants.CaseType.EMPTY, new Position(c - 2, r));
           this.set(GameConstants.CaseType.EMPTY, new Position(c - 1, r));
-          this.maze_recursion(r, c - 2);
+          this.mazeRecursion(r, c - 2);
         }
 
         break;
@@ -177,7 +177,7 @@ export default class Grid {
   generateMaze() {
     this.mazeFirstPosition = new Position(1, 1, GameConstants.Direction.RIGHT);
     this.set(GameConstants.CaseType.EMPTY, this.mazeFirstPosition);
-    this.maze_recursion(1, 1);
+    this.mazeRecursion(1, 1);
   }
 
   set(value, position) {
@@ -189,22 +189,7 @@ export default class Grid {
   }
 
   valToChar(value) {
-    switch(value) {
-    case GameConstants.CaseType.EMPTY:
-      return "-";
-    case GameConstants.CaseType.SNAKE:
-      return "o";
-    case GameConstants.CaseType.SNAKE_DEAD:
-      return "O";
-    case GameConstants.CaseType.FRUIT:
-      return "x";
-    case GameConstants.CaseType.WALL:
-      return "#";
-    case GameConstants.CaseType.SURROUNDED:
-      return "/";
-    case GameConstants.CaseType.FRUIT_GOLD:
-      return "X";
-    }
+    return GameConstants.CaseTypeText[value];
   }
 
   getImageCase(position) {
@@ -216,13 +201,9 @@ export default class Grid {
     case GameConstants.CaseType.FRUIT_GOLD:
       return "fruit_gold.png";
     case GameConstants.CaseType.EMPTY:
-      return "";
     case GameConstants.CaseType.SNAKE:
-      return "";
     case GameConstants.CaseType.SNAKE_DEAD:
-      return "";
     case GameConstants.CaseType.SURROUNDED:
-      return "";
     case GameConstants.CaseType.CROSSED:
       return "";
     }

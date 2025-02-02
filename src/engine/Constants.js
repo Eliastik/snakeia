@@ -27,6 +27,26 @@ export default {
     FRUIT_GOLD: 6,
     CROSSED: 7
   },
+  CaseTypeText: {
+    0: "-",
+    1: "o",
+    2: "x",
+    3: "#",
+    4: "O",
+    5: "/",
+    6: "X",
+    7: " "
+  },
+  CaseTypeAIValue: {
+    0: 0,
+    1: 1,
+    2: 0.3,
+    3: -1,
+    4: -0.5,
+    5: 0,
+    6: 0.5,
+    7: 0
+  },
   PlayerType: {
     AI: "PLAYER_AI",
     HUMAN: "PLAYER_HUMAN",

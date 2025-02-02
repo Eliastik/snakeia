@@ -52,7 +52,8 @@
     "jest-environment-jsdom": "^29.7.0",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.0"
+    "webpack-dev-server": "^5.2.0",
+    "@tensorflow/tfjs-node-gpu": "^4.22.0"
   },
   "dependencies": {
     "@tensorflow/tfjs-node": "^4.22.0",

@@ -288,6 +288,16 @@ export default class Snake {
     return this.get(this.length() - 1);
   }
 
+  positionInQueue(position) {
+    for(const value of this.queue) {
+      if(value && value.x == position.x && value.y == position.y) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   hasMaxScore() {
     return this.grid.getTotal(GameConstants.CaseType.EMPTY) <= 0 && !this.grid.fruitPosGold && !this.grid.fruitPos;
   }

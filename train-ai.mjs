@@ -3,15 +3,19 @@ import Constants from "./src/engine/Constants.js";
 import Snake from "./src/engine/Snake.js";
 import GameEngine from "./src/engine/GameEngine.js";
 import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
-import "@tensorflow/tfjs-node";
 
-const NUM_EPISODES = 1;
-const TRAIN_EVERY = 5;
-const MAX_TICKS = 1000;
+// import "@tensorflow/tfjs-node";
+import "@tensorflow/tfjs-node-gpu"; // Uncomment to enable GPU
+
+const NUM_EPISODES = 5000;
+const TRAIN_EVERY = 10;
+const MAX_TICKS = 500;
 
 const theSnakeAI = new SnakeAIUltra(true);
+const startTime = performance.now();
 
 let totalScore = 0;
+let totalReward = 0;
 
 for(let episode = 1; episode <= NUM_EPISODES; episode++) {
   const theGrid = new Grid(10, 10, false, false, false, null, false, 1, 2);
@@ -23,7 +27,7 @@ for(let episode = 1; episode <= NUM_EPISODES; episode++) {
 
   let tick = 0;
 
-  while(!gameEngine.gameFinished && tick < MAX_TICKS) {
+  while(!gameEngine.gameFinished && !gameEngine.gameOver && tick <= MAX_TICKS) {
     const currentState = theSnakeAI.getState(theSnake);
 
     await gameEngine.doTick();
@@ -36,8 +40,7 @@ for(let episode = 1; episode <= NUM_EPISODES; episode++) {
 
     tick++;
 
-    console.clear();
-    console.log(`Game n°${episode} - Score: ${theSnake.score} - Reward: ${theSnakeAI.calculateReward(theSnake, currentState)}`);
+    totalReward += theSnakeAI.calculateReward(theSnake, currentState);
   }
 
   await theSnakeAI.train();
@@ -51,7 +54,9 @@ for(let episode = 1; episode <= NUM_EPISODES; episode++) {
   }
 }
 
-console.log(`Training finished! Average score: ${totalScore / NUM_EPISODES}`);
+console.log(`Training finished! Average score: ${totalScore / NUM_EPISODES} - Average reward: ${totalReward / NUM_EPISODES} - Time: ${performance.now() - startTime} ms`);
+
+console.log("Saving model...");
 
 await theSnakeAI.model.save("file://models");
 
