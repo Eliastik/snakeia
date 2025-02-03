@@ -33,11 +33,11 @@ export default class SnakeAIUltra extends SnakeAI {
     this.model = null;
     this.memory = [];
     this.gamma = 0.95;
-    this.epsilon = 0.99;
-    this.epsilonDecay = 0.995;
+    this.epsilon = 1.0;
+    this.epsilonDecay = 0.95;
     this.epsilonMin = 0.01;
     this.learningRate = 0.001;
-    this.batchSize = 32;
+    this.batchSize = 64;
     this.lastAction = null;
   }
 
@@ -91,7 +91,7 @@ export default class SnakeAIUltra extends SnakeAI {
     // TODO
   }
 
-  async ai(snake) {
+  ai(snake) {
     let action = null;
 
     if(Math.random() < this.epsilon && this.enableTrainingMode) {

@@ -13,7 +13,7 @@ test("snake stuck horizontally - auto detection", async () => {
   engine.started = true;
 
   for(let i = 0; i < theGrid5.width * engine.aiStuckLimit + 1; i++) {
-    await engine.doTick();
+    engine.doTick();
   }
 
   expect(engine.gameOver).toBe(true);
@@ -29,7 +29,7 @@ test("snake stuck vertically - auto detection", async () => {
   engine.started = true;
 
   for(let i = 0; i < theGrid6.height * engine.aiStuckLimit + 1; i++) {
-    await engine.doTick();
+    engine.doTick();
   }
 
   expect(engine.gameOver).toBe(true);

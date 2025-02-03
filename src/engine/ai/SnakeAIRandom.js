@@ -27,8 +27,8 @@ export default class SnakeAIRandom extends SnakeAI {
     this._aiLevelText = "random";
   }
 
-  async ai(snake) {
-    await super.ai(snake);
+  ai(snake) {
+    super.ai(snake);
 
     const currentPosition = snake.getHeadPosition();
     const top = snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.UP));

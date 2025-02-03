@@ -299,7 +299,7 @@ export default class GameEngine {
     }, this.initialSpeed * GameConstants.Setting.TIME_MULTIPLIER);
   }
 
-  async doTick() {
+  doTick() {
     if(!this.paused && !this.killed) {
       this.ticks++;
 
@@ -319,14 +319,14 @@ export default class GameEngine {
               this.snakes[i].moveTo(this.snakes[i].lastKey);
               this.snakes[i].lastKey = -1;
             } else if(this.snakes[i].player == GameConstants.PlayerType.AI && (!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && this.snakes[i].aiLevel != GameConstants.AiLevel.RANDOM))) {
-              this.snakes[i].moveTo(await this.snakes[i].ai());
+              this.snakes[i].moveTo(this.snakes[i].ai());
             }
 
             let headSnakePos = this.snakes[i].getHeadPosition();
 
             if(this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI && this.grid.isDeadPosition(this.snakes[i].getNextPosition(headSnakePos, this.snakes[i].direction))) {
               this.snakes[i].direction = initialDirection;
-              this.snakes[i].moveTo(await this.snakes[i].ai());
+              this.snakes[i].moveTo(this.snakes[i].ai());
               this.snakes[i].lastKey = -1;
             }
 

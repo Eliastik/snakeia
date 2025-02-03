@@ -26,8 +26,8 @@ export default class SnakeAILow extends SnakeAI {
     this._aiLevelText = "low";
   }
 
-  async ai(snake) {
-    await super.ai(snake);
+  ai(snake) {
+    super.ai(snake);
 
     if(snake.grid.fruitPos != null) {
       const currentPosition = snake.getHeadPosition();

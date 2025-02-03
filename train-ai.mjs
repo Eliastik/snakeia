@@ -34,7 +34,7 @@ for(let episode = 1; episode <= NUM_EPISODES; episode++) {
   while(!gameEngine.gameFinished && !gameEngine.gameOver && tick <= MAX_TICKS) {
     const currentState = theSnakeAI.getState(theSnake);
 
-    await gameEngine.doTick();
+    gameEngine.doTick();
 
     await theSnakeAI.step(theSnake, currentState);
 

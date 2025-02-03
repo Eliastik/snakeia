@@ -398,9 +398,9 @@ export default class Snake {
     return snake;
   }
 
-  async ai() {
+  ai() {
     if(this.snakeAI && this.snakeAI.ai) {
-      const action = await this.snakeAI.ai(this);
+      const action = this.snakeAI.ai(this);
 
       if(!action || this.keyToDirection(action) == this.direction) {
         this.ticksWithoutAction++;

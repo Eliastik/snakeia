@@ -24,7 +24,7 @@ export default class SnakeAI {
     this._aiLevelText = "custom";
   }
 
-  async ai(snake) {
+  ai(snake) {
     const currentPosition = snake.getHeadPosition();
     const fruitPos = snake.grid.fruitPos;
     const fruitPosGold = snake.grid.fruitPosGold;

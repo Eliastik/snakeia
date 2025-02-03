@@ -27,8 +27,8 @@ export default class SnakeAIHigh extends SnakeAINormal {
     this._aiLevelText = "high";
   }
 
-  async ai(snake) {
-    const res = await super.ai(snake);
+  ai(snake) {
+    const res = super.ai(snake);
 
     if(!res) {
       return this.aiLow.ai(snake);

@@ -25,7 +25,7 @@ export default class SnakeAIMock extends SnakeAI {
     this._aiLevelText = "mock";
   }
 
-  async ai() {
+  ai() {
     return null;
   }
 }

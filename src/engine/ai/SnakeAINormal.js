@@ -29,8 +29,8 @@ export default class SnakeAINormal extends SnakeAI {
     this._aiLevelText = "normal";
   }
 
-  async ai(snake) {
-    await super.ai(snake);
+  ai(snake) {
+    super.ai(snake);
 
     const currentPosition = snake.getHeadPosition();
     const fruitPos = snake.grid.fruitPos;
