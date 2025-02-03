@@ -1117,7 +1117,7 @@ function validateSettings(returnValidation) {
     speed = parseInt(customSpeed);
   }
 
-  if(selectedMode != SOLO_PLAYER && selectedMode != BATTLE_ROYALE_ONLINE && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high" && aiLevel != "random")) {
+  if(selectedMode != SOLO_PLAYER && selectedMode != BATTLE_ROYALE_ONLINE && (aiLevel != "low" && aiLevel != "normal" && aiLevel != "high" && aiLevel != "ultra" && aiLevel != "random")) {
     formValidated = false;
 
     if(!returnValidation) {

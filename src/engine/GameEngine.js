@@ -70,7 +70,7 @@ export default class GameEngine {
     this.reactor.registerEvent("onUpdateCounter");
   }
 
-  init() {
+  async init() {
     if(!this.clientSidePredictionsMode) {
       if(this.snakes == null) {
         this.errorOccurred = true;
@@ -84,7 +84,7 @@ export default class GameEngine {
       if(this.grid instanceof Grid == false) {
         this.errorOccurred = true;
       } else if(!this.errorOccurred) {
-        this.initGridAndSnakes();
+        await this.initGridAndSnakes();
 
         // Init Snake colors
         let startHue = GameUtils.randRange(0, 360, this.grid ? new seedrandom(this.grid.seedGame) : null);
@@ -101,7 +101,7 @@ export default class GameEngine {
     }
   }
 
-  initGridAndSnakes() {
+  async initGridAndSnakes() {
     this.grid.reset();
     this.grid.init();
 
@@ -111,14 +111,14 @@ export default class GameEngine {
       }
       
       for(let i = 0; i < this.snakes.length; i++) {
-        this.snakes[i].init();
+        await this.snakes[i].init();
       }
     }
 
     this.grid.setFruit(this.snakes.length);
   }
 
-  reset() {
+  async reset() {
     this.paused = true;
     this.isReseted = true;
     this.exited = false;
@@ -145,7 +145,7 @@ export default class GameEngine {
       this.grid.seedGame = "" + (parseInt(this.grid.seedGame) + 1);
     }
 
-    this.initGridAndSnakes();
+    await this.initGridAndSnakes();
 
     this.reactor.dispatchEvent("onReset");
     this.start();

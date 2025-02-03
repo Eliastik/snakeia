@@ -10,19 +10,23 @@ import "@tensorflow/tfjs-node-gpu"; // Uncomment to enable GPU
 const NUM_EPISODES = 5000;
 const TRAIN_EVERY = 10;
 const MAX_TICKS = 500;
+const GRID_WIDTH = 10;
+const GRID_HEIGHT = 10;
 
 const theSnakeAI = new SnakeAIUltra(true);
+await theSnakeAI.setup(GRID_WIDTH, GRID_HEIGHT);
+
 const startTime = performance.now();
 
 let totalScore = 0;
 let totalReward = 0;
 
 for(let episode = 1; episode <= NUM_EPISODES; episode++) {
-  const theGrid = new Grid(10, 10, false, false, false, null, false, 1, 2);
+  const theGrid = new Grid(GRID_WIDTH, GRID_HEIGHT, false, false, false, null, false, 1, 2);
   const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", theSnakeAI);
   const gameEngine = new GameEngine(theGrid, [theSnake]);
 
-  gameEngine.init();
+  await gameEngine.init();
   gameEngine.paused = false;
 
   let tick = 0;

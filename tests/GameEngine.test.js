@@ -8,7 +8,7 @@ test("snake stuck horizontally - auto detection", async () => {
   const theGrid5 = new Grid(5, 5, false, false, false, null, false, 1, 2);
   const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid5, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
   const engine = new GameEngine(theGrid5, [theSnake]);
-  engine.init();
+  await engine.init();
   engine.paused = false;
   engine.started = true;
 
@@ -24,7 +24,7 @@ test("snake stuck vertically - auto detection", async () => {
   const theGrid6 = new Grid(5, 5, false, false, false, null, false, 1, 2);
   const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid6, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
   const engine = new GameEngine(theGrid6, [theSnake]);
-  engine.init();
+  await engine.init();
   engine.paused = false;
   engine.started = true;
 

@@ -130,5 +130,6 @@ export default {
     STARTED: "STARTED",
     SEARCHING_PLAYERS: "SEARCHING_PLAYERS",
     AUTHENTICATION_SUCCESS: "AUTHENTICATION_SUCCESS"
-  }
+  },
+  AIModelLocation: "/models/model.json"
 };

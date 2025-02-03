@@ -62,25 +62,25 @@ test("not enough free space to put a snake", () => {
   expect(theSnake.errorInit).toBe(true);
 });
 
-test("not enough free space to put a snake horizontally - auto detection", () => {
+test("not enough free space to put a snake horizontally - auto detection", async () => {
   const mockRandom = jest.fn();
   mockRandom.mockReturnValueOnce(new Position(1, 3));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
   const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid3);
-  theSnake.init();
+  await theSnake.init();
 
   expect(theSnake.errorInit).toBe(false);
   expect(theSnake.getHeadPosition().direction).toBe(Constants.Direction.DOWN);
 });
 
-test("not enough free space to put a snake vertically - auto detection", () => {
+test("not enough free space to put a snake vertically - auto detection", async () => {
   const mockRandom = jest.fn();
   mockRandom.mockReturnValueOnce(new Position(1, 1));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
   const theSnake = new Snake(Constants.Direction.DOWN, 3, theGrid4);
-  theSnake.init();
+  await theSnake.init();
 
   expect(theSnake.errorInit).toBe(false);
   expect(theSnake.getHeadPosition().direction).toBe(Constants.Direction.LEFT);

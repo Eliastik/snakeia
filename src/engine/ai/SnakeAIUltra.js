@@ -16,16 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+import SnakeAI from "./SnakeAI.js";
 import GameConstants from "../Constants.js";
 import Position from "../Position.js";
 import GameUtils from "../GameUtils.js";
 import * as tf from "@tensorflow/tfjs";
 
-export default class SnakeAIUltra {
-  constructor(enableTrainingMode) {
-    this.aiFruitGoal = GameConstants.CaseType.FRUIT;
-    this._aiLevelText = "Ultra";
-    this.model = this.createModel(10, 10); // Height / width
+export default class SnakeAIUltra extends SnakeAI {
+  constructor(enableTrainingMode, modelLocation) {
+    super();
+
+    this._aiLevelText = "ultra";
+    this.enableTrainingMode = enableTrainingMode;
+    this.modelLocation = modelLocation;
+
+    this.model = null;
     this.memory = [];
     this.gamma = 0.95;
     this.epsilon = 0.99;
@@ -34,15 +39,21 @@ export default class SnakeAIUltra {
     this.learningRate = 0.001;
     this.batchSize = 32;
     this.lastAction = null;
-
-    this.enableTrainingMode = enableTrainingMode;
   }
 
-  createModel(height, width) {
+  async setup(width, height) {
+    this.model = await this.createOrLoadModel(width, height, this.enableTrainingMode, this.modelLocation);
+  }
+
+  async createOrLoadModel(width, height, enableTrainingMode, modelLocation) {
+    if(!enableTrainingMode) {
+      return await tf.loadLayersModel(modelLocation);
+    }
+
     const model = tf.sequential();
   
     model.add(tf.layers.conv2d({
-      inputShape: [height, width, 1],
+      inputShape: [width, height, 1],
       filters: 32,
       kernelSize: 3,
       activation: "relu",

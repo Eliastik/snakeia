@@ -45,11 +45,9 @@ export default class Snake {
     this.snakeAI = new SnakeAI();
     this.customAI = customAI;
     this.ticksWithoutAction = 0;
-
-    this.initAI();
   }
 
-  init() {
+  async init() {
     if(this.initialLength <= 0) {
       this.errorInit = true;
       return false;
@@ -201,10 +199,13 @@ export default class Snake {
     }
 
     this.lastTail = this.get(this.queue.length - 1);
+
+    await this.initAI();
+
     return true;
   }
 
-  initAI() {
+  async initAI() {
     if(!this.customAI) {
       switch(this.aiLevel) {
       case GameConstants.AiLevel.RANDOM:
@@ -219,9 +220,12 @@ export default class Snake {
       case GameConstants.AiLevel.HIGH:
         this.snakeAI = new SnakeAIHigh();
         break;
-      case GameConstants.AiLevel.ULTRA:
-        this.snakeAI = new SnakeAIUltra();
+      case GameConstants.AiLevel.ULTRA: {
+        const aiUltra = new SnakeAIUltra(false, GameConstants.AIModelLocation);
+        await aiUltra.setup();
+        this.snakeAI = aiUltra;
         break;
+      }
       case GameConstants.AiLevel.MOCK:
         this.snakeAI = new SnakeAIMock();
         break;
