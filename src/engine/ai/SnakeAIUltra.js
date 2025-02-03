@@ -37,7 +37,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonDecay = 0.95;
     this.epsilonMin = 0.01;
     this.learningRate = 0.001;
-    this.batchSize = 64;
+    this.batchSize = 32;
     this.lastAction = null;
   }
 
@@ -53,7 +53,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const model = tf.sequential();
   
     model.add(tf.layers.conv2d({
-      inputShape: [width, height, 1],
+      inputShape: [width, height, 3],
       filters: 32,
       kernelSize: 3,
       activation: "relu",
@@ -121,7 +121,7 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   getBestAction(snake) {
-    const currentState = this.getState(snake);
+    const currentState = this.stateToTensor(this.getState(snake));
     const currentStateTensor = currentState.expandDims(0);
 
     const qValues = this.model.predict(currentStateTensor);
@@ -134,25 +134,57 @@ export default class SnakeAIUltra extends SnakeAI {
 
   getState(snake) {
     const grid = snake.grid;
-    const state = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
+
+    const aiSnakeLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
+    const fruitsLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
+    const wallsLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
+
+    // TODO
+    // const opponentSnakeLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
     
     for(let i = 0; i < grid.height; i++) {
       for(let j = 0; j < grid.width; j++) {
         const position = new Position(j, i);
+        const cellValue = grid.get(position);
 
+        // AI Snake
         if(snake.positionInQueue(position)) {
-          state[i][j] = 1;
-        } else {
-          state[i][j] = this.cellToStateValue(grid.get(position));
+          if(snake.getHeadPosition().equals(position)) {
+            aiSnakeLayer[i][j] = 3;
+          } else if(snake.getTailPosition().equals(position)) {
+            aiSnakeLayer[i][j] = 2;
+          } else {
+            aiSnakeLayer[i][j] = 1;
+          }
+        }
+
+        // TODO opponent Snakes
+
+        // Fruits
+        if(cellValue === GameConstants.CaseType.FRUIT) {
+          fruitsLayer[i][j] = 1;
+        } else if(cellValue === GameConstants.CaseType.FRUIT_GOLD) {
+          fruitsLayer[i][j] = 2;
+        }
+
+        // Walls
+        if(cellValue === GameConstants.CaseType.WALL || cellValue == GameConstants.CaseType.SNAKE_DEAD) {
+          wallsLayer[i][j] = 1;
         }
       }
     }
 
-    return tf.tensor(state).expandDims(-1);
+    return { aiSnakeLayer, fruitsLayer, wallsLayer };
   }
 
-  cellToStateValue(cellValue) {
-    return GameConstants.CaseTypeAIValue[cellValue];
+  stateToTensor(stateArray) {
+    const stateTensor = tf.stack([
+      tf.tensor(stateArray.aiSnakeLayer),
+      tf.tensor(stateArray.fruitsLayer),
+      tf.tensor(stateArray.wallsLayer)
+    ]);
+
+    return stateTensor.transpose([1, 2, 0]);
   }
 
   findPositionInState(stateArray, targetValue) {
@@ -208,7 +240,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
     const inputTensors = tf.stack(inputs);
     const targetTensors = tf.stack(targets);
-    
+
     await this.model.fit(inputTensors, targetTensors, { epochs: 1, verbose: 0 });
 
     if(this.epsilon > this.epsilonMin) {
@@ -219,14 +251,13 @@ export default class SnakeAIUltra extends SnakeAI {
   calculateReward(snake, currentState) {
     const { gameOver } = snake;
     const head = snake.getHeadPosition();
-    const currentStateArray = currentState.arraySync().map(row => 
-      row.map(cell => Math.round(cell[0] * 1000) / 1000)
-    );
 
-    const fruit = this.findPositionInState(currentStateArray, GameConstants.CaseType.FRUIT);
-    const fruitGold = this.findPositionInState(currentStateArray, GameConstants.CaseType.FRUIT_GOLD);
+    const fruit = this.findPositionInState(currentState.fruitsLayer, GameConstants.CaseType.FRUIT);
+    const fruitGold = this.findPositionInState(currentState.fruitsLayer, GameConstants.CaseType.FRUIT_GOLD);
 
-    if(gameOver) return -10;
+    if(gameOver) {
+      return -15;
+    }
 
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
       return 10;
@@ -245,6 +276,6 @@ export default class SnakeAIUltra extends SnakeAI {
     const reward = this.calculateReward(snake, currentState);
     const done = snake.gameOver;
 
-    this.remember(currentState, this.lastAction, reward, nextState, done);
+    this.remember(this.stateToTensor(currentState), this.lastAction, reward, this.stateToTensor(nextState), done);
   }
 }

@@ -40,11 +40,11 @@ export default {
   CaseTypeAIValue: {
     0: 0,
     1: 1,
-    2: 0.3,
-    3: -1,
-    4: -0.5,
+    2: 1,
+    3: 1,
+    4: 1,
     5: 0,
-    6: 0.5,
+    6: 2,
     7: 0
   },
   PlayerType: {
