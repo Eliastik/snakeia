@@ -131,5 +131,5 @@ export default {
     SEARCHING_PLAYERS: "SEARCHING_PLAYERS",
     AUTHENTICATION_SUCCESS: "AUTHENTICATION_SUCCESS"
   },
-  AIModelLocation: "/models/model.json"
+  AIModelLocation: "/models/v0.0.1/model.json"
 };

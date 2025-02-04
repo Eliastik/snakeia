@@ -38,6 +38,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMin = 0.01;
     this.learningRate = 0.001;
     this.batchSize = 32;
+    this.maxMemoryLength = 2000;
     this.lastAction = null;
   }
 
@@ -121,15 +122,17 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   getBestAction(snake) {
-    const currentState = this.stateToTensor(this.getState(snake));
-    const currentStateTensor = currentState.expandDims(0);
+    return tf.tidy(() => {
+      const currentState = this.stateToTensor(this.getState(snake));
+      const currentStateTensor = currentState.expandDims(0);
+  
+      const qValues = this.model.predict(currentStateTensor);
+      const qValuesArray = qValues.arraySync()[0];
+  
+      const actionIndex = qValuesArray.indexOf(Math.max(...qValuesArray));
 
-    const qValues = this.model.predict(currentStateTensor);
-    const qValuesArray = qValues.arraySync()[0];
-
-    const actionIndex = qValuesArray.indexOf(Math.max(...qValuesArray));
-
-    return GameConstants.ActionMappingInverse[actionIndex];
+      return GameConstants.ActionMappingInverse[actionIndex];
+    });
   }
 
   getState(snake) {
@@ -178,13 +181,15 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   stateToTensor(stateArray) {
-    const stateTensor = tf.stack([
-      tf.tensor(stateArray.aiSnakeLayer),
-      tf.tensor(stateArray.fruitsLayer),
-      tf.tensor(stateArray.wallsLayer)
-    ]);
+    return tf.tidy(() => {
+      const stateTensor = tf.stack([
+        tf.tensor(stateArray.aiSnakeLayer),
+        tf.tensor(stateArray.fruitsLayer),
+        tf.tensor(stateArray.wallsLayer)
+      ]);
 
-    return stateTensor.transpose([1, 2, 0]);
+      return stateTensor.transpose([1, 2, 0]);
+    });
   }
 
   findPositionInState(stateArray, targetValue) {
@@ -202,8 +207,16 @@ export default class SnakeAIUltra extends SnakeAI {
   remember(state, action, reward, nextState, done) {
     this.memory.push({ state, action, reward, nextState, done });
 
-    if(this.memory.length > 2000) {
-      this.memory.shift();
+    if(this.memory.length > this.maxMemoryLength) {
+      const removedMemory = this.memory.shift();
+
+      if(removedMemory && removedMemory.state) {
+        removedMemory.state.dispose();
+      }
+
+      if(removedMemory && removedMemory.nextState) {
+        removedMemory.nextState.dispose();
+      }
     }
   }
 
@@ -221,27 +234,33 @@ export default class SnakeAIUltra extends SnakeAI {
     const targets = [];
 
     for(const { state, action, reward, nextState, done } of batch) {
-      let target = reward;
-
-      if(!done) {
-        const qNext = this.model.predict(nextState.expandDims(0)).arraySync()[0];
-        target += this.gamma * Math.max(...qNext);
-      }
-
-      const qValues = this.model.predict(state.expandDims(0)).arraySync()[0];
-
-      const actionIndex = GameConstants.ActionMapping[action];
-
-      qValues[actionIndex] = target;
-
-      inputs.push(state);
-      targets.push(qValues);
+      tf.tidy(() => {
+        let target = reward;
+  
+        if(!done) {
+          const qNext = this.model.predict(nextState.expandDims(0)).arraySync()[0];
+          target += this.gamma * Math.max(...qNext);
+        }
+  
+        const qValues = this.model.predict(state.expandDims(0)).arraySync()[0];
+  
+        const actionIndex = GameConstants.ActionMapping[action];
+  
+        qValues[actionIndex] = target;
+  
+        inputs.push(state);
+        targets.push(qValues);
+      });
     }
 
     const inputTensors = tf.stack(inputs);
     const targetTensors = tf.stack(targets);
 
     await this.model.fit(inputTensors, targetTensors, { epochs: 1, verbose: 0 });
+
+    // Cleanup tensors
+    inputTensors.dispose();
+    targetTensors.dispose();
 
     if(this.epsilon > this.epsilonMin) {
       this.epsilon *= this.epsilonDecay;
@@ -256,7 +275,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const fruitGold = this.findPositionInState(currentState.fruitsLayer, GameConstants.CaseType.FRUIT_GOLD);
 
     if(gameOver) {
-      return -15;
+      return -10;
     }
 
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
@@ -272,10 +291,12 @@ export default class SnakeAIUltra extends SnakeAI {
 
   async step(snake, currentState) {
     const nextState = this.getState(snake);
-    
     const reward = this.calculateReward(snake, currentState);
     const done = snake.gameOver;
 
-    this.remember(this.stateToTensor(currentState), this.lastAction, reward, this.stateToTensor(nextState), done);
+    const currentStateTensor = this.stateToTensor(currentState);
+    const nextStateTensor = this.stateToTensor(nextState);
+
+    this.remember(currentStateTensor, this.lastAction, reward, nextStateTensor, done);
   }
 }
