@@ -20,7 +20,7 @@ import GameUtils from "./GameUtils.js";
 import GameConstants from "./Constants.js";
 import Position from "./Position.js";
 import seedrandom from "seedrandom";
-import * as Lowlight from "../../libs/lowlight.astar.min.js";
+import Lowlight from "../../libs/lowlight.astar.min.js";
 
 export default class Grid {
   constructor(width, height, generateWalls, borderWalls, maze, customGrid, mazeForceAuto, seedGrid, seedGame, probGoldFruitIncrease) {

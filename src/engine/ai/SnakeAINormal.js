@@ -20,7 +20,7 @@
 import SnakeAI from "./SnakeAI.js";
 import GameConstants from "../Constants.js";
 import Position from "../Position.js";
-import * as Lowlight from "../../../libs/lowlight.astar.min.js";
+import Lowlight from "../../../libs/lowlight.astar.min.js";
 
 export default class SnakeAINormal extends SnakeAI {
   constructor(enableTorus) {

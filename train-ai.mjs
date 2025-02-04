@@ -7,24 +7,52 @@ import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 // import "@tensorflow/tfjs-node";
 import "@tensorflow/tfjs-node-gpu"; // Uncomment to enable GPU
 
-const NUM_EPISODES = 5000;
+// Settings
+const NUM_EPISODES = 10000;
 const TRAIN_EVERY = 10;
 const MAX_TICKS = 750;
-const GRID_WIDTH = 10;
-const GRID_HEIGHT = 10;
+const INITAL_GRID_WIDTH = 10;
+const INITAL_GRID_HEIGHT = 10;
+const EPISODES_TYPES = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "INCREASE_SIZE"]; // TODO add Maze training?
+const CHANGE_TYPES_EACH_X_EPISODES = 150;
+const AI_LEVEL_OPPONENTS = Constants.AiLevel.DEFAULT;
+const NUMBER_OPPONENTS = 5;
 
+// Setup and run training
 const theSnakeAI = new SnakeAIUltra(true);
-await theSnakeAI.setup(GRID_WIDTH, GRID_HEIGHT);
-
-const startTime = performance.now();
+await theSnakeAI.setup();
 
 let totalScore = 0;
 let totalReward = 0;
 
+let currentGridSeed = 1;
+let currentGameSeed = 2;
+let currentEpisodeTypeIndex = 0;
+let currentEpisodeType = "DEFAULT";
+let currentGridWidth = INITAL_GRID_WIDTH;
+let currentGridHeight = INITAL_GRID_HEIGHT;
+
+const startTime = performance.now();
+
 for(let episode = 1; episode <= NUM_EPISODES; episode++) {
-  const theGrid = new Grid(GRID_WIDTH, GRID_HEIGHT, false, false, false, null, false);
+  const randomWalls = currentEpisodeType === "RANDOM_WALLS";
+  const borderWalls = currentEpisodeType === "BORDER_WALLS";
+  const maze = currentEpisodeType === "MAZE";
+  const opponents = currentEpisodeType === "OPPONENTS";
+
+  const theGrid = new Grid(currentGridWidth, currentGridHeight, randomWalls, borderWalls, maze, null, false, currentGridSeed, currentGameSeed);
   const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", theSnakeAI);
-  const gameEngine = new GameEngine(theGrid, [theSnake]);
+
+  const theSnakes = [theSnake];
+
+  if(opponents) {
+    for(let i = 0; i < NUMBER_OPPONENTS; i++) {
+      const theOpponentSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, AI_LEVEL_OPPONENTS, false, `TheOpponentAI${i}`, null);
+      theSnakes.push(theOpponentSnake);
+    }
+  }
+
+  const gameEngine = new GameEngine(theGrid, theSnakes);
 
   await gameEngine.init();
   gameEngine.paused = false;
@@ -49,10 +77,26 @@ for(let episode = 1; episode <= NUM_EPISODES; episode++) {
 
   await theSnakeAI.train();
 
-  console.log(`Game n°${episode} finished - Score: ${theSnake.score}`);
+  console.log(`Game n°${episode} finished - Episode type: ${currentEpisodeType} - Score: ${theSnake.score} - Grid size: ${currentGridWidth} x ${currentGridHeight} - Random walls: ${randomWalls} - Border walls: ${borderWalls} - Maze: ${maze} - Opponents: ${opponents}`);
+
+  // Change games conditions each X episodes
+  if(episode % CHANGE_TYPES_EACH_X_EPISODES === 0) {
+    currentEpisodeTypeIndex++;
+    currentEpisodeType = EPISODES_TYPES[currentEpisodeTypeIndex % EPISODES_TYPES.length];
+
+    if(currentEpisodeType === "INCREASE_SIZE") {
+      currentGridWidth = Math.min(100, currentGridWidth + 5);
+      currentGridHeight = Math.min(100, currentGridHeight + 5);
+      currentEpisodeType = "DEFAULT";
+    }
+  }
 
   totalScore += theSnake.score;
 
+  currentGridSeed++;
+  currentGameSeed++;
+
+  // Reduce the epsilon
   if(theSnakeAI.epsilon > theSnakeAI.epsilonMin) {
     theSnakeAI.epsilon *= theSnakeAI.epsilonDecay;
   }

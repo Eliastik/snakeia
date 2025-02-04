@@ -31,6 +31,8 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelLocation = modelLocation;
 
     this.model = null;
+    this.modelHeight = 50;
+    this.modelWidth = 50;
     this.memory = [];
     this.gamma = 0.95;
     this.epsilon = 1.0;
@@ -42,11 +44,11 @@ export default class SnakeAIUltra extends SnakeAI {
     this.lastAction = null;
   }
 
-  async setup(width, height) {
-    this.model = await this.createOrLoadModel(width, height, this.enableTrainingMode, this.modelLocation);
+  async setup() {
+    this.model = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
   }
 
-  async createOrLoadModel(width, height, enableTrainingMode, modelLocation) {
+  async createOrLoadModel(enableTrainingMode, modelLocation) {
     if(!enableTrainingMode) {
       return await tf.loadLayersModel(modelLocation);
     }
@@ -54,7 +56,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const model = tf.sequential();
   
     model.add(tf.layers.conv2d({
-      inputShape: [width, height, 3],
+      inputShape: [this.modelHeight, this.modelWidth, 3],
       filters: 32,
       kernelSize: 3,
       activation: "relu",
@@ -127,9 +129,9 @@ export default class SnakeAIUltra extends SnakeAI {
       const currentStateTensor = currentState.expandDims(0);
   
       const qValues = this.model.predict(currentStateTensor);
-      const qValuesArray = qValues.arraySync()[0];
+      const qValuesArray = qValues.dataSync();
   
-      const actionIndex = qValuesArray.indexOf(Math.max(...qValuesArray));
+      const actionIndex = qValuesArray.indexOf(tf.max(qValuesArray).arraySync());
 
       return GameConstants.ActionMappingInverse[actionIndex];
     });
@@ -138,12 +140,9 @@ export default class SnakeAIUltra extends SnakeAI {
   getState(snake) {
     const grid = snake.grid;
 
-    const aiSnakeLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
+    const snakesLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
     const fruitsLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
     const wallsLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
-
-    // TODO
-    // const opponentSnakeLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
     
     for(let i = 0; i < grid.height; i++) {
       for(let j = 0; j < grid.width; j++) {
@@ -153,15 +152,16 @@ export default class SnakeAIUltra extends SnakeAI {
         // AI Snake
         if(snake.positionInQueue(position)) {
           if(snake.getHeadPosition().equals(position)) {
-            aiSnakeLayer[i][j] = 3;
+            snakesLayer[i][j] = 3;
           } else if(snake.getTailPosition().equals(position)) {
-            aiSnakeLayer[i][j] = 2;
+            snakesLayer[i][j] = 2;
           } else {
-            aiSnakeLayer[i][j] = 1;
+            snakesLayer[i][j] = 1;
           }
+        } else if(cellValue === GameConstants.CaseType.SNAKE) { // Opponent Snakes
+          // TODO opponent Snakes - special value for head/tail?
+          snakesLayer[i][j] = 4;
         }
-
-        // TODO opponent Snakes
 
         // Fruits
         if(cellValue === GameConstants.CaseType.FRUIT) {
@@ -177,18 +177,25 @@ export default class SnakeAIUltra extends SnakeAI {
       }
     }
 
-    return { aiSnakeLayer, fruitsLayer, wallsLayer };
+    return { snakesLayer, fruitsLayer, wallsLayer };
   }
 
   stateToTensor(stateArray) {
     return tf.tidy(() => {
       const stateTensor = tf.stack([
-        tf.tensor(stateArray.aiSnakeLayer),
+        tf.tensor(stateArray.snakesLayer),
         tf.tensor(stateArray.fruitsLayer),
         tf.tensor(stateArray.wallsLayer)
       ]);
 
-      return stateTensor.transpose([1, 2, 0]);
+      const stateTensorTransposed = stateTensor.transpose([1, 2, 0]);
+
+      const currentShape = stateTensorTransposed.shape;
+      const expectedShape = [this.modelHeight, this.modelWidth];
+
+      if(currentShape[0] !== expectedShape[0] || currentShape[1] !== expectedShape[1]) {
+        return tf.image.resizeNearestNeighbor(stateTensorTransposed, expectedShape);
+      }
     });
   }
 
@@ -238,11 +245,11 @@ export default class SnakeAIUltra extends SnakeAI {
         let target = reward;
   
         if(!done) {
-          const qNext = this.model.predict(nextState.expandDims(0)).arraySync()[0];
-          target += this.gamma * Math.max(...qNext);
+          const qNext = this.model.predict(nextState.expandDims(0)).dataSync();
+          target += this.gamma * tf.max(qNext).arraySync();
         }
   
-        const qValues = this.model.predict(state.expandDims(0)).arraySync()[0];
+        const qValues = this.model.predict(state.expandDims(0)).dataSync();
   
         const actionIndex = GameConstants.ActionMapping[action];
   
@@ -275,7 +282,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const fruitGold = this.findPositionInState(currentState.fruitsLayer, GameConstants.CaseType.FRUIT_GOLD);
 
     if(gameOver) {
-      return -10;
+      return -100;
     }
 
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
@@ -286,7 +293,7 @@ export default class SnakeAIUltra extends SnakeAI {
       return 30;
     }
 
-    return -0.2;
+    return -0.1;
   }
 
   async step(snake, currentState) {
