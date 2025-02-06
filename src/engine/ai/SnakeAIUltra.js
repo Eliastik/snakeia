@@ -31,24 +31,33 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelLocation = modelLocation;
 
     this.model = null;
-    this.modelHeight = 50;
-    this.modelWidth = 50;
+    this.modelHeight = 20;
+    this.modelWidth = 20;
+    this.modelDepth = 3;
+
     this.memory = [];
     this.gamma = 0.95;
     this.epsilon = 1.0;
-    this.epsilonDecay = 0.95;
+    this.epsilonDecay = 0.999;
     this.epsilonMin = 0.01;
     this.learningRate = 0.001;
-    this.batchSize = 32;
-    this.maxMemoryLength = 2000;
+    this.batchSize = 64;
+    this.maxMemoryLength = 2500;
+
     this.lastAction = null;
+    this.currentQValue = 0;
+
+    this.summaryWriter = null;
+    this.currentEpoch = 0;
   }
 
-  async setup() {
+  async setup(summaryWriter) {
     this.model = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
+    this.summaryWriter = summaryWriter;
   }
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
+    // TODO load once
     if(!enableTrainingMode) {
       return await tf.loadLayersModel(modelLocation);
     }
@@ -56,7 +65,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const model = tf.sequential();
   
     model.add(tf.layers.conv2d({
-      inputShape: [this.modelHeight, this.modelWidth, 3],
+      inputShape: [this.modelHeight, this.modelWidth, this.modelDepth],
       filters: 32,
       kernelSize: 3,
       activation: "relu",
@@ -129,9 +138,13 @@ export default class SnakeAIUltra extends SnakeAI {
       const currentStateTensor = currentState.expandDims(0);
   
       const qValues = this.model.predict(currentStateTensor);
-      const qValuesArray = qValues.dataSync();
   
-      const actionIndex = qValuesArray.indexOf(tf.max(qValuesArray).arraySync());
+      const actionIndex = tf.argMax(qValues, 1).arraySync()[0];
+
+      if(this.summaryWriter) {
+        const maxValue = tf.max(qValues, 1).arraySync()[0];
+        this.currentQValue = maxValue;
+      }
 
       return GameConstants.ActionMappingInverse[actionIndex];
     });
@@ -182,20 +195,24 @@ export default class SnakeAIUltra extends SnakeAI {
 
   stateToTensor(stateArray) {
     return tf.tidy(() => {
-      const stateTensor = tf.stack([
-        tf.tensor(stateArray.snakesLayer),
-        tf.tensor(stateArray.fruitsLayer),
-        tf.tensor(stateArray.wallsLayer)
-      ]);
+      const snakesTensor = tf.tensor(stateArray.snakesLayer);
+      const fruitsTensor = tf.tensor(stateArray.fruitsLayer);
+      const wallsTensor = tf.tensor(stateArray.wallsLayer);
 
-      const stateTensorTransposed = stateTensor.transpose([1, 2, 0]);
+      const height = snakesTensor.shape[0];
+      const width = snakesTensor.shape[1];
 
-      const currentShape = stateTensorTransposed.shape;
-      const expectedShape = [this.modelHeight, this.modelWidth];
+      const padHeight = this.modelHeight - height;
+      const padWidth = this.modelWidth - width;
 
-      if(currentShape[0] !== expectedShape[0] || currentShape[1] !== expectedShape[1]) {
-        return tf.image.resizeNearestNeighbor(stateTensorTransposed, expectedShape);
-      }
+      const padConfig = [[0, padHeight], [0, padWidth]]; 
+      const padValue = -1;
+
+      return tf.stack([
+        tf.pad(snakesTensor, padConfig, padValue),
+        tf.pad(fruitsTensor, padConfig, padValue),
+        tf.pad(wallsTensor, padConfig, padValue)
+      ], -1);
     });
   }
 
@@ -240,38 +257,41 @@ export default class SnakeAIUltra extends SnakeAI {
     const inputs = [];
     const targets = [];
 
-    for(const { state, action, reward, nextState, done } of batch) {
-      tf.tidy(() => {
+    tf.tidy(() => {
+      for(const { state, action, reward, nextState, done } of batch) {
         let target = reward;
-  
+    
         if(!done) {
           const qNext = this.model.predict(nextState.expandDims(0)).dataSync();
           target += this.gamma * tf.max(qNext).arraySync();
         }
-  
+    
         const qValues = this.model.predict(state.expandDims(0)).dataSync();
-  
+    
         const actionIndex = GameConstants.ActionMapping[action];
-  
+    
         qValues[actionIndex] = target;
-  
+    
         inputs.push(state);
         targets.push(qValues);
-      });
-    }
+      }
+    });
 
     const inputTensors = tf.stack(inputs);
     const targetTensors = tf.stack(targets);
 
-    await this.model.fit(inputTensors, targetTensors, { epochs: 1, verbose: 0 });
+    const fitData = await this.model.fit(inputTensors, targetTensors, { epochs: 1, verbose: 0 });
+
+    if(this.summaryWriter) {
+      this.summaryWriter.scalar("loss", fitData.history.loss[0], this.currentEpoch);
+      this.summaryWriter.scalar("epsilon", this.epsilon, this.currentEpoch);
+    }
 
     // Cleanup tensors
     inputTensors.dispose();
     targetTensors.dispose();
 
-    if(this.epsilon > this.epsilonMin) {
-      this.epsilon *= this.epsilonDecay;
-    }
+    this.currentEpoch++;
   }
 
   calculateReward(snake, currentState) {
@@ -282,7 +302,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const fruitGold = this.findPositionInState(currentState.fruitsLayer, GameConstants.CaseType.FRUIT_GOLD);
 
     if(gameOver) {
-      return -100;
+      return -20;
     }
 
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
@@ -293,7 +313,7 @@ export default class SnakeAIUltra extends SnakeAI {
       return 30;
     }
 
-    return -0.1;
+    return -0.2;
   }
 
   async step(snake, currentState) {

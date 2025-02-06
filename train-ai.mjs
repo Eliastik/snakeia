@@ -4,23 +4,28 @@ import Snake from "./src/engine/Snake.js";
 import GameEngine from "./src/engine/GameEngine.js";
 import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 
-// import "@tensorflow/tfjs-node";
-import "@tensorflow/tfjs-node-gpu"; // Uncomment to enable GPU
+import tf from "@tensorflow/tfjs-node";
+// Uncomment to enable GPU, and comment above import
+// import tf from "@tensorflow/tfjs-node-gpu";
 
 // Settings
-const NUM_EPISODES = 10000;
+const NUM_EPISODES = 2000;
 const TRAIN_EVERY = 10;
-const MAX_TICKS = 750;
-const INITAL_GRID_WIDTH = 10;
-const INITAL_GRID_HEIGHT = 10;
-const EPISODES_TYPES = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "INCREASE_SIZE"]; // TODO add Maze training?
-const CHANGE_TYPES_EACH_X_EPISODES = 150;
+const MAX_TICKS = 1000;
+const INITAL_GRID_WIDTH = 5;
+const INITAL_GRID_HEIGHT = 5;
+const EPISODES_TYPES = ["DEFAULT", "INCREASE_SIZE"];
+// OR:
+// const EPISODES_TYPES = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_SIZE"];
+const CHANGE_TYPES_EACH_X_EPISODES = 500;
 const AI_LEVEL_OPPONENTS = Constants.AiLevel.DEFAULT;
 const NUMBER_OPPONENTS = 5;
+const ENABLE_TENSORBOARD_LOGS = true;
 
 // Setup and run training
+const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
 const theSnakeAI = new SnakeAIUltra(true);
-await theSnakeAI.setup();
+await theSnakeAI.setup(ENABLE_TENSORBOARD_LOGS ? tensorboardSummaryWriter : null);
 
 let totalScore = 0;
 let totalReward = 0;
@@ -64,20 +69,31 @@ for(let episode = 1; episode <= NUM_EPISODES; episode++) {
 
     gameEngine.doTick();
 
+    const currentReward = theSnakeAI.calculateReward(theSnake, currentState);
+
     await theSnakeAI.step(theSnake, currentState);
 
     if(tick % TRAIN_EVERY === 0) {
       await theSnakeAI.train();
+
+      if(ENABLE_TENSORBOARD_LOGS) {
+        tensorboardSummaryWriter.scalar("reward", currentReward, theSnakeAI.currentEpoch);
+        tensorboardSummaryWriter.scalar("qValue", theSnakeAI.currentQValue, theSnakeAI.currentEpoch);
+      }
     }
 
     tick++;
 
-    totalReward += theSnakeAI.calculateReward(theSnake, currentState);
+    totalReward += currentReward;
   }
 
   await theSnakeAI.train();
 
   console.log(`Game n°${episode} finished - Episode type: ${currentEpisodeType} - Score: ${theSnake.score} - Grid size: ${currentGridWidth} x ${currentGridHeight} - Random walls: ${randomWalls} - Border walls: ${borderWalls} - Maze: ${maze} - Opponents: ${opponents}`);
+
+  if(ENABLE_TENSORBOARD_LOGS) {
+    tensorboardSummaryWriter.scalar("score", theSnake.score, episode);
+  }
 
   // Change games conditions each X episodes
   if(episode % CHANGE_TYPES_EACH_X_EPISODES === 0) {
@@ -85,8 +101,8 @@ for(let episode = 1; episode <= NUM_EPISODES; episode++) {
     currentEpisodeType = EPISODES_TYPES[currentEpisodeTypeIndex % EPISODES_TYPES.length];
 
     if(currentEpisodeType === "INCREASE_SIZE") {
-      currentGridWidth = Math.min(100, currentGridWidth + 5);
-      currentGridHeight = Math.min(100, currentGridHeight + 5);
+      currentGridWidth = Math.min(theSnakeAI.modelWidth, currentGridWidth + 5);
+      currentGridHeight = Math.min(theSnakeAI.modelHeight, currentGridHeight + 5);
       currentEpisodeType = "DEFAULT";
     }
   }
