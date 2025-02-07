@@ -4,17 +4,17 @@ import Snake from "./src/engine/Snake.js";
 import GameEngine from "./src/engine/GameEngine.js";
 import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 
-import tf from "@tensorflow/tfjs-node";
+// import tf from "@tensorflow/tfjs-node";
 // Uncomment to enable GPU, and comment above import
-// import tf from "@tensorflow/tfjs-node-gpu";
+import tf from "@tensorflow/tfjs-node-gpu";
 
 // Settings
-const NUM_EPISODES = 2000;
+const NUM_EPISODES = 5000;
 const TRAIN_EVERY = 10;
-const MAX_TICKS = 1000;
-const INITAL_GRID_WIDTH = 5;
-const INITAL_GRID_HEIGHT = 5;
-const EPISODES_TYPES = ["DEFAULT", "INCREASE_SIZE"];
+const MAX_TICKS = 750;
+const INITAL_GRID_WIDTH = 10;
+const INITAL_GRID_HEIGHT = 10;
+const EPISODES_TYPES = ["DEFAULT"];
 // OR:
 // const EPISODES_TYPES = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_SIZE"];
 const CHANGE_TYPES_EACH_X_EPISODES = 500;
@@ -113,9 +113,10 @@ for(let episode = 1; episode <= NUM_EPISODES; episode++) {
   currentGameSeed++;
 
   // Reduce the epsilon
-  if(theSnakeAI.epsilon > theSnakeAI.epsilonMin) {
-    theSnakeAI.epsilon *= theSnakeAI.epsilonDecay;
-  }
+  theSnakeAI.epsilon = Math.max(
+    theSnakeAI.epsilonMin,
+    theSnakeAI.epsilonMax - ((episode / NUM_EPISODES) * (theSnakeAI.epsilonMax - theSnakeAI.epsilonMin))
+  );
 }
 
 console.log(`Training finished! Average score: ${totalScore / NUM_EPISODES} - Average reward: ${totalReward / NUM_EPISODES} - Time: ${performance.now() - startTime} ms`);

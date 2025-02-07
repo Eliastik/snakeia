@@ -31,24 +31,24 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelLocation = modelLocation;
 
     this.model = null;
-    this.modelHeight = 20;
-    this.modelWidth = 20;
-    this.modelDepth = 3;
+    this.modelHeight = 10;
+    this.modelWidth = 10;
+    this.modelDepth = 2;
 
-    this.memory = [];
     this.gamma = 0.95;
-    this.epsilon = 1.0;
-    this.epsilonDecay = 0.999;
-    this.epsilonMin = 0.01;
+    this.epsilonMax = 1.0;
+    this.epsilonMin = 0.1;
+    this.epsilon = this.epsilonMax;
     this.learningRate = 0.001;
     this.batchSize = 64;
-    this.maxMemoryLength = 2500;
+    this.maxMemoryLength = 5000;
 
+    this.memory = [];
     this.lastAction = null;
     this.currentQValue = 0;
+    this.currentEpoch = 0;
 
     this.summaryWriter = null;
-    this.currentEpoch = 0;
   }
 
   async setup(summaryWriter) {
@@ -97,10 +97,6 @@ export default class SnakeAIUltra extends SnakeAI {
     });
   
     return model;
-  }
-
-  loadModel() {
-    // TODO
   }
 
   ai(snake) {
@@ -154,8 +150,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const grid = snake.grid;
 
     const snakesLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
-    const fruitsLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
-    const wallsLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
+    const fruitsAndWallsLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
     
     for(let i = 0; i < grid.height; i++) {
       for(let j = 0; j < grid.width; j++) {
@@ -178,26 +173,25 @@ export default class SnakeAIUltra extends SnakeAI {
 
         // Fruits
         if(cellValue === GameConstants.CaseType.FRUIT) {
-          fruitsLayer[i][j] = 1;
+          fruitsAndWallsLayer[i][j] = 1;
         } else if(cellValue === GameConstants.CaseType.FRUIT_GOLD) {
-          fruitsLayer[i][j] = 2;
+          fruitsAndWallsLayer[i][j] = 2;
         }
 
         // Walls
         if(cellValue === GameConstants.CaseType.WALL || cellValue == GameConstants.CaseType.SNAKE_DEAD) {
-          wallsLayer[i][j] = 1;
+          fruitsAndWallsLayer[i][j] = 3;
         }
       }
     }
 
-    return { snakesLayer, fruitsLayer, wallsLayer };
+    return { snakesLayer, fruitsAndWallsLayer };
   }
 
   stateToTensor(stateArray) {
     return tf.tidy(() => {
       const snakesTensor = tf.tensor(stateArray.snakesLayer);
-      const fruitsTensor = tf.tensor(stateArray.fruitsLayer);
-      const wallsTensor = tf.tensor(stateArray.wallsLayer);
+      const fruitsAndWallsTensor = tf.tensor(stateArray.fruitsAndWallsLayer);
 
       const height = snakesTensor.shape[0];
       const width = snakesTensor.shape[1];
@@ -210,8 +204,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
       return tf.stack([
         tf.pad(snakesTensor, padConfig, padValue),
-        tf.pad(fruitsTensor, padConfig, padValue),
-        tf.pad(wallsTensor, padConfig, padValue)
+        tf.pad(fruitsAndWallsTensor, padConfig, padValue)
       ], -1);
     });
   }
@@ -298,15 +291,19 @@ export default class SnakeAIUltra extends SnakeAI {
     const { gameOver } = snake;
     const head = snake.getHeadPosition();
 
-    const fruit = this.findPositionInState(currentState.fruitsLayer, GameConstants.CaseType.FRUIT);
-    const fruitGold = this.findPositionInState(currentState.fruitsLayer, GameConstants.CaseType.FRUIT_GOLD);
+    const fruit = this.findPositionInState(currentState.fruitsAndWallsLayer, GameConstants.CaseType.FRUIT);
+    const fruitGold = this.findPositionInState(currentState.fruitsAndWallsLayer, GameConstants.CaseType.FRUIT_GOLD);
+
+    if(!fruit) {
+      console.warn("No fruit detected");
+    }
 
     if(gameOver) {
-      return -20;
+      return -15;
     }
 
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
-      return 10;
+      return 15;
     }
 
     if(fruitGold && head.x === fruitGold.x && head.y === fruitGold.y) {
