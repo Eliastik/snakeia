@@ -30,10 +30,14 @@ export default class SnakeAIUltra extends SnakeAI {
     this.enableTrainingMode = enableTrainingMode;
     this.modelLocation = modelLocation;
 
-    this.model = null;
+    this.mainModel = null;
+    this.targetModel = null;
+
     this.modelHeight = 10;
     this.modelWidth = 10;
     this.modelDepth = 2;
+    this.syncTargetEvery = 1000;
+    this.stepsSinceLastSync = 0;
 
     this.gamma = 0.95;
     this.epsilonMax = 1.0;
@@ -52,18 +56,31 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   async setup(summaryWriter) {
-    this.model = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
-    this.summaryWriter = summaryWriter;
+    this.mainModel = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
+
+    if(this.enableTrainingMode) {
+      this.targetModel = this.createModel();
+      this.targetModel.setWeights(this.mainModel.getWeights());
+      this.summaryWriter = summaryWriter;
+    }
   }
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
     // TODO load once
     if(!enableTrainingMode) {
-      return await tf.loadLayersModel(modelLocation);
+      return await this.loadModel(modelLocation);
     }
 
+    return this.createModel();
+  }
+
+  async loadModel(modelLocation) {
+    return await tf.loadLayersModel(modelLocation);
+  }
+
+  createModel() {
     const model = tf.sequential();
-  
+
     model.add(tf.layers.conv2d({
       inputShape: [this.modelHeight, this.modelWidth, this.modelDepth],
       filters: 32,
@@ -71,31 +88,31 @@ export default class SnakeAIUltra extends SnakeAI {
       activation: "relu",
       padding: "same"
     }));
-  
+
     model.add(tf.layers.conv2d({
-      filters: 64,                   
-      kernelSize: 3,                 
-      activation: "relu",            
+      filters: 64,
+      kernelSize: 3,
+      activation: "relu",
       padding: "same"
     }));
-  
+
     model.add(tf.layers.flatten());
-  
+
     model.add(tf.layers.dense({
       units: 128,
       activation: "relu"
     }));
-  
+
     model.add(tf.layers.dense({
       units: 4, // Number of possible actions
       activation: "linear"
     }));
-  
+
     model.compile({
       optimizer: tf.train.adam(this.learningRate),
       loss: "meanSquaredError"
     });
-  
+
     return model;
   }
 
@@ -133,7 +150,7 @@ export default class SnakeAIUltra extends SnakeAI {
       const currentState = this.stateToTensor(this.getState(snake));
       const currentStateTensor = currentState.expandDims(0);
   
-      const qValues = this.model.predict(currentStateTensor);
+      const qValues = this.mainModel.predict(currentStateTensor);
   
       const actionIndex = tf.argMax(qValues, 1).arraySync()[0];
 
@@ -240,12 +257,7 @@ export default class SnakeAIUltra extends SnakeAI {
   async train() {
     if(this.memory.length < this.batchSize) return;
 
-    const batch = [];
-
-    for(let i = 0; i < this.batchSize; i++) {
-      const index = Math.floor(Math.random() * this.memory.length);
-      batch.push(this.memory[index]);
-    }
+    const batch = this.loadBatches();
 
     const inputs = [];
     const targets = [];
@@ -255,11 +267,11 @@ export default class SnakeAIUltra extends SnakeAI {
         let target = reward;
     
         if(!done) {
-          const qNext = this.model.predict(nextState.expandDims(0)).dataSync();
+          const qNext = this.targetModel.predict(nextState.expandDims(0)).dataSync();
           target += this.gamma * tf.max(qNext).arraySync();
         }
     
-        const qValues = this.model.predict(state.expandDims(0)).dataSync();
+        const qValues = this.targetModel.predict(state.expandDims(0)).dataSync();
     
         const actionIndex = GameConstants.ActionMapping[action];
     
@@ -273,7 +285,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const inputTensors = tf.stack(inputs);
     const targetTensors = tf.stack(targets);
 
-    const fitData = await this.model.fit(inputTensors, targetTensors, { epochs: 1, verbose: 0 });
+    const fitData = await this.mainModel.fit(inputTensors, targetTensors, { epochs: 1, verbose: 0 });
 
     if(this.summaryWriter) {
       this.summaryWriter.scalar("loss", fitData.history.loss[0], this.currentEpoch);
@@ -284,7 +296,29 @@ export default class SnakeAIUltra extends SnakeAI {
     inputTensors.dispose();
     targetTensors.dispose();
 
+    if(this.stepsSinceLastSync >= this.syncTargetEvery) {
+      this.synchronizeTargetNetwork();
+      this.stepsSinceLastSync = 0;
+    }
+
+    this.stepsSinceLastSync++;
     this.currentEpoch++;
+  }
+
+  loadBatches() {
+    const batch = [];
+
+    for(let i = 0; i < this.batchSize; i++) {
+      const index = Math.floor(Math.random() * this.memory.length);
+      batch.push(this.memory[index]);
+    }
+
+    return batch;
+  }
+
+  synchronizeTargetNetwork() {
+    this.targetModel.setWeights(this.mainModel.getWeights());
+    console.info("Target network synchronized!");
   }
 
   calculateReward(snake, currentState) {
@@ -322,5 +356,9 @@ export default class SnakeAIUltra extends SnakeAI {
     const nextStateTensor = this.stateToTensor(nextState);
 
     this.remember(currentStateTensor, this.lastAction, reward, nextStateTensor, done);
+  }
+
+  async saveModel(destination) {
+    await this.mainModel.save(destination);
   }
 }
