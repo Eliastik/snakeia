@@ -36,15 +36,15 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelHeight = 10;
     this.modelWidth = 10;
     this.modelDepth = 2;
-    this.syncTargetEvery = 1000;
+    this.syncTargetEvery = 500;
     this.stepsSinceLastSync = 0;
 
     this.gamma = 0.95;
     this.epsilonMax = 1.0;
-    this.epsilonMin = 0.1;
+    this.epsilonMin = 0.01;
     this.epsilon = this.epsilonMax;
     this.learningRate = 0.001;
-    this.batchSize = 64;
+    this.batchSize = 512;
     this.maxMemoryLength = 5000;
 
     this.memory = [];
@@ -152,10 +152,10 @@ export default class SnakeAIUltra extends SnakeAI {
   
       const qValues = this.mainModel.predict(currentStateTensor);
   
-      const actionIndex = tf.argMax(qValues, 1).arraySync()[0];
+      const actionIndex = qValues.argMax(1).arraySync()[0];
 
       if(this.summaryWriter) {
-        const maxValue = tf.max(qValues, 1).arraySync()[0];
+        const maxValue = qValues.max().arraySync();
         this.currentQValue = maxValue;
       }
 
@@ -263,23 +263,30 @@ export default class SnakeAIUltra extends SnakeAI {
     const targets = [];
 
     tf.tidy(() => {
-      for(const { state, action, reward, nextState, done } of batch) {
+      const nextStates = tf.stack(batch.map(({ nextState }) => nextState));
+      const states = tf.stack(batch.map(({ state }) => state));
+  
+      const qNextBatch = this.targetModel.predict(nextStates);
+      const qCurrentBatch = this.targetModel.predict(states);
+  
+      const qNextMaxValues = qNextBatch.max(1).arraySync();
+      const qCurrentValues = qCurrentBatch.arraySync();
+  
+      batch.forEach(({ state, action, reward, done }, index) => {
         let target = reward;
-    
+  
         if(!done) {
-          const qNext = this.targetModel.predict(nextState.expandDims(0)).dataSync();
-          target += this.gamma * tf.max(qNext).arraySync();
+          target += this.gamma * qNextMaxValues[index];
         }
-    
-        const qValues = this.targetModel.predict(state.expandDims(0)).dataSync();
-    
+  
+        const qValues = qCurrentValues[index];
         const actionIndex = GameConstants.ActionMapping[action];
-    
+
         qValues[actionIndex] = target;
-    
+  
         inputs.push(state);
         targets.push(qValues);
-      }
+      });
     });
 
     const inputTensors = tf.stack(inputs);
@@ -333,7 +340,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     if(gameOver) {
-      return -15;
+      return -10;
     }
 
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
@@ -344,7 +351,7 @@ export default class SnakeAIUltra extends SnakeAI {
       return 30;
     }
 
-    return -0.2;
+    return -0.1;
   }
 
   async step(snake, currentState) {
