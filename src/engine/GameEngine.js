@@ -41,6 +41,8 @@ export default class GameEngine {
     this.numFruit = 1;
     this.ticks = 0;
     // Game state variables
+    this.isInit = false;
+    this.engineLoading = true;
     this.firstStart = true;
     this.starting = false;
     this.paused = true;
@@ -72,6 +74,8 @@ export default class GameEngine {
 
   async init() {
     if(!this.clientSidePredictionsMode) {
+      this.engineLoading = true;
+
       if(this.snakes == null) {
         this.errorOccurred = true;
         this.snakes = [];
@@ -98,7 +102,11 @@ export default class GameEngine {
           }
         }
       }
+
+      this.engineLoading = false;
     }
+    
+    this.isInit = true;
   }
 
   async initGridAndSnakes() {

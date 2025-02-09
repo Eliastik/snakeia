@@ -60,7 +60,8 @@ export default class GameController {
       "enableRetry": this.gameEngine.enableRetry,
       "progressiveSpeed": this.gameEngine.progressiveSpeed,
       "offsetFrame": this.gameEngine.speed * GameConstants.Setting.TIME_MULTIPLIER,
-      "errorOccurred": this.gameEngine.errorOccurred
+      "errorOccurred": this.gameEngine.errorOccurred,
+      "engineLoading": this.gameEngine.engineLoading
     });
 
     this.gameEngine.onReset(() => {
@@ -86,7 +87,8 @@ export default class GameController {
         "errorOccurred": this.gameEngine.errorOccurred,
         "offsetFrame": this.gameEngine.speed * GameConstants.Setting.TIME_MULTIPLIER,
         "aiStuck": this.gameEngine.aiStuck,
-        "precAiStuck": false
+        "precAiStuck": false,
+        "engineLoading": this.gameEngine.engineLoading
       });
 
       this.reactor.dispatchEvent("onReset");
@@ -104,7 +106,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": this.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred,
+        "engineLoading": this.gameEngine.engineLoading
       });
       this.reactor.dispatchEvent("onStart");
     });
@@ -116,7 +119,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": this.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred,
+        "engineLoading": this.gameEngine.engineLoading
       });
       this.reactor.dispatchEvent("onPause");
     });
@@ -127,7 +131,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": this.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred,
+        "engineLoading": this.gameEngine.engineLoading
       });
       this.reactor.dispatchEvent("onContinue");
     });
@@ -142,7 +147,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": this.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred,
+        "engineLoading": this.gameEngine.engineLoading
       });
       this.reactor.dispatchEvent("onStop");
     });
@@ -157,7 +163,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": this.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred,
+        "engineLoading": this.gameEngine.engineLoading
       });
       this.reactor.dispatchEvent("onExit");
     });
@@ -174,7 +181,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
-        "errorOccurred": this.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred,
+        "engineLoading": this.gameEngine.engineLoading
       });
 
       this.reactor.dispatchEvent("onKill");
@@ -203,7 +211,8 @@ export default class GameController {
         "countBeforePlay": this.gameEngine.countBeforePlay,
         "offsetFrame": 0,
         "errorOccurred": this.gameEngine.errorOccurred,
-        "aiStuck": this.gameEngine.aiStuck
+        "aiStuck": this.gameEngine.aiStuck,
+        "engineLoading": this.gameEngine.engineLoading
       });
 
       this.reactor.dispatchEvent("onUpdate");
@@ -226,7 +235,8 @@ export default class GameController {
         "speed": this.gameEngine.speed,
         "snakes": this.gameEngine.snakes,
         "countBeforePlay": this.gameEngine.countBeforePlay,
-        "errorOccurred": this.gameEngine.errorOccurred
+        "errorOccurred": this.gameEngine.errorOccurred,
+        "engineLoading": this.gameEngine.engineLoading
       });
       
       this.reactor.dispatchEvent("onUpdateCounter");
@@ -237,7 +247,11 @@ export default class GameController {
     this.gameEngine.reset();
   }
 
-  start() {
+  async start() {
+    if(!this.gameEngine.isInit) {
+      await this.gameEngine.init();
+    }
+
     this.gameEngine.start();
   }
 

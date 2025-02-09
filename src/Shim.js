@@ -80,7 +80,6 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   let controller;
 
   const engine = new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed);
-  engine.init();
   
   if(workersAvailable && settings.enableMultithreading) {
     controller = new GameControllerWorker(engine);
