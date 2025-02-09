@@ -9,7 +9,7 @@ import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 import tf from "@tensorflow/tfjs-node-gpu";
 
 // Settings
-const NUM_EPISODES = 5000;
+const NUM_EPISODES = 10000;
 const TRAIN_EVERY = 10;
 const MAX_TICKS = 750;
 const INITAL_GRID_WIDTH = 10;

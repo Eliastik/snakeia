@@ -45,9 +45,9 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMax = 1.0;
     this.epsilonMin = 0.01;
     this.epsilon = this.epsilonMax;
-    this.learningRate = 0.001;
+    this.learningRate = 0.0005;
     this.batchSize = 32;
-    this.maxMemoryLength = 2000;
+    this.maxMemoryLength = 2500;
 
     this.memory = [];
     this.lastAction = null;
