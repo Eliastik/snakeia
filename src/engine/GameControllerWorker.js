@@ -34,6 +34,7 @@ export default class GameControllerWorker extends GameController {
       try {
         this.worker = new Worker("dist/GameEngineWorker.js");
       } catch(e) {
+        console.error(e);
         this.update("init", {
           "errorOccurred": true
         });

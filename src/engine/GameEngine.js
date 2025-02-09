@@ -402,7 +402,7 @@ export default class GameEngine {
         let endGameAIStuck = false;
 
         for(let k = 0; k < this.snakes.length; k++) {
-          if(!this.snakes[k].gameOver && this.snakes[k].isAIStuck(1, 1)) {
+          if(!this.snakes[k].gameOver && this.snakes[k].isAIStuck(this.aiStuckLimit / 2, this.aiStuckLimit / 2)) {
             this.aiStuck = true;
 
             if(this.snakes[k].isAIStuck(this.aiStuckLimit, this.aiStuckLimit)) { // Limit of aiStuckLimit loops - end the game

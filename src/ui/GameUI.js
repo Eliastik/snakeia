@@ -743,7 +743,6 @@ export default class GameUI {
         if(this.snakes[0] && this.snakes[0].autoRetry && this.timeoutAutoRetry == null) {
           this.timeoutAutoRetry = setTimeout(() => {
             this.reset();
-            this.timeoutAutoRetry = null;
           }, 500);
         } else {
           this.btnRetry.setClickAction(() => {
@@ -817,6 +816,8 @@ export default class GameUI {
         if(this.notificationMessage != undefined && this.notificationMessage != null && this.notificationMessage instanceof NotificationMessage && !this.notificationMessage.foreGround) {
           this.notificationMessage.enableCloseButton();
         }
+
+        this.timeoutAutoRetry = null;
       }
 
       if(this.assetsLoaded && this.engineLoading) {
