@@ -401,8 +401,9 @@ export default class Snake {
   ai() {
     if(this.snakeAI && this.snakeAI.ai) {
       const action = this.snakeAI.ai(this);
+      const directionFromKey = this.keyToDirection(action);
 
-      if(!action || this.keyToDirection(action) == this.direction) {
+      if(!action || !directionFromKey || directionFromKey == this.direction) {
         this.ticksWithoutAction++;
       } else {
         this.ticksWithoutAction = 0;
