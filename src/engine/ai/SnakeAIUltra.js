@@ -20,6 +20,7 @@ import SnakeAI from "./SnakeAI.js";
 import GameConstants from "../Constants.js";
 import Position from "../Position.js";
 import GameUtils from "../GameUtils.js";
+import TensorflowModelLoader from "./TensorflowModelLoader.js";
 import * as tf from "@tensorflow/tfjs";
 
 export default class SnakeAIUltra extends SnakeAI {
@@ -71,7 +72,6 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
-    // TODO load once
     if(!enableTrainingMode) {
       return await this.loadModel(modelLocation);
     }
@@ -80,7 +80,8 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   async loadModel(modelLocation) {
-    return await tf.loadLayersModel(modelLocation);
+    const modelLoader = TensorflowModelLoader.getInstance();
+    return await modelLoader.loadModel(modelLocation);
   }
 
   createModel() {

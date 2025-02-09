@@ -48,7 +48,7 @@ function copyGrid(grid) {
   return copy;
 }
 
-function parseSnakes(snakes, grid) {
+async function parseSnakes(snakes, grid) {
   if(game) {
     grid = grid != null ? grid : game.grid;
   }
@@ -67,7 +67,7 @@ function parseSnakes(snakes, grid) {
       snakes[i].queue[j] = Object.assign(new Position(), snakes[i].queue[j]);
     }
 
-    snakes[i].initAI();
+    await snakes[i].initAI();
   }
 
   return {
@@ -80,7 +80,7 @@ onmessage = async e => {
   const data = e.data;
 
   if(data.length > 1 && data[0] == "init") {
-    const parsed = parseSnakes(data[1]["snakes"], data[1]["grid"]);
+    const parsed = await parseSnakes(data[1]["snakes"], data[1]["grid"]);
     const grid = parsed["grid"];
     const snakes = parsed["snakes"];
 

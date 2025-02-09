@@ -53,10 +53,7 @@ export default class GameControllerWorker extends GameController {
           const data = e.data;
 
           if(data == "ready") {
-            this.workerReady = true;
-            this.update("init", { "engineLoading": false });
             this.worker.postMessage(["init", this.gameEngine]);
-            this.passQueuedMessages();
           } else {
             if(data.length > 1) {
               let grid = this.gameUI.grid;
@@ -80,6 +77,11 @@ export default class GameControllerWorker extends GameController {
               this.update(data[0], data[1]);
               
               switch(data[0]) {
+              case "init":
+                this.workerReady = true;
+                this.update("init", { "engineLoading": false });
+                this.passQueuedMessages();
+                break;
               case "reset":
                 this.reactor.dispatchEvent("onReset");
                 break;
