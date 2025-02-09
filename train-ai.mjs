@@ -9,12 +9,12 @@ import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 import tf from "@tensorflow/tfjs-node-gpu";
 
 // Settings
-const NUM_EPISODES = 10000;
+const NUM_EPISODES = 5000;
 const TRAIN_EVERY = 10;
 const MAX_TICKS = 750;
 const INITAL_GRID_WIDTH = 10;
 const INITAL_GRID_HEIGHT = 10;
-const EPISODES_TYPES = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS"];
+const EPISODES_TYPES = ["DEFAULT"];
 // OR:
 // const EPISODES_TYPES = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_SIZE"];
 const CHANGE_TYPES_EACH_X_EPISODES = 500;

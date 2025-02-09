@@ -36,7 +36,9 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelHeight = 10;
     this.modelWidth = 10;
     this.modelDepth = 2;
-    this.syncTargetEvery = 500;
+
+    this.enableTargetModel = true;
+    this.syncTargetEvery = 1000;
     this.stepsSinceLastSync = 0;
 
     this.gamma = 0.95;
@@ -44,8 +46,8 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMin = 0.01;
     this.epsilon = this.epsilonMax;
     this.learningRate = 0.001;
-    this.batchSize = 512;
-    this.maxMemoryLength = 5000;
+    this.batchSize = 32;
+    this.maxMemoryLength = 2000;
 
     this.memory = [];
     this.lastAction = null;
@@ -59,8 +61,11 @@ export default class SnakeAIUltra extends SnakeAI {
     this.mainModel = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
 
     if(this.enableTrainingMode) {
-      this.targetModel = this.createModel();
-      this.targetModel.setWeights(this.mainModel.getWeights());
+      if(this.enableTargetModel) {
+        this.targetModel = this.createModel();
+        this.targetModel.setWeights(this.mainModel.getWeights());
+      }
+
       this.summaryWriter = summaryWriter;
     }
   }
@@ -266,8 +271,9 @@ export default class SnakeAIUltra extends SnakeAI {
       const nextStates = tf.stack(batch.map(({ nextState }) => nextState));
       const states = tf.stack(batch.map(({ state }) => state));
   
-      const qNextBatch = this.targetModel.predict(nextStates);
-      const qCurrentBatch = this.targetModel.predict(states);
+      const currentModel = this.enableTargetModel ? this.targetModel : this.mainModel;
+      const qNextBatch = currentModel.predict(nextStates);
+      const qCurrentBatch = currentModel.predict(states);
   
       const qNextMaxValues = qNextBatch.max(1).arraySync();
       const qCurrentValues = qCurrentBatch.arraySync();
@@ -292,7 +298,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const inputTensors = tf.stack(inputs);
     const targetTensors = tf.stack(targets);
 
-    const fitData = await this.mainModel.fit(inputTensors, targetTensors, { epochs: 1, verbose: 0 });
+    const fitData = await this.mainModel.fit(inputTensors, targetTensors, { batchSize: this.batchSize, epochs: 1, verbose: 0, shuffle: true });
 
     if(this.summaryWriter) {
       this.summaryWriter.scalar("loss", fitData.history.loss[0], this.currentEpoch);
@@ -324,8 +330,10 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   synchronizeTargetNetwork() {
-    this.targetModel.setWeights(this.mainModel.getWeights());
-    console.info("Target network synchronized!");
+    if(this.enableTargetModel) {
+      this.targetModel.setWeights(this.mainModel.getWeights());
+      console.info("Target network synchronized!");
+    }
   }
 
   calculateReward(snake, currentState) {
@@ -344,14 +352,14 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
-      return 15;
+      return 10;
     }
 
     if(fruitGold && head.x === fruitGold.x && head.y === fruitGold.y) {
       return 30;
     }
 
-    return -0.1;
+    return -0.2;
   }
 
   async step(snake, currentState) {
