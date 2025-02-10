@@ -525,7 +525,11 @@ export default class GameUI {
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.font = this.fontSize + "px " + GameConstants.Setting.FONT_FAMILY;
 
-      if(this.assetsLoaded && !this.errorOccurred) {
+      if(this.assetsLoaded && this.engineLoading) {
+        this.labelMenus.text = i18next.t("engine.loadingWorker");
+        this.labelMenus.color = "white";
+        this.menu.set(this.labelMenus);
+      } else if(this.assetsLoaded && !this.errorOccurred) {
         this.header.set(this.snakes, this.imageLoader, this.bestScoreToDisplay, this.header.height, this.numFruit, this.enablePause);
         this.header.draw(ctx);
 
@@ -567,7 +571,7 @@ export default class GameUI {
         this.gameRanking.forceClose();
       }
 
-      if(!this.gameFinished && !this.gameOver && this.assetsLoaded && !this.errorOccurred) {
+      if(!this.gameFinished && !this.gameOver && this.assetsLoaded && !this.engineLoading && !this.errorOccurred) {
         this.gameRanking.set(this.snakes, this.fontSize, this.header.height, this.currentPlayer, this.imageLoader, this.spectatorMode);
         this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
       }
@@ -647,7 +651,7 @@ export default class GameUI {
         this.btnNo.setClickAction(() => {
           this.confirmExit = false;
         });
-      } else if(this.assetsLoaded && this.countBeforePlay >= 0) {
+      } else if(this.assetsLoaded && !this.engineLoading && this.countBeforePlay >= 0) {
         if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null) || (this.currentPlayer != null && this.snakes.length > 1))) {
           let playerHuman, colorName, colorRgb;
 
@@ -757,7 +761,7 @@ export default class GameUI {
             this.toggleFullscreen();
           });
         }
-      } else if(this.assetsLoaded && this.searchingPlayers) {
+      } else if(this.assetsLoaded && !this.engineLoading && this.searchingPlayers) {
         this.labelMenus.text = i18next.t("engine.servers.waitingPlayers") + "\n" + this.playerNumber + "/" + this.maxPlayers + (this.timeStart > 0 ? ("\n\n" + i18next.t("engine.servers.gameStart") + " " + GameUtils.millisecondsFormat(this.timeStart)) : "");
         this.labelMenus.color = "white";
         this.onlineMaster ? this.menu.set(this.labelMenus, this.btnStartGame, this.btnQuit) : this.menu.set(this.labelMenus, this.btnQuit);
@@ -769,7 +773,7 @@ export default class GameUI {
         this.btnStartGame.setClickAction(() => {
           this.forceStart();
         });
-      } else if(this.paused && !this.gameOver && this.assetsLoaded) {
+      } else if(this.paused && !this.gameOver && this.assetsLoaded && !this.engineLoading) {
         this.labelMenus.text = i18next.t("engine.pause");
         this.labelMenus.color = "white";
         this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ? this.menu.set(this.labelMenus, this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit) : this.menu.set(this.labelMenus, this.btnContinue, this.btnAbout, this.btnQuit)) : (this.menu.set(this.labelMenus, this.btnContinue, this.btnAbout));
@@ -789,7 +793,7 @@ export default class GameUI {
         this.btnAbout.setClickAction(() => {
           this.getInfos = true;
         });
-      } else if(this.assetsLoaded) {
+      } else if(this.assetsLoaded && !this.engineLoading) {
         this.btnFullScreen.enable();
         this.gameRanking.enable();
 
@@ -818,12 +822,6 @@ export default class GameUI {
         }
 
         this.timeoutAutoRetry = null;
-      }
-
-      if(this.assetsLoaded && this.engineLoading) {
-        this.labelMenus.text = i18next.t("engine.loadingWorker");
-        this.labelMenus.color = "white";
-        this.menu.set(this.labelMenus);
       }
 
       this.labelMenus.fontSize = this.fontSize;

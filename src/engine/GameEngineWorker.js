@@ -59,15 +59,17 @@ async function parseSnakes(snakes, grid) {
     snakes = game.snakes;
   }
   
-  for(let i = 0; i < snakes.length; i++) {
-    snakes[i].grid = grid;
-    snakes[i] = Object.assign(new Snake(), snakes[i]);
-
-    for(let j = 0; j < snakes[i].queue.length; j++) {
-      snakes[i].queue[j] = Object.assign(new Position(), snakes[i].queue[j]);
+  if(snakes) {
+    for(let i = 0; i < snakes.length; i++) {
+      snakes[i].grid = grid;
+      snakes[i] = Object.assign(new Snake(), snakes[i]);
+  
+      for(let j = 0; j < snakes[i].queue.length; j++) {
+        snakes[i].queue[j] = Object.assign(new Position(), snakes[i].queue[j]);
+      }
+  
+      await snakes[i].initAI();
     }
-
-    await snakes[i].initAI();
   }
 
   return {
@@ -302,10 +304,10 @@ onmessage = async e => {
     case "update":
       if(data.length > 1) {
         if(data[1]["key"] == "snakes") {
-          const d = parseSnakes(data[1]["data"]);
+          const d = await parseSnakes(data[1]["data"]);
           if(d) game.snakes = d.snakes;
         } else if(data[1]["key"] == "grid") {
-          const d = parseSnakes(null, data[1]["data"]);
+          const d = await parseSnakes(null, data[1]["data"]);
           if(d) game.grid = d.grid;
         } else {
           game[data[1]["key"]] = data[1]["data"];
