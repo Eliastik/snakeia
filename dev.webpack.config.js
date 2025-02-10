@@ -57,6 +57,7 @@ const config = [
       contentBase: "./dist",
     },
     plugins: [new ESLintPlugin(estlintOptions)],
+    target: "node",
     module: {
       rules: [
         {

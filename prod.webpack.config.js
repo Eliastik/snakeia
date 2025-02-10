@@ -49,6 +49,7 @@ const config = [
       globalObject: "typeof self !== \"undefined\" ? self : this"
     },
     plugins: [new ESLintPlugin(estlintOptions)],
+    target: "node",
     module: {
       rules: [
         {
