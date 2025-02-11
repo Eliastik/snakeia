@@ -38,7 +38,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelWidth = 10;
     this.modelDepth = 2;
 
-    this.enableTargetModel = true;
+    this.enableTargetModel = false;
     this.syncTargetEvery = 1000;
     this.stepsSinceLastSync = 0;
 
@@ -46,9 +46,9 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMax = 1.0;
     this.epsilonMin = 0.01;
     this.epsilon = this.epsilonMax;
-    this.learningRate = 0.0005;
+    this.learningRate = 0.001;
     this.batchSize = 32;
-    this.maxMemoryLength = 2500;
+    this.maxMemoryLength = 2000;
 
     this.memory = [];
     this.lastAction = null;
@@ -89,16 +89,20 @@ export default class SnakeAIUltra extends SnakeAI {
 
     model.add(tf.layers.conv2d({
       inputShape: [this.modelHeight, this.modelWidth, this.modelDepth],
-      filters: 32,
+      filters: 128,
       kernelSize: 3,
+      strides: 1,
       activation: "relu",
       padding: "same"
     }));
 
+    model.add(tf.layers.batchNormalization());
+
     model.add(tf.layers.conv2d({
-      filters: 64,
+      filters: 256,
       kernelSize: 3,
       activation: "relu",
+      strides: 1,
       padding: "same"
     }));
 

@@ -32,32 +32,32 @@ const theGrid4 = new Grid(5, 5, true, false, false,
 false);
 theGrid4.init();
 
-test("snakes put next to a wall/dead position", () => {
+test("snakes put next to a wall/dead position", async () => {
   const mockRandom = jest.fn();
   mockRandom.mockReturnValueOnce(new Position(6, 5)).mockReturnValueOnce(new Position(2, 3)).mockReturnValueOnce(new Position(3, 5));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
   const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid);
-  theSnake.init();
+  await theSnake.init();
 
   const theSnake2 = new Snake(Constants.Direction.RIGHT, 3, theGrid);
-  theSnake2.init();
+  await theSnake2.init();
 
   const theSnake3 = new Snake(Constants.Direction.RIGHT, 3, theGrid);
-  theSnake3.init();
+  await theSnake3.init();
 
   expect(theSnake.getHeadPosition().direction).toBe(Constants.Direction.LEFT);
   expect(theSnake2.getHeadPosition().direction).toBe(Constants.Direction.RIGHT);
   expect(theSnake3.getHeadPosition().direction).toBe(Constants.Direction.LEFT);
 });
 
-test("not enough free space to put a snake", () => {
+test("not enough free space to put a snake", async () => {
   const mockRandom = jest.fn();
   mockRandom.mockReturnValueOnce(new Position(1, 1));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
   const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid2);
-  theSnake.init();
+  await theSnake.init();
 
   expect(theSnake.errorInit).toBe(true);
 });
