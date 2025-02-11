@@ -89,20 +89,16 @@ export default class SnakeAIUltra extends SnakeAI {
 
     model.add(tf.layers.conv2d({
       inputShape: [this.modelHeight, this.modelWidth, this.modelDepth],
-      filters: 128,
+      filters: 32,
       kernelSize: 3,
-      strides: 1,
       activation: "relu",
       padding: "same"
     }));
 
-    model.add(tf.layers.batchNormalization());
-
     model.add(tf.layers.conv2d({
-      filters: 256,
+      filters: 64,
       kernelSize: 3,
       activation: "relu",
-      strides: 1,
       padding: "same"
     }));
 
@@ -114,6 +110,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }));
 
     model.add(tf.layers.dense({
+      // TODO reduce to 3 (turn right/left/continue)
       units: 4, // Number of possible actions
       activation: "linear"
     }));
@@ -353,8 +350,25 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     if(gameOver) {
+      // TODO unit test
+      let numberOfEmptyCaseAround = 0;
+
+      for(const directionNext of [GameConstants.Direction.UP, GameConstants.Direction.DOWN, GameConstants.Direction.LEFT, GameConstants.Direction.RIGHT]) {
+        const nextPosition = snake.getNextPosition(head, directionNext);
+
+        if(!snake.grid.isDeadPosition(nextPosition)) {
+          numberOfEmptyCaseAround++;
+        }
+      }
+
+      if(numberOfEmptyCaseAround >= 1) {
+        return -15;
+      }
+
       return -10;
     }
+
+    // TODO lower reward if blocked (isAIStuck)
 
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
       return 10;
