@@ -27,7 +27,7 @@ export default class SnakeAIUltra extends SnakeAI {
   constructor(enableTrainingMode, modelLocation) {
     super();
 
-    this._aiLevelText = "ultra";
+    this.aiLevelText = "ultra";
     this.enableTrainingMode = enableTrainingMode;
     this.modelLocation = modelLocation;
 

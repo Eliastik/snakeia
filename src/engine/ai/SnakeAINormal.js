@@ -26,7 +26,7 @@ export default class SnakeAINormal extends SnakeAI {
   constructor(enableTorus) {
     super();
     this.enableTorus = enableTorus;
-    this._aiLevelText = "normal";
+    this.aiLevelText = "normal";
   }
 
   ai(snake) {

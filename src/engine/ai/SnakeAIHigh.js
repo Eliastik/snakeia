@@ -24,7 +24,7 @@ export default class SnakeAIHigh extends SnakeAINormal {
   constructor(snake) {
     super(true);
     this.aiLow = new SnakeAILow(snake);
-    this._aiLevelText = "high";
+    this.aiLevelText = "high";
   }
 
   ai(snake) {

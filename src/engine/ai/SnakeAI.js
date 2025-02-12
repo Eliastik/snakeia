@@ -21,7 +21,7 @@ import GameConstants from "../Constants.js";
 export default class SnakeAI {
   constructor() {
     this.aiFruitGoal = GameConstants.CaseType.FRUIT;
-    this._aiLevelText = "custom";
+    this.aiLevelText = "custom";
   }
 
   ai(snake) {
@@ -47,9 +47,5 @@ export default class SnakeAI {
     }
 
     return null;
-  }
-
-  get aiLevelText() {
-    return this._aiLevelText;
   }
 }

@@ -23,7 +23,7 @@ import GameConstants from "../Constants.js";
 export default class SnakeAILow extends SnakeAI {
   constructor() {
     super();
-    this._aiLevelText = "low";
+    this.aiLevelText = "low";
   }
 
   ai(snake) {

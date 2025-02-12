@@ -22,7 +22,7 @@ import SnakeAI from "./SnakeAI.js";
 export default class SnakeAIMock extends SnakeAI {
   constructor() {
     super();
-    this._aiLevelText = "mock";
+    this.aiLevelText = "mock";
   }
 
   ai() {

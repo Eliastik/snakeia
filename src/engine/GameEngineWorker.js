@@ -25,16 +25,38 @@ import GameEngine from "./GameEngine.js";
 let game;
 
 function copySnakes(snakes) {
-  const copy = JSON.parse(JSON.stringify(snakes));
+  const snakesCopy = [];
 
-  if(copy) {
-    for(let i = 0; i < copy.length; i++) {
-      delete copy[i]["grid"];
-      if(snakes[i].snakeAI && snakes[i].snakeAI.aiLevelText) copy[i]["snakeAI"]["aiLevelText"] = snakes[i].snakeAI.aiLevelText;
-    }
+  if(snakes) {
+    snakes.forEach(snake => {
+      if(snake) {
+        const snakeCopy = new Snake();
+  
+        snakeCopy.color = snake.color;
+        snakeCopy.direction = snake.direction;
+        snakeCopy.errorInit = snake.errorInit;
+        snakeCopy.gameOver = snake.gameOver;
+        snakeCopy.lastTail = JSON.parse(JSON.stringify(snake.lastTail));
+        snakeCopy.lastTailMoved = snake.lastTailMoved;
+        snakeCopy.name = snake.name;
+        snakeCopy.player = snake.player;
+        snakeCopy.queue = JSON.parse(JSON.stringify(snake.queue));
+        snakeCopy.score = snake.score;
+        snakeCopy.scoreMax = snake.scoreMax;
+        snakeCopy.ticksDead = snake.ticksDead;
+        snakeCopy.ticksWithoutAction = snake.ticksWithoutAction;
+        snakeCopy.grid = null;
+  
+        if(snake.snakeAI && snake.snakeAI.aiLevelText) {
+          snakeCopy.snakeAI.aiLevelText = snake.snakeAI.aiLevelText;
+        }
+  
+        snakesCopy.push(snakeCopy);
+      }
+    });
   }
 
-  return copy;
+  return snakesCopy;
 }
 
 function copyGrid(grid) {
@@ -48,46 +70,56 @@ function copyGrid(grid) {
   return copy;
 }
 
-async function parseSnakes(snakes, grid) {
-  if(game) {
-    grid = grid != null ? grid : game.grid;
-  }
-  
-  grid = Object.assign(new Grid(), grid);
-  
-  if(!snakes && game) {
-    snakes = game.snakes;
-  }
-  
-  if(snakes) {
-    for(let i = 0; i < snakes.length; i++) {
-      snakes[i].grid = grid;
-      snakes[i] = Object.assign(new Snake(), snakes[i]);
-  
-      for(let j = 0; j < snakes[i].queue.length; j++) {
-        snakes[i].queue[j] = Object.assign(new Position(), snakes[i].queue[j]);
-      }
-  
-      await snakes[i].initAI();
-    }
-  }
+function parseSnakes(snakes, grid) {
+  let gridCopy = game ? (grid ?? game.grid) : grid;
+  gridCopy = Object.assign(new Grid(), gridCopy);
 
-  return {
-    grid: grid,
-    snakes: snakes
-  };
+  snakes = snakes ?? game?.snakes;
+  const snakesCopy = (Array.isArray(snakes) ? snakes : [snakes]).map(snake => {
+    const newSnake = Object.assign(new Snake(), snake);
+    newSnake.grid = gridCopy;
+    newSnake.queue = newSnake.queue.map(pos => Object.assign(new Position(), pos));
+    return newSnake;
+  });
+
+  return { grid: gridCopy, snakes: snakesCopy };
 }
 
 onmessage = async e => {
   const data = e.data;
 
   if(data.length > 1 && data[0] == "init") {
-    const parsed = await parseSnakes(data[1]["snakes"], data[1]["grid"]);
-    const grid = parsed["grid"];
-    const snakes = parsed["snakes"];
+    try {
+      const parsed = parseSnakes(data[1]["snakes"], data[1]["grid"]);
+      const grid = parsed["grid"];
+      const snakes = parsed["snakes"];
+  
+      game = new GameEngine(grid, snakes, data[1]["speed"], data[1]["enablePause"], data[1]["enableRetry"], data[1]["progressiveSpeed"]);
 
-    game = new GameEngine(grid, snakes, data[1]["speed"], data[1]["enablePause"], data[1]["enableRetry"], data[1]["progressiveSpeed"]);
-    await game.init();
+      game.onExit(() => {
+        self.postMessage(["exit", {
+          "paused": game.paused,
+          "gameOver": game.gameOver,
+          "gameFinished": game.gameFinished,
+          "exited": game.exited,
+          "confirmReset": false,
+          "confirmExit": false,
+          "getInfos": false,
+          "getInfosGame": false,
+          "errorOccurred": game.errorOccurred
+        }]);
+      });
+
+      await game.init();
+    } catch(e) {
+      console.error(e);
+
+      self.postMessage(["init", {
+        "errorOccurred": true
+      }]);
+
+      return;
+    }
 
     self.postMessage(["init", {
       "snakes": copySnakes(game.snakes),
@@ -169,20 +201,6 @@ onmessage = async e => {
         "scoreMax": game.scoreMax,
         "gameOver": game.gameOver,
         "gameFinished": game.gameFinished,
-        "confirmReset": false,
-        "confirmExit": false,
-        "getInfos": false,
-        "getInfosGame": false,
-        "errorOccurred": game.errorOccurred
-      }]);
-    });
-
-    game.onExit(() => {
-      self.postMessage(["exit", {
-        "paused": game.paused,
-        "gameOver": game.gameOver,
-        "gameFinished": game.gameFinished,
-        "exited": game.exited,
         "confirmReset": false,
         "confirmExit": false,
         "getInfos": false,
@@ -304,10 +322,10 @@ onmessage = async e => {
     case "update":
       if(data.length > 1) {
         if(data[1]["key"] == "snakes") {
-          const d = await parseSnakes(data[1]["data"]);
+          const d = parseSnakes(data[1]["data"]);
           if(d) game.snakes = d.snakes;
         } else if(data[1]["key"] == "grid") {
-          const d = await parseSnakes(null, data[1]["data"]);
+          const d = parseSnakes(null, data[1]["data"]);
           if(d) game.grid = d.grid;
         } else {
           game[data[1]["key"]] = data[1]["data"];

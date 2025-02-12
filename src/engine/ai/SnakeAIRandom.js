@@ -24,7 +24,7 @@ import GameUtils from "../GameUtils.js";
 export default class SnakeAIRandom extends SnakeAI {
   constructor() {
     super();
-    this._aiLevelText = "random";
+    this.aiLevelText = "random";
   }
 
   ai(snake) {
