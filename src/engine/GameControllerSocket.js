@@ -62,7 +62,6 @@ export default class GameControllerSocket extends GameController {
   init() {
     this.socket.on("init", data => {
       this.parseData("init", data, this.enableClientSidePredictions);
-      this.gameEngine.update("update", { "engineLoading": false }, true);
 
       if(this.enableClientSidePredictions) {
         this.gameEngine.update("update", { "clientSidePredictionsMode": true }, true);

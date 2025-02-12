@@ -36,11 +36,19 @@ function copySnakes(snakes) {
         snakeCopy.direction = snake.direction;
         snakeCopy.errorInit = snake.errorInit;
         snakeCopy.gameOver = snake.gameOver;
-        snakeCopy.lastTail = JSON.parse(JSON.stringify(snake.lastTail));
+  
+        if(snake.lastTail) {
+          snakeCopy.lastTail = JSON.parse(JSON.stringify(snake.lastTail));
+        }
+  
         snakeCopy.lastTailMoved = snake.lastTailMoved;
         snakeCopy.name = snake.name;
         snakeCopy.player = snake.player;
-        snakeCopy.queue = JSON.parse(JSON.stringify(snake.queue));
+  
+        if(snake.queue) {
+          snakeCopy.queue = JSON.parse(JSON.stringify(snake.queue));
+        }
+  
         snakeCopy.score = snake.score;
         snakeCopy.scoreMax = snake.scoreMax;
         snakeCopy.ticksDead = snake.ticksDead;
