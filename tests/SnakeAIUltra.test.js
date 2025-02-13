@@ -399,3 +399,42 @@ test("calculate reward - move", async () => {
     expect(theSnake.score).toBe(0);
     expect(theSnakeAI.calculateReward(theSnake, currentState)).toBe(Constants.AIRewards.MOVE);
 });
+
+test("action to key test 1", async () => {
+    const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.numberOfPossibleActions = 3;
+
+    const theGrid = new Grid(10, 5, false, false, false);
+    const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid);
+
+    theGrid.init();
+    await theSnake.init();
+
+    expect(theSnakeAI.actionToKey(theSnake, Constants.AIActions.CONTINUE)).toBe(Constants.Key.RIGHT);
+});
+
+test("action to key test 2", async () => {
+    const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.numberOfPossibleActions = 3;
+
+    const theGrid = new Grid(10, 5, false, false, false);
+    const theSnake = new Snake(Constants.Direction.LEFT, 3, theGrid);
+
+    theGrid.init();
+    await theSnake.init();
+
+    expect(theSnakeAI.actionToKey(theSnake, Constants.AIActions.CONTINUE)).toBe(Constants.Key.LEFT);
+});
+
+test("action to key test 3", async () => {
+    const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.numberOfPossibleActions = 3;
+
+    const theGrid = new Grid(10, 5, false, false, false);
+    const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid);
+
+    theGrid.init();
+    await theSnake.init();
+
+    expect(theSnakeAI.actionToKey(theSnake, Constants.AIActions.TURN_RIGHT)).toBe(Constants.Key.BOTTOM);
+});
