@@ -122,6 +122,11 @@ export default {
     GOLD_FRUIT_EATEN: 30,
     MOVE: -0.2
   },
+  AIActions: {
+    TURN_LEFT: 0,
+    TURN_RIGHT: 1,
+    CONTINUE: 2
+  },
   Error: {
     ROOM_NOT_FOUND: "ROOM_NOT_FOUND",
     ROOM_ALREADY_JOINED: "ROOM_ALREADY_JOINED",

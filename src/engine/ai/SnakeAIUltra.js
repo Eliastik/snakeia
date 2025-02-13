@@ -37,6 +37,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelHeight = 10;
     this.modelWidth = 10;
     this.modelDepth = 2;
+    this.numberOfPossibleActions = 4;
 
     this.enableTargetModel = false;
     this.syncTargetEvery = 1000;
@@ -110,8 +111,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }));
 
     model.add(tf.layers.dense({
-      // TODO reduce to 3 (turn right/left/continue)
-      units: 4, // Number of possible actions
+      units: this.numberOfPossibleActions,
       activation: "linear"
     }));
 
@@ -134,22 +134,11 @@ export default class SnakeAIUltra extends SnakeAI {
 
     this.lastAction = action;
   
-    return action;
+    return this.actionToKey(snake, action);
   }
 
   getRandomAction() {
-    const r = GameUtils.randRange(1, 4);
-    
-    switch(r) {
-    case 1:
-      return GameConstants.Key.UP;
-    case 2:
-      return GameConstants.Key.LEFT;
-    case 3:
-      return GameConstants.Key.BOTTOM;
-    case 4:
-      return GameConstants.Key.RIGHT;
-    }
+    return GameUtils.randRange(0, this.numberOfPossibleActions - 1);
   }
 
   getBestAction(snake) {
@@ -166,8 +155,50 @@ export default class SnakeAIUltra extends SnakeAI {
         this.currentQValue = maxValue;
       }
 
-      return GameConstants.ActionMappingInverse[actionIndex];
+      return actionIndex;
     });
+  }
+
+  actionToKey(snake, actionIndex) {
+    if(this.numberOfPossibleActions === 4) {
+      return GameConstants.ActionMappingInverse[actionIndex];
+    } else if(this.numberOfPossibleActions === 3) {
+      const { direction } = snake.getHeadPosition();
+
+      if(actionIndex === GameConstants.AIActions.CONTINUE) {
+        return GameConstants.ActionMappingInverse[direction];
+      }
+
+      if(actionIndex === GameConstants.AIActions.TURN_LEFT) {
+        switch(direction) {
+        case GameConstants.Direction.UP:
+          return GameConstants.ActionMappingInverse[GameConstants.Direction.LEFT];
+        case GameConstants.Direction.BOTTOM:
+          return GameConstants.ActionMappingInverse[GameConstants.Direction.RIGHT];
+        case GameConstants.Direction.RIGHT:
+          return GameConstants.ActionMappingInverse[GameConstants.Direction.TOP];
+        case GameConstants.Direction.LEFT:
+          return GameConstants.ActionMappingInverse[GameConstants.Direction.BOTTOM];
+        }
+      }
+
+      if(actionIndex === GameConstants.AIActions.TURN_RIGHT) {
+        switch(direction) {
+        case GameConstants.Direction.UP:
+          return GameConstants.ActionMappingInverse[GameConstants.Direction.RIGHT];
+        case GameConstants.Direction.BOTTOM:
+          return GameConstants.ActionMappingInverse[GameConstants.Direction.LEFT];
+        case GameConstants.Direction.RIGHT:
+          return GameConstants.ActionMappingInverse[GameConstants.Direction.BOTTOM];
+        case GameConstants.Direction.LEFT:
+          return GameConstants.ActionMappingInverse[GameConstants.Direction.TOP];
+        }
+      }
+    } else {
+      throw new Error(`Error: this number of possible actions (${this.numberOfPossibleActions}) is not supported`);
+    }
+
+    throw new Error(`Error: no action was mapped for actionIndex ${actionIndex}`);
   }
 
   getState(snake) {
@@ -288,9 +319,8 @@ export default class SnakeAIUltra extends SnakeAI {
         }
   
         const qValues = qCurrentValues[index];
-        const actionIndex = GameConstants.ActionMapping[action];
 
-        qValues[actionIndex] = target;
+        qValues[action] = target;
   
         inputs.push(state);
         targets.push(qValues);
