@@ -36,6 +36,8 @@ function copySnakes(snakes) {
         snakeCopy.direction = snake.direction;
         snakeCopy.errorInit = snake.errorInit;
         snakeCopy.gameOver = snake.gameOver;
+        snakeCopy.autoRetry = snake.autoRetry;
+        snakeCopy.aiLevel = snake.aiLevel;
   
         if(snake.lastTail) {
           snakeCopy.lastTail = JSON.parse(JSON.stringify(snake.lastTail));
