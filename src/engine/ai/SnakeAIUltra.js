@@ -381,10 +381,9 @@ export default class SnakeAIUltra extends SnakeAI {
     return -0.2;
   }
 
-  async step(snake, currentState) {
+  async step(snake, currentState, done) {
     const nextState = this.getState(snake);
     const reward = this.calculateReward(snake, currentState);
-    const done = snake.gameOver;
 
     const currentStateTensor = this.stateToTensor(currentState);
     const nextStateTensor = this.stateToTensor(nextState);

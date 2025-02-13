@@ -9,7 +9,7 @@ import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 import tf from "@tensorflow/tfjs-node-gpu";
 
 // Settings
-const NUM_EPISODES = 5000;
+const NUM_EPISODES = 10000;
 const TRAIN_EVERY = 10;
 const MAX_TICKS = 500;
 const INITAL_GRID_WIDTH = 10;
@@ -64,14 +64,15 @@ for(let episode = 1; episode <= NUM_EPISODES; episode++) {
 
   let tick = 0;
 
-  while(!gameEngine.gameFinished && !gameEngine.gameOver && tick <= MAX_TICKS) {
+  while(!gameEngine.gameFinished && !gameEngine.gameOver && !theSnake.gameOver && tick <= MAX_TICKS) {
     const currentState = theSnakeAI.getState(theSnake);
 
     gameEngine.doTick();
 
     const currentReward = theSnakeAI.calculateReward(theSnake, currentState);
+    const done = gameEngine.gameFinished || gameEngine.gameOver || theSnake.gameOver || tick + 1 >= MAX_TICKS;
 
-    await theSnakeAI.step(theSnake, currentState);
+    await theSnakeAI.step(theSnake, currentState, done);
 
     if(tick % TRAIN_EVERY === 0) {
       await theSnakeAI.train();
