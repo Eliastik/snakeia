@@ -23,11 +23,11 @@ import Snake from "./Snake.js";
 import Position from "./Position.js";
 import GameConstants from "./Constants.js";
 import { NotificationMessage } from "jsgametools";
-import { Game } from "../Shim.js";
+import GameEngine from "./GameEngine.js";
 
 export default class GameControllerSocket extends GameController {
-  constructor(socket, ui, enableClientSidePredictions, settings) {
-    super(new Game(null, null, null, null, null, null, null, null, null, null, null, settings, ui, true), ui);
+  constructor(socket, ui, enableClientSidePredictions) {
+    super(new GameEngine(), ui);
     this.enableClientSidePredictions = enableClientSidePredictions || false;
     this.socket = socket;
     this.pingLatency = -1;
@@ -63,8 +63,7 @@ export default class GameControllerSocket extends GameController {
     this.socket.on("init", data => {
       this.parseData("init", data, this.enableClientSidePredictions);
 
-      if(this.enableClientSidePredictions) {
-        this.gameEngine.update("update", { "clientSidePredictionsMode": true }, true);
+      if(this.enableClientSidePredictions && this.gameEngine) {
         if(data && data["currentPlayer"])
           this.gameEngine.currentPlayer = data["currentPlayer"];
         if(data && data["countBeforePlay"] < 0)
@@ -191,15 +190,11 @@ export default class GameControllerSocket extends GameController {
 
   key(key) {
     this.socket.emit("key", key);
-    this.gameEngine.key(key);
+    super.key(key);
     this.lastKey = this.gameEngine.lastKey;
   }
 
   forceStart() {
     this.socket.emit("forceStart");
-  }
-
-  updateEngine(key, value) {
-    this.gameEngine.updateEngine(key, value);
   }
 }
