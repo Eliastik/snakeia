@@ -350,7 +350,6 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     if(gameOver) {
-      // TODO unit test
       let numberOfEmptyCaseAround = 0;
 
       for(const directionNext of [GameConstants.Direction.UP, GameConstants.Direction.DOWN, GameConstants.Direction.LEFT, GameConstants.Direction.RIGHT]) {
@@ -362,23 +361,21 @@ export default class SnakeAIUltra extends SnakeAI {
       }
 
       if(numberOfEmptyCaseAround >= 1) {
-        return -15;
+        return GameConstants.AIRewards.GAME_OVER_WITH_EMPTY_CASES_AROUND;
       }
 
-      return -10;
+      return GameConstants.AIRewards.GAME_OVER;
     }
 
-    // TODO lower reward if blocked (isAIStuck)
-
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
-      return 10;
+      return GameConstants.AIRewards.FRUIT_EATEN;
     }
 
     if(fruitGold && head.x === fruitGold.x && head.y === fruitGold.y) {
-      return 30;
+      return GameConstants.AIRewards.GOLD_FRUIT_EATEN;
     }
 
-    return -0.2;
+    return GameConstants.AIRewards.MOVE;
   }
 
   async step(snake, currentState, done) {

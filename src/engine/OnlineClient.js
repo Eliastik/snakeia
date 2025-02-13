@@ -249,7 +249,7 @@ export default class OnlineClient {
     if(this.socket != null && this.currentRoom && ui != null) {
       this.game = null;
       this.stopGame();
-      this.game = new GameControllerSocket(this.socket, ui, settings && settings.onlineEnableClientSidePredictions && this.engineServerVersion == GameConstants.Setting.APP_VERSION, settings);
+      this.game = new GameControllerSocket(this.socket, ui, settings && settings.onlineEnableClientSidePredictions && this.engineServerVersion == GameConstants.Setting.APP_VERSION);
       ui.controller = this.game;
       ui.pingLatency = this.pingLatency;
       this.ui = ui;

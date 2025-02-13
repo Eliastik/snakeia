@@ -115,6 +115,13 @@ export default {
     2: 40,
     3: 37
   },
+  AIRewards: {
+    GAME_OVER: -10,
+    GAME_OVER_WITH_EMPTY_CASES_AROUND: -15,
+    FRUIT_EATEN: 10,
+    GOLD_FRUIT_EATEN: 30,
+    MOVE: -0.2
+  },
   Error: {
     ROOM_NOT_FOUND: "ROOM_NOT_FOUND",
     ROOM_ALREADY_JOINED: "ROOM_ALREADY_JOINED",

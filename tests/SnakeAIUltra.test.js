@@ -4,6 +4,7 @@ import Constants from "../src/engine/Constants.js";
 import GameUtils from "../src/engine/GameUtils.js";
 import SnakeAIUltra from "../src/engine/ai/SnakeAIUltra.js";
 import Snake from "../src/engine/Snake.js";
+import GameEngine from "../src/engine/GameEngine.js";
 
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);
@@ -222,4 +223,179 @@ test("state to tensor - test 2", async () => {
         [[ 0, 3 ], [ 0, 0 ], [ 0, 1 ], [ 0, 0 ], [ 0, 3 ]],
         [[ 0, 3 ], [ 0, 3 ], [ 0, 3 ], [ 0, 3 ], [ 0, 3 ]]
     ]);
+});
+
+test("calculate reward - game over reward when there are no empty cases around", async () => {
+    const theGrid = new Grid(10, 5, false, false, false,
+    [
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 3, 3, 3, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    ], // Custom grid
+    false);
+
+    const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid);
+
+    const mockRandom = jest.fn();
+    mockRandom.mockReturnValueOnce(new Position(5, 1)).mockReturnValueOnce(new Position(4, 3)).mockReturnValue(new Position(1, 1));
+    jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+    
+    const engine = new GameEngine(theGrid, [theSnake]);
+    await engine.init();
+    engine.paused = false;
+    engine.started = true;
+
+    const theSnakeAI = new SnakeAIUltra();
+
+    expect(theSnake.errorInit).toBe(false);
+    expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 1, direction: Constants.Direction.RIGHT });
+
+    for(let i = 0; i < 2; i++) {
+        engine.doTick();
+    }
+
+    expect(theSnake.gameOver).toBe(true);
+    expect(theSnakeAI.calculateReward(theSnake, theSnakeAI.getState(theSnake))).toBe(Constants.AIRewards.GAME_OVER);
+});
+
+test("calculate reward - game over reward when there are 1 empty case around", async () => {
+    const theGrid = new Grid(10, 5, false, false, false,
+    [
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    ], // Custom grid
+    false);
+
+    const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid);
+
+    const mockRandom = jest.fn();
+    mockRandom.mockReturnValueOnce(new Position(5, 1)).mockReturnValueOnce(new Position(4, 3)).mockReturnValue(new Position(1, 1));
+    jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+    
+    const engine = new GameEngine(theGrid, [theSnake]);
+    await engine.init();
+    engine.paused = false;
+    engine.started = true;
+
+    const theSnakeAI = new SnakeAIUltra();
+
+    expect(theSnake.errorInit).toBe(false);
+    expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 1, direction: Constants.Direction.RIGHT });
+
+    for(let i = 0; i < 2; i++) {
+        engine.doTick();
+    }
+
+    expect(theSnake.gameOver).toBe(true);
+    expect(theSnakeAI.calculateReward(theSnake, theSnakeAI.getState(theSnake))).toBe(Constants.AIRewards.GAME_OVER_WITH_EMPTY_CASES_AROUND);
+});
+
+test("calculate reward - game over reward when there are 2 empty cases around", async () => {
+    const theGrid = new Grid(10, 5, false, false, false,
+    [
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    ], // Custom grid
+    false);
+
+    const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid);
+
+    const mockRandom = jest.fn();
+    mockRandom.mockReturnValueOnce(new Position(5, 2)).mockReturnValueOnce(new Position(4, 3)).mockReturnValue(new Position(1, 1));
+    jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+    
+    const engine = new GameEngine(theGrid, [theSnake]);
+    await engine.init();
+    engine.paused = false;
+    engine.started = true;
+
+    const theSnakeAI = new SnakeAIUltra();
+
+    expect(theSnake.errorInit).toBe(false);
+    expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 2, direction: Constants.Direction.RIGHT });
+
+    for(let i = 0; i < 2; i++) {
+        engine.doTick();
+    }
+
+    expect(theSnake.gameOver).toBe(true);
+    expect(theSnakeAI.calculateReward(theSnake, theSnakeAI.getState(theSnake))).toBe(Constants.AIRewards.GAME_OVER_WITH_EMPTY_CASES_AROUND);
+});
+
+test("calculate reward - fruit eaten", async () => {
+    const theGrid = new Grid(10, 5, false, false, false,
+    [
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    ], // Custom grid
+    false);
+
+    const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid);
+
+    const mockRandom = jest.fn();
+    mockRandom.mockReturnValueOnce(new Position(5, 2)).mockReturnValueOnce(new Position(8, 2)).mockReturnValue(new Position(1, 1));
+    jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+    
+    const engine = new GameEngine(theGrid, [theSnake]);
+    await engine.init();
+    engine.paused = false;
+    engine.started = true;
+
+    const theSnakeAI = new SnakeAIUltra();
+    const currentState = theSnakeAI.getState(theSnake);
+
+    expect(theSnake.errorInit).toBe(false);
+    expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 2, direction: Constants.Direction.RIGHT });
+    
+    engine.doTick();
+
+    expect(theSnake.gameOver).toBe(false);
+    expect(theSnake.score).toBe(1);
+    expect(theSnakeAI.calculateReward(theSnake, currentState)).toBe(Constants.AIRewards.FRUIT_EATEN);
+});
+
+test("calculate reward - move", async () => {
+    const theGrid = new Grid(10, 5, false, false, false,
+    [
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    ], // Custom grid
+    false);
+
+    const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid);
+
+    const mockRandom = jest.fn();
+    mockRandom.mockReturnValueOnce(new Position(5, 2)).mockReturnValueOnce(new Position(9, 2)).mockReturnValue(new Position(1, 1));
+    jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+    
+    const engine = new GameEngine(theGrid, [theSnake]);
+    await engine.init();
+    engine.paused = false;
+    engine.started = true;
+
+    const theSnakeAI = new SnakeAIUltra();
+    const currentState = theSnakeAI.getState(theSnake);
+
+    expect(theSnake.errorInit).toBe(false);
+    expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 2, direction: Constants.Direction.RIGHT });
+    
+    engine.doTick();
+
+    expect(theSnake.gameOver).toBe(false);
+    expect(theSnake.score).toBe(0);
+    expect(theSnakeAI.calculateReward(theSnake, currentState)).toBe(Constants.AIRewards.MOVE);
 });
