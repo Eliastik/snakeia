@@ -22,14 +22,17 @@ import Position from "../Position.js";
 import GameUtils from "../GameUtils.js";
 import TensorflowModelLoader from "./TensorflowModelLoader.js";
 import * as tf from "@tensorflow/tfjs";
+import seedrandom from "seedrandom";
 
 export default class SnakeAIUltra extends SnakeAI {
-  constructor(enableTrainingMode, modelLocation) {
+  constructor(enableTrainingMode, modelLocation, seed) {
     super();
 
     this.aiLevelText = "ultra";
     this.enableTrainingMode = enableTrainingMode;
     this.modelLocation = modelLocation;
+    this.trainingRandomSeed = seed || new seedrandom().int32();
+    this.trainingRng = new seedrandom(this.trainingRandomSeed);
 
     this.mainModel = null;
     this.targetModel = null;
@@ -69,6 +72,8 @@ export default class SnakeAIUltra extends SnakeAI {
       }
 
       this.summaryWriter = summaryWriter;
+
+      console.info(`INFO: The current seed for this training process is: ${this.trainingRandomSeed}`);
     }
   }
 
@@ -126,7 +131,7 @@ export default class SnakeAIUltra extends SnakeAI {
   ai(snake) {
     let action = null;
 
-    if(Math.random() < this.epsilon && this.enableTrainingMode) {
+    if(this.trainingRng() < this.epsilon && this.enableTrainingMode) {
       action = this.getRandomAction();
     } else {
       action = this.getBestAction(snake);
@@ -354,7 +359,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const batch = [];
 
     for(let i = 0; i < this.batchSize; i++) {
-      const index = Math.floor(Math.random() * this.memory.length);
+      const index = Math.floor(this.trainingRng() * this.memory.length);
       batch.push(this.memory[index]);
     }
 
@@ -364,6 +369,7 @@ export default class SnakeAIUltra extends SnakeAI {
   synchronizeTargetNetwork() {
     if(this.enableTargetModel) {
       this.targetModel.setWeights(this.mainModel.getWeights());
+
       console.info("Target network synchronized!");
     }
   }

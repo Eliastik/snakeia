@@ -9,7 +9,7 @@ import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 import tf from "@tensorflow/tfjs-node-gpu";
 
 // Settings
-const NUM_EPISODES = 10000;
+const NUM_EPISODES = 15000;
 const TRAIN_EVERY = 10;
 const MAX_TICKS = 500;
 const INITAL_GRID_WIDTH = 10;
@@ -21,10 +21,11 @@ const CHANGE_TYPES_EACH_X_EPISODES = 500;
 const AI_LEVEL_OPPONENTS = Constants.AiLevel.DEFAULT;
 const NUMBER_OPPONENTS = 5;
 const ENABLE_TENSORBOARD_LOGS = true;
+const TRAINING_SEED = 1;
 
 // Setup and run training
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
-const theSnakeAI = new SnakeAIUltra(true);
+const theSnakeAI = new SnakeAIUltra(true, null, TRAINING_SEED);
 await theSnakeAI.setup(ENABLE_TENSORBOARD_LOGS ? tensorboardSummaryWriter : null);
 
 let totalScore = 0;
