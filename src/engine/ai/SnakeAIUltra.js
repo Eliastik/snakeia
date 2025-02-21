@@ -62,7 +62,6 @@ export default class SnakeAIUltra extends SnakeAI {
     this.summaryWriter = null;
   }
 
-  // TODO other: dark mode theme
   async setup(summaryWriter) {
     this.mainModel = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
 
