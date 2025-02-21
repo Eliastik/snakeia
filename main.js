@@ -119,7 +119,8 @@ function restoreSettings() {
     textOutput: false,
     graphicSkin: "flat",
     maxFPS: -1,
-    unlockAllLevels: false
+    unlockAllLevels: false,
+    darkMode: "auto"
   };
 }
 
@@ -163,11 +164,48 @@ function showSettings() {
   } else {
     document.getElementById("maxFPS").value = -1;
   }
+
+  checkDarkMode();
+}
+
+function checkDarkMode() {
+  const settings = getSettings();
+  let darkModeEnabled = false;
+
+  if(settings) {
+    if(!settings.darkMode || settings.darkMode === "auto") {
+      darkModeEnabled = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    } else if(settings.darkMode === "enabled") {
+      darkModeEnabled = true;
+    }
+  }
+
+  if(darkModeEnabled) {
+    document.getElementById("darkModeCheckbox").checked = true;
+
+    document.body.classList.remove("light");
+    document.body.classList.add("dark");
+
+    document.querySelectorAll(".logoLight").forEach(logo => logo.style.display = "none");
+    document.querySelectorAll(".logoDark").forEach(logo => logo.style.display = "inline");
+  } else {
+    document.getElementById("darkModeCheckbox").checked = false;
+
+    document.body.classList.remove("dark");
+    document.body.classList.add("light");
+
+    document.querySelectorAll(".logoLight").forEach(logo => logo.style.display = "inline");
+    document.querySelectorAll(".logoDark").forEach(logo => logo.style.display = "none");
+  }
 }
 
 restoreSettings();
 customSettings = getSettings();
 showSettings();
+
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  checkDarkMode();
+});
 
 document.getElementById("enableAnimations").onchange = function() {
   customSettings.enableAnimations = this.checked;
@@ -206,6 +244,11 @@ document.getElementById("graphicSkin").onchange = function() {
 
 document.getElementById("maxFPS").oninput = function() {
   customSettings.maxFPS = this.value;
+  saveSettings();
+};
+
+document.getElementById("darkModeCheckbox").onchange = function() {
+  customSettings.darkMode = this.checked ? "enabled" : "disabled";
   saveSettings();
 };
 

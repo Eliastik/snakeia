@@ -14,13 +14,14 @@ const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 // Settings
 const NUM_EPISODES              = 30000;
 const TRAIN_EVERY               = 10;
-const MAX_TICKS                 = 500;
+const MAX_TICKS                 = 1000;
 const INITAL_GRID_WIDTH         = 10;
 const INITAL_GRID_HEIGHT        = 10;
 const SAVE_CHECKPOINT_MODELS    = true;
 const ENABLE_TENSORBOARD_LOGS   = true;
+// TODO enable grid increase
 const INCREASE_GRID_SIZE_EACH   = -1; // Increase grid size each X episodes. -1 to disable
-const EPISODES_TYPES            = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS"];
+const EPISODES_TYPES            = ["DEFAULT", "BORDER_WALLS"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
 const AI_LEVEL_OPPONENTS        = Constants.AiLevel.DEFAULT;
@@ -167,7 +168,8 @@ async function train() {
     console.log(`Episode type ${currentEpisodeType} finished! Average score: ${currentEpisodeTypeScore / currentMaxEpisodes} - Average reward: ${currentEpisodeTypeReward / currentMaxEpisodes} - Time: ${performance.now() - startTime} ms`);
 
     // Reset the epsilon
-    theSnakeAI.epsilon = 0.5;
+    theSnakeAI.epsilonMax = 0.75;
+    theSnakeAI.epsilon = 0.75;
 
     // Save the intermediate model
     if(SAVE_CHECKPOINT_MODELS) {
