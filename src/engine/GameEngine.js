@@ -341,17 +341,19 @@ export default class GameEngine {
 
         if(!snake.gameOver && !snake.scoreMax) {
           const headSnakePos = this.moveSnake(snake, initialDirection);
-          
-          if(this.grid.isDeadPosition(headSnakePos)) {
-            snake.setGameOver(this.ticks);
-          } else {
-            const { scoreHasIncreased, setFruit } = this.handleSnakeMoveResult(headSnakePos, snake);
 
-            scoreIncreased = scoreHasIncreased;
-
-            // Set a new fruit if the current fruit is eaten
-            if(!this.scoreMax && setFruit && !this.clientSidePredictionsMode) {
-              setFruitError = !this.grid.setFruit(this.snakes.length);
+          if(headSnakePos) {
+            if(this.grid.isDeadPosition(headSnakePos)) {
+              snake.setGameOver(this.ticks);
+            } else {
+              const { scoreHasIncreased, setFruit } = this.handleSnakeMoveResult(headSnakePos, snake);
+  
+              scoreIncreased = scoreHasIncreased;
+  
+              // Set a new fruit if the current fruit is eaten
+              if(!this.scoreMax && setFruit && !this.clientSidePredictionsMode) {
+                setFruitError = !this.grid.setFruit(this.snakes.length);
+              }
             }
           }
         }
@@ -382,19 +384,23 @@ export default class GameEngine {
       snake.moveTo(snake.ai());
     }
 
-    let headSnakePos = snake.getHeadPosition();
+    const headSnakePos = snake.getHeadPosition();
+    const nextIsDeadPosition = this.grid.isDeadPosition(snake.getNextPosition(headSnakePos, snake.direction));
 
-    if(snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI && this.grid.isDeadPosition(snake.getNextPosition(headSnakePos, snake.direction))) {
+    if(snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI && nextIsDeadPosition) {
       snake.direction = initialDirection;
       snake.moveTo(snake.ai());
       snake.lastKey = -1;
     }
 
-    // TODO if maze and player human, ignore dead position?
+    // If maze and player human, ignore dead position
+    if(this.grid.maze && snake.player == GameConstants.PlayerType.HUMAN && nextIsDeadPosition) {
+      snake.direction = initialDirection;
+      snake.lastKey = -1;
+      return null;
+    }
 
-    headSnakePos = snake.getNextPosition(headSnakePos, snake.direction);
-
-    return headSnakePos;
+    return snake.getNextPosition(headSnakePos, snake.direction);
   }
 
   handleSnakeMoveResult(headSnakePos, snake) {
@@ -507,7 +513,9 @@ export default class GameEngine {
 
         if(isHumanPlayer) {
           humanPlayerActive = true;
-        } else if(!isPartiallyStuck) {
+        }
+        
+        if(!isPartiallyStuck) {
           allActiveAIAreStuck = false;
           allActiveAIAreFullyStuck = false;
         } else if(!isFullyStuck) {
@@ -518,7 +526,7 @@ export default class GameEngine {
 
     const shouldEndGame = nbOver >= this.snakes.length || setFruitError || (allActiveAIAreFullyStuck && !humanPlayerActive);
 
-    this.aiStuck = allActiveAIAreStuck && !shouldEndGame;
+    this.aiStuck = allActiveAIAreStuck && !humanPlayerActive && !shouldEndGame;
 
     if(shouldEndGame) {
       this.stop();
