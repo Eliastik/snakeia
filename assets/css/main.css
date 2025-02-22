@@ -210,9 +210,14 @@ body.dark .custom-control.custom-checkbox .custom-control-label:before {
   border-color: #4b4746;
 }
 
-body.dark .custom-control-input:checked~.custom-control-label::before {
+body.dark .custom-control-input:checked~.custom-control-label:before {
   background-color: #005cbf;
   border-color: #005cbf;
+}
+
+body.dark .custom-control-input:disabled~.custom-control-label:before {
+  background-color: #534a47;
+  border-color: #4b4746;
 }
 
 body.dark .card {
