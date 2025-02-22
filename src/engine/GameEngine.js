@@ -266,7 +266,9 @@ export default class GameEngine {
 
   destroySnakes(exceptionIds, types) {
     for(let i = 0; i < this.snakes.length; i++) {
-      if(exceptionIds && Array.isArray(exceptionIds) && exceptionIds.indexOf(i) < 0 && types.indexOf(this.snakes[i].player) > -1) this.snakes[i].setGameOver(this.ticks);
+      if(exceptionIds && Array.isArray(exceptionIds) && exceptionIds.indexOf(i) < 0 && types.indexOf(this.snakes[i].player) > -1) {
+        this.snakes[i].setGameOver(this.ticks);
+      }
     }
   }
 
@@ -355,6 +357,7 @@ export default class GameEngine {
         }
       }
 
+      // Check stuck fruits
       setFruitError = this.handleStuckFruits(setFruitError);
 
       // Check if the game should end
@@ -386,6 +389,8 @@ export default class GameEngine {
       snake.moveTo(snake.ai());
       snake.lastKey = -1;
     }
+
+    // TODO if maze and player human, ignore dead position?
 
     headSnakePos = snake.getNextPosition(headSnakePos, snake.direction);
 
@@ -518,7 +523,7 @@ export default class GameEngine {
     if(shouldEndGame) {
       this.stop();
 
-      if (this.snakes.length > 1) {
+      if(this.snakes.length > 1) {
         this.gameFinished = true;
       }
     }
