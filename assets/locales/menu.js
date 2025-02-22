@@ -126,7 +126,9 @@ i18next.addResourceBundle("fr", "translation", {
     "seedGrid": "Valeur aléatoire grille :",
     "seedGame": "Valeur aléatoire jeu :",
     "advancedSettings": "Paramètres avancés…",
-    "invalidValue": "Cette valeur est invalide."
+    "invalidValue": "Cette valeur est invalide.",
+    "seedGridInfos": "Cette valeur configure la RNG pour la génération des murs sur les grilles (si l'une des options est activée) ou pour la création des labyrinthes. Une même valeur produira la même grille si les autres paramètres restent inchangés.",
+    "seedGameInfos": "Cette valeur configure la RNG du jeu : elle détermine la génération aléatoire des positions des fruits, le placement initial des Snake et l'activation éventuelle des fruits en or, et autres. Une même valeur produira la même partie si les autres paramètres restent inchangés."
   },
   "game": {
     "backToMenu": "Retour au menu",
@@ -368,7 +370,9 @@ i18next.addResourceBundle("en", "translation", {
     "seedGrid": "Grid random value:",
     "seedGame": "Game random value:",
     "advancedSettings": "Advanced settings…",
-    "invalidValue": "This value is invalid."
+    "invalidValue": "This value is invalid.",
+    "seedGridInfos": "This value configures the RNG for generating walls on the grids (if one of the options is enabled) or for creating mazes. The same value will produce the same grid if the other parameters remain unchanged.",
+    "seedGameInfos": "This value configures the game's RNG: it determines the random generation of fruit positions, the initial placement of the Snake, and the potential activation of golden fruits, and others. The same value will produce the same game if the other parameters remain unchanged."
   },
   "game": {
     "backToMenu": "Back to the menu",

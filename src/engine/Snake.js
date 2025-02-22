@@ -134,6 +134,7 @@ export default class Snake {
 
   checkSpace(isColumn) {
     let spaceAvailable = 0;
+    
     const outerLimit = isColumn ? this.grid.width : this.grid.height;
     const innerLimit = isColumn ? this.grid.height : this.grid.width;
   

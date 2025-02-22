@@ -2454,6 +2454,8 @@ function translateContent() {
 
   document.getElementById("aiAssistantInfos").setAttribute("aria-label", i18next.t("settings.aiAssistantInfos"));
   document.getElementById("multithreadingInfos").setAttribute("aria-label", i18next.t("menu.multithreadingInfos"));
+  document.getElementById("seedGridInfos").setAttribute("aria-label", i18next.t("settings.seedGridInfos"));
+  document.getElementById("seedGameInfos").setAttribute("aria-label", i18next.t("settings.seedGameInfos"));
   document.getElementById("onlineEnableClientSidePredictionsInfos").setAttribute("aria-label", i18next.t("menu.onlineEnableClientSidePredictionsInfos"));
   document.querySelectorAll(".settingNotAvailable").forEach(e => {
     e.setAttribute("aria-label", i18next.t("menu.settingNotAvailable"));

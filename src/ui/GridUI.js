@@ -55,22 +55,25 @@ export default class GridUI extends Component {
       this.canvasTmp.height = canvas.height;
   
       ctx.save();
+
+      const availableHeight = canvas.height - this.headerHeight;
+      const availableWidth = canvas.width;
   
-      let caseHeight = Math.floor((canvas.height - this.headerHeight) / this.grid.height);
-      let caseWidth = Math.floor(canvas.width / this.grid.width);
-      caseHeight = caseHeight > caseWidth ? caseWidth : caseHeight;
-      caseWidth = caseWidth > caseHeight ? caseHeight : caseWidth;
-  
-      const totalWidth = caseWidth * this.grid.width;
-      const totalHeight = caseHeight * this.grid.height;
-  
+      const caseSize = this.calculateCaseSize(availableHeight, availableWidth);
+
+      const totalWidth = caseSize * this.grid.width;
+      const totalHeight = caseSize * this.grid.height;
+
+      const offsetX = Math.floor((availableWidth - totalWidth) / 2);
+      const offsetY = Math.floor((availableHeight - totalHeight) / 2) + this.headerHeight;
+
       this.width = totalWidth;
       this.height = totalHeight;
   
       for(let i = 0; i < this.grid.height; i++) {
         for(let j = 0; j < this.grid.width; j++) {
-          const caseX = Math.floor(j * caseWidth + ((canvas.width - totalWidth) / 2));
-          const caseY = this.headerHeight + i * caseHeight;
+          const caseX = offsetX + j * caseSize;
+          const caseY = offsetY + i * caseSize;
   
           if(i == 0 && j == 0) {
             this.x = caseX;
@@ -83,12 +86,19 @@ export default class GridUI extends Component {
             ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
           }
   
-          ctx.fillRect(caseX, caseY, caseWidth, caseHeight);
-          Utils.drawImage(ctx, this.imageLoader.get("assets/images/skin/" + this.graphicSkin + "/" + this.grid.getImageCase(new Position(j, i)), Math.round(caseWidth), Math.round(caseHeight)), Math.round(caseX), Math.round(caseY), Math.round(caseWidth), Math.round(caseHeight));
+          ctx.fillRect(caseX, caseY, caseSize, caseSize);
+          Utils.drawImage(ctx,
+            this.imageLoader.get("assets/images/skin/" + this.graphicSkin + "/" + this.grid.getImageCase(new Position(j, i)),
+              caseSize,
+              Math.round(caseSize)),
+            Math.round(caseX),
+            Math.round(caseY),
+            Math.round(caseSize),
+            Math.round(caseSize));
         }
       }
   
-      this.drawSnake(ctx, caseWidth, caseHeight, totalWidth, this.currentPlayer);
+      this.drawSnake(ctx, caseSize, offsetY, totalWidth, this.currentPlayer);
   
       this.canvasTmp.width = 0;
       this.canvasTmp.height = 0;
@@ -97,7 +107,19 @@ export default class GridUI extends Component {
     }
   }
   
-  drawSnake(ctx, caseWidth, caseHeight, totalWidth, currentPlayer) {
+  calculateCaseSize(availableHeight, availableWidth) {
+    let caseSize = Math.min(availableHeight / this.grid.height, availableWidth / this.grid.width);
+
+    const heightPercent = availableHeight / (caseSize * this.grid.height);
+    const widthPercent = availableWidth / (caseSize * this.grid.width);
+    const percent = Math.min(heightPercent, widthPercent);
+
+    caseSize *= percent;
+    
+    return Math.floor(caseSize);
+  }
+
+  drawSnake(ctx, caseSize, offsetY, totalWidth, currentPlayer) {
     if(this.snakes != null) {
       const canvas = this.canvasTmp;
       const ctxTmp = this.canvasTmp.getContext("2d");
@@ -151,8 +173,9 @@ export default class GridUI extends Component {
             }
 
             offset = Math.max(0, Math.min(1, offset));
-            const offsetX = (caseWidth * offset) - caseWidth;
-            const offsetY = (caseHeight * offset) - caseHeight;
+
+            const offsetX = (caseSize * offset) - caseSize;
+            const offsetY = (caseSize * offset) - caseSize;
 
             let currentPosition = position;
             let graphicDirection;
@@ -213,8 +236,9 @@ export default class GridUI extends Component {
 
           const posX = position.x;
           const posY = position.y;
-          caseX += Math.floor(posX * caseWidth + ((canvas.width - totalWidth) / 2));
-          caseY += this.headerHeight + posY * caseHeight;
+
+          caseX += Math.floor(posX * caseSize + ((canvas.width - totalWidth) / 2));
+          caseY += offsetY + posY * caseSize;
 
           if(i == 0) {
             if(this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
@@ -292,20 +316,20 @@ export default class GridUI extends Component {
             }
           }
 
-          Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc, Math.round(caseWidth), Math.round(caseHeight)), Math.round(caseX), Math.round(caseY), Math.round(caseWidth), Math.round(caseHeight), null, null, null, null, eraseBelow, Math.round(angle));
+          Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc, Math.round(caseSize), Math.round(caseSize)), Math.round(caseX), Math.round(caseY), Math.round(caseSize), Math.round(caseSize), null, null, null, null, eraseBelow, Math.round(angle));
         }
 
-        Utils.drawImageData(ctx, this.canvasTmp, Math.round((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height), Math.floor((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseHeight * this.grid.height));
+        Utils.drawImageData(ctx, this.canvasTmp, Math.round((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseSize * this.grid.height), Math.floor((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseSize * this.grid.height));
         ctxTmp.filter = "none";
       }
 
       if(this.snakes.length > 1) {
-        this.drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight, currentPlayer);
+        this.drawSnakeInfos(ctx, totalWidth, caseSize, currentPlayer);
       }
     }
   }
 
-  drawSnakeInfos(ctx, totalWidth, caseWidth, caseHeight, currentPlayer) {
+  drawSnakeInfos(ctx, totalWidth, caseSize, currentPlayer) {
     let numPlayer = 0;
     let numAI = 0;
 
@@ -321,14 +345,14 @@ export default class GridUI extends Component {
       if(position != null) {
         const posX = position.x;
         const posY = position.y;
-        let caseX = Math.floor(posX * caseWidth + ((this.canvasTmp.width - totalWidth) / 2));
-        let caseY = this.headerHeight + posY * caseHeight;
+        let caseX = Math.floor(posX * caseSize + ((this.canvasTmp.width - totalWidth) / 2));
+        let caseY = this.headerHeight + posY * caseSize;
     
         if(!this.disableAnimation && !this.snakes[i].gameOver && !this.gameFinished && !this.gameOver) {
           let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
           offset = (offset > 1 ? 1 : offset);
-          const offsetX = (caseWidth * offset) - caseWidth;
-          const offsetY = (caseHeight * offset) - caseHeight;
+          const offsetX = (caseSize * offset) - caseSize;
+          const offsetY = (caseSize * offset) - caseSize;
     
           switch(position.direction) {
           case GameConstants.Direction.UP:
@@ -346,10 +370,10 @@ export default class GridUI extends Component {
           }
         }
     
-        Utils.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseHeight / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseHeight / 1.75), false, true);
+        Utils.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseSize / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseSize / 1.75), false, true);
     
         if(!this.spectatorMode && (currentPlayer == i && this.countBeforePlay >= 0 && (currentPlayer != null || (this.isFilterHueAvailable && this.snakes.length > 2) || (!this.isFilterHueAvailable && this.snakes.length > 1)))) {
-          Utils.drawArrow(ctx, Math.round(caseX + (caseWidth / 2)), Math.round(caseY - caseHeight * 2), Math.round(caseX + (caseWidth / 2)), Math.round(caseY - 5));
+          Utils.drawArrow(ctx, Math.round(caseX + (caseSize / 2)), Math.round(caseY - caseSize * 2), Math.round(caseX + (caseSize / 2)), Math.round(caseY - 5));
         }
       }
     }
