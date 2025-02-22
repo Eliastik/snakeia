@@ -93,12 +93,12 @@ export default class GameEngine {
         // Init Snake colors
         let startHue = GameUtils.randRange(0, 360, this.grid ? new seedrandom(this.grid.seedGame) : null);
   
-        for(let i = 0; i < this.snakes.length; i++) {
-          if(this.snakes[i] instanceof Snake == false) {
+        for(const snake of this.snakes) {
+          if(snake instanceof Snake == false) {
             this.errorOccurred = true;
           } else {
             startHue = GameUtils.addHue(startHue, Math.round(360 / (this.snakes.length)));
-            this.snakes[i].color = startHue;
+            snake.color = startHue;
           }
         }
       }
@@ -114,12 +114,12 @@ export default class GameEngine {
     this.grid.init();
 
     if(this.snakes != null) {
-      for(let i = 0; i < this.snakes.length; i++) {
-        this.snakes[i].reset();
+      for(const snake of this.snakes) {
+        snake.reset();
       }
       
-      for(let i = 0; i < this.snakes.length; i++) {
-        await this.snakes[i].init();
+      for(const snake of this.snakes) {
+        await snake.init();
       }
     }
 
@@ -164,8 +164,8 @@ export default class GameEngine {
     
     if(!this.errorOccurred) {
       if(this.snakes != null) {
-        for(let i = 0; i < this.snakes.length; i++) {
-          if(this.snakes[i].errorInit) {
+        for(const snake of this.snakes) {
+          if(snake.errorInit) {
             this.errorOccurred = true;
             this.stop();
           }
@@ -242,10 +242,11 @@ export default class GameEngine {
       this.killed = true;
 
       if(this.snakes != null) {
-        for(let i = 0; i < this.snakes.length; i++) {
-          this.snakes[i].kill();
-          this.snakes[i] = null;
+        for(const snake of this.snakes) {
+          snake.kill();
         }
+
+        this.snakes = [];
       }
 
       this.clearIntervalPlay();
@@ -273,8 +274,8 @@ export default class GameEngine {
     let numPlayer = 0;
 
     if(this.snakes != null) {
-      for(let i = 0; i < this.snakes.length; i++) {
-        if(this.snakes[i].player == type) {
+      for(const snake of this.snakes) {
+        if(snake.player == type) {
           numPlayer++;
         }
       }
@@ -287,13 +288,13 @@ export default class GameEngine {
     let numPlayer = 0;
 
     if(this.snakes != null) {
-      for(let i = 0; i < this.snakes.length; i++) {
-        if(this.snakes[i].player == type) {
+      for(const snake of this.snakes) {
+        if(snake.player == type) {
           numPlayer++;
         }
 
         if(numPlayer == num) {
-          return this.snakes[i];
+          return snake;
         }
       }
     }
@@ -330,124 +331,36 @@ export default class GameEngine {
 
       this.ticks++;
 
-      for(let i = 0; i < this.snakes.length; i++) {
-        const initialDirection = this.snakes[i].direction;
-        let setFruit = false;
-        let goldFruit = false;
+      for(const snake of this.snakes) {
         setFruitError = false;
-        this.snakes[i].lastTailMoved = false;
 
-        if(!this.snakes[i].gameOver && !this.snakes[i].scoreMax) {
-          if(this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
-            this.snakes[i].moveTo(this.snakes[i].lastKey);
-            this.snakes[i].lastKey = -1;
-          } else if(this.snakes[i].player == GameConstants.PlayerType.AI && (!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && this.snakes[i].aiLevel != GameConstants.AiLevel.RANDOM))) {
-            this.snakes[i].moveTo(this.snakes[i].ai());
-          }
+        const initialDirection = snake.direction;
+        snake.lastTailMoved = false;
 
-          let headSnakePos = this.snakes[i].getHeadPosition();
-
-          if(this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI && this.grid.isDeadPosition(this.snakes[i].getNextPosition(headSnakePos, this.snakes[i].direction))) {
-            this.snakes[i].direction = initialDirection;
-            this.snakes[i].moveTo(this.snakes[i].ai());
-            this.snakes[i].lastKey = -1;
-          }
-
-          headSnakePos = this.snakes[i].getNextPosition(headSnakePos, this.snakes[i].direction);
+        if(!snake.gameOver && !snake.scoreMax) {
+          const headSnakePos = this.moveSnake(snake, initialDirection);
           
           if(this.grid.isDeadPosition(headSnakePos)) {
-            this.snakes[i].setGameOver(this.ticks);
+            snake.setGameOver(this.ticks);
           } else {
-            if(this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT || this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
-              if(this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT) {
-                this.snakes[i].score++;
-                this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPos);
-                this.grid.fruitPos = null;
-              } else if(this.grid.get(headSnakePos) == GameConstants.CaseType.FRUIT_GOLD) {
-                this.snakes[i].score += 3;
-                this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPosGold);
-                this.grid.fruitPosGold = null;
-                goldFruit = true;
-              }
+            const { scoreHasIncreased, setFruit } = this.handleSnakeMoveResult(headSnakePos, snake);
 
-              scoreIncreased = true;
-              this.snakes[i].insert(headSnakePos);
+            scoreIncreased = scoreHasIncreased;
 
-              if(this.grid.maze) {
-                this.gameMazeWin = true;
-                this.gameFinished = true;
-                this.stop();
-              } else if(this.snakes[i].hasMaxScore() && this.snakes.length <= 1) {
-                this.scoreMax = true;
-                this.snakes[i].scoreMax = true;
-                this.stop();
-              } else {
-                this.numFruit++;
-                if(!goldFruit) setFruit = true;
-              }
-
-              if(this.snakes.length <= 1 && this.progressiveSpeed && this.snakes[i].score > 0 && this.initialSpeed > 1) {
-                this.initialSpeed = Math.ceil(((-this.initialSpeedUntouched / 100) * this.snakes[i].score) + this.initialSpeedUntouched);
-                this.initialSpeed = this.initialSpeed < 1 ? 1 : this.initialSpeed;
-              }
-            } else {
-              this.snakes[i].insert(headSnakePos);
-
-              if(!this.grid.maze) {
-                this.snakes[i].remove();
-                this.snakes[i].lastTailMoved = true;
-              }
+            // Set a new fruit if the current fruit is eaten
+            if(!this.scoreMax && setFruit && !this.clientSidePredictionsMode) {
+              setFruitError = !this.grid.setFruit(this.snakes.length);
             }
           }
         }
-
-        if(!this.scoreMax && setFruit && !this.clientSidePredictionsMode) {
-          setFruitError = !this.grid.setFruit(this.snakes.length);
-        }
       }
 
-      if(!this.scoreMax && !setFruitError && (this.grid.detectCorridor(this.grid.fruitPos) || this.grid.isFruitSurrounded(this.grid.fruitPos, true)) && !this.clientSidePredictionsMode) {
-        setFruitError = !this.grid.setFruit(this.snakes.length);
-      }
+      setFruitError = this.handleStuckFruits(setFruitError);
 
-      if(!this.scoreMax && this.grid.fruitPosGold != null && (this.grid.detectCorridor(this.grid.fruitPosGold) || this.grid.isFruitSurrounded(this.grid.fruitPosGold, true))) {
-        this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPosGold);
-        this.grid.fruitPosGold = null;
-      }
+      // Check if the game should end
+      this.checkEndGameCondition(setFruitError);
 
-      let nbOver = 0;
-
-      for(let j = 0; j < this.snakes.length; j++) {
-        (this.snakes[j].gameOver || this.snakes[j].scoreMax) && nbOver++;
-      }
-
-      // Checking if the AIs are all stuck
-      let endGameAIStuck = false;
-
-      for(let k = 0; k < this.snakes.length; k++) {
-        if(!this.snakes[k].gameOver && this.snakes[k].isAIStuck(this.aiStuckLimit / 2, this.aiStuckLimit / 2)) {
-          this.aiStuck = true;
-
-          if(this.snakes[k].isAIStuck(this.aiStuckLimit, this.aiStuckLimit)) { // Limit of aiStuckLimit loops - end the game
-            endGameAIStuck = true;
-          } else {
-            endGameAIStuck = false;
-          }
-        } else if(((this.snakes[k].player == GameConstants.PlayerType.HUMAN || this.snakes[k].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) && !this.snakes[k].gameOver) || (this.snakes[k].player == GameConstants.PlayerType.AI && !this.snakes[k].gameOver)) {
-          this.aiStuck = false;
-          endGameAIStuck = false;
-          break;
-        } 
-      }
-
-      if(nbOver >= this.snakes.length || setFruitError || endGameAIStuck) {
-        this.stop();
-
-        if(this.snakes.length > 1) {
-          this.gameFinished = true;
-        }
-      }
-
+      // Send events about the current game state update
       this.reactor.dispatchEvent("onUpdate");
 
       if(scoreIncreased) {
@@ -456,6 +369,159 @@ export default class GameEngine {
     }
 
     this.tick();
+  }
+
+  moveSnake(snake, initialDirection) {
+    if(snake.player == GameConstants.PlayerType.HUMAN || snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
+      snake.moveTo(snake.lastKey);
+      snake.lastKey = -1;
+    } else if(snake.player == GameConstants.PlayerType.AI && (!this.clientSidePredictionsMode || (this.clientSidePredictionsMode && snake.aiLevel != GameConstants.AiLevel.RANDOM))) {
+      snake.moveTo(snake.ai());
+    }
+
+    let headSnakePos = snake.getHeadPosition();
+
+    if(snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI && this.grid.isDeadPosition(snake.getNextPosition(headSnakePos, snake.direction))) {
+      snake.direction = initialDirection;
+      snake.moveTo(snake.ai());
+      snake.lastKey = -1;
+    }
+
+    headSnakePos = snake.getNextPosition(headSnakePos, snake.direction);
+
+    return headSnakePos;
+  }
+
+  handleSnakeMoveResult(headSnakePos, snake) {
+    const cellType = this.grid.get(headSnakePos);
+
+    if(cellType == GameConstants.CaseType.FRUIT || cellType == GameConstants.CaseType.FRUIT_GOLD) {
+      return this.handleScoreIncrease(snake, cellType, headSnakePos);
+    } else {
+      snake.insert(headSnakePos);
+
+      if(!this.grid.maze) {
+        snake.remove();
+        snake.lastTailMoved = true;
+      }
+    }
+
+    return { goldFruit: false, scoreHasIncreased: false, setFruit: false };
+  }
+
+  handleScoreIncrease(snake, cellType, headSnakePos) {
+    let setFruit = false;
+    let goldFruit = false;
+
+    if(cellType == GameConstants.CaseType.FRUIT) {
+      snake.score++;
+
+      this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPos);
+      this.grid.fruitPos = null;
+    } else if(cellType == GameConstants.CaseType.FRUIT_GOLD) {
+      goldFruit = true;
+
+      snake.score += 3;
+
+      this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPosGold);
+      this.grid.fruitPosGold = null;
+    }
+
+    snake.insert(headSnakePos);
+
+    if(this.grid.maze) {
+      this.gameMazeWin = true;
+      this.gameFinished = true;
+
+      this.stop();
+    } else if(snake.hasMaxScore() && this.snakes.length <= 1) {
+      this.scoreMax = true;
+      snake.scoreMax = true;
+
+      this.stop();
+    } else {
+      this.numFruit++;
+
+      if(!goldFruit) {
+        setFruit = true;
+      }
+    }
+
+    this.handleSpeedIncrease(snake);
+
+    return { goldFruit, scoreHasIncreased: true, setFruit };
+  }
+
+  handleSpeedIncrease(snake) {
+    if(this.snakes.length <= 1 && this.progressiveSpeed && snake.score > 0 && this.initialSpeed > 1) {
+      this.initialSpeed = Math.ceil(((-this.initialSpeedUntouched / 100) * snake.score) + this.initialSpeedUntouched);
+      this.initialSpeed = this.initialSpeed < 1 ? 1 : this.initialSpeed;
+    }
+  }
+
+  handleStuckFruits(setFruitError) {
+    // If the fruit is in a corridor, we set it in a new cell
+    if(!this.scoreMax && !setFruitError && (this.grid.detectCorridor(this.grid.fruitPos) || this.grid.isFruitSurrounded(this.grid.fruitPos, true)) && !this.clientSidePredictionsMode) {
+      setFruitError = !this.grid.setFruit(this.snakes.length);
+    }
+
+    // If gold fruit is in a corridor, we remove it
+    if(!this.scoreMax && this.grid.fruitPosGold != null && (this.grid.detectCorridor(this.grid.fruitPosGold) || this.grid.isFruitSurrounded(this.grid.fruitPosGold, true))) {
+      this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPosGold);
+      this.grid.fruitPosGold = null;
+    }
+
+    return setFruitError;
+  }
+
+  checkSnakeAIStuckStatus(snake) {
+    const isPartiallyStuck = snake.isAIStuck(this.aiStuckLimit / 2, this.aiStuckLimit / 2);
+    const isFullyStuck = isPartiallyStuck && snake.isAIStuck(this.aiStuckLimit, this.aiStuckLimit);
+    const isHumanPlayer = (snake.player === GameConstants.PlayerType.HUMAN || snake.player === GameConstants.PlayerType.HYBRID_HUMAN_AI) && !snake.gameOver;
+    
+    return {
+      isPartiallyStuck,
+      isFullyStuck,
+      isHumanPlayer
+    };
+  }
+
+  checkEndGameCondition(setFruitError) {
+    let nbOver = 0;
+
+    let allActiveAIAreStuck = true;
+    let allActiveAIAreFullyStuck = true;
+    let humanPlayerActive = false;
+
+    for(const snake of this.snakes) {
+      if(snake.gameOver || snake.scoreMax) {
+        nbOver++;
+      } else {
+        // Check if AI player is stuck
+        const { isPartiallyStuck, isFullyStuck, isHumanPlayer } = this.checkSnakeAIStuckStatus(snake);
+
+        if(isHumanPlayer) {
+          humanPlayerActive = true;
+        } else if(!isPartiallyStuck) {
+          allActiveAIAreStuck = false;
+          allActiveAIAreFullyStuck = false;
+        } else if(!isFullyStuck) {
+          allActiveAIAreFullyStuck = false;
+        }
+      }
+    }
+
+    const shouldEndGame = nbOver >= this.snakes.length || setFruitError || (allActiveAIAreFullyStuck && !humanPlayerActive);
+
+    this.aiStuck = allActiveAIAreStuck && !shouldEndGame;
+
+    if(shouldEndGame) {
+      this.stop();
+
+      if (this.snakes.length > 1) {
+        this.gameFinished = true;
+      }
+    }
   }
 
   onReset(callback) {

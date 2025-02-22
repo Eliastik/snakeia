@@ -60,6 +60,12 @@ export default class SnakeAIUltra extends SnakeAI {
     this.currentEpoch = 0;
 
     this.summaryWriter = null;
+
+    // TODO
+    // - Fix training with multiple environments (with or without walls, etc...) :
+    // - Increase memory size + optimize
+    // - Prioritized Experience Replay
+    // - Dueling DQN
   }
 
   async setup(summaryWriter) {
