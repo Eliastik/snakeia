@@ -168,17 +168,22 @@ function showSettings() {
   checkDarkMode();
 }
 
-function checkDarkMode() {
+function isDarkModeEnabled() {
   const settings = getSettings();
-  let darkModeEnabled = false;
 
   if(settings) {
     if(!settings.darkMode || settings.darkMode === "auto") {
-      darkModeEnabled = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     } else if(settings.darkMode === "enabled") {
-      darkModeEnabled = true;
+      return true;
     }
   }
+
+  return false;
+}
+
+function checkDarkMode() {
+  const darkModeEnabled = isDarkModeEnabled();
 
   if(darkModeEnabled) {
     document.getElementById("darkModeCheckbox").checked = true;
@@ -396,12 +401,16 @@ function connectToServer(url, port) {
     if(!success) {
       if(data == GameConstants.Error.AUTHENTICATION_REQUIRED || data == GameConstants.Error.BANNED) {
         document.getElementById("authenticationServerContainer").innerHTML = "";
-        const authent_frame = document.createElement("iframe");
-        authent_frame.id = "authent_frame";
-        authent_frame.src = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2) + (id ? "&id=" + id : "");
-        authent_frame.classList.add("frame-responsive");
-        document.getElementById("authenticationServerContainer").appendChild(authent_frame);
-        document.getElementById("linkAuthenticationServer").href = onlineClient.getURL() + "/authentication?lang=" + i18next.language.substr(0, 2) + (id ? "&id=" + id : "");
+        
+        const authentIframe = document.createElement("iframe");
+        const authentUrl = onlineClient.getURL() + `/authentication?lang=${i18next.language.substring(0, 2)}&theme=${isDarkModeEnabled() ? "dark" : "light"}` + (id ? "&id=" + id : "");
+
+        authentIframe.id = "authent_frame";
+        authentIframe.src = authentUrl;
+        authentIframe.classList.add("frame-responsive");
+
+        document.getElementById("authenticationServerContainer").appendChild(authentIframe);
+        document.getElementById("linkAuthenticationServer").href = authentUrl;
 
         displayAuthentication();
       } else if(data == GameConstants.Error.DISCONNECTED) {
