@@ -96,6 +96,20 @@ export default {
     ANGLE_3: 6,
     ANGLE_4: 7
   },
+  SimpleDirection: {
+    UP: 0,
+    RIGHT: 1,
+    BOTTOM: 2,
+    LEFT: 3
+  },
+  VerticalDirection: {
+    UP: 0,
+    BOTTOM: 2
+  },
+  HorizontalDirection: {
+    RIGHT: 1,
+    LEFT: 3
+  },
   Key: {
     UP: 38,
     RIGHT: 39,
@@ -143,5 +157,5 @@ export default {
     SEARCHING_PLAYERS: "SEARCHING_PLAYERS",
     AUTHENTICATION_SUCCESS: "AUTHENTICATION_SUCCESS"
   },
-  AIModelLocation: "/models/model.json"
+  AIModelLocation: "/models/2025-02-21T18-45-33-122Z/model.json"
 };

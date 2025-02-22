@@ -61,106 +61,43 @@ export default class Snake {
     let spaceLineAvailable = 0;
     let spaceColAvailable = 0;
 
-    if((this.initialDirection == GameConstants.Direction.RIGHT && this.initTriedDirections.indexOf(GameConstants.Direction.RIGHT) == -1) || (this.initialDirection == GameConstants.Direction.LEFT && this.initTriedDirections.indexOf(GameConstants.Direction.LEFT) == -1)) {
-      for(let i = 0; i < this.grid.height; i++) {
-        let emptyOnLine = 0;
+    const horizontal = Object.values(GameConstants.HorizontalDirection);
+    const vertical = Object.values(GameConstants.VerticalDirection);
 
-        for(let j = 0; j < this.grid.width; j++) {
-          if(this.grid.get(new Position(j, i)) == GameConstants.CaseType.EMPTY) {
-            emptyOnLine++;
-          } else {
-            emptyOnLine = 0;
-          }
-
-          if(emptyOnLine >= this.initialLength) {
-            spaceLineAvailable++;
-            break;
-          }
-        }
-      }
-    } else if((this.initialDirection == GameConstants.Direction.UP && this.initTriedDirections.indexOf(GameConstants.Direction.UP) == -1) || (this.initialDirection == GameConstants.Direction.BOTTOM && this.initTriedDirections.indexOf(GameConstants.Direction.BOTTOM) == -1)) {
-      for(let i = 0; i < this.grid.width; i++) {
-        let emptyOnCol = 0;
-
-        for(let j = 0; j < this.grid.height; j++) {
-          if(this.grid.get(new Position(i, j)) == GameConstants.CaseType.EMPTY) {
-            emptyOnCol++;
-          } else {
-            emptyOnCol = 0;
-          }
-
-          if(emptyOnCol >= this.initialLength) {
-            spaceColAvailable++;
-            break;
-          }
-        }
-      }
+    if(horizontal.includes(this.initialDirection) && !this.initTriedDirections.includes(this.initialDirection)) {
+      spaceLineAvailable = this.checkSpace(false);
+    } else if(vertical.includes(this.initialDirection) && !this.initTriedDirections.includes(this.initialDirection)) {
+      spaceColAvailable = this.checkSpace(true);
     }
 
+    // Add current tried direction
     this.initTriedDirections.push(this.initialDirection);
 
-    if((spaceLineAvailable <= 0 && (this.initialDirection == GameConstants.Direction.RIGHT || this.initialDirection == GameConstants.Direction.LEFT)) || (spaceColAvailable <= 0 && (this.initialDirection == GameConstants.Direction.UP || this.initialDirection == GameConstants.Direction.BOTTOM))) {
-      if(this.initTriedDirections.indexOf(GameConstants.Direction.RIGHT) == -1) {
-        this.initialDirection = GameConstants.Direction.RIGHT;
-        this.direction = GameConstants.Direction.RIGHT;
-        return this.init();
-      } else if(this.initTriedDirections.indexOf(GameConstants.Direction.LEFT) == -1) {
-        this.initialDirection = GameConstants.Direction.LEFT;
-        this.direction = GameConstants.Direction.LEFT;
-        return this.init();
-      } else if(this.initTriedDirections.indexOf(GameConstants.Direction.UP) == -1) {
-        this.initialDirection = GameConstants.Direction.UP;
-        this.direction = GameConstants.Direction.UP;
-        return this.init();
-      } else if(this.initTriedDirections.indexOf(GameConstants.Direction.BOTTOM) == -1) {
-        this.initialDirection = GameConstants.Direction.BOTTOM;
-        this.direction = GameConstants.Direction.BOTTOM;
-        return this.init();
-      }
-
-      this.errorInit = true;
-      return false;
+    // If there are no space available for current direction
+    if((spaceLineAvailable <= 0 && horizontal.includes(this.initialDirection)) || (spaceColAvailable <= 0 && vertical.includes(this.initialDirection))) {
+      return this.handleNoSpace();
     }
 
+    // If there are space available for current direction, place the Snake at a random position
     let posNotValidated = true;
     let positionsToAdd = [];
-    let startPos, currentPos;
 
     while(posNotValidated) {
       posNotValidated = false;
 
-      if(this.grid.maze) {
-        startPos = this.grid.mazeFirstPosition;
-      } else {
-        startPos = this.grid.getRandomPosition();
-      }
+      const startPos = this.getStartPosition();
 
       if(!startPos) {
         this.errorInit = true;
         return false;
       }
 
-      currentPos = new Position(startPos.x, startPos.y, this.initialDirection);
-      positionsToAdd = [];
+      const generatedPositions = this.generateSnakePositions(startPos);
 
-      for(let i = this.initialLength - 1; i >= 0; i--) {
-        if(i < this.initialLength - 1) {
-          if(this.initialDirection == GameConstants.Direction.RIGHT) {
-            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), GameConstants.Direction.RIGHT);
-          } else if(this.initialDirection == GameConstants.Direction.LEFT) {
-            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), GameConstants.Direction.LEFT);
-          } else if(this.initialDirection == GameConstants.Direction.BOTTOM) {
-            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), GameConstants.Direction.BOTTOM);
-          } else if(this.initialDirection == GameConstants.Direction.UP) {
-            currentPos = this.grid.getNextPosition(new Position(currentPos.x, currentPos.y, this.initialDirection), GameConstants.Direction.UP);
-          }
-        }
-
-        if(this.grid.get(currentPos) != GameConstants.CaseType.EMPTY) {
-          posNotValidated = true;
-        } else {
-          positionsToAdd.push(new Position(currentPos.x, currentPos.y, currentPos.direction));
-        }
+      if(!generatedPositions) {
+        posNotValidated = true;
+      } else {
+        positionsToAdd = generatedPositions;
       }
 
       if(this.grid.maze && posNotValidated) {
@@ -169,31 +106,21 @@ export default class Snake {
     }
 
     // If the Snake is near a dead position
-    let nearDeadPosition = false;
+    const nearDeadPosition = this.isNearDeadPosition(positionsToAdd);
 
-    if(!this.grid.maze) {
-      const firstPosition = new Position(positionsToAdd[positionsToAdd.length - 1].x, positionsToAdd[positionsToAdd.length - 1].y, this.direction);
-  
-      if((this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.UP), false) && this.direction == GameConstants.Direction.UP) || (this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.BOTTOM), false) && this.direction == GameConstants.Direction.BOTTOM) || (this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.LEFT), false) && this.direction == GameConstants.Direction.LEFT) || (this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, GameConstants.Direction.RIGHT), false) && this.direction == GameConstants.Direction.RIGHT)) {
-        nearDeadPosition = true;
-        this.direction = this.grid.invertDirection(this.direction);
-      }
+    if(nearDeadPosition) {
+      this.direction = this.grid.invertDirection(this.direction);
     }
   
-    for(let i = 0; i < positionsToAdd.length; i++) {
-      if(nearDeadPosition) {
-        const position = positionsToAdd[positionsToAdd.length - i - 1];
-        position.direction =  this.grid.invertDirection(position.direction);
-        this.insert(positionsToAdd[positionsToAdd.length - i - 1]);
-      } else {
-        this.insert(positionsToAdd[i]);
-      }
-    }
+    // Place the Snake at selected positions
+    this.placeSnakeOnGrid(positionsToAdd, nearDeadPosition);
 
+    // Assistant AI mode is forbidden if the grid is a maze
     if(this.grid.maze && this.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
       this.player = GameConstants.PlayerType.HUMAN;
     }
 
+    // If Assistant AI mode is enabled, the AI assistant level is "High"
     if(this.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
       this.aiLevel = GameConstants.AiLevel.HIGH;
     }
@@ -203,6 +130,102 @@ export default class Snake {
     await this.initAI();
 
     return true;
+  }
+
+  checkSpace(isColumn) {
+    let spaceAvailable = 0;
+    const outerLimit = isColumn ? this.grid.width : this.grid.height;
+    const innerLimit = isColumn ? this.grid.height : this.grid.width;
+  
+    for(let i = 0; i < outerLimit; i++) {
+      let emptyCount = 0;
+  
+      for(let j = 0; j < innerLimit; j++) {
+        const x = isColumn ? i : j;
+        const y = isColumn ? j : i;
+  
+        if(this.grid.get(new Position(x, y)) == GameConstants.CaseType.EMPTY) {
+          emptyCount++;
+        } else {
+          emptyCount = 0;
+        }
+  
+        if(emptyCount >= this.initialLength) {
+          spaceAvailable++;
+          break;
+        }
+      }
+    }
+  
+    return spaceAvailable;
+  }
+
+  handleNoSpace() {
+    for(const direction of Object.values(GameConstants.SimpleDirection)) {
+      if(!this.initTriedDirections.includes(direction)) {
+        this.initialDirection = direction;
+        this.direction = direction;
+        return this.init();
+      }
+    }
+
+    this.errorInit = true;
+
+    return false;
+  }
+
+  getStartPosition() {
+    if(this.grid.maze) {
+      return this.grid.mazeFirstPosition;
+    }
+    
+    return this.grid.getRandomPosition();
+  }
+
+  generateSnakePositions(startPos) {
+    const positions = [];
+    let currentPos = new Position(startPos.x, startPos.y, this.initialDirection);
+
+    for(let i = this.initialLength - 1; i >= 0; i--) {
+      if(i < this.initialLength - 1) {
+        currentPos = this.grid.getNextPosition(currentPos, this.initialDirection);
+      }
+
+      if(this.grid.get(currentPos) != GameConstants.CaseType.EMPTY) {
+        return null;
+      }
+
+      positions.push(new Position(currentPos.x, currentPos.y, currentPos.direction));
+    }
+
+    return positions;
+  }
+
+  isNearDeadPosition(positions) {
+    if(!this.grid.maze) {
+      const firstPosition = new Position(positions[positions.length - 1].x, positions[positions.length - 1].y, this.direction);
+
+      for(const direction of Object.values(GameConstants.SimpleDirection)) {
+        if(this.grid.isDeadPosition(this.grid.getNextPosition(firstPosition, direction), false) && this.direction == direction) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  placeSnakeOnGrid(positionsToAdd, nearDeadPosition) {
+    for(let i = 0; i < positionsToAdd.length; i++) {
+      if(nearDeadPosition) {
+        // We invert the direction of the Snake if near a dead position
+        const position = positionsToAdd[positionsToAdd.length - i - 1];
+        position.direction = this.grid.invertDirection(position.direction);
+        this.insert(positionsToAdd[positionsToAdd.length - i - 1]);
+      } else {
+        this.insert(positionsToAdd[i]);
+      }
+    }
   }
 
   async initAI() {
@@ -252,7 +275,10 @@ export default class Snake {
     this.lastKey = -1;
     this.ticksDead = 0;
     this.ticksWithoutAction = 0;
-    if(this.snakeAI) this.snakeAI.aiFruitGoal = GameConstants.CaseType.FRUIT;
+
+    if(this.snakeAI) {
+      this.snakeAI.aiFruitGoal = GameConstants.CaseType.FRUIT;
+    }
   }
 
   insert(position) {

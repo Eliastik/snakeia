@@ -334,9 +334,9 @@ export default class GameEngine {
       this.ticks++;
 
       for(const snake of this.snakes) {
-        setFruitError = false;
-
         const initialDirection = snake.direction;
+
+        setFruitError = false;
         snake.lastTailMoved = false;
 
         if(!snake.gameOver && !snake.scoreMax) {
