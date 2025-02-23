@@ -21,6 +21,7 @@ import GameConstants from "../Constants.js";
 import Position from "../Position.js";
 import GameUtils from "../GameUtils.js";
 import TensorflowModelLoader from "./TensorflowModelLoader.js";
+import UniformReplayBuffer from "./utils/UniformReplayBuffer.js";
 import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
@@ -54,7 +55,8 @@ export default class SnakeAIUltra extends SnakeAI {
     this.batchSize = 32;
     this.maxMemoryLength = 2000;
 
-    this.memory = [];
+    // TODO multi environment buffer (with or without walls, random walls etc.)?
+    this.memory = new UniformReplayBuffer(this.maxMemoryLength, this.trainingRng);
     this.lastAction = null;
     this.currentQValue = 0;
     this.currentEpoch = 0;
@@ -111,7 +113,7 @@ export default class SnakeAIUltra extends SnakeAI {
     model.add(tf.layers.flatten());
 
     model.add(tf.layers.dense({
-      units: 128,
+      units: 256, // Increase?
       activation: "relu"
     }));
 
@@ -121,9 +123,17 @@ export default class SnakeAIUltra extends SnakeAI {
     }));
 
     model.compile({
-      optimizer: tf.train.rmsprop(this.learningRate),
-      loss: (yTrue, yPred) => tf.losses.huberLoss(yTrue, yPred)
+      optimizer: tf.train.rmsprop(this.learningRate), // Or Adam
+      loss: (yTrue, yPred) => tf.losses.huberLoss(yTrue, yPred) // Or Mean Square Root
     });
+
+    // TODO
+    // - Fix training with multiple environments (with or without walls, etc...) :
+    // - Increase memory size + optimize + random sample of multiple environments
+    // - Fix double Qlearning (target network)
+    // - Prioritized Experience Replay -> OK
+    // - Dueling DQN
+    // - Distributional RL - Noisy Nets - Multi step learning ?
 
     return model;
   }
@@ -282,19 +292,7 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   remember(state, action, reward, nextState, done) {
-    this.memory.push({ state, action, reward, nextState, done });
-
-    if(this.memory.length > this.maxMemoryLength) {
-      const removedMemory = this.memory.shift();
-
-      if(removedMemory && removedMemory.state) {
-        removedMemory.state.dispose();
-      }
-
-      if(removedMemory && removedMemory.nextState) {
-        removedMemory.nextState.dispose();
-      }
-    }
+    this.memory.add(state, action, reward, nextState, done);
   }
 
   async train() {
@@ -306,8 +304,8 @@ export default class SnakeAIUltra extends SnakeAI {
     const targets = [];
 
     tf.tidy(() => {
-      const nextStates = tf.stack(batch.map(({ nextState }) => nextState));
-      const states = tf.stack(batch.map(({ state }) => state));
+      const nextStates = tf.stack(batch.samples.map(({ nextState }) => nextState));
+      const states = tf.stack(batch.samples.map(({ state }) => state));
   
       const currentModel = this.enableTargetModel ? this.targetModel : this.mainModel;
       const qNextBatch = currentModel.predict(nextStates);
@@ -316,7 +314,7 @@ export default class SnakeAIUltra extends SnakeAI {
       const qNextMaxValues = qNextBatch.max(1).arraySync();
       const qCurrentValues = qCurrentBatch.arraySync();
   
-      batch.forEach(({ state, action, reward, done }, index) => {
+      batch.samples.forEach(({ state, action, reward, done }, index) => {
         let target = reward;
   
         if(!done) {
@@ -324,6 +322,9 @@ export default class SnakeAIUltra extends SnakeAI {
         }
   
         const qValues = qCurrentValues[index];
+        const tdError = Math.abs(target - qValues[action]);
+
+        this.memory.updatePriority(batch.indices[index], tdError);
 
         qValues[action] = target;
   
@@ -356,14 +357,7 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   loadBatches() {
-    const batch = [];
-
-    for(let i = 0; i < this.batchSize; i++) {
-      const index = Math.floor(this.trainingRng() * this.memory.length);
-      batch.push(this.memory[index]);
-    }
-
-    return batch;
+    return this.memory.sample(this.batchSize);
   }
 
   synchronizeTargetNetwork() {
