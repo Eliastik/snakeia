@@ -60,12 +60,6 @@ export default class SnakeAIUltra extends SnakeAI {
     this.currentEpoch = 0;
 
     this.summaryWriter = null;
-
-    // TODO
-    // - Fix training with multiple environments (with or without walls, etc...) :
-    // - Increase memory size + optimize
-    // - Prioritized Experience Replay
-    // - Dueling DQN
   }
 
   async setup(summaryWriter) {
@@ -127,8 +121,8 @@ export default class SnakeAIUltra extends SnakeAI {
     }));
 
     model.compile({
-      optimizer: tf.train.adam(this.learningRate),
-      loss: "meanSquaredError"
+      optimizer: tf.train.rmsprop(this.learningRate),
+      loss: (yTrue, yPred) => tf.losses.huberLoss(yTrue, yPred)
     });
 
     return model;
