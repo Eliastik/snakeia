@@ -23,6 +23,7 @@ export default class PrioritizedReplayBuffer {
     this.calculateWeight = calculateWeight;
     this.alpha = alpha;
 
+    // TODO sumtree
     this.buffer = [];
     this.priorities = [];
     this.position = 0;

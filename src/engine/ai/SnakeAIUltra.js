@@ -22,6 +22,7 @@ import Position from "../Position.js";
 import GameUtils from "../GameUtils.js";
 import TensorflowModelLoader from "./TensorflowModelLoader.js";
 import PrioritizedReplayBuffer from "./utils/PrioritizedReplayBuffer.js";
+import DuelingQLayer from "./utils/DuelingQLayer.js";
 import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
@@ -43,7 +44,8 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelDepth = 2;
     this.numberOfPossibleActions = 4;
 
-    this.enableTargetModel = false;
+    this.enableTargetModel = false; // Double DQN
+    this.enableDuelingQLearning = true; // Dueling DQN
     this.syncTargetEvery = 1000;
     this.stepsSinceLastSync = 0;
 
@@ -93,47 +95,61 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   createModel() {
-    const model = tf.sequential();
-
-    model.add(tf.layers.conv2d({
-      inputShape: [this.modelHeight, this.modelWidth, this.modelDepth],
+    const input = tf.input({
+      shape: [this.modelHeight, this.modelWidth, this.modelDepth]
+    });
+  
+    const conv1 = tf.layers.conv2d({
       filters: 32,
       kernelSize: 3,
       activation: "relu",
       padding: "same"
-    }));
-
-    model.add(tf.layers.conv2d({
+    }).apply(input);
+  
+    const conv2 = tf.layers.conv2d({
       filters: 64,
       kernelSize: 3,
       activation: "relu",
       padding: "same"
-    }));
-
-    model.add(tf.layers.flatten());
-
-    model.add(tf.layers.dense({
-      units: 256, // Increase?
+    }).apply(conv1);
+  
+    const flatten = tf.layers.flatten().apply(conv2);
+  
+    const dense = tf.layers.dense({
+      units: 256,
       activation: "relu"
-    }));
+    }).apply(flatten);
 
-    model.add(tf.layers.dense({
+    const advantage = tf.layers.dense({
       units: this.numberOfPossibleActions,
       activation: "linear"
-    }));
+    }).apply(dense);
 
+    let model;
+  
+    if(this.enableDuelingQLearning) {
+      const value = tf.layers.dense({
+        units: 1,
+        activation: "linear"
+      }).apply(dense);
+    
+      const qValues = new DuelingQLayer().apply([value, advantage]);
+    
+      model = tf.model({
+        inputs: input,
+        outputs: qValues
+      });
+    } else {
+      model = tf.model({
+        inputs: input,
+        outputs: advantage
+      });
+    }
+  
     model.compile({
       optimizer: tf.train.rmsprop(this.learningRate), // Or Adam
       loss: (yTrue, yPred) => tf.losses.huberLoss(yTrue, yPred) // Or Mean Square Root
     });
-
-    // TODO
-    // - Fix training with multiple environments (with or without walls, etc...) :
-    // - Increase memory size + optimize + random sample of multiple environments
-    // - Fix double Qlearning (target network)
-    // - Prioritized Experience Replay -> OK
-    // - Dueling DQN
-    // - Distributional RL - Noisy Nets - Multi step learning ?
 
     return model;
   }
