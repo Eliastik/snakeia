@@ -17,10 +17,12 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 export default class PrioritizedReplayBuffer {
-  constructor(capacity, rng, alpha = 0.6) {
+  constructor(capacity, rng, calculateWeight = false, alpha = 0.6) {
     this.capacity = capacity;
     this.rng = rng;
+    this.calculateWeight = calculateWeight;
     this.alpha = alpha;
+
     this.buffer = [];
     this.priorities = [];
     this.position = 0;
@@ -66,6 +68,7 @@ export default class PrioritizedReplayBuffer {
 
       for(let j = 0; j < probabilities.length; j++) {
         cumulative += probabilities[j];
+
         if(rand < cumulative) {
           indices.push(j);
           break;
@@ -75,13 +78,17 @@ export default class PrioritizedReplayBuffer {
 
     const samples = indices.map(index => this.buffer[index]);
 
-    const weights = indices.map(index => {
-      const prob = probabilities[index];
-      return Math.pow(this.buffer.length * prob, -beta);
-    });
+    let normalizedWeights = null;
 
-    const maxWeight = Math.max(...weights);
-    const normalizedWeights = weights.map(w => w / maxWeight);
+    if(this.calculateWeight) {
+      const weights = indices.map(index => {
+        const prob = probabilities[index];
+        return Math.pow(this.buffer.length * prob, -beta);
+      });
+
+      const maxWeight = Math.max(...weights);
+      normalizedWeights = weights.map(w => w / maxWeight);
+    }
 
     return {
       samples,

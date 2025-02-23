@@ -21,7 +21,7 @@ import GameConstants from "../Constants.js";
 import Position from "../Position.js";
 import GameUtils from "../GameUtils.js";
 import TensorflowModelLoader from "./TensorflowModelLoader.js";
-import UniformReplayBuffer from "./utils/UniformReplayBuffer.js";
+import PrioritizedReplayBuffer from "./utils/PrioritizedReplayBuffer.js";
 import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
@@ -53,10 +53,10 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilon = this.epsilonMax;
     this.learningRate = 0.001;
     this.batchSize = 32;
-    this.maxMemoryLength = 2000;
+    this.maxMemoryLength = 5000;
 
     // TODO multi environment buffer (with or without walls, random walls etc.)?
-    this.memory = new UniformReplayBuffer(this.maxMemoryLength, this.trainingRng);
+    this.memory = new PrioritizedReplayBuffer(this.maxMemoryLength, this.trainingRng);
     this.lastAction = null;
     this.currentQValue = 0;
     this.currentEpoch = 0;
