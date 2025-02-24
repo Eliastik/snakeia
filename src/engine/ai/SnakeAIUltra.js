@@ -44,7 +44,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelDepth = 2;
     this.numberOfPossibleActions = 4;
 
-    this.enableTargetModel = false; // Double DQN
+    this.enableTargetModel = true; // Double DQN
     this.enableDuelingQLearning = true; // Dueling DQN
     this.syncTargetEvery = 1000;
     this.stepsSinceLastSync = 0;
@@ -115,7 +115,7 @@ export default class SnakeAIUltra extends SnakeAI {
   
     const flatten = tf.layers.flatten().apply(conv2);
   
-    const dense = tf.layers.dense({
+    const dense1 = tf.layers.dense({
       units: 256,
       activation: "relu"
     }).apply(flatten);
@@ -123,15 +123,20 @@ export default class SnakeAIUltra extends SnakeAI {
     const advantage = tf.layers.dense({
       units: this.numberOfPossibleActions,
       activation: "linear"
-    }).apply(dense);
+    }).apply(dense1);
 
     let model;
   
     if(this.enableDuelingQLearning) {
+      const dense2 = tf.layers.dense({
+        units: 256,
+        activation: "relu"
+      }).apply(flatten);
+
       const value = tf.layers.dense({
         units: 1,
         activation: "linear"
-      }).apply(dense);
+      }).apply(dense2);
     
       const qValues = new DuelingQLayer().apply([value, advantage]);
     
@@ -150,6 +155,14 @@ export default class SnakeAIUltra extends SnakeAI {
       optimizer: tf.train.rmsprop(this.learningRate), // Or Adam
       loss: (yTrue, yPred) => tf.losses.huberLoss(yTrue, yPred) // Or Mean Square Root
     });
+
+    // TODO
+    // - Fix training with multiple environments (with or without walls, etc...) :
+    // - Increase memory size + optimize + random sample of multiple environments
+    // - Fix double Qlearning (target network)
+    // - Prioritized Experience Replay -> OK
+    // - Dueling DQN -> Testing
+    // - Distributional RL - Noisy Nets - Multi step learning ?
 
     return model;
   }
@@ -323,9 +336,8 @@ export default class SnakeAIUltra extends SnakeAI {
       const nextStates = tf.stack(batch.samples.map(({ nextState }) => nextState));
       const states = tf.stack(batch.samples.map(({ state }) => state));
   
-      const currentModel = this.enableTargetModel ? this.targetModel : this.mainModel;
-      const qNextBatch = currentModel.predict(nextStates);
-      const qCurrentBatch = currentModel.predict(states);
+      const qNextBatch = (this.enableTargetModel ? this.targetModel : this.mainModel).predict(nextStates);
+      const qCurrentBatch = this.mainModel.predict(states);
   
       const qNextMaxValues = qNextBatch.max(1).arraySync();
       const qCurrentValues = qCurrentBatch.arraySync();
@@ -338,8 +350,8 @@ export default class SnakeAIUltra extends SnakeAI {
         }
   
         const qValues = qCurrentValues[index];
+        
         const tdError = Math.abs(target - qValues[action]);
-
         this.memory.updatePriority(batch.indices[index], tdError);
 
         qValues[action] = target;
