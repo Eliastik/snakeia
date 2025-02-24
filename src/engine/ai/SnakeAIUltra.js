@@ -44,9 +44,9 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelDepth = 2;
     this.numberOfPossibleActions = 4;
 
-    this.enableTargetModel = true; // Double DQN
+    this.enableTargetModel = false; // Double DQN
     this.enableDuelingQLearning = true; // Dueling DQN
-    this.syncTargetEvery = 1000;
+    this.syncTargetEvery = 500;
     this.stepsSinceLastSync = 0;
 
     this.gamma = 0.95;
@@ -329,51 +329,49 @@ export default class SnakeAIUltra extends SnakeAI {
 
     const batch = this.loadBatches();
 
-    const inputs = [];
-    const targets = [];
-
-    tf.tidy(() => {
+    const { inputs, targets, meanTDError } = tf.tidy(() => {
       const nextStates = tf.stack(batch.samples.map(({ nextState }) => nextState));
       const states = tf.stack(batch.samples.map(({ state }) => state));
+      const rewards = tf.tensor1d(batch.samples.map(({ reward }) => reward));
+      const dones = tf.tensor1d(batch.samples.map(({ done }) => done ? 0 : 1));
+      const actions = tf.tensor1d(batch.samples.map(({ action }) => action), "int32");
   
       const qNextBatch = (this.enableTargetModel ? this.targetModel : this.mainModel).predict(nextStates);
       const qCurrentBatch = this.mainModel.predict(states);
   
-      const qNextMaxValues = qNextBatch.max(1).arraySync();
-      const qCurrentValues = qCurrentBatch.arraySync();
-  
-      batch.samples.forEach(({ state, action, reward, done }, index) => {
-        let target = reward;
-  
-        if(!done) {
-          target += this.gamma * qNextMaxValues[index];
-        }
-  
-        const qValues = qCurrentValues[index];
-        
-        const tdError = Math.abs(target - qValues[action]);
-        this.memory.updatePriority(batch.indices[index], tdError);
+      const qNextMax = qNextBatch.max(1);
+      const qValues = qCurrentBatch.clone();
 
-        qValues[action] = target;
-  
-        inputs.push(state);
-        targets.push(qValues);
+      // Bellman Equation
+      const discountedFutureRewards = qNextMax.mul(this.gamma).mul(dones);
+      const targetQs = rewards.add(discountedFutureRewards);
+
+      const actionMask = tf.oneHot(actions, qValues.shape[1]);
+      const qCurrentActions = qCurrentBatch.mul(actionMask).sum(1);
+
+      const tdErrors = targetQs.sub(qCurrentActions).abs();
+      const meanTDError = tdErrors.mean().arraySync();
+
+      tdErrors.arraySync().forEach((error, index) => {
+        this.memory.updatePriority(batch.indices[index], error);
       });
+
+      const updatedQValues = qValues.mul(tf.scalar(1).sub(actionMask)).add(actionMask.mul(targetQs.expandDims(1)));
+
+      return { inputs: states, targets: updatedQValues, meanTDError };
     });
 
-    const inputTensors = tf.stack(inputs);
-    const targetTensors = tf.stack(targets);
-
-    const fitData = await this.mainModel.fit(inputTensors, targetTensors, { batchSize: this.batchSize, epochs: 1, verbose: 0, shuffle: true });
+    const fitData = await this.mainModel.fit(inputs, targets, { batchSize: this.batchSize, epochs: 1, verbose: 0, shuffle: true });
 
     if(this.summaryWriter) {
       this.summaryWriter.scalar("loss", fitData.history.loss[0], this.currentEpoch);
+      this.summaryWriter.scalar("td_error", meanTDError, this.currentEpoch);
       this.summaryWriter.scalar("epsilon", this.epsilon, this.currentEpoch);
     }
 
     // Cleanup tensors
-    inputTensors.dispose();
-    targetTensors.dispose();
+    inputs.dispose();
+    targets.dispose();
 
     if(this.stepsSinceLastSync >= this.syncTargetEvery) {
       this.synchronizeTargetNetwork();
