@@ -35,7 +35,7 @@ export default class DuelingQLayer extends tf.layers.Layer {
       return value.add(advantage.sub(meanAdvantage));
     });
   }
-    
+
   static get className() {
     return "DuelingQLayer";
   }

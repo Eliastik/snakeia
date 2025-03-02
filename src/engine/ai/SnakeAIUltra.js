@@ -23,6 +23,7 @@ import GameUtils from "../GameUtils.js";
 import TensorflowModelLoader from "./TensorflowModelLoader.js";
 import PrioritizedReplayBuffer from "./utils/PrioritizedReplayBuffer.js";
 import DuelingQLayer from "./utils/DuelingQLayer.js";
+import NoisyDense from "./utils/NoisyDenseLayer.js";
 import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
@@ -44,18 +45,19 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelDepth = 2;
     this.numberOfPossibleActions = 4;
 
-    this.enableTargetModel = false; // Double DQN
+    this.enableTargetModel = true; // Double DQN
     this.enableDuelingQLearning = true; // Dueling DQN
-    this.syncTargetEvery = 500;
+    this.enableNoisyNetwork = true; // Noisy Network
+    this.syncTargetEvery = 100;
     this.stepsSinceLastSync = 0;
 
     this.gamma = 0.95;
     this.epsilonMax = 1.0;
-    this.epsilonMin = 0.01;
+    this.epsilonMin = 0.005;
     this.epsilon = this.epsilonMax;
     this.learningRate = 0.001;
     this.batchSize = 32;
-    this.maxMemoryLength = 5000;
+    this.maxMemoryLength = 100000;
 
     // TODO multi environment buffer (with or without walls, random walls etc.)?
     this.memory = new PrioritizedReplayBuffer(this.maxMemoryLength, this.trainingRng);
@@ -95,6 +97,8 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   createModel() {
+    const DenseLayer = (config) => this.enableNoisyNetwork ? new NoisyDense(config) : tf.layers.dense(config);
+
     const input = tf.input({
       shape: [this.modelHeight, this.modelWidth, this.modelDepth]
     });
@@ -115,7 +119,7 @@ export default class SnakeAIUltra extends SnakeAI {
   
     const flatten = tf.layers.flatten().apply(conv2);
   
-    const dense1 = tf.layers.dense({
+    const dense1 = DenseLayer({
       units: 256,
       activation: "relu"
     }).apply(flatten);
@@ -128,7 +132,7 @@ export default class SnakeAIUltra extends SnakeAI {
     let model;
   
     if(this.enableDuelingQLearning) {
-      const dense2 = tf.layers.dense({
+      const dense2 = DenseLayer({
         units: 256,
         activation: "relu"
       }).apply(flatten);
@@ -157,12 +161,17 @@ export default class SnakeAIUltra extends SnakeAI {
     });
 
     // TODO
-    // - Fix training with multiple environments (with or without walls, etc...) :
-    // - Increase memory size + optimize + random sample of multiple environments
-    // - Fix double Qlearning (target network)
+    // - Fix double Qlearning -> OK
     // - Prioritized Experience Replay -> OK
-    // - Dueling DQN -> Testing
-    // - Distributional RL - Noisy Nets - Multi step learning ?
+    // - Dueling DQN -> OK
+    // - Increase memory size + optimize -> OK
+    // - Noisy Networks -> OK
+    // * Ideas :
+    // - Memory : sample memory of different environments (wall or without walls, etc.) + check prioritized implementation
+    // - Feed the input with N previous frames?
+    // - Data augmentation (reverse the grid etc...)?
+    // - Retest 3 moves
+    // - Distributional RL - Multi step learning ?
 
     return model;
   }
@@ -170,7 +179,7 @@ export default class SnakeAIUltra extends SnakeAI {
   ai(snake) {
     let action = null;
 
-    if(this.trainingRng() < this.epsilon && this.enableTrainingMode) {
+    if(this.trainingRng() < this.epsilon && this.enableTrainingMode && !this.enableNoisyNetwork) {
       action = this.getRandomAction();
     } else {
       action = this.getBestAction(snake);
