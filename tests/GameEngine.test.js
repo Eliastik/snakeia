@@ -8,14 +8,14 @@ import SnakeAI from "../src/engine/ai/SnakeAI.js";
 import GameUtils from "../src/engine/GameUtils.js";
 
 test("snake stuck horizontally - auto detection", async () => {
-  const theGrid5 = new Grid(5, 5, false, false, false, null, false, 1, 2);
-  const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid5, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
-  const engine = new GameEngine(theGrid5, [theSnake]);
+  const theGrid = new Grid(5, 5, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
+  const engine = new GameEngine(theGrid, [theSnake]);
   await engine.init();
   engine.paused = false;
   engine.started = true;
 
-  for(let i = 0; i < theGrid5.width * engine.aiStuckLimit + 1; i++) {
+  for(let i = 0; i < theGrid.width * 2 * engine.aiStuckLimit + 1; i++) {
     engine.doTick();
   }
 
@@ -30,14 +30,30 @@ test("snake stuck horizontally - auto detection - inverse action", async () => {
     }
   }
 
-  const theGrid5 = new Grid(5, 5, false, false, false, null, false, 1, 2);
-  const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid5, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", new SnakeAICustom());
-  const engine = new GameEngine(theGrid5, [theSnake]);
+  const theGrid = new Grid(5, 5, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", new SnakeAICustom());
+  const engine = new GameEngine(theGrid, [theSnake]);
   await engine.init();
   engine.paused = false;
   engine.started = true;
 
-  for(let i = 0; i < theGrid5.width * engine.aiStuckLimit + 1; i++) {
+  for(let i = 0; i < theGrid.width * 2 * engine.aiStuckLimit + 1; i++) {
+    engine.doTick();
+  }
+
+  expect(engine.gameOver).toBe(true);
+  expect(theSnake.isAIStuck(engine.aiStuckLimit, engine.aiStuckLimit)).toBe(true);
+});
+
+test("snake stuck horizontally - auto detection - grid 5 x 50", async () => {
+  const theGrid = new Grid(5, 50, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
+  const engine = new GameEngine(theGrid, [theSnake]);
+  await engine.init();
+  engine.paused = false;
+  engine.started = true;
+
+  for(let i = 0; i < theGrid.height * 2 * engine.aiStuckLimit + 1; i++) {
     engine.doTick();
   }
 
@@ -46,14 +62,14 @@ test("snake stuck horizontally - auto detection - inverse action", async () => {
 });
 
 test("snake stuck vertically - auto detection", async () => {
-  const theGrid6 = new Grid(5, 5, false, false, false, null, false, 1, 2);
-  const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid6, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
-  const engine = new GameEngine(theGrid6, [theSnake]);
+  const theGrid = new Grid(5, 5, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
+  const engine = new GameEngine(theGrid, [theSnake]);
   await engine.init();
   engine.paused = false;
   engine.started = true;
 
-  for(let i = 0; i < theGrid6.height * engine.aiStuckLimit + 1; i++) {
+  for(let i = 0; i < theGrid.height * 2 * engine.aiStuckLimit + 1; i++) {
     engine.doTick();
   }
 
@@ -68,14 +84,30 @@ test("snake stuck vertically - auto detection - inverse action", async () => {
     }
   }
 
-  const theGrid6 = new Grid(5, 5, false, false, false, null, false, 1, 2);
-  const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid6, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", new SnakeAICustom());
-  const engine = new GameEngine(theGrid6, [theSnake]);
+  const theGrid = new Grid(5, 5, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", new SnakeAICustom());
+  const engine = new GameEngine(theGrid, [theSnake]);
   await engine.init();
   engine.paused = false;
   engine.started = true;
 
-  for(let i = 0; i < theGrid6.height * engine.aiStuckLimit + 1; i++) {
+  for(let i = 0; i < theGrid.height * 2 * engine.aiStuckLimit + 1; i++) {
+    engine.doTick();
+  }
+
+  expect(engine.gameOver).toBe(true);
+  expect(theSnake.isAIStuck(engine.aiStuckLimit, engine.aiStuckLimit)).toBe(true);
+});
+
+test("snake stuck vertically - auto detection - grid 5 x 50", async () => {
+  const theGrid = new Grid(5, 50, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
+  const engine = new GameEngine(theGrid, [theSnake]);
+  await engine.init();
+  engine.paused = false;
+  engine.started = true;
+
+  for(let i = 0; i < theGrid.height * 2 * engine.aiStuckLimit + 1; i++) {
     engine.doTick();
   }
 

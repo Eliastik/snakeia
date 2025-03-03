@@ -44,8 +44,9 @@ export default class Snake {
     this.name = name == undefined ? "Snake" : name;
     this.snakeAI = new SnakeAI();
     this.customAI = customAI;
-    this.ticksWithoutActionWidth = 0;
-    this.ticksWithoutActionHeight = 0;
+
+    this.lastPositions = [];
+    this.stuckCounter = 0;
   }
 
   async init() {
@@ -276,8 +277,8 @@ export default class Snake {
     this.lastTail = undefined;
     this.lastKey = -1;
     this.ticksDead = 0;
-    this.ticksWithoutActionWidth = 0;
-    this.ticksWithoutActionHeight = 0;
+    this.lastPositions = [];
+    this.stuckCounter = 0;
 
     if(this.snakeAI) {
       this.snakeAI.aiFruitGoal = GameConstants.CaseType.FRUIT;
@@ -311,6 +312,11 @@ export default class Snake {
     if(index >= 0 && index < this.length()) {
       this.queue[index] = position;
     }
+  }
+
+  increaseScore(count) {
+    this.score += count;
+    this.stuckCounter = 0;
   }
 
   getHeadPosition() {
@@ -376,6 +382,29 @@ export default class Snake {
     if(direction != null) {
       this.direction = direction;
     }
+
+    this.addMoveToHistory();
+  }
+
+  addMoveToHistory() {
+    const head = this.getHeadPosition();
+    const posKey = `${head.x},${head.y},${head.direction}`;
+
+    if(this.lastPositions.includes(posKey)) {
+      this.stuckCounter++;
+    } else {
+      this.stuckCounter = Math.max(0, this.stuckCounter - 1);
+    }
+
+    this.lastPositions.push(posKey);
+
+    if(this.lastPositions.size > this.maxLastMoves) {
+      this.lastPositions.shift();
+    }
+  }
+
+  get maxLastMoves() {
+    return Math.max(this.grid.width, this.grid.height);
   }
 
   getNextPosition(oldPos, newDirection) {
@@ -429,33 +458,15 @@ export default class Snake {
 
   ai() {
     if(this.snakeAI && this.snakeAI.ai) {
-      const action = this.snakeAI.ai(this);
-      const directionFromKey = this.keyToDirection(action);
-
-      if(!action || !directionFromKey || directionFromKey == this.direction) {
-        if(this.direction == GameConstants.Direction.LEFT || this.direction == GameConstants.Direction.RIGHT) {
-          this.ticksWithoutActionWidth++;
-        } else if(this.direction == GameConstants.Direction.UP || this.direction == GameConstants.Direction.BOTTOM) {
-          this.ticksWithoutActionHeight++;
-        }
-      } else {
-        this.ticksWithoutActionHeight = 0;
-        this.ticksWithoutActionWidth = 0;
-      }
-
-      return action;
+      return this.snakeAI.ai(this);
     }
     
     return null;
   }
 
-  isAIStuck(widthLimit, heightLimit) {
+  isAIStuck(limit) {
     if(this.snakeAI && this.snakeAI.ai) {
-      if((this.direction == GameConstants.Direction.LEFT || this.direction == GameConstants.Direction.RIGHT) && this.ticksWithoutActionWidth >= this.grid.width * widthLimit) {
-        return true;
-      } else if((this.direction == GameConstants.Direction.UP || this.direction == GameConstants.Direction.BOTTOM) && this.ticksWithoutActionHeight >= this.grid.height * heightLimit) {
-        return true;
-      }
+      return this.stuckCounter >= this.maxLastMoves * limit;
     }
 
     return false;

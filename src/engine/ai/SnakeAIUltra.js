@@ -74,6 +74,7 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Increase memory size + optimize -> OK
     // - Noisy Networks -> OK
     // * Ideas :
+    // - Disable AI stuck detection on GameEngine
     // - Memory : sample memory of different environments (wall or without walls, etc.) + check prioritized implementation
     // - Feed the input with N previous frames?
     // - Data augmentation (reverse the grid etc...)?

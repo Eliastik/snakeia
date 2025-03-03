@@ -425,14 +425,14 @@ export default class GameEngine {
     let goldFruit = false;
 
     if(cellType == GameConstants.CaseType.FRUIT) {
-      snake.score++;
+      snake.increaseScore(1);
 
       this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPos);
       this.grid.fruitPos = null;
     } else if(cellType == GameConstants.CaseType.FRUIT_GOLD) {
+      snake.increaseScore(3);
+      
       goldFruit = true;
-
-      snake.score += 3;
 
       this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPosGold);
       this.grid.fruitPosGold = null;
@@ -486,8 +486,8 @@ export default class GameEngine {
   }
 
   checkSnakeAIStuckStatus(snake) {
-    const isPartiallyStuck = snake.isAIStuck(this.aiStuckLimit / 2, this.aiStuckLimit / 2);
-    const isFullyStuck = isPartiallyStuck && snake.isAIStuck(this.aiStuckLimit, this.aiStuckLimit);
+    const isPartiallyStuck = snake.isAIStuck(this.aiStuckLimit / 2);
+    const isFullyStuck = isPartiallyStuck && snake.isAIStuck(this.aiStuckLimit);
     const isHumanPlayer = (snake.player === GameConstants.PlayerType.HUMAN || snake.player === GameConstants.PlayerType.HYBRID_HUMAN_AI) && !snake.gameOver;
     
     return {
