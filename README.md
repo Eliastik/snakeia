@@ -12,6 +12,20 @@ Game written in pure JavaScript and object oriented.
 * Online version of this game: [www.eliastiksofts.com/snakeia/demo](http://www.eliastiksofts.com/snakeia/demo/)
 * Github repository: [https://github.com/Eliastik/snakeia](https://github.com/Eliastik/snakeia)
 
+## About the AIs (Artificial Intelligence)
+
+The game features multiple AI modes that play the game autonomously.
+
+The AI Ultra mode is a trained AI using the Deep Q-Learning algorithm along with several enhancements, including Dueling Layers, Double Q-Learning, Noisy Networks, Prioritized Experience Replay, and more.
+It is developed using the TensorFlow.js framework.
+
+Other AI modes include:
+
+* Random: Performs random actions.
+* Low: A basic heuristic (rule-based) AI.
+* Normal: Uses the A* algorithm (pathfinding), but does not support torus mode.
+* High: Uses the A* algorithm with torus mode enabled and falls back to the Low mode heuristics if it gets stuck.
+
 ## About this game
 
 * Version: 2.2
@@ -23,6 +37,7 @@ Game written in pure JavaScript and object oriented.
 * Uses the JavaScript library [Lowlight.Astar](https://github.com/lowlighter/astar) under [MIT](https://opensource.org/licenses/mit-license.php) license
 * Uses the JavaScript library [Socket.IO client](https://github.com/socketio/socket.io-client) under [MIT](https://github.com/socketio/socket.io-client/blob/master/LICENSE) license
 * Uses the JavaScript library [i18next](https://github.com/i18next/i18next) (with the module [i18next-browser-languageDetector](https://github.com/i18next/i18next-browser-languageDetector)) under [MIT](https://opensource.org/licenses/mit-license.php) license for the translation engine
+* Uses the Tensorflow.js framework for Ultra AI mode
 * Uses the CSS framework [Bootstrap 4](https://getbootstrap.com/) and the theme [Flat UI](https://designmodo.github.io/Flat-UI/)
 * Uses the CSS library [balloon.css](https://kazzkiq.github.io/balloon.css/) under [MIT](https://github.com/kazzkiq/balloon.css/blob/master/LICENSE) license
 * Uses graphic elements from [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728), [Trophy](https://www.flaticon.com/free-icon/cup_625398), [Clock](https://www.flaticon.com/free-icon/clock_214288), [Snake](https://www.flaticon.com/free-icon/snake_194210) (changed), [Rank](https://www.flaticon.com/free-icon/ranking_2665632) (changed)
@@ -200,6 +215,24 @@ This will compile the JavaScript code into the sub-directory "dist".
 
 SnakeIA contains some unit tests. To execute them, launch the command `npm run test`.
 
+## How to train the AI
+
+The Ultra AI mode is powered by a Deep Q-Learning algorithm, trained on multiple games using TensorFlow.js.
+
+To train the AI, first install the dependencies:
+
+````
+npm install
+````
+
+Then run the following command:
+
+```
+npm run train-ai
+```
+
+You can customize the training settings in the train-ai.mjs script.
+
 # Français
 
 Une version du Snake dotée d'une intelligence artificielle. Cette version est dotée de nombreux modes de jeu. Vous pouvez notamment jouer contre l'IA, ou la laisser jouer seule. Un mode Battle Royale est également disponible, ce mode voit s'affronter entre 2 et 100 IA ! De nombreux paramétrages sont disponibles pour varier les parties. Un mode Niveaux (pour le joueur et l'IA) est également disponible, il s'agit d'un série de niveau dotés d'un objectif particulier à accomplir (obtenir un score minimal, obtenir un score en un certain temps, …). Des niveaux téléchargeables sont disponibles.
@@ -210,6 +243,20 @@ Jeu programmé en JavaScript pur et en orienté objet.
 
 * Version en ligne de ce jeu : [www.eliastiksofts.com/snakeia/demo](http://www.eliastiksofts.com/snakeia/demo/)
 * Dépôt Github : [https://github.com/Eliastik/snakeia](https://github.com/Eliastik/snakeia)
+
+# À propos des IA (Intelligences Artificielles)
+
+Le jeu propose plusieurs modes d’IA capables de jouer de manière autonome.
+
+Le mode IA Ultra est une intelligence artificielle entraînée avec l’algorithme de Deep Q-Learning, amélioré par plusieurs optimisations telles que les Dueling Layers, le Double Q-Learning, les Noisy Networks, le Prioritized Experience Replay, et d'autres encore.
+Elle a été développée grâce au framework TensorFlow.js.
+
+Les autres modes d’IA sont :
+
+* Aléatoire : Effectue des actions au hasard.
+* Faible : Une IA basique utilisant des heuristiques (basée sur des règles).
+* Normale : Une IA utilisant l’algorithme de recherche de chemin A*, mais sans mode tore.
+* Élevée : Une IA basée sur A* avec le mode tore activé, et qui utilise les heuristiques du mode Faible si elle se retrouve bloquée.
 
 ## À propos du jeu
 
@@ -222,6 +269,7 @@ Jeu programmé en JavaScript pur et en orienté objet.
 * Utilise la bibliothèque logicielle JavaScript [Lowlight.Astar](https://github.com/lowlighter/astar) sous licence [MIT](https://opensource.org/licenses/mit-license.php)
 * Utilise la bibliothèque logicielle JavaScript [Socket.IO client](https://github.com/socketio/socket.io-client) sous licence [MIT](https://github.com/socketio/socket.io-client/blob/master/LICENSE)
 * Utilise la bibliothèque logicielle JavaScript [i18next](https://github.com/i18next/i18next) (avec le module [i18next-browser-languageDetector](https://github.com/i18next/i18next-browser-languageDetector)) sous licence [MIT](https://opensource.org/licenses/mit-license.php) pour le moteur de traduction
+* Utilise le framework Tensorflow.js pour le mode d'IA ultra
 * Utilise le framework CSS [Bootstrap 4](https://getbootstrap.com/) et le thème [Flat UI](https://designmodo.github.io/Flat-UI/)
 * Utilise la bibliothèque logicielle CSS [balloon.css](https://kazzkiq.github.io/balloon.css/) sous licence [MIT](https://github.com/kazzkiq/balloon.css/blob/master/LICENSE)
 * Utilise des éléments graphiques venant de [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728), [Trophy](https://www.flaticon.com/free-icon/cup_625398), [Clock](https://www.flaticon.com/free-icon/clock_214288), [Snake](https://www.flaticon.com/free-icon/snake_194210) (modifié), [Rank](https://www.flaticon.com/free-icon/ranking_2665632) (modifié)
@@ -399,10 +447,42 @@ Cela va compiler le code JavaScript dans le sous-répertoire "dist".
 
 SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la commande `npm run test`.
 
+## Comment entraîner l’IA
+
+Le mode IA Ultra fonctionne avec un algorithme de Deep Q-Learning, entraîné sur de nombreuses parties grâce à TensorFlow.js.
+
+Pour entraîner l’IA, commencez par installer les dépendances :
+
+```
+npm install
+```
+
+Puis lancez la commande suivante :
+
+```
+npm run train-ai
+```
+
+Vous pouvez personnaliser les paramètres d'entraînement dans le fichier train-ai.mjs.
+
 ## TO-DO list
 
-- [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning)
-- [ ] Améliorer les performances graphiques
+### Prochaine version (3.0 ?)
+
+- [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning) (En cours)
+- [ ] Améliorer les performances graphiques -> Optimiser le rendu de la grille et des Snake (rendu différentiel, uniquement redessiner ce qui change)
+- [ ] Améliorer algorithme détection IA bloquée : se baser aussi sur les actions exécutée (pas seulement les positions) ?
+- [x] Ajout tests unitaires
+- [x] Améliorer algorithme détection IA bloquée
+- [x] Centrer la grille sur le Canvas
+- [x] Affichage temps de chargement engine + ajout gestion chargement modèle DQN
+- [x] Améliorer et simplifier code moteur de jeu
+- [x] Améliorer contrôle joueur sur les labyrinthes
+- [x] Correction bug avec auto retry
+- [x] Mode sombre
+
+### Précédentes versions
+
 - [x] Eviter de placer les joueurs trop près des murs -> direction inversée si trop près d'un mur
 - [x] Bug lors de la création d'une partie en mode en ligne (quelquefois) : message "Erreur est survenue" ou "Chargement" et partie bloquée
 - [x] Corriger message "Une erreur est survenue" lors du lancement d'une partie en mode en ligne
@@ -441,7 +521,7 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 
 ## Déclaration de licence
 
-Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
+Copyright (C) 2019-2025 Eliastik (eliastiksofts.com)
 
 Ce programme est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant les termes de la GNU General Public License telle que publiée par la Free Software Foundation ; soit la version 3 de la licence, soit (à votre gré) toute version ultérieure.
 
@@ -451,7 +531,7 @@ Vous devez avoir reçu une copie de la GNU General Public License en même temps
 
 ----
 
-Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
+Copyright (C) 2019-2025 Eliastik (eliastiksofts.com)
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
