@@ -115,6 +115,34 @@ test("snake stuck vertically - auto detection - grid 5 x 50", async () => {
   expect(theSnake.isAIStuck(engine.aiStuckLimit, engine.aiStuckLimit)).toBe(true);
 });
 
+test("snake stuck with repetitive action - auto detection", async () => {
+  class SnakeAICustom extends SnakeAI {
+
+    actionsStep = [Constants.Key.BOTTOM, Constants.Key.BOTTOM, Constants.Key.BOTTOM, Constants.Key.RIGHT, Constants.Key.UP, Constants.Key.UP, Constants.Key.UP, Constants.Key.LEFT];
+    actionStepCounter = 0;
+
+    ai(_snake) {
+      const action = this.actionsStep[this.actionStepCounter];
+      this.actionStepCounter = (this.actionStepCounter + 1) % this.actionsStep.length;
+      return action;
+    }
+  }
+
+  const theGrid = new Grid(10, 10, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", new SnakeAICustom());
+  const engine = new GameEngine(theGrid, [theSnake]);
+  await engine.init();
+  engine.paused = false;
+  engine.started = true;
+
+  for(let i = 0; i < theGrid.height * 2 * engine.aiStuckLimit + 1; i++) {
+    engine.doTick();
+  }
+
+  expect(engine.gameOver).toBe(true);
+  expect(theSnake.isAIStuck(engine.aiStuckLimit, engine.aiStuckLimit)).toBe(true);
+});
+
 test("fruit eaten should increase score", async () => {
     const theGrid = new Grid(10, 5, false, false, false, null, false);
 
