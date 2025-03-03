@@ -143,6 +143,58 @@ test("snake stuck with repetitive action - auto detection", async () => {
   expect(theSnake.isAIStuck(engine.aiStuckLimit, engine.aiStuckLimit)).toBe(true);
 });
 
+test("eating fruit should reset the stuck counter", async () => {
+  class SnakeAICustom extends SnakeAI {
+
+    actionsStep = [Constants.Key.BOTTOM, Constants.Key.BOTTOM, Constants.Key.BOTTOM, Constants.Key.RIGHT, Constants.Key.UP, Constants.Key.UP, Constants.Key.UP, Constants.Key.LEFT];
+    actionStepCounter = 0;
+
+    ai(_snake) {
+      const action = this.actionsStep[this.actionStepCounter];
+      this.actionStepCounter = (this.actionStepCounter + 1) % this.actionsStep.length;
+      return action;
+    }
+  }
+
+  const theGrid = new Grid(10, 10, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", new SnakeAICustom());
+
+  function allPositionsOccupied() {
+    const restrictedArea = Array.from({ length: 2 }, (_, dx) => 
+      Array.from({ length: 4 }, (_, dy) => new Position(5 + dx, 4 + dy))
+    ).flat();
+
+    return restrictedArea.every(pos =>
+      theSnake.queue.some(sq => sq.equals(pos)) || pos.equals(theGrid.fruitPos)
+    );
+  }
+
+  const mockRandom = jest.fn();
+  mockRandom.mockReturnValueOnce(new Position(5, 2)).mockImplementation(() => {
+    if(allPositionsOccupied()) {
+      return new Position(GameUtils.randRange(0, theGrid.width - 1), GameUtils.randRange(0, theGrid.height - 1));
+    }
+    
+    return new Position(GameUtils.randRange(5, 6), GameUtils.randRange(4, 7));
+  });
+
+  jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
+
+  const engine = new GameEngine(theGrid, [theSnake]);
+  await engine.init();
+  engine.paused = false;
+  engine.started = true;
+
+  while(!allPositionsOccupied() && !engine.gameOver) {
+    console.log(theGrid.toString());
+    engine.doTick();
+  }
+
+  expect(engine.gameOver).toBe(false);
+  expect(theSnake.isAIStuck(engine.aiStuckLimit, engine.aiStuckLimit)).toBe(false);
+  expect(theSnake.stuckCounter).toBe(0);
+});
+
 test("fruit eaten should increase score", async () => {
     const theGrid = new Grid(10, 5, false, false, false, null, false);
 
