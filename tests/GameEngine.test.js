@@ -186,13 +186,28 @@ test("eating fruit should reset the stuck counter", async () => {
   engine.started = true;
 
   while(!allPositionsOccupied() && !engine.gameOver) {
-    console.log(theGrid.toString());
     engine.doTick();
   }
 
   expect(engine.gameOver).toBe(false);
   expect(theSnake.isAIStuck(engine.aiStuckLimit, engine.aiStuckLimit)).toBe(false);
   expect(theSnake.stuckCounter).toBe(0);
+});
+
+test("snake stuck horizontally - stuck detection disabled", async () => {
+  const theGrid = new Grid(5, 5, false, false, false, null, false, 1, 2);
+  const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.MOCK);
+  const engine = new GameEngine(theGrid, [theSnake], null, null, null, null, null, true);
+  await engine.init();
+  engine.paused = false;
+  engine.started = true;
+
+  for(let i = 0; i < theGrid.width * 2 * engine.aiStuckLimit + 1; i++) {
+    engine.doTick();
+  }
+
+  expect(engine.gameOver).toBe(false);
+  expect(theSnake.isAIStuck(engine.aiStuckLimit, engine.aiStuckLimit)).toBe(true);
 });
 
 test("fruit eaten should increase score", async () => {

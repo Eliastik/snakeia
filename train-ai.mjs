@@ -66,14 +66,14 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
     }
   }
 
-  const gameEngine = new GameEngine(theGrid, theSnakes);
+  const gameEngine = new GameEngine(theGrid, theSnakes, null, null, null, null, null, true);
 
   await gameEngine.init();
   gameEngine.paused = false;
 
   let tick = 0;
 
-  while (!gameEngine.gameFinished && !gameEngine.gameOver && !theSnake.gameOver && tick <= MAX_TICKS) {
+  while(!gameEngine.gameFinished && !gameEngine.gameOver && !theSnake.gameOver && tick <= MAX_TICKS) {
     const currentReward = await executeTick(theSnake, gameEngine, tick);
 
     currentTotalReward += currentReward;
@@ -87,7 +87,7 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
   console.log(`Game n°${episode} finished - Episode type: ${currentEpisodeType} - Score: ${theSnake.score} - Epsilon: ${theSnakeAI.epsilon.toFixed(3)} - Grid size: ${currentGridWidth} x ${currentGridHeight} - Random walls: ${randomWalls} - Border walls: ${borderWalls} - Maze: ${maze} - Opponents: ${opponents}`);
 
   // Save the score into the Tensorflow logs
-  if (ENABLE_TENSORBOARD_LOGS) {
+  if(ENABLE_TENSORBOARD_LOGS) {
     tensorboardSummaryWriter.scalar("score", theSnake.score, episode);
   }
 
@@ -108,10 +108,10 @@ async function executeTick(theSnake, gameEngine, currentTick) {
 
   await theSnakeAI.step(theSnake, currentState, done);
 
-  if (currentTick % TRAIN_EVERY === 0) {
+  if(currentTick % TRAIN_EVERY === 0) {
     await theSnakeAI.train();
 
-    if (ENABLE_TENSORBOARD_LOGS) {
+    if(ENABLE_TENSORBOARD_LOGS) {
       tensorboardSummaryWriter.scalar("reward", currentReward, theSnakeAI.currentEpoch);
       tensorboardSummaryWriter.scalar("qValue", theSnakeAI.currentQValue, theSnakeAI.currentEpoch);
     }
@@ -136,7 +136,7 @@ async function saveModel(subDirectory = "") {
 }
 
 async function train() {
-  for (const currentEpisodeType of EPISODES_TYPES) {
+  for(const currentEpisodeType of EPISODES_TYPES) {
     const startTime = performance.now();
     const currentMaxEpisodes = NUM_EPISODES / EPISODES_TYPES.length;
 

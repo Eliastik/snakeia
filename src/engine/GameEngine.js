@@ -24,7 +24,7 @@ import Snake from "./Snake.js";
 import seedrandom from "seedrandom";
 
 export default class GameEngine {
-  constructor(grid, snake, speed, enablePause, enableRetry, progressiveSpeed, aiStuckLimit) {
+  constructor(grid, snake, speed, enablePause, enableRetry, progressiveSpeed, aiStuckLimit, disableStuckAIDetection) {
     // Game settings
     this.grid = grid;
     this.snakes = snake;
@@ -35,6 +35,7 @@ export default class GameEngine {
     this.enableRetry = enableRetry == null ? true : enableRetry;
     this.progressiveSpeed = progressiveSpeed == null ? false : progressiveSpeed;
     this.aiStuckLimit = aiStuckLimit == null ? 3 : aiStuckLimit;
+    this.disableStuckAIDetection = disableStuckAIDetection == null ? false : disableStuckAIDetection;
     this.countBeforePlay = 3;
     // Game variables
     this.lastKey = -1;
@@ -486,8 +487,8 @@ export default class GameEngine {
   }
 
   checkSnakeAIStuckStatus(snake) {
-    const isPartiallyStuck = snake.isAIStuck(this.aiStuckLimit / 2);
-    const isFullyStuck = isPartiallyStuck && snake.isAIStuck(this.aiStuckLimit);
+    const isPartiallyStuck = !this.disableStuckAIDetection ? snake.isAIStuck(this.aiStuckLimit / 2) : false;
+    const isFullyStuck = !this.disableStuckAIDetection ? isPartiallyStuck && snake.isAIStuck(this.aiStuckLimit) : false;
     const isHumanPlayer = (snake.player === GameConstants.PlayerType.HUMAN || snake.player === GameConstants.PlayerType.HYBRID_HUMAN_AI) && !snake.gameOver;
     
     return {
