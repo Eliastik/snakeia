@@ -66,6 +66,19 @@ export default class SnakeAIUltra extends SnakeAI {
     this.currentEpoch = 0;
 
     this.summaryWriter = null;
+
+    // TODO
+    // - Fix double Qlearning -> OK
+    // - Prioritized Experience Replay -> OK
+    // - Dueling DQN -> OK
+    // - Increase memory size + optimize -> OK
+    // - Noisy Networks -> OK
+    // * Ideas :
+    // - Memory : sample memory of different environments (wall or without walls, etc.) + check prioritized implementation
+    // - Feed the input with N previous frames?
+    // - Data augmentation (reverse the grid etc...)?
+    // - Retest 3 moves
+    // - Distributional RL - Multi step learning ?
   }
 
   async setup(summaryWriter) {
@@ -120,7 +133,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const flatten = tf.layers.flatten().apply(conv2);
   
     const dense1 = DenseLayer({
-      units: 256,
+      units: 64,
       activation: "relu"
     }).apply(flatten);
 
@@ -133,7 +146,7 @@ export default class SnakeAIUltra extends SnakeAI {
   
     if(this.enableDuelingQLearning) {
       const dense2 = DenseLayer({
-        units: 256,
+        units: 64,
         activation: "relu"
       }).apply(flatten);
 
@@ -160,20 +173,25 @@ export default class SnakeAIUltra extends SnakeAI {
       loss: (yTrue, yPred) => tf.losses.huberLoss(yTrue, yPred) // Or Mean Square Root
     });
 
-    // TODO
-    // - Fix double Qlearning -> OK
-    // - Prioritized Experience Replay -> OK
-    // - Dueling DQN -> OK
-    // - Increase memory size + optimize -> OK
-    // - Noisy Networks -> OK
-    // * Ideas :
-    // - Memory : sample memory of different environments (wall or without walls, etc.) + check prioritized implementation
-    // - Feed the input with N previous frames?
-    // - Data augmentation (reverse the grid etc...)?
-    // - Retest 3 moves
-    // - Distributional RL - Multi step learning ?
-
     return model;
+  }
+  
+  resetNoisyLayers() {
+    if(this.enableNoisyNetwork && this.enableTrainingMode) {
+      this.mainModel.layers.forEach(layer => {
+        if(layer instanceof NoisyDense) {
+          layer.resetNoise();
+        }
+      });
+  
+      if(this.enableTargetModel && this.targetModel) {
+        this.targetModel.layers.forEach(layer => {
+          if(layer instanceof NoisyDense) {
+            layer.resetNoise();
+          }
+        });
+      }
+    }
   }
 
   ai(snake) {
@@ -196,6 +214,8 @@ export default class SnakeAIUltra extends SnakeAI {
 
   getBestAction(snake) {
     return tf.tidy(() => {
+      this.resetNoisyLayers();
+  
       const currentState = this.stateToTensor(this.getState(snake));
       const currentStateTensor = currentState.expandDims(0);
   
@@ -335,6 +355,8 @@ export default class SnakeAIUltra extends SnakeAI {
 
   async train() {
     if(this.memory.length < this.batchSize) return;
+
+    this.resetNoisyLayers();
 
     const batch = this.loadBatches();
 

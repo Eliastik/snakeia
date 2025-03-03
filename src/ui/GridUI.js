@@ -98,7 +98,7 @@ export default class GridUI extends Component {
         }
       }
   
-      this.drawSnake(ctx, caseSize, offsetY, totalWidth, this.currentPlayer);
+      this.drawSnake(ctx, caseSize, offsetX, offsetY, totalWidth, this.currentPlayer);
   
       this.canvasTmp.width = 0;
       this.canvasTmp.height = 0;
@@ -119,7 +119,7 @@ export default class GridUI extends Component {
     return Math.floor(caseSize);
   }
 
-  drawSnake(ctx, caseSize, offsetY, totalWidth, currentPlayer) {
+  drawSnake(ctx, caseSize, offsetX, offsetY, totalWidth, currentPlayer) {
     if(this.snakes != null) {
       const canvas = this.canvasTmp;
       const ctxTmp = this.canvasTmp.getContext("2d");
@@ -319,17 +319,17 @@ export default class GridUI extends Component {
           Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc, Math.round(caseSize), Math.round(caseSize)), Math.round(caseX), Math.round(caseY), Math.round(caseSize), Math.round(caseSize), null, null, null, null, eraseBelow, Math.round(angle));
         }
 
-        Utils.drawImageData(ctx, this.canvasTmp, Math.round((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseSize * this.grid.height), Math.floor((canvas.width - totalWidth) / 2), this.headerHeight, totalWidth, Math.round(caseSize * this.grid.height));
+        Utils.drawImageData(ctx, this.canvasTmp, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
         ctxTmp.filter = "none";
       }
 
       if(this.snakes.length > 1) {
-        this.drawSnakeInfos(ctx, totalWidth, caseSize, currentPlayer);
+        this.drawSnakeInfos(ctx, offsetX, offsetY, caseSize, currentPlayer);
       }
     }
   }
 
-  drawSnakeInfos(ctx, totalWidth, caseSize, currentPlayer) {
+  drawSnakeInfos(ctx, offsetX, offsetY, caseSize, currentPlayer) {
     let numPlayer = 0;
     let numAI = 0;
 
@@ -345,8 +345,8 @@ export default class GridUI extends Component {
       if(position != null) {
         const posX = position.x;
         const posY = position.y;
-        let caseX = Math.floor(posX * caseSize + ((this.canvasTmp.width - totalWidth) / 2));
-        let caseY = this.headerHeight + posY * caseSize;
+        let caseX = Math.floor(posX * caseSize + offsetX);
+        let caseY = offsetY + posY * caseSize;
     
         if(!this.disableAnimation && !this.snakes[i].gameOver && !this.gameFinished && !this.gameOver) {
           let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);

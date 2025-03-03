@@ -146,30 +146,34 @@ export default class NoisyDense extends tf.layers.Layer {
   }
 
   resetNoise() {
-    if(this.useFactorised) {
-      const inEps = scaledNoise([this.lastDim, 1]);
-      const outEps = scaledNoise([1, this.units]);
-      const newEpsKernel = tf.matMul(inEps, outEps);
-      this.epsKernel.write(newEpsKernel);
+    tf.tidy(() => {
+      if(this.useFactorised) {
+        const inEps = scaledNoise([this.lastDim, 1]);
+        const outEps = scaledNoise([1, this.units]);
+        const newEpsKernel = tf.matMul(inEps, outEps);
+        this.epsKernel.write(newEpsKernel);
 
-      if(this.useBias) {
-        this.epsBias.write(outEps.flatten());
-      }
-    } else {
-      this.epsKernel.write(tf.randomNormal([this.lastDim, this.units]));
+        if(this.useBias) {
+          this.epsBias.write(outEps.flatten());
+        }
+      } else {
+        this.epsKernel.write(tf.randomNormal([this.lastDim, this.units]));
       
-      if(this.useBias) {
-        this.epsBias.write(tf.randomNormal([this.units]));
+        if(this.useBias) {
+          this.epsBias.write(tf.randomNormal([this.units]));
+        }
       }
-    }
+    });
   }
 
   removeNoise() {
-    this.epsKernel.write(tf.zeros([this.lastDim, this.units]));
+    tf.tidy(() => {
+      this.epsKernel.write(tf.zeros([this.lastDim, this.units]));
 
-    if(this.useBias) {
-      this.epsBias.write(tf.zeros([this.units]));
-    }
+      if(this.useBias) {
+        this.epsBias.write(tf.zeros([this.units]));
+      }
+    });
   }
 
   computeOutputShape(inputShape) {
