@@ -463,7 +463,7 @@ Puis lancez la commande suivante :
 npm run train-ai
 ```
 
-Vous pouvez personnaliser les paramètres d'entraînement dans le fichier train-ai.mjs.
+Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train-ai.mjs`.
 
 ## TO-DO list
 
