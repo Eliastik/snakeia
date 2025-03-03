@@ -44,7 +44,8 @@ export default class Snake {
     this.name = name == undefined ? "Snake" : name;
     this.snakeAI = new SnakeAI();
     this.customAI = customAI;
-    this.ticksWithoutAction = 0;
+    this.ticksWithoutActionWidth = 0;
+    this.ticksWithoutActionHeight = 0;
   }
 
   async init() {
@@ -275,7 +276,8 @@ export default class Snake {
     this.lastTail = undefined;
     this.lastKey = -1;
     this.ticksDead = 0;
-    this.ticksWithoutAction = 0;
+    this.ticksWithoutActionWidth = 0;
+    this.ticksWithoutActionHeight = 0;
 
     if(this.snakeAI) {
       this.snakeAI.aiFruitGoal = GameConstants.CaseType.FRUIT;
@@ -431,9 +433,14 @@ export default class Snake {
       const directionFromKey = this.keyToDirection(action);
 
       if(!action || !directionFromKey || directionFromKey == this.direction) {
-        this.ticksWithoutAction++;
+        if(this.direction == GameConstants.Direction.LEFT || this.direction == GameConstants.Direction.RIGHT) {
+          this.ticksWithoutActionWidth++;
+        } else if(this.direction == GameConstants.Direction.UP || this.direction == GameConstants.Direction.BOTTOM) {
+          this.ticksWithoutActionHeight++;
+        }
       } else {
-        this.ticksWithoutAction = 0;
+        this.ticksWithoutActionHeight = 0;
+        this.ticksWithoutActionWidth = 0;
       }
 
       return action;
@@ -444,9 +451,9 @@ export default class Snake {
 
   isAIStuck(widthLimit, heightLimit) {
     if(this.snakeAI && this.snakeAI.ai) {
-      if((this.direction == GameConstants.Direction.LEFT || this.direction == GameConstants.Direction.RIGHT) && this.ticksWithoutAction >= this.grid.width * widthLimit) {
+      if((this.direction == GameConstants.Direction.LEFT || this.direction == GameConstants.Direction.RIGHT) && this.ticksWithoutActionWidth >= this.grid.width * widthLimit) {
         return true;
-      } else if((this.direction == GameConstants.Direction.UP || this.direction == GameConstants.Direction.BOTTOM) && this.ticksWithoutAction >= this.grid.height * heightLimit) {
+      } else if((this.direction == GameConstants.Direction.UP || this.direction == GameConstants.Direction.BOTTOM) && this.ticksWithoutActionHeight >= this.grid.height * heightLimit) {
         return true;
       }
     }
