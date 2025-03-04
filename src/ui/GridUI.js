@@ -57,9 +57,6 @@ export default class GridUI extends Component {
 
       const canvas = context.canvas;
       const ctx = canvas.getContext("2d");
-  
-      this.canvasSnakes.width = canvas.width;
-      this.canvasSnakes.height = canvas.height;
 
       if(this.oldHeight != canvas.height || this.oldWidth != canvas.width) {
         this.forceRedraw = true;
@@ -92,6 +89,18 @@ export default class GridUI extends Component {
   
       ctx.restore();
     }
+  }
+
+  calculateCaseSize(availableHeight, availableWidth) {
+    let caseSize = Math.min(availableHeight / this.grid.height, availableWidth / this.grid.width);
+
+    const heightPercent = availableHeight / (caseSize * this.grid.height);
+    const widthPercent = availableWidth / (caseSize * this.grid.width);
+    const percent = Math.min(heightPercent, widthPercent);
+
+    caseSize *= percent;
+    
+    return Math.floor(caseSize);
   }
 
   get gridStateChanged() {
@@ -159,226 +168,249 @@ export default class GridUI extends Component {
     Utils.drawImageData(ctx, canvasGrid, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
   }
 
-  calculateCaseSize(availableHeight, availableWidth) {
-    let caseSize = Math.min(availableHeight / this.grid.height, availableWidth / this.grid.width);
-
-    const heightPercent = availableHeight / (caseSize * this.grid.height);
-    const widthPercent = availableWidth / (caseSize * this.grid.width);
-    const percent = Math.min(heightPercent, widthPercent);
-
-    caseSize *= percent;
-    
-    return Math.floor(caseSize);
-  }
-
   drawSnakes(ctx, caseSize, offsetX, offsetY, totalWidth, currentPlayer) {
     if(this.snakes != null) {
-      const canvas = this.canvasSnakes;
-      const ctxTmp = canvas.getContext("2d");
+      const canvasSnake = this.canvasSnakes;
+      const ctxTmp = canvasSnake.getContext("2d");
+
+      canvasSnake.width = ctx.canvas.width;
+      canvasSnake.height = ctx.canvas.height;
     
-      for(let j = 0; j < this.snakes.length; j++) {
-        ctxTmp.clearRect(0, 0, this.canvasSnakes.width, this.canvasSnakes.height);
+      for(const snake of this.snakes) {
+        this.drawSnake(ctxTmp, canvasSnake, snake, caseSize, totalWidth, offsetY);
 
-        if(this.snakes[j].color != undefined) {
-          ctxTmp.filter = "hue-rotate(" + this.snakes[j].color + "deg)";
-        }
-
-        for(let i = this.snakes[j].length() - 1; (i >= -1 && this.snakes[j].length() > 1) || i >= 0; i--) { // -1 == tail
-          let position;
-
-          if(i == -1) {
-            position = this.snakes[j].get(this.snakes[j].length() - 1);
-          } else {
-            position = this.snakes[j].get(i);
-          }
-
-          let caseX = 0;
-          let caseY = 0;
-          let direction = position.direction;
-          let angle = 0;
-          let imageLoc = "";
-          let eraseBelow = true;
-
-          if(i == 0) {
-            direction = this.snakes[j].getHeadPosition().direction;
-          } else if(i == -1) {
-            if(!this.disableAnimation && !this.snakes[j].gameOver && !this.snakes[j].scoreMax && !this.gameFinished && this.snakes[j].lastTailMoved) {
-              direction = this.snakes[j].getTailPosition().direction;
-            } else {
-              direction = this.snakes[j].get(this.snakes[j].length() - 2).direction;
-            }
-          } else {
-            direction = this.snakes[j].getGraphicDirection(i);
-          }
-
-          // Animation
-          if(!this.disableAnimation && (i == 0 || (i == -1 && this.snakes[j].lastTailMoved)) && !this.snakes[j].scoreMax && ((!this.gameFinished && !this.gameOver) || this.snakes[j].gameOver) && (!this.snakes[j].gameOver || (this.snakes[j].gameOver && this.ticks < this.snakes[j].ticksDead + 2))) {
-            let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER); // Percentage of the animation
-
-            if(this.snakes[j].gameOver && this.snakes[j].ticksDead) {
-              if(this.ticks <= this.snakes[j].ticksDead) {
-                offset = 1 - offset; // Dead animation
-                offset = EasingFunctions.easeInCubic(offset);
-              } else {
-                offset = EasingFunctions.easeOutBounce(offset);
-              }
-            }
-
-            offset = Math.max(0, Math.min(1, offset));
-
-            const offsetX = (caseSize * offset) - caseSize;
-            const offsetY = (caseSize * offset) - caseSize;
-
-            let currentPosition = position;
-            let graphicDirection;
-
-            if(i == 0) {
-              if(this.snakes[j].length() > 1) {
-                graphicDirection = this.snakes[j].getGraphicDirection(1);
-              } else {
-                graphicDirection = this.snakes[j].getGraphicDirection(0);
-              }
-            } else if(i == -1) {
-              graphicDirection = this.snakes[j].getGraphicDirectionFor(this.snakes[j].getTailPosition(), this.snakes[j].lastTail, this.snakes[j].get(this.snakes[j].length() - 2));
-            }
-
-            if(i == -1 && this.snakes[j].length() > 1) {
-              currentPosition = this.snakes[j].get(this.snakes[j].length() - 1);
-            }
-
-            if((i == 0 || i == -1) && (graphicDirection == GameConstants.Direction.ANGLE_1 || graphicDirection == GameConstants.Direction.ANGLE_2 || graphicDirection == GameConstants.Direction.ANGLE_3 || graphicDirection == GameConstants.Direction.ANGLE_4)) {
-              if(i == 0) {
-                angle = -90;
-              }
-
-              if(i == 0) {
-                angle += -128.073 * Math.pow(offset, 2) + 222.332 * offset - 5.47066; // Interpolated rotation animation
-              } else if(i == -1) {
-                angle += 126.896 * Math.pow(offset, 2) + -33.6471 * offset + 1.65942; // Interpolated rotation animation tail
-              }
-
-              if(i == 0 && ((graphicDirection == GameConstants.Direction.ANGLE_4 && direction == GameConstants.Direction.UP) || (graphicDirection == GameConstants.Direction.ANGLE_1 && direction == GameConstants.Direction.LEFT) || (graphicDirection == GameConstants.Direction.ANGLE_2 && direction == GameConstants.Direction.BOTTOM) || (graphicDirection == GameConstants.Direction.ANGLE_3 && direction == GameConstants.Direction.RIGHT))) {
-                angle = -angle;
-              } else if(i == -1 && ((graphicDirection == GameConstants.Direction.ANGLE_4 && direction == GameConstants.Direction.RIGHT) || (graphicDirection == GameConstants.Direction.ANGLE_3 && direction == GameConstants.Direction.BOTTOM) || (graphicDirection == GameConstants.Direction.ANGLE_1 && direction == GameConstants.Direction.UP) || (graphicDirection == GameConstants.Direction.ANGLE_2 && direction == GameConstants.Direction.LEFT))) {
-                angle = -angle;
-              }
-
-              eraseBelow = false;
-            }
-
-            switch(currentPosition.direction) {
-            case GameConstants.Direction.UP:
-              caseY -= offsetY;
-              break;
-            case GameConstants.Direction.BOTTOM:
-              caseY += offsetY;
-              break;
-            case GameConstants.Direction.RIGHT:
-              caseX += offsetX;
-              break;
-            case GameConstants.Direction.LEFT:
-              caseX -= offsetX;
-              break;
-            }
-          }
-
-          if(i == this.snakes[j].length() - 1) {
-            direction = this.snakes[j].getGraphicDirectionFor(position, this.snakes[j].get(i - 1), this.snakes[j].lastTail);
-          }
-
-          const posX = position.x;
-          const posY = position.y;
-
-          caseX += Math.floor(posX * caseSize + ((canvas.width - totalWidth) / 2));
-          caseY += offsetY + posY * caseSize;
-
-          if(i == 0) {
-            if(this.snakes[j].gameOver && !this.snakes[j].scoreMax) {
-              switch(direction) {
-              case GameConstants.Direction.BOTTOM:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead.png";
-                break;
-              case GameConstants.Direction.RIGHT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png";
-                break;
-              case GameConstants.Direction.UP:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png";
-                break;
-              case GameConstants.Direction.LEFT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png";
-                break;
-              }
-            } else {
-              switch(direction) {
-              case GameConstants.Direction.BOTTOM:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake.png";
-                break;
-              case GameConstants.Direction.RIGHT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_2.png";
-                break;
-              case GameConstants.Direction.UP:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_3.png";
-                break;
-              case GameConstants.Direction.LEFT:
-                imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_4.png";
-                break;
-              }
-            }
-          } else if(i == -1) {
-            switch(direction) {
-            case GameConstants.Direction.BOTTOM:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_end.png";
-              break;
-            case GameConstants.Direction.RIGHT:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2_end.png";
-              break;
-            case GameConstants.Direction.UP:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_3_end.png";
-              break;
-            case GameConstants.Direction.LEFT:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_4_end.png";
-              break;
-            }
-          } else {
-            switch(direction) {
-            case GameConstants.Direction.UP:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
-              break;
-            case GameConstants.Direction.BOTTOM:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
-              break;
-            case GameConstants.Direction.RIGHT:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
-              break;
-            case GameConstants.Direction.LEFT:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
-              break;
-            case GameConstants.Direction.ANGLE_1:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png";
-              break;
-            case GameConstants.Direction.ANGLE_2:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png";
-              break;
-            case GameConstants.Direction.ANGLE_3:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png";
-              break;
-            case GameConstants.Direction.ANGLE_4:
-              imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png";
-              break;
-            }
-          }
-
-          Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc, Math.round(caseSize), Math.round(caseSize)), Math.round(caseX), Math.round(caseY), Math.round(caseSize), Math.round(caseSize), null, null, null, null, eraseBelow, Math.round(angle));
-        }
-
-        Utils.drawImageData(ctx, this.canvasSnakes, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
-        ctxTmp.filter = "none";
+        Utils.drawImageData(ctx, canvasSnake, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
       }
 
       if(this.snakes.length > 1) {
         this.drawSnakeInfos(ctx, offsetX, offsetY, caseSize, currentPlayer);
       }
     }
+  }
+
+  drawSnake(ctxTmp, canvasSnake, snake, caseSize, totalWidth, offsetY) {
+    ctxTmp.clearRect(0, 0, canvasSnake.width, canvasSnake.height);
+
+    if(snake.color != undefined) {
+      ctxTmp.filter = "hue-rotate(" + snake.color + "deg)";
+    }
+
+    for(let i = snake.length() - 1; (i >= -1 && snake.length() > 1) || i >= 0; i--) { // -1 == tail
+      this.drawkSnakePart(i, snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
+    }
+
+    ctxTmp.filter = "none";
+  }
+
+  drawkSnakePart(partNumber, snake, caseSize, canvas, totalWidth, offsetY, ctxTmp) {
+    let position;
+
+    if(partNumber == -1) {
+      position = snake.get(snake.length() - 1);
+    } else {
+      position = snake.get(partNumber);
+    }
+
+    const direction = this.getSnakeDirection(snake, partNumber, position);
+
+    // Animation
+    const { angle, eraseBelow, caseY, caseX } = this.calculateSnakeAnimation(snake, partNumber, caseSize, position, direction);
+
+    const posX = position.x;
+    const posY = position.y;
+
+    const finalCaseX = caseX + Math.floor(posX * caseSize + ((canvas.width - totalWidth) / 2));
+    const finalCaseY = caseY + offsetY + posY * caseSize;
+
+    let imageLoc = "";
+
+    if(partNumber == 0) {
+      imageLoc = this.getSnakeHeadImage(snake, direction, imageLoc);
+    } else if(partNumber == -1) {
+      imageLoc = this.getSnakeTailImage(direction, imageLoc);
+    } else {
+      imageLoc = this.getSnakeBodyImage(direction, imageLoc);
+    }
+
+    Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc, Math.round(caseSize), Math.round(caseSize)), Math.round(finalCaseX), Math.round(finalCaseY), Math.round(caseSize), Math.round(caseSize), null, null, null, null, eraseBelow, Math.round(angle));
+  }
+
+  calculateSnakeAnimation(snake, partNumber, caseSize, position, direction) {
+    let caseX = 0;
+    let caseY = 0;
+    let angle = 0;
+    let eraseBelow = true;
+
+    if(!this.disableAnimation && (partNumber == 0 || (partNumber == -1 && snake.lastTailMoved)) && !snake.scoreMax && ((!this.gameFinished && !this.gameOver) || snake.gameOver) && (!snake.gameOver || (snake.gameOver && this.ticks < snake.ticksDead + 2))) {
+      let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER); // Percentage of the animation
+
+      if (snake.gameOver && snake.ticksDead) {
+        if (this.ticks <= snake.ticksDead) {
+          offset = 1 - offset; // Dead animation
+          offset = EasingFunctions.easeInCubic(offset);
+        } else {
+          offset = EasingFunctions.easeOutBounce(offset);
+        }
+      }
+
+      offset = Math.max(0, Math.min(1, offset));
+
+      const offsetX = (caseSize * offset) - caseSize;
+      const offsetY = (caseSize * offset) - caseSize;
+
+      let currentPosition = position;
+      let graphicDirection;
+
+      if(partNumber == 0) {
+        if(snake.length() > 1) {
+          graphicDirection = snake.getGraphicDirection(1);
+        } else {
+          graphicDirection = snake.getGraphicDirection(0);
+        }
+      } else if(partNumber == -1) {
+        graphicDirection = snake.getGraphicDirectionFor(snake.getTailPosition(), snake.lastTail, snake.get(snake.length() - 2));
+      }
+
+      if(partNumber == -1 && snake.length() > 1) {
+        currentPosition = snake.get(snake.length() - 1);
+      }
+
+      if((partNumber == 0 || partNumber == -1) && (graphicDirection == GameConstants.Direction.ANGLE_1 || graphicDirection == GameConstants.Direction.ANGLE_2 || graphicDirection == GameConstants.Direction.ANGLE_3 || graphicDirection == GameConstants.Direction.ANGLE_4)) {
+        if(partNumber == 0) {
+          angle = -90;
+        }
+
+        if(partNumber == 0) {
+          angle += -128.073 * Math.pow(offset, 2) + 222.332 * offset - 5.47066; // Interpolated rotation animation
+        } else if(partNumber == -1) {
+          angle += 126.896 * Math.pow(offset, 2) + -33.6471 * offset + 1.65942; // Interpolated rotation animation tail
+        }
+
+        if(partNumber == 0 && ((graphicDirection == GameConstants.Direction.ANGLE_4 && direction == GameConstants.Direction.UP) || (graphicDirection == GameConstants.Direction.ANGLE_1 && direction == GameConstants.Direction.LEFT) || (graphicDirection == GameConstants.Direction.ANGLE_2 && direction == GameConstants.Direction.BOTTOM) || (graphicDirection == GameConstants.Direction.ANGLE_3 && direction == GameConstants.Direction.RIGHT))) {
+          angle = -angle;
+        } else if (partNumber == -1 && ((graphicDirection == GameConstants.Direction.ANGLE_4 && direction == GameConstants.Direction.RIGHT) || (graphicDirection == GameConstants.Direction.ANGLE_3 && direction == GameConstants.Direction.BOTTOM) || (graphicDirection == GameConstants.Direction.ANGLE_1 && direction == GameConstants.Direction.UP) || (graphicDirection == GameConstants.Direction.ANGLE_2 && direction == GameConstants.Direction.LEFT))) {
+          angle = -angle;
+        }
+
+        eraseBelow = false;
+      }
+
+      switch (currentPosition.direction) {
+      case GameConstants.Direction.UP:
+        caseY -= offsetY;
+        break;
+      case GameConstants.Direction.BOTTOM:
+        caseY += offsetY;
+        break;
+      case GameConstants.Direction.RIGHT:
+        caseX += offsetX;
+        break;
+      case GameConstants.Direction.LEFT:
+        caseX -= offsetX;
+        break;
+      }
+    }
+
+    return { angle, eraseBelow, caseY, caseX };
+  }
+
+  getSnakeDirection(snake, partNumber, position) {
+    if(partNumber == 0) {
+      return snake.getHeadPosition().direction;
+    } else if(partNumber == -1) {
+      if (!this.disableAnimation && !snake.gameOver && !snake.scoreMax && !this.gameFinished && snake.lastTailMoved) {
+        return snake.getTailPosition().direction;
+      } else {
+        return snake.get(snake.length() - 2).direction;
+      }
+    } else if(partNumber == snake.length() - 1) {
+      return snake.getGraphicDirectionFor(position, snake.get(partNumber - 1), snake.lastTail);
+    }
+    
+    return snake.getGraphicDirection(partNumber);
+  }
+
+  getSnakeHeadImage(snake, direction, imageLoc) {
+    if(snake.gameOver && !snake.scoreMax) {
+      switch (direction) {
+      case GameConstants.Direction.BOTTOM:
+        imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead.png";
+        break;
+      case GameConstants.Direction.RIGHT:
+        imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png";
+        break;
+      case GameConstants.Direction.UP:
+        imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png";
+        break;
+      case GameConstants.Direction.LEFT:
+        imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png";
+        break;
+      }
+    } else {
+      switch (direction) {
+      case GameConstants.Direction.BOTTOM:
+        imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake.png";
+        break;
+      case GameConstants.Direction.RIGHT:
+        imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_2.png";
+        break;
+      case GameConstants.Direction.UP:
+        imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_3.png";
+        break;
+      case GameConstants.Direction.LEFT:
+        imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_4.png";
+        break;
+      }
+    }
+    return imageLoc;
+  }
+
+  getSnakeTailImage(direction, imageLoc) {
+    switch (direction) {
+    case GameConstants.Direction.BOTTOM:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_end.png";
+      break;
+    case GameConstants.Direction.RIGHT:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2_end.png";
+      break;
+    case GameConstants.Direction.UP:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_3_end.png";
+      break;
+    case GameConstants.Direction.LEFT:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_4_end.png";
+      break;
+    }
+    return imageLoc;
+  }
+
+  getSnakeBodyImage(direction, imageLoc) {
+    switch(direction) {
+    case GameConstants.Direction.UP:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
+      break;
+    case GameConstants.Direction.BOTTOM:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body.png";
+      break;
+    case GameConstants.Direction.RIGHT:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
+      break;
+    case GameConstants.Direction.LEFT:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_2.png";
+      break;
+    case GameConstants.Direction.ANGLE_1:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png";
+      break;
+    case GameConstants.Direction.ANGLE_2:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png";
+      break;
+    case GameConstants.Direction.ANGLE_3:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png";
+      break;
+    case GameConstants.Direction.ANGLE_4:
+      imageLoc = "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png";
+      break;
+    }
+    return imageLoc;
   }
 
   drawSnakeInfos(ctx, offsetX, offsetY, caseSize, currentPlayer) {
