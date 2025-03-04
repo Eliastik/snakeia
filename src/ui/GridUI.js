@@ -17,6 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import GameConstants from "../engine/Constants";
+import GameUtils from "../engine/GameUtils";
 import { Component, Utils, EasingFunctions } from "jsgametools";
 import i18next from "i18next";
 import Position from "../engine/Position";
@@ -103,11 +104,11 @@ export default class GridUI extends Component {
     for(let i = 0; i < this.grid.height; i++) {
       for(let j = 0; j < this.grid.width; j++) {
         const currentPosition = new Position(j, i);
-        const oldGridValue = this.oldGridState[i][j];
-        const newGridValue = this.grid.get(currentPosition);
 
-        if(this.grid.getImageCase(currentPosition) != ""
-          && oldGridValue !== newGridValue) {
+        const oldGridValue = GameUtils.getImageCase(this.oldGridState[i][j]);
+        const newGridValue = this.grid.getImageCase(currentPosition);
+
+        if(oldGridValue !== newGridValue) {
           return true;
         }
       }

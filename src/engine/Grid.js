@@ -193,22 +193,7 @@ export default class Grid {
   }
 
   getImageCase(position) {
-    switch(this.get(position)) {
-    case GameConstants.CaseType.WALL:
-      return "wall.png";
-    case GameConstants.CaseType.FRUIT:
-      return "fruit.png";
-    case GameConstants.CaseType.FRUIT_GOLD:
-      return "fruit_gold.png";
-    case GameConstants.CaseType.EMPTY:
-    case GameConstants.CaseType.SNAKE:
-    case GameConstants.CaseType.SNAKE_DEAD:
-    case GameConstants.CaseType.SURROUNDED:
-    case GameConstants.CaseType.CROSSED:
-      return "";
-    }
-
-    return "unknown.png";
+    return GameUtils.getImageCase(this.get(position));
   }
 
   getGraph(ignoreSnakePos) {
