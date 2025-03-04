@@ -41,7 +41,13 @@ export default class GridUI extends Component {
     this.ticks = ticks;
     this.gameOver = gameOver;
 
-    this.canvasTmp = document.createElement("canvas");
+    this.canvasSnakes = document.createElement("canvas");
+    this.canvasGrid = document.createElement("canvas");
+
+    this.forceRedraw = true;
+    this.oldGridState = null;
+    this.oldWidth = 0;
+    this.oldHeight = 0;
   }
 
   draw(context) {
@@ -51,8 +57,12 @@ export default class GridUI extends Component {
       const canvas = context.canvas;
       const ctx = canvas.getContext("2d");
   
-      this.canvasTmp.width = canvas.width;
-      this.canvasTmp.height = canvas.height;
+      this.canvasSnakes.width = canvas.width;
+      this.canvasSnakes.height = canvas.height;
+
+      if(this.oldHeight != canvas.height || this.oldWidth != canvas.width) {
+        this.forceRedraw = true;
+      }
   
       ctx.save();
 
@@ -70,6 +80,52 @@ export default class GridUI extends Component {
       this.width = totalWidth;
       this.height = totalHeight;
   
+      this.drawGrid(ctx, caseSize, totalWidth, offsetX, offsetY);
+  
+      this.drawSnakes(ctx, caseSize, offsetX, offsetY, totalWidth, this.currentPlayer);
+
+      this.forceRedraw = false;
+      this.oldGridState = this.grid.grid;
+      this.oldWidth = canvas.width;
+      this.oldHeight = canvas.height;
+  
+      ctx.restore();
+    }
+  }
+
+  get gridStateChanged() {
+    if(!this.oldGridState
+      || this.oldGridState.length != this.grid.height
+      || this.oldGridState[0].length != this.grid.width) {
+      return true;
+    }
+
+    for(let i = 0; i < this.grid.height; i++) {
+      for(let j = 0; j < this.grid.width; j++) {
+        const currentPosition = new Position(j, i);
+        const oldGridValue = this.oldGridState[i][j];
+        const newGridValue = this.grid.get(currentPosition);
+
+        if(this.grid.getImageCase(currentPosition) != ""
+          && oldGridValue !== newGridValue) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+  
+  drawGrid(ctx, caseSize, totalWidth, offsetX, offsetY) {
+    const canvasGrid = this.canvasGrid;
+    const ctxGrid = canvasGrid.getContext("2d");
+
+    if(this.forceRedraw || this.gridStateChanged) {
+      canvasGrid.width = ctx.canvas.width;
+      canvasGrid.height = ctx.canvas.height;
+      
+      ctxGrid.clearRect(0, 0, canvasGrid.width, canvasGrid.height);
+
       for(let i = 0; i < this.grid.height; i++) {
         for(let j = 0; j < this.grid.width; j++) {
           const caseX = offsetX + j * caseSize;
@@ -81,13 +137,13 @@ export default class GridUI extends Component {
           }
   
           if((i % 2 == 0 && j % 2 == 0) || (i % 2 == 1 && j % 2 == 1)) {
-            ctx.fillStyle = "rgba(127, 140, 141, 0.75)";
+            ctxGrid.fillStyle = "rgba(127, 140, 141, 0.75)";
           } else {
-            ctx.fillStyle = "rgba(44, 62, 80, 0.75)";
+            ctxGrid.fillStyle = "rgba(44, 62, 80, 0.75)";
           }
   
-          ctx.fillRect(caseX, caseY, caseSize, caseSize);
-          Utils.drawImage(ctx,
+          ctxGrid.fillRect(caseX, caseY, caseSize, caseSize);
+          Utils.drawImage(ctxGrid,
             this.imageLoader.get("assets/images/skin/" + this.graphicSkin + "/" + this.grid.getImageCase(new Position(j, i)),
               caseSize,
               Math.round(caseSize)),
@@ -97,16 +153,11 @@ export default class GridUI extends Component {
             Math.round(caseSize));
         }
       }
-  
-      this.drawSnake(ctx, caseSize, offsetX, offsetY, totalWidth, this.currentPlayer);
-  
-      this.canvasTmp.width = 0;
-      this.canvasTmp.height = 0;
-  
-      ctx.restore();
     }
+
+    Utils.drawImageData(ctx, canvasGrid, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
   }
-  
+
   calculateCaseSize(availableHeight, availableWidth) {
     let caseSize = Math.min(availableHeight / this.grid.height, availableWidth / this.grid.width);
 
@@ -119,13 +170,13 @@ export default class GridUI extends Component {
     return Math.floor(caseSize);
   }
 
-  drawSnake(ctx, caseSize, offsetX, offsetY, totalWidth, currentPlayer) {
+  drawSnakes(ctx, caseSize, offsetX, offsetY, totalWidth, currentPlayer) {
     if(this.snakes != null) {
-      const canvas = this.canvasTmp;
-      const ctxTmp = this.canvasTmp.getContext("2d");
+      const canvas = this.canvasSnakes;
+      const ctxTmp = canvas.getContext("2d");
     
       for(let j = 0; j < this.snakes.length; j++) {
-        ctxTmp.clearRect(0, 0, this.canvasTmp.width, this.canvasTmp.height);
+        ctxTmp.clearRect(0, 0, this.canvasSnakes.width, this.canvasSnakes.height);
 
         if(this.snakes[j].color != undefined) {
           ctxTmp.filter = "hue-rotate(" + this.snakes[j].color + "deg)";
@@ -319,7 +370,7 @@ export default class GridUI extends Component {
           Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc, Math.round(caseSize), Math.round(caseSize)), Math.round(caseX), Math.round(caseY), Math.round(caseSize), Math.round(caseSize), null, null, null, null, eraseBelow, Math.round(angle));
         }
 
-        Utils.drawImageData(ctx, this.canvasTmp, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
+        Utils.drawImageData(ctx, this.canvasSnakes, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
         ctxTmp.filter = "none";
       }
 
