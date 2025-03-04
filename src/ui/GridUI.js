@@ -47,6 +47,7 @@ export default class GridUI extends Component {
 
     this.forceRedraw = true;
     this.oldGridState = null;
+    this.oldSnakesState = null;
     this.oldWidth = 0;
     this.oldHeight = 0;
   }
@@ -82,12 +83,24 @@ export default class GridUI extends Component {
   
       this.drawSnakes(ctx, caseSize, offsetX, offsetY, totalWidth, this.currentPlayer);
 
-      this.forceRedraw = false;
-      this.oldGridState = this.grid.grid;
-      this.oldWidth = canvas.width;
-      this.oldHeight = canvas.height;
+      this.saveCurrentState(canvas);
   
       ctx.restore();
+    }
+  }
+
+  saveCurrentState(canvas) {
+    this.forceRedraw = false;
+    this.oldGridState = this.grid.grid;
+    this.oldWidth = canvas.width;
+    this.oldHeight = canvas.height;
+    this.oldSnakesState = [];
+
+    for(const snake of this.snakes) {
+      this.oldSnakesState.push({
+        tail: snake.getTailPosition(),
+        head: snake.getHeadPosition()
+      });
     }
   }
 
@@ -168,19 +181,42 @@ export default class GridUI extends Component {
     Utils.drawImageData(ctx, canvasGrid, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
   }
 
+  snakeStateHasChanged() {
+    for(let i = 0; i < this.snakes.length; i++) {
+      const snake = this.snakes[i];
+      const oldState = this.oldSnakesState && this.oldSnakesState[i];
+
+      if(oldState) {
+        const currentTail = snake.getTailPosition();
+        const currentHead = snake.getHeadPosition();
+  
+        if(Math.abs(currentHead.x - oldState.head.x) > 1 || Math.abs(currentHead.y - oldState.head.y) > 1
+        || Math.abs(currentTail.x - oldState.tail.x) > 1 || Math.abs(currentTail.y - oldState.tail.y) > 1) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   drawSnakes(ctx, caseSize, offsetX, offsetY, totalWidth, currentPlayer) {
     if(this.snakes != null) {
       const canvasSnake = this.canvasSnakes;
       const ctxTmp = canvasSnake.getContext("2d");
 
-      canvasSnake.width = ctx.canvas.width;
-      canvasSnake.height = ctx.canvas.height;
+      if(this.forceRedraw || this.snakeStateHasChanged()) {
+        canvasSnake.width = ctx.canvas.width;
+        canvasSnake.height = ctx.canvas.height;
+  
+        ctxTmp.clearRect(0, 0, canvasSnake.width, canvasSnake.height);
+      }
     
       for(const snake of this.snakes) {
         this.drawSnake(ctxTmp, canvasSnake, snake, caseSize, totalWidth, offsetY);
-
-        Utils.drawImageData(ctx, canvasSnake, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
       }
+
+      Utils.drawImageData(ctx, canvasSnake, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
 
       if(this.snakes.length > 1) {
         this.drawSnakeInfos(ctx, offsetX, offsetY, caseSize, currentPlayer);
@@ -189,23 +225,56 @@ export default class GridUI extends Component {
   }
 
   drawSnake(ctxTmp, canvasSnake, snake, caseSize, totalWidth, offsetY) {
-    ctxTmp.clearRect(0, 0, canvasSnake.width, canvasSnake.height);
-
     if(snake.color != undefined) {
       ctxTmp.filter = "hue-rotate(" + snake.color + "deg)";
     }
 
-    for(let i = snake.length() - 1; (i >= -1 && snake.length() > 1) || i >= 0; i--) { // -1 == tail
-      this.drawkSnakePart(i, snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
+    if(this.forceRedraw || this.snakeStateHasChanged()) {
+      // Full redraw
+      for(let i = snake.length() - 1; (i >= -1 && snake.length() > 1) || i >= 0; i--) { // -1 == tail
+        this.drawSnakePart(i, snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
+      }
+    } else {
+      // Differential redraw
+      if(!snake.gameOver && snake.lastTailMoved) {
+        this.eraseTail(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
+      }
+      
+      this.eraseHead(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
+
+      // Redraw only the head, tail and case below head
+      for(let i = Math.min(1, snake.length() - 1); (i >= -1 && snake.length() > 1) || i >= 0; i--) {
+        this.drawSnakePart(i, snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
+      }
     }
 
     ctxTmp.filter = "none";
   }
 
-  drawkSnakePart(partNumber, snake, caseSize, canvas, totalWidth, offsetY, ctxTmp) {
+  eraseTail(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp) {
+    const lastTailPos = snake.lastTail;
+
+    if(lastTailPos) {
+      const finalCaseX = Math.floor(lastTailPos.x * caseSize + ((canvasSnake.width - totalWidth) / 2));
+      const finalCaseY = offsetY + lastTailPos.y * caseSize;
+      ctxTmp.clearRect(finalCaseX, finalCaseY, caseSize, caseSize);
+    }
+  }
+
+  eraseHead(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp) {
+    const lastHeadPos = snake.lastHead;
+
+    if(lastHeadPos) {
+      const finalCaseX = Math.floor(lastHeadPos.x * caseSize + ((canvasSnake.width - totalWidth) / 2));
+      const finalCaseY = offsetY + lastHeadPos.y * caseSize;
+      ctxTmp.clearRect(finalCaseX, finalCaseY, caseSize, caseSize);
+    }
+  }
+
+  drawSnakePart(partNumber, snake, caseSize, canvas, totalWidth, offsetY, ctxTmp) {
     let position;
 
-    if(partNumber == -1) {
+    if(partNumber == -1) { // Tail
       position = snake.get(snake.length() - 1);
     } else {
       position = snake.get(partNumber);
@@ -244,8 +313,8 @@ export default class GridUI extends Component {
     if(!this.disableAnimation && (partNumber == 0 || (partNumber == -1 && snake.lastTailMoved)) && !snake.scoreMax && ((!this.gameFinished && !this.gameOver) || snake.gameOver) && (!snake.gameOver || (snake.gameOver && this.ticks < snake.ticksDead + 2))) {
       let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER); // Percentage of the animation
 
-      if (snake.gameOver && snake.ticksDead) {
-        if (this.ticks <= snake.ticksDead) {
+      if(snake.gameOver && snake.ticksDead) {
+        if(this.ticks <= snake.ticksDead) {
           offset = 1 - offset; // Dead animation
           offset = EasingFunctions.easeInCubic(offset);
         } else {
@@ -295,7 +364,7 @@ export default class GridUI extends Component {
         eraseBelow = false;
       }
 
-      switch (currentPosition.direction) {
+      switch(currentPosition.direction) {
       case GameConstants.Direction.UP:
         caseY -= offsetY;
         break;
@@ -315,10 +384,10 @@ export default class GridUI extends Component {
   }
 
   getSnakeDirection(snake, partNumber, position) {
-    if(partNumber == 0) {
+    if(partNumber == 0) { // Head
       return snake.getHeadPosition().direction;
-    } else if(partNumber == -1) {
-      if (!this.disableAnimation && !snake.gameOver && !snake.scoreMax && !this.gameFinished && snake.lastTailMoved) {
+    } else if(partNumber == -1) { // Tail
+      if(!this.disableAnimation && !snake.gameOver && !snake.scoreMax && !this.gameFinished && snake.lastTailMoved) {
         return snake.getTailPosition().direction;
       } else {
         return snake.get(snake.length() - 2).direction;
@@ -332,7 +401,7 @@ export default class GridUI extends Component {
 
   getSnakeHeadImage(snake, direction, imageLoc) {
     if(snake.gameOver && !snake.scoreMax) {
-      switch (direction) {
+      switch(direction) {
       case GameConstants.Direction.BOTTOM:
         imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake_dead.png";
         break;
@@ -347,7 +416,7 @@ export default class GridUI extends Component {
         break;
       }
     } else {
-      switch (direction) {
+      switch(direction) {
       case GameConstants.Direction.BOTTOM:
         imageLoc = "assets/images/skin/" + this.graphicSkin + "/snake.png";
         break;

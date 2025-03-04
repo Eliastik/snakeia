@@ -32,7 +32,9 @@ export default class Snake {
     this.queue = [];
     this.lastKey = -1;
     this.lastTail;
+    this.lastHead;
     this.lastTailMoved;
+    this.lastHeadMoved;
     this.ticksDead = 0;
     this.player = player == undefined ? GameConstants.PlayerType.HUMAN : player;
     this.aiLevel = aiLevel == undefined ? GameConstants.AiLevel.DEFAULT : aiLevel;
@@ -127,7 +129,8 @@ export default class Snake {
       this.aiLevel = GameConstants.AiLevel.HIGH;
     }
 
-    this.lastTail = this.get(this.queue.length - 1);
+    this.lastTail = this.getTailPosition();
+    this.lastHead = this.getHeadPosition();
 
     await this.initAI();
 
@@ -274,7 +277,9 @@ export default class Snake {
     this.gameOver = false;
     this.scoreMax = false;
     this.lastTailMoved = true;
+    this.lastHeadMoved = true;
     this.lastTail = undefined;
+    this.lastHead = undefined;
     this.lastKey = -1;
     this.ticksDead = 0;
     this.lastPositions = [];
@@ -293,7 +298,9 @@ export default class Snake {
   remove() {
     const last = this.queue.pop();
     this.grid.set(GameConstants.CaseType.EMPTY, last);
+
     this.lastTail = last;
+    this.lastHead = this.getHeadPosition();
   }
 
   length() {

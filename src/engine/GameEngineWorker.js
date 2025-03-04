@@ -43,7 +43,12 @@ function copySnakes(snakes) {
           snakeCopy.lastTail = JSON.parse(JSON.stringify(snake.lastTail));
         }
   
+        if(snake.lastHead) {
+          snakeCopy.lastHead = JSON.parse(JSON.stringify(snake.lastHead));
+        }
+  
         snakeCopy.lastTailMoved = snake.lastTailMoved;
+        snakeCopy.lastHeadMoved = snake.lastHeadMoved;
         snakeCopy.name = snake.name;
         snakeCopy.player = snake.player;
   

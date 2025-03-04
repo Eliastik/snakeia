@@ -339,6 +339,7 @@ export default class GameEngine {
 
         setFruitError = false;
         snake.lastTailMoved = false;
+        snake.lastHeadMoved = false;
 
         if(!snake.gameOver && !snake.scoreMax) {
           const headSnakePos = this.moveSnake(snake, initialDirection);
@@ -415,6 +416,7 @@ export default class GameEngine {
       if(!this.grid.maze) {
         snake.remove();
         snake.lastTailMoved = true;
+        snake.lastHeadMoved = true;
       }
     }
 
