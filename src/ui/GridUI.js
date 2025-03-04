@@ -189,6 +189,10 @@ export default class GridUI extends Component {
       if(oldState) {
         const currentTail = snake.getTailPosition();
         const currentHead = snake.getHeadPosition();
+
+        if(!snake.lastHead || !snake.lastTail) {
+          return true;
+        }
   
         if(Math.abs(currentHead.x - oldState.head.x) > 1 || Math.abs(currentHead.y - oldState.head.y) > 1
         || Math.abs(currentTail.x - oldState.tail.x) > 1 || Math.abs(currentTail.y - oldState.tail.y) > 1) {
