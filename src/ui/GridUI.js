@@ -244,7 +244,9 @@ export default class GridUI extends Component {
         this.eraseTail(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
       }
       
-      this.eraseHead(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
+      if(snake.gameOver) {
+        this.eraseHead(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
+      }
 
       // Redraw only the head, tail and case below head
       for(let i = Math.min(1, snake.length() - 1); (i >= -1 && snake.length() > 1) || i >= 0; i--) {
