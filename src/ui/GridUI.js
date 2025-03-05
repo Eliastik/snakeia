@@ -23,7 +23,7 @@ import i18next from "i18next";
 import Position from "../engine/Position";
 
 export default class GridUI extends Component {
-  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver) {
+  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
     super();
 
     this.snakes = snakes;
@@ -41,6 +41,7 @@ export default class GridUI extends Component {
     this.spectatorMode = spectatorMode;
     this.ticks = ticks;
     this.gameOver = gameOver;
+    this.onlineMode = onlineMode;
 
     this.canvasSnakes = document.createElement("canvas");
     this.canvasGrid = document.createElement("canvas");
@@ -99,7 +100,8 @@ export default class GridUI extends Component {
     for(const snake of this.snakes) {
       this.oldSnakesState.push({
         tail: snake.getTailPosition(),
-        head: snake.getHeadPosition()
+        head: snake.getHeadPosition(),
+        firstPosition: snake.get(1)
       });
     }
   }
@@ -183,7 +185,7 @@ export default class GridUI extends Component {
 
   snakeStateHasChanged() {
     // Differential rendering is disabled with Pixel skin
-    if(this.graphicSkin === "pixel") {
+    if(this.graphicSkin === "pixel" || this.onlineMode) {
       return true;
     }
 
@@ -197,6 +199,7 @@ export default class GridUI extends Component {
       if(oldState) {
         const currentTail = snake.getTailPosition();
         const currentHead = snake.getHeadPosition();
+        const currentFirstPosition = snake.get(1);
 
         if(!snake.lastTail) {
           return true;
@@ -208,7 +211,9 @@ export default class GridUI extends Component {
         if(wrappedDistance(currentHead.x, oldState.head.x, width) > 1 ||
           wrappedDistance(currentHead.y, oldState.head.y, height) > 1 ||
           wrappedDistance(currentTail.x, oldState.tail.x, width) > 1 ||
-          wrappedDistance(currentTail.y, oldState.tail.y, height) > 1) {
+          wrappedDistance(currentTail.y, oldState.tail.y, height) > 1 ||
+          wrappedDistance(currentFirstPosition.x, oldState.firstPosition.x, width) > 1 ||
+          wrappedDistance(currentFirstPosition.y, oldState.firstPosition.y, height) > 1) {
           return true;
         }
       }
@@ -296,7 +301,7 @@ export default class GridUI extends Component {
       const { finalCaseX, finalCaseY } = this.calculateCasePositionWithAnimation(animationPercentage, position, caseSize,
         canvasSnake, totalWidth, offsetY);
 
-      ctxTmp.clearRect(finalCaseX, finalCaseY, caseSize, caseSize);
+      ctxTmp.clearRect(Math.round(finalCaseX), Math.round(finalCaseY), Math.round(caseSize), Math.round(caseSize));
     }
   }
 
@@ -594,7 +599,7 @@ export default class GridUI extends Component {
     }
   }
 
-  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver) {
+  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
     this.snakes = snakes;
     this.grid = grid;
     this.speed = speed;
@@ -607,5 +612,6 @@ export default class GridUI extends Component {
     this.spectatorMode = spectatorMode;
     this.ticks = ticks;
     this.gameOver = gameOver;
+    this.onlineMode = onlineMode;
   }
 }
