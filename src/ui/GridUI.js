@@ -234,8 +234,21 @@ export default class GridUI extends Component {
         ctxTmp.clearRect(0, 0, canvasSnake.width, canvasSnake.height);
       }
     
-      for(const snake of this.snakes) {
-        this.drawSnake(ctxTmp, canvasSnake, snake, caseSize, totalWidth, offsetY);
+      if(this.forceRedraw || this.snakeStateHasChanged()) {
+        // Full redraw
+        for(const snake of this.snakes) {
+          this.fullSnakeRendering(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
+        }
+      } else {
+        // Differential redraw
+        // Draw the tail, first body part and then head
+        [-1, 1, 0].forEach(part => {
+          for(const snake of this.snakes) {
+            if(snake.length() > part) {
+              this.differentialSnakeRendering(snake, part, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
+            }
+          }
+        });
       }
 
       Utils.drawImageData(ctx, canvasSnake, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
@@ -246,41 +259,23 @@ export default class GridUI extends Component {
     }
   }
 
-  drawSnake(ctxTmp, canvasSnake, snake, caseSize, totalWidth, offsetY) {
-    if(snake.color != undefined) {
-      ctxTmp.filter = "hue-rotate(" + snake.color + "deg)";
-    }
-
-    if(this.forceRedraw || this.snakeStateHasChanged()) {
-      // Full redraw
-      this.fullSnakeRendering(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
-    } else {
-      // Differential redraw
-      this.differentialSnakeRendering(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
-    }
-
-    ctxTmp.filter = "none";
-  }
-
   fullSnakeRendering(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp) {
     for(let i = snake.length() - 1; (i >= -1 && snake.length() > 1) || i >= 0; i--) { // -1 == tail
       this.drawSnakePart(i, snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
     }
   }
 
-  differentialSnakeRendering(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp) {
-    if(!snake.gameOver && snake.lastTailMoved) {
+  differentialSnakeRendering(snake, part, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp) {
+    if(part === -1 && !snake.gameOver && snake.lastTailMoved) {
       this.eraseTail(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
     }
 
-    if(snake.gameOver) {
+    if(part === 0 && snake.gameOver) {
       this.eraseHead(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
     }
 
     // Redraw only the head, tail and case below head
-    for(let i = Math.min(1, snake.length() - 1); (i >= -1 && snake.length() > 1) || i >= 0; i--) {
-      this.drawSnakePart(i, snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
-    }
+    this.drawSnakePart(part, snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);
   }
 
   eraseTail(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp) {
@@ -330,6 +325,10 @@ export default class GridUI extends Component {
   }
 
   drawSnakePart(partNumber, snake, caseSize, canvas, totalWidth, offsetY, ctxTmp) {
+    if(snake.color != undefined) {
+      ctxTmp.filter = "hue-rotate(" + snake.color + "deg)";
+    }
+
     let position;
 
     if(partNumber == -1) { // Tail
@@ -357,6 +356,8 @@ export default class GridUI extends Component {
     }
 
     Utils.drawImage(ctxTmp, this.imageLoader.get(imageLoc, Math.round(caseSize), Math.round(caseSize)), Math.round(finalCaseX), Math.round(finalCaseY), Math.round(caseSize), Math.round(caseSize), null, null, null, null, eraseBelow, Math.round(angle));
+
+    ctxTmp.filter = "none";
   }
 
   shouldDisplayAnimation(snake, partNumber) {

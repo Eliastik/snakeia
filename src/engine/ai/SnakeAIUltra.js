@@ -97,6 +97,34 @@ export default class SnakeAIUltra extends SnakeAI {
     }
   }
 
+  async exportWeights() {
+    const weightsData = {};
+    
+    this.mainModel.layers.forEach(async (layer, index) => {
+      const layerName = layer.name || `layer_${index}`;
+      weightsData[layerName] = {};
+  
+      if (layer instanceof NoisyDense) {
+        weightsData[layerName]["muKernel"] = await layer.muKernel.read().data();
+        weightsData[layerName]["sigmaKernel"] = await layer.sigmaKernel.read().data();
+        weightsData[layerName]["epsKernel"] = await layer.epsKernel.read().data();
+  
+        if (layer.useBias) {
+          weightsData[layerName]["muBias"] = await layer.muBias.read().data();
+          weightsData[layerName]["sigmaBias"] = await layer.sigmaBias.read().data();
+          weightsData[layerName]["epsBias"] = await layer.epsBias.read().data();
+        }
+      } else {
+        const weights = layer.getWeights();
+        for (let i = 0; i < weights.length; i++) {
+          weightsData[layerName][`weight_${i}`] = await weights[i].data();
+        }
+      }
+    });
+  
+    return weightsData;
+  }  
+
   async createOrLoadModel(enableTrainingMode, modelLocation) {
     if(!enableTrainingMode) {
       return await this.loadModel(modelLocation);
@@ -138,7 +166,7 @@ export default class SnakeAIUltra extends SnakeAI {
       activation: "relu"
     }).apply(flatten);
 
-    const advantage = tf.layers.dense({
+    const advantage = tf.layers.dense({ // TODO also noisy?
       units: this.numberOfPossibleActions,
       activation: "linear"
     }).apply(dense1);
@@ -151,7 +179,7 @@ export default class SnakeAIUltra extends SnakeAI {
         activation: "relu"
       }).apply(flatten);
 
-      const value = tf.layers.dense({
+      const value = tf.layers.dense({ // TODO also noisy?
         units: 1,
         activation: "linear"
       }).apply(dense2);
