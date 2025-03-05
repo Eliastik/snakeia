@@ -94,36 +94,16 @@ export default class SnakeAIUltra extends SnakeAI {
       this.summaryWriter = summaryWriter;
 
       console.info(`INFO: The current seed for this training process is: ${this.trainingRandomSeed}`);
+
+      if(this.enableNoisyNetwork) {
+        this.resetNoisyLayers();
+      }
+    } else {
+      if(this.enableNoisyNetwork) {
+        this.clearNoisyLayers();
+      }
     }
   }
-
-  async exportWeights() {
-    const weightsData = {};
-    
-    this.mainModel.layers.forEach(async (layer, index) => {
-      const layerName = layer.name || `layer_${index}`;
-      weightsData[layerName] = {};
-  
-      if (layer instanceof NoisyDense) {
-        weightsData[layerName]["muKernel"] = await layer.muKernel.read().data();
-        weightsData[layerName]["sigmaKernel"] = await layer.sigmaKernel.read().data();
-        weightsData[layerName]["epsKernel"] = await layer.epsKernel.read().data();
-  
-        if (layer.useBias) {
-          weightsData[layerName]["muBias"] = await layer.muBias.read().data();
-          weightsData[layerName]["sigmaBias"] = await layer.sigmaBias.read().data();
-          weightsData[layerName]["epsBias"] = await layer.epsBias.read().data();
-        }
-      } else {
-        const weights = layer.getWeights();
-        for (let i = 0; i < weights.length; i++) {
-          weightsData[layerName][`weight_${i}`] = await weights[i].data();
-        }
-      }
-    });
-  
-    return weightsData;
-  }  
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
     if(!enableTrainingMode) {
@@ -217,6 +197,24 @@ export default class SnakeAIUltra extends SnakeAI {
         this.targetModel.layers.forEach(layer => {
           if(layer instanceof NoisyDense) {
             layer.resetNoise();
+          }
+        });
+      }
+    }
+  }
+  
+  clearNoisyLayers() {
+    if(this.enableNoisyNetwork) {
+      this.mainModel.layers.forEach(layer => {
+        if(layer instanceof NoisyDense) {
+          layer.removeNoise();
+        }
+      });
+  
+      if(this.enableTargetModel && this.targetModel) {
+        this.targetModel.layers.forEach(layer => {
+          if(layer instanceof NoisyDense) {
+            layer.removeNoise();
           }
         });
       }

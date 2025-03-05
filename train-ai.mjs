@@ -12,7 +12,7 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const NUM_EPISODES              = 2500;
+const NUM_EPISODES              = 1000;
 const TRAIN_EVERY               = 10;
 const MAX_TICKS                 = 1000;
 const INITAL_GRID_WIDTH         = 10;
@@ -131,6 +131,8 @@ async function saveModel(subDirectory = "") {
   theSnakeAI.synchronizeTargetNetwork();
 
   await theSnakeAI.saveModel(`file://${fullPath}`);
+
+  fs.writeFileSync(`${fullPath}/weights.json`, JSON.stringify(await theSnakeAI.exportWeights()));
 
   console.log(`Model saved to ${fullPath} directory`);
 }

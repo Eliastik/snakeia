@@ -332,7 +332,7 @@ export default class GridUI extends Component {
     let position;
 
     if(partNumber == -1) { // Tail
-      position = snake.get(snake.length() - 1);
+      position = snake.getTailPosition();
     } else {
       position = snake.get(partNumber);
     }
@@ -416,7 +416,7 @@ export default class GridUI extends Component {
       }
 
       if(partNumber == -1 && snake.length() > 1) {
-        currentPosition = snake.get(snake.length() - 1);
+        currentPosition = snake.getTailPosition();
       }
 
       if((partNumber == 0 || partNumber == -1) &&

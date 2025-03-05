@@ -109,7 +109,6 @@ export default class NoisyDense extends tf.layers.Layer {
       );
     }
 
-    this.resetNoise();
     super.build(inputShape);
   }
 
