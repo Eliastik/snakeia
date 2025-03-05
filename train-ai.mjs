@@ -132,8 +132,6 @@ async function saveModel(subDirectory = "") {
 
   await theSnakeAI.saveModel(`file://${fullPath}`);
 
-  fs.writeFileSync(`${fullPath}/weights.json`, JSON.stringify(await theSnakeAI.exportWeights()));
-
   console.log(`Model saved to ${fullPath} directory`);
 }
 
