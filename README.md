@@ -471,6 +471,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 
 - [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning) (En cours)
 - [x] Améliorer les performances graphiques -> Optimiser le rendu de la grille et des Snake (rendu différentiel, uniquement redessiner ce qui change)
+  - [ ] Bug lorsque pause labyrinthe
 - [ ] Améliorer algorithme détection IA bloquée : se baser aussi sur les actions exécutée (pas seulement les positions) ?
 - [x] Ajout tests unitaires
 - [x] Améliorer algorithme détection IA bloquée
