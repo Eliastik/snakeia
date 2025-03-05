@@ -43,6 +43,10 @@ export default class NoisyDense extends tf.layers.Layer {
     this.useBias = config.useBias === undefined ? true : config.useBias;
     this.activationName = config.activation;
     this.activation = this.activationName ? ACTIVATIONS[this.activationName] : null;
+
+    if(!this.activation) {
+      console.warn("NoisyDense layer: no activation function provided or found");
+    }
   }
 
   build(inputShape) {
