@@ -21,6 +21,7 @@ import * as tf from "@tensorflow/tfjs";
 const ACTIVATIONS = {
   linear: x => x,
   relu: tf.relu,
+  reluOp: tf.relu,
   sigmoid: tf.sigmoid,
   tanh: tf.tanh,
 };
@@ -32,7 +33,7 @@ function scaledNoise(shape) {
   });
 }
 
-// Implementation of NoisyDense layer in JS - https://github.com/tensorflow/addons/blob/master/tensorflow_addons/layers/noisy_dense.py
+// Implementation of NoisyDense layer in JS - Inspired by: https://github.com/tensorflow/addons/blob/master/tensorflow_addons/layers/noisy_dense.py
 export default class NoisyDense extends tf.layers.Layer {
   constructor(config) {
     super(config);
@@ -40,7 +41,8 @@ export default class NoisyDense extends tf.layers.Layer {
     this.sigma = config.sigma === undefined ? 0.5 : config.sigma;
     this.useFactorised = config.useFactorised === undefined ? true : config.useFactorised;
     this.useBias = config.useBias === undefined ? true : config.useBias;
-    this.activation = config.activation ? ACTIVATIONS[config.activation] : null;
+    this.activationName = config.activation;
+    this.activation = this.activationName ? ACTIVATIONS[this.activationName] : null;
   }
 
   build(inputShape) {
@@ -188,7 +190,7 @@ export default class NoisyDense extends tf.layers.Layer {
       units: this.units,
       sigma: this.sigma,
       useFactorised: this.useFactorised,
-      activation: this.activation ? this.activation.name : null,
+      activation: this.activationName ? this.activationName : null,
       useBias: this.useBias,
     });
   }

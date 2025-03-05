@@ -12,7 +12,7 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const NUM_EPISODES              = 1000;
+const NUM_EPISODES              = 10000;
 const TRAIN_EVERY               = 10;
 const MAX_TICKS                 = 1000;
 const INITAL_GRID_WIDTH         = 10;
