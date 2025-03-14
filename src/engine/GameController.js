@@ -50,6 +50,12 @@ export default class GameController {
     this.reactor.registerEvent("onScoreIncreased");
     this.reactor.registerEvent("onUpdate");
     this.reactor.registerEvent("onUpdateCounter");
+
+    this.onReset(() => {
+      if(this.gameUI) {
+        this.gameUI.resetState();
+      }
+    });
   }
   
   init() {

@@ -848,6 +848,12 @@ export default class GameUI {
     }
   }
 
+  resetState() {
+    if(this.gridUI) {
+      this.gridUI.resetState();
+    }
+  }
+
   setDisplayFPS(display) {
     this.displayFPS = display;
   }

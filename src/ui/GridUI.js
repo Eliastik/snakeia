@@ -106,6 +106,10 @@ export default class GridUI extends Component {
     }
   }
 
+  resetState() {
+    this.forceRedraw = true;
+  }
+
   calculateCaseSize(availableHeight, availableWidth) {
     let caseSize = Math.min(availableHeight / this.grid.height, availableWidth / this.grid.width);
 
