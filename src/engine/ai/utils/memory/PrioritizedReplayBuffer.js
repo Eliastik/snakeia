@@ -105,4 +105,9 @@ export default class PrioritizedReplayBuffer {
   size() {
     return this.buffer.length;
   }
+
+  // eslint-disable-next-line no-unused-vars
+  changeEnvironment(envId) {
+    // Do nothing
+  }
 }

@@ -12,7 +12,7 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const NUM_EPISODES              = 5000;
+const NUM_EPISODES              = 200;
 const TRAIN_EVERY               = 10;
 const MAX_TICKS                 = 1000;
 const INITAL_GRID_WIDTH         = 10;
@@ -21,7 +21,7 @@ const SAVE_CHECKPOINT_MODELS    = true;
 const ENABLE_TENSORBOARD_LOGS   = true;
 // TODO enable grid increase
 const INCREASE_GRID_SIZE_EACH   = -1; // Increase grid size each X episodes. -1 to disable
-const EPISODES_TYPES            = ["DEFAULT"];
+const EPISODES_TYPES            = ["DEFAULT", "BORDER_WALLS"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
 const AI_LEVEL_OPPONENTS        = Constants.AiLevel.DEFAULT;
@@ -51,6 +51,8 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
   const maze = currentEpisodeType === "MAZE";
   const opponents = currentEpisodeType === "OPPONENTS";
 
+  theSnakeAI.changeEnvironment(currentEpisodeType);
+
   const theGrid = new Grid(currentGridWidth, currentGridHeight, randomWalls, borderWalls, maze, null, false, currentGridSeed, currentGameSeed);
   const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", theSnakeAI);
 
@@ -59,8 +61,8 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
   let currentTotalScore = 0;
   let currentTotalReward = 0;
 
-  if (opponents) {
-    for (let i = 0; i < NUMBER_OPPONENTS; i++) {
+  if(opponents) {
+    for(let i = 0; i < NUMBER_OPPONENTS; i++) {
       const theOpponentSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, AI_LEVEL_OPPONENTS, false, `TheOpponentAI${i}`, null);
       theSnakes.push(theOpponentSnake);
     }

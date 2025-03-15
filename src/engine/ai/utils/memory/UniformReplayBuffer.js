@@ -68,4 +68,9 @@ export default class UniformReplayBuffer {
   size() {
     return this.buffer.length;
   }
+
+  // eslint-disable-next-line no-unused-vars
+  changeEnvironment(envId) {
+    // Do nothing
+  }
 }

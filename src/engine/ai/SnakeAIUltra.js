@@ -21,9 +21,9 @@ import GameConstants from "../Constants.js";
 import Position from "../Position.js";
 import GameUtils from "../GameUtils.js";
 import TensorflowModelLoader from "./TensorflowModelLoader.js";
-import PrioritizedReplayBuffer from "./utils/PrioritizedReplayBuffer.js";
-import DuelingQLayer from "./utils/DuelingQLayer.js";
-import NoisyDense from "./utils/NoisyDenseLayer.js";
+import MultiEnvironmentReplayBuffer from "./utils/memory/MultiEnvironmentReplayBuffer.js";
+import DuelingQLayer from "./utils/layers/DuelingQLayer.js";
+import NoisyDense from "./utils/layers/NoisyDenseLayer.js";
 import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
@@ -59,8 +59,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.batchSize = 32;
     this.maxMemoryLength = 100000;
 
-    // TODO multi environment buffer (with or without walls, random walls etc.)?
-    this.memory = new PrioritizedReplayBuffer(this.maxMemoryLength, this.trainingRng);
+    this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, "prioritized");
     this.lastAction = null;
     this.currentQValue = 0;
     this.currentEpoch = 0;
@@ -74,8 +73,9 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Increase memory size + optimize -> OK
     // - Noisy Networks -> OK
     // - Disable AI stuck detection on GameEngine -> OK
+    // - Memory : sample memory of different environments (wall or without walls, etc.) -> OK
     // * Ideas :
-    // - Memory : sample memory of different environments (wall or without walls, etc.) + check prioritized implementation
+    // - Check prioritized implementation
     // - Feed the input with N previous frames?
     // - Data augmentation (reverse the grid etc...)?
     // - Retest 3 moves
@@ -500,6 +500,14 @@ export default class SnakeAIUltra extends SnakeAI {
     const nextStateTensor = this.stateToTensor(nextState);
 
     this.remember(currentStateTensor, this.lastAction, reward, nextStateTensor, done);
+  }
+
+  changeEnvironment(envId) {
+    console.info(`Changed training environment to ${envId}`);
+    
+    if(this.memory) {
+      this.memory.changeEnvironment(envId);
+    }
   }
 
   async saveModel(destination) {
