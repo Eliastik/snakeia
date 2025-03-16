@@ -45,10 +45,10 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelDepth = 2;
     this.numberOfPossibleActions = 4;
 
-    this.enableTargetModel = false; // Double DQN
+    this.enableTargetModel = true; // Double DQN
     this.enableDuelingQLearning = true; // Dueling DQN
     this.enableNoisyNetwork = true; // Noisy Network
-    this.syncTargetEvery = 100;
+    this.syncTargetEvery = 1000;
     this.stepsSinceLastSync = 0;
 
     this.gamma = 0.95;
@@ -60,6 +60,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.maxMemoryLength = 100000;
 
     this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, "prioritized");
+    this.currentEnv = null;
     this.lastAction = null;
     this.currentQValue = 0;
     this.currentEpoch = 0;
@@ -74,11 +75,12 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Noisy Networks -> OK
     // - Disable AI stuck detection on GameEngine -> OK
     // - Memory : sample memory of different environments (wall or without walls, etc.) -> OK
-    // * Ideas :
-    // - Check prioritized implementation
-    // - Feed the input with N previous frames?
-    // - Data augmentation (reverse the grid etc...)?
+    // * Ideas:
     // - Retest 3 moves
+    // - Check prioritized implementation
+    // - Data augmentation (reverse the grid etc...)?
+    // * Others:
+    // - Feed the input with N previous frames?
     // - Distributional RL - Multi step learning ?
   }
 
@@ -381,6 +383,8 @@ export default class SnakeAIUltra extends SnakeAI {
   async train() {
     if(this.memory.size() < this.batchSize) return;
 
+    this.resetNoisyLayers();
+
     const batch = this.loadBatches();
 
     const { inputs, targets, meanTDError } = tf.tidy(() => {
@@ -503,9 +507,15 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   changeEnvironment(envId) {
+    console.info(`Changing environment to: ${envId}`);
+
+    this.resetNoisyLayers();
+
     if(this.memory) {
       this.memory.changeEnvironment(envId);
     }
+
+    this.currentEnv = envId;
   }
 
   async saveModel(destination) {

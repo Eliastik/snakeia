@@ -130,12 +130,12 @@ export default {
     3: 37
   },
   AIRewards: {
-    GAME_OVER: -2,
+    GAME_OVER: -1,
     GAME_OVER_WITH_EMPTY_CASES_AROUND: -1,
-    FRUIT_EATEN: 1,
-    GOLD_FRUIT_EATEN: 2,
-    MOVE: -0.002,
-    STUCK: -2
+    FRUIT_EATEN: 0.5,
+    GOLD_FRUIT_EATEN: 1,
+    MOVE: -0.001,
+    STUCK: 0
   },
   AIActions: {
     TURN_LEFT: 0,
@@ -158,5 +158,5 @@ export default {
     SEARCHING_PLAYERS: "SEARCHING_PLAYERS",
     AUTHENTICATION_SUCCESS: "AUTHENTICATION_SUCCESS"
   },
-  AIModelLocation: "/models/2025-03-16T16-34-21-114Z/model.json"
+  AIModelLocation: "/models/2025-03-16T17-25-16-137Z/model.json"
 };

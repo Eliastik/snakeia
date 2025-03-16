@@ -51,8 +51,6 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
   const maze = currentEpisodeType === "MAZE";
   const opponents = currentEpisodeType === "OPPONENTS";
 
-  theSnakeAI.changeEnvironment(currentEpisodeType);
-
   const theGrid = new Grid(currentGridWidth, currentGridHeight, randomWalls, borderWalls, maze, null, false, currentGridSeed, currentGameSeed);
   const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", theSnakeAI);
 
@@ -144,6 +142,8 @@ async function train() {
 
     let currentEpisodeTypeScore = 0;
     let currentEpisodeTypeReward = 0;
+
+    theSnakeAI.changeEnvironment(currentEpisodeType);
 
     for (let episode = 1; episode <= currentMaxEpisodes; episode++) {
       if (INCREASE_GRID_SIZE_EACH > -1 && episode % INCREASE_GRID_SIZE_EACH == 0) {
