@@ -45,7 +45,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelDepth = 2;
     this.numberOfPossibleActions = 4;
 
-    this.enableTargetModel = true; // Double DQN
+    this.enableTargetModel = false; // Double DQN
     this.enableDuelingQLearning = true; // Dueling DQN
     this.enableNoisyNetwork = true; // Noisy Network
     this.syncTargetEvery = 100;
@@ -146,7 +146,7 @@ export default class SnakeAIUltra extends SnakeAI {
       activation: "relu"
     }).apply(flatten);
 
-    const advantage = tf.layers.dense({ // TODO also noisy?
+    const advantage = DenseLayer({
       units: this.numberOfPossibleActions,
       activation: "linear"
     }).apply(dense1);
@@ -159,7 +159,7 @@ export default class SnakeAIUltra extends SnakeAI {
         activation: "relu"
       }).apply(flatten);
 
-      const value = tf.layers.dense({ // TODO also noisy?
+      const value = DenseLayer({
         units: 1,
         activation: "linear"
       }).apply(dense2);
@@ -241,8 +241,6 @@ export default class SnakeAIUltra extends SnakeAI {
 
   getBestAction(snake) {
     return tf.tidy(() => {
-      this.resetNoisyLayers();
-  
       const currentState = this.stateToTensor(this.getState(snake));
       const currentStateTensor = currentState.expandDims(0);
   
@@ -381,9 +379,7 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   async train() {
-    if(this.memory.length < this.batchSize) return;
-
-    this.resetNoisyLayers();
+    if(this.memory.size() < this.batchSize) return;
 
     const batch = this.loadBatches();
 
@@ -452,7 +448,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }
   }
 
-  calculateReward(snake, currentState) {
+  calculateReward(snake, currentState, done) {
     const { gameOver } = snake;
     const head = snake.getHeadPosition();
 
@@ -481,6 +477,10 @@ export default class SnakeAIUltra extends SnakeAI {
       return GameConstants.AIRewards.GAME_OVER;
     }
 
+    if(done && snake.isAIStuck(3)) {
+      return GameConstants.AIRewards.STUCK;
+    }
+
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
       return GameConstants.AIRewards.FRUIT_EATEN;
     }
@@ -494,7 +494,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
   async step(snake, currentState, done) {
     const nextState = this.getState(snake);
-    const reward = this.calculateReward(snake, currentState);
+    const reward = this.calculateReward(snake, currentState, done);
 
     const currentStateTensor = this.stateToTensor(currentState);
     const nextStateTensor = this.stateToTensor(nextState);
@@ -503,8 +503,6 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   changeEnvironment(envId) {
-    console.info(`Changed training environment to ${envId}`);
-    
     if(this.memory) {
       this.memory.changeEnvironment(envId);
     }

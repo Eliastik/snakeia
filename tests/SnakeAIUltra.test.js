@@ -5,6 +5,7 @@ import GameUtils from "../src/engine/GameUtils.js";
 import SnakeAIUltra from "../src/engine/ai/SnakeAIUltra.js";
 import Snake from "../src/engine/Snake.js";
 import GameEngine from "../src/engine/GameEngine.js";
+import SnakeAI from "../src/engine/ai/SnakeAI.js";
 
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);
@@ -398,6 +399,38 @@ test("calculate reward - move", async () => {
     expect(theSnake.gameOver).toBe(false);
     expect(theSnake.score).toBe(0);
     expect(theSnakeAI.calculateReward(theSnake, currentState)).toBe(Constants.AIRewards.MOVE);
+    expect(theSnakeAI.calculateReward(theSnake, currentState, true)).not.toBe(Constants.AIRewards.STUCK);
+});
+
+test("calculate reward - stuck", async () => {
+    class SnakeAICustom extends SnakeAI {
+    
+        actionsStep = [Constants.Key.BOTTOM, Constants.Key.BOTTOM, Constants.Key.BOTTOM, Constants.Key.RIGHT, Constants.Key.UP, Constants.Key.UP, Constants.Key.UP, Constants.Key.LEFT];
+        actionStepCounter = 0;
+
+        ai(_snake) {
+            const action = this.actionsStep[this.actionStepCounter];
+            this.actionStepCounter = (this.actionStepCounter + 1) % this.actionsStep.length;
+            return action;
+        }
+    }
+
+    const theGrid = new Grid(10, 10, false, false, false, null, false, 1, 2);
+    const theSnake = new Snake(Constants.Direction.BOTTOM, 3, theGrid, Constants.PlayerType.AI, Constants.AiLevel.CUSTOM, false, "TheAI", new SnakeAICustom());
+    const engine = new GameEngine(theGrid, [theSnake]);
+    await engine.init();
+    engine.paused = false;
+    engine.started = true;
+
+    for(let i = 0; i < theGrid.height * 2 * engine.aiStuckLimit + 1; i++) {
+        engine.doTick();
+    }
+
+    const theSnakeAI = new SnakeAIUltra();
+    const currentState = theSnakeAI.getState(theSnake);
+
+    expect(engine.gameOver).toBe(true);
+    expect(theSnakeAI.calculateReward(theSnake, currentState, true)).toBe(Constants.AIRewards.STUCK);
 });
 
 test("action to key test 1", async () => {

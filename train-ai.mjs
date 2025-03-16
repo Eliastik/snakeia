@@ -21,7 +21,7 @@ const SAVE_CHECKPOINT_MODELS    = true;
 const ENABLE_TENSORBOARD_LOGS   = true;
 // TODO enable grid increase
 const INCREASE_GRID_SIZE_EACH   = -1; // Increase grid size each X episodes. -1 to disable
-const EPISODES_TYPES            = ["DEFAULT", "BORDER_WALLS"];
+const EPISODES_TYPES            = ["DEFAULT"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
 const AI_LEVEL_OPPONENTS        = Constants.AiLevel.DEFAULT;
@@ -105,8 +105,8 @@ async function executeTick(theSnake, gameEngine, currentTick) {
 
   gameEngine.doTick();
 
-  const currentReward = theSnakeAI.calculateReward(theSnake, currentState);
   const done = gameEngine.gameFinished || gameEngine.gameOver || theSnake.gameOver || currentTick + 1 >= MAX_TICKS;
+  const currentReward = theSnakeAI.calculateReward(theSnake, currentState, done);
 
   await theSnakeAI.step(theSnake, currentState, done);
 
