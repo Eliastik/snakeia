@@ -158,5 +158,5 @@ export default {
     SEARCHING_PLAYERS: "SEARCHING_PLAYERS",
     AUTHENTICATION_SUCCESS: "AUTHENTICATION_SUCCESS"
   },
-  AIModelLocation: "/models/2025-03-16T17-25-16-137Z/model.json"
+  AIModelLocation: "/models/2025-03-16T19-11-38-209Z/model.json"
 };

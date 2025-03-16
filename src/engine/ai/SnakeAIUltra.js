@@ -75,13 +75,13 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Noisy Networks -> OK
     // - Disable AI stuck detection on GameEngine -> OK
     // - Memory : sample memory of different environments (wall or without walls, etc.) -> OK
+    // - Retest 3 moves -> Not working
     // * Ideas:
-    // - Retest 3 moves
     // - Check prioritized implementation
     // - Data augmentation (reverse the grid etc...)?
     // * Others:
     // - Feed the input with N previous frames?
-    // - Distributional RL - Multi step learning ?
+    // - Distributional RL - Categorical DQN - Multi step learning ?
   }
 
   async setup(summaryWriter) {
@@ -243,6 +243,8 @@ export default class SnakeAIUltra extends SnakeAI {
 
   getBestAction(snake) {
     return tf.tidy(() => {
+      this.resetNoisyLayers();
+
       const currentState = this.stateToTensor(this.getState(snake));
       const currentStateTensor = currentState.expandDims(0);
   
