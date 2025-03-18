@@ -12,7 +12,7 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const NUM_EPISODES              = 200;
+const NUM_EPISODES              = 5000;
 const TRAIN_EVERY               = 10;
 const MAX_TICKS                 = 1000;
 const INITAL_GRID_WIDTH         = 10;
@@ -21,7 +21,7 @@ const SAVE_CHECKPOINT_MODELS    = true;
 const ENABLE_TENSORBOARD_LOGS   = true;
 // TODO enable grid increase
 const INCREASE_GRID_SIZE_EACH   = -1; // Increase grid size each X episodes. -1 to disable
-const EPISODES_TYPES            = ["DEFAULT"];
+const EPISODES_TYPES            = ["BORDER_WALLS", "DEFAULT"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
 const AI_LEVEL_OPPONENTS        = Constants.AiLevel.DEFAULT;

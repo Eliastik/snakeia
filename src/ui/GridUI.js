@@ -92,7 +92,7 @@ export default class GridUI extends Component {
 
   saveCurrentState(canvas) {
     this.forceRedraw = false;
-    this.oldGridState = this.grid.grid;
+    this.oldGridState = JSON.parse(JSON.stringify(this.grid.grid));
     this.oldWidth = canvas.width;
     this.oldHeight = canvas.height;
     this.oldSnakesState = [];

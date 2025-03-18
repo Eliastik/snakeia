@@ -77,7 +77,7 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Memory : sample memory of different environments (wall or without walls, etc.) -> OK
     // - Retest 3 moves -> Not working
     // * Ideas:
-    // - Check prioritized implementation
+    // - Check prioritized implementation - Fix memory leak
     // - Data augmentation (reverse the grid etc...)?
     // * Others:
     // - Feed the input with N previous frames?
