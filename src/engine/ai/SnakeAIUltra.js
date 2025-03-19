@@ -76,8 +76,9 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Disable AI stuck detection on GameEngine -> OK
     // - Memory : sample memory of different environments (wall or without walls, etc.) -> OK
     // - Retest 3 moves -> Not working
+    // - Check prioritized implementation - Fix memory leak -> OK
     // * Ideas:
-    // - Check prioritized implementation - Fix memory leak
+    // - Enhance multi environment
     // - Data augmentation (reverse the grid etc...)?
     // * Others:
     // - Feed the input with N previous frames?
@@ -413,7 +414,7 @@ export default class SnakeAIUltra extends SnakeAI {
       const meanTDError = tdErrors.mean().arraySync();
 
       tdErrors.arraySync().forEach((error, index) => {
-        this.memory.updatePriority(batch.indices[index], error);
+        this.memory.updatePriority(batch.indices[index], error, batch.envAssignments ? batch.envAssignments[index] : null);
       });
 
       const updatedQValues = qValues.mul(tf.scalar(1).sub(actionMask)).add(actionMask.mul(targetQs.expandDims(1)));

@@ -16,34 +16,37 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+import SumTree from "./SumTree.js";
+
 export default class PrioritizedReplayBuffer {
   constructor(capacity, rng, calculateWeight = false, alpha = 0.6) {
     this.capacity = capacity;
     this.rng = rng;
     this.calculateWeight = calculateWeight;
     this.alpha = alpha;
+    this.defaultPriority = 1.0;
 
-    // TODO sumtree
-    this.buffer = [];
-    this.priorities = [];
-    this.position = 0;
+    this.sumTree = new SumTree(capacity);
   }
 
   add(state, action, reward, nextState, done) {
-    const maxPriority = this.priorities.length > 0 ? Math.max(...this.priorities) : 1.0;
+    let maxPriority = this.defaultPriority;
 
-    if(this.buffer.length < this.capacity) {
-      this.buffer.push({ state, action, reward, nextState, done });
-      this.priorities.push(maxPriority);
-    } else {
-      const removedMemory = this.buffer[this.position];
-
-      this.buffer[this.position] = { state, action, reward, nextState, done };
-      this.priorities[this.position] = maxPriority;
-      this.position = (this.position + 1) % this.capacity;
-
-      this.cleanOldMemory(removedMemory);
+    if(this.sumTree.size > 0) {
+      const start = this.sumTree.capacity - 1;
+      const leafPriorities = Array.from(this.sumTree.tree.slice(start, start + this.sumTree.size));
+      maxPriority = Math.max(...leafPriorities, this.defaultPriority);
     }
+
+    const data = { state, action, reward, nextState, done };
+
+    const overwrittenData = this.sumTree.data[this.sumTree.write];
+    
+    if(overwrittenData) {
+      this.cleanOldMemory(overwrittenData);
+    }
+
+    this.sumTree.add(Math.pow(maxPriority, this.alpha), data);
   }
 
   cleanOldMemory(removedMemory) {
@@ -57,53 +60,52 @@ export default class PrioritizedReplayBuffer {
   }
 
   sample(batchSize, beta = 0.4) {
-    const prioritiesRaised = this.priorities.map(p => Math.pow(p, this.alpha));
-    const totalPriority = prioritiesRaised.reduce((a, b) => a + b, 0);
-    const probabilities = prioritiesRaised.map(p => p / totalPriority);
-
+    const samples = [];
     const indices = [];
+    const weights = [];
+
+    const totalPriority = this.sumTree.total();
+
+    let maxWeight = 0;
 
     for(let i = 0; i < batchSize; i++) {
-      const rand = this.rng();
-      let cumulative = 0;
+      const r = this.rng() * totalPriority;
+      const { index, value, data } = this.sumTree.get(r);
 
-      for(let j = 0; j < probabilities.length; j++) {
-        cumulative += probabilities[j];
+      indices.push(index);
+      samples.push(data);
 
-        if(rand < cumulative) {
-          indices.push(j);
-          break;
-        }
+      if(!data) {
+        console.log(r, index, this.sumTree.total(), this.sumTree.size, data);
+      }
+
+      const prob = value / totalPriority;
+
+      const weight = Math.pow(this.sumTree.size * prob, -beta);
+      weights.push(weight);
+
+      if(weight > maxWeight) {
+        maxWeight = weight;
       }
     }
 
-    const samples = indices.map(index => this.buffer[index]);
-
-    let normalizedWeights = null;
-
-    if(this.calculateWeight) {
-      const weights = indices.map(index => {
-        const prob = probabilities[index];
-        return Math.pow(this.buffer.length * prob, -beta);
-      });
-
-      const maxWeight = Math.max(...weights);
-      normalizedWeights = weights.map(w => w / maxWeight);
-    }
+    const normalizedWeights = weights.map(w => w / maxWeight);
 
     return {
       samples,
       indices,
-      weights: normalizedWeights
+      weights: this.calculateWeight ? normalizedWeights : null
     };
   }
 
-  updatePriority(indice, tdError) {
-    this.priorities[indice] = Math.abs(tdError) + 1e-5;
+  // eslint-disable-next-line no-unused-vars
+  updatePriority(treeIndex, tdError, envId) {
+    const newPriority = Math.abs(tdError) + 1e-5;
+    this.sumTree.update(treeIndex, Math.pow(newPriority, this.alpha));
   }
 
   size() {
-    return this.buffer.length;
+    return this.sumTree.size;
   }
 
   // eslint-disable-next-line no-unused-vars

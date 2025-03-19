@@ -19,7 +19,6 @@
 import PrioritizedReplayBuffer from "./PrioritizedReplayBuffer.js";
 import UniformReplayBuffer from "./UniformReplayBuffer.js";
 
-
 export default class MultiEnvironmentReplayBuffer {
   constructor(capacity, rng, bufferType = "uniform") {
     this.capacity = capacity;
@@ -43,7 +42,7 @@ export default class MultiEnvironmentReplayBuffer {
   }
   
   add(state, action, reward, nextState, done) {
-    if (!this.currentEnvironment) {
+    if(!this.currentEnvironment) {
       throw new Error("No environment selected. Please use changeEnvironment(envId) to setup the current environment.");
     }
   
@@ -52,25 +51,27 @@ export default class MultiEnvironmentReplayBuffer {
   
   sample(batchSize) {
     const envIds = Array.from(this.buffers.keys());
+    const totalSize = this.size();
     
-    if(envIds.length === 0) {
+    if(envIds.length === 0 || totalSize === 0) {
       return { samples: [], indices: [], weight: null };
     }
   
     const samples = [];
     const indices = [];
     const weights = [];
-  
-    const samplesPerEnv = Math.max(1, Math.floor(batchSize / envIds.length));
+    const envAssignments = [];
   
     for(const envId of envIds) {
       const buffer = this.buffers.get(envId);
 
       if(buffer.size() > 0) {
-        const { samples: envSamples, indices: envIndices, weight: envWeights } = buffer.sample(samplesPerEnv);
+        const envBatchSize = Math.max(1, Math.floor(batchSize * (buffer.size() / totalSize)));
+        const { samples: envSamples, indices: envIndices, weight: envWeights } = buffer.sample(envBatchSize);
   
         samples.push(...envSamples);
         indices.push(...envIndices);
+        envAssignments.push(...Array(envIndices.length).fill(envId));
 
         if(envWeights) {
           weights.push(...envWeights);
@@ -82,11 +83,14 @@ export default class MultiEnvironmentReplayBuffer {
       samples,
       indices,
       weight: weights.length > 0 ? weights : null,
+      envAssignments
     };
   }
   
-  updatePriority(indices, tdErrors) {
-    for(const buffer of this.buffers.values()) {
+  updatePriority(indices, tdErrors, envId) {
+    const buffer = this.buffers.get(envId);
+  
+    if(buffer) {
       buffer.updatePriority(indices, tdErrors);
     }
   }
