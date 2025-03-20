@@ -77,12 +77,12 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Memory : sample memory of different environments (wall or without walls, etc.) -> OK
     // - Retest 3 moves -> Not working
     // - Check prioritized implementation - Fix memory leak -> OK
+    // - Enhance multi environment -> OK
     // * Ideas:
-    // - Enhance multi environment
     // - Data augmentation (reverse the grid etc...)?
     // * Others:
     // - Feed the input with N previous frames?
-    // - Distributional RL - Categorical DQN - Multi step learning ?
+    // - Distributional RL - Categorical DQN - Multi step learning?
   }
 
   async setup(summaryWriter) {
@@ -244,8 +244,6 @@ export default class SnakeAIUltra extends SnakeAI {
 
   getBestAction(snake) {
     return tf.tidy(() => {
-      this.resetNoisyLayers();
-
       const currentState = this.stateToTensor(this.getState(snake));
       const currentStateTensor = currentState.expandDims(0);
   
@@ -386,8 +384,6 @@ export default class SnakeAIUltra extends SnakeAI {
   async train() {
     if(this.memory.size() < this.batchSize) return;
 
-    this.resetNoisyLayers();
-
     const batch = this.loadBatches();
 
     const { inputs, targets, meanTDError } = tf.tidy(() => {
@@ -519,6 +515,10 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     this.currentEnv = envId;
+  }
+
+  beginEpisode() {
+    this.resetNoisyLayers();
   }
 
   async saveModel(destination) {

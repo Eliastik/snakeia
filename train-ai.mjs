@@ -73,6 +73,8 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
 
   let tick = 0;
 
+  theSnakeAI.beginEpisode();
+
   while(!gameEngine.gameFinished && !gameEngine.gameOver && !theSnake.gameOver && tick <= MAX_TICKS) {
     const currentReward = await executeTick(theSnake, gameEngine, tick);
 
