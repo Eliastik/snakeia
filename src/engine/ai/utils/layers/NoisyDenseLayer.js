@@ -37,9 +37,6 @@ export default class NoisyDense extends tf.layers.Layer {
     this.activationLayer = this.activationName ? tf.layers.activation({ activation: this.activationName, trainable: false }) : null;
     this.dtype = config.dtype || "float32";
 
-    this.kernel = null;
-    this.bias = null;
-
     if(!this.activationLayer) {
       console.warn("NoisyDense layer: no activation function provided or found");
     }
@@ -109,24 +106,11 @@ export default class NoisyDense extends tf.layers.Layer {
     super.build(inputShape);
   }
 
-  updateKernelAndBias() {
-    if(this.kernel) {
-      tf.dispose(this.kernel);
-    }
-
-    if(this.bias) {
-      tf.dispose(this.bias);
-    }
-
-    this.kernel = this.getKernel();
-    this.bias = this.getBias();
-  }
-
-  getKernel() {
+  get kernel() {
     return tf.tidy(() => tf.add(this.muKernel.read(), tf.mul(this.sigmaKernel.read(), this.epsKernel.read())));
   }
 
-  getBias() {
+  get bias() {
     return tf.tidy(() => {
       if(this.useBias) {
         return tf.add(this.muBias.read(), tf.mul(this.sigmaBias.read(), this.epsBias.read()));
@@ -155,7 +139,7 @@ export default class NoisyDense extends tf.layers.Layer {
       if(this.useFactorised) {
         const inEps = scaledNoise([this.lastDim, 1], this.dtype);
         const outEps = scaledNoise([1, this.units], this.dtype);
-        const newEpsKernel = tf.mul(inEps, outEps);
+        const newEpsKernel = tf.matMul(inEps, outEps);
 
         this.epsKernel.write(newEpsKernel);
 
@@ -170,8 +154,6 @@ export default class NoisyDense extends tf.layers.Layer {
         }
       }
     });
-
-    this.updateKernelAndBias();
   }
 
   removeNoise() {
@@ -182,8 +164,6 @@ export default class NoisyDense extends tf.layers.Layer {
         this.epsBias.write(tf.zeros([this.units]));
       }
     });
-
-    this.updateKernelAndBias();
   }
 
   computeOutputShape(inputShape) {
