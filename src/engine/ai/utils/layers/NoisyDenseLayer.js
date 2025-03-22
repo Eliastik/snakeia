@@ -18,17 +18,9 @@
  */
 import * as tf from "@tensorflow/tfjs";
 
-const ACTIVATIONS = {
-  linear: x => x,
-  relu: tf.relu,
-  reluOp: tf.relu,
-  sigmoid: tf.sigmoid,
-  tanh: tf.tanh,
-};
-
-function scaledNoise(shape) {
+function scaledNoise(shape, dtype = "float32") {
   return tf.tidy(() => {
-    const x = tf.randomNormal(shape);
+    const x = tf.randomNormal(shape, 0, 1, dtype);
     return tf.mul(tf.sign(x), tf.sqrt(tf.abs(x)));
   });
 }
@@ -42,9 +34,13 @@ export default class NoisyDense extends tf.layers.Layer {
     this.useFactorised = config.useFactorised === undefined ? true : config.useFactorised;
     this.useBias = config.useBias === undefined ? true : config.useBias;
     this.activationName = config.activation;
-    this.activation = this.activationName ? ACTIVATIONS[this.activationName] : null;
+    this.activationLayer = this.activationName ? tf.layers.activation({ activation: this.activationName, trainable: false }) : null;
+    this.dtype = config.dtype || "float32";
 
-    if(!this.activation) {
+    this.kernel = null;
+    this.bias = null;
+
+    if(!this.activationLayer) {
       console.warn("NoisyDense layer: no activation function provided or found");
     }
   }
@@ -57,34 +53,27 @@ export default class NoisyDense extends tf.layers.Layer {
     }
 
     const sqrtDim = Math.sqrt(this.lastDim);
-    let muInitVal, sigmaInitVal;
-
-    if(this.useFactorised) {
-      muInitVal = 1.0 / sqrtDim;
-      sigmaInitVal = this.sigma / sqrtDim;
-    } else {
-      muInitVal = Math.sqrt(3.0 / this.lastDim);
-      sigmaInitVal = 0.017;
-    }
+    const muInitVal = this.useFactorised ? 1.0 / sqrtDim : Math.sqrt(3.0 / this.lastDim);
+    const sigmaInitVal = this.useFactorised ? this.sigma / sqrtDim : 0.017;
 
     this.muKernel = this.addWeight(
       "muKernel",
       [this.lastDim, this.units],
-      "float32",
+      this.dtype,
       tf.initializers.randomUniform({ minval: -muInitVal, maxval: muInitVal })
     );
 
     this.sigmaKernel = this.addWeight(
       "sigmaKernel",
       [this.lastDim, this.units],
-      "float32",
+      this.dtype,
       tf.initializers.constant({ value: sigmaInitVal })
     );
 
     this.epsKernel = this.addWeight(
       "epsKernel",
       [this.lastDim, this.units],
-      "float32",
+      this.dtype,
       tf.initializers.zeros(),
       undefined,
       false
@@ -94,35 +83,50 @@ export default class NoisyDense extends tf.layers.Layer {
       this.muBias = this.addWeight(
         "muBias",
         [this.units],
-        "float32",
+        this.dtype,
         tf.initializers.randomUniform({ minval: -muInitVal, maxval: muInitVal })
       );
 
       this.sigmaBias = this.addWeight(
         "sigmaBias",
         [this.units],
-        "float32",
+        this.dtype,
         tf.initializers.constant({ value: sigmaInitVal })
       );
 
       this.epsBias = this.addWeight(
         "epsBias",
         [this.units],
-        "float32",
+        this.dtype,
         tf.initializers.zeros(),
         undefined,
         false
       );
     }
 
+    this.resetNoise();
+
     super.build(inputShape);
   }
 
-  get kernel() {
+  updateKernelAndBias() {
+    if(this.kernel) {
+      tf.dispose(this.kernel);
+    }
+
+    if(this.bias) {
+      tf.dispose(this.bias);
+    }
+
+    this.kernel = this.getKernel();
+    this.bias = this.getBias();
+  }
+
+  getKernel() {
     return tf.tidy(() => tf.add(this.muKernel.read(), tf.mul(this.sigmaKernel.read(), this.epsKernel.read())));
   }
 
-  get bias() {
+  getBias() {
     return tf.tidy(() => {
       if(this.useBias) {
         return tf.add(this.muBias.read(), tf.mul(this.sigmaBias.read(), this.epsBias.read()));
@@ -142,20 +146,17 @@ export default class NoisyDense extends tf.layers.Layer {
         output = tf.add(output, this.bias);
       }
 
-      if(this.activation != null) {
-        output = this.activation(output);
-      }
-
-      return output;
+      return this.activationLayer != null ? this.activationLayer.apply(output) : output;
     });
   }
 
   resetNoise() {
     tf.tidy(() => {
       if(this.useFactorised) {
-        const inEps = scaledNoise([this.lastDim, 1]);
-        const outEps = scaledNoise([1, this.units]);
-        const newEpsKernel = tf.matMul(inEps, outEps);
+        const inEps = scaledNoise([this.lastDim, 1], this.dtype);
+        const outEps = scaledNoise([1, this.units], this.dtype);
+        const newEpsKernel = tf.mul(inEps, outEps);
+
         this.epsKernel.write(newEpsKernel);
 
         if(this.useBias) {
@@ -169,6 +170,8 @@ export default class NoisyDense extends tf.layers.Layer {
         }
       }
     });
+
+    this.updateKernelAndBias();
   }
 
   removeNoise() {
@@ -179,12 +182,12 @@ export default class NoisyDense extends tf.layers.Layer {
         this.epsBias.write(tf.zeros([this.units]));
       }
     });
+
+    this.updateKernelAndBias();
   }
 
   computeOutputShape(inputShape) {
-    const outputShape = inputShape.slice();
-    outputShape[outputShape.length - 1] = this.units;
-    return outputShape;
+    return [...inputShape.slice(0, -1), this.units];
   }
 
   getConfig() {
@@ -194,8 +197,9 @@ export default class NoisyDense extends tf.layers.Layer {
       units: this.units,
       sigma: this.sigma,
       useFactorised: this.useFactorised,
-      activation: this.activationName ? this.activationName : null,
+      activation: this.activationName || null,
       useBias: this.useBias,
+      dtype: this.dtype
     });
   }
 

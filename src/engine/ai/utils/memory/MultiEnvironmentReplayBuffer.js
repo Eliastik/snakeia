@@ -59,7 +59,7 @@ export default class MultiEnvironmentReplayBuffer {
       return { samples: [], indices: [], weight: null };
     }
   
-    switch (this.selectMode) {
+    switch(this.selectMode) {
     case "cycling": return this.cyclingSample(envIds, batchSize);
     case "random": return this.randomSample(envIds, batchSize, totalSize);
     case "balanced": return this.balancedSample(envIds, batchSize, totalSize);
