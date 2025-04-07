@@ -1,4 +1,3 @@
-/* eslint-disable no-inner-declarations */
 /* eslint-disable no-undef */
 /*
  * Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
@@ -39,8 +38,8 @@ window.AI_VS_AI = "AI_VS_AI";
 window.BATTLE_ROYALE = "BATTLE_ROYALE";
 window.BATTLE_ROYALE_ONLINE = "BATTLE_ROYALE_ONLINE";
 // URIs :
-window.UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update/";
-window.SERVERS_LIST_URI = "https://www.eliastiksofts.com/snakeia/serversList/";
+window.UPDATER_URI = "https://www.eliastiksofts.com/snakeia/update/?format=json";
+window.SERVERS_LIST_URI = "https://www.eliastiksofts.com/snakeia/serversList/?format=json";
 // Levels types :
 window.LEVEL_REACH_SCORE = "LEVEL_REACH_SCORE";
 window.LEVEL_REACH_MAX_SCORE = "LEVEL_REACH_MAX_SCORE";
@@ -78,7 +77,7 @@ window.SOLO_PLAYER_SAVE = "snakeia_solo_player_";
 window.DEFAULT_LEVELS_SOLO_AI = DEFAULT_LEVELS_SOLO_PLAYER;
 window.SOLO_AI_SAVE = "snakeia_solo_ai_";
 // Downloadable levels :
-window.DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLevels/?player={player}&ver={appVersion}";
+window.DOWNLOAD_DEFAULT_URI = "https://www.eliastiksofts.com/snakeia/downloadLevels/?player={player}&ver={appVersion}&format=json";
 window.SOLO_PLAYER_DOWNLOAD_LEVELS_TO = "snakeia_solo_player_downloadedLevels";
 window.SOLO_AI_DOWNLOAD_LEVELS_TO = "snakeia_solo_ai_downloadedLevels";
 
@@ -262,15 +261,7 @@ document.getElementById("resetParameters").onclick = function() {
   saveSettings();
 };
 
-// Updater
-function checkUpdate() {
-  const script = document.createElement("script");
-  script.src = UPDATER_URI;
-
-  document.getElementsByTagName("head")[0].appendChild(script);
-}
-
-window.updateCallback = data => {
+const processUpdateData = data => {
   if(typeof(data) !== "undefined" && data !== null && typeof(data.version) !== "undefined" && data.version !== null) {
     const newVersionTest = GameConstants.Setting.APP_VERSION.strcmp(data.version);
 
@@ -315,17 +306,19 @@ window.updateCallback = data => {
   }
 };
 
-// Load server list
-function loadServerList() {
-  const script = document.createElement("script");
-  script.src = SERVERS_LIST_URI;
-
-  document.getElementsByTagName("head")[0].appendChild(script);
-  document.getElementById("loadingServersList").style.display = "inline-block";
-  document.getElementById("serverListGroup").innerHTML = "";
+// Updater
+function checkUpdate() {
+  fetch(UPDATER_URI)
+    .then(response => response.json())
+    .then(data => {
+      processUpdateData(data);
+    })
+    .catch(error => {
+      console.error(error);
+    });
 }
 
-window.listServersCallback = data => {
+const processServersListData = data => {
   document.getElementById("serverListGroup").innerHTML = "";
 
   if(data != null && data.length > 0) {
@@ -373,6 +366,21 @@ window.listServersCallback = data => {
 
   document.getElementById("loadingServersList").style.display = "none";
 };
+
+// Load server list
+function loadServerList() {
+  document.getElementById("loadingServersList").style.display = "inline-block";
+  document.getElementById("serverListGroup").innerHTML = "";
+
+  fetch(SERVERS_LIST_URI)
+    .then(response => response.json())
+    .then(data => {
+      processServersListData(data);
+    })
+    .catch(error => {
+      console.error(error);
+    });
+}
 
 document.getElementById("linkCustomServer").onclick = () => {
   const url = prompt(i18next.t("servers.enterCustomServer"), "http://");
@@ -2165,26 +2173,6 @@ window.downloadLevels = (player, button) => {
   url = url.replace("{player}", player);
   url = url.replace("{appVersion}", GameConstants.Setting.APP_VERSION);
 
-  const script = document.createElement("script");
-  script.src = url;
-
-  let canceled = false;
-
-  window["callbackDownloadLevels"] = (player, data) => {
-    if(!canceled) {
-      if(player == PLAYER_HUMAN) {
-        storageGlobal.setItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
-      } else if(player == PLAYER_AI) {
-        storageGlobal.setItem(SOLO_AI_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
-      }
-
-      displayLevelList(player);
-    }
-
-    document.getElementById("levelDownloading").innerHTML = "";
-    document.getElementById("btnDeblockDiv").innerHTML = "";
-  };
-
   button.disabled = true;
 
   const buttonDeblock = document.createElement("button");
@@ -2194,23 +2182,29 @@ window.downloadLevels = (player, button) => {
   document.getElementById("levelDownloading").innerHTML = "<strong>" + i18next.t("levels.downloading") + "</strong>";
   document.getElementById("btnDeblockDiv").innerHTML = "";
 
-  document.getElementsByTagName("head")[0].appendChild(script);
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      if (player == PLAYER_HUMAN) {
+        storageGlobal.setItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
+      } else if (player == PLAYER_AI) {
+        storageGlobal.setItem(SOLO_AI_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
+      }
 
-  buttonDeblock.onclick = () => {
-    canceled = true;
-    deblockButton(button, script, "callbackDownloadLevels");
-  };
+      displayLevelList(player);
 
-  document.getElementById("btnDeblockDiv").appendChild(buttonDeblock);
+      document.getElementById("levelDownloading").innerHTML = "";
+      document.getElementById("btnDeblockDiv").innerHTML = "";
+      
+      button.disabled = false;
+    })
+    .catch(error => {
+      console.error("Error downloading levels:", error);
+      document.getElementById("levelDownloading").innerHTML = i18next.t("levels.downloadError");
+      
+      button.disabled = false;
+    });
 };
-
-function deblockButton(button, script) {
-  button.disabled = false;
-  script.src = null;
-  document.getElementById("levelDownloading").innerHTML = "";
-  document.getElementById("btnDeblockDiv").innerHTML = "";
-  document.getElementsByTagName("head")[0].removeChild(script);
-}
 
 function getNumberFruits(player) {
   const item = getSave(player, DEFAULT_LEVEL);
