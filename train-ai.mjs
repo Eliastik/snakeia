@@ -40,7 +40,7 @@ const multiBar = new cliProgress.MultiBar({
   hideCursor: false,
   barCompleteChar: "\u2588",
   barIncompleteChar: "\u2591",
-  clearOnComplete: true,
+  clearOnComplete: false,
   stopOnComplete: true,
   forceRedraw: true
 });
@@ -49,7 +49,8 @@ const progressBar = multiBar.create(NUM_EPISODES, 0);
 const theSnakeAI = new SnakeAIUltra(true, null, TRAINING_SEED, {
   log: (text) => multiBar.log(text),
   info: (text) => multiBar.log(text),
-  warn: (text) => multiBar.log(`[WARN] ${text}`)
+  warn: (text) => multiBar.log(`[WARNING] ${text}`),
+  error: (text) => multiBar.log(`[ERROR] ${text}`)
 });
 await theSnakeAI.setup(ENABLE_TENSORBOARD_LOGS ? tensorboardSummaryWriter : null);
 
@@ -142,6 +143,7 @@ async function saveModel(subDirectory = "") {
   const fullPath = `${MODEL_SAVE_DIRECTORY}/${subDirectory}`;
 
   multiBar.log(`Saving model to ${fullPath}...\n`);
+  multiBar.update();
 
   fs.mkdirSync(fullPath, { recursive: true });
 
@@ -151,6 +153,7 @@ async function saveModel(subDirectory = "") {
   await theSnakeAI.saveModel(`file://${fullPath}`);
 
   multiBar.log(`Model saved to ${fullPath} directory\n`);
+  multiBar.update();
 }
 
 async function train() {
@@ -189,6 +192,7 @@ async function train() {
     }
 
     multiBar.log(`Episode type ${currentEpisodeType} finished! Average score: ${currentEpisodeTypeScore / currentMaxEpisodes} - Average reward: ${currentEpisodeTypeReward / currentMaxEpisodes} - Time: ${performance.now() - startTime} ms\n`);
+    multiBar.update();
 
     // Reset the epsilon
     theSnakeAI.epsilonMax = 0.75;
@@ -206,7 +210,8 @@ const trainStartTime = performance.now();
 await train();
 
 multiBar.log(`Training finished! Average score: ${totalScore / NUM_EPISODES} - Average reward: ${totalReward / NUM_EPISODES} - Time: ${performance.now() - trainStartTime} ms\n`);
-
-multiBar.stop();
+multiBar.update();
 
 await saveModel();
+
+multiBar.stop();

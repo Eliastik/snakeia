@@ -50,7 +50,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.enableTargetModel = true; // Double DQN
     this.enableDuelingQLearning = true; // Dueling DQN
     this.enableNoisyNetwork = true; // Noisy Network
-    this.enableVariableInputSize = false; // Enable Variable Input Size for model (experimental)
+    this.enableVariableInputSize = true; // Enable Variable Input Size for the model (experimental)
     this.syncTargetEvery = 1000;
     this.stepsSinceLastSync = 0;
 
@@ -153,7 +153,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }).apply(conv1);
   
     const flattenOrPooling = this.enableVariableInputSize ?
-      tf.layers.globalAveragePooling2d({ dataFormat: "channelsFirst", trainable: true }).apply(conv2) :
+      tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true }).apply(conv2) :
       tf.layers.flatten().apply(conv2);
   
     const dense1 = DenseLayer({
@@ -364,8 +364,8 @@ export default class SnakeAIUltra extends SnakeAI {
       const height = snakesTensor.shape[0];
       const width = snakesTensor.shape[1];
 
-      const padHeight = this.enableVariableInputSize ? height : this.modelHeight - height;
-      const padWidth = this.enableVariableInputSize ? width : this.modelWidth - width;
+      const padHeight = this.enableVariableInputSize ? 0 : this.modelHeight - height;
+      const padWidth = this.enableVariableInputSize ? 0 : this.modelWidth - width;
 
       const padConfig = [[0, padHeight], [0, padWidth]]; 
       const padValue = -1;
