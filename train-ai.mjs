@@ -3,6 +3,7 @@ import Constants from "./src/engine/Constants.js";
 import Snake from "./src/engine/Snake.js";
 import GameEngine from "./src/engine/GameEngine.js";
 import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
+import cliProgress from "cli-progress";
 import fs from "fs";
 
 // import tf from "@tensorflow/tfjs-node";
@@ -12,15 +13,15 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const NUM_EPISODES              = 5000;
+const NUM_EPISODES              = 500;
 const TRAIN_EVERY               = 10;
 const MAX_TICKS                 = 1000;
-const INITAL_GRID_WIDTH         = 10;
-const INITAL_GRID_HEIGHT        = 10;
+const INITAL_GRID_WIDTH         = 5;
+const INITAL_GRID_HEIGHT        = 5;
 const SAVE_CHECKPOINT_MODELS    = true;
 const ENABLE_TENSORBOARD_LOGS   = true;
 // TODO enable grid increase
-const INCREASE_GRID_SIZE_EACH   = -1; // Increase grid size each X episodes. -1 to disable
+const INCREASE_GRID_SIZE_EACH   = 150; // Increase grid size each X episodes. -1 to disable
 const EPISODES_TYPES            = ["DEFAULT", "BORDER_WALLS"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
@@ -34,7 +35,22 @@ const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 
 // Setup and run training
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
-const theSnakeAI = new SnakeAIUltra(true, null, TRAINING_SEED);
+const multiBar = new cliProgress.MultiBar({
+  format: "Training |{bar}| {percentage}% | ETA: {eta_formatted} | Elapsed time: {duration_formatted} | Episode {value}/{total}",
+  hideCursor: false,
+  barCompleteChar: "\u2588",
+  barIncompleteChar: "\u2591",
+  clearOnComplete: true,
+  stopOnComplete: true,
+  forceRedraw: true
+});
+const progressBar = multiBar.create(NUM_EPISODES, 0);
+
+const theSnakeAI = new SnakeAIUltra(true, null, TRAINING_SEED, {
+  log: (text) => multiBar.log(text),
+  info: (text) => multiBar.log(text),
+  warn: (text) => multiBar.log(`[WARN] ${text}`)
+});
 await theSnakeAI.setup(ENABLE_TENSORBOARD_LOGS ? tensorboardSummaryWriter : null);
 
 let totalScore = 0;
@@ -86,7 +102,7 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
 
   await theSnakeAI.train();
 
-  console.log(`Game n°${episode} finished - Episode type: ${currentEpisodeType} - Score: ${theSnake.score} - Epsilon: ${theSnakeAI.epsilon.toFixed(3)} - Grid size: ${currentGridWidth} x ${currentGridHeight} - Random walls: ${randomWalls} - Border walls: ${borderWalls} - Maze: ${maze} - Opponents: ${opponents}`);
+  multiBar.log(`Game n°${episode} finished - Episode type: ${currentEpisodeType} - Score: ${theSnake.score} - Epsilon: ${theSnakeAI.epsilon.toFixed(3)} - Grid size: ${currentGridWidth} x ${currentGridHeight} - Random walls: ${randomWalls} - Border walls: ${borderWalls} - Maze: ${maze} - Opponents: ${opponents}\n`);
 
   // Save the score into the Tensorflow logs
   if(ENABLE_TENSORBOARD_LOGS) {
@@ -125,7 +141,7 @@ async function executeTick(theSnake, gameEngine, currentTick) {
 async function saveModel(subDirectory = "") {
   const fullPath = `${MODEL_SAVE_DIRECTORY}/${subDirectory}`;
 
-  console.log(`Saving model to ${fullPath}...`);
+  multiBar.log(`Saving model to ${fullPath}...\n`);
 
   fs.mkdirSync(fullPath, { recursive: true });
 
@@ -134,7 +150,7 @@ async function saveModel(subDirectory = "") {
 
   await theSnakeAI.saveModel(`file://${fullPath}`);
 
-  console.log(`Model saved to ${fullPath} directory`);
+  multiBar.log(`Model saved to ${fullPath} directory\n`);
 }
 
 async function train() {
@@ -167,9 +183,12 @@ async function train() {
         theSnakeAI.epsilonMin,
         theSnakeAI.epsilonMax - ((episode / currentMaxEpisodes) * (theSnakeAI.epsilonMax - theSnakeAI.epsilonMin))
       );
+    
+      progressBar.increment();
+      multiBar.update();
     }
 
-    console.log(`Episode type ${currentEpisodeType} finished! Average score: ${currentEpisodeTypeScore / currentMaxEpisodes} - Average reward: ${currentEpisodeTypeReward / currentMaxEpisodes} - Time: ${performance.now() - startTime} ms`);
+    multiBar.log(`Episode type ${currentEpisodeType} finished! Average score: ${currentEpisodeTypeScore / currentMaxEpisodes} - Average reward: ${currentEpisodeTypeReward / currentMaxEpisodes} - Time: ${performance.now() - startTime} ms\n`);
 
     // Reset the epsilon
     theSnakeAI.epsilonMax = 0.75;
@@ -186,6 +205,8 @@ const trainStartTime = performance.now();
 
 await train();
 
-console.log(`Training finished! Average score: ${totalScore / NUM_EPISODES} - Average reward: ${totalReward / NUM_EPISODES} - Time: ${performance.now() - trainStartTime} ms`);
+multiBar.log(`Training finished! Average score: ${totalScore / NUM_EPISODES} - Average reward: ${totalReward / NUM_EPISODES} - Time: ${performance.now() - trainStartTime} ms\n`);
+
+multiBar.stop();
 
 await saveModel();

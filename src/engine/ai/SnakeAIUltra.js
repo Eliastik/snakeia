@@ -28,7 +28,7 @@ import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
 export default class SnakeAIUltra extends SnakeAI {
-  constructor(enableTrainingMode, modelLocation, seed) {
+  constructor(enableTrainingMode, modelLocation, seed, logger) {
     super();
 
     this.aiLevelText = "ultra";
@@ -36,10 +36,12 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelLocation = modelLocation;
     this.trainingRandomSeed = seed || new seedrandom().int32();
     this.trainingRng = new seedrandom(this.trainingRandomSeed);
+    this.logger = logger || console;
 
     this.mainModel = null;
     this.targetModel = null;
 
+    // Model and training settings
     this.modelHeight = 10;
     this.modelWidth = 10;
     this.modelDepth = 2;
@@ -48,16 +50,18 @@ export default class SnakeAIUltra extends SnakeAI {
     this.enableTargetModel = true; // Double DQN
     this.enableDuelingQLearning = true; // Dueling DQN
     this.enableNoisyNetwork = true; // Noisy Network
+    this.enableVariableInputSize = false; // Enable Variable Input Size for model (experimental)
     this.syncTargetEvery = 1000;
     this.stepsSinceLastSync = 0;
 
     this.gamma = 0.95;
-    this.epsilonMax = 1.0;
-    this.epsilonMin = 0.005;
-    this.epsilon = this.epsilonMax;
+    this.epsilonMax = 1.0; // Not used if Noisy Network is enabled
+    this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
+    this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.001;
     this.batchSize = 32;
     this.maxMemoryLength = 100000;
+    // End of model and training settings
 
     this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, "prioritized");
     this.currentEnv = null;
@@ -98,7 +102,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
       this.summaryWriter = summaryWriter;
 
-      console.info(`INFO: The current seed for this training process is: ${this.trainingRandomSeed}`);
+      this.logger.info(`INFO: The current seed for this training process is: ${this.trainingRandomSeed}\n`);
 
       if(this.enableNoisyNetwork) {
         this.resetNoisyLayers();
@@ -127,29 +131,35 @@ export default class SnakeAIUltra extends SnakeAI {
     const DenseLayer = (config) => this.enableNoisyNetwork ? new NoisyDense(config) : tf.layers.dense(config);
 
     const input = tf.input({
-      shape: [this.modelHeight, this.modelWidth, this.modelDepth]
+      shape: [
+        this.enableVariableInputSize ? null : this.modelHeight,
+        this.enableVariableInputSize ? null : this.modelWidth,
+        this.modelDepth
+      ]
     });
   
     const conv1 = tf.layers.conv2d({
       filters: 32,
-      kernelSize: 3,
+      kernelSize: this.enableVariableInputSize ? 1 : 3,
       activation: "relu",
       padding: "same"
     }).apply(input);
   
     const conv2 = tf.layers.conv2d({
       filters: 64,
-      kernelSize: 3,
+      kernelSize: this.enableVariableInputSize ? 1 : 3,
       activation: "relu",
       padding: "same"
     }).apply(conv1);
   
-    const flatten = tf.layers.flatten().apply(conv2);
+    const flattenOrPooling = this.enableVariableInputSize ?
+      tf.layers.globalAveragePooling2d({ dataFormat: "channelsFirst", trainable: true }).apply(conv2) :
+      tf.layers.flatten().apply(conv2);
   
     const dense1 = DenseLayer({
       units: 64,
       activation: "relu"
-    }).apply(flatten);
+    }).apply(flattenOrPooling);
 
     const advantage = DenseLayer({
       units: this.numberOfPossibleActions,
@@ -162,7 +172,7 @@ export default class SnakeAIUltra extends SnakeAI {
       const dense2 = DenseLayer({
         units: 64,
         activation: "relu"
-      }).apply(flatten);
+      }).apply(flattenOrPooling);
 
       const value = DenseLayer({
         units: 1,
@@ -354,8 +364,8 @@ export default class SnakeAIUltra extends SnakeAI {
       const height = snakesTensor.shape[0];
       const width = snakesTensor.shape[1];
 
-      const padHeight = this.modelHeight - height;
-      const padWidth = this.modelWidth - width;
+      const padHeight = this.enableVariableInputSize ? height : this.modelHeight - height;
+      const padWidth = this.enableVariableInputSize ? width : this.modelWidth - width;
 
       const padConfig = [[0, padHeight], [0, padWidth]]; 
       const padValue = -1;
@@ -449,7 +459,7 @@ export default class SnakeAIUltra extends SnakeAI {
     if(this.enableTargetModel) {
       this.targetModel.setWeights(this.mainModel.getWeights());
 
-      console.info("Target network synchronized!");
+      this.logger.info("Target network synchronized!\n");
     }
   }
 
@@ -461,7 +471,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const fruitGold = this.findPositionInState(currentState.fruitsAndWallsLayer, GameConstants.CaseType.FRUIT_GOLD);
 
     if(!fruit) {
-      console.warn("No fruit detected");
+      this.logger.warn("No fruit detected\n");
     }
 
     if(gameOver) {
@@ -508,7 +518,7 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   changeEnvironment(envId) {
-    console.info(`Changing environment to: ${envId}`);
+    this.logger.info(`Changing environment to: ${envId}\n`);
 
     this.resetNoisyLayers();
 
