@@ -324,6 +324,7 @@ export default class Snake {
   increaseScore(count) {
     this.score += count;
     this.stuckCounter = 0;
+    this.lastPositions = [];
   }
 
   getHeadPosition() {

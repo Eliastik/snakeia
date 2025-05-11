@@ -79,6 +79,8 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Check prioritized implementation - Fix memory leak -> OK
     // - Enhance multi environment -> OK
     // * Ideas:
+    // - Retest NoisyDenseLayers changes
+    // - Variable grid size
     // - Data augmentation (reverse the grid etc...)?
     // * Others:
     // - Feed the input with N previous frames?
