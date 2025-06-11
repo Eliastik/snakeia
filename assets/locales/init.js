@@ -20,12 +20,12 @@ import i18next from "i18next";
 import i18nextBrowserLanguageDetector from "i18next-browser-languagedetector";
 
 i18next.use(i18nextBrowserLanguageDetector).init({
-  fallbackLng: ['en', 'fr'],
-  load: 'languageOnly',
+  fallbackLng: ["en", "fr"],
+  load: "languageOnly",
   detection: {
-    order: ['localStorage', 'querystring', 'navigator', 'htmlTag'],
-    lookupQuerystring: 'lng',
-    lookupLocalStorage: 'i18nextLng',
-    caches: ['localStorage'],
+    order: ["localStorage", "querystring", "navigator", "htmlTag"],
+    lookupQuerystring: "lng",
+    lookupLocalStorage: "i18nextLng",
+    caches: ["localStorage"],
   },
 });

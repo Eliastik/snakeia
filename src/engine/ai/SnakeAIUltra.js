@@ -42,17 +42,18 @@ export default class SnakeAIUltra extends SnakeAI {
     this.targetModel = null;
 
     // Model and training settings
-    this.modelHeight = 10;
-    this.modelWidth = 10;
+    this.modelHeight = 25;
+    this.modelWidth = 25;
     this.modelDepth = 2;
     this.numberOfPossibleActions = 4;
 
-    this.enableTargetModel = true; // Double DQN
-    this.enableDuelingQLearning = true; // Dueling DQN
-    this.enableNoisyNetwork = true; // Noisy Network
-    this.enableVariableInputSize = true; // Enable Variable Input Size for the model (experimental)
-    this.syncTargetEvery = 1000;
-    this.stepsSinceLastSync = 0;
+    this.enableTargetModel = true; // Enable Double DQN
+    this.enableDuelingQLearning = true; // Enable Dueling DQN
+    this.enableNoisyNetwork = true; // Enable Noisy Network for exploration
+    /* Enable Variable Input Size for the model (experimental).
+       If disabled and the input (grid size) of the game is different than the input size of the model, the input will be padded. */
+    this.enableVariableInputSize = false;
+    this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
 
     this.gamma = 0.95;
     this.epsilonMax = 1.0; // Not used if Noisy Network is enabled
@@ -68,6 +69,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.lastAction = null;
     this.currentQValue = 0;
     this.currentEpoch = 0;
+    this.stepsSinceLastSync = 0;
 
     this.summaryWriter = null;
 
@@ -82,11 +84,11 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Retest 3 moves -> Not working
     // - Check prioritized implementation - Fix memory leak -> OK
     // - Enhance multi environment -> OK
-    // * Ideas:
-    // - Retest NoisyDenseLayers changes
+    // - Retest NoisyDenseLayers changes -> OK
     // - Variable grid size
+    // * Ideas:
+    // - Add direction information for Snake head?
     // - Data augmentation (reverse the grid etc...)?
-    // * Others:
     // - Feed the input with N previous frames?
     // - Distributional RL - Categorical DQN - Multi step learning?
   }
@@ -140,14 +142,14 @@ export default class SnakeAIUltra extends SnakeAI {
   
     const conv1 = tf.layers.conv2d({
       filters: 32,
-      kernelSize: this.enableVariableInputSize ? 1 : 3,
+      kernelSize: 3,
       activation: "relu",
       padding: "same"
     }).apply(input);
   
     const conv2 = tf.layers.conv2d({
       filters: 64,
-      kernelSize: this.enableVariableInputSize ? 1 : 3,
+      kernelSize: 3,
       activation: "relu",
       padding: "same"
     }).apply(conv1);

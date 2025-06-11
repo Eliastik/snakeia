@@ -292,34 +292,48 @@ export default class Grid {
   isCaseSurrounded(position, fill, foundVals, forbiddenVals) {
     if(!position) return false;
 
-    const gridCopy = JSON.parse(JSON.stringify(this.grid));
+    const forbidden = new Set(forbiddenVals);
+    const found     = new Set(foundVals);
+    const visited   = new Set();
     const checkList = [position];
 
     while(checkList.length > 0) {
-      const currentPosition = checkList[0];
-      checkList.shift();
+      const currentPosition = checkList.pop();
 
-      const directions = [this.getNextPosition(currentPosition, GameConstants.Direction.UP), this.getNextPosition(currentPosition, GameConstants.Direction.BOTTOM), this.getNextPosition(currentPosition, GameConstants.Direction.LEFT), this.getNextPosition(currentPosition, GameConstants.Direction.RIGHT)]; // UP, DOWN, LEFT, RIGHT
+      const nextPositions = [
+        GameConstants.Direction.UP,
+        GameConstants.Direction.BOTTOM,
+        GameConstants.Direction.LEFT,
+        GameConstants.Direction.RIGHT
+      ].map(direction => this.getNextPosition(currentPosition, direction));
 
-      for(let i = 0; i < directions.length; i++) {
-        if(gridCopy[directions[i].y][directions[i].x] != GameConstants.CaseType.CROSSED && forbiddenVals.indexOf(this.get(directions[i])) > -1) {
-          checkList.push(directions[i]);
+      for(const nextPosition of nextPositions) {
+        const positionKey = nextPosition.y * this.width + nextPosition.x;
 
-          if(foundVals.indexOf(this.get(directions[i])) > -1) {
+        if(visited.has(positionKey)) {
+          continue;
+        }
+
+        const nextValue = this.get(nextPosition);
+
+        if(forbidden.has(nextValue)) {
+          if(found.has(nextValue)) {
             return false;
           }
+          
+          visited.add(positionKey);
+          checkList.push(nextPosition);
 
-          if(fill && this.get(directions[i]) == GameConstants.CaseType.EMPTY) {
-            this.set(GameConstants.CaseType.SURROUNDED, directions[i]);
-            gridCopy[directions[i].y][directions[i].x] = GameConstants.CaseType.SURROUNDED;
-          } else {
-            gridCopy[directions[i].y][directions[i].x] = GameConstants.CaseType.CROSSED;
+          if(fill && nextValue == GameConstants.CaseType.EMPTY) {
+            this.set(GameConstants.CaseType.SURROUNDED, nextPosition);
           }
         }
       }
     }
 
-    if(fill && (this.get(position) == GameConstants.CaseType.EMPTY || this.get(position) == GameConstants.CaseType.FRUIT) || this.get(position) == GameConstants.CaseType.FRUIT_GOLD) {
+    const startPosition = this.get(position);
+
+    if(fill && [GameConstants.CaseType.EMPTY, GameConstants.CaseType.FRUIT, GameConstants.CaseType.FRUIT_GOLD].includes(startPosition)) {
       this.set(GameConstants.CaseType.SURROUNDED, position);
     }
 

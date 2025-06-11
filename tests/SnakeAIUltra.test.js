@@ -6,6 +6,7 @@ import SnakeAIUltra from "../src/engine/ai/SnakeAIUltra.js";
 import Snake from "../src/engine/Snake.js";
 import GameEngine from "../src/engine/GameEngine.js";
 import SnakeAI from "../src/engine/ai/SnakeAI.js";
+import "@tensorflow/tfjs-node";
 
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);

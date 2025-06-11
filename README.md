@@ -470,6 +470,9 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 ### Prochaine version (3.0 ?)
 
 - [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning) (En cours)
+  - [ ] Récupération du modèle : API à appeler qui retourne la version + date version + URL vers le modèle / éventuellement une liste de version pour choisir la version du modèle ?
+  - [ ] Afficher informations sur les niveaux de l'IA
+- [ ] Mettre à jour socket.io
 - [x] Améliorer les performances graphiques -> Optimiser le rendu de la grille et des Snake (rendu différentiel, uniquement redessiner ce qui change)
 - [x] Améliorer algorithme détection IA bloquée : se baser aussi sur les actions exécutée (pas seulement les positions) ? -> Non
 - [x] Ajout tests unitaires
