@@ -61,7 +61,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.001;
     this.batchSize = 32;
-    this.maxMemoryLength = 100000;
+    this.maxMemoryLength = 10000;
     // End of model and training settings
 
     this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, "prioritized");
@@ -322,35 +322,35 @@ export default class SnakeAIUltra extends SnakeAI {
     const snakesLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
     const fruitsAndWallsLayer = new Array(grid.height).fill(0).map(() => new Array(grid.width).fill(0));
     
-    for(let i = 0; i < grid.height; i++) {
-      for(let j = 0; j < grid.width; j++) {
-        const position = new Position(j, i);
+    for(let y = 0; y < grid.height; y++) {
+      for(let x = 0; x < grid.width; x++) {
+        const position = new Position(x, y);
         const cellValue = grid.get(position);
 
         // AI Snake
         if(snake.positionInQueue(position)) {
           if(snake.getHeadPosition().equals(position)) {
-            snakesLayer[i][j] = 3;
+            snakesLayer[y][x] = 3;
           } else if(snake.getTailPosition().equals(position)) {
-            snakesLayer[i][j] = 2;
+            snakesLayer[y][x] = 2;
           } else {
-            snakesLayer[i][j] = 1;
+            snakesLayer[y][x] = 1;
           }
         } else if(cellValue === GameConstants.CaseType.SNAKE) { // Opponent Snakes
           // TODO opponent Snakes - special value for head/tail?
-          snakesLayer[i][j] = 4;
+          snakesLayer[y][x] = 4;
         }
 
         // Fruits
         if(cellValue === GameConstants.CaseType.FRUIT) {
-          fruitsAndWallsLayer[i][j] = 1;
+          fruitsAndWallsLayer[y][x] = 1;
         } else if(cellValue === GameConstants.CaseType.FRUIT_GOLD) {
-          fruitsAndWallsLayer[i][j] = 2;
+          fruitsAndWallsLayer[y][x] = 2;
         }
 
         // Walls
         if(cellValue === GameConstants.CaseType.WALL || cellValue == GameConstants.CaseType.SNAKE_DEAD) {
-          fruitsAndWallsLayer[i][j] = 3;
+          fruitsAndWallsLayer[y][x] = 3;
         }
       }
     }
@@ -359,24 +359,28 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   stateToTensor(stateArray) {
-    return tf.tidy(() => {
-      const snakesTensor = tf.tensor(stateArray.snakesLayer);
-      const fruitsAndWallsTensor = tf.tensor(stateArray.fruitsAndWallsLayer);
+    const inputHeight = stateArray.snakesLayer.length;
+    const inputWidth = stateArray.snakesLayer[0].length;
 
-      const height = snakesTensor.shape[0];
-      const width = snakesTensor.shape[1];
+    const targetHeight = this.enableVariableInputSize ? inputHeight : this.modelHeight;
+    const targetWidth = this.enableVariableInputSize ? inputWidth : this.modelWidth;
 
-      const padHeight = this.enableVariableInputSize ? 0 : this.modelHeight - height;
-      const padWidth = this.enableVariableInputSize ? 0 : this.modelWidth - width;
+    const channels = 2;
+    const padValue = -1;
+    const data = new Float32Array(targetHeight * targetWidth * channels);
 
-      const padConfig = [[0, padHeight], [0, padWidth]]; 
-      const padValue = -1;
+    for(let y = 0; y < targetHeight; y++) {
+      for(let x = 0; x < targetWidth; x++) {
+        const index = (y * targetWidth + x) * channels;
 
-      return tf.stack([
-        tf.pad(snakesTensor, padConfig, padValue),
-        tf.pad(fruitsAndWallsTensor, padConfig, padValue)
-      ], -1);
-    });
+        const isInside = y < inputHeight && x < inputWidth;
+
+        data[index]     = isInside ? stateArray.snakesLayer[y][x] : padValue;
+        data[index + 1] = isInside ? stateArray.fruitsAndWallsLayer[y][x] : padValue;
+      }
+    }
+
+    return tf.tensor(data, [targetHeight, targetWidth, channels]);
   }
 
   findPositionInState(stateArray, targetValue) {
