@@ -27,26 +27,19 @@ export default class PrioritizedReplayBuffer {
     this.defaultPriority = 1.0;
 
     this.sumTree = new SumTree(capacity);
+    this.currentMaxPriority = Math.pow(this.defaultPriority, this.alpha);
   }
 
   add(state, action, reward, nextState, done) {
-    let maxPriority = this.defaultPriority;
-
-    if(this.sumTree.size > 0) {
-      const start = this.sumTree.capacity - 1;
-      const leafPriorities = Array.from(this.sumTree.tree.slice(start, start + this.sumTree.size));
-      maxPriority = Math.max(...leafPriorities, this.defaultPriority);
-    }
-
     const data = { state, action, reward, nextState, done };
 
     const overwrittenData = this.sumTree.data[this.sumTree.write];
-    
+
     if(overwrittenData) {
       this.cleanOldMemory(overwrittenData);
     }
 
-    this.sumTree.add(Math.pow(maxPriority, this.alpha), data);
+    this.sumTree.add(this.currentMaxPriority, data);
   }
 
   cleanOldMemory(removedMemory) {
@@ -75,13 +68,9 @@ export default class PrioritizedReplayBuffer {
       indices.push(index);
       samples.push(data);
 
-      if(!data) {
-        console.log(r, index, this.sumTree.total(), this.sumTree.size, data);
-      }
-
       const prob = value / totalPriority;
-
       const weight = Math.pow(this.sumTree.size * prob, -beta);
+
       weights.push(weight);
 
       if(weight > maxWeight) {
@@ -101,7 +90,13 @@ export default class PrioritizedReplayBuffer {
   // eslint-disable-next-line no-unused-vars
   updatePriority(treeIndex, tdError, envId) {
     const newPriority = Math.abs(tdError) + 1e-5;
-    this.sumTree.update(treeIndex, Math.pow(newPriority, this.alpha));
+    const priority = Math.pow(newPriority, this.alpha);
+
+    this.sumTree.update(treeIndex, priority);
+
+    if (priority > this.currentMaxPriority) {
+      this.currentMaxPriority = priority;
+    }
   }
 
   size() {

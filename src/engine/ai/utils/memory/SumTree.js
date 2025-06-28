@@ -19,7 +19,7 @@
 export default class SumTree {
   constructor(capacity) {
     this.capacity = capacity;
-    this.tree = new Float64Array(2 * capacity - 1);
+    this.tree = new Float32Array(2 * capacity - 1);
     this.data = new Array(capacity);
     this.size = 0;
     this.write = 0;
