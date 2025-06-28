@@ -258,19 +258,18 @@ export default class SnakeAIUltra extends SnakeAI {
 
   getBestAction(snake) {
     return tf.tidy(() => {
-      const currentState = this.stateToTensor(this.getState(snake));
-      const currentStateTensor = currentState.expandDims(0);
+      const currentStateTensor = this.stateToTensor(this.getState(snake)).expandDims(0);
   
       const qValues = this.mainModel.predict(currentStateTensor);
-  
-      const actionIndex = qValues.argMax(1).arraySync()[0];
+      const values = qValues.dataSync();
+
+      const { maxValue, maxIndex } = GameUtils.fastArgMax(values);
 
       if(this.summaryWriter) {
-        const maxValue = qValues.max().arraySync();
         this.currentQValue = maxValue;
       }
 
-      return actionIndex;
+      return maxIndex;
     });
   }
 

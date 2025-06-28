@@ -69,5 +69,18 @@ export default {
     }
     
     return "unknown.png";
+  },
+  fastArgMax(arr) {
+    let maxValue = -Infinity;
+    let maxIndex = -1;
+
+    for(let i = 0; i < arr.length; i++) {
+      if(arr[i] > maxValue) {
+        maxValue = arr[i];
+        maxIndex = i;
+      }
+    }
+
+    return { maxValue, maxIndex };
   }
 };
