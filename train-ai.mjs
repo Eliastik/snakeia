@@ -13,18 +13,18 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const NUM_EPISODES              = 5000;
+const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
+// OR:
+// const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
+const NUM_EPISODES_PER_TYPE     = 500;
+const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 15;
 const MAX_TICKS                 = 1000;
 const INITAL_GRID_WIDTH         = 5;
 const INITAL_GRID_HEIGHT        = 5;
+const GRID_INCREASE_INCREMENT   = 5;
 const SAVE_CHECKPOINT_MODELS    = true;
 const ENABLE_TENSORBOARD_LOGS   = true;
-// TODO enable grid increase
-const INCREASE_GRID_SIZE_EACH   = 500; // Increase grid size each X episodes. -1 to disable
-const EPISODES_TYPES            = ["DEFAULT"];
-// OR:
-// const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
 const AI_LEVEL_OPPONENTS        = Constants.AiLevel.DEFAULT;
 const NUMBER_OPPONENTS          = 5;
 const TRAINING_SEED             = 1;
@@ -35,6 +35,7 @@ const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 
 // Setup and run training
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
+
 const multiBar = new cliProgress.MultiBar({
   format: "Training |{bar}| {percentage}% | ETA: {eta_formatted} | Elapsed time: {duration_formatted} | Episode {value}/{total}",
   hideCursor: false,
@@ -44,7 +45,6 @@ const multiBar = new cliProgress.MultiBar({
   stopOnComplete: true,
   forceRedraw: true
 });
-const progressBar = multiBar.create(NUM_EPISODES, 0);
 
 const theSnakeAI = new SnakeAIUltra(true, null, TRAINING_SEED, {
   log: (text) => multiBar.log(text),
@@ -52,7 +52,12 @@ const theSnakeAI = new SnakeAIUltra(true, null, TRAINING_SEED, {
   warn: (text) => multiBar.log(`[WARNING] ${text}`),
   error: (text) => multiBar.log(`[ERROR] ${text}`)
 });
+
 await theSnakeAI.setup(ENABLE_TENSORBOARD_LOGS ? tensorboardSummaryWriter : null);
+
+const currentMaxEpisodes = getMaxEpisodesCount();
+
+const progressBar = multiBar.create(currentMaxEpisodes, 0);
 
 let totalScore = 0;
 let totalReward = 0;
@@ -61,6 +66,26 @@ let currentGridSeed = GRID_SEED;
 let currentGameSeed = GAME_SEED;
 let currentGridWidth = INITAL_GRID_WIDTH;
 let currentGridHeight = INITAL_GRID_HEIGHT;
+
+function getMaxEpisodesCount() {
+  if(MAX_EPISODES === "auto") {
+    const staticTypesCount = EPISODES_TYPES.filter(t => t !== "INCREASE_GRID_SIZE").length;
+    const hasIncreaseGridSize = EPISODES_TYPES.find(type => type === "INCREASE_GRID_SIZE");
+
+    let gridSteps = 1;
+
+    if(hasIncreaseGridSize) {
+      const gridRangeW = Math.ceil((theSnakeAI.modelWidth - INITAL_GRID_WIDTH) / GRID_INCREASE_INCREMENT);
+      const gridRangeH = Math.ceil((theSnakeAI.modelHeight - INITAL_GRID_HEIGHT) / GRID_INCREASE_INCREMENT);
+
+      gridSteps = Math.max(gridRangeW, gridRangeH) + 1;
+    }
+
+    return gridSteps * staticTypesCount * NUM_EPISODES_PER_TYPE;
+  }
+
+  return MAX_EPISODES;
+}
 
 async function executeTrainingEpisode(currentEpisodeType, episode) {
   const randomWalls = currentEpisodeType === "RANDOM_WALLS";
@@ -156,18 +181,27 @@ async function saveModel(subDirectory = "") {
   multiBar.update();
 }
 
+function getNextEpisodeType(currentEpisodeType) {
+  const nextEpisodeTypeIndex = (EPISODES_TYPES.indexOf(currentEpisodeType) + 1) % EPISODES_TYPES.length;
+  return EPISODES_TYPES[nextEpisodeTypeIndex];
+}
+
 async function train() {
-  for(const currentEpisodeType of EPISODES_TYPES) {
+  let currentEpisodeType = EPISODES_TYPES[0];
+  let currentEpisodeNumber = 1;
+
+  while(currentEpisodeNumber <= currentMaxEpisodes) {
     const startTime = performance.now();
-    const currentMaxEpisodes = NUM_EPISODES / EPISODES_TYPES.length;
 
     let currentEpisodeTypeScore = 0;
     let currentEpisodeTypeReward = 0;
 
-    for (let episode = 1; episode <= currentMaxEpisodes; episode++) {
-      if (INCREASE_GRID_SIZE_EACH > -1 && episode % INCREASE_GRID_SIZE_EACH == 0) {
-        currentGridWidth = Math.min(theSnakeAI.modelWidth, currentGridWidth + 5);
-        currentGridHeight = Math.min(theSnakeAI.modelHeight, currentGridHeight + 5);
+    for(let episode = 1; episode <= NUM_EPISODES_PER_TYPE; episode++) {
+      if(currentEpisodeType === "INCREASE_GRID_SIZE") {
+        currentGridWidth = Math.min(theSnakeAI.modelWidth, currentGridWidth + GRID_INCREASE_INCREMENT);
+        currentGridHeight = Math.min(theSnakeAI.modelHeight, currentGridHeight + GRID_INCREASE_INCREMENT);
+
+        currentEpisodeType = getNextEpisodeType(currentEpisodeType);
       }
       
       theSnakeAI.changeEnvironment(`${currentGridWidth}x${currentGridHeight}_${currentEpisodeType}`);
@@ -189,6 +223,8 @@ async function train() {
     
       progressBar.increment();
       multiBar.update();
+
+      currentEpisodeNumber++;
     }
 
     multiBar.log(`Episode type ${currentEpisodeType} finished! Average score: ${currentEpisodeTypeScore / currentMaxEpisodes} - Average reward: ${currentEpisodeTypeReward / currentMaxEpisodes} - Time: ${performance.now() - startTime} ms\n`);
@@ -202,6 +238,8 @@ async function train() {
     if(SAVE_CHECKPOINT_MODELS) {
       await saveModel(currentEpisodeType);
     }
+
+    currentEpisodeType = getNextEpisodeType(currentEpisodeType);
   }
 }
 
@@ -209,7 +247,7 @@ const trainStartTime = performance.now();
 
 await train();
 
-multiBar.log(`Training finished! Average score: ${totalScore / NUM_EPISODES} - Average reward: ${totalReward / NUM_EPISODES} - Time: ${performance.now() - trainStartTime} ms\n`);
+multiBar.log(`Training finished! Average score: ${totalScore / currentMaxEpisodes} - Average reward: ${totalReward / currentMaxEpisodes} - Time: ${performance.now() - trainStartTime} ms\n`);
 multiBar.update();
 
 await saveModel();
