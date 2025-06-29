@@ -46,6 +46,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.modelWidth = 25;
     this.modelDepth = 2;
     this.numberOfPossibleActions = 4;
+    this.dtype = "float32";
 
     this.enableTargetModel = true; // Enable Double DQN
     this.enableDuelingQLearning = true; // Enable Dueling DQN
@@ -144,28 +145,32 @@ export default class SnakeAIUltra extends SnakeAI {
       filters: 32,
       kernelSize: 3,
       activation: "relu",
-      padding: "same"
+      padding: "same",
+      dtype: this.dtype
     }).apply(input);
   
     const conv2 = tf.layers.conv2d({
       filters: 64,
       kernelSize: 3,
       activation: "relu",
-      padding: "same"
+      padding: "same",
+      dtype: this.dtype
     }).apply(conv1);
   
     const flattenOrPooling = this.enableVariableInputSize ?
-      tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true }).apply(conv2) :
-      tf.layers.flatten().apply(conv2);
+      tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true, dtype: this.dtype }).apply(conv2) :
+      tf.layers.flatten({ dtype: this.dtype }).apply(conv2);
   
     const dense1 = DenseLayer({
       units: 64,
-      activation: "relu"
+      activation: "relu",
+      dtype: this.dtype
     }).apply(flattenOrPooling);
 
     const advantage = DenseLayer({
       units: this.numberOfPossibleActions,
-      activation: "linear"
+      activation: "linear",
+      dtype: this.dtype
     }).apply(dense1);
 
     let model;
@@ -173,24 +178,28 @@ export default class SnakeAIUltra extends SnakeAI {
     if(this.enableDuelingQLearning) {
       const dense2 = DenseLayer({
         units: 64,
-        activation: "relu"
+        activation: "relu",
+        dtype: this.dtype
       }).apply(flattenOrPooling);
 
       const value = DenseLayer({
         units: 1,
-        activation: "linear"
+        activation: "linear",
+        dtype: this.dtype
       }).apply(dense2);
     
       const qValues = new DuelingQLayer().apply([value, advantage]);
     
       model = tf.model({
         inputs: input,
-        outputs: qValues
+        outputs: qValues,
+        dtype: this.dtype
       });
     } else {
       model = tf.model({
         inputs: input,
-        outputs: advantage
+        outputs: advantage,
+        dtype: this.dtype
       });
     }
   
@@ -379,7 +388,7 @@ export default class SnakeAIUltra extends SnakeAI {
       }
     }
 
-    return tf.tensor(data, [targetHeight, targetWidth, channels]);
+    return tf.tensor(data, [targetHeight, targetWidth, channels], this.dtype);
   }
 
   findPositionInState(stateArray, targetValue) {
@@ -406,8 +415,8 @@ export default class SnakeAIUltra extends SnakeAI {
     const { inputs, targets, meanTDError } = tf.tidy(() => {
       const nextStates = tf.stack(batch.samples.map(({ nextState }) => nextState));
       const states = tf.stack(batch.samples.map(({ state }) => state));
-      const rewards = tf.tensor1d(batch.samples.map(({ reward }) => reward));
-      const dones = tf.tensor1d(batch.samples.map(({ done }) => done ? 0 : 1));
+      const rewards = tf.tensor1d(batch.samples.map(({ reward }) => reward), this.dtype);
+      const dones = tf.tensor1d(batch.samples.map(({ done }) => done ? 0 : 1), this.dtype);
       const actions = tf.tensor1d(batch.samples.map(({ action }) => action), "int32");
   
       const qNextBatch = (this.enableTargetModel ? this.targetModel : this.mainModel).predict(nextStates);
@@ -420,13 +429,13 @@ export default class SnakeAIUltra extends SnakeAI {
       const discountedFutureRewards = qNextMax.mul(this.gamma).mul(dones);
       const targetQs = rewards.add(discountedFutureRewards);
 
-      const actionMask = tf.oneHot(actions, qValues.shape[1]);
+      const actionMask = tf.oneHot(actions, qValues.shape[1], undefined, undefined, this.dtype);
       const qCurrentActions = qCurrentBatch.mul(actionMask).sum(1);
 
       const tdErrors = targetQs.sub(qCurrentActions).abs();
-      const meanTDError = tdErrors.mean().arraySync();
+      const meanTDError = tdErrors.mean().dataSync()[0];
 
-      tdErrors.arraySync().forEach((error, index) => {
+      tdErrors.dataSync().forEach((error, index) => {
         this.memory.updatePriority(batch.indices[index], error, batch.envAssignments ? batch.envAssignments[index] : null);
       });
 
@@ -523,15 +532,15 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   changeEnvironment(envId) {
-    this.logger.info(`Changing environment to: ${envId}\n`);
+    if(this.currentEnv !== envId) {
+      this.logger.info(`Changing environment to: ${envId}\n`);
 
-    this.resetNoisyLayers();
+      if(this.memory) {
+        this.memory.changeEnvironment(envId);
+      }
 
-    if(this.memory) {
-      this.memory.changeEnvironment(envId);
+      this.currentEnv = envId;
     }
-
-    this.currentEnv = envId;
   }
 
   beginEpisode() {
