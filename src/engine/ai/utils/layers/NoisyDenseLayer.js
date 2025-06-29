@@ -26,20 +26,21 @@ function scaledNoise(shape, dtype = "float32") {
 }
 
 // Implementation of NoisyDense layer in JS - Inspired by: https://github.com/tensorflow/addons/blob/master/tensorflow_addons/layers/noisy_dense.py
-export default class NoisyDense extends tf.layers.Layer {
-  constructor(config) {
-    super(config);
-    this.units = config.units;
-    this.sigma = config.sigma === undefined ? 0.5 : config.sigma;
-    this.useFactorised = config.useFactorised === undefined ? true : config.useFactorised;
-    this.useBias = config.useBias === undefined ? true : config.useBias;
-    this.activationName = config.activation;
-    this.activationLayer = this.activationName ? tf.layers.activation({ activation: this.activationName, trainable: false }) : null;
-    this.dtype = config.dtype || "float32";
+export default class NoisyDense extends tf.layers.dense {
+  constructor(args) {
+    const config = {
+      ...args,
+      sigma: args.sigma ?? 0.5,
+      useFactorised: args.useFactorised ?? true,
+      useBias: args.useBias ?? true,
+      dtype: args.dtype || "float32"
+    };
 
-    if(!this.activationLayer) {
-      console.warn("NoisyDense layer: no activation function provided or found");
-    }
+    super(config);
+
+    this.sigma = config.sigma;
+    this.useFactorised = config.useFactorised;
+    this.dtype = config.dtype;
   }
 
   build(inputShape) {
@@ -106,11 +107,11 @@ export default class NoisyDense extends tf.layers.Layer {
     super.build(inputShape);
   }
 
-  calculateKernelValue() {
+  get kernel() {
     return tf.tidy(() => tf.add(this.muKernel.read(), tf.mul(this.sigmaKernel.read(), this.epsKernel.read())));
   }
 
-  calculateBiasValue() {
+  get bias() {
     if(!this.useBias) {
       return null;
     }
@@ -119,17 +120,7 @@ export default class NoisyDense extends tf.layers.Layer {
   }
 
   call(inputs) {
-    return tf.tidy(() => {
-      const input = Array.isArray(inputs) ? inputs[0] : inputs;
-
-      let output = tf.dot(input, this.calculateKernelValue());
-
-      if(this.useBias) {
-        output = tf.add(output, this.calculateBiasValue());
-      }
-
-      return this.activationLayer != null ? this.activationLayer.apply(output) : output;
-    });
+    return super.call(inputs);
   }
 
   resetNoise() {
@@ -164,21 +155,15 @@ export default class NoisyDense extends tf.layers.Layer {
     });
   }
 
-  computeOutputShape(inputShape) {
-    return [...inputShape.slice(0, -1), this.units];
-  }
-
   getConfig() {
     const baseConfig = super.getConfig();
 
-    return Object.assign(baseConfig, {
-      units: this.units,
+    return {
+      ...baseConfig,
       sigma: this.sigma,
       useFactorised: this.useFactorised,
-      activation: this.activationName || null,
-      useBias: this.useBias,
       dtype: this.dtype
-    });
+    };
   }
 
   static get className() {

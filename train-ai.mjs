@@ -236,7 +236,7 @@ async function train() {
 
     // Save the intermediate model
     if(SAVE_CHECKPOINT_MODELS) {
-      await saveModel(currentEpisodeType);
+      await saveModel(theSnakeAI.currentEnv);
     }
 
     currentEpisodeType = getNextEpisodeType(currentEpisodeType);
