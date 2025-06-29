@@ -37,9 +37,6 @@ export default class NoisyDense extends tf.layers.Layer {
     this.activationLayer = this.activationName ? tf.layers.activation({ activation: this.activationName, trainable: false }) : null;
     this.dtype = config.dtype || "float32";
 
-    this.kernelVal;
-    this.biasVal;
-
     if(!this.activationLayer) {
       console.warn("NoisyDense layer: no activation function provided or found");
     }
@@ -109,20 +106,6 @@ export default class NoisyDense extends tf.layers.Layer {
     super.build(inputShape);
   }
 
-  call(inputs) {
-    return tf.tidy(() => {
-      const input = Array.isArray(inputs) ? inputs[0] : inputs;
-
-      let output = tf.dot(input, this.kernelVal);
-
-      if(this.useBias) {
-        output = tf.add(output, this.biasVal);
-      }
-
-      return this.activationLayer != null ? this.activationLayer.apply(output) : output;
-    });
-  }
-
   calculateKernelValue() {
     return tf.tidy(() => tf.add(this.muKernel.read(), tf.mul(this.sigmaKernel.read(), this.epsKernel.read())));
   }
@@ -133,6 +116,20 @@ export default class NoisyDense extends tf.layers.Layer {
     }
 
     return tf.tidy(() => tf.add(this.muBias.read(), tf.mul(this.sigmaBias.read(), this.epsBias.read())));
+  }
+
+  call(inputs) {
+    return tf.tidy(() => {
+      const input = Array.isArray(inputs) ? inputs[0] : inputs;
+
+      let output = tf.dot(input, this.calculateKernelValue());
+
+      if(this.useBias) {
+        output = tf.add(output, this.calculateBiasValue());
+      }
+
+      return this.activationLayer != null ? this.activationLayer.apply(output) : output;
+    });
   }
 
   resetNoise() {
@@ -155,14 +152,6 @@ export default class NoisyDense extends tf.layers.Layer {
         }
       }
     });
-
-    this.kernelVal?.dispose();
-    this.kernelVal = this.calculateKernelValue();
-
-    if(this.useBias) {
-      this.biasVal?.dispose();
-      this.biasVal = this.calculateBiasValue();
-    }
   }
 
   removeNoise() {
