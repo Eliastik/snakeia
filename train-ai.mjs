@@ -31,6 +31,9 @@ const TRAINING_SEED             = 1;
 const GRID_SEED                 = 2;
 const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
+// Path to a model to load before beginning training (for fine tuning)
+// Example: file://models/2025-06-29T20-08-14-389Z/5x5_RANDOM_WALLS/model.json
+const LOAD_MODEL_PATH           = null;
 // End of settings
 
 // Setup and run training
@@ -46,7 +49,7 @@ const multiBar = new cliProgress.MultiBar({
   forceRedraw: true
 });
 
-const theSnakeAI = new SnakeAIUltra(true, null, TRAINING_SEED, {
+const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, TRAINING_SEED, {
   log: (text) => multiBar.log(text),
   info: (text) => multiBar.log(text),
   warn: (text) => multiBar.log(`[WARNING] ${text}`),

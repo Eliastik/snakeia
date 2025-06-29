@@ -118,16 +118,20 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
-    if(!enableTrainingMode) {
-      return await this.loadModel(modelLocation);
+    const model = modelLocation ?
+      await this.loadModel(modelLocation) :
+      this.createModel();
+  
+    if(enableTrainingMode) {
+      this.compileModel(model);
     }
 
-    return this.createModel();
+    return model;
   }
 
-  async loadModel(modelLocation) {
+  loadModel(modelLocation) {
     const modelLoader = TensorflowModelLoader.getInstance();
-    return await modelLoader.loadModel(modelLocation);
+    return modelLoader.loadModel(modelLocation);
   }
 
   createModel() {
@@ -202,15 +206,17 @@ export default class SnakeAIUltra extends SnakeAI {
         dtype: this.dtype
       });
     }
-  
-    model.compile({
-      optimizer: tf.train.rmsprop(this.learningRate), // Or Adam
-      loss: (yTrue, yPred) => tf.losses.huberLoss(yTrue, yPred) // Or Mean Square Root
-    });
 
     return model;
   }
   
+  compileModel(model) {
+    model.compile({
+      optimizer: tf.train.rmsprop(this.learningRate), // Or Adam
+      loss: (yTrue, yPred) => tf.losses.huberLoss(yTrue, yPred) // Or Mean Square Root
+    });
+  }
+
   resetNoisyLayers() {
     if(this.enableNoisyNetwork && this.enableTrainingMode) {
       this.mainModel.layers.forEach(layer => {
