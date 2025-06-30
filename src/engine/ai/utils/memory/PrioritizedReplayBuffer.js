@@ -16,10 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+import BaseReplayBuffer from "./BaseReplayBuffer.js";
 import SumTree from "./SumTree.js";
 
-export default class PrioritizedReplayBuffer {
+export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
   constructor(capacity, rng, calculateWeight = false, alpha = 0.6) {
+    super();
+
     this.capacity = capacity;
     this.rng = rng;
     this.calculateWeight = calculateWeight;
@@ -40,16 +43,6 @@ export default class PrioritizedReplayBuffer {
     }
 
     this.sumTree.add(this.currentMaxPriority, data);
-  }
-
-  cleanOldMemory(removedMemory) {
-    if(removedMemory && removedMemory.state) {
-      removedMemory.state.dispose();
-    }
-
-    if(removedMemory && removedMemory.nextState) {
-      removedMemory.nextState.dispose();
-    }
   }
 
   sample(batchSize, beta = 0.4) {

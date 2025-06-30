@@ -16,11 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+import BaseReplayBuffer from "./BaseReplayBuffer.js";
 import PrioritizedReplayBuffer from "./PrioritizedReplayBuffer.js";
 import UniformReplayBuffer from "./UniformReplayBuffer.js";
 
-export default class MultiEnvironmentReplayBuffer {
+export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
   constructor(capacity, rng, bufferType = "uniform", selectMode = "cycling") {
+    super();
+
     this.capacity = capacity;
     this.rng = rng;
     this.buffers = new Map();
@@ -147,6 +150,14 @@ export default class MultiEnvironmentReplayBuffer {
   
     if(buffer) {
       buffer.updatePriority(indices, tdErrors);
+    }
+  }
+
+  cleanOldMemory(removedMemory) {
+    const buffer = this.buffers.get(this.currentEnvironment);
+  
+    if(buffer) {
+      buffer.cleanOldMemory(removedMemory);
     }
   }
   

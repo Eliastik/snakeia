@@ -16,8 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-export default class UniformReplayBuffer {
+import BaseReplayBuffer from "./BaseReplayBuffer.js";
+
+export default class UniformReplayBuffer extends BaseReplayBuffer {
   constructor(capacity, rng) {
+    super();
+
     this.capacity = capacity;
     this.rng = rng;
     this.buffer = [];
@@ -29,16 +33,6 @@ export default class UniformReplayBuffer {
     if(this.buffer.length > this.capacity) {
       const removedMemory = this.buffer.shift();
       this.cleanOldMemory(removedMemory);
-    }
-  }
-  
-  cleanOldMemory(removedMemory) {
-    if(removedMemory && removedMemory.state) {
-      removedMemory.state.dispose();
-    }
-  
-    if(removedMemory && removedMemory.nextState) {
-      removedMemory.nextState.dispose();
     }
   }
   

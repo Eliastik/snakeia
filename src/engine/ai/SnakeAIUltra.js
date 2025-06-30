@@ -419,8 +419,8 @@ export default class SnakeAIUltra extends SnakeAI {
     const batch = this.loadBatches();
 
     const { inputs, targets, meanTDError } = tf.tidy(() => {
-      const nextStates = tf.stack(batch.samples.map(({ nextState }) => nextState));
-      const states = tf.stack(batch.samples.map(({ state }) => state));
+      const nextStates = tf.stack(batch.samples.map(({ nextState }) => this.stateToTensor(nextState)));
+      const states = tf.stack(batch.samples.map(({ state }) => this.stateToTensor(state)));
       const rewards = tf.tensor1d(batch.samples.map(({ reward }) => reward), this.dtype);
       const dones = tf.tensor1d(batch.samples.map(({ done }) => done ? 0 : 1), this.dtype);
       const actions = tf.tensor1d(batch.samples.map(({ action }) => action), "int32");
@@ -531,10 +531,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const nextState = this.getState(snake);
     const reward = this.calculateReward(snake, currentState, done);
 
-    const currentStateTensor = this.stateToTensor(currentState);
-    const nextStateTensor = this.stateToTensor(nextState);
-
-    this.remember(currentStateTensor, this.lastAction, reward, nextStateTensor, done);
+    this.remember(currentState, this.lastAction, reward, nextState, done);
   }
 
   changeEnvironment(envId) {
