@@ -91,6 +91,7 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Add direction information for Snake head?
     // - Data augmentation (reverse the grid etc...)?
     // - Feed the input with N previous frames?
+    // - Store memory with the model? To improve fine tuning
     // - Distributional RL - Categorical DQN - Multi step learning?
   }
 
@@ -272,6 +273,10 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   getBestAction(snake) {
+    if(this.enableTrainingMode) {
+      this.resetNoisyLayers();
+    }
+
     return tf.tidy(() => {
       const currentStateTensor = this.stateToTensor(this.getState(snake)).expandDims(0);
   
