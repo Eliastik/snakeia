@@ -67,4 +67,11 @@ export default class UniformReplayBuffer extends BaseReplayBuffer {
   changeEnvironment(envId) {
     // Do nothing
   }
+
+  serializeToJson() {
+    return {
+      capacity: this.capacity,
+      buffer: this.buffer
+    };
+  }
 }

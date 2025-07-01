@@ -86,4 +86,14 @@ export default class SumTree {
     const dataIndex = treeIndex - (this.capacity - 1);
     return this.data[dataIndex];
   }
+
+  serializeToJson() {
+    return {
+      capacity: this.capacity,
+      tree: Array.from(this.tree),
+      data: this.data,
+      size: this.size,
+      write: this.write
+    };
+  }
 }

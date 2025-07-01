@@ -100,4 +100,14 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
   changeEnvironment(envId) {
     // Do nothing
   }
+
+  serializeToJson() {
+    return {
+      capacity: this.capacity,
+      calculateWeight: this.calculateWeight,
+      alpha: this.alpha,
+      currentMaxPriority: this.currentMaxPriority,
+      sumtree: this.sumTree.serializeToJson()
+    };
+  }
 }

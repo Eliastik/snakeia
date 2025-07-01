@@ -170,4 +170,19 @@ export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
 
     return totalSize;
   }
+  
+  serializeToJson() {
+    return {
+      capacity: this.capacity,
+      buffers: Array.from(this.buffers.keys()).map(key => {
+        return {
+          name: key,
+          buffer: this.buffers.get(key).serializeToJson()
+        };
+      }),
+      currentEnvironment: this.currentEnvironment,
+      selectMode: this.selectMode,
+      currentBufferIndex: this.currentBufferIndex
+    };
+  }
 }

@@ -13,17 +13,16 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
+const EPISODES_TYPES            = ["DEFAULT"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
-const NUM_EPISODES_PER_TYPE     = 500;
+const NUM_EPISODES_PER_TYPE     = 5;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 15;
 const MAX_TICKS                 = 1000;
 const INITAL_GRID_WIDTH         = 5;
 const INITAL_GRID_HEIGHT        = 5;
 const GRID_INCREASE_INCREMENT   = 5;
-const SAVE_CHECKPOINT_MODELS    = true;
 const ENABLE_TENSORBOARD_LOGS   = true;
 const AI_LEVEL_OPPONENTS        = Constants.AiLevel.DEFAULT;
 const NUMBER_OPPONENTS          = 5;
@@ -31,6 +30,8 @@ const TRAINING_SEED             = 1;
 const GRID_SEED                 = 2;
 const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
+const SAVE_CHECKPOINT_MODELS    = true;
+const SAVE_MEMORY               = true;
 // Path to a model to load before beginning training (for fine tuning)
 // Example: file://models/2025-06-29T20-08-14-389Z/5x5_RANDOM_WALLS/model.json
 const LOAD_MODEL_PATH           = null;
@@ -178,10 +179,19 @@ async function saveModel(subDirectory = "") {
   // Synchronize target model with main model when the training is finished
   theSnakeAI.synchronizeTargetNetwork();
 
-  await theSnakeAI.saveModel(`file://${fullPath}`);
+  await theSnakeAI.mainModel.save(`file://${fullPath}`);
 
   multiBar.log(`Model saved to ${fullPath} directory\n`);
   multiBar.update();
+
+  if(SAVE_MEMORY) {
+    const memoryJSON = await theSnakeAI.saveMemory();
+
+    fs.writeFileSync(`${fullPath}/memory.json`, memoryJSON);
+
+    multiBar.log(`Memory saved to ${fullPath} directory\n`);
+    multiBar.update();
+  }
 }
 
 function getNextEpisodeType(currentEpisodeType) {
@@ -239,7 +249,7 @@ async function train() {
 
     // Save the intermediate model
     if(SAVE_CHECKPOINT_MODELS) {
-      await saveModel(theSnakeAI.currentEnv);
+      await saveModel(theSnakeAI.currentEnv, true);
     }
 
     currentEpisodeType = getNextEpisodeType(currentEpisodeType);

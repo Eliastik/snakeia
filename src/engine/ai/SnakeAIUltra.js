@@ -555,7 +555,9 @@ export default class SnakeAIUltra extends SnakeAI {
     this.resetNoisyLayers();
   }
 
-  async saveModel(destination) {
-    await this.mainModel.save(destination);
+  async saveMemory() {
+    return JSON.stringify({
+      memory: this.memory.serializeToJson()
+    }, null, 0);
   }
 }
