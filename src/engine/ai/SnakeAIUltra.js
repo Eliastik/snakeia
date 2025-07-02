@@ -179,13 +179,15 @@ export default class SnakeAIUltra extends SnakeAI {
     const dense1 = DenseLayer({
       units: 64,
       activation: "relu",
-      dtype: this.dtype
+      dtype: this.dtype,
+      seed: this.trainingRng()
     }).apply(flattenOrPooling);
 
     const advantage = DenseLayer({
       units: this.numberOfPossibleActions,
       activation: "linear",
-      dtype: this.dtype
+      dtype: this.dtype,
+      seed: this.trainingRng()
     }).apply(dense1);
 
     let model;
@@ -194,13 +196,15 @@ export default class SnakeAIUltra extends SnakeAI {
       const dense2 = DenseLayer({
         units: 64,
         activation: "relu",
-        dtype: this.dtype
+        dtype: this.dtype,
+        seed: this.trainingRng()
       }).apply(flattenOrPooling);
 
       const value = DenseLayer({
         units: 1,
         activation: "linear",
-        dtype: this.dtype
+        dtype: this.dtype,
+        seed: this.trainingRng()
       }).apply(dense2);
     
       const qValues = new DuelingQLayer().apply([value, advantage]);
@@ -279,7 +283,7 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   getRandomAction() {
-    return GameUtils.randRange(0, this.numberOfPossibleActions - 1);
+    return GameUtils.randRange(0, this.numberOfPossibleActions - 1, this.trainingRng);
   }
 
   getBestAction(snake) {

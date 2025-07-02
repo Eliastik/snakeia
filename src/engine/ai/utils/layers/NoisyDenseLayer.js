@@ -18,9 +18,9 @@
  */
 import * as tf from "@tensorflow/tfjs";
 
-function scaledNoise(shape, dtype = "float32") {
+function scaledNoise(shape, dtype = "float32", seed) {
   return tf.tidy(() => {
-    const x = tf.randomNormal(shape, 0, 1, dtype);
+    const x = tf.randomNormal(shape, 0, 1, dtype, seed);
     return tf.mul(tf.sign(x), tf.sqrt(tf.abs(x)));
   });
 }
@@ -33,7 +33,8 @@ export default class NoisyDense extends tf.layers.dense {
       sigma: args.sigma ?? 0.5,
       useFactorised: args.useFactorised ?? true,
       useBias: args.useBias ?? true,
-      dtype: args.dtype || "float32"
+      dtype: args.dtype || "float32",
+      seed: args.seed || 1
     };
 
     super(config);
@@ -41,6 +42,7 @@ export default class NoisyDense extends tf.layers.dense {
     this.sigma = config.sigma;
     this.useFactorised = config.useFactorised;
     this.dtype = config.dtype;
+    this.seed = config.seed;
   }
 
   build(inputShape) {
@@ -58,7 +60,7 @@ export default class NoisyDense extends tf.layers.dense {
       "muKernel",
       [this.lastDim, this.units],
       this.dtype,
-      tf.initializers.randomUniform({ minval: -muInitVal, maxval: muInitVal })
+      tf.initializers.randomUniform({ minval: -muInitVal, maxval: muInitVal, seed: this.seed })
     );
 
     this.sigmaKernel = this.addWeight(
@@ -82,7 +84,7 @@ export default class NoisyDense extends tf.layers.dense {
         "muBias",
         [this.units],
         this.dtype,
-        tf.initializers.randomUniform({ minval: -muInitVal, maxval: muInitVal })
+        tf.initializers.randomUniform({ minval: -muInitVal, maxval: muInitVal, seed: this.seed + 1 })
       );
 
       this.sigmaBias = this.addWeight(
@@ -125,9 +127,11 @@ export default class NoisyDense extends tf.layers.dense {
 
   resetNoise() {
     tf.tidy(() => {
+      this.seed++;
+
       if(this.useFactorised) {
-        const inEps = scaledNoise([this.lastDim, 1], this.dtype);
-        const outEps = scaledNoise([1, this.units], this.dtype);
+        const inEps = scaledNoise([this.lastDim, 1], this.dtype, this.seed);
+        const outEps = scaledNoise([1, this.units], this.dtype, this.seed + 1);
         const newEpsKernel = tf.matMul(inEps, outEps);
 
         this.epsKernel.write(newEpsKernel);
@@ -136,10 +140,10 @@ export default class NoisyDense extends tf.layers.dense {
           this.epsBias.write(outEps.flatten());
         }
       } else {
-        this.epsKernel.write(tf.randomNormal([this.lastDim, this.units]));
+        this.epsKernel.write(tf.randomNormal([this.lastDim, this.units], null, null, this.dtype, this.seed));
       
         if(this.useBias) {
-          this.epsBias.write(tf.randomNormal([this.units]));
+          this.epsBias.write(tf.randomNormal([this.units], null, null, this.dtype, this.seed + 1));
         }
       }
     });
@@ -162,7 +166,8 @@ export default class NoisyDense extends tf.layers.dense {
       ...baseConfig,
       sigma: this.sigma,
       useFactorised: this.useFactorised,
-      dtype: this.dtype
+      dtype: this.dtype,
+      seed: this.seed
     };
   }
 

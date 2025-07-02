@@ -14,7 +14,7 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
+const EPISODES_TYPES            = ["DEFAULT"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
 const NUM_EPISODES_PER_TYPE     = 500;
@@ -271,8 +271,8 @@ async function train() {
     theSnakeAI.epsilonMax = 0.75;
     theSnakeAI.epsilon = 0.75;
 
-    // Save the intermediate model
-    if(SAVE_CHECKPOINT_MODELS) {
+    // Save the intermediate model only if the training is not yet finished
+    if(SAVE_CHECKPOINT_MODELS && currentEpisodeNumber <= currentMaxEpisodes) {
       await saveState(theSnakeAI.currentEnv, true);
     }
 
