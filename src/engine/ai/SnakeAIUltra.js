@@ -22,13 +22,15 @@ import Position from "../Position.js";
 import GameUtils from "../GameUtils.js";
 import TensorflowModelLoader from "./TensorflowModelLoader.js";
 import MultiEnvironmentReplayBuffer from "./utils/memory/MultiEnvironmentReplayBuffer.js";
+import PrioritizedReplayBuffer from "./utils/memory/PrioritizedReplayBuffer.js";
+import UniformReplayBuffer from "./utils/memory/UniformReplayBuffer.js";
 import DuelingQLayer from "./utils/layers/DuelingQLayer.js";
 import NoisyDense from "./utils/layers/NoisyDenseLayer.js";
 import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
 export default class SnakeAIUltra extends SnakeAI {
-  constructor(enableTrainingMode, modelLocation, seed, logger) {
+  constructor(enableTrainingMode, modelLocation, seed, logger, fileReader) {
     super();
 
     this.aiLevelText = "ultra";
@@ -37,6 +39,9 @@ export default class SnakeAIUltra extends SnakeAI {
     this.trainingRandomSeed = seed || new seedrandom().int32();
     this.trainingRng = new seedrandom(this.trainingRandomSeed, { state: true });
     this.logger = logger || console;
+    this.fileReader = fileReader || {
+      readJSON: async (location) => await (await fetch(location)).json()
+    };
 
     this.mainModel = null;
     this.targetModel = null;
@@ -86,12 +91,12 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Check prioritized implementation - Fix memory leak -> OK
     // - Enhance multi environment -> OK
     // - Retest NoisyDenseLayers changes -> OK
-    // - Variable grid size
+    // - Store memory with the model? To improve fine tuning -> OK
+    // - Variable grid size -> OK, need some more tests
     // * Ideas:
     // - Add direction information for Snake head?
     // - Data augmentation (reverse the grid etc...)?
     // - Feed the input with N previous frames?
-    // - Store memory with the model? To improve fine tuning
     // - Distributional RL - Categorical DQN - Multi step learning?
   }
 
@@ -99,6 +104,11 @@ export default class SnakeAIUltra extends SnakeAI {
     this.mainModel = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
 
     if(this.enableTrainingMode) {
+      if(this.modelLocation) {
+        await this.loadMetadata(`${this.modelLocation}/metadata.json`);
+        await this.loadMemory(`${this.modelLocation}/memory.json`);
+      }
+
       if(this.enableTargetModel) {
         this.targetModel = this.createModel();
         this.targetModel.setWeights(this.mainModel.getWeights());
@@ -120,7 +130,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
     const model = modelLocation ?
-      await this.loadModel(modelLocation) :
+      await this.loadModel(`file://${modelLocation}/model.json`) :
       this.createModel();
   
     if(enableTrainingMode) {
@@ -555,14 +565,25 @@ export default class SnakeAIUltra extends SnakeAI {
     this.resetNoisyLayers();
   }
 
-  async exportMemory() {
+  exportMemory() {
+    let type = "";
+
+    if(this.memory instanceof UniformReplayBuffer) {
+      type = UniformReplayBuffer.getType();
+    } else if(this.memory instanceof PrioritizedReplayBuffer) {
+      type = PrioritizedReplayBuffer.getType();
+    } else if(this.memory instanceof MultiEnvironmentReplayBuffer) {
+      type = MultiEnvironmentReplayBuffer.getType();
+    }
+
     return {
       memory: this.memory.serializeToJson(),
+      type,
       maxMemoryLength: this.maxMemoryLength
     };
   }
 
-  async exportMetadata() {
+  exportMetadata() {
     return {
       trainingConfig: {
         dtype: this.dtype,
@@ -580,7 +601,7 @@ export default class SnakeAIUltra extends SnakeAI {
       modelInfo: {
         modelHeight: this.modelHeight,
         modelWidth: this.modelWidth,
-        modelDepth: this.modelWidth,
+        modelDepth: this.modelDepth,
         numberOfPossibleActions: this.numberOfPossibleActions,
         enableVariableInputSize: this.enableVariableInputSize
       },
@@ -593,5 +614,115 @@ export default class SnakeAIUltra extends SnakeAI {
         stepsSinceLastSync: this.stepsSinceLastSync
       }
     };
+  }
+
+  async loadMemory(memoryLocation) {
+    try {
+      this.logger.info(`Loading memory from file: ${memoryLocation}\n`);
+
+      const memoryJSON = await this.fileReader.readJSON(memoryLocation);
+
+      if(!memoryJSON) {
+        this.logger.warn(`No memory found at location: ${memoryLocation}\n`);
+        return;
+      }
+
+      if(!("type" in memoryJSON)) {
+        throw new Error("The 'type' property is missing in the memory file.");
+      }
+
+      if(!("maxMemoryLength" in memoryJSON) || typeof memoryJSON.maxMemoryLength !== "number") {
+        this.logger.warn("maxMemoryLength missing or invalid in the memory file.\n");
+      } else {
+        this.maxMemoryLength = memoryJSON.maxMemoryLength;
+      }
+
+      switch(memoryJSON.type) {
+      case UniformReplayBuffer.getType():
+        this.memory = new UniformReplayBuffer(this.maxMemoryLength, this.trainingRng);
+        break;
+      case PrioritizedReplayBuffer.getType():
+        this.memory = new PrioritizedReplayBuffer(this.maxMemoryLength, this.trainingRng);
+        break;
+      case MultiEnvironmentReplayBuffer.getType():
+        this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng);
+        break;
+      default:
+        throw new Error(`Unknown memory type: ${memoryJSON.type}`);
+      }
+
+      if(!("memory" in memoryJSON)) {
+        throw new Error("The memory data to deserialize are missing or are invalid.");
+      }
+
+      this.memory.deserializeFromJSON(memoryJSON.memory);
+
+      this.logger.info("Memory correctly loaded from file\n");
+    } catch (err) {
+      this.logger.error(`Error loading memory: ${err.message}\n`);
+      this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng);
+    }
+  }
+
+  async loadMetadata(metadataLocation) {
+    try {
+      this.logger.info(`Loading metadata from file: ${metadataLocation}\n`);
+
+      const metadata = await this.fileReader.readJSON(metadataLocation);
+
+      if(!metadata) {
+        this.logger.warn(`No metadata found at location: ${metadataLocation}\n`);
+        return;
+      }
+
+      if(metadata.trainingConfig) {
+        const config = metadata.trainingConfig;
+
+        if(config.dtype) this.dtype = config.dtype;
+
+        if(typeof config.trainingRandomSeed === "number") {
+          this.trainingRandomSeed = config.trainingRandomSeed;
+          this.trainingRng = new seedrandom(this.trainingRandomSeed, { state: true });
+        }
+
+        if(typeof config.enableDuelingQLearning === "boolean") this.enableDuelingQLearning = config.enableDuelingQLearning;
+        if(typeof config.enableNoisyNetwork === "boolean") this.enableNoisyNetwork = config.enableNoisyNetwork;
+        if(typeof config.syncTargetEvery === "number") this.syncTargetEvery = config.syncTargetEvery;
+        if(typeof config.gamma === "number") this.gamma = config.gamma;
+        if(typeof config.epsilonMax === "number") this.epsilonMax = config.epsilonMax;
+        if(typeof config.epsilonMin === "number") this.epsilonMin = config.epsilonMin;
+        if(typeof config.epsilon === "number") this.epsilon = config.epsilon;
+        if(typeof config.learningRate === "number") this.learningRate = config.learningRate;
+        if(typeof config.batchSize === "number") this.batchSize = config.batchSize;
+      }
+
+      if(metadata.modelInfo) {
+        const modelInfo = metadata.modelInfo;
+
+        if(typeof modelInfo.modelHeight === "number") this.modelHeight = modelInfo.modelHeight;
+        if(typeof modelInfo.modelWidth === "number") this.modelWidth = modelInfo.modelWidth;
+        if(typeof modelInfo.modelDepth === "number") this.modelDepth = modelInfo.modelDepth;
+        if(typeof modelInfo.numberOfPossibleActions === "number") this.numberOfPossibleActions = modelInfo.numberOfPossibleActions;
+        if(typeof modelInfo.enableVariableInputSize === "boolean") this.enableVariableInputSize = modelInfo.enableVariableInputSize;
+      }
+
+      if(metadata.trainingState) {
+        const state = metadata.trainingState;
+
+        if(state.trainingRng) {
+          this.trainingRng = seedrandom("", { state: state.trainingRng });
+        }
+
+        if(state.currentEnv !== undefined) this.currentEnv = state.currentEnv;
+        if(state.lastAction !== undefined) this.lastAction = state.lastAction;
+        if(state.currentQValue !== undefined) this.currentQValue = state.currentQValue;
+        if(state.currentEpoch !== undefined) this.currentEpoch = state.currentEpoch;
+        if(state.stepsSinceLastSync !== undefined) this.stepsSinceLastSync = state.stepsSinceLastSync;
+      }
+
+      this.logger.info("Metadata correctly loaded from file\n");
+    } catch (err) {
+      this.logger.error(`Error loading metadata: ${err.message}\n`);
+    }
   }
 }

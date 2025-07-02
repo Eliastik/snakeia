@@ -74,4 +74,39 @@ export default class UniformReplayBuffer extends BaseReplayBuffer {
       buffer: this.buffer
     };
   }
+
+  deserializeFromJSON(memory) {
+    if(!memory || typeof memory !== "object") {
+      throw new Error("Invalid or missing memory data.");
+    }
+
+    if(typeof memory.capacity !== "number" || memory.capacity <= 0) {
+      throw new Error("Property 'capacity' is missing or invalid.");
+    }
+
+    if(!Array.isArray(memory.buffer)) {
+      throw new Error("Property 'buffer' must be an array.");
+    }
+
+    for(const item of memory.buffer) {
+      if(typeof item !== "object" || item === null) {
+        throw new Error("Buffer contains invalid entry (not an object).");
+      }
+
+      const requiredKeys = ["state", "action", "reward", "nextState", "done"];
+
+      for(const key of requiredKeys) {
+        if(!(key in item)) {
+          throw new Error(`Buffer entry missing required key '${key}'.`);
+        }
+      }
+    }
+
+    this.capacity = memory.capacity;
+    this.buffer = memory.buffer.slice(0, this.capacity);
+  }
+
+  static getType() {
+    return "UniformReplayBuffer";
+  }
 }

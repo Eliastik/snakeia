@@ -110,4 +110,41 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
       sumtree: this.sumTree.serializeToJson()
     };
   }
+
+  deserializeFromJSON(memory) {
+    if(!memory || typeof memory !== "object") {
+      throw new Error("Invalid or missing memory data.");
+    }
+
+    if(typeof memory.capacity !== "number" || memory.capacity <= 0) {
+      throw new Error("Property 'capacity' is missing or invalid.");
+    }
+
+    if(typeof memory.calculateWeight !== "boolean") {
+      throw new Error("Property 'calculateWeight' is missing or invalid.");
+    }
+
+    if(typeof memory.alpha !== "number" || memory.alpha < 0) {
+      throw new Error("Property 'alpha' is missing or invalid.");
+    }
+
+    if(typeof memory.currentMaxPriority !== "number" || memory.currentMaxPriority < 0) {
+      throw new Error("Property 'currentMaxPriority' is missing or invalid.");
+    }
+
+    if(!memory.sumtree || typeof memory.sumtree !== "object") {
+      throw new Error("Property 'sumtree' is missing or invalid.");
+    }
+
+    this.capacity = memory.capacity;
+    this.calculateWeight = memory.calculateWeight;
+    this.alpha = memory.alpha;
+    this.currentMaxPriority = memory.currentMaxPriority;
+
+    this.sumTree.deserializeFromJSON(memory.sumtree);
+  }
+
+  static getType() {
+    return "PrioritizedReplayBuffer";
+  }
 }

@@ -57,7 +57,7 @@ export default class SumTree {
   }
   
   get(randomValue) {
-    if(randomValue > this.total) {
+    if(randomValue > this.total()) {
       throw new Error("SumTree: randomValue is greater than total");
     }
 
@@ -95,5 +95,41 @@ export default class SumTree {
       size: this.size,
       write: this.write
     };
+  }
+
+  deserializeFromJSON(memory) {
+    if(!memory || typeof memory !== "object") {
+      throw new Error("Invalid or missing memory data.");
+    }
+
+    if(typeof memory.capacity !== "number" || memory.capacity <= 0) {
+      throw new Error("Property 'capacity' is missing or invalid.");
+    }
+
+    if(!Array.isArray(memory.tree)) {
+      throw new Error("Property 'tree' must be an array.");
+    }
+
+    if(!Array.isArray(memory.data)) {
+      throw new Error("Property 'data' must be an array.");
+    }
+
+    if(typeof memory.size !== "number" || memory.size < 0 || memory.size > memory.capacity) {
+      throw new Error("Property 'size' is missing or invalid.");
+    }
+
+    if(typeof memory.write !== "number" || memory.write < 0 || memory.write >= memory.capacity) {
+      throw new Error("Property 'write' is missing or invalid.");
+    }
+
+    if(memory.tree.length !== 2 * memory.capacity - 1) {
+      throw new Error("Length of 'tree' array is inconsistent with capacity.");
+    }
+
+    this.capacity = memory.capacity;
+    this.tree = new Float32Array(memory.tree);
+    this.data = memory.data.slice(0, this.capacity);
+    this.size = memory.size;
+    this.write = memory.write;
   }
 }

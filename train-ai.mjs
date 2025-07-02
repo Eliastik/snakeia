@@ -14,10 +14,10 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const EPISODES_TYPES            = ["DEFAULT"];
+const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
-const NUM_EPISODES_PER_TYPE     = 5;
+const NUM_EPISODES_PER_TYPE     = 500;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 15;
 const MAX_TICKS                 = 1000;
@@ -34,7 +34,7 @@ const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = true; // Export memory
 // Path to a model to load before beginning training (for fine tuning)
-// Example: file://models/2025-06-29T20-08-14-389Z/5x5_RANDOM_WALLS
+// Example: ./models/2025-06-29T20-08-14-389Z/5x5_RANDOM_WALLS
 const LOAD_MODEL_PATH           = null;
 // End of settings
 
@@ -56,13 +56,17 @@ const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, TRAINING_SEED, {
   info: (text) => multiBar.log(text),
   warn: (text) => multiBar.log(`[WARNING] ${text}`),
   error: (text) => multiBar.log(`[ERROR] ${text}`)
+}, {
+  readJSON: async (location) => JSON.parse(fs.readFileSync(location, "utf-8"))
 });
-
-await theSnakeAI.setup(ENABLE_TENSORBOARD_LOGS ? tensorboardSummaryWriter : null);
 
 const currentMaxEpisodes = getMaxEpisodesCount();
 
 const progressBar = multiBar.create(currentMaxEpisodes, 0);
+
+await theSnakeAI.setup(ENABLE_TENSORBOARD_LOGS ? tensorboardSummaryWriter : null);
+
+multiBar.update();
 
 let totalScore = 0;
 let totalReward = 0;
@@ -181,8 +185,8 @@ async function saveModel(fullPath) {
   multiBar.update();
 }
 
-async function saveMetadata(fullPath) {
-  const metadataJSON = JSON.stringify(await theSnakeAI.exportMetadata(), null, 0);
+function saveMetadata(fullPath) {
+  const metadataJSON = JSON.stringify(theSnakeAI.exportMetadata(), null, 0);
 
   fs.writeFileSync(`${fullPath}/metadata.json`, metadataJSON);
 
@@ -190,8 +194,8 @@ async function saveMetadata(fullPath) {
   multiBar.update();
 }
 
-async function saveMemory(fullPath) {
-  const checkpointJSON = JSON.stringify(await theSnakeAI.exportMemory(), null, 0);
+function saveMemory(fullPath) {
+  const checkpointJSON = JSON.stringify(theSnakeAI.exportMemory(), null, 0);
 
   fs.writeFileSync(`${fullPath}/memory.json`, checkpointJSON);
 
@@ -207,10 +211,10 @@ async function saveState(subDirectory = "") {
   // Synchronize target model with main model when the training is finished
   await saveModel(fullPath);
 
-  await saveMetadata(fullPath);
+  saveMetadata(fullPath);
 
   if(EXPORT_MEMORY) {
-    await saveMemory(fullPath);
+    saveMemory(fullPath);
   }
 }
 

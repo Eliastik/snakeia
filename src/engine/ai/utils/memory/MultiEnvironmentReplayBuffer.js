@@ -30,9 +30,10 @@ export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
     this.currentEnvironment = null;
     this.selectMode = selectMode || "classic";
     this.currentBufferIndex = 0;
+    this.bufferType = bufferType;
   
-    this.createBuffer = (capacity) => {
-      return bufferType === "prioritized"
+    this.createBuffer = (type, capacity) => {
+      return type === "prioritized"
         ? new PrioritizedReplayBuffer(capacity, rng)
         : new UniformReplayBuffer(capacity, rng);
     };
@@ -42,7 +43,7 @@ export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
     this.currentEnvironment = envId;
   
     if(!this.buffers.has(envId)) {
-      this.buffers.set(envId, this.createBuffer(this.capacity));
+      this.buffers.set(envId, this.createBuffer(this.bufferType, this.capacity));
     }
   }
   
@@ -174,6 +175,7 @@ export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
   serializeToJson() {
     return {
       capacity: this.capacity,
+      bufferType: this.bufferType,
       buffers: Array.from(this.buffers.keys()).map(key => {
         return {
           name: key,
@@ -184,5 +186,62 @@ export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
       selectMode: this.selectMode,
       currentBufferIndex: this.currentBufferIndex
     };
+  }
+
+  deserializeFromJSON(memory) {
+    if(!memory || typeof memory !== "object") {
+      throw new Error("Memory data is invalid or missing.");
+    }
+
+    if(typeof memory.capacity !== "number" || memory.capacity <= 0) {
+      throw new Error("Property 'capacity' is missing or invalid.");
+    }
+
+    if(typeof memory.bufferType !== "string" || !["uniform", "prioritized"].includes(memory.bufferType)) {
+      throw new Error("Property 'bufferType' is invalid or not supported.");
+    }
+
+    if(!Array.isArray(memory.buffers)) {
+      throw new Error("Property 'buffers' must be an array.");
+    }
+
+    if(typeof memory.selectMode !== "string") {
+      throw new Error("Property 'selectMode' is missing or invalid.");
+    }
+
+    if(typeof memory.currentBufferIndex !== "number" || memory.currentBufferIndex < 0) {
+      throw new Error("Property 'currentBufferIndex' is missing or invalid.");
+    }
+
+    this.capacity = memory.capacity;
+    this.bufferType = memory.bufferType;
+    this.currentEnvironment = memory.currentEnvironment || null;
+    this.selectMode = memory.selectMode;
+    this.currentBufferIndex = memory.currentBufferIndex;
+
+    this.buffers.clear();
+
+    memory.buffers.forEach(saved => {
+      if(!saved || typeof saved !== "object") {
+        throw new Error("An element in 'buffers' is invalid.");
+      }
+
+      if(typeof saved.name !== "string") {
+        throw new Error("A buffer has an invalid or missing 'name'.");
+      }
+
+      if(!saved.buffer || typeof saved.buffer !== "object") {
+        throw new Error(`The buffer associated with '${saved.name}' is invalid or missing.`);
+      }
+
+      const buffer = this.createBuffer(this.bufferType, this.capacity);
+      buffer.deserializeFromJSON(saved.buffer);
+
+      this.buffers.set(saved.name, buffer);
+    });
+  }
+
+  static getType() {
+    return "MultiEnvironmentReplayBuffer";
   }
 }
