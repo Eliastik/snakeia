@@ -35,7 +35,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.enableTrainingMode = enableTrainingMode;
     this.modelLocation = modelLocation;
     this.trainingRandomSeed = seed || new seedrandom().int32();
-    this.trainingRng = new seedrandom(this.trainingRandomSeed);
+    this.trainingRng = new seedrandom(this.trainingRandomSeed, { state: true });
     this.logger = logger || console;
 
     this.mainModel = null;
@@ -555,9 +555,43 @@ export default class SnakeAIUltra extends SnakeAI {
     this.resetNoisyLayers();
   }
 
-  async saveMemory() {
-    return JSON.stringify({
-      memory: this.memory.serializeToJson()
-    }, null, 0);
+  async exportMemory() {
+    return {
+      memory: this.memory.serializeToJson(),
+      maxMemoryLength: this.maxMemoryLength
+    };
+  }
+
+  async exportMetadata() {
+    return {
+      trainingConfig: {
+        dtype: this.dtype,
+        trainingRandomSeed: this.trainingRandomSeed,
+        enableDuelingQLearning: this.enableDuelingQLearning,
+        enableNoisyNetwork: this.enableNoisyNetwork,
+        syncTargetEvery: this.syncTargetEvery,
+        gamma: this.gamma,
+        epsilonMax: this.epsilonMax,
+        epsilonMin: this.epsilonMin,
+        epsilon: this.epsilon,
+        learningRate: this.learningRate,
+        batchSize: this.batchSize
+      },
+      modelInfo: {
+        modelHeight: this.modelHeight,
+        modelWidth: this.modelWidth,
+        modelDepth: this.modelWidth,
+        numberOfPossibleActions: this.numberOfPossibleActions,
+        enableVariableInputSize: this.enableVariableInputSize
+      },
+      trainingState: {
+        trainingRng: this.trainingRng.state(),
+        currentEnv: this.currentEnv,
+        lastAction: this.lastAction,
+        currentQValue: this.currentQValue,
+        currentEpoch: this.currentEpoch,
+        stepsSinceLastSync: this.stepsSinceLastSync
+      }
+    };
   }
 }

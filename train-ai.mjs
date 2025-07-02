@@ -5,6 +5,7 @@ import GameEngine from "./src/engine/GameEngine.js";
 import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 import cliProgress from "cli-progress";
 import fs from "fs";
+import process from "process";
 
 // import tf from "@tensorflow/tfjs-node";
 // Uncomment to enable GPU, and comment above import
@@ -31,9 +32,9 @@ const GRID_SEED                 = 2;
 const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
-const SAVE_MEMORY               = true;
+const EXPORT_MEMORY             = true; // Export memory
 // Path to a model to load before beginning training (for fine tuning)
-// Example: file://models/2025-06-29T20-08-14-389Z/5x5_RANDOM_WALLS/model.json
+// Example: file://models/2025-06-29T20-08-14-389Z/5x5_RANDOM_WALLS
 const LOAD_MODEL_PATH           = null;
 // End of settings
 
@@ -168,29 +169,48 @@ async function executeTick(theSnake, gameEngine, currentTick) {
   return currentReward;
 }
 
-async function saveModel(subDirectory = "") {
-  const fullPath = `${MODEL_SAVE_DIRECTORY}/${subDirectory}`;
-
+async function saveModel(fullPath) {
   multiBar.log(`Saving model to ${fullPath}...\n`);
   multiBar.update();
 
-  fs.mkdirSync(fullPath, { recursive: true });
-
-  // Synchronize target model with main model when the training is finished
   theSnakeAI.synchronizeTargetNetwork();
 
   await theSnakeAI.mainModel.save(`file://${fullPath}`);
 
   multiBar.log(`Model saved to ${fullPath} directory\n`);
   multiBar.update();
+}
 
-  if(SAVE_MEMORY) {
-    const memoryJSON = await theSnakeAI.saveMemory();
+async function saveMetadata(fullPath) {
+  const metadataJSON = JSON.stringify(await theSnakeAI.exportMetadata(), null, 0);
 
-    fs.writeFileSync(`${fullPath}/memory.json`, memoryJSON);
+  fs.writeFileSync(`${fullPath}/metadata.json`, metadataJSON);
 
-    multiBar.log(`Memory saved to ${fullPath} directory\n`);
-    multiBar.update();
+  multiBar.log(`Metadata saved to ${fullPath} directory\n`);
+  multiBar.update();
+}
+
+async function saveMemory(fullPath) {
+  const checkpointJSON = JSON.stringify(await theSnakeAI.exportMemory(), null, 0);
+
+  fs.writeFileSync(`${fullPath}/memory.json`, checkpointJSON);
+
+  multiBar.log(`Memory saved to ${fullPath} directory\n`);
+  multiBar.update();
+}
+
+async function saveState(subDirectory = "") {
+  const fullPath = `${MODEL_SAVE_DIRECTORY}/${subDirectory}`;
+
+  fs.mkdirSync(fullPath, { recursive: true });
+
+  // Synchronize target model with main model when the training is finished
+  await saveModel(fullPath);
+
+  await saveMetadata(fullPath);
+
+  if(EXPORT_MEMORY) {
+    await saveMemory(fullPath);
   }
 }
 
@@ -249,7 +269,7 @@ async function train() {
 
     // Save the intermediate model
     if(SAVE_CHECKPOINT_MODELS) {
-      await saveModel(theSnakeAI.currentEnv, true);
+      await saveState(theSnakeAI.currentEnv, true);
     }
 
     currentEpisodeType = getNextEpisodeType(currentEpisodeType);
@@ -263,7 +283,9 @@ await train();
 multiBar.log(`Training finished! Average score: ${totalScore / currentMaxEpisodes} - Average reward: ${totalReward / currentMaxEpisodes} - Time: ${performance.now() - trainStartTime} ms\n`);
 multiBar.update();
 
-await saveModel();
+await saveState();
 
 progressBar.stop();
 multiBar.stop();
+
+process.exit();
