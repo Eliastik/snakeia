@@ -19,22 +19,31 @@
 import BaseReplayBuffer from "./BaseReplayBuffer.js";
 
 export default class UniformReplayBuffer extends BaseReplayBuffer {
-  constructor(capacity, logger, rng) {
+  constructor(capacity, rng, logger) {
     super();
 
     this.capacity = capacity;
     this.rng = rng;
     this.logger = logger;
 
-    this.buffer = [];
+    this.buffer = new Array(capacity);
+    this.position = 0;
+    this.totalSize = 0;
   }
   
   add(state, action, reward, nextState, done) {
-    this.buffer.push({ state, action, reward, nextState, done });
+    const overwrittenData = this.buffer[this.position];
 
-    if(this.buffer.length > this.capacity) {
-      const removedMemory = this.buffer.shift();
-      this.cleanOldMemory(removedMemory);
+    if(overwrittenData) {
+      this.cleanOldMemory(overwrittenData);
+    }
+
+    this.buffer[this.position] = { state, action, reward, nextState, done };
+
+    this.position = (this.position + 1) % this.capacity;
+
+    if(this.totalSize < this.capacity) {
+      this.totalSize++;
     }
   }
   
@@ -43,7 +52,7 @@ export default class UniformReplayBuffer extends BaseReplayBuffer {
     const indices = [];
 
     for(let i = 0; i < batchSize; i++) {
-      const index = Math.floor(this.rng() * this.buffer.length);
+      const index = Math.floor(this.rng() * this.totalSize);
 
       samples.push(this.buffer[index]);
       indices.push(index);
@@ -62,7 +71,7 @@ export default class UniformReplayBuffer extends BaseReplayBuffer {
   }
   
   size() {
-    return this.buffer.length;
+    return this.totalSize;
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -73,7 +82,9 @@ export default class UniformReplayBuffer extends BaseReplayBuffer {
   serializeToJson() {
     return {
       capacity: this.capacity,
-      buffer: this.buffer
+      buffer: this.buffer,
+      position: this.position,
+      totalSize: this.totalSize
     };
   }
 
@@ -86,26 +97,22 @@ export default class UniformReplayBuffer extends BaseReplayBuffer {
       throw new Error("Property 'capacity' is missing or invalid.");
     }
 
+    if(typeof memory.totalSize !== "number" || memory.totalSize < 0 || memory.totalSize > memory.capacity) {
+      throw new Error("Property 'totalSize' is missing or invalid.");
+    }
+
+    if(typeof memory.position !== "number" || memory.position < 0 || memory.position >= memory.capacity) {
+      throw new Error("Property 'position' is missing or invalid.");
+    }
+
     if(!Array.isArray(memory.buffer)) {
       throw new Error("Property 'buffer' must be an array.");
     }
 
-    for(const item of memory.buffer) {
-      if(typeof item !== "object" || item === null) {
-        throw new Error("Buffer contains invalid entry (not an object).");
-      }
-
-      const requiredKeys = ["state", "action", "reward", "nextState", "done"];
-
-      for(const key of requiredKeys) {
-        if(!(key in item)) {
-          throw new Error(`Buffer entry missing required key '${key}'.`);
-        }
-      }
-    }
-
     this.capacity = memory.capacity;
     this.buffer = memory.buffer.slice(0, this.capacity);
+    this.position = memory.position;
+    this.totalSize = memory.totalSize;
   }
 
   static getType() {

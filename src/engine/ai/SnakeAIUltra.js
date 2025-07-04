@@ -131,7 +131,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
     const model = modelLocation ?
-      await this.loadModel(`file://${modelLocation}/model.json`) :
+      await this.loadModel(modelLocation) :
       this.createModel();
   
     if(enableTrainingMode) {

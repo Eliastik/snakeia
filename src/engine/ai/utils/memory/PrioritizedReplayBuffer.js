@@ -67,7 +67,7 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
       const { index, value, data } = this.sumTree.get(r);
 
       if(!data) {
-        this.logger.warn(`\nPrioritizedReplayBuffer: Found null/undefined data for value: ${r}\n`);
+        this.logger.warn(`PrioritizedReplayBuffer: Found null/undefined data for value: ${r}\n`);
         continue;
       }
 

@@ -473,6 +473,8 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
   - [ ] Récupération du modèle : API à appeler qui retourne la version + date version + URL vers le modèle / éventuellement une liste de version pour choisir la version du modèle ?
   - [ ] Afficher informations sur les niveaux de l'IA
 - [ ] Mettre à jour socket.io
+- [ ] Bug sur la détection des objectifs atteints dans le mode niveaux (il y a l'air d'y avoir un délai) suite à l'opti et refactor du moteur de jeu
+- [ ] Bug graphique suite à l'opti du draw
 - [x] Améliorer les performances graphiques -> Optimiser le rendu de la grille et des Snake (rendu différentiel, uniquement redessiner ce qui change)
 - [x] Améliorer algorithme détection IA bloquée : se baser aussi sur les actions exécutée (pas seulement les positions) ? -> Non
 - [x] Ajout tests unitaires

@@ -40,7 +40,11 @@ export default class TensorflowModelLoader {
     return TensorflowModelLoader.instance;
   }
 
-  async loadModel(modelLocation) {
+  async loadModel(location) {
+    const isNode = (typeof process !== "undefined");
+    const modelLocation = isNode ?
+      `file://${location}/model.json` : location;
+
     if(TensorflowModelLoader.modelCache.has(modelLocation)) {
       return TensorflowModelLoader.modelCache.get(modelLocation);
     }
