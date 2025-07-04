@@ -67,10 +67,10 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.001;
     this.batchSize = 32;
-    this.maxMemoryLength = 10000;
+    this.maxMemoryLength = 100000;
     // End of model and training settings
 
-    this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, "prioritized");
+    this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger, "prioritized");
     this.currentEnv = null;
     this.lastAction = null;
     this.currentQValue = 0;
@@ -98,6 +98,7 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Data augmentation (reverse the grid etc...)?
     // - Feed the input with N previous frames?
     // - Distributional RL - Categorical DQN - Multi step learning?
+    // - Reproducible training with seed: some fixes needed?
   }
 
   async setup(summaryWriter) {
@@ -643,13 +644,13 @@ export default class SnakeAIUltra extends SnakeAI {
 
       switch(memoryJSON.type) {
       case UniformReplayBuffer.getType():
-        this.memory = new UniformReplayBuffer(this.maxMemoryLength, this.trainingRng);
+        this.memory = new UniformReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger);
         break;
       case PrioritizedReplayBuffer.getType():
-        this.memory = new PrioritizedReplayBuffer(this.maxMemoryLength, this.trainingRng);
+        this.memory = new PrioritizedReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger);
         break;
       case MultiEnvironmentReplayBuffer.getType():
-        this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng);
+        this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger);
         break;
       default:
         throw new Error(`Unknown memory type: ${memoryJSON.type}`);
@@ -664,7 +665,7 @@ export default class SnakeAIUltra extends SnakeAI {
       this.logger.info("Memory correctly loaded from file\n");
     } catch (err) {
       this.logger.error(`Error loading memory: ${err.message}\n`);
-      this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng);
+      this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger);
     }
   }
 

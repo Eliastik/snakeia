@@ -20,17 +20,19 @@ import BaseReplayBuffer from "./BaseReplayBuffer.js";
 import SumTree from "./SumTree.js";
 
 export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
-  constructor(capacity, rng, calculateWeight = false, alpha = 0.6) {
+  constructor(capacity, rng, logger, calculateWeight = false, alpha = 0.6, beta = 0.4, espilon = 1e-5, betaIncrementPerSampling = 0.001) {
     super();
 
     this.capacity = capacity;
     this.rng = rng;
+    this.logger = logger;
     this.calculateWeight = calculateWeight;
     this.alpha = alpha;
-    this.defaultPriority = 1.0;
+    this.beta = beta;
+    this.espilon = espilon;
+    this.betaIncrementPerSampling = betaIncrementPerSampling;
 
     this.sumTree = new SumTree(capacity);
-    this.currentMaxPriority = Math.pow(this.defaultPriority, this.alpha);
   }
 
   add(state, action, reward, nextState, done) {
@@ -42,54 +44,59 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
       this.cleanOldMemory(overwrittenData);
     }
 
-    this.sumTree.add(this.currentMaxPriority, data);
+    this.sumTree.add(Math.pow(this.sumTree.getMaxPriority(), this.alpha), data);
   }
 
-  sample(batchSize, beta = 0.4) {
+  sample(batchSize) {
     const samples = [];
     const indices = [];
     const weights = [];
 
+    this.beta = Math.min(1.0, this.beta + this.betaIncrementPerSampling);
+
     const totalPriority = this.sumTree.total();
+    const segment = totalPriority / batchSize;
 
     let maxWeight = 0;
 
     for(let i = 0; i < batchSize; i++) {
-      const r = this.rng() * totalPriority;
+      const a = segment * i;
+      const b = segment * (i + 1);
+      const r = a + this.rng() * (b - a);
+
       const { index, value, data } = this.sumTree.get(r);
+
+      if(!data) {
+        this.logger.warn(`\nPrioritizedReplayBuffer: Found null/undefined data for value: ${r}\n`);
+        continue;
+      }
 
       indices.push(index);
       samples.push(data);
 
-      const prob = value / totalPriority;
-      const weight = Math.pow(this.sumTree.size * prob, -beta);
+      if(this.calculateWeight) {
+        const prob = value / totalPriority;
+        const weight = Math.pow(this.sumTree.size * prob, -this.beta);
 
-      weights.push(weight);
+        weights.push(weight);
 
-      if(weight > maxWeight) {
-        maxWeight = weight;
+        if(weight > maxWeight) {
+          maxWeight = weight;
+        }
       }
     }
-
-    const normalizedWeights = weights.map(w => w / maxWeight);
 
     return {
       samples,
       indices,
-      weights: this.calculateWeight ? normalizedWeights : null
+      weights: this.calculateWeight ? weights.map(w => w / maxWeight) : null
     };
   }
 
   // eslint-disable-next-line no-unused-vars
   updatePriority(treeIndex, tdError, envId) {
-    const newPriority = Math.abs(tdError) + 1e-5;
-    const priority = Math.pow(newPriority, this.alpha);
-
+    const priority = Math.pow(Math.abs(tdError) + this.espilon, this.alpha);
     this.sumTree.update(treeIndex, priority);
-
-    if (priority > this.currentMaxPriority) {
-      this.currentMaxPriority = priority;
-    }
   }
 
   size() {
@@ -106,7 +113,9 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
       capacity: this.capacity,
       calculateWeight: this.calculateWeight,
       alpha: this.alpha,
-      currentMaxPriority: this.currentMaxPriority,
+      beta: this.beta,
+      espilon: this.espilon,
+      betaIncrementPerSampling: this.betaIncrementPerSampling,
       sumtree: this.sumTree.serializeToJson()
     };
   }
@@ -128,10 +137,6 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
       throw new Error("Property 'alpha' is missing or invalid.");
     }
 
-    if(typeof memory.currentMaxPriority !== "number" || memory.currentMaxPriority < 0) {
-      throw new Error("Property 'currentMaxPriority' is missing or invalid.");
-    }
-
     if(!memory.sumtree || typeof memory.sumtree !== "object") {
       throw new Error("Property 'sumtree' is missing or invalid.");
     }
@@ -139,7 +144,6 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
     this.capacity = memory.capacity;
     this.calculateWeight = memory.calculateWeight;
     this.alpha = memory.alpha;
-    this.currentMaxPriority = memory.currentMaxPriority;
 
     this.sumTree.deserializeFromJSON(memory.sumtree);
   }

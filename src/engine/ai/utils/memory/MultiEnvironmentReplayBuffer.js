@@ -21,11 +21,12 @@ import PrioritizedReplayBuffer from "./PrioritizedReplayBuffer.js";
 import UniformReplayBuffer from "./UniformReplayBuffer.js";
 
 export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
-  constructor(capacity, rng, bufferType = "uniform", selectMode = "cycling") {
+  constructor(capacity, rng, logger, bufferType = "uniform", selectMode = "cycling") {
     super();
 
     this.capacity = capacity;
     this.rng = rng;
+    this.logger = logger;
     this.buffers = new Map();
     this.currentEnvironment = null;
     this.selectMode = selectMode || "classic";
@@ -34,8 +35,8 @@ export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
   
     this.createBuffer = (type, capacity) => {
       return type === "prioritized"
-        ? new PrioritizedReplayBuffer(capacity, rng)
-        : new UniformReplayBuffer(capacity, rng);
+        ? new PrioritizedReplayBuffer(capacity, rng, this.logger)
+        : new UniformReplayBuffer(capacity, rng, this.logger);
     };
   }
   

@@ -23,6 +23,7 @@ export default class SumTree {
     this.data = new Array(capacity);
     this.size = 0;
     this.write = 0;
+    this.maxPriority = 1.0;
   }
   
   total() {
@@ -34,31 +35,51 @@ export default class SumTree {
 
     this.data[this.write] = data;
     this.update(index, p);
-  
-    this.write++;
 
-    if(this.write >= this.capacity) {
-      this.write = 0;
-    }
-
-    if(this.size < this.capacity) {
-      this.size++;
-    }
+    this.write = (this.write + 1) % this.capacity;
+    this.size = Math.min(this.size + 1, this.capacity);
   }
   
   update(index, p) {
-    const change = p - this.tree[index];
+    const oldPriority = this.tree[index];
+    const change = p - oldPriority;
+
     this.tree[index] = p;
+
+    if(p > this.maxPriority) {
+      this.maxPriority = p;
+    } else if(oldPriority === this.maxPriority && p < oldPriority) {
+      this.recalculateMaxPriority();
+    }
 
     while(index !== 0) {
       index = Math.floor((index - 1) / 2);
       this.tree[index] += change;
     }
   }
+
+  getMaxPriority() {
+    return this.maxPriority;
+  }
+
+  recalculateMaxPriority() {
+    const start = this.capacity - 1;
+    let max = 0;
+    
+    for(let i = start; i < start + this.size; i++) {
+      const p = this.tree[i];
+
+      if(p > max) {
+        max = p;
+      }
+    }
+
+    this.maxPriority = max;
+  }
   
-  get(randomValue) {
-    if(randomValue > this.total()) {
-      throw new Error("SumTree: randomValue is greater than total");
+  get(value) {
+    if(value > this.total()) {
+      throw new Error("SumTree: value is greater than total");
     }
 
     let index = 0;
@@ -67,11 +88,11 @@ export default class SumTree {
       const left = 2 * index + 1;
       const right = left + 1;
 
-      if(randomValue <= this.tree[left]) {
+      if(value <= this.tree[left]) {
         index = left;
       } else {
         index = right;
-        randomValue -= this.tree[left];
+        value -= this.tree[left];
       }
     }
 
@@ -93,6 +114,7 @@ export default class SumTree {
       tree: Array.from(this.tree),
       data: this.data,
       size: this.size,
+      maxPriority: this.maxPriority,
       write: this.write
     };
   }
@@ -118,6 +140,10 @@ export default class SumTree {
       throw new Error("Property 'size' is missing or invalid.");
     }
 
+    if(typeof memory.maxPriority !== "number") {
+      throw new Error("Property 'maxPriority' is missing or invalid.");
+    }
+
     if(typeof memory.write !== "number" || memory.write < 0 || memory.write >= memory.capacity) {
       throw new Error("Property 'write' is missing or invalid.");
     }
@@ -130,6 +156,7 @@ export default class SumTree {
     this.tree = new Float32Array(memory.tree);
     this.data = memory.data.slice(0, this.capacity);
     this.size = memory.size;
+    this.maxPriority = memory.maxPriority;
     this.write = memory.write;
   }
 }

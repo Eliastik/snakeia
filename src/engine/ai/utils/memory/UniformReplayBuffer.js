@@ -19,11 +19,13 @@
 import BaseReplayBuffer from "./BaseReplayBuffer.js";
 
 export default class UniformReplayBuffer extends BaseReplayBuffer {
-  constructor(capacity, rng) {
+  constructor(capacity, logger, rng) {
     super();
 
     this.capacity = capacity;
     this.rng = rng;
+    this.logger = logger;
+
     this.buffer = [];
   }
   
