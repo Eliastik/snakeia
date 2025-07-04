@@ -472,6 +472,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 - [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning) (En cours)
   - [ ] Récupération du modèle : API à appeler qui retourne la version + date version + URL vers le modèle / éventuellement une liste de version pour choisir la version du modèle ?
   - [ ] Afficher informations sur les niveaux de l'IA
+  - [ ] Corriger les pommes qui disparaissent en fin de partie (pour permettre d'avoir le vrai état de fin)
 - [ ] Mettre à jour socket.io
 - [ ] Bug sur la détection des objectifs atteints dans le mode niveaux (il y a l'air d'y avoir un délai) suite à l'opti et refactor du moteur de jeu
 - [ ] Bug graphique suite à l'opti du draw
