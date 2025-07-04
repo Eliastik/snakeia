@@ -41,7 +41,8 @@ export default class TensorflowModelLoader {
   }
 
   async loadModel(location) {
-    const isNode = (typeof process !== "undefined");
+    // eslint-disable-next-line no-undef
+    const isNode = (typeof process !== "undefined") && (process.release.name === "node");
     const modelLocation = isNode ?
       `file://${location}/model.json` : location;
 
