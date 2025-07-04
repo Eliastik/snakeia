@@ -62,14 +62,14 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
     for(let i = 0; i < batchSize; i++) {
       const a = segment * i;
       const b = segment * (i + 1);
-      const r = a + this.rng() * (b - a);
 
-      const { index, value, data } = this.sumTree.get(r);
+      const sampled = this.sampleOneWithRetry(a, b);
 
-      if(!data) {
-        this.logger.warn(`PrioritizedReplayBuffer: Found null/undefined data for value: ${r}\n`);
+      if(!sampled) {
         continue;
       }
+
+      const { index, value, data } = sampled;
 
       indices.push(index);
       samples.push(data);
@@ -91,6 +91,24 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
       indices,
       weights: this.calculateWeight ? weights.map(w => w / maxWeight) : null
     };
+  }
+
+  sampleOneWithRetry(a, b, maxRetries = 10) {
+    for(let attempt = 0; attempt < maxRetries; attempt++) {
+      const r = a + this.rng() * (b - a);
+
+      const { index, value, data } = this.sumTree.get(r);
+
+      if(data) {
+        return { index, value, data };
+      } else {
+        this.logger.warn(`PrioritizedReplayBuffer: Retry sampling, null data at value ${r} (attempt ${attempt + 1})\n`);
+      }
+    }
+
+    this.logger.error(`PrioritizedReplayBuffer: Failed to sample valid data after ${maxRetries} attempts\n`);
+
+    return null;
   }
 
   // eslint-disable-next-line no-unused-vars
