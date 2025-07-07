@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 import GameControllerSocket from "./GameControllerSocket.js";
 import GameConstants from "./Constants.js";
 
@@ -52,7 +52,9 @@ export default class OnlineClient {
       this.url = this.url.substring(0, this.url.length - 1);
     }
     
-    this.socket = new io(this.getURL() + (this.token ? "?token=" + this.token : ""));
+    this.socket = new io(this.getURL() + (this.token ? "?token=" + this.token : ""), {
+      withCredentials: true
+    });
 
     this.socket.once("connect", () => {
       this.socket.once("authent", data => {
@@ -116,7 +118,9 @@ export default class OnlineClient {
     if(!this.loadingRooms) {
       this.loadingRooms = true;
 
-      const ioRooms = new io(this.getURL() + "/rooms" + (this.token ? "?token=" + this.token : ""));
+      const ioRooms = new io(this.getURL() + "/rooms" + (this.token ? "?token=" + this.token : ""), {
+        withCredentials: true
+      });
     
       ioRooms.once("rooms", data => {
         callback(true, data);
@@ -153,7 +157,9 @@ export default class OnlineClient {
     if(!this.creatingRoom) {
       this.creatingRoom = true;
       
-      const ioCreate = new io(this.getURL() + "/createRoom" + (this.token ? "?token=" + this.token : ""));
+      const ioCreate = new io(this.getURL() + "/createRoom" + (this.token ? "?token=" + this.token : ""), {
+        withCredentials: true
+      });
 
       ioCreate.once("connect", () => {
         ioCreate.emit("create", data);
