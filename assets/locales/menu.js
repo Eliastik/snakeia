@@ -260,6 +260,32 @@ i18next.addResourceBundle("fr", "translation", {
     "authenticationServer": "Authentification au serveur",
     "linkAuthenticationServer": "Si le formulaire ne s'affiche pas, cliquez ici",
     "disconnectedError": "Vous avez été déconnecté du serveur. Veuillez réessayer."
+  },
+  "modalAIInformations": {
+    "title": "Information sur les niveaux des IAs",
+    "lead": "Voici une description des différents niveaux des IAs. Elle vous permet de mieux comprendre les différentes stratégies adoptées par l’IA ainsi que son fonctionnement technique interne :",
+    "weakPoint": "Point faible :",
+    "technical": "Technique :",
+    "random": "Au hasard",
+    "randomDescription": "Cette IA joue totalement au hasard. Elle effectue des mouvements aléatoires mais tente d'éviter les obstacles lorsque c'est possible. Autant dire qu'elle n'est pas très forte…",
+    "randomWeakPoint": "Très imprévisible mais facile à piéger : elle se bloque rapidement sans réfléchir.",
+    "low": "Faible",
+    "lowDescription": "Cette IA est assez basique. Elle s'aligne au niveau de la pomme, en se déplaçant d'abord horizontalement pour s’aligner, puis verticalement pour l’atteindre. Si elle rencontre un obstacle, elle essaye de le contourner tant bien que mal. Si elle se retrouve bloquée, elle tente de survivre en attendant d'être débloquée, en zigzaguant.",
+    "lowTechnical": "Algorithme heuristique basique",
+    "lowWeakPoint": "Se laisse facilement piéger dans des couloirs ou coins ; ne planifie pas plusieurs étapes à l’avance.",
+    "normal": "Normal",
+    "normalDescription": "Cette IA calcule le chemin le plus rapide pour atteindre la pomme, tout en évitant les obstacles. Elle ne sait pas utiliser les bords de la grille pour passer de l’autre côté. Si elle se retrouve bloquée, elle ne réagit pas et finit par percuter l’obstacle devant elle.",
+    "normalTechnical": "Algorithme de recherche de chemin A*",
+    "normalWeakPoint": "Très efficace en terrain dégagé, mais incapable de réagir si on lui bloque l’accès à la pomme.",
+    "high": "Élevé",
+    "highDescription": "Cette IA calcule le chemin le plus rapide pour atteindre la pomme, tout en évitant les obstacles, comme l’IA de niveau Normal, mais avec des capacités supplémentaires. Elle sait utiliser les bords de la grille pour passer de l’autre côté. Si elle se retrouve bloquée, elle utilise l'heuristique de l'IA de niveau Faible pour essayer de survivre en attendant d'être débloquée.",
+    "highTechnical": "Algorithme de recherche de chemin A*, algorithme heuristique en complément",
+    "highWeakPoint": "Difficile à piéger, mais peut paniquer ou mal s’adapter si le joueur crée des situations ambiguës ou dynamiques.",
+    "ultra": "Ultra",
+    "ultraDescription": "Cette IA est basée sur un réseau de neurones artificiels entraîné sur un nombre important de parties. Sa stratégie et son comportement dépendent de l'entraînement, mais contrairement aux IA pré-programmées, elle est généralement capable de repérer en avance les pièges et de les éviter.",
+    "ultraTechnical": "Algorithme d'apprentissage par renforcement Deep-Q-Learning, réseau de neurones artificiels (basé sur un réseau convolutif en entrée), autres améliorations de l'algorithme (Double Deep-Q-Learning, Dueling Layers, Noisy Networks for Exploration, Prioritized Experience Replay).",
+    "ultraWeakPoint": "Dépend de l'entraînement, mais peut avoir appris des comportements sous-optimaux ou mauvais.",
+    "close": "Fermer"
   }
 }, true, false);
 
@@ -505,5 +531,31 @@ i18next.addResourceBundle("en", "translation", {
     "authenticationServer": "Server authentication",
     "linkAuthenticationServer": "If the form does not appear, click here",
     "disconnectedError": "You have been disconnected from the server. Please retry."
+  },
+  "modalAIInformations": {
+    "title": "AI Levels Information",
+    "lead": "Here is a description of the different AI levels. It will help you better understand the strategies each AI uses, as well as its internal technical behavior:",
+    "weakPoint": "Weakness:",
+    "technical": "Technique:",
+    "random": "Random",
+    "randomDescription": "This AI plays completely at random. It performs random movements but tries to avoid obstacles when possible. Needless to say, it’s not very strong…",
+    "randomWeakPoint": "Highly unpredictable but easy to trap — it often blocks itself without thinking.",
+    "low": "Weak",
+    "lowDescription": "This AI is fairly basic. It aligns with the apple's position by moving horizontally first, then vertically to reach it. If it encounters an obstacle, it tries to go around it as best it can. If it gets stuck, it tries to survive by zigzagging until it’s free again.",
+    "lowTechnical": "Basic heuristic algorithm",
+    "lowWeakPoint": "Easily trapped in corridors or corners; does not plan multiple steps ahead.",
+    "normal": "Normal",
+    "normalDescription": "This AI calculates the shortest path to reach the apple while avoiding obstacles. It doesn't know how to use the edges of the grid to wrap around to the other side. If it gets blocked, it does not react and crashes into the obstacle in front of it",
+    "normalTechnical": "A* pathfinding algorithm",
+    "normalWeakPoint": "Very effective in open areas, but cannot react if its access to the apple is blocked.",
+    "high": "High",
+    "highDescription": "This AI calculates the shortest path to the apple while avoiding obstacles, like the Normal-level AI, but with additional capabilities. It knows how to use the grid's edges to wrap around. If it gets blocked, it falls back to the Weak AI's heuristic to try to survive until it can move again.",
+    "highTechnical": "A* pathfinding algorithm, complemented with a heuristic fallback",
+    "highWeakPoint": "Harder to trap, but can panic or react poorly in ambiguous or dynamic situations created by the player.",
+    "ultra": "Ultra",
+    "ultraDescription": "This AI is based on an artificial neural network trained on a large number of games. Its strategy and behavior depend on its training, but unlike pre-programmed AIs, it is generally capable of identifying and avoiding traps in advance.",
+    "ultraTechnical": "Reinforcement learning algorithm (Deep-Q-Learning), artificial neural network (based on a convolutional input layer), with various algorithm enhancements (Double Deep-Q-Learning, Dueling Layers, Noisy Networks for Exploration, Prioritized Experience Replay).",
+    "ultraWeakPoint": "Training-dependent, and may have learned suboptimal or flawed behaviors.",
+    "close": "Close"
   }
 }, true, false);

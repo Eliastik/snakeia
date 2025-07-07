@@ -294,15 +294,18 @@
             <div class="form-group row">
               <label for="aiLevel" class="col-sm-4 col-form-label" data-i18n="settings.aiLevel">Niveau de l'IA :</label>
               <div class="col-sm-8">
-                <select class="custom-select" id="aiLevel">
-                  <option value="random" data-i18n="settings.aiLevelSelect.random">Au hasard</option>
-                  <option value="low" data-i18n="settings.aiLevelSelect.low">Faible</option>
-                  <option value="normal" data-i18n="settings.aiLevelSelect.normal" selected>Normal</option>
-                  <option value="high" data-i18n="settings.aiLevelSelect.high">Élevé</option>
-                  <option value="ultra" data-i18n="settings.aiLevelSelect.ultra">Ultra</option>
-                </select>
-                <div class="invalid-feedback" id="invalidaiLevel" data-i18n="settings.invalidaiLevel">
-                  Cette valeur est invalide
+                <div class="col d-flex p-0">
+                  <select class="custom-select" id="aiLevel">
+                    <option value="random" data-i18n="settings.aiLevelSelect.random">Au hasard</option>
+                    <option value="low" data-i18n="settings.aiLevelSelect.low">Faible</option>
+                    <option value="normal" data-i18n="settings.aiLevelSelect.normal" selected>Normal</option>
+                    <option value="high" data-i18n="settings.aiLevelSelect.high">Élevé</option>
+                    <option value="ultra" data-i18n="settings.aiLevelSelect.ultra">Ultra</option>
+                  </select>
+                  <button class="btn btn-sm btn-secondary ml-2" type="button" data-toggle="modal" data-target="#modalAIInformations"><span class="fui-question-circle"></span></button>
+                  <div class="invalid-feedback" id="invalidaiLevel" data-i18n="settings.invalidaiLevel">
+                    Cette valeur est invalide
+                  </div>
                 </div>
                 <div class="custom-control custom-checkbox" id="autoRetrySettings">
                   <input type="checkbox" class="custom-control-input" id="autoRetry">
@@ -542,6 +545,84 @@
         </div>
       </div>
     </div>
+    <div class="modal" tabindex="-1" id="modalAIInformations">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" data-i18n="modalAIInformations.title">Information sur les niveaux des IAs</h5>
+            <button type="button" class="close" data-dismiss="modal">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p data-i18n="modalAIInformations.lead">
+              Voici une description des différents niveaux des IAs. Elle vous permet de mieux comprendre les différentes stratégies adoptées par l’IA ainsi que son fonctionnement technique interne :
+            </p>
+            <h6 data-i18n="modalAIInformations.random">Au hasard</h6>
+            <p data-i18n="modalAIInformations.randomDescription">
+              Cette IA joue totalement au hasard. Elle effectue des mouvements aléatoires mais tente d'éviter les obstacles lorsque c'est possible. Autant dire qu'elle n'est pas très forte…
+            </p>
+            <p>
+              <strong data-i18n="modalAIInformations.weakPoint">Point faible :</strong>
+              <span data-i18n="modalAIInformations.randomWeakPoint">Très imprévisible mais facile à piéger : elle se bloque rapidement sans réfléchir.</span>
+            </p>
+            <h6 data-i18n="modalAIInformations.low">Faible</h6>
+            <p data-i18n="modalAIInformations.lowDescription">
+              Cette IA est assez basique. Elle s'aligne au niveau de la pomme, en se déplaçant d'abord horizontalement pour s’aligner, puis verticalement pour l’atteindre. Si elle rencontre un obstacle, elle essaye de le contourner tant bien que mal. Si elle se retrouve bloquée, elle tente de survivre en attendant d'être débloquée, en zigzaguant.
+            </p>
+            <p>
+              <strong data-i18n="modalAIInformations.technical">Technique :</strong>
+              <span data-i18n="modalAIInformations.lowTechnical">Algorithme heuristique basique</span>
+            </p>
+            <p>
+              <strong data-i18n="modalAIInformations.weakPoint">Point faible :</strong>
+              <span data-i18n="modalAIInformations.lowWeakPoint">Se laisse facilement piéger dans des couloirs ou coins ; ne planifie pas plusieurs étapes à l’avance.</span>
+            </p>
+            <h6 data-i18n="modalAIInformations.normal">Normal</h6>
+            <p data-i18n="modalAIInformations.normalDescription">
+              Cette IA calcule le chemin le plus rapide pour atteindre la pomme, tout en évitant les obstacles. Elle ne sait pas utiliser les bords de la grille pour passer de l’autre côté. Si elle se retrouve bloquée, elle ne réagit pas et finit par percuter l’obstacle devant elle.
+            </p>
+            <p>
+              <strong data-i18n="modalAIInformations.technical">Technique :</strong>
+              <span data-i18n="modalAIInformations.normalTechnical">Algorithme de recherche de chemin A*</span>
+            </p>
+            <p>
+              <strong data-i18n="modalAIInformations.weakPoint">Point faible :</strong>
+              <span data-i18n="modalAIInformations.normalWeakPoint">Très efficace en terrain dégagé, mais incapable de réagir si on lui bloque l’accès à la pomme.</span>
+            </p>
+            <h6 data-i18n="modalAIInformations.high">Élevé</h6>
+            <p data-i18n="modalAIInformations.highDescription">
+              Cette IA calcule le chemin le plus rapide pour atteindre la pomme, tout en évitant les obstacles, comme l’IA de niveau Normal, mais avec des capacités supplémentaires. Elle sait utiliser les bords de la grille pour passer de l’autre côté. Si elle se retrouve bloquée, elle utilise l'heuristique de l'IA de niveau Faible pour essayer de survivre en attendant d'être débloquée.
+            </p>
+            <p>
+              <strong data-i18n="modalAIInformations.technical">Technique :</strong>
+              <span data-i18n="modalAIInformations.highTechnical">Algorithme de recherche de chemin A*, algorithme heuristique en complément</span>
+            </p>
+            <p>
+              <strong data-i18n="modalAIInformations.weakPoint">Point faible :</strong>
+              <span data-i18n="modalAIInformations.highWeakPoint">Difficile à piéger, mais peut paniquer ou mal s’adapter si le joueur crée des situations ambiguës ou dynamiques.</span>
+            </p>
+
+            <h6 data-i18n="modalAIInformations.ultra">Ultra</h6>
+            <p data-i18n="modalAIInformations.ultraDescription">
+              Cette IA est basée sur un réseau de neurones artificiels entraîné sur un nombre important de parties. Sa stratégie et son comportement dépendent de l'entraînement, mais contrairement aux IA pré-programmées, elle est généralement capable de repérer en avance les pièges et de les éviter.
+            </p>
+            <p>
+              <strong data-i18n="modalAIInformations.technical">Technique :</strong>
+              <span data-i18n="modalAIInformations.ultraTechnical">Algorithme d'apprentissage par renforcement Deep-Q-Learning, réseau de neurones artificiels (basé sur un réseau convolutif en entrée), autres améliorations de l'algorithme (Double Deep-Q-Learning, Dueling Layers, Noisy Networks for Exploration, Prioritized Experience Replay).</span>
+            </p>
+            <p>
+              <strong data-i18n="modalAIInformations.weakPoint">Point faible :</strong>
+              <span data-i18n="modalAIInformations.ultraWeakPoint">Dépend de l'entraînement, mais peut avoir appris des comportements sous-optimaux ou mauvais.</span>
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" data-i18n="modalAIInformations.close">Fermer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="assets/js/bootstrap-native-v4.min.js"></script>
     <script type="text/javascript" src="dist/SnakeIA.js"></script>
   </body>
 </html>
