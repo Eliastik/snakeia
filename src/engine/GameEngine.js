@@ -350,7 +350,9 @@ export default class GameEngine {
             } else {
               const { scoreHasIncreased, setFruit } = this.handleSnakeMoveResult(headSnakePos, snake);
   
-              scoreIncreased = scoreHasIncreased;
+              if(scoreHasIncreased) {
+                scoreIncreased = true;
+              }
   
               // Set a new fruit if the current fruit is eaten
               if(!this.scoreMax && setFruit && !this.clientSidePredictionsMode) {

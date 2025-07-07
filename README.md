@@ -474,7 +474,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
   - [ ] Afficher informations sur les niveaux de l'IA
   - [ ] Corriger les pommes qui disparaissent en fin de partie (pour permettre d'avoir le vrai état de fin)
 - [ ] Mettre à jour socket.io
-- [ ] Bug sur la détection des objectifs atteints dans le mode niveaux (il y a l'air d'y avoir un délai) suite à l'opti et refactor du moteur de jeu
+- [x] Bug sur la détection des objectifs atteints dans le mode niveaux (il y a l'air d'y avoir un délai) suite à l'opti et refactor du moteur de jeu
 - [ ] Bug graphique suite à l'opti du draw
 - [x] Améliorer les performances graphiques -> Optimiser le rendu de la grille et des Snake (rendu différentiel, uniquement redessiner ce qui change)
 - [x] Améliorer algorithme détection IA bloquée : se baser aussi sur les actions exécutée (pas seulement les positions) ? -> Non
