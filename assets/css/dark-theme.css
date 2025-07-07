@@ -1,0 +1,103 @@
+/*
+ * Copyright (C) 2019-2025 Eliastik (eliastiksofts.com)
+ *
+ * This file is part of "SnakeIA".
+ *
+ * "SnakeIA" is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * "SnakeIA" is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+body.dark {
+  background-color: #130F0E;
+  color: #a6bbd4;
+}
+
+body.dark .btn-info:not(:disabled):not(:hover):not(:active) {
+  background-color: #246a99;
+}
+
+body.dark .btn-primary:not(:disabled):not(:hover):not(:active) {
+  background-color: #15997f;
+}
+
+body.dark .btn-warning:not(:disabled):not(:hover):not(:active) {
+  background-color: #b4920b;
+}
+
+body.dark .btn-danger:not(:disabled):not(:hover):not(:active) {
+  background-color: #b43b2f;
+}
+
+body.dark .btn-success:not(:disabled):not(:hover):not(:active) {
+  background-color: #239955;
+}
+
+body.dark .btn-default:not(:hover):not(:active) {
+  color: white;
+  background-color: #8d9396;
+}
+
+body.dark select, body.dark input {
+  color: #a6bbd4;
+  background-color: #1b1817;
+  border-color: #4b4746;
+}
+
+body.dark select:active, body.dark input:active, body.dark select:focus, body.dark input:focus {
+  color: #a6bbd4;
+  background-color: #1b1817;
+  border-color: #4b8246;
+}
+
+body.dark .custom-control.custom-checkbox .custom-control-label:before {
+  background-color: #1b1817;
+  border-color: #4b4746;
+}
+
+body.dark .custom-control-input:checked~.custom-control-label:before {
+  background-color: #005cbf;
+  border-color: #005cbf;
+}
+
+body.dark .custom-control-input:disabled~.custom-control-label:before {
+  background-color: #534a47;
+  border-color: #4b4746;
+}
+
+body.dark .card {
+  background-color: #181615;
+  border: 1px solid rgba(255, 255, 255, .125);
+}
+
+body.dark .card-header {
+  background-color: rgba(255, 255, 255, .03);
+  border: 1px solid rgba(255, 255, 255, .125);
+}
+
+body.dark .list-group-item {
+  background-color: #181615;
+  color: white;
+  border-color: rgba(255, 255, 255, .125);
+}
+
+body.dark .list-group-item:hover {
+  background-color: #1d1b19;
+}
+
+body.dark .modal-content {
+    background-color: #130F0E;
+}
+
+body.dark .modal-header {
+    background-color: rgba(255, 255, 255, .05);
+}
