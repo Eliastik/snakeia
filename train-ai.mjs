@@ -51,7 +51,7 @@ const multiBar = new cliProgress.MultiBar({
   forceRedraw: true
 });
 
-const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, TRAINING_SEED, {
+const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, null, TRAINING_SEED, {
   log: (text) => multiBar.log(text),
   info: (text) => multiBar.log(text),
   warn: (text) => multiBar.log(`[WARNING] ${text}`),
@@ -117,7 +117,7 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
     }
   }
 
-  const gameEngine = new GameEngine(theGrid, theSnakes, null, null, null, null, null, true);
+  const gameEngine = new GameEngine(theGrid, theSnakes, null, null, null, null, null, true, null);
 
   await gameEngine.init();
   gameEngine.paused = false;

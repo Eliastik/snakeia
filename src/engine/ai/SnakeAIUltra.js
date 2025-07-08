@@ -30,12 +30,13 @@ import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
 export default class SnakeAIUltra extends SnakeAI {
-  constructor(enableTrainingMode, modelLocation, seed, logger, fileReader) {
+  constructor(enableTrainingMode, modelLocation, modelApiLocation, seed, logger, fileReader) {
     super();
 
     this.aiLevelText = "ultra";
     this.enableTrainingMode = enableTrainingMode;
     this.modelLocation = modelLocation;
+    this.modelApiLocation = modelApiLocation;
     this.trainingRandomSeed = seed || new seedrandom().int32();
     this.trainingRng = new seedrandom(this.trainingRandomSeed, { state: true });
     this.logger = logger || console;
@@ -104,9 +105,10 @@ export default class SnakeAIUltra extends SnakeAI {
   async setup(summaryWriter) {
     this.mainModel = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
 
+    await this.loadMetadata(`${this.modelLocation}/metadata.json`);
+
     if(this.enableTrainingMode) {
       if(this.modelLocation) {
-        await this.loadMetadata(`${this.modelLocation}/metadata.json`);
         await this.loadMemory(`${this.modelLocation}/memory.json`);
       }
 
@@ -130,20 +132,44 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
-    const model = modelLocation ?
-      await this.loadModel(modelLocation) :
-      this.createModel();
-  
+    const modelLoader = TensorflowModelLoader.getInstance();
+
     if(enableTrainingMode) {
-      this.compileModel(model);
+      return this.loadModelTrainingMode(modelLocation, modelLoader);
+    } else {
+      return this.loadModelStandardMode(modelLocation, modelLoader);
     }
+  }
+
+  async loadModelTrainingMode(modelLocation, modelLoader) {
+    const model = modelLocation ?
+      await modelLoader.loadModel(this.processModelLocation(modelLocation)) :
+      this.createModel();
+
+    this.compileModel(model);
 
     return model;
   }
 
-  loadModel(modelLocation) {
-    const modelLoader = TensorflowModelLoader.getInstance();
-    return modelLoader.loadModel(modelLocation);
+  async loadModelStandardMode(modelLocation, modelLoader) {
+    if(modelLocation) {
+      return modelLoader.loadModel(this.processModelLocation(modelLocation));
+    }
+
+    await modelLoader.loadModelList(this.modelApiLocation);
+
+    const model = await modelLoader.loadSelectedModel();
+      
+    this.modelLocation = modelLoader.getSelectedModel().location;
+
+    return model;
+  }
+
+  processModelLocation(modelLocation) {
+    // eslint-disable-next-line no-undef
+    const isNode = typeof process !== "undefined" && process.release.name === "node";
+
+    return isNode ? `file://${modelLocation}/model.json` : `${modelLocation}/model.json`;
   }
 
   createModel() {

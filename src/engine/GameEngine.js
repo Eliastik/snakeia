@@ -21,10 +21,11 @@ import GameConstants from "./Constants.js";
 import Reactor from "./Reactor.js";
 import Grid from "./Grid.js";
 import Snake from "./Snake.js";
+import TensorflowModelLoader from "./ai/TensorflowModelLoader.js";
 import seedrandom from "seedrandom";
 
 export default class GameEngine {
-  constructor(grid, snake, speed, enablePause, enableRetry, progressiveSpeed, aiStuckLimit, disableStuckAIDetection) {
+  constructor(grid, snake, speed, enablePause, enableRetry, progressiveSpeed, aiStuckLimit, disableStuckAIDetection, aiUltraModelSettings) {
     // Game settings
     this.grid = grid;
     this.snakes = snake;
@@ -36,6 +37,7 @@ export default class GameEngine {
     this.progressiveSpeed = progressiveSpeed == null ? false : progressiveSpeed;
     this.aiStuckLimit = aiStuckLimit == null ? 3 : aiStuckLimit;
     this.disableStuckAIDetection = disableStuckAIDetection == null ? false : disableStuckAIDetection;
+    this.aiUltraModelSettings = aiUltraModelSettings;
     this.countBeforePlay = 3;
     // Game variables
     this.lastKey = -1;
@@ -115,6 +117,13 @@ export default class GameEngine {
     this.grid.init();
 
     if(this.snakes != null) {
+      const hasUltraAI = this.snakes
+        .find(snake => !snake.customAI && snake.aiLevel === GameConstants.AiLevel.ULTRA);
+
+      if(hasUltraAI && this.aiUltraModelSettings) {
+        await this.initAIUltra();
+      }
+
       for(const snake of this.snakes) {
         snake.reset();
       }
@@ -125,6 +134,11 @@ export default class GameEngine {
     }
 
     this.grid.setFruit(this.snakes.length);
+  }
+
+  async initAIUltra() {
+    const modelLoader = TensorflowModelLoader.getInstance();
+    await modelLoader.selectModel(this.aiUltraModelSettings.modelID);
   }
 
   async reset() {

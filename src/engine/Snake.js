@@ -250,7 +250,7 @@ export default class Snake {
         this.snakeAI = new SnakeAIHigh();
         break;
       case GameConstants.AiLevel.ULTRA: {
-        const aiUltra = new SnakeAIUltra(false, GameConstants.AIModelLocation);
+        const aiUltra = new SnakeAIUltra(false);
         await aiUltra.setup();
         this.snakeAI = aiUltra;
         break;

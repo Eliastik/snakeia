@@ -29,6 +29,7 @@ import { NotificationMessage } from "jsgametools";
 import seedrandom from "seedrandom";
 import StorageFactory from "./src/StorageFactory";
 import { Timer, TimerInterval } from "./src/Timers";
+import TensorflowModelLoader from "./src/engine/ai/TensorflowModelLoader.js";
 
 // Modes :
 window.SOLO_AI = "SOLO_AI";
@@ -119,7 +120,8 @@ function restoreSettings() {
     graphicSkin: "flat",
     maxFPS: -1,
     unlockAllLevels: false,
-    darkMode: "auto"
+    darkMode: "auto",
+    aiUltraModelId: null
   };
 }
 
@@ -1020,6 +1022,67 @@ document.getElementById("resetSeeds").onclick = e => {
   resetForm(false, true);
   e.preventDefault();
   e.stopPropagation();
+};
+
+document.getElementById("aiLevel").onchange = function() {
+  if(this.value === "ultra") {
+    document.getElementById("modalSelectAIUltraModelButton").style.display = "block";
+  } else {
+    document.getElementById("modalSelectAIUltraModelButton").style.display = "none";
+  }
+};
+
+const modalSelectAIUltraModelInstance = new BSN.Modal(
+  "#modalSelectAIUltraModel",
+  {
+    backdrop: "static",
+    keyboard: false
+  }
+);
+
+document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
+  document.getElementById("errorLoadingModelList").style.display = "none";
+  document.getElementById("formSettingsAIUltraModel").style.display = "block";
+
+  modalSelectAIUltraModelInstance.show();
+
+  try {
+    const modelLoader = TensorflowModelLoader.getInstance();
+    const modelList = await modelLoader.getModelList();
+
+    if(modelList && Array.isArray(modelList)) {
+      const selectElement = document.getElementById("aiModelList");
+
+      selectElement.innerHTML = "";
+
+      modelList.forEach(model => {
+        const option = document.createElement("option");
+        option.value = model.id;
+        option.text = model.name;
+        selectElement.appendChild(option);
+      });
+
+      const selectedModelStorage = customSettings.aiUltraModelId;
+
+      document.getElementById("aiModelList").value = selectedModelStorage ? selectedModelStorage : 
+        modelLoader.getSelectedModel().id;
+    } else {
+      document.getElementById("errorLoadingModelList").style.display = "block";
+      document.getElementById("formSettingsAIUltraModel").style.display = "none";
+    }
+  } catch(e) {
+    document.getElementById("errorLoadingModelList").style.display = "block";
+    document.getElementById("formSettingsAIUltraModel").style.display = "none";
+  }
+};
+
+document.getElementById("validateAIUltraModel").onclick = () => {
+  const selectElement = document.getElementById("aiModelList");
+
+  customSettings.aiUltraModelId = selectElement.value;
+  saveSettings();
+
+  modalSelectAIUltraModelInstance.hide();
 };
 
 function resetForm(resetValues, resetSeeds) {

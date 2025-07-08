@@ -286,6 +286,14 @@ i18next.addResourceBundle("fr", "translation", {
     "ultraTechnical": "Algorithme d'apprentissage par renforcement Deep-Q-Learning, réseau de neurones artificiels (basé sur un réseau convolutif en entrée), autres améliorations de l'algorithme (Double Deep-Q-Learning, Dueling Layers, Noisy Networks for Exploration, Prioritized Experience Replay).",
     "ultraWeakPoint": "Dépend de l'entraînement, mais peut avoir appris des comportements sous-optimaux ou mauvais.",
     "close": "Fermer"
+  },
+  "modalSelectAIUltraModel": {
+    "title": "Paramètres de l'IA Ultra",
+    "description": "Vous pouvez paramétrer ci-dessous l'IA Ultra, notamment en sélectionnant le modèle qui sera chargé.",
+    "model": "Modèle de l'IA :",
+    "errorLoading": "Une erreur est survenue lors du chargement de la liste des modèles",
+    "validate": "Valider",
+    "close": "Fermer"
   }
 }, true, false);
 
@@ -556,6 +564,14 @@ i18next.addResourceBundle("en", "translation", {
     "ultraDescription": "This AI is based on an artificial neural network trained on a large number of games. Its strategy and behavior depend on its training, but unlike pre-programmed AIs, it is generally capable of identifying and avoiding traps in advance.",
     "ultraTechnical": "Reinforcement learning algorithm (Deep-Q-Learning), artificial neural network (based on a convolutional input layer), with various algorithm enhancements (Double Deep-Q-Learning, Dueling Layers, Noisy Networks for Exploration, Prioritized Experience Replay).",
     "ultraWeakPoint": "Training-dependent, and may have learned suboptimal or flawed behaviors.",
+    "close": "Close"
+  },
+  "modalSelectAIUltraModel": {
+    "title": "Ultra AI settings",
+    "description": "You can configure the Ultra AI below, including selecting the model to be loaded.",
+    "model": "AI model:",
+    "errorLoading": "An error occurred while loading the model list.",
+    "validate": "Validate",
     "close": "Close"
   }
 }, true, false);

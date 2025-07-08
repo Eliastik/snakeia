@@ -26,5 +26,6 @@ import GameGroup from "./engine/GameGroup.js";
 import GameUtils from "./engine/GameUtils.js";
 import Position from "./engine/Position.js";
 import GameEngine from "./engine/GameEngine.js";
+import TensorflowModelLoader from "./engine/ai/TensorflowModelLoader.js";
 
-export { GameConstants, Event, Reactor, Grid, Snake, GameGroup, GameUtils, Position, GameEngine };
+export { GameConstants, Event, Reactor, Grid, Snake, GameGroup, GameUtils, Position, GameEngine, TensorflowModelLoader };

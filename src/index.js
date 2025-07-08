@@ -36,5 +36,6 @@ import GameControllerWorker from "./engine/GameControllerWorker.js";
 import GameControllerSocket from "./engine/GameControllerSocket.js";
 import GameUI from "./ui/GameUI.js";
 import OnlineClient from "./engine/OnlineClient.js";
+import TensorflowModelLoader from "./engine/ai/TensorflowModelLoader.js";
 
-export { GameConstants, Event, Reactor, Grid, Snake, GameGroup, GameUtils, Position, GameEngine, Game, GameController, GameControllerWorker, GameControllerSocket, GameUI, OnlineClient };
+export { GameConstants, Event, Reactor, Grid, Snake, GameGroup, GameUtils, Position, GameEngine, Game, GameController, GameControllerWorker, GameControllerSocket, GameUI, OnlineClient, TensorflowModelLoader };

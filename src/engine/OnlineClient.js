@@ -52,8 +52,11 @@ export default class OnlineClient {
       this.url = this.url.substring(0, this.url.length - 1);
     }
     
-    this.socket = new io(this.getURL() + (this.token ? "?token=" + this.token : ""), {
-      withCredentials: true
+    this.socket = io(this.getURL(), {
+      withCredentials: true,
+      auth: this.token ? {
+        token: this.token
+      } : null
     });
 
     this.socket.once("connect", () => {
@@ -65,7 +68,7 @@ export default class OnlineClient {
         }
       });
     
-      this.socket.once("token", (token) => {
+      this.socket.once("token", token => {
         this.token = token;
         this.connect(this.url, this.port, callback);
       });
@@ -118,8 +121,11 @@ export default class OnlineClient {
     if(!this.loadingRooms) {
       this.loadingRooms = true;
 
-      const ioRooms = new io(this.getURL() + "/rooms" + (this.token ? "?token=" + this.token : ""), {
-        withCredentials: true
+      const ioRooms = io(this.getURL() + "/rooms", {
+        withCredentials: true,
+        auth: this.token ? {
+          token: this.token
+        } : null
       });
     
       ioRooms.once("rooms", data => {
@@ -157,8 +163,11 @@ export default class OnlineClient {
     if(!this.creatingRoom) {
       this.creatingRoom = true;
       
-      const ioCreate = new io(this.getURL() + "/createRoom" + (this.token ? "?token=" + this.token : ""), {
-        withCredentials: true
+      const ioCreate = io(this.getURL() + "/createRoom", {
+        withCredentials: true,
+        auth: this.token ? {
+          token: this.token
+        } : null
       });
 
       ioCreate.once("connect", () => {

@@ -303,6 +303,7 @@
                     <option value="high" data-i18n="settings.aiLevelSelect.high">Élevé</option>
                     <option value="ultra" data-i18n="settings.aiLevelSelect.ultra">Ultra</option>
                   </select>
+                  <button class="btn btn-sm btn-primary ml-2" type="button" id="modalSelectAIUltraModelButton" style="display: none;"><span class="fui-gear"></span></button>
                   <button class="btn btn-sm btn-secondary ml-2" type="button" data-toggle="modal" data-target="#modalAIInformations"><span class="fui-question-circle"></span></button>
                   <div class="invalid-feedback" id="invalidaiLevel" data-i18n="settings.invalidaiLevel">
                     Cette valeur est invalide
@@ -619,6 +620,38 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal" data-i18n="modalAIInformations.close">Fermer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal" tabindex="-1" id="modalSelectAIUltraModel">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" data-i18n="modalSelectAIUltraModel.title">Paramètres de l'IA Ultra</h5>
+            <button type="button" class="close" data-dismiss="modal">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p data-i18n="modalSelectAIUltraModel.description">Vous pouvez paramétrer ci-dessous l'IA Ultra, notamment en sélectionnant le modèle qui sera chargé.</p>
+            <form id="formSettingsAIUltraModel">
+              <fieldset class="form-group" id="aiModelSettings">
+                <div class="form-group row">
+                  <label for="aiModelList" class="col-sm-4 col-form-label" data-i18n="modalSelectAIUltraModel.model">Modèle de l'IA :</label>
+                  <div class="col-sm-8">
+                    <select class="custom-select" id="aiModelList"></select>
+                  </div>
+                </div>
+              </fieldset>
+            </form>
+          </div>
+          <div class="alert alert-danger" role="alert" id="errorLoadingModelList">
+            <span class="fui-cross-circle mr-2"></span> <span data-i18n="modalSelectAIUltraModel.errorLoading">Une erreur est survenue lors du chargement de la liste des modèles</span>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="validateAIUltraModel" data-i18n="modalSelectAIUltraModel.validate">Valider</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" data-i18n="modalSelectAIUltraModel.close">Fermer</button>
           </div>
         </div>
       </div>

@@ -79,7 +79,8 @@ WorkersAvailable(result => {
 function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, settings, ui, onlineMode) {
   let controller;
 
-  const engine = new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed);
+  const aiUltraSettings = { modelID: settings.aiUltraModelId };
+  const engine = new GameEngine(grid, snake, speed, enablePause, enableRetry, progressiveSpeed, null, false, aiUltraSettings);
   
   if(workersAvailable && settings.enableMultithreading) {
     controller = new GameControllerWorker(engine);

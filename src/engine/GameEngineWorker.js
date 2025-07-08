@@ -109,7 +109,7 @@ onmessage = async e => {
       const grid = parsed["grid"];
       const snakes = parsed["snakes"];
   
-      game = new GameEngine(grid, snakes, data[1]["speed"], data[1]["enablePause"], data[1]["enableRetry"], data[1]["progressiveSpeed"]);
+      game = new GameEngine(grid, snakes, data[1]["speed"], data[1]["enablePause"], data[1]["enableRetry"], data[1]["progressiveSpeed"], data[1]["aiStuckLimit"], data[1]["disableStuckAIDetection"], data[1]["aiUltraModelSettings"]);
 
       game.onExit(() => {
         self.postMessage(["exit", {

@@ -17,12 +17,15 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 import * as tf from "@tensorflow/tfjs";
+import Constants from "../Constants";
 
 export default class TensorflowModelLoader {
 
   static instance = null;
   
   static modelCache = new Map();
+  static modelListCache = null;
+  static selectedModel = null;
 
   constructor() {
     if(TensorflowModelLoader.instance) {
@@ -41,10 +44,7 @@ export default class TensorflowModelLoader {
   }
 
   async loadModel(location) {
-    // eslint-disable-next-line no-undef
-    const isNode = (typeof process !== "undefined") && (process.release.name === "node");
-    const modelLocation = isNode ?
-      `file://${location}/model.json` : location;
+    const modelLocation = `${location}/model.json`;
 
     if(TensorflowModelLoader.modelCache.has(modelLocation)) {
       return TensorflowModelLoader.modelCache.get(modelLocation);
@@ -55,5 +55,49 @@ export default class TensorflowModelLoader {
     TensorflowModelLoader.modelCache.set(modelLocation, model);
 
     return model;
+  }
+
+  async loadSelectedModel() {
+    if(!TensorflowModelLoader.selectedModel) {
+      throw new Error("No model selected.");
+    }
+
+    return this.loadModel(TensorflowModelLoader.selectedModel.location);
+  }
+
+  async loadModelList(apiLocation) {
+    if(!TensorflowModelLoader.modelListCache) {
+      const result = await fetch(apiLocation || Constants.DefaultAIModelsListAPI);
+      const modelList = await result.json();
+
+      TensorflowModelLoader.modelListCache = modelList;
+
+      this.selectDefaultModel();
+    }
+  }
+
+  async getModelList(apiLocation) {
+    await this.loadModelList(apiLocation);
+    return TensorflowModelLoader.modelListCache;
+  }
+
+  getSelectedModel() {
+    return TensorflowModelLoader.selectedModel;
+  }
+
+  async selectModel(modelId, apiLocation) {
+    await this.loadModelList(apiLocation);
+
+    const selectedModel = TensorflowModelLoader.modelListCache.find(model => model.id === modelId);
+
+    if(selectedModel) {
+      TensorflowModelLoader.selectedModel = selectedModel;
+    } else {
+      this.selectDefaultModel();
+    }
+  }
+
+  selectDefaultModel() {
+    this.selectModel(TensorflowModelLoader.modelListCache.find(model => model.isDefault).id);
   }
 }
