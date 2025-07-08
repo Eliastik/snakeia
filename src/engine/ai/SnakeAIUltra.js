@@ -30,13 +30,12 @@ import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
 export default class SnakeAIUltra extends SnakeAI {
-  constructor(enableTrainingMode, modelLocation, modelApiLocation, seed, logger, fileReader) {
+  constructor(enableTrainingMode, modelLocation, seed, logger, fileReader) {
     super();
 
     this.aiLevelText = "ultra";
     this.enableTrainingMode = enableTrainingMode;
     this.modelLocation = modelLocation;
-    this.modelApiLocation = modelApiLocation;
     this.trainingRandomSeed = seed || new seedrandom().int32();
     this.trainingRng = new seedrandom(this.trainingRandomSeed, { state: true });
     this.logger = logger || console;
@@ -156,7 +155,7 @@ export default class SnakeAIUltra extends SnakeAI {
       return modelLoader.loadModel(this.processModelLocation(modelLocation));
     }
 
-    await modelLoader.loadModelList(this.modelApiLocation);
+    await modelLoader.loadModelList();
 
     const model = await modelLoader.loadSelectedModel();
       
@@ -168,8 +167,7 @@ export default class SnakeAIUltra extends SnakeAI {
   processModelLocation(modelLocation) {
     // eslint-disable-next-line no-undef
     const isNode = typeof process !== "undefined" && process.release.name === "node";
-
-    return isNode ? `file://${modelLocation}/model.json` : `${modelLocation}/model.json`;
+    return isNode ? `file://${modelLocation}` : `${modelLocation}`;
   }
 
   createModel() {

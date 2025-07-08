@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+import GameConstants from "../Constants.js";
 import * as tf from "@tensorflow/tfjs";
-import Constants from "../Constants";
 
 export default class TensorflowModelLoader {
 
@@ -26,6 +26,7 @@ export default class TensorflowModelLoader {
   static modelCache = new Map();
   static modelListCache = null;
   static selectedModel = null;
+  static modelAPILocation = null;
 
   constructor() {
     if(TensorflowModelLoader.instance) {
@@ -65,9 +66,9 @@ export default class TensorflowModelLoader {
     return this.loadModel(TensorflowModelLoader.selectedModel.location);
   }
 
-  async loadModelList(apiLocation) {
+  async loadModelList() {
     if(!TensorflowModelLoader.modelListCache) {
-      const result = await fetch(apiLocation || Constants.DefaultAIModelsListAPI);
+      const result = await fetch(this.modelAPILocation || GameConstants.DefaultAIModelsListAPI);
       const modelList = await result.json();
 
       TensorflowModelLoader.modelListCache = modelList;
@@ -76,8 +77,8 @@ export default class TensorflowModelLoader {
     }
   }
 
-  async getModelList(apiLocation) {
-    await this.loadModelList(apiLocation);
+  async getModelList() {
+    await this.loadModelList();
     return TensorflowModelLoader.modelListCache;
   }
 
@@ -85,8 +86,8 @@ export default class TensorflowModelLoader {
     return TensorflowModelLoader.selectedModel;
   }
 
-  async selectModel(modelId, apiLocation) {
-    await this.loadModelList(apiLocation);
+  async selectModel(modelId) {
+    await this.loadModelList();
 
     const selectedModel = TensorflowModelLoader.modelListCache.find(model => model.id === modelId);
 
@@ -99,5 +100,9 @@ export default class TensorflowModelLoader {
 
   selectDefaultModel() {
     this.selectModel(TensorflowModelLoader.modelListCache.find(model => model.isDefault).id);
+  }
+
+  setModelListAPI(modelAPILocation) {
+    this.modelAPILocation = modelAPILocation;
   }
 }

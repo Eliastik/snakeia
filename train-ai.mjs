@@ -51,7 +51,7 @@ const multiBar = new cliProgress.MultiBar({
   forceRedraw: true
 });
 
-const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, null, TRAINING_SEED, {
+const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, TRAINING_SEED, {
   log: (text) => multiBar.log(text),
   info: (text) => multiBar.log(text),
   warn: (text) => multiBar.log(`[WARNING] ${text}`),
