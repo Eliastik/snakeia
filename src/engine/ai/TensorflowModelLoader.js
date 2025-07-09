@@ -79,7 +79,7 @@ export default class TensorflowModelLoader {
 
   async loadSelectedModel() {
     if(!TensorflowModelLoader.selectedModel) {
-      throw new Error("No model selected.");
+      await this.selectDefaultModel();
     }
 
     return this.loadModel(TensorflowModelLoader.selectedModel.location);
@@ -91,8 +91,6 @@ export default class TensorflowModelLoader {
       const modelList = await result.json();
 
       TensorflowModelLoader.modelListCache = modelList;
-
-      this.selectDefaultModel();
     }
   }
 
@@ -117,7 +115,12 @@ export default class TensorflowModelLoader {
     }
   }
 
-  selectDefaultModel() {
+  async selectCustomModel(location) {
+    TensorflowModelLoader.selectedModel = { id: "custom", location, isDefault: false };
+  }
+
+  async selectDefaultModel() {
+    await this.loadModelList();
     this.selectModel(TensorflowModelLoader.modelListCache.find(model => model.isDefault).id);
   }
 

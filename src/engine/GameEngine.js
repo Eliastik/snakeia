@@ -138,15 +138,21 @@ export default class GameEngine {
 
   async initAIUltra() {
     const modelLoader = TensorflowModelLoader.getInstance();
-    const modelListAPI = this.aiUltraModelSettings.modelListAPI;
 
-    if(modelListAPI) {
-      modelLoader.setModelListAPI(this.aiUltraModelSettings.modelListAPI);
+    const modelListAPIURL = this.aiUltraModelSettings.modelListAPIURL;
+
+    if(modelListAPIURL) {
+      modelLoader.setModelListAPI(this.aiUltraModelSettings.modelListAPIURL);
     }
-    
-    await modelLoader.selectModel(this.aiUltraModelSettings.modelID);
 
-    // TODO custom model URL setting
+    const modelID = this.aiUltraModelSettings.modelID;
+    const customURL = this.aiUltraModelSettings.customURL;
+
+    if(modelID === "custom") {
+      await modelLoader.selectCustomModel(customURL);
+    } else {
+      await modelLoader.selectModel(modelID);
+    }
   }
 
   async reset() {

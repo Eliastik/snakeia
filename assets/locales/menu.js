@@ -293,7 +293,9 @@ i18next.addResourceBundle("fr", "translation", {
     "model": "Modèle de l'IA :",
     "errorLoading": "Une erreur est survenue lors du chargement de la liste des modèles",
     "validate": "Valider",
-    "close": "Fermer"
+    "close": "Fermer",
+    "custom": "Personnalisé…",
+    "modelPath": "URL du modèle personnalisée :"
   }
 }, true, false);
 
@@ -572,6 +574,8 @@ i18next.addResourceBundle("en", "translation", {
     "model": "AI model:",
     "errorLoading": "An error occurred while loading the model list.",
     "validate": "Validate",
-    "close": "Close"
+    "close": "Close",
+    "custom": "Custom…",
+    "modelPath": "Custom model URL:"
   }
 }, true, false);

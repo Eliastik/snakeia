@@ -157,8 +157,6 @@ export default class SnakeAIUltra extends SnakeAI {
       return modelLoader.loadModel(this.processModelLocation(modelLocation));
     }
 
-    await modelLoader.loadModelList();
-
     const model = await modelLoader.loadSelectedModel();
       
     this.modelLocation = modelLoader.getSelectedModel().location;

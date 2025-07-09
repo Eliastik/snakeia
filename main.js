@@ -121,7 +121,8 @@ function restoreSettings() {
     maxFPS: -1,
     unlockAllLevels: false,
     darkMode: "auto",
-    aiUltraModelId: null
+    aiUltraModelId: null,
+    aiUltraModelCustomURL: null
   };
 }
 
@@ -1040,6 +1041,14 @@ const modalSelectAIUltraModelInstance = new BSN.Modal(
   }
 );
 
+function displayCustomURLAIUltraModel(value) {
+  if(value === "custom") {
+    document.getElementById("aiModelSettingsCustomPath").style.display = "block";
+  } else {
+    document.getElementById("aiModelSettingsCustomPath").style.display = "none";
+  }
+}
+
 document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
   document.getElementById("errorLoadingModelList").style.display = "none";
   document.getElementById("formSettingsAIUltraModel").style.display = "block";
@@ -1062,27 +1071,49 @@ document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
         selectElement.appendChild(option);
       });
 
-      const selectedModelStorage = customSettings.aiUltraModelId;
+      const option = document.createElement("option");
+      option.value = "custom";
+      option.text = i18next.t("modalSelectAIUltraModel.custom");
+      selectElement.appendChild(option);
 
-      document.getElementById("aiModelList").value = selectedModelStorage ? selectedModelStorage : 
+      const selectedModelStorageValue = customSettings.aiUltraModelId;
+      const customURLStorage = customSettings.aiUltraModelCustomURL;
+
+      const selectedModel = selectedModelStorageValue ? selectedModelStorageValue : 
         modelLoader.getSelectedModel().id;
+
+      document.getElementById("aiModelList").value = selectedModel;
+      document.getElementById("aiModelPath").value = customURLStorage ? customURLStorage : "";
+
+      displayCustomURLAIUltraModel(selectedModel);
     } else {
       document.getElementById("errorLoadingModelList").style.display = "block";
       document.getElementById("formSettingsAIUltraModel").style.display = "none";
     }
   } catch(e) {
+    console.error(e);
+
     document.getElementById("errorLoadingModelList").style.display = "block";
     document.getElementById("formSettingsAIUltraModel").style.display = "none";
   }
 };
 
 document.getElementById("validateAIUltraModel").onclick = () => {
-  const selectElement = document.getElementById("aiModelList");
+  const selectElementValue = document.getElementById("aiModelList").value;
 
-  customSettings.aiUltraModelId = selectElement.value;
+  customSettings.aiUltraModelId = selectElementValue;
+
+  if(selectElementValue === "custom") {
+    customSettings.aiUltraModelCustomURL = document.getElementById("aiModelPath").value;
+  }
+
   saveSettings();
 
   modalSelectAIUltraModelInstance.hide();
+};
+
+document.getElementById("aiModelList").onchange = function() {
+  displayCustomURLAIUltraModel(this.value);
 };
 
 function resetForm(resetValues, resetSeeds) {
