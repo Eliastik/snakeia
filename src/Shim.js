@@ -64,6 +64,7 @@ function WorkersAvailable(callback) {
         };
       }
     } catch(e) {
+      console.error(e);
       return callback(false);
     }
   }

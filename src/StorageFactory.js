@@ -24,6 +24,7 @@ export default class StorageFactory {
     try {
       this.storage = storage || window.localStorage;
     } catch(e) {
+      console.error(e);
       this.storage = null;
     }
 
@@ -34,6 +35,7 @@ export default class StorageFactory {
       this.storage.removeItem(testKey);
       this._isSupported = true;
     } catch(e) {
+      console.error(e);
       this._isSupported = false;
     }
   }

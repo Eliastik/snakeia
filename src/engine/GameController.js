@@ -382,7 +382,7 @@ export default class GameController {
       const dataKeys = Object.keys(data);
 
       for(let i = 0; i < dataKeys.length; i++) {
-        if((!this.clientSidePredictionsMode && !this.onlineMode) || (this.clientSidePredictionsMode && (dataKeys[i] == "snakes" || dataKeys[i] == "grid" || dataKeys[i] == "offsetFrame" || dataKeys[i] == "gameOver") && (!this.onlineMode || (this.onlineMode && dataKeys[i] != "errorOccurred"))) || (!this.clientSidePredictionsMode && this.onlineMode && dataKeys[i] != "errorOccurred")) {
+        if((!this.clientSidePredictionsMode && !this.onlineMode) || (this.clientSidePredictionsMode && (dataKeys[i] == "snakes" || dataKeys[i] == "grid" || dataKeys[i] == "offsetFrame" || dataKeys[i] == "gameOver") && this.onlineMode) || (!this.clientSidePredictionsMode && this.onlineMode)) {
           if(Object.prototype.hasOwnProperty.call(this.gameUI, dataKeys[i]) && typeof(data[dataKeys[i]]) !== "function" && typeof(this.gameUI[dataKeys[i]]) !== "function") {
             this.gameUI[dataKeys[i]] = data[dataKeys[i]];
           }

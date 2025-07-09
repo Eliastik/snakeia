@@ -99,6 +99,8 @@ export default class GameEngine {
         for(const snake of this.snakes) {
           if(snake instanceof Snake == false) {
             this.errorOccurred = true;
+          } else if(snake.errorInit) {
+            this.errorOccurred = true;
           } else {
             startHue = GameUtils.addHue(startHue, Math.round(360 / (this.snakes.length)));
             snake.color = startHue;

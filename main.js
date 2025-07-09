@@ -1683,6 +1683,8 @@ function getSave(player, type) {
     const res = JSON.parse(storageGlobal.getItem(getTitleSave(player, type)));
     return res;
   } catch(e) {
+    console.error(e);
+
     initSaveLevel(player, type, true);
     return getSave(player, type);
   }
@@ -1765,12 +1767,14 @@ function getLevels(player, type) {
       try {
         return JSON.parse(storageGlobal.getItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO));
       } catch(e) {
+        console.error(e);
         return null;
       }
     } else if(player == PLAYER_AI) {
       try {
         return JSON.parse(storageGlobal.getItem(SOLO_AI_DOWNLOAD_LEVELS_TO));
       } catch(e) {
+        console.error(e);
         return null;
       }
     }
