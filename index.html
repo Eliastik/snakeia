@@ -653,6 +653,24 @@
                 </div>
               </fieldset>
             </form>
+            <button id="aiModelDetailsCollapseButton" class="btn btn-link px-0 mb-2" type="button" data-toggle="collapse" data-target="#aiModelDetailsCollapse" aria-expanded="false" aria-controls="aiModelDetailsCollapse">
+              <span data-i18n="modalSelectAIUltraModel.toggleDetails">Afficher les détails du modèle</span>
+            </button>
+            <div class="collapse" id="aiModelDetailsCollapse">
+              <div class="card card-body">
+                <div><strong data-i18n="modalSelectAIUltraModel.name">Nom :</strong> <span id="aiModelName">—</span></div>
+                <div><strong data-i18n="modalSelectAIUltraModel.descriptionLabel">Description :</strong> <span id="aiModelDescription">—</span></div>
+                <div><strong data-i18n="modalSelectAIUltraModel.version">Version :</strong> <span id="aiModelVersion">—</span></div>
+                <div><strong data-i18n="modalSelectAIUltraModel.gameVersion">Version du jeu requise :</strong> <span id="aiModelGameVersion">—</span></div>
+                <div><strong data-i18n="modalSelectAIUltraModel.size">Taille :</strong> <span id="aiModelSize">—</span> <span data-i18n="modalSelectAIUltraModel.mb">Mo</span></div>
+                <div><strong data-i18n="modalSelectAIUltraModel.date">Date :</strong> <span id="aiModelDate">—</span></div>
+                <div><strong data-i18n="modalSelectAIUltraModel.author">Auteur :</strong> <a href="#" target="_blank" id="aiModelAuthorWebsite">—</a></div>
+                <div><strong data-i18n="modalSelectAIUltraModel.source">URL du modèle :</strong> <a href="#" target="_blank" id="aiModelURL">—</a></div>
+                <div><strong data-i18n="modalSelectAIUltraModel.technical">Technique :</strong> <span id="aiModelTechnical">—</span></div>
+                <p id="aiModelDeprecated"><strong data-i18n="modalSelectAIUltraModel.deprecated">Ce modèle est déprécié</strong></p>
+                <p id="aiModelDefault"><strong data-i18n="modalSelectAIUltraModel.default">Ce modèle est le modèle par défaut</strong></p>
+              </div>
+            </div>
           </div>
           <div class="alert alert-danger" role="alert" id="errorLoadingModelList">
             <span class="fui-cross-circle mr-2"></span> <span data-i18n="modalSelectAIUltraModel.errorLoading">Une erreur est survenue lors du chargement de la liste des modèles</span>

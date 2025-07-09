@@ -472,9 +472,9 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 - [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning) (En cours)
   - [x] Récupération du modèle : API à appeler qui retourne la version + date version + URL vers le modèle / éventuellement une liste de version pour choisir la version du modèle ?
     - [x] Vérifier que ça ne casse pas la partie serveur => il faut gérer pour que ça charge un modèle par défaut
-    - [ ] Permettre de charger une URL personnalisée
-    - [ ] Afficher plus d'infos sur les modèles
-    - [ ] Côté serveur : paramètre pour l'API liste des modèles + URL modèle personnalisée ?
+    - [x] Permettre de charger une URL personnalisée
+    - [x] Afficher plus d'infos sur les modèles
+    - [x] Côté serveur : paramètre pour l'API liste des modèles + URL modèle personnalisée ?
   - [ ] Corriger les pommes qui disparaissent en fin de partie (pour permettre d'avoir le vrai état de fin)
   - [x] Afficher informations sur les niveaux de l'IA
 - [ ] Bug graphique suite à l'opti du draw

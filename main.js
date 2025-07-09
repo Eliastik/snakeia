@@ -1074,7 +1074,7 @@ document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
       modelList.forEach(model => {
         const option = document.createElement("option");
         option.value = model.id;
-        option.text = model.name;
+        option.text = model.name[i18next.language.substring(0, 2)];
         selectElement.appendChild(option);
       });
 
@@ -1092,6 +1092,7 @@ document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
       document.getElementById("aiModelList").value = selectedModel;
       document.getElementById("aiModelPath").value = customURLStorage ? customURLStorage : "";
 
+      updateModelDetails(modelList.find(model => model.id === selectedModel));
       displayCustomURLAIUltraModel(selectedModel);
     } else {
       document.getElementById("errorLoadingModelList").style.display = "block";
@@ -1104,6 +1105,50 @@ document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
     document.getElementById("formSettingsAIUltraModel").style.display = "none";
   }
 };
+
+function updateModelDetails(model) {
+  if(model.id === "custom") {
+    document.getElementById("aiModelDetailsCollapse").style.display = "none";
+    document.getElementById("aiModelDetailsCollapseButton").style.display = "none";
+    return;
+  }
+  
+  document.getElementById("aiModelDetailsCollapse").style.display = null;
+  document.getElementById("aiModelDetailsCollapseButton").style.display = null;
+
+  const language = i18next.language.substring(0, 2);
+  
+  document.getElementById("aiModelName").textContent = model.name[language] || "—";
+  document.getElementById("aiModelVersion").textContent = model.version || "—";
+  document.getElementById("aiModelGameVersion").textContent = model.gameVersion || "—";
+  document.getElementById("aiModelDescription").textContent = model.description[language] || "—";
+  document.getElementById("aiModelTechnical").textContent = model.technical[language] || "—";
+  document.getElementById("aiModelSize").textContent = model.sizeMb ? model.sizeMb.toFixed(1) : "—";
+  document.getElementById("aiModelDate").textContent = model.createdAt ?
+    new Date(model.createdAt).toLocaleDateString(language, { hour: "numeric", minute: "numeric", second: "numeric" }) : "—";
+
+  if(model.isDeprecated) {
+    document.getElementById("aiModelDeprecated").style.display = "block";
+  } else {
+    document.getElementById("aiModelDeprecated").style.display = "none";
+  }
+
+  if(model.isDefault) {
+    document.getElementById("aiModelDefault").style.display = "block";
+  } else {
+    document.getElementById("aiModelDefault").style.display = "none";
+  }
+
+  const website = document.getElementById("aiModelAuthorWebsite");
+
+  website.textContent = model.author || "—";
+  website.href = model.authorWebsite || "#";
+
+  const modelURL = document.getElementById("aiModelURL");
+
+  modelURL.textContent = model.location || "—";
+  modelURL.href = model.location || "#";
+}
 
 document.getElementById("validateAIUltraModel").onclick = () => {
   const selectElementValue = document.getElementById("aiModelList").value;
@@ -1119,8 +1164,13 @@ document.getElementById("validateAIUltraModel").onclick = () => {
   modalSelectAIUltraModelInstance.hide();
 };
 
-document.getElementById("aiModelList").onchange = function() {
+document.getElementById("aiModelList").onchange = async function() {
+  const modelLoader = TensorflowModelLoader.getInstance();
+  const modelList = await modelLoader.getModelList();
+
   displayCustomURLAIUltraModel(this.value);
+  updateModelDetails(this.value === "custom" ? { id: "custom" } :
+    modelList.find(model => model.id === this.value));
 };
 
 function resetForm(resetValues, resetSeeds) {

@@ -158,5 +158,5 @@ export default {
     SEARCHING_PLAYERS: "SEARCHING_PLAYERS",
     AUTHENTICATION_SUCCESS: "AUTHENTICATION_SUCCESS"
   },
-  DefaultAIModelsListAPI: "http://eliastiksofts.local/snakeia/models/"
+  DefaultAIModelsListAPI: "https://www.eliastiksofts.com/snakeia/models/"
 };

@@ -295,8 +295,22 @@ i18next.addResourceBundle("fr", "translation", {
     "validate": "Valider",
     "close": "Fermer",
     "custom": "Personnalisé…",
-    "modelPath": "URL du modèle personnalisée :"
+    "modelPath": "URL du modèle personnalisé :",
+    "toggleDetails": "Afficher les informations sur le modèle",
+    "name": "Nom :",
+    "descriptionLabel": "Description :",
+    "version": "Version :",
+    "gameVersion": "Version du jeu requise :",
+    "technical": "Technique :",
+    "size": "Taille :",
+    "mb": "Mo",
+    "date": "Date :",
+    "author": "Auteur :",
+    "source": "URL du modèle :",
+    "deprecated": "Ce modèle est déprécié",
+    "default": "Ce modèle est le modèle par défaut"
   }
+
 }, true, false);
 
 // English
@@ -576,6 +590,19 @@ i18next.addResourceBundle("en", "translation", {
     "validate": "Validate",
     "close": "Close",
     "custom": "Custom…",
-    "modelPath": "Custom model URL:"
+    "modelPath": "Custom model URL:",
+    "toggleDetails": "Show model informations",
+    "name": "Name:",
+    "descriptionLabel": "Description:",
+    "version": "Version:",
+    "gameVersion": "Required game version:",
+    "technical": "Technical:",
+    "size": "Size:",
+    "mb": "MB",
+    "date": "Date:",
+    "author": "Author:",
+    "source": "Model URL:",
+    "deprecated": "This model is deprecated",
+    "default": "This model is the default model"
   }
 }, true, false);
