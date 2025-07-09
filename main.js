@@ -1087,7 +1087,7 @@ document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
       const customURLStorage = customSettings.aiUltraModelCustomURL;
 
       const selectedModel = selectedModelStorageValue ? selectedModelStorageValue : 
-        modelLoader.getSelectedModel().id;
+        modelLoader.getDefaultModel().id;
 
       document.getElementById("aiModelList").value = selectedModel;
       document.getElementById("aiModelPath").value = customURLStorage ? customURLStorage : "";

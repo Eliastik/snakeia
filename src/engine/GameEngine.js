@@ -137,21 +137,26 @@ export default class GameEngine {
   }
 
   async initAIUltra() {
-    const modelLoader = TensorflowModelLoader.getInstance();
+    try {
+      const modelLoader = TensorflowModelLoader.getInstance();
 
-    const modelListAPIURL = this.aiUltraModelSettings.modelListAPIURL;
+      const modelListAPIURL = this.aiUltraModelSettings.modelListAPIURL;
 
-    if(modelListAPIURL) {
-      modelLoader.setModelListAPI(this.aiUltraModelSettings.modelListAPIURL);
-    }
+      if(modelListAPIURL) {
+        modelLoader.setModelListAPI(this.aiUltraModelSettings.modelListAPIURL);
+      }
 
-    const modelID = this.aiUltraModelSettings.modelID;
-    const customURL = this.aiUltraModelSettings.customURL;
+      const modelID = this.aiUltraModelSettings.modelID;
+      const customURL = this.aiUltraModelSettings.customURL;
 
-    if(modelID === "custom") {
-      await modelLoader.selectCustomModel(customURL);
-    } else {
-      await modelLoader.selectModel(modelID);
+      if(modelID === "custom") {
+        await modelLoader.selectCustomModel(customURL);
+      } else {
+        await modelLoader.selectModel(modelID);
+      }
+    } catch(e) {
+      console.error(e);
+      this.errorOccurred = true;
     }
   }
 

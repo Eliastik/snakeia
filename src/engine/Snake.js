@@ -250,9 +250,14 @@ export default class Snake {
         this.snakeAI = new SnakeAIHigh();
         break;
       case GameConstants.AiLevel.ULTRA: {
-        const aiUltra = new SnakeAIUltra(false);
-        await aiUltra.setup();
-        this.snakeAI = aiUltra;
+        try {
+          const aiUltra = new SnakeAIUltra(false);
+          await aiUltra.setup();
+          this.snakeAI = aiUltra;
+        } catch(e) {
+          console.error(e);
+          this.errorInit = true;
+        }
         break;
       }
       case GameConstants.AiLevel.MOCK:

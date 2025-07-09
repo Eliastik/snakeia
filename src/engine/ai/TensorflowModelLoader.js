@@ -121,7 +121,11 @@ export default class TensorflowModelLoader {
 
   async selectDefaultModel() {
     await this.loadModelList();
-    this.selectModel(TensorflowModelLoader.modelListCache.find(model => model.isDefault).id);
+    this.selectModel(this.getDefaultModel().id);
+  }
+
+  getDefaultModel() {
+    return TensorflowModelLoader.modelListCache.find(model => model.isDefault);
   }
 
   setModelListAPI(modelAPILocation) {
