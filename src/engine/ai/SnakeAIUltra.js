@@ -103,8 +103,10 @@ export default class SnakeAIUltra extends SnakeAI {
 
   async setup(summaryWriter) {
     this.mainModel = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
-
-    await this.loadMetadata(`${this.modelLocation}/metadata.json`);
+      
+    if(this.modelLocation) {
+      await this.loadMetadata(`${this.modelLocation}/metadata.json`);
+    }
 
     if(this.enableTrainingMode) {
       if(this.modelLocation) {
@@ -131,7 +133,7 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
-    const modelLoader = TensorflowModelLoader.getInstance();
+    const modelLoader = TensorflowModelLoader.getInstance(this.fileReader);
 
     if(enableTrainingMode) {
       return this.loadModelTrainingMode(modelLocation, modelLoader);
@@ -697,7 +699,9 @@ export default class SnakeAIUltra extends SnakeAI {
     try {
       this.logger.info(`Loading metadata from file: ${metadataLocation}\n`);
 
-      const metadata = await this.fileReader.readJSON(metadataLocation);
+      const modelLoader = TensorflowModelLoader.getInstance(this.fileReader);
+
+      const metadata = await modelLoader.loadModelMetadata(metadataLocation);
 
       if(!metadata) {
         this.logger.warn(`No metadata found at location: ${metadataLocation}\n`);

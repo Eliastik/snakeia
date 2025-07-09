@@ -24,9 +24,12 @@ export default class TensorflowModelLoader {
   static instance = null;
   
   static modelCache = new Map();
+  static metadataCache = new Map();
   static modelListCache = null;
   static selectedModel = null;
   static modelAPILocation = null;
+
+  static fileReader = null;
 
   constructor() {
     if(TensorflowModelLoader.instance) {
@@ -36,9 +39,13 @@ export default class TensorflowModelLoader {
     TensorflowModelLoader.instance = this;
   }
 
-  static getInstance() {
+  static getInstance(fileReader) {
     if(!TensorflowModelLoader.instance) {
       TensorflowModelLoader.instance = new TensorflowModelLoader();
+    }
+    
+    if(fileReader) {
+      TensorflowModelLoader.fileReader = fileReader;
     }
     
     return TensorflowModelLoader.instance;
@@ -56,6 +63,18 @@ export default class TensorflowModelLoader {
     TensorflowModelLoader.modelCache.set(modelLocation, model);
 
     return model;
+  }
+
+  async loadModelMetadata(location) {
+    if(TensorflowModelLoader.metadataCache.has(location)) {
+      return TensorflowModelLoader.metadataCache.get(location);
+    }
+
+    const metadata = await TensorflowModelLoader.fileReader.readJSON(location);
+
+    TensorflowModelLoader.metadataCache.set(location, metadata);
+
+    return metadata;
   }
 
   async loadSelectedModel() {
