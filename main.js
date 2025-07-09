@@ -672,6 +672,7 @@ function selectMode(mode) {
     document.getElementById("privateGameDiv").style.display = "block";
     document.getElementById("iaSettings").style.display = "none";
     document.getElementById("seedSettings").style.display = "none";
+    document.getElementById("modalSelectAIUltraModelButton").style.display = "none";
 
     if(onlineClient.serverSettings && onlineClient.serverSettings.enableAI) {
       document.getElementById("enableAIDiv").style.display = "block";
@@ -683,6 +684,12 @@ function selectMode(mode) {
     document.getElementById("seedSettings").style.display = "block";
     document.getElementById("privateGameDiv").style.display = "none";
     document.getElementById("enableAIDiv").style.display = "none";
+
+    if(document.getElementById("aiLevel").value === "ultra") {
+      document.getElementById("modalSelectAIUltraModelButton").style.display = "block";
+    } else {
+      document.getElementById("modalSelectAIUltraModelButton").style.display = "none";
+    }
   }
 
   displaySettings();
@@ -1026,7 +1033,7 @@ document.getElementById("resetSeeds").onclick = e => {
 };
 
 document.getElementById("aiLevel").onchange = function() {
-  if(this.value === "ultra") {
+  if(this.value === "ultra" && selectedMode !== BATTLE_ROYALE_ONLINE) {
     document.getElementById("modalSelectAIUltraModelButton").style.display = "block";
   } else {
     document.getElementById("modalSelectAIUltraModelButton").style.display = "none";
