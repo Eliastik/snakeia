@@ -262,7 +262,9 @@ export default class Grid {
       return false;
     }
 
-    if(!this.maze && this.fruitPosGold == null && GameUtils.randRange(1, (this.probGoldFruitIncrease ? 3 : (numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER)), this.rngGame) == 1) {
+    const shouldSetGoldFruit = GameUtils.randRange(1, (this.probGoldFruitIncrease ? 3 : (numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER)), this.rngGame) == 1;
+
+    if(!this.maze && this.fruitPosGold == null && shouldSetGoldFruit) {
       this.setFruit(numberPlayers, true);
     }
 
@@ -331,9 +333,9 @@ export default class Grid {
       }
     }
 
-    const startPosition = this.get(position);
+    const startPositionValue = this.get(position);
 
-    if(fill && [GameConstants.CaseType.EMPTY, GameConstants.CaseType.FRUIT, GameConstants.CaseType.FRUIT_GOLD].includes(startPosition)) {
+    if(fill && [GameConstants.CaseType.EMPTY].includes(startPositionValue)) {
       this.set(GameConstants.CaseType.SURROUNDED, position);
     }
 

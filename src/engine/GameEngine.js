@@ -398,11 +398,20 @@ export default class GameEngine {
         }
       }
 
-      // Check stuck fruits
-      setFruitError = this.handleStuckFruits(setFruitError);
-
       // Check if the game should end
-      this.checkEndGameCondition(setFruitError);
+      const shouldEndGame = this.checkEndGameCondition();
+
+      if(shouldEndGame) {
+        this.endGame();
+      } else {
+        // Check stuck fruits
+        setFruitError = this.handleStuckFruits(setFruitError);
+
+        // If there was an error setting the fruit, we end the game here
+        if(setFruitError) {
+          this.endGame();
+        }
+      }
 
       // Send events about the current game state update
       this.reactor.dispatchEvent("onUpdate");
@@ -537,7 +546,7 @@ export default class GameEngine {
     };
   }
 
-  checkEndGameCondition(setFruitError) {
+  checkEndGameCondition() {
     let nbOver = 0;
 
     let allActiveAIAreStuck = true;
@@ -564,16 +573,18 @@ export default class GameEngine {
       }
     }
 
-    const shouldEndGame = nbOver >= this.snakes.length || setFruitError || (allActiveAIAreFullyStuck && !humanPlayerActive);
+    const shouldEndGame = nbOver >= this.snakes.length || (allActiveAIAreFullyStuck && !humanPlayerActive);
 
     this.aiStuck = allActiveAIAreStuck && !humanPlayerActive && !shouldEndGame;
 
-    if(shouldEndGame) {
-      this.stop();
+    return shouldEndGame;
+  }
 
-      if(this.snakes.length > 1) {
-        this.gameFinished = true;
-      }
+  endGame() {
+    this.stop();
+
+    if(this.snakes.length > 1) {
+      this.gameFinished = true;
     }
   }
 
