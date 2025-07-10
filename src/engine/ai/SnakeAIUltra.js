@@ -20,7 +20,7 @@ import SnakeAI from "./SnakeAI.js";
 import GameConstants from "../Constants.js";
 import Position from "../Position.js";
 import GameUtils from "../GameUtils.js";
-import TensorflowModelLoader from "./TensorflowModelLoader.js";
+import SnakeAIUltraModelLoader from "./SnakeAIUltraModelLoader.js";
 import MultiEnvironmentReplayBuffer from "./utils/memory/MultiEnvironmentReplayBuffer.js";
 import PrioritizedReplayBuffer from "./utils/memory/PrioritizedReplayBuffer.js";
 import UniformReplayBuffer from "./utils/memory/UniformReplayBuffer.js";
@@ -133,7 +133,7 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
-    const modelLoader = TensorflowModelLoader.getInstance(this.fileReader);
+    const modelLoader = SnakeAIUltraModelLoader.getInstance(this.fileReader);
 
     if(enableTrainingMode) {
       return this.loadModelTrainingMode(modelLocation, modelLoader);
@@ -697,7 +697,7 @@ export default class SnakeAIUltra extends SnakeAI {
     try {
       this.logger.info(`Loading metadata from file: ${metadataLocation}\n`);
 
-      const modelLoader = TensorflowModelLoader.getInstance(this.fileReader);
+      const modelLoader = SnakeAIUltraModelLoader.getInstance(this.fileReader);
 
       const metadata = await modelLoader.loadModelMetadata(metadataLocation);
 

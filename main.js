@@ -29,7 +29,8 @@ import { NotificationMessage } from "jsgametools";
 import seedrandom from "seedrandom";
 import StorageFactory from "./src/StorageFactory";
 import { Timer, TimerInterval } from "./src/Timers";
-import TensorflowModelLoader from "./src/engine/ai/TensorflowModelLoader.js";
+import SnakeAIUltraModelLoader from "./src/engine/ai/SnakeAIUltraModelLoader.js";
+import semver from "semver";
 
 // Modes :
 window.SOLO_AI = "SOLO_AI";
@@ -50,6 +51,8 @@ window.LEVEL_REACH_SCORE_ON_TIME = "LEVEL_REACH_SCORE_ON_TIME";
 window.LEVEL_MAZE_WIN = "LEVEL_MAZE_WIN";
 window.DEFAULT_LEVEL = "DEFAULT_LEVEL";
 window.DOWNLOADED_LEVEL = "DOWNLOADED_LEVEL";
+// Level type array
+const LEVEL_TYPES = [LEVEL_REACH_SCORE, LEVEL_REACH_MAX_SCORE, LEVEL_MULTI_BEST_SCORE, LEVEL_REACH_SCORE_ON_TIME, LEVEL_MULTI_REACH_SCORE_FIRST, LEVEL_MAZE_WIN];
 // Default levels :
 // Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame], type: levelType(see below), typeValue: levelTypeValue(score, time, ...), version: (version min to play the level) }
 window.DEFAULT_LEVELS_SOLO_PLAYER = {
@@ -93,11 +96,6 @@ document.getElementById("versionTxt").innerHTML = GameConstants.Setting.APP_VERS
 document.getElementById("appVersion").innerHTML = GameConstants.Setting.APP_VERSION;
 document.getElementById("dateTxt").innerHTML = DATE_VERSION;
 document.getElementById("appUpdateDate").innerHTML = DATE_VERSION;
-
-// Libs
-String.prototype.strcmp = function(str) {
-  return ((this == str) ? 0 : ((this > str) ? 1 : -1));
-};
 
 if(!storageGlobal.isSupported) {
   document.getElementById("localstorageDisabled").style.display = "block";
@@ -264,11 +262,21 @@ document.getElementById("resetParameters").onclick = function() {
   saveSettings();
 };
 
+function normalizeVersion(version) {
+  const parts = version.split(".");
+
+  while(parts.length < 3) {
+    parts.push("0");
+  }
+
+  return parts.slice(0, 3).join(".");
+}
+
 const processUpdateData = data => {
   if(typeof(data) !== "undefined" && data !== null && typeof(data.version) !== "undefined" && data.version !== null) {
-    const newVersionTest = GameConstants.Setting.APP_VERSION.strcmp(data.version);
+    const newVersionTest = semver.lt(GameConstants.Setting.APP_VERSION, normalizeVersion(data.version));
 
-    if(newVersionTest < 0) {
+    if(newVersionTest) {
       document.getElementById("updateAvailable").style.display = "block";
       document.getElementById("appUpdateVersion").textContent = data.version;
 
@@ -1058,13 +1066,17 @@ function displayCustomURLAIUltraModel(value) {
 
 document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
   document.getElementById("errorLoadingModelList").style.display = "none";
-  document.getElementById("formSettingsAIUltraModel").style.display = "block";
+  document.getElementById("formSettingsAIUltraModel").style.display = "none";
+  document.getElementById("loadingModelList").style.display = "block";
 
   modalSelectAIUltraModelInstance.show();
 
   try {
-    const modelLoader = TensorflowModelLoader.getInstance();
+    const modelLoader = SnakeAIUltraModelLoader.getInstance();
     const modelList = await modelLoader.getModelList();
+
+    document.getElementById("formSettingsAIUltraModel").style.display = "block";
+    document.getElementById("loadingModelList").style.display = "none";
 
     if(modelList && Array.isArray(modelList)) {
       const selectElement = document.getElementById("aiModelList");
@@ -1086,14 +1098,19 @@ document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
       const selectedModelStorageValue = customSettings.aiUltraModelId;
       const customURLStorage = customSettings.aiUltraModelCustomURL;
 
-      const selectedModel = selectedModelStorageValue ? selectedModelStorageValue : 
-        modelLoader.getDefaultModel().id;
+      const defaultModel = modelLoader.getDefaultModel();
+      const selectedModelId = selectedModelStorageValue ? selectedModelStorageValue : 
+        defaultModel?.id;
+      const selectedModel = modelList.find(model => model.id === selectedModelId);
 
-      document.getElementById("aiModelList").value = selectedModel;
+      document.getElementById("aiModelList").value = selectedModelId;
       document.getElementById("aiModelPath").value = customURLStorage ? customURLStorage : "";
 
-      updateModelDetails(modelList.find(model => model.id === selectedModel));
-      displayCustomURLAIUltraModel(selectedModel);
+      const isCompatible = selectedModelStorageValue === "custom" ? true :
+        modelLoader.isModelCompatible(selectedModel);
+
+      updateModelDetails(selectedModel, isCompatible, defaultModel?.id === selectedModelId);
+      displayCustomURLAIUltraModel(selectedModelId);
     } else {
       document.getElementById("errorLoadingModelList").style.display = "block";
       document.getElementById("formSettingsAIUltraModel").style.display = "none";
@@ -1102,14 +1119,19 @@ document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
     console.error(e);
 
     document.getElementById("errorLoadingModelList").style.display = "block";
+    document.getElementById("loadingModelList").style.display = "none";
     document.getElementById("formSettingsAIUltraModel").style.display = "none";
   }
 };
 
-function updateModelDetails(model) {
-  if(model.id === "custom") {
+function updateModelDetails(model, isCompatible, isDefault) {
+  if(!model || model.id === "custom") {
     document.getElementById("aiModelDetailsCollapse").style.display = "none";
     document.getElementById("aiModelDetailsCollapseButton").style.display = "none";
+    document.getElementById("aiModelDefault").style.display = "none";
+    document.getElementById("aiModelNotCompatible").style.display = "none";
+    document.getElementById("aiModelDeprecated").style.display = "none";
+
     return;
   }
   
@@ -1124,6 +1146,7 @@ function updateModelDetails(model) {
   document.getElementById("aiModelDescription").textContent = model.description[language] || "—";
   document.getElementById("aiModelTechnical").textContent = model.technical[language] || "—";
   document.getElementById("aiModelSize").textContent = model.sizeMb ? model.sizeMb.toFixed(1) : "—";
+  document.getElementById("aiModelId").textContent = model.id || "—";
   document.getElementById("aiModelDate").textContent = model.createdAt ?
     new Date(model.createdAt).toLocaleDateString(language, { hour: "numeric", minute: "numeric", second: "numeric" }) : "—";
 
@@ -1133,10 +1156,16 @@ function updateModelDetails(model) {
     document.getElementById("aiModelDeprecated").style.display = "none";
   }
 
-  if(model.isDefault) {
+  if(isDefault) {
     document.getElementById("aiModelDefault").style.display = "block";
   } else {
     document.getElementById("aiModelDefault").style.display = "none";
+  }
+
+  if(isCompatible) {
+    document.getElementById("aiModelNotCompatible").style.display = "none";
+  } else {
+    document.getElementById("aiModelNotCompatible").style.display = "block";
   }
 
   const website = document.getElementById("aiModelAuthorWebsite");
@@ -1165,12 +1194,18 @@ document.getElementById("validateAIUltraModel").onclick = () => {
 };
 
 document.getElementById("aiModelList").onchange = async function() {
-  const modelLoader = TensorflowModelLoader.getInstance();
+  const modelLoader = SnakeAIUltraModelLoader.getInstance();
   const modelList = await modelLoader.getModelList();
+  const defaultModel = modelLoader.getDefaultModel();
+
+  const model = this.value === "custom" ? { id: "custom" } :
+    modelList.find(model => model.id === this.value);
+
+  const isCompatible = this.value === "custom" ? true :
+    modelLoader.isModelCompatible(model);
 
   displayCustomURLAIUltraModel(this.value);
-  updateModelDetails(this.value === "custom" ? { id: "custom" } :
-    modelList.find(model => model.id === this.value));
+  updateModelDetails(model, isCompatible, defaultModel?.id === this.value);
 };
 
 function resetForm(resetValues, resetSeeds) {
@@ -1856,11 +1891,10 @@ function canPlay(level, player, type) {
 }
 
 function levelCompatible(levelType, version) {
-  if((levelType != LEVEL_REACH_SCORE && levelType != LEVEL_REACH_MAX_SCORE && levelType != LEVEL_MULTI_BEST_SCORE && levelType != LEVEL_REACH_SCORE_ON_TIME && levelType != LEVEL_MULTI_REACH_SCORE_FIRST && levelType != LEVEL_MAZE_WIN) || GameConstants.Setting.APP_VERSION.strcmp(version) < 0) {
-    return false;
-  }
-
-  return true;
+  const isKnownLevelType = LEVEL_TYPES.includes(levelType);
+  const isCompatibleVersion = semver.gte(GameConstants.Setting.APP_VERSION, normalizeVersion(version));
+  
+  return isKnownLevelType && isCompatibleVersion;
 }
 
 function printResultLevel(level, player, levelType, type, shortVersion) {

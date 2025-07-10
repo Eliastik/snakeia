@@ -21,7 +21,7 @@ import GameConstants from "./Constants.js";
 import Reactor from "./Reactor.js";
 import Grid from "./Grid.js";
 import Snake from "./Snake.js";
-import TensorflowModelLoader from "./ai/TensorflowModelLoader.js";
+import SnakeAIUltraModelLoader from "./ai/SnakeAIUltraModelLoader.js";
 import seedrandom from "seedrandom";
 
 export default class GameEngine {
@@ -140,7 +140,7 @@ export default class GameEngine {
 
   async initAIUltra() {
     try {
-      const modelLoader = TensorflowModelLoader.getInstance();
+      const modelLoader = SnakeAIUltraModelLoader.getInstance();
 
       const modelListAPIURL = this.aiUltraModelSettings.modelListAPIURL;
 

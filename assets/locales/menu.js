@@ -304,11 +304,13 @@ i18next.addResourceBundle("fr", "translation", {
     "technical": "Technique :",
     "size": "Taille :",
     "mb": "Mo",
-    "date": "Date :",
+    "date": "Date de création :",
     "author": "Auteur :",
-    "source": "URL du modèle :",
+    "source": "URL de base du modèle :",
     "deprecated": "Ce modèle est déprécié",
-    "default": "Ce modèle est le modèle par défaut"
+    "default": "Ce modèle est le modèle par défaut",
+    "notCompatible": "Ce modèle n'est pas compatible avec votre version du jeu. Vous risquez de rencontrer des problèmes si vous le sélectionnez",
+    "modelID": "Identifiant du modèle :"
   }
 
 }, true, false);
@@ -599,10 +601,12 @@ i18next.addResourceBundle("en", "translation", {
     "technical": "Technical:",
     "size": "Size:",
     "mb": "MB",
-    "date": "Date:",
+    "date": "Created date:",
     "author": "Author:",
-    "source": "Model URL:",
+    "source": "Model base URL:",
     "deprecated": "This model is deprecated",
-    "default": "This model is the default model"
+    "default": "This model is the default model",
+    "notCompatible": "This model is not compatible with your game version. You may encounter problems if you select it",
+    "modelID": "Model ID:"
   }
 }, true, false);
