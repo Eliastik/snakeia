@@ -50,33 +50,36 @@ export default class GameControllerWorker extends GameController {
         if(this.gameEngine && this.gameEngine.grid && this.gameEngine.grid.rngGame) this.gameEngine.grid.rngGame = null;
 
         this.worker.onmessage = e => {
-          const data = e.data;
+          const message = e.data;
 
-          if(data == "ready") {
+          if(message == "ready") {
             this.worker.postMessage(["init", this.gameEngine]);
           } else {
-            if(data.length > 1) {
+            if(Array.isArray(message) && message.length > 1) {
+              const key = message[0];
+              const data = message[1];
+
               let grid = this.gameUI.grid;
   
-              if(Object.prototype.hasOwnProperty.call(data[1], "grid") && data[1]["grid"] != null) {
-                grid = Object.assign(new Grid(), data[1]["grid"]);
-                data[1]["grid"] = grid;
+              if(Object.prototype.hasOwnProperty.call(data, "grid") && data["grid"] != null) {
+                grid = Object.assign(new Grid(), data["grid"]);
+                data["grid"] = grid;
               }
               
-              if(Object.prototype.hasOwnProperty.call(data[1], "snakes") && data[1]["snakes"] != null) {
-                for(let i = 0; i < data[1]["snakes"].length; i++) {
-                  data[1]["snakes"][i].grid = grid;
-                  data[1]["snakes"][i] = Object.assign(new Snake(), data[1]["snakes"][i]);
+              if(Object.prototype.hasOwnProperty.call(data, "snakes") && data["snakes"] != null) {
+                for(let i = 0; i < data["snakes"].length; i++) {
+                  data["snakes"][i].grid = grid;
+                  data["snakes"][i] = Object.assign(new Snake(), data["snakes"][i]);
   
-                  for(let j = 0; j < data[1]["snakes"][i].queue.length; j++) {
-                    data[1]["snakes"][i].queue[j] = Object.assign(new Position(), data[1]["snakes"][i].queue[j]);
+                  for(let j = 0; j < data["snakes"][i].queue.length; j++) {
+                    data["snakes"][i].queue[j] = Object.assign(new Position(), data["snakes"][i].queue[j]);
                   }
                 }
               }
               
-              this.update(data[0], data[1]);
+              this.update(key, data);
               
-              switch(data[0]) {
+              switch(key) {
               case "init":
                 this.workerReady = true;
                 this.update("init", { "engineLoading": false });
