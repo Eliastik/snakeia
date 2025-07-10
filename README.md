@@ -475,7 +475,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
     - [x] Permettre de charger une URL personnalisée
     - [x] Afficher plus d'infos sur les modèles
     - [x] Côté serveur : paramètre pour l'API liste des modèles + URL modèle personnalisée ?
-  - [ ] Corriger les pommes qui disparaissent en fin de partie (pour permettre d'avoir le vrai état de fin)
+  - [x] Corriger les pommes qui disparaissent en fin de partie (pour permettre d'avoir le vrai état de fin)
   - [x] Afficher informations sur les niveaux de l'IA
 - [ ] Bug graphique suite à l'opti du draw
 - [x] Mettre à jour socket.io
