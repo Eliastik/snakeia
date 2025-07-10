@@ -335,7 +335,7 @@ export default class Grid {
 
     const startPositionValue = this.get(position);
 
-    if(fill && [GameConstants.CaseType.EMPTY].includes(startPositionValue)) {
+    if(fill && [GameConstants.CaseType.EMPTY, GameConstants.CaseType.FRUIT, GameConstants.CaseType.FRUIT_GOLD].includes(startPositionValue)) {
       this.set(GameConstants.CaseType.SURROUNDED, position);
     }
 
