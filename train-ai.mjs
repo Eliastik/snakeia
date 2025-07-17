@@ -17,13 +17,15 @@ const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 const EPISODES_TYPES            = ["DEFAULT"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
-const NUM_EPISODES_PER_TYPE     = 500;
+const NUM_EPISODES_PER_TYPE     = 1500;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 15;
 const MAX_TICKS                 = 1000;
-const INITAL_GRID_WIDTH         = 5;
-const INITAL_GRID_HEIGHT        = 5;
+const INITAL_GRID_WIDTH         = 15;
+const INITAL_GRID_HEIGHT        = 15;
 const GRID_INCREASE_INCREMENT   = 5;
+const MAX_GRID_WIDTH            = 15;
+const MAX_GRID_HEIGHT           = 15;
 const ENABLE_TENSORBOARD_LOGS   = true;
 const AI_LEVEL_OPPONENTS        = Constants.AiLevel.DEFAULT;
 const NUMBER_OPPONENTS          = 5;
@@ -84,8 +86,8 @@ function getMaxEpisodesCount() {
     let gridSteps = 1;
 
     if(hasIncreaseGridSize) {
-      const gridRangeW = Math.ceil((theSnakeAI.modelWidth - INITAL_GRID_WIDTH) / GRID_INCREASE_INCREMENT);
-      const gridRangeH = Math.ceil((theSnakeAI.modelHeight - INITAL_GRID_HEIGHT) / GRID_INCREASE_INCREMENT);
+      const gridRangeW = Math.ceil((Math.min(MAX_GRID_WIDTH, theSnakeAI.modelWidth) - INITAL_GRID_WIDTH) / GRID_INCREASE_INCREMENT);
+      const gridRangeH = Math.ceil((Math.min(MAX_GRID_HEIGHT, theSnakeAI.modelHeight) - INITAL_GRID_HEIGHT) / GRID_INCREASE_INCREMENT);
 
       gridSteps = Math.max(gridRangeW, gridRangeH) + 1;
     }
@@ -235,8 +237,8 @@ async function train() {
 
     for(let episode = 1; episode <= NUM_EPISODES_PER_TYPE; episode++) {
       if(currentEpisodeType === "INCREASE_GRID_SIZE") {
-        currentGridWidth = Math.min(theSnakeAI.modelWidth, currentGridWidth + GRID_INCREASE_INCREMENT);
-        currentGridHeight = Math.min(theSnakeAI.modelHeight, currentGridHeight + GRID_INCREASE_INCREMENT);
+        currentGridWidth = Math.min(Math.min(MAX_GRID_WIDTH, theSnakeAI.modelWidth), currentGridWidth + GRID_INCREASE_INCREMENT);
+        currentGridHeight = Math.min(Math.min(MAX_GRID_HEIGHT, theSnakeAI.modelHeight), currentGridHeight + GRID_INCREASE_INCREMENT);
 
         currentEpisodeType = getNextEpisodeType(currentEpisodeType);
       }
