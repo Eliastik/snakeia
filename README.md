@@ -43,6 +43,7 @@ Other AI modes include:
 * Uses graphic elements from [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728), [Trophy](https://www.flaticon.com/free-icon/cup_625398), [Clock](https://www.flaticon.com/free-icon/clock_214288), [Snake](https://www.flaticon.com/free-icon/snake_194210) (changed), [Rank](https://www.flaticon.com/free-icon/ranking_2665632) (changed)
 * Uses the font [Delius](https://www.fontsquirrel.com/fonts/delius) under SIL Open Font License
 * The "tropical" graphic skin uses as a base a [picture from here](https://commons.wikimedia.org/wiki/File:Gunther%27s_Racer_Coluber_gracilis_Snake_snake_by_Dr._Raju_Kasambe_(23).jpg) under Creative Commons Attribution-Share Alike 4.0 International license, [this picture](https://www.piqsels.com/fr/public-domain-photo-zbzjp) under [Creative Commons Zero](https://creativecommons.org/publicdomain/zero/1.0/deed.en) license and [this picture](https://commons.wikimedia.org/wiki/File:Red_brick_wall_texture.JPG) under Creative Commons Attribution-Share Alike 3.0 Unported license
+* Uses a 3D model of an apple created by [bariacg](https://sketchfab.com/bariacg), available on [Sketchfab website](https://sketchfab.com/3d-models/apple-8cc60d44baec49558156ac767839c2ed), licensed under [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## Changelog
 
@@ -275,6 +276,7 @@ Les autres modes d’IA sont :
 * Utilise des éléments graphiques venant de [Flaticon](https://www.flaticon.com) : [Brick wall](https://www.flaticon.com/free-icon/brick-wall_1833083), [Apple](https://www.flaticon.com/free-icon/apple_135728), [Trophy](https://www.flaticon.com/free-icon/cup_625398), [Clock](https://www.flaticon.com/free-icon/clock_214288), [Snake](https://www.flaticon.com/free-icon/snake_194210) (modifié), [Rank](https://www.flaticon.com/free-icon/ranking_2665632) (modifié)
 * Utilise la police de caractères [Delius](https://www.fontsquirrel.com/fonts/delius) sous licence SIL Open Font License
 * Le skin graphique "tropical" utilise comme base une [photo venant d'ici](https://commons.wikimedia.org/wiki/File:Gunther%27s_Racer_Coluber_gracilis_Snake_snake_by_Dr._Raju_Kasambe_(23).jpg) sous licence Creative Commons Attribution-Share Alike 4.0 International, [cette photo](https://www.piqsels.com/fr/public-domain-photo-zbzjp) sous licence [Creative Commons Zero](https://creativecommons.org/publicdomain/zero/1.0/deed.en) et [cette photo](https://commons.wikimedia.org/wiki/File:Red_brick_wall_texture.JPG) sous licence Creative Commons Attribution-Share Alike 3.0 Unported
+* Utilise un modèle 3D de pomme réalisé par [bariacg](https://sketchfab.com/bariacg) et disponible sur le [site Sketchfab](https://sketchfab.com/3d-models/apple-8cc60d44baec49558156ac767839c2ed), sous [licence Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## Journal des changements
 
@@ -478,6 +480,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
   - [x] Corriger les pommes qui disparaissent en fin de partie (pour permettre d'avoir le vrai état de fin)
   - [x] Afficher informations sur les niveaux de l'IA
 - [ ] Bug graphique suite à l'opti du draw
+- [ ] Rendu 3D (le rendu 2D reste sélectionnable/par défaut ?)
 - [x] Mettre à jour socket.io
   - [x] Bug en chargeant la liste des salles après avoir quitté une partie
 - [x] Bug sur la détection des objectifs atteints dans le mode niveaux (il y a l'air d'y avoir un délai) suite à l'opti et refactor du moteur de jeu
