@@ -21,6 +21,7 @@ import GameUtils from "../engine/GameUtils";
 import { Component, Utils, EasingFunctions } from "jsgametools";
 import i18next from "i18next";
 import Position from "../engine/Position";
+import * as THREE from "three";
 
 export default class GridUI extends Component {
   constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
@@ -51,6 +52,19 @@ export default class GridUI extends Component {
     this.oldSnakesState = null;
     this.oldWidth = 0;
     this.oldHeight = 0;
+
+    this.initThreeJS();
+  }
+
+  initThreeJS() {
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.gridGroup = new THREE.Group();
+
+    this.scene.add(this.gridGroup);
+
+    document.body.appendChild(this.renderer.domElement);
   }
 
   draw(context) {
@@ -79,15 +93,30 @@ export default class GridUI extends Component {
 
       this.width = totalWidth;
       this.height = totalHeight;
-  
+
+      this.setupCameraAndSize();
+        
       this.drawGrid(ctx, caseSize, totalWidth, offsetX, offsetY);
+  
+      this.drawGrid3D(ctx);
   
       this.drawSnakes(ctx, caseSize, offsetX, offsetY, totalWidth, this.currentPlayer);
 
       this.saveCurrentState(canvas);
+
+      this.renderer.render(this.scene, this.camera);
   
       ctx.restore();
     }
+  }
+
+  setupCameraAndSize() {
+    this.camera.aspect = this.width / this.height;
+    this.camera.position.set(0, -20, 20);
+    this.camera.lookAt(0, 0, 0);
+
+    this.renderer.setSize(this.width, this.height);
+    this.renderer.shadowMap.enabled = true;
   }
 
   saveCurrentState(canvas) {
@@ -185,6 +214,73 @@ export default class GridUI extends Component {
     }
 
     Utils.drawImageData(ctx, canvasGrid, offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height), offsetX, offsetY, totalWidth, Math.round(caseSize * this.grid.height));
+  }
+  
+  drawGrid3D(ctx) {
+    const canvasGrid = this.canvasGrid;
+    const ctxGrid = canvasGrid.getContext("2d");
+
+    if(this.forceRedraw || this.gridStateChanged) {
+      this.gridGroup.clear();
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(this.grid.width / 2, this.grid.height / 2, 15);
+      dirLight.castShadow = true;
+
+      const ground = new THREE.Mesh(
+        new THREE.BoxGeometry(this.grid.width, this.grid.height, 2),
+        new THREE.MeshStandardMaterial({ color: 0x95a5a6, roughness: 0.6, metalness: 0.2 })
+      );
+      ground.receiveShadow = false;
+      ground.position.set(0, 0, -1);
+
+      this.gridGroup.add(ambientLight);
+      this.gridGroup.add(dirLight);
+      this.gridGroup.add(ground);
+
+      const halfGridWidth = this.grid.width / 2;
+      const halfGridHeight = this.grid.height / 2;
+
+      for(let y = 0; y < this.grid.height; y++) {
+        for(let x = 0; x < this.grid.width; x++) {
+          const caseType = this.grid.get(new Position(x, y));
+
+          if(caseType === GameConstants.CaseType.WALL) {
+            const geometry = new THREE.BoxGeometry(1, 1, 1.5);
+            const color = 0xe67e22;
+            const material = new THREE.MeshStandardMaterial({ color });
+            const tile = new THREE.Mesh(geometry, material);
+
+            tile.receiveShadow = true;
+
+            tile.position.set(
+              x - halfGridWidth + 0.5,
+              y - halfGridHeight + 0.5,
+              0.5
+            );
+
+            this.gridGroup.add(tile);
+          } else {
+            const geometry = new THREE.BoxGeometry(1, 1, 0.1);
+            const color = (x + y) % 2 === 0 ? 0x2c3e50 : 0x95a5a6;
+            const material = new THREE.MeshStandardMaterial({ color });
+            const tile = new THREE.Mesh(geometry, material);
+
+            tile.receiveShadow = true;
+
+            tile.position.set(
+              x - halfGridWidth + 0.5,
+              y - halfGridHeight + 0.5,
+              0
+            );
+
+            this.gridGroup.add(tile);
+          }
+        }
+      }
+    }
   }
 
   snakeStateHasChanged() {

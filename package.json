@@ -63,6 +63,7 @@
     "jsgametools": "git+https://github.com/Eliastik/JSGameTools.git#cf5bbf3",
     "seedrandom": "^3.0.5",
     "semver": "^7.7.2",
-    "socket.io-client": "~4.8.1"
+    "socket.io-client": "~4.8.1",
+    "three": "^0.178.0"
   }
 }
