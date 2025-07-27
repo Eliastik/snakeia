@@ -125,7 +125,7 @@ export default class GridUI extends Component {
 
     this.camera.fov = fov;
     this.camera.aspect = this.width / this.height;
-    this.camera.position.set(0, -distanceZ * 0.3, distanceZ * 1.1);
+    this.camera.position.set(0, -distanceZ * 0.25, distanceZ * 1.1);
     this.camera.lookAt(0, 0, 0);
     this.camera.updateProjectionMatrix();
 
@@ -238,10 +238,10 @@ export default class GridUI extends Component {
 
       const gridSize = Math.max(this.grid.width, this.grid.height) / 2;
 
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      dirLight.position.set(-gridSize, gridSize, 20);
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      dirLight.position.set(-gridSize, gridSize, 25);
 
       dirLight.castShadow = true;
       dirLight.shadow.mapSize.width = 4096;
@@ -274,6 +274,7 @@ export default class GridUI extends Component {
 
       const wallImage = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/${GameUtils.getImageCase(GameConstants.CaseType.WALL)}`);
       const wallTexture = new THREE.CanvasTexture(wallImage);
+      wallTexture.colorSpace = THREE.SRGBColorSpace;
 
       for(let y = 0; y < this.grid.height; y++) {
         for(let x = 0; x < this.grid.width; x++) {
