@@ -215,7 +215,7 @@ export default class GridUI extends Component {
   
           ctxGrid.fillRect(caseX, caseY, caseSize, caseSize);
           Utils.drawImage(ctxGrid,
-            this.imageLoader.get("assets/images/skin/" + this.graphicSkin + "/" + this.grid.getImageCase(new Position(j, i)),
+            this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/${this.grid.getImageCase(new Position(j, i))}`,
               caseSize,
               Math.round(caseSize)),
             Math.round(caseX),
@@ -236,15 +236,28 @@ export default class GridUI extends Component {
     if(this.forceRedraw || this.gridStateChanged) {
       this.gridGroup.clear();
 
+      const gridSize = Math.max(this.grid.width, this.grid.height) / 2;
+
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
 
       const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      dirLight.position.set(10, 10, 50);
+      dirLight.position.set(-gridSize, gridSize, 20);
+
       dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 4096;
+      dirLight.shadow.mapSize.height = 4096;
+
+      dirLight.shadow.camera.near = 1;
+      dirLight.shadow.camera.far = 100;
+
+      dirLight.shadow.camera.left = -gridSize;
+      dirLight.shadow.camera.right = gridSize;
+      dirLight.shadow.camera.top = gridSize;
+      dirLight.shadow.camera.bottom = -gridSize;
 
       const ground = new THREE.Mesh(
         new THREE.BoxGeometry(this.grid.width, this.grid.height, 2),
-        new THREE.MeshPhongMaterial({ color: 0x95a5a6 })
+        new THREE.MeshStandardMaterial({ color: 0x95a5a6 })
       );
       ground.receiveShadow = false;
       ground.position.set(0, 0, -1);
@@ -253,8 +266,14 @@ export default class GridUI extends Component {
       this.gridGroup.add(dirLight);
       this.gridGroup.add(ground);
 
+      this.gridGroup.add(new THREE.CameraHelper(dirLight.shadow.camera));
+      this.gridGroup.add(new THREE.AxesHelper(1));
+
       const halfGridWidth = this.grid.width / 2;
       const halfGridHeight = this.grid.height / 2;
+
+      const wallImage = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/${GameUtils.getImageCase(GameConstants.CaseType.WALL)}`);
+      const wallTexture = new THREE.CanvasTexture(wallImage);
 
       for(let y = 0; y < this.grid.height; y++) {
         for(let x = 0; x < this.grid.width; x++) {
@@ -265,8 +284,7 @@ export default class GridUI extends Component {
 
           if(caseType === GameConstants.CaseType.WALL) {
             const geometry = new THREE.BoxGeometry(1, 1, 1.5);
-            const color = 0xe67e22;
-            const material = new THREE.MeshPhongMaterial({ color });
+            const material = new THREE.MeshStandardMaterial({ map: wallTexture, toneMapped: false });
             const tile = new THREE.Mesh(geometry, material);
 
             tile.receiveShadow = true;
