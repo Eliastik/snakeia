@@ -309,7 +309,7 @@ export default class GridUI extends Component {
             this.gridGroup.add(tile);
           }
 
-          if(caseType === GameConstants.CaseType.FRUIT) {
+          if(caseType === GameConstants.CaseType.FRUIT || caseType === GameConstants.CaseType.FRUIT_GOLD) {
             const fruitModel = this.modelLoader.get("fruit");
 
             if(fruitModel) {
@@ -321,11 +321,17 @@ export default class GridUI extends Component {
               fruitModel.scale.setScalar(0.8 / size.x);
               fruitModel.position.set(xPosition, yPosition, 0.5);
               fruitModel.rotation.x = Math.PI / 2;
-              fruitModel.receiveShadow = true;
-              fruitModel.castShadow = true;
 
-              fruitModel.traverse((child) => {
+              fruitModel.traverse(child => {
                 if(child.isMesh) {
+                  if(caseType === GameConstants.CaseType.FRUIT_GOLD) {
+                    child.material = new THREE.MeshStandardMaterial({
+                      color: 0xFFD700,
+                      metalness: 0.75,
+                      roughness: 0.2,
+                    });
+                  }
+                  
                   child.castShadow = true;
                   child.receiveShadow = true;
                 }
