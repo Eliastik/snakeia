@@ -24,7 +24,7 @@ import Position from "../engine/Position";
 import * as THREE from "three";
 
 export default class GridUI extends Component {
-  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
+  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
     super();
 
     this.snakes = snakes;
@@ -34,6 +34,7 @@ export default class GridUI extends Component {
     this.isFilterHueAvailable = isFilterHueAvailable;
     this.headerHeight = headerHeight;
     this.imageLoader = imageLoader;
+    this.modelLoader = modelLoader;
     this.graphicSkin = graphicSkin;
     this.currentPlayer = currentPlayer;
     this.gameFinished = gameFinished;
@@ -66,7 +67,7 @@ export default class GridUI extends Component {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    //this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.gridGroup = new THREE.Group();
 
@@ -125,7 +126,7 @@ export default class GridUI extends Component {
 
     this.camera.fov = fov;
     this.camera.aspect = this.width / this.height;
-    this.camera.position.set(0, -distanceZ * 0.25, distanceZ * 1.1);
+    this.camera.position.set(0, -distanceZ * 0.25, distanceZ * 1.15);
     this.camera.lookAt(0, 0, 0);
     this.camera.updateProjectionMatrix();
 
@@ -244,8 +245,8 @@ export default class GridUI extends Component {
       dirLight.position.set(-gridSize, gridSize, 25);
 
       dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 4096;
-      dirLight.shadow.mapSize.height = 4096;
+      dirLight.shadow.mapSize.width = 2048;
+      dirLight.shadow.mapSize.height = 2048;
 
       dirLight.shadow.camera.near = 1;
       dirLight.shadow.camera.far = 100;
@@ -296,7 +297,7 @@ export default class GridUI extends Component {
             this.gridGroup.add(tile);
           } else {
             const geometry = new THREE.BoxGeometry(1, 1, 0.1);
-            const color = (x + y) % 2 === 0 ? 0x2c3e50 : 0x95a5a6;
+            const color = (x + y) % 2 === 0 ? 0x95a5a6 : 0x2c3e50;
             const material = new THREE.MeshStandardMaterial({ color });
             const tile = new THREE.Mesh(geometry, material);
 
@@ -306,6 +307,32 @@ export default class GridUI extends Component {
             tile.position.set(xPosition, yPosition, 0);
 
             this.gridGroup.add(tile);
+          }
+
+          if(caseType === GameConstants.CaseType.FRUIT) {
+            const fruitModel = this.modelLoader.get("fruit");
+
+            if(fruitModel) {
+              const box = new THREE.Box3().setFromObject(fruitModel);
+              
+              const size = new THREE.Vector3();
+              box.getSize(size);
+
+              fruitModel.scale.setScalar(0.8 / size.x);
+              fruitModel.position.set(xPosition, yPosition, 0.5);
+              fruitModel.rotation.x = Math.PI / 2;
+              fruitModel.receiveShadow = true;
+              fruitModel.castShadow = true;
+
+              fruitModel.traverse((child) => {
+                if(child.isMesh) {
+                  child.castShadow = true;
+                  child.receiveShadow = true;
+                }
+              });
+
+              this.gridGroup.add(fruitModel);
+            }
           }
         }
       }
@@ -729,12 +756,13 @@ export default class GridUI extends Component {
     }
   }
 
-  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
+  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
     this.snakes = snakes;
     this.grid = grid;
     this.speed = speed;
     this.headerHeight = headerHeight;
     this.imageLoader = imageLoader;
+    this.modelLoader = modelLoader;
     this.currentPlayer = currentPlayer;
     this.gameFinished = gameFinished;
     this.offsetFrame = offsetFrame;

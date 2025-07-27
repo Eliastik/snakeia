@@ -21,6 +21,7 @@ import GameUtils from "../engine/GameUtils";
 import GraphicsUtils from "./GraphicsUtils";
 import GameConstants from "../engine/Constants";
 import GameRanking from "./GameRanking";
+import ModelLoader from "./ModelLoader";
 import { ImageLoader, Button, ButtonImage, NotificationMessage, Utils, Menu, Label, ProgressBar, Constants, EasingFunctions } from "jsgametools";
 import GridUI from "./GridUI";
 import Header from "./Header";
@@ -30,6 +31,7 @@ export default class GameUI {
   constructor(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, settings) {
     // Assets loader
     this.imageLoader;
+    this.modelLoader;
     this.assetsLoaded = false;
     // Game settings
     this.controller = controller;
@@ -103,7 +105,7 @@ export default class GameUI {
     this.isFilterHueAvailable = Utils.isFilterHueAvailable();
     this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader);
     this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
-    this.gridUI = new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.onlineMode);
+    this.gridUI = new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.onlineMode);
     this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, null, null, null, 0.5, this.disableAnimation, "center");
     this.notificationMessage;
     this.labelMenus;
@@ -144,6 +146,7 @@ export default class GameUI {
 
   init() {
     this.imageLoader = new ImageLoader();
+    this.modelLoader = new ModelLoader();
 
     if(this.outputType == GameConstants.OutputType.TEXT) {
       this.textarea = document.createElement("textarea");
@@ -428,7 +431,11 @@ export default class GameUI {
 
   loadAssets() {
     if(!this.errorOccurred && this.outputType != GameConstants.OutputType.TEXT) {
-      this.imageLoader.load(["assets/images/skin/" + this.graphicSkin + "/snake_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_2.png", "assets/images/skin/" + this.graphicSkin + "/snake.png", "assets/images/skin/" + this.graphicSkin + "/body_4_end.png", "assets/images/skin/" + this.graphicSkin + "/body_3_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2_end.png", "assets/images/skin/" + this.graphicSkin + "/body_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2.png", "assets/images/skin/" + this.graphicSkin + "/body.png", "assets/images/skin/" + this.graphicSkin + "/wall.png", "assets/images/skin/" + this.graphicSkin + "/fruit.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/trophy.png", "assets/images/trophy_silver.png", "assets/images/trophy_bronze.png", "assets/images/clock.png", "assets/images/skin/" + this.graphicSkin + "/fruit_gold.png", "assets/images/ranking.png", "assets/images/skin/flat/fruit.png", "assets/images/skin/" + this.graphicSkin + "/unknown.png"], () => {
+      // Load images/textures
+      this.imageLoader.load(["assets/images/skin/" + this.graphicSkin + "/snake_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_2.png", "assets/images/skin/" + this.graphicSkin + "/snake.png", "assets/images/skin/" + this.graphicSkin + "/body_4_end.png", "assets/images/skin/" + this.graphicSkin + "/body_3_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2_end.png", "assets/images/skin/" + this.graphicSkin + "/body_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2.png", "assets/images/skin/" + this.graphicSkin + "/body.png", "assets/images/skin/" + this.graphicSkin + "/wall.png", "assets/images/skin/" + this.graphicSkin + "/fruit.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/trophy.png", "assets/images/trophy_silver.png", "assets/images/trophy_bronze.png", "assets/images/clock.png", "assets/images/skin/" + this.graphicSkin + "/fruit_gold.png", "assets/images/ranking.png", "assets/images/skin/flat/fruit.png", "assets/images/skin/" + this.graphicSkin + "/unknown.png"], async () => {
+        // Load 3D models
+        await this.modelLoader.preloadAll({ fruit: "assets/models/fruit.glb" });
+
         if(this.imageLoader.hasError) {
           this.errorOccurred = true;
         } else {
@@ -534,7 +541,7 @@ export default class GameUI {
         this.header.draw(ctx);
 
         if(this.grid != null && (!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished)))) {
-          this.gridUI.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.currentPlayer, this.gameFinished, this.countBeforePlay, this.spectatorMode, this.ticks, this.gameOver, this.onlineMode);
+          this.gridUI.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, this.gameFinished, this.countBeforePlay, this.spectatorMode, this.ticks, this.gameOver, this.onlineMode);
           this.gridUI.draw(ctx);
         }
 
@@ -543,7 +550,7 @@ export default class GameUI {
           Utils.drawImage(ctx, this.imageLoader.get("assets/images/clock.png", Math.round(this.header.height * 0.64), Math.round(this.header.height * 0.64)), Math.round(sizesTimer["x"] - this.header.height * 0.64 - 10), Math.round(this.header.height + 15), Math.round(this.header.height * 0.64), Math.round(this.header.height * 0.64));
         }
       } else if(!this.assetsLoaded) {
-        const percentLoaded = Math.floor((100 * Object.keys(this.imageLoader.images).length) / this.imageLoader.nbImagesToLoad);
+        const percentLoaded = Math.floor((100 * (Object.keys(this.imageLoader.images).length + this.modelLoader.cache.size)) / (this.imageLoader.nbImagesToLoad + this.modelLoader.nbModelsToLoad));
         this.labelMenus.text = i18next.t("engine.loading") + "\n" + percentLoaded + "%";
         this.labelMenus.color = "white";
         this.progressBarLoading.percent = percentLoaded / 100;
