@@ -47,8 +47,9 @@ export default class GridUI3D extends GridUI {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.gridGroup = new THREE.Group();
+    this.snakesGroup = new THREE.Group();
 
-    this.scene.add(this.gridGroup);
+    this.scene.add(this.gridGroup, this.snakesGroup);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
@@ -90,6 +91,8 @@ export default class GridUI3D extends GridUI {
   
       this.setupGrid();
 
+      this.setupSnakes(caseSize, canvas, totalWidth, offsetY);
+
       this.saveCurrentState(canvas);
 
       this.renderer.render(this.scene, this.camera);
@@ -114,6 +117,8 @@ export default class GridUI3D extends GridUI {
 
       this.isCameraInit = true;
     }
+
+    // TODO: fix camera in large grids (100x100)
 
     this.renderer.setSize(this.width, this.height);
 
@@ -163,46 +168,18 @@ export default class GridUI3D extends GridUI {
   }
   
   setupGrid() {
-    // eslint-disable-next-line no-debugger
-    debugger;
     if(this.forceRedraw || this.gridStateChanged) {
       this.gridGroup.clear();
-
-      const ground = new THREE.Mesh(
-        new THREE.BoxGeometry(this.grid.width, this.grid.height, 2),
-        new THREE.MeshStandardMaterial({ color: 0x95a5a6 })
-      );
-      ground.receiveShadow = false;
-      ground.position.set(0, 0, -1);
-
-      this.gridGroup.add(ground);
-
-      const wallImage = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/${GameUtils.getImageCase(GameConstants.CaseType.WALL)}`);
-      const wallTexture = new THREE.CanvasTexture(wallImage);
-      wallTexture.colorSpace = THREE.SRGBColorSpace;
-
-      const wallGeometry = new THREE.BoxGeometry(1, 1, 1.5);
-      const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture, toneMapped: false });
-      const wallInstancedMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.countWalls());
-      wallInstancedMesh.receiveShadow = true;
-      wallInstancedMesh.castShadow = true;
 
       const totalCells = this.grid.width * this.grid.height;
       const halfCells = Math.floor(totalCells / 2);
 
-      const lightGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
-      const lightGrayCellMaterial = new THREE.MeshStandardMaterial({ color: 0x95a5a6 });
-      const lightGrayCellInstancedMesh = new THREE.InstancedMesh(lightGrayCellGeometry, lightGrayCellMaterial, totalCells % 2 === 0 ? halfCells : halfCells + 1);
-      lightGrayCellInstancedMesh.receiveShadow = true;
-      lightGrayCellInstancedMesh.castShadow = false;
+      const ground = this.constructGround();
+      const wallInstancedMesh = this.constructWallMesh();
+      const lightGrayCellInstancedMesh = this.constructLightGrayCell(totalCells, halfCells);
+      const darkGrayCellInstancedMesh = this.constructDarkGrayCell(halfCells);
 
-      const darkGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
-      const darkGrayCellMaterial = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
-      const darkGrayCellInstancedMesh = new THREE.InstancedMesh(darkGrayCellGeometry, darkGrayCellMaterial, halfCells);
-      darkGrayCellInstancedMesh.receiveShadow = true;
-      darkGrayCellInstancedMesh.castShadow = false;
-
-      this.gridGroup.add(wallInstancedMesh, lightGrayCellInstancedMesh, darkGrayCellInstancedMesh);
+      this.gridGroup.add(ground, wallInstancedMesh, lightGrayCellInstancedMesh, darkGrayCellInstancedMesh);
 
       const halfGridWidth = this.grid.width / 2;
       const halfGridHeight = this.grid.height / 2;
@@ -228,43 +205,22 @@ export default class GridUI3D extends GridUI {
           }
 
           if(caseType === GameConstants.CaseType.FRUIT || caseType === GameConstants.CaseType.FRUIT_GOLD) {
-            const fruitModel = this.modelLoader.get("fruit");
-
-            if(fruitModel) {
-              const pointLight = new THREE.PointLight(0xff1100, 0.8, 2);
-              pointLight.position.set(xPosition, yPosition, 0.5);
-
-              const box = new THREE.Box3().setFromObject(fruitModel);
-              
-              const size = new THREE.Vector3();
-              box.getSize(size);
-
-              fruitModel.scale.setScalar(0.8 / size.x);
-              fruitModel.position.set(xPosition, yPosition, 0.5);
-              fruitModel.rotation.x = Math.PI / 2;
-
-              fruitModel.traverse(child => {
-                if(child.isMesh) {
-                  if(caseType === GameConstants.CaseType.FRUIT_GOLD) {
-                    child.material = new THREE.MeshStandardMaterial({
-                      color: 0xFFD700,
-                      metalness: 0.75,
-                      roughness: 0.2,
-                    });
-                  }
-                  
-                  child.castShadow = true;
-                  child.receiveShadow = true;
-                }
-              });
-
-              this.gridGroup.add(fruitModel);
-              this.gridGroup.add(pointLight);
-            }
+            const { fruitModel, pointLight } = this.constructFruit(xPosition, yPosition, caseType);
+            this.gridGroup.add(fruitModel, pointLight);
           }
         }
       }
     }
+  }
+
+  constructGround() {
+    const ground = new THREE.Mesh(
+      new THREE.BoxGeometry(this.grid.width, this.grid.height, 2),
+      new THREE.MeshStandardMaterial({ color: 0x95a5a6 })
+    );
+    ground.receiveShadow = false;
+    ground.position.set(0, 0, -1);
+    return ground;
   }
 
   countWalls() {
@@ -283,8 +239,138 @@ export default class GridUI3D extends GridUI {
     return wallsCount;
   }
 
-  setupSnakes() {
-    // TODO
+  constructWallMesh() {
+    const wallImage = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/${GameUtils.getImageCase(GameConstants.CaseType.WALL)}`);
+    const wallTexture = new THREE.CanvasTexture(wallImage);
+    wallTexture.colorSpace = THREE.SRGBColorSpace;
+
+    const wallGeometry = new THREE.BoxGeometry(1, 1, 1.5);
+    const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture, toneMapped: false });
+    const wallInstancedMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.countWalls());
+    wallInstancedMesh.receiveShadow = true;
+    wallInstancedMesh.castShadow = true;
+    return wallInstancedMesh;
+  }
+
+  constructLightGrayCell(totalCells, halfCells) {
+    const lightGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
+    const lightGrayCellMaterial = new THREE.MeshStandardMaterial({ color: 0x95a5a6 });
+    const lightGrayCellInstancedMesh = new THREE.InstancedMesh(lightGrayCellGeometry, lightGrayCellMaterial, totalCells % 2 === 0 ? halfCells : halfCells + 1);
+    lightGrayCellInstancedMesh.receiveShadow = true;
+    lightGrayCellInstancedMesh.castShadow = false;
+    return lightGrayCellInstancedMesh;
+  }
+
+  constructDarkGrayCell(halfCells) {
+    const darkGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
+    const darkGrayCellMaterial = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
+    const darkGrayCellInstancedMesh = new THREE.InstancedMesh(darkGrayCellGeometry, darkGrayCellMaterial, halfCells);
+    darkGrayCellInstancedMesh.receiveShadow = true;
+    darkGrayCellInstancedMesh.castShadow = false;
+    return darkGrayCellInstancedMesh;
+  }
+
+  constructFruit(xPosition, yPosition, caseType) {
+    const fruitModel = this.modelLoader.get("fruit");
+
+    if (fruitModel) {
+      const pointLight = new THREE.PointLight(0xff1100, 0.8, 2);
+      pointLight.position.set(xPosition, yPosition, 0.5);
+
+      const box = new THREE.Box3().setFromObject(fruitModel);
+
+      const size = new THREE.Vector3();
+      box.getSize(size);
+
+      fruitModel.scale.setScalar(0.8 / size.x);
+      fruitModel.position.set(xPosition, yPosition, 0.5);
+      fruitModel.rotation.x = Math.PI / 2;
+
+      fruitModel.traverse(child => {
+        if(child.isMesh) {
+          if(caseType === GameConstants.CaseType.FRUIT_GOLD) {
+            child.material = new THREE.MeshStandardMaterial({
+              color: 0xFFD700,
+              metalness: 0.75,
+              roughness: 0.2,
+            });
+          }
+
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+
+      return { fruitModel, pointLight };
+    }
+  }
+
+  setupSnakes(caseSize, canvas, totalWidth, offsetY) {
+    this.snakesGroup.clear();
+
+    for(const snake of this.snakes) {
+      if(snake.color != undefined) {
+        // TODO color
+      }
+
+      const points = [];
+
+      for(let i = 0; i < snake.length(); i++) {
+        const meshInfo = this.getSnakePart3DPosition(i, snake, caseSize, totalWidth, offsetY, canvas);
+
+        if(meshInfo) {
+          const { x, y, z } = meshInfo.position;
+          points.push(new THREE.Vector3(x, y, z));
+        }
+      }
+
+      console.log(points);
+      if(points.length >= 2) {
+        const curve = new THREE.CatmullRomCurve3(points, false);
+        const geometry = new THREE.TubeGeometry(curve, 256, 0.35, 64, false);
+        const material = new THREE.MeshStandardMaterial({ color: snake.color ?? 0x00ff00 });
+        const tube = new THREE.Mesh(geometry, material);
+        tube.castShadow = true;
+        tube.receiveShadow = true;
+
+        this.snakesGroup.add(tube);
+      }
+    }
+  }
+
+  getSnakePart3DPosition(partNumber, snake, caseSize, totalWidth, offsetY, canvas) {
+    let position;
+
+    if(partNumber === -1) {
+      position = snake.getTailPosition();
+    } else {
+      position = snake.get(partNumber);
+    }
+
+    const direction = this.getSnakeDirection(snake, partNumber, position);
+
+    const { animationPercentage, currentPosition } = this.calculateSnakeAnimation(snake, partNumber, position, direction);
+
+    /*const { finalCaseX, finalCaseY } = this.calculateCasePositionWithAnimation(
+      animationPercentage, currentPosition, caseSize, canvas, totalWidth, offsetY
+    );*/
+
+    const gridX = currentPosition.x;
+    const gridY = currentPosition.y;
+
+    const halfGridWidth = this.grid.width / 2;
+    const halfGridHeight = this.grid.height / 2;
+
+    const xPosition = gridX - halfGridWidth + 0.5;
+    const yPosition = (this.grid.height - 1 - gridY) - halfGridHeight + 0.5;
+
+    return {
+      position: {
+        x: xPosition,
+        y: yPosition,
+        z: 0.3
+      }
+    };
   }
 
   set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
