@@ -22,6 +22,7 @@ import { Component, Utils, EasingFunctions } from "jsgametools";
 import i18next from "i18next";
 import Position from "../engine/Position";
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 export default class GridUI extends Component {
   constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
@@ -67,13 +68,23 @@ export default class GridUI extends Component {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
     this.renderer.shadowMap.enabled = true;
-    //this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.gridGroup = new THREE.Group();
 
     this.scene.add(this.gridGroup);
 
+    this.isLightInit = false;
+
     document.body.appendChild(this.renderer.domElement);
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.1;
+    this.controls.screenSpacePanning = false;
+    this.controls.minDistance = 5;
+    this.controls.maxDistance = 100;
+    this.controls.maxPolarAngle = Math.PI / 2;
   }
 
   draw(context) {
@@ -103,6 +114,8 @@ export default class GridUI extends Component {
       this.width = totalWidth;
       this.height = totalHeight;
 
+      this.setupLights();
+
       this.setupCameraAndSize();
         
       this.drawGrid(ctx, caseSize, totalWidth, offsetX, offsetY);
@@ -120,17 +133,53 @@ export default class GridUI extends Component {
   }
 
   setupCameraAndSize() {
-    const fov = 30;
-    const fovRadians = THREE.MathUtils.degToRad(fov);
-    const distanceZ = (this.grid.height / 2) / Math.tan(fovRadians / 2);
+    if(!this.isCameraInit) {
+      const fov = 30;
+      const fovRadians = THREE.MathUtils.degToRad(fov);
+      const distanceZ = (this.grid.height / 2) / Math.tan(fovRadians / 2);
 
-    this.camera.fov = fov;
-    this.camera.aspect = this.width / this.height;
-    this.camera.position.set(0, 0, distanceZ * 1.15);
-    this.camera.lookAt(0, 0, 0);
-    this.camera.updateProjectionMatrix();
+      this.camera.fov = fov;
+      this.camera.aspect = this.width / this.height;
+      this.camera.position.set(0, 0, distanceZ * 1.15);
+      this.camera.lookAt(0, 0, 0);
+      this.camera.updateProjectionMatrix();
+
+      this.isCameraInit = true;
+    }
 
     this.renderer.setSize(this.width, this.height);
+
+    this.controls.update();
+  }
+
+  setupLights() {
+    if(!this.isLightInit) {
+      const gridSize = Math.max(this.grid.width, this.grid.height) / 2;
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      dirLight.position.set(-gridSize, gridSize, 25);
+
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 2048;
+      dirLight.shadow.mapSize.height = 2048;
+
+      dirLight.shadow.camera.near = 1;
+      dirLight.shadow.camera.far = 100;
+
+      dirLight.shadow.camera.left = -gridSize;
+      dirLight.shadow.camera.right = gridSize;
+      dirLight.shadow.camera.top = gridSize;
+      dirLight.shadow.camera.bottom = -gridSize;
+
+      this.scene.add(ambientLight);
+      this.scene.add(dirLight);
+
+      this.scene.add(new THREE.CameraHelper(dirLight.shadow.camera));
+
+      this.isLightInit = true;
+    }
   }
 
   saveCurrentState(canvas) {
@@ -237,25 +286,6 @@ export default class GridUI extends Component {
     if(this.forceRedraw || this.gridStateChanged) {
       this.gridGroup.clear();
 
-      const gridSize = Math.max(this.grid.width, this.grid.height) / 2;
-
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-      dirLight.position.set(-gridSize, gridSize, 25);
-
-      dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 2048;
-      dirLight.shadow.mapSize.height = 2048;
-
-      dirLight.shadow.camera.near = 1;
-      dirLight.shadow.camera.far = 100;
-
-      dirLight.shadow.camera.left = -gridSize;
-      dirLight.shadow.camera.right = gridSize;
-      dirLight.shadow.camera.top = gridSize;
-      dirLight.shadow.camera.bottom = -gridSize;
-
       const ground = new THREE.Mesh(
         new THREE.BoxGeometry(this.grid.width, this.grid.height, 2),
         new THREE.MeshStandardMaterial({ color: 0x95a5a6 })
@@ -263,15 +293,7 @@ export default class GridUI extends Component {
       ground.receiveShadow = false;
       ground.position.set(0, 0, -1);
 
-      this.gridGroup.add(ambientLight);
-      this.gridGroup.add(dirLight);
       this.gridGroup.add(ground);
-
-      this.gridGroup.add(new THREE.CameraHelper(dirLight.shadow.camera));
-      this.gridGroup.add(new THREE.AxesHelper(1));
-
-      const halfGridWidth = this.grid.width / 2;
-      const halfGridHeight = this.grid.height / 2;
 
       const wallImage = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/${GameUtils.getImageCase(GameConstants.CaseType.WALL)}`);
       const wallTexture = new THREE.CanvasTexture(wallImage);
@@ -280,11 +302,32 @@ export default class GridUI extends Component {
       const wallGeometry = new THREE.BoxGeometry(1, 1, 1.5);
       const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture, toneMapped: false });
       const wallInstancedMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.countWalls());
-      wallInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       wallInstancedMesh.receiveShadow = true;
       wallInstancedMesh.castShadow = true;
 
+      const totalCells = this.grid.width * this.grid.height;
+      const halfCells = Math.floor(totalCells / 2);
+
+      const lightGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
+      const lightGrayCellMaterial = new THREE.MeshStandardMaterial({ color: 0x95a5a6 });
+      const lightGrayCellInstancedMesh = new THREE.InstancedMesh(lightGrayCellGeometry, lightGrayCellMaterial, totalCells % 2 === 0 ? halfCells : halfCells + 1);
+      lightGrayCellInstancedMesh.receiveShadow = true;
+      lightGrayCellInstancedMesh.castShadow = false;
+
+      const darkGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
+      const darkGrayCellMaterial = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
+      const darkGrayCellInstancedMesh = new THREE.InstancedMesh(darkGrayCellGeometry, darkGrayCellMaterial, halfCells);
+      darkGrayCellInstancedMesh.receiveShadow = true;
+      darkGrayCellInstancedMesh.castShadow = false;
+
+      this.gridGroup.add(wallInstancedMesh, lightGrayCellInstancedMesh, darkGrayCellInstancedMesh);
+
+      const halfGridWidth = this.grid.width / 2;
+      const halfGridHeight = this.grid.height / 2;
+
       let wallIndex = 0;
+      let lightGrayCellIndex = 0;
+      let darkGrayCellIndex = 0;
 
       for(let y = 0; y < this.grid.height; y++) {
         for(let x = 0; x < this.grid.width; x++) {
@@ -294,20 +337,12 @@ export default class GridUI extends Component {
           const caseType = this.grid.get(new Position(x, y));
 
           if(caseType === GameConstants.CaseType.WALL) {
-            const matrix = new THREE.Matrix4().makeTranslation(xPosition, yPosition, 0.7);
+            const matrix = new THREE.Matrix4().makeTranslation(xPosition, yPosition, 0.75);
             wallInstancedMesh.setMatrixAt(wallIndex++, matrix);
           } else {
-            const geometry = new THREE.BoxGeometry(1, 1, 0.1);
-            const color = (x + y) % 2 === 0 ? 0x95a5a6 : 0x2c3e50;
-            const material = new THREE.MeshStandardMaterial({ color });
-            const tile = new THREE.Mesh(geometry, material);
-
-            tile.receiveShadow = true;
-            tile.castShadow = false;
-
-            tile.position.set(xPosition, yPosition, 0);
-
-            this.gridGroup.add(tile);
+            const matrix = new THREE.Matrix4().makeTranslation(xPosition, yPosition, 0.05);
+            const cellMesh = (x + y) % 2 === 0 ? lightGrayCellInstancedMesh : darkGrayCellInstancedMesh;
+            cellMesh.setMatrixAt((x + y) % 2 === 0 ? lightGrayCellIndex++ : darkGrayCellIndex++, matrix);
           }
 
           if(caseType === GameConstants.CaseType.FRUIT || caseType === GameConstants.CaseType.FRUIT_GOLD) {
@@ -347,8 +382,6 @@ export default class GridUI extends Component {
           }
         }
       }
-
-      this.gridGroup.add(wallInstancedMesh);
     }
   }
 
