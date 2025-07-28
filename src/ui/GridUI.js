@@ -126,7 +126,7 @@ export default class GridUI extends Component {
 
     this.camera.fov = fov;
     this.camera.aspect = this.width / this.height;
-    this.camera.position.set(0, -distanceZ * 0.25, distanceZ * 1.15);
+    this.camera.position.set(0, 0, distanceZ * 1.15);
     this.camera.lookAt(0, 0, 0);
     this.camera.updateProjectionMatrix();
 
@@ -277,6 +277,15 @@ export default class GridUI extends Component {
       const wallTexture = new THREE.CanvasTexture(wallImage);
       wallTexture.colorSpace = THREE.SRGBColorSpace;
 
+      const wallGeometry = new THREE.BoxGeometry(1, 1, 1.5);
+      const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture, toneMapped: false });
+      const wallInstancedMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.countWalls());
+      wallInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      wallInstancedMesh.receiveShadow = true;
+      wallInstancedMesh.castShadow = true;
+
+      let wallIndex = 0;
+
       for(let y = 0; y < this.grid.height; y++) {
         for(let x = 0; x < this.grid.width; x++) {
           const xPosition = x - halfGridWidth + 0.5;
@@ -285,16 +294,8 @@ export default class GridUI extends Component {
           const caseType = this.grid.get(new Position(x, y));
 
           if(caseType === GameConstants.CaseType.WALL) {
-            const geometry = new THREE.BoxGeometry(1, 1, 1.5);
-            const material = new THREE.MeshStandardMaterial({ map: wallTexture, toneMapped: false });
-            const tile = new THREE.Mesh(geometry, material);
-
-            tile.receiveShadow = true;
-            tile.castShadow = true;
-
-            tile.position.set(xPosition, yPosition, 0.7);
-
-            this.gridGroup.add(tile);
+            const matrix = new THREE.Matrix4().makeTranslation(xPosition, yPosition, 0.7);
+            wallInstancedMesh.setMatrixAt(wallIndex++, matrix);
           } else {
             const geometry = new THREE.BoxGeometry(1, 1, 0.1);
             const color = (x + y) % 2 === 0 ? 0x95a5a6 : 0x2c3e50;
@@ -313,6 +314,9 @@ export default class GridUI extends Component {
             const fruitModel = this.modelLoader.get("fruit");
 
             if(fruitModel) {
+              const pointLight = new THREE.PointLight(0xff1100, 0.8, 2);
+              pointLight.position.set(xPosition, yPosition, 0.5);
+
               const box = new THREE.Box3().setFromObject(fruitModel);
               
               const size = new THREE.Vector3();
@@ -338,11 +342,30 @@ export default class GridUI extends Component {
               });
 
               this.gridGroup.add(fruitModel);
+              this.gridGroup.add(pointLight);
             }
           }
         }
       }
+
+      this.gridGroup.add(wallInstancedMesh);
     }
+  }
+
+  countWalls() {
+    let wallsCount = 0;
+
+    for(let y = 0; y < this.grid.height; y++) {
+      for(let x = 0; x < this.grid.width; x++) {
+        const caseType = this.grid.get(new Position(x, y));
+
+        if(caseType === GameConstants.CaseType.WALL) {
+          wallsCount++;
+        }
+      }
+    }
+
+    return wallsCount;
   }
 
   snakeStateHasChanged() {
