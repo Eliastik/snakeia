@@ -274,7 +274,10 @@ export default class GridUI3D extends GridUI {
     const fruitModel = this.modelLoader.get("fruit");
 
     if (fruitModel) {
-      const pointLight = new THREE.PointLight(0xff1100, 0.8, 2);
+      const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
+      const fruitColor = isGoldFruit ? 0xFFD700 : 0xff1100;
+
+      const pointLight = new THREE.PointLight(fruitColor, 0.8, 2);
       pointLight.position.set(xPosition, yPosition, 0.5);
 
       const box = new THREE.Box3().setFromObject(fruitModel);
@@ -288,9 +291,9 @@ export default class GridUI3D extends GridUI {
 
       fruitModel.traverse(child => {
         if(child.isMesh) {
-          if(caseType === GameConstants.CaseType.FRUIT_GOLD) {
+          if(isGoldFruit) {
             child.material = new THREE.MeshStandardMaterial({
-              color: 0xFFD700,
+              color: fruitColor,
               metalness: 0.75,
               roughness: 0.2,
             });
@@ -306,7 +309,19 @@ export default class GridUI3D extends GridUI {
   }
 
   setupSnakes(caseSize, canvas, totalWidth, offsetY) {
-    this.snakesGroup.clear();
+    this.snakesGroup.children.forEach(mesh => {
+      if(mesh.geometry) mesh.geometry.dispose();
+
+      if(mesh.material) {
+        if(Array.isArray(mesh.material)) {
+          mesh.material.forEach(mat => mat.dispose());
+        } else {
+          mesh.material.dispose();
+        }
+      }
+
+      this.snakesGroup.remove(mesh);
+    });
 
     for(const snake of this.snakes) {
       if(snake.color != undefined) {
@@ -324,10 +339,21 @@ export default class GridUI3D extends GridUI {
         }
       }
 
-      console.log(points);
       if(points.length >= 2) {
+        const minTubularSegments = 2;
+        const maxTubularSegments = 512;
+
+        const minRadiusSegments = 2;
+        const maxRadiusSegments = 128;
+
+        const maxLengthForMaxDetail = 50;
+        const normalizedLength = Math.min(snake.length() / maxLengthForMaxDetail, 1);
+
+        const tubularSegments = Math.floor(minTubularSegments + normalizedLength * (maxTubularSegments - minTubularSegments));
+        const radiusSegments = Math.floor(minRadiusSegments + normalizedLength * (maxRadiusSegments - minRadiusSegments));
+
         const curve = new THREE.CatmullRomCurve3(points, false);
-        const geometry = new THREE.TubeGeometry(curve, 256, 0.35, 64, false);
+        const geometry = new THREE.TubeGeometry(curve, tubularSegments, 0.35, radiusSegments, false);
         const material = new THREE.MeshStandardMaterial({ color: snake.color ?? 0x00ff00 });
         const tube = new THREE.Mesh(geometry, material);
         tube.castShadow = true;
