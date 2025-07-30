@@ -28,6 +28,7 @@ export default class GridUI3D extends GridUI {
   constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
     super(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode);
 
+    this.snakesMeshes = [];
     this.initThreeJS();
   }
 
@@ -91,7 +92,7 @@ export default class GridUI3D extends GridUI {
   
       this.setupGrid();
 
-      this.setupSnakes(caseSize, canvas, totalWidth, offsetY);
+      this.updateSnakes(caseSize, canvas, totalWidth, offsetY);
 
       this.saveCurrentState(canvas);
 
@@ -308,22 +309,40 @@ export default class GridUI3D extends GridUI {
     }
   }
 
-  setupSnakes(caseSize, canvas, totalWidth, offsetY) {
-    this.snakesGroup.children.forEach(mesh => {
-      if(mesh.geometry) mesh.geometry.dispose();
+  shouldUpdateSnakes() {
+    return this.oldTicks < this.ticks || this.oldTicks === undefined || (this.ticks === 0 && this.oldTicks !== 0);
+  }
 
-      if(mesh.material) {
-        if(Array.isArray(mesh.material)) {
-          mesh.material.forEach(mat => mat.dispose());
-        } else {
-          mesh.material.dispose();
+  updateSnakes(caseSize, canvas, totalWidth, offsetY) {
+    if(!this.shouldUpdateSnakes()) {
+      return;
+    }
+
+    this.oldTicks = this.ticks;
+
+    this.snakesMeshes.forEach(({ mesh, snakeIndex }) => {
+      if(this.snakes[snakeIndex] && !this.snakes[snakeIndex].gameOver) {
+        if(mesh.geometry) mesh.geometry.dispose();
+
+        if(mesh.material) {
+          if(Array.isArray(mesh.material)) {
+            mesh.material.forEach(mat => mat.dispose());
+          } else {
+            mesh.material.dispose();
+          }
         }
-      }
 
-      this.snakesGroup.remove(mesh);
+        this.snakesGroup.remove(mesh);
+      }
     });
 
-    for(const snake of this.snakes) {
+    for(let i = 0; i < this.snakes.length; i++) {
+      const snake = this.snakes[i];
+
+      if(snake.gameOver) {
+        continue;
+      }
+
       if(snake.color != undefined) {
         // TODO color
       }
@@ -360,6 +379,7 @@ export default class GridUI3D extends GridUI {
         tube.receiveShadow = true;
 
         this.snakesGroup.add(tube);
+        this.snakesMeshes[i] = { mesh: tube, snakeIndex: i };
       }
     }
   }
