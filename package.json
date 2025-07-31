@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "@tensorflow/tfjs-node": "^4.22.0",
+    "chroma-js": "^3.1.2",
     "i18next": "^25.3.2",
     "i18next-browser-languagedetector": "^8.2.0",
     "jsgametools": "git+https://github.com/Eliastik/JSGameTools.git#cf5bbf3",

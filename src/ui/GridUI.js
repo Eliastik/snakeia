@@ -52,6 +52,8 @@ export default class GridUI extends Component {
     this.oldSnakesState = null;
     this.oldWidth = 0;
     this.oldHeight = 0;
+
+    this.baseSnakeColor = "#a0c432";
   }
 
   draw(context) {

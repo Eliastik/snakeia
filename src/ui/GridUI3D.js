@@ -23,6 +23,7 @@ import Position from "../engine/Position";
 import { Utils } from "jsgametools";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import chroma from "chroma-js";
 
 export default class GridUI3D extends GridUI {
   constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
@@ -115,11 +116,19 @@ export default class GridUI3D extends GridUI {
 
       this.saveCurrentState(canvas);
 
-      this.renderer.render(this.scene, this.camera);
-
-      Utils.drawImageData(ctx, this.renderer.domElement, offsetX, offsetY, totalWidth, totalHeight, 0, 0, totalWidth, totalHeight);
+      this.drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize);
   
       ctx.restore();
+    }
+  }
+
+  drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize) {
+    this.renderer.render(this.scene, this.camera);
+
+    Utils.drawImageData(ctx, this.renderer.domElement, offsetX, offsetY, totalWidth, totalHeight, 0, 0, totalWidth, totalHeight);
+
+    if (this.snakes.length > 1) {
+      this.drawSnakeInfos(ctx, offsetX, offsetY, caseSize, this.currentPlayer);
     }
   }
 
@@ -171,10 +180,10 @@ export default class GridUI3D extends GridUI {
       this.camera.lookAt(0, 0, 0);
       this.camera.updateProjectionMatrix();
 
+      this.renderer.setSize(this.width, this.height);
+
       this.isCameraInit = true;
     }
-
-    this.renderer.setSize(this.width, this.height);
 
     this.controls.update();
   }
@@ -404,21 +413,9 @@ export default class GridUI3D extends GridUI {
       }
 
       if(points.length >= 2) {
-        const minTubularSegments = 2;
-        const maxTubularSegments = 512;
+        const geometry = this.getSnakeGeometry(snake, points);
+        const material = this.getSnakeMaterial(snake);
 
-        const minRadiusSegments = 2;
-        const maxRadiusSegments = 128;
-
-        const maxLengthForMaxDetail = 50;
-        const normalizedLength = Math.min(snake.length() / maxLengthForMaxDetail, 1);
-
-        const tubularSegments = Math.floor(minTubularSegments + normalizedLength * (maxTubularSegments - minTubularSegments));
-        const radiusSegments = Math.floor(minRadiusSegments + normalizedLength * (maxRadiusSegments - minRadiusSegments));
-
-        const curve = new THREE.CatmullRomCurve3(points, false);
-        const geometry = new THREE.TubeGeometry(curve, tubularSegments, 0.35, radiusSegments, false);
-        const material = new THREE.MeshStandardMaterial({ color: snake.color ?? 0x00ff00 });
         const tube = new THREE.Mesh(geometry, material);
         tube.castShadow = true;
         tube.receiveShadow = true;
@@ -427,6 +424,34 @@ export default class GridUI3D extends GridUI {
         this.snakesMeshes[i] = { mesh: tube, snakeIndex: i };
       }
     }
+  }
+
+  getSnakeMaterial(snake) {
+    const baseColor = chroma(this.baseSnakeColor);
+    const rotated = baseColor.set("hsl.h", (baseColor.get("hsl.h") + snake.color) % 360);
+    const [r, g, b] = rotated.rgb();
+    const snakeColor = new THREE.Color(r / 255, g / 255, b / 255);
+    snakeColor.convertSRGBToLinear();
+
+    return new THREE.MeshStandardMaterial({ color: snakeColor });
+  }
+
+  getSnakeGeometry(snake, points) {
+    const minTubularSegments = 2;
+    const maxTubularSegments = 512;
+
+    const minRadiusSegments = 2;
+    const maxRadiusSegments = 128;
+
+    const maxLengthForMaxDetail = 50;
+    const normalizedLength = Math.min(snake.length() / maxLengthForMaxDetail, 1);
+
+    const tubularSegments = Math.floor(minTubularSegments + normalizedLength * (maxTubularSegments - minTubularSegments));
+    const radiusSegments = Math.floor(minRadiusSegments + normalizedLength * (maxRadiusSegments - minRadiusSegments));
+
+    const curve = new THREE.CatmullRomCurve3(points, false);
+   
+    return new THREE.TubeGeometry(curve, tubularSegments, 0.35, radiusSegments, false);
   }
 
   getSnakePart3DPosition(partNumber, snake, caseSize, totalWidth, offsetY, canvas) {
