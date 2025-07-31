@@ -116,6 +116,7 @@ function restoreSettings() {
     showDebugInfo: false,
     textOutput: false,
     graphicSkin: "flat",
+    graphicType: "2d",
     maxFPS: -1,
     unlockAllLevels: false,
     darkMode: "auto",
@@ -130,7 +131,16 @@ function saveSettings() {
 }
 
 function getSettings() {
-  return (storageGlobal.getItem("snakeia_settings") && JSON.parse(storageGlobal.getItem("snakeia_settings"))) || customSettings;
+  const settingsFromStorage = (storageGlobal.getItem("snakeia_settings") && JSON.parse(storageGlobal.getItem("snakeia_settings")));
+
+  if(!settingsFromStorage) {
+    return customSettings;
+  }
+
+  return {
+    ...customSettings,
+    ...settingsFromStorage
+  };
 }
 
 function showSettings() {
@@ -150,6 +160,7 @@ function showSettings() {
   if(settings.showDebugInfo) document.getElementById("showDebugInfo").checked = true;
   if(settings.textOutput) document.getElementById("textOutput").checked = true;
   document.getElementById("graphicSkin").value = settings.graphicSkin;
+  document.getElementById("graphicType").value = settings.graphicType;
 
   if(!workersAvailable) {
     document.getElementById("enableMultithreading").disabled = true;
@@ -244,6 +255,11 @@ document.getElementById("textOutput").onclick = function() {
 
 document.getElementById("graphicSkin").onchange = function() {
   customSettings.graphicSkin = this.value;
+  saveSettings();
+};
+
+document.getElementById("graphicType").onchange = function() {
+  customSettings.graphicType = this.value;
   saveSettings();
 };
 
@@ -789,6 +805,19 @@ document.getElementById("backToMenuServerList").onclick = () => {
 
 document.getElementById("collapseSeedSettingsBtn").onclick = e => {
   const collapse = document.getElementById("collapseSeedSettings");
+
+  if(collapse && collapse.classList.contains("show")) {
+    collapse.classList.remove("show");
+  } else if(collapse) {
+    collapse.classList.add("show");
+  }
+
+  e.preventDefault();
+  e.stopPropagation();
+};
+
+document.getElementById("collapseAdvancedSettingsBtn").onclick = e => {
+  const collapse = document.getElementById("collapseAdvancedSettings");
 
   if(collapse && collapse.classList.contains("show")) {
     collapse.classList.remove("show");

@@ -25,9 +25,20 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import chroma from "chroma-js";
 
+const defaultQualitySettings = {
+  enableShadows: true,
+  enableAntialiasing: true,
+  shadowResolution: 4096,
+  minSnakeTubularSegments: 2,
+  maxSnakeTubularSegments: 512,
+  minSnakeRadiusSegments: 2,
+  maxSnakeRadiusSegments: 128,
+  maxSnakeLengthForMaxDetail: 50
+};
+
 export default class GridUI3D extends GridUI {
-  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
-    super(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode);
+  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, graphicType) {
+    super(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer);
 
     this.snakesMeshes = [];
 
@@ -49,7 +60,46 @@ export default class GridUI3D extends GridUI {
       100: { fov: 55, distance: 120, zoom: 1 }
     };
 
+    this.qualitySettings = {
+      ...defaultQualitySettings,
+      ...this.getQualityPresetSettings(graphicType)
+    };
+
     this.initThreeJS();
+  }
+
+  getQualityPresetSettings(graphicType) {
+    switch(graphicType) {
+    case "3dMinimal":
+      return {
+        enableShadows: false,
+        enableAntialiasing: false
+      };
+    case "3dLow":
+      return {
+        enableShadows: true,
+        enableAntialiasing: false,
+        shadowResolution: 512
+      };
+    case "3dNormal":
+      return {
+        enableShadows: true,
+        enableAntialiasing: true,
+        shadowResolution: 1024
+      };
+    case "3dMedium":
+      return {
+        enableShadows: true,
+        enableAntialiasing: true,
+        shadowResolution: 2048
+      };
+    case "3dHigh":
+      return {
+        enableShadows: true,
+        enableAntialiasing: true,
+        shadowResolution: 4096
+      };
+    }
   }
 
   initThreeJS() {
@@ -62,23 +112,31 @@ export default class GridUI3D extends GridUI {
     this.camera.position.set(0, 0, 0);
     this.camera.lookAt(0, 0, 0);
   
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: this.qualitySettings.enableAntialiasing, alpha: true });
 
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = this.qualitySettings.enableShadows;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.gridGroup = new THREE.Group();
     this.snakesGroup = new THREE.Group();
 
     this.scene.add(this.gridGroup, this.snakesGroup);
+  }
 
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.1;
-    this.controls.screenSpacePanning = false;
-    this.controls.minDistance = 5;
-    this.controls.maxDistance = 100;
-    this.controls.maxPolarAngle = Math.PI / 2;
+  setupControls(canvas) {
+    if(!this.areControlsInit) {
+      this.controls = new OrbitControls(this.camera, canvas);
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.1;
+      this.controls.screenSpacePanning = false;
+      this.controls.minDistance = 0;
+      this.controls.maxDistance = 500;
+      this.controls.maxPolarAngle = Math.PI / 2;
+
+      this.scene.add(this.controls);
+
+      this.areControlsInit = true;
+    }
   }
 
   draw(context) {
@@ -184,8 +242,6 @@ export default class GridUI3D extends GridUI {
 
       this.isCameraInit = true;
     }
-
-    this.controls.update();
   }
 
   setupLights() {
@@ -201,8 +257,8 @@ export default class GridUI3D extends GridUI {
       dirLight.target.position.set(0, 0, 0);
 
       dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 4096;
-      dirLight.shadow.mapSize.height = 4096;
+      dirLight.shadow.mapSize.width = this.qualitySettings.shadowResolution;
+      dirLight.shadow.mapSize.height = this.qualitySettings.shadowResolution;
 
       dirLight.shadow.camera.near = 1;
       dirLight.shadow.camera.far = 100;
@@ -437,17 +493,10 @@ export default class GridUI3D extends GridUI {
   }
 
   getSnakeGeometry(snake, points) {
-    const minTubularSegments = 2;
-    const maxTubularSegments = 512;
+    const normalizedLength = Math.min(snake.length() / this.qualitySettings.maxSnakeLengthForMaxDetail, 1);
 
-    const minRadiusSegments = 2;
-    const maxRadiusSegments = 128;
-
-    const maxLengthForMaxDetail = 50;
-    const normalizedLength = Math.min(snake.length() / maxLengthForMaxDetail, 1);
-
-    const tubularSegments = Math.floor(minTubularSegments + normalizedLength * (maxTubularSegments - minTubularSegments));
-    const radiusSegments = Math.floor(minRadiusSegments + normalizedLength * (maxRadiusSegments - minRadiusSegments));
+    const tubularSegments = Math.floor(this.qualitySettings.minSnakeTubularSegments + normalizedLength * (this.qualitySettings.maxSnakeTubularSegments - this.qualitySettings.minSnakeTubularSegments));
+    const radiusSegments = Math.floor(this.qualitySettings.minSnakeRadiusSegments + normalizedLength * (this.qualitySettings.maxSnakeRadiusSegments - this.qualitySettings.minSnakeRadiusSegments));
 
     const curve = new THREE.CatmullRomCurve3(points, false);
    

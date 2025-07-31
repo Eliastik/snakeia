@@ -23,7 +23,7 @@ import i18next from "i18next";
 import Position from "../engine/Position";
 
 export default class GridUI extends Component {
-  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
+  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer) {
     super();
 
     this.snakes = snakes;
@@ -36,13 +36,7 @@ export default class GridUI extends Component {
     this.modelLoader = modelLoader;
     this.graphicSkin = graphicSkin;
     this.currentPlayer = currentPlayer;
-    this.gameFinished = gameFinished;
     this.offsetFrame = 0;
-    this.countBeforePlay = countBeforePlay;
-    this.spectatorMode = spectatorMode;
-    this.ticks = ticks;
-    this.gameOver = gameOver;
-    this.onlineMode = onlineMode;
 
     this.canvasSnakes = document.createElement("canvas");
     this.canvasGrid = document.createElement("canvas");

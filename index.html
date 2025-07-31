@@ -122,6 +122,21 @@
         <h1 class="h3 mb-3 font-weight-normal" data-i18n="menu.othersSettings">Paramètres</h1>
         <div class="mt-2">
           <div class="form-group row">
+            <label for="graphicType" class="col-sm-4 col-form-label" data-i18n="menu.graphicType">Type de graphismes :</label>
+            <div class="col-sm-8">
+              <select class="custom-select" id="graphicType">
+                <option value="2d" data-i18n="menu.2d" selected>2D</option>
+                <option value="3dMinimal" data-i18n="menu.3dMinimal">3D - Qualité minimale</option>
+                <option value="3dLow" data-i18n="menu.3dLow">3D - Qualité faible</option>
+                <option value="3dNormal" data-i18n="menu.3dNormal">3D - Qualité normale</option>
+                <option value="3dMedium" data-i18n="menu.3dMedium">3D - Qualité moyenne</option>
+                <option value="3dHigh" data-i18n="menu.3dHigh">3D - Qualité élevée</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="mt-2">
+          <div class="form-group row">
             <label for="graphicSkin" class="col-sm-4 col-form-label" data-i18n="menu.graphicSkin">Skin graphique :</label>
             <div class="col-sm-8">
               <select class="custom-select" id="graphicSkin">
@@ -141,26 +156,37 @@
                 <input type="checkbox" class="custom-control-input" id="renderBlur">
                 <label class="custom-control-label" for="renderBlur" data-i18n="menu.renderBlur">Activer le rendu de flou</label>
               </div>
-              <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" id="enableMultithreading">
-                <label class="custom-control-label" for="enableMultithreading" data-i18n="menu.enableMultithreading">Activer le multi-threading</label> <a id="multithreadingInfos" aria-label="" data-balloon-length="large" data-balloon-pos="down"><span class="ml-2 fui-question-circle"></span></a> <a id="multithreadingNotAvailable" class="settingNotAvailable" aria-label="" data-balloon-length="large" data-balloon-pos="down"><span class="ml-2 fui-cross-circle text-danger"></span></a>
-              </div>
-              <div class="custom-control custom-checkbox" style="display: none;">
-                <input type="checkbox" class="custom-control-input" id="onlineEnableClientSidePredictions">
-                <label class="custom-control-label" for="onlineEnableClientSidePredictions" data-i18n="menu.onlineEnableClientSidePredictions">Activer les prédictions côté client pour le jeu en ligne</label> <a id="onlineEnableClientSidePredictionsInfos" aria-label="" data-balloon-length="large" data-balloon-pos="down"><span class="ml-2 fui-question-circle"></span></a>
-              </div>
-              <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" id="showDebugInfo">
-                <label class="custom-control-label" for="showDebugInfo" data-i18n="menu.showDebugInfo">Activer le mode de débogage</label>
-              </div>
-              <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" id="textOutput">
-                <label class="custom-control-label" for="textOutput" data-i18n="menu.textOutput">Activer le rendu en mode texte</label>
-              </div>
-              <div class="form-group row">
-                <label class="col-sm-4 col-form-label" for="maxFPS" data-i18n="menu.maxFPS">Images par secondes maximum :</label>
-                <div class="col-sm-8">
-                  <input type="number" class="form-control" id="maxFPS" />
+              <div id="accordionAdvancedSettings" class="mb-3 mt-3">
+                <div class="card">
+                  <div class="card-header p-0">
+                    <button class="btn btn-lg btn-link" id="collapseAdvancedSettingsBtn" data-i18n="settings.advancedSettings">Paramètres avancés…</button>
+                  </div>
+                  <div id="collapseAdvancedSettings" class="collapse" data-parent="#accordionAdvancedSettings">
+                    <div class="card-body">
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="enableMultithreading">
+                        <label class="custom-control-label" for="enableMultithreading" data-i18n="menu.enableMultithreading">Activer le multi-threading</label> <a id="multithreadingInfos" aria-label="" data-balloon-length="large" data-balloon-pos="down"><span class="ml-2 fui-question-circle"></span></a> <a id="multithreadingNotAvailable" class="settingNotAvailable" aria-label="" data-balloon-length="large" data-balloon-pos="down"><span class="ml-2 fui-cross-circle text-danger"></span></a>
+                      </div>
+                      <div class="custom-control custom-checkbox" style="display: none;">
+                        <input type="checkbox" class="custom-control-input" id="onlineEnableClientSidePredictions">
+                        <label class="custom-control-label" for="onlineEnableClientSidePredictions" data-i18n="menu.onlineEnableClientSidePredictions">Activer les prédictions côté client pour le jeu en ligne</label> <a id="onlineEnableClientSidePredictionsInfos" aria-label="" data-balloon-length="large" data-balloon-pos="down"><span class="ml-2 fui-question-circle"></span></a>
+                      </div>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="showDebugInfo">
+                        <label class="custom-control-label" for="showDebugInfo" data-i18n="menu.showDebugInfo">Activer le mode de débogage</label>
+                      </div>
+                      <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="textOutput">
+                        <label class="custom-control-label" for="textOutput" data-i18n="menu.textOutput">Activer le rendu en mode texte</label>
+                      </div>
+                      <div class="form-group row">
+                        <label class="col-sm-4 col-form-label" for="maxFPS" data-i18n="menu.maxFPS">Images par secondes maximum :</label>
+                        <div class="col-sm-8">
+                          <input type="number" class="form-control" id="maxFPS" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

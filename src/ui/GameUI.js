@@ -106,8 +106,7 @@ export default class GameUI {
     this.isFilterHueAvailable = Utils.isFilterHueAvailable();
     this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader);
     this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
-    //this.gridUI = new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.onlineMode);
-    this.gridUI = new GridUI3D(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.onlineMode);
+    this.gridUI = this.constructGridUI(settings);
     this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, null, null, null, 0.5, this.disableAnimation, "center");
     this.notificationMessage;
     this.labelMenus;
@@ -144,6 +143,15 @@ export default class GameUI {
     this.btnRank;
 
     this.init();
+  }
+
+  constructGridUI(settings) {
+    console.log(settings);
+    if(settings.graphicType && settings.graphicType !== "2d") {
+      return new GridUI3D(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, settings.graphicType);
+    } 
+    
+    return new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer);
   }
 
   init() {
