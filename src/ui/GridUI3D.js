@@ -29,6 +29,16 @@ export default class GridUI3D extends GridUI {
     super(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode);
 
     this.snakesMeshes = [];
+
+    this.cameraPresets = {
+      5: { fov: 30, distance: 10 },
+      10: { fov: 30, distance: 20 },
+      20: { fov: 30, distance: 40 },
+      50: { fov: 30, distance: 95 },
+      75: { fov: 45, distance: 100 },
+      100: { fov: 55, distance: 120 }
+    };
+
     this.initThreeJS();
   }
 
@@ -104,48 +114,42 @@ export default class GridUI3D extends GridUI {
     }
   }
 
+  interpolateCameraSettings(gridSize, presets) {
+    const sizes = Object.keys(presets).map(Number).sort((a, b) => a - b);
+
+    if(gridSize <= sizes[0]) {
+      return presets[sizes[0]];
+    }
+
+    if(gridSize >= sizes[sizes.length - 1]) {
+      return presets[sizes[sizes.length - 1]];
+    }
+
+    for(let i = 0; i < sizes.length - 1; i++) {
+      const sizeA = sizes[i];
+      const sizeB = sizes[i + 1];
+
+      if(gridSize >= sizeA && gridSize <= sizeB) {
+        const ratio = (gridSize - sizeA) / (sizeB - sizeA);
+        const fov = presets[sizeA].fov + ratio * (presets[sizeB].fov - presets[sizeA].fov);
+        const distance = presets[sizeA].distance + ratio * (presets[sizeB].distance - presets[sizeA].distance);
+
+        return { fov, distance };
+      }
+    }
+  }
+
   setupCameraAndSize() {
     if(!this.isCameraInit) {
+
       const aspect = this.width / this.height;
+      const gridSize = Math.max(this.grid.width, this.grid.height);
 
-      const gridWidth = this.grid.width;
-      const gridHeight = this.grid.height;
+      const { fov, distance } = this.interpolateCameraSettings(gridSize, this.cameraPresets);
 
-      const maxFov = 60;
-      const minFov = 20;
-      const baseFov = 30;
-      const fovRadians = THREE.MathUtils.degToRad(baseFov);
-
-      const distanceY = (gridHeight / 2) / Math.tan(fovRadians / 2);
-      const fovHorizontalRadians = 2 * Math.atan(Math.tan(fovRadians / 2) * aspect);
-      const distanceX = (gridWidth / 2) / Math.tan(fovHorizontalRadians / 2);
-      const requiredDistance = Math.max(distanceX, distanceY) * 1.05;
-
-      const maxAllowedDistance = 100;
-
-      let finalDistanceZ = requiredDistance;
-      let finalFov = baseFov;
-
-      if(requiredDistance > maxAllowedDistance) {
-        finalDistanceZ = maxAllowedDistance;
-
-        const fovY = THREE.MathUtils.radToDeg(
-          2 * Math.atan((gridHeight / 2) / finalDistanceZ)
-        );
-        const fovX = THREE.MathUtils.radToDeg(
-          2 * Math.atan((gridWidth / 2) / finalDistanceZ)
-        );
-        const fovXtoY = THREE.MathUtils.radToDeg(
-          2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(fovX / 2)) / aspect)
-        );
-
-        finalFov = Math.max(fovY, fovXtoY);
-        finalFov = Math.min(Math.max(finalFov, minFov), maxFov);
-      }
-
-      this.camera.fov = finalFov;
+      this.camera.fov = fov;
       this.camera.aspect = aspect;
-      this.camera.position.set(0, 0, finalDistanceZ);
+      this.camera.position.set(0, 0, distance);
       this.camera.lookAt(0, 0, 0);
       this.camera.updateProjectionMatrix();
 
