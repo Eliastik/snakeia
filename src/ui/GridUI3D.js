@@ -30,13 +30,22 @@ export default class GridUI3D extends GridUI {
 
     this.snakesMeshes = [];
 
-    this.cameraPresets = {
-      5: { fov: 30, distance: 10 },
-      10: { fov: 30, distance: 20 },
-      20: { fov: 30, distance: 40 },
-      50: { fov: 30, distance: 95 },
-      75: { fov: 45, distance: 100 },
-      100: { fov: 55, distance: 120 }
+    this.cameraPresetsByHeight = {
+      5: { fov: 5, distance: 60, zoom: 1 },
+      10: { fov: 8, distance: 75, zoom: 1 },
+      20: { fov: 12, distance: 100, zoom: 1 },
+      50: { fov: 30, distance: 125, zoom: 1 },
+      75: { fov: 45, distance: 135, zoom: 1 },
+      100: { fov: 55, distance: 120, zoom: 1 }
+    };
+
+    this.cameraPresetsByWidth = {
+      5: { fov: 30, distance: 10, zoom: 1 },
+      10: { fov: 30, distance: 20, zoom: 1 },
+      20: { fov: 30, distance: 40, zoom: 1 },
+      50: { fov: 30, distance: 95, zoom: 1 },
+      75: { fov: 45, distance: 100, zoom: 1 },
+      100: { fov: 55, distance: 120, zoom: 1 }
     };
 
     this.initThreeJS();
@@ -133,22 +142,31 @@ export default class GridUI3D extends GridUI {
         const ratio = (gridSize - sizeA) / (sizeB - sizeA);
         const fov = presets[sizeA].fov + ratio * (presets[sizeB].fov - presets[sizeA].fov);
         const distance = presets[sizeA].distance + ratio * (presets[sizeB].distance - presets[sizeA].distance);
+        const zoom = presets[sizeA].zoom + ratio * (presets[sizeB].zoom - presets[sizeA].zoom);
 
-        return { fov, distance };
+        return { fov, distance, zoom };
       }
     }
   }
 
   setupCameraAndSize() {
     if(!this.isCameraInit) {
+      const gridWidth = this.grid.width;
+      const gridHeight = this.grid.height;
+      
+      const screenAspect = this.width / this.height;
+      const gridAspect = this.grid.width / this.grid.height;
 
-      const aspect = this.width / this.height;
-      const gridSize = Math.max(this.grid.width, this.grid.height);
+      const useWidthPresets = gridAspect > screenAspect;
 
-      const { fov, distance } = this.interpolateCameraSettings(gridSize, this.cameraPresets);
+      const gridSize = useWidthPresets ? gridWidth : gridHeight;
+      const presets = useWidthPresets ? this.cameraPresetsByWidth : this.cameraPresetsByHeight;
+
+      const { fov, distance, zoom } = this.interpolateCameraSettings(gridSize, presets);
 
       this.camera.fov = fov;
-      this.camera.aspect = aspect;
+      this.camera.aspect = screenAspect;
+      this.camera.zoom = zoom;
       this.camera.position.set(0, 0, distance);
       this.camera.lookAt(0, 0, 0);
       this.camera.updateProjectionMatrix();
