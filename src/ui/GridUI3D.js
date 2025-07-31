@@ -37,9 +37,9 @@ export default class GridUI3D extends GridUI {
     this.isCameraInit = false;
 
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(25, 1, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(30, 1, 0.1, 1000);
 
-    this.camera.position.set(0, 0, 10);
+    this.camera.position.set(0, 0, 0);
     this.camera.lookAt(0, 0, 0);
   
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -106,20 +106,51 @@ export default class GridUI3D extends GridUI {
 
   setupCameraAndSize() {
     if(!this.isCameraInit) {
-      const fov = 30;
-      const fovRadians = THREE.MathUtils.degToRad(fov);
-      const distanceZ = (this.grid.height / 2) / Math.tan(fovRadians / 2);
+      const aspect = this.width / this.height;
 
-      this.camera.fov = fov;
-      this.camera.aspect = this.width / this.height;
-      this.camera.position.set(0, 0, distanceZ * 1.05);
+      const gridWidth = this.grid.width;
+      const gridHeight = this.grid.height;
+
+      const maxFov = 60;
+      const minFov = 20;
+      const baseFov = 30;
+      const fovRadians = THREE.MathUtils.degToRad(baseFov);
+
+      const distanceY = (gridHeight / 2) / Math.tan(fovRadians / 2);
+      const fovHorizontalRadians = 2 * Math.atan(Math.tan(fovRadians / 2) * aspect);
+      const distanceX = (gridWidth / 2) / Math.tan(fovHorizontalRadians / 2);
+      const requiredDistance = Math.max(distanceX, distanceY) * 1.05;
+
+      const maxAllowedDistance = 100;
+
+      let finalDistanceZ = requiredDistance;
+      let finalFov = baseFov;
+
+      if(requiredDistance > maxAllowedDistance) {
+        finalDistanceZ = maxAllowedDistance;
+
+        const fovY = THREE.MathUtils.radToDeg(
+          2 * Math.atan((gridHeight / 2) / finalDistanceZ)
+        );
+        const fovX = THREE.MathUtils.radToDeg(
+          2 * Math.atan((gridWidth / 2) / finalDistanceZ)
+        );
+        const fovXtoY = THREE.MathUtils.radToDeg(
+          2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(fovX / 2)) / aspect)
+        );
+
+        finalFov = Math.max(fovY, fovXtoY);
+        finalFov = Math.min(Math.max(finalFov, minFov), maxFov);
+      }
+
+      this.camera.fov = finalFov;
+      this.camera.aspect = aspect;
+      this.camera.position.set(0, 0, finalDistanceZ);
       this.camera.lookAt(0, 0, 0);
       this.camera.updateProjectionMatrix();
 
       this.isCameraInit = true;
     }
-
-    // TODO: fix camera in large grids (100x100)
 
     this.renderer.setSize(this.width, this.height);
 
@@ -128,12 +159,14 @@ export default class GridUI3D extends GridUI {
 
   setupLights() {
     if(!this.isLightInit) {
-      const gridSize = Math.max(this.grid.width, this.grid.height) / 2;
+      const gridSize = Math.max(this.grid.width, this.grid.height);
+      const halfGrid = gridSize / 2;
 
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 
       const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-      dirLight.position.set(-gridSize, gridSize, 25);
+      dirLight.position.set(-halfGrid * 0.5, halfGrid * 0.5, halfGrid * 2);
+      dirLight.target.position.set(0, 0, 0);
 
       dirLight.castShadow = true;
       dirLight.shadow.mapSize.width = 2048;
@@ -142,30 +175,19 @@ export default class GridUI3D extends GridUI {
       dirLight.shadow.camera.near = 1;
       dirLight.shadow.camera.far = 100;
 
-      dirLight.shadow.camera.left = -gridSize;
-      dirLight.shadow.camera.right = gridSize;
-      dirLight.shadow.camera.top = gridSize;
-      dirLight.shadow.camera.bottom = -gridSize;
+      dirLight.shadow.camera.left = -halfGrid;
+      dirLight.shadow.camera.right = halfGrid;
+      dirLight.shadow.camera.top = halfGrid;
+      dirLight.shadow.camera.bottom = -halfGrid;
+
+      dirLight.shadow.camera.near = 0.1;
+      dirLight.shadow.camera.far = halfGrid * 4;
 
       this.scene.add(ambientLight);
       this.scene.add(dirLight);
 
-      // TODO: fix light in large grids (100x100)
-
       this.isLightInit = true;
     }
-  }
-
-  calculateCaseSize(availableHeight, availableWidth) {
-    let caseSize = Math.min(availableHeight / this.grid.height, availableWidth / this.grid.width);
-
-    const heightPercent = availableHeight / (caseSize * this.grid.height);
-    const widthPercent = availableWidth / (caseSize * this.grid.width);
-    const percent = Math.min(heightPercent, widthPercent);
-
-    caseSize *= percent;
-    
-    return Math.floor(caseSize);
   }
   
   setupGrid() {
