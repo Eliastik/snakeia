@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2020 Eliastik (eliastiksofts.com)
+ * Copyright (C) 2019-2025 Eliastik (eliastiksofts.com)
  *
  * This file is part of "SnakeIA".
  *
@@ -183,6 +183,7 @@ export default class GridUI3D extends GridUI {
     if(!this.isLightInit) {
       const gridSize = Math.max(this.grid.width, this.grid.height);
       const halfGrid = gridSize / 2;
+      const padding = 2;
 
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 
@@ -191,16 +192,16 @@ export default class GridUI3D extends GridUI {
       dirLight.target.position.set(0, 0, 0);
 
       dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 2048;
-      dirLight.shadow.mapSize.height = 2048;
+      dirLight.shadow.mapSize.width = 4096;
+      dirLight.shadow.mapSize.height = 4096;
 
       dirLight.shadow.camera.near = 1;
       dirLight.shadow.camera.far = 100;
 
-      dirLight.shadow.camera.left = -halfGrid;
-      dirLight.shadow.camera.right = halfGrid;
-      dirLight.shadow.camera.top = halfGrid;
-      dirLight.shadow.camera.bottom = -halfGrid;
+      dirLight.shadow.camera.left = -halfGrid - padding;
+      dirLight.shadow.camera.right = halfGrid + padding;
+      dirLight.shadow.camera.top = halfGrid + padding;
+      dirLight.shadow.camera.bottom = -halfGrid - padding;
 
       dirLight.shadow.camera.near = 0.1;
       dirLight.shadow.camera.far = halfGrid * 4;
