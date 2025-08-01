@@ -133,8 +133,6 @@ export default class GridUI3D extends GridUI {
       this.controls.maxDistance = 500;
       this.controls.maxPolarAngle = Math.PI / 2;
 
-      this.scene.add(this.controls);
-
       this.areControlsInit = true;
     }
   }
@@ -163,6 +161,8 @@ export default class GridUI3D extends GridUI {
 
       this.width = totalWidth;
       this.height = totalHeight;
+
+      this.setupControls(canvas);
 
       this.setupLights();
 
@@ -238,9 +238,13 @@ export default class GridUI3D extends GridUI {
       this.camera.lookAt(0, 0, 0);
       this.camera.updateProjectionMatrix();
 
-      this.renderer.setSize(this.width, this.height);
-
       this.isCameraInit = true;
+    }
+
+    this.renderer.setSize(this.width, this.height);
+
+    if(this.controls) {
+      this.controls.update();
     }
   }
 
@@ -250,7 +254,7 @@ export default class GridUI3D extends GridUI {
       const halfGrid = gridSize / 2;
       const padding = 2;
 
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1);
 
       const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
       dirLight.position.set(-halfGrid * 0.5, halfGrid * 0.5, halfGrid * 2);
@@ -423,6 +427,26 @@ export default class GridUI3D extends GridUI {
     return this.oldTicks < this.ticks || this.oldTicks === undefined || (this.ticks === 0 && this.oldTicks !== 0);
   }
 
+  cleanOldSnakes() {
+    this.snakesMeshes.forEach(({ tubes, snakeIndex }) => {
+      if(this.snakes[snakeIndex] && !this.snakes[snakeIndex].gameOver) {
+        for(const tube of tubes) {
+          if(tube.geometry) tube.geometry.dispose();
+
+          if(tube.material) {
+            if (Array.isArray(tube.material)) {
+              tube.material.forEach(mat => mat.dispose());
+            } else {
+              tube.material.dispose();
+            }
+          }
+
+          this.snakesGroup.remove(tube);
+        }
+      }
+    });
+  }
+
   updateSnakes(caseSize, canvas, totalWidth, offsetY) {
     if(!this.shouldUpdateSnakes()) {
       return;
@@ -430,21 +454,7 @@ export default class GridUI3D extends GridUI {
 
     this.oldTicks = this.ticks;
 
-    this.snakesMeshes.forEach(({ mesh, snakeIndex }) => {
-      if(this.snakes[snakeIndex] && !this.snakes[snakeIndex].gameOver) {
-        if(mesh.geometry) mesh.geometry.dispose();
-
-        if(mesh.material) {
-          if(Array.isArray(mesh.material)) {
-            mesh.material.forEach(mat => mat.dispose());
-          } else {
-            mesh.material.dispose();
-          }
-        }
-
-        this.snakesGroup.remove(mesh);
-      }
-    });
+    this.cleanOldSnakes();
 
     for(let i = 0; i < this.snakes.length; i++) {
       const snake = this.snakes[i];
@@ -453,32 +463,66 @@ export default class GridUI3D extends GridUI {
         continue;
       }
 
-      if(snake.color != undefined) {
-        // TODO color
-      }
+      const segments = [];
+      let currentSegment = [];
 
-      const points = [];
+      let prev = null;
 
       for(let i = 0; i < snake.length(); i++) {
         const meshInfo = this.getSnakePart3DPosition(i, snake, caseSize, totalWidth, offsetY, canvas);
 
         if(meshInfo) {
           const { x, y, z } = meshInfo.position;
-          points.push(new THREE.Vector3(x, y, z));
+          const current = new THREE.Vector3(x, y, z);
+
+          if(prev) {
+            const gridSize3D = this.gridPositionTo3DPosition({ x: this.grid.width, y: this.grid.height });
+
+            const dx = current.x - prev.x;
+            const dy = current.y - prev.y;
+
+            const wrappedX = Math.abs(dx) > Math.abs(gridSize3D.x);
+            const wrappedY = Math.abs(dy) > Math.abs(gridSize3D.y);
+
+            if(wrappedX || wrappedY) {
+              if(currentSegment.length >= 2) {
+                segments.push(currentSegment);
+              }
+
+              currentSegment = [];
+            }
+          }
+
+          currentSegment.push(current);
+          prev = current;
         }
       }
 
-      if(points.length >= 2) {
-        const geometry = this.getSnakeGeometry(snake, points);
-        const material = this.getSnakeMaterial(snake);
+      if(currentSegment.length >= 2) {
+        segments.push(currentSegment);
+      }
+
+      const material = this.getSnakeMaterial(snake);
+
+      const tubes = [];
+
+      for(const segment of segments) {
+        const geometry = this.getSnakeGeometry(snake, segment);
 
         const tube = new THREE.Mesh(geometry, material);
         tube.castShadow = true;
         tube.receiveShadow = true;
-
         this.snakesGroup.add(tube);
-        this.snakesMeshes[i] = { mesh: tube, snakeIndex: i };
+
+        tubes.push(tube);
       }
+
+      this.snakesMeshes[i] = {
+        tubes,
+        headMesh: null,
+        tailMesh: null,
+        snakeIndex: i
+      };
     }
   }
 
@@ -520,21 +564,27 @@ export default class GridUI3D extends GridUI {
       animationPercentage, currentPosition, caseSize, canvas, totalWidth, offsetY
     );*/
 
-    const gridX = currentPosition.x;
-    const gridY = currentPosition.y;
-
-    const halfGridWidth = this.grid.width / 2;
-    const halfGridHeight = this.grid.height / 2;
-
-    const xPosition = gridX - halfGridWidth + 0.5;
-    const yPosition = (this.grid.height - 1 - gridY) - halfGridHeight + 0.5;
+    const position3D = this.gridPositionTo3DPosition(currentPosition);
 
     return {
       position: {
-        x: xPosition,
-        y: yPosition,
+        x: position3D.x,
+        y: position3D.y,
         z: 0.3
       }
+    };
+  }
+
+  gridPositionTo3DPosition(position) {
+    const halfGridWidth = this.grid.width / 2;
+    const halfGridHeight = this.grid.height / 2;
+
+    const xPosition = position.x - halfGridWidth + 0.5;
+    const yPosition = (this.grid.height - 1 - position.y) - halfGridHeight + 0.5;
+
+    return {
+      x: xPosition,
+      y: yPosition
     };
   }
 
