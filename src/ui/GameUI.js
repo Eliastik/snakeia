@@ -446,7 +446,7 @@ export default class GameUI {
         // Load 3D models
         await this.modelLoader.preloadAll({ fruit: "assets/models/fruit.glb" });
 
-        if(this.imageLoader.hasError) {
+        if(this.imageLoader.hasError || this.modelLoader.hasError) {
           this.errorOccurred = true;
         } else {
           this.assetsLoaded = true;
