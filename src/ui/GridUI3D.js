@@ -66,6 +66,8 @@ export default class GridUI3D extends GridUI {
     };
 
     this.initThreeJS();
+
+    this.is3DRendering = true;
   }
 
   getQualityPresetSettings(graphicType) {
