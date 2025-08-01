@@ -428,20 +428,20 @@ export default class GridUI3D extends GridUI {
   }
 
   cleanOldSnakes() {
-    this.snakesMeshes.forEach(({ tubes, snakeIndex }) => {
+    this.snakesMeshes.forEach(({ bodyParts, snakeIndex }) => {
       if(this.snakes[snakeIndex] && !this.snakes[snakeIndex].gameOver) {
-        for(const tube of tubes) {
-          if(tube.geometry) tube.geometry.dispose();
+        for(const bodyPart of bodyParts) {
+          if(bodyPart.geometry) bodyPart.geometry.dispose();
 
-          if(tube.material) {
-            if (Array.isArray(tube.material)) {
-              tube.material.forEach(mat => mat.dispose());
+          if(bodyPart.material) {
+            if (Array.isArray(bodyPart.material)) {
+              bodyPart.material.forEach(mat => mat.dispose());
             } else {
-              tube.material.dispose();
+              bodyPart.material.dispose();
             }
           }
 
-          this.snakesGroup.remove(tube);
+          this.snakesGroup.remove(bodyPart);
         }
       }
     });
@@ -463,67 +463,133 @@ export default class GridUI3D extends GridUI {
         continue;
       }
 
-      const segments = [];
-      let currentSegment = [];
-
-      let prev = null;
-
-      for(let i = 0; i < snake.length(); i++) {
-        const meshInfo = this.getSnakePart3DPosition(i, snake, caseSize, totalWidth, offsetY, canvas);
-
-        if(meshInfo) {
-          const { x, y, z } = meshInfo.position;
-          const current = new THREE.Vector3(x, y, z);
-
-          if(prev) {
-            const gridSize3D = this.gridPositionTo3DPosition({ x: this.grid.width, y: this.grid.height });
-
-            const dx = current.x - prev.x;
-            const dy = current.y - prev.y;
-
-            const wrappedX = Math.abs(dx) > Math.abs(gridSize3D.x);
-            const wrappedY = Math.abs(dy) > Math.abs(gridSize3D.y);
-
-            if(wrappedX || wrappedY) {
-              if(currentSegment.length >= 2) {
-                segments.push(currentSegment);
-              }
-
-              currentSegment = [];
-            }
-          }
-
-          currentSegment.push(current);
-          prev = current;
-        }
-      }
-
-      if(currentSegment.length >= 2) {
-        segments.push(currentSegment);
-      }
+      const segmentsPositions = this.calculateSnakeSegmentsPositions(snake, caseSize, totalWidth, offsetY, canvas);
 
       const material = this.getSnakeMaterial(snake);
 
-      const tubes = [];
-
-      for(const segment of segments) {
-        const geometry = this.getSnakeGeometry(snake, segment);
-
-        const tube = new THREE.Mesh(geometry, material);
-        tube.castShadow = true;
-        tube.receiveShadow = true;
-        this.snakesGroup.add(tube);
-
-        tubes.push(tube);
+      if(!this.snakesMeshes[i]) {
+        this.snakesMeshes[i] = {
+          bodyParts: null,
+          headMesh: null,
+          tailMesh: null,
+          snakeIndex: i
+        };
       }
 
-      this.snakesMeshes[i] = {
-        tubes,
-        headMesh: null,
-        tailMesh: null,
-        snakeIndex: i
-      };
+      const bodyParts = this.generateSnakeBody(segmentsPositions, snake, material);
+
+      this.snakesMeshes[i].bodyParts = bodyParts;
+      
+      this.processSnakeHead(segmentsPositions.flat(), i, material);
+      this.processSnakeTail(segmentsPositions.flat(), i, material);
     }
+  }
+
+  calculateSnakeSegmentsPositions(snake, caseSize, totalWidth, offsetY, canvas) {
+    const segments = [];
+    let currentSegment = [];
+
+    let prev = null;
+
+    for(let i = 0; i < snake.length(); i++) {
+      const meshInfo = this.getSnakePart3DPosition(i, snake, caseSize, totalWidth, offsetY, canvas);
+
+      if(meshInfo) {
+        const { x, y, z } = meshInfo.position;
+        const current = new THREE.Vector3(x, y, z);
+
+        if(prev) {
+          const gridSize3D = this.gridPositionTo3DPosition({ x: this.grid.width, y: this.grid.height });
+
+          const dx = current.x - prev.x;
+          const dy = current.y - prev.y;
+
+          const wrappedX = Math.abs(dx) > Math.abs(gridSize3D.x);
+          const wrappedY = Math.abs(dy) > Math.abs(gridSize3D.y);
+
+          if(wrappedX || wrappedY) {
+            const direction = new THREE.Vector3().subVectors(current, prev).normalize();
+            const extrapolatedEnd = prev.clone().addScaledVector(direction, 0.5);
+
+            currentSegment.push(extrapolatedEnd);
+
+            if(currentSegment.length >= 2) {
+              segments.push(currentSegment);
+            }
+
+            const extrapolatedStart = current.clone().addScaledVector(direction, -0.5);
+            currentSegment = [extrapolatedStart];
+          }
+        }
+
+        currentSegment.push(current);
+        prev = current;
+      }
+    }
+
+    if (currentSegment.length >= 2) {
+      segments.push(currentSegment);
+    }
+    return segments;
+  }
+
+  generateSnakeBody(segments, snake, material) {
+    const tubes = [];
+
+    for(const segment of segments) {
+      const geometry = this.getSnakeGeometry(snake, segment);
+
+      const tube = new THREE.Mesh(geometry, material);
+      tube.castShadow = true;
+      tube.receiveShadow = true;
+      this.snakesGroup.add(tube);
+
+      tubes.push(tube);
+    }
+
+    return tubes;
+  }
+
+  processSnakeHead(segmentsPositions, snakeIndex, material) {
+    const existingSnakeMeshes = this.snakesMeshes[snakeIndex];
+
+    if(!existingSnakeMeshes || !existingSnakeMeshes.headMesh) {
+      const capsuleGeom = new THREE.CapsuleGeometry(0.35, 0.1, 4, 8);
+      const headMesh = new THREE.Mesh(capsuleGeom, material.clone());
+      headMesh.castShadow = true;
+      headMesh.receiveShadow = true;
+
+      this.snakesMeshes[snakeIndex].headMesh = headMesh;
+
+      this.snakesGroup.add(headMesh);
+    }
+
+    const headMesh = this.snakesMeshes[snakeIndex].headMesh;
+
+    headMesh.position.copy(segmentsPositions[0]);
+  }
+
+  processSnakeTail(segmentsPositions, snakeIndex, material) {
+    const existingSnakeMeshes = this.snakesMeshes[snakeIndex];
+
+    if(!existingSnakeMeshes || !existingSnakeMeshes.tailMesh) {
+      const capsuleGeom = new THREE.CapsuleGeometry(0.35, 2, 4, 8);
+      const tailMesh = new THREE.Mesh(capsuleGeom, material.clone());
+      tailMesh.castShadow = true;
+      tailMesh.receiveShadow = true;
+
+      this.snakesMeshes[snakeIndex].tailMesh = tailMesh;
+
+      this.snakesGroup.add(tailMesh);
+    }
+
+    const tailMesh = this.snakesMeshes[snakeIndex].tailMesh;
+    const last = segmentsPositions[segmentsPositions.length - 1];
+    const beforeLast = segmentsPositions[segmentsPositions.length - 2];
+
+    tailMesh.position.copy(last);
+    tailMesh.lookAt(beforeLast);
+    tailMesh.rotateX(Math.PI / 2);
   }
 
   getSnakeMaterial(snake) {
