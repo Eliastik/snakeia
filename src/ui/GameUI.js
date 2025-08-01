@@ -614,7 +614,7 @@ export default class GameUI {
           this.toggleFullscreen();
         });
       } else if(this.errorOccurred) {
-        this.labelMenus.text = this.imageLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error");
+        this.labelMenus.text = this.imageLoader.hasError || this.modelLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error");
         this.labelMenus.color = "#E74C3C";
         this.menu.set(this.labelMenus, this.btnQuit);
         
