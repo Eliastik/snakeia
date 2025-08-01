@@ -508,17 +508,11 @@ export default class GridUI3D extends GridUI {
           const wrappedY = Math.abs(dy) > Math.abs(gridSize3D.y);
 
           if(wrappedX || wrappedY) {
-            const direction = new THREE.Vector3().subVectors(current, prev).normalize();
-            const extrapolatedEnd = prev.clone().addScaledVector(direction, 0.5);
-
-            currentSegment.push(extrapolatedEnd);
-
             if(currentSegment.length >= 2) {
               segments.push(currentSegment);
             }
 
-            const extrapolatedStart = current.clone().addScaledVector(direction, -0.5);
-            currentSegment = [extrapolatedStart];
+            currentSegment = [];
           }
         }
 
@@ -573,7 +567,7 @@ export default class GridUI3D extends GridUI {
     const existingSnakeMeshes = this.snakesMeshes[snakeIndex];
 
     if(!existingSnakeMeshes || !existingSnakeMeshes.tailMesh) {
-      const capsuleGeom = new THREE.CapsuleGeometry(0.35, 2, 4, 8);
+      const capsuleGeom = new THREE.CapsuleGeometry(0.35, 0.3, 4, 8);
       const tailMesh = new THREE.Mesh(capsuleGeom, material.clone());
       tailMesh.castShadow = true;
       tailMesh.receiveShadow = true;
