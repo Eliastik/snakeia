@@ -172,7 +172,7 @@ export default class GridUI3D extends GridUI {
   
       this.setupGrid();
 
-      this.updateSnakes(caseSize, canvas, totalWidth, offsetY);
+      this.updateSnakes();
 
       this.saveCurrentState(canvas);
 
@@ -425,13 +425,17 @@ export default class GridUI3D extends GridUI {
     }
   }
 
-  shouldUpdateSnakes() {
+  shouldUpdateSnakeBodyGeometry() {
     return this.oldTicks < this.ticks || this.oldTicks === undefined || (this.ticks === 0 && this.oldTicks !== 0);
   }
 
   cleanOldSnakes() {
+    if(!this.snakesMeshes) {
+      return;
+    }
+    
     this.snakesMeshes.forEach(({ bodyParts, snakeIndex }) => {
-      if(this.snakes[snakeIndex] && !this.snakes[snakeIndex].gameOver) {
+      if(this.snakes[snakeIndex] && !this.snakes[snakeIndex].gameOver && bodyParts) {
         for(const bodyPart of bodyParts) {
           if(bodyPart.geometry) bodyPart.geometry.dispose();
 
@@ -449,14 +453,10 @@ export default class GridUI3D extends GridUI {
     });
   }
 
-  updateSnakes(caseSize, canvas, totalWidth, offsetY) {
-    if(!this.shouldUpdateSnakes()) {
-      return;
+  updateSnakes() {
+    if(this.shouldUpdateSnakeBodyGeometry()) {
+      this.cleanOldSnakes();
     }
-
-    this.oldTicks = this.ticks;
-
-    this.cleanOldSnakes();
 
     for(let i = 0; i < this.snakes.length; i++) {
       const snake = this.snakes[i];
@@ -465,7 +465,7 @@ export default class GridUI3D extends GridUI {
         continue;
       }
 
-      const segmentsPositions = this.calculateSnakeSegmentsPositions(snake, caseSize, totalWidth, offsetY, canvas);
+      const segmentsPositions = this.calculateSnakeSegmentsPositions(snake);
 
       const material = this.getSnakeMaterial(snake);
 
@@ -478,23 +478,26 @@ export default class GridUI3D extends GridUI {
         };
       }
 
-      const bodyParts = this.generateSnakeBody(segmentsPositions, snake, material);
-
-      this.snakesMeshes[i].bodyParts = bodyParts;
+      if(this.shouldUpdateSnakeBodyGeometry()) {
+        const bodyParts = this.generateSnakeBody(segmentsPositions, snake, material);
+        this.snakesMeshes[i].bodyParts = bodyParts;
+      }
       
       this.processSnakeHead(segmentsPositions.flat(), i, material);
       this.processSnakeTail(segmentsPositions.flat(), i, material);
     }
+    
+    this.oldTicks = this.ticks;
   }
 
-  calculateSnakeSegmentsPositions(snake, caseSize, totalWidth, offsetY, canvas) {
+  calculateSnakeSegmentsPositions(snake) {
     const segments = [];
     let currentSegment = [];
 
     let prev = null;
 
-    for(let i = 0; i < snake.length(); i++) {
-      const meshInfo = this.getSnakePart3DPosition(i, snake, caseSize, totalWidth, offsetY, canvas);
+    for(let i = 0; i < snake.length() - 1; i++) {
+      const meshInfo = this.getSnakePart3DPosition(i, snake);
 
       if(meshInfo) {
         const { x, y, z } = meshInfo.position;
@@ -523,9 +526,10 @@ export default class GridUI3D extends GridUI {
       }
     }
 
-    if (currentSegment.length >= 2) {
+    if(currentSegment.length >= 2) {
       segments.push(currentSegment);
     }
+
     return segments;
   }
 
@@ -547,10 +551,11 @@ export default class GridUI3D extends GridUI {
   }
 
   processSnakeHead(segmentsPositions, snakeIndex, material) {
+    const snake = this.snakes[snakeIndex];
     const existingSnakeMeshes = this.snakesMeshes[snakeIndex];
 
     if(!existingSnakeMeshes || !existingSnakeMeshes.headMesh) {
-      const capsuleGeom = new THREE.CapsuleGeometry(0.35, 0.1, 4, 8);
+      const capsuleGeom = new THREE.CapsuleGeometry(0.38, 0.4, 4, 8);
       const headMesh = new THREE.Mesh(capsuleGeom, material.clone());
       headMesh.castShadow = true;
       headMesh.receiveShadow = true;
@@ -561,11 +566,19 @@ export default class GridUI3D extends GridUI {
     }
 
     const headMesh = this.snakesMeshes[snakeIndex].headMesh;
+    const headPosition = snake.getHeadPosition();
 
-    headMesh.position.copy(segmentsPositions[0]);
+    const { animationPercentage, angle } = this.calculateSnakeAnimation(snake, 0, headPosition, snake.direction);
+    const animatedPos = this.calculateCasePositionWithAnimation(animationPercentage, headPosition, 0.2);
+    const firstPartInfos = this.getSnakePart3DPosition(1, snake);
+
+    headMesh.position.copy(animatedPos);
+    headMesh.lookAt(new THREE.Vector3(firstPartInfos.position.x, firstPartInfos.position.y, 0.35));
+    headMesh.rotateX(Math.PI / 2);
   }
 
   processSnakeTail(segmentsPositions, snakeIndex, material) {
+    const snake = this.snakes[snakeIndex];
     const existingSnakeMeshes = this.snakesMeshes[snakeIndex];
 
     if(!existingSnakeMeshes || !existingSnakeMeshes.tailMesh) {
@@ -580,11 +593,14 @@ export default class GridUI3D extends GridUI {
     }
 
     const tailMesh = this.snakesMeshes[snakeIndex].tailMesh;
-    const last = segmentsPositions[segmentsPositions.length - 1];
-    const beforeLast = segmentsPositions[segmentsPositions.length - 2];
+    const tailPosition = snake.getTailPosition();
 
-    tailMesh.position.copy(last);
-    tailMesh.lookAt(beforeLast);
+    const { animationPercentage, angle } = this.calculateSnakeAnimation(snake, -1, tailPosition, snake.direction);
+    const animatedPos = this.calculateCasePositionWithAnimation(animationPercentage, tailPosition, -0.5);
+    const beforeLastInfos = this.getSnakePart3DPosition(snake.length() - 2, snake);
+
+    tailMesh.position.copy(animatedPos);
+    tailMesh.lookAt(new THREE.Vector3(beforeLastInfos.position.x, beforeLastInfos.position.y, 0.35));
     tailMesh.rotateX(Math.PI / 2);
   }
 
@@ -609,7 +625,7 @@ export default class GridUI3D extends GridUI {
     return new THREE.TubeGeometry(curve, tubularSegments, 0.35, radiusSegments, false);
   }
 
-  getSnakePart3DPosition(partNumber, snake, caseSize, totalWidth, offsetY, canvas) {
+  getSnakePart3DPosition(partNumber, snake) {
     let position;
 
     if(partNumber === -1) {
@@ -620,11 +636,7 @@ export default class GridUI3D extends GridUI {
 
     const direction = this.getSnakeDirection(snake, partNumber, position);
 
-    const { animationPercentage, currentPosition } = this.calculateSnakeAnimation(snake, partNumber, position, direction);
-
-    /*const { finalCaseX, finalCaseY } = this.calculateCasePositionWithAnimation(
-      animationPercentage, currentPosition, caseSize, canvas, totalWidth, offsetY
-    );*/
+    const { currentPosition } = this.calculateSnakeAnimation(snake, partNumber, position, direction);
 
     const position3D = this.gridPositionTo3DPosition(currentPosition);
 
@@ -635,6 +647,29 @@ export default class GridUI3D extends GridUI {
         z: 0.3
       }
     };
+  }
+
+  calculateCasePositionWithAnimation(animationPercentage = 1, currentPosition, test) {
+    const animationOffset = animationPercentage - test;
+    const basePos = this.gridPositionTo3DPosition(currentPosition);
+    const offset = new THREE.Vector3();
+  
+    switch(currentPosition.direction) {
+    case GameConstants.Direction.UP:
+      offset.y = -animationOffset;
+      break;
+    case GameConstants.Direction.BOTTOM:
+      offset.y = animationOffset;
+      break;
+    case GameConstants.Direction.RIGHT:
+      offset.x = animationOffset;
+      break;
+    case GameConstants.Direction.LEFT:
+      offset.x = -animationOffset;
+      break;
+    }
+  
+    return new THREE.Vector3(basePos.x, basePos.y, 0.35).add(offset);
   }
 
   gridPositionTo3DPosition(position) {

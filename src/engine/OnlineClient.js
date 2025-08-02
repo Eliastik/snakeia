@@ -260,7 +260,7 @@ export default class OnlineClient {
     }
   }
 
-  getGame(ui, settings) {
+  getGame(ui) {
     if(this.socket != null && this.currentRoom && ui != null) {
       this.game = null;
       this.stopGame();
