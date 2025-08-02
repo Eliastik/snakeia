@@ -685,6 +685,49 @@ export default class GridUI3D extends GridUI {
     };
   }
 
+  disposeGroup(group) {
+    group.traverse(child => {
+      if(child.isMesh) {
+        child.geometry?.dispose();
+
+        if(Array.isArray(child.material)) {
+          child.material.forEach(mat => mat?.dispose());
+        } else {
+          child.material?.dispose();
+        }
+
+        if(child.texture?.dispose) {
+          child.texture.dispose();
+        }
+      }
+    });
+  }
+
+  cleanAfterGameExit() {
+    if(this.scene) {
+      this.scene.remove(this.gridGroup, this.snakesGroup);
+
+      this.disposeGroup(this.gridGroup);
+      this.disposeGroup(this.snakesGroup);
+
+      this.gridGroup?.clear();
+      this.snakesGroup?.clear();
+    }
+
+    this.snakesMeshes = [];
+
+    this.controls?.dispose();
+    this.controls = null;
+
+    this.renderer?.dispose();
+    this.renderer = null;
+
+    this.scene?.clear();
+    this.scene = null;
+
+    this.camera = null;
+  }
+
   set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
     super.set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode);
   }

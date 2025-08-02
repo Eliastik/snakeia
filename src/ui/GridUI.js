@@ -602,6 +602,11 @@ export default class GridUI extends Component {
     }
   }
 
+  cleanAfterGameExit() {
+    this.canvasSnakes = null;
+    this.canvasGrid = null;
+  }
+
   set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
     this.snakes = snakes;
     this.grid = grid;

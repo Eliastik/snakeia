@@ -52,6 +52,7 @@ export default class GameUI {
     this.lastFrameTime = 0;
     this.currentFPS = 0;
     this.engineLoading = false;
+    this.loadingResourcesErrorOccurred = false;
     // Swipe detection variables
     this.touchEventStartX;
     this.touchEventStartY;
@@ -403,6 +404,8 @@ export default class GameUI {
         this.imageLoader.clear();
       }
     }
+
+    this.gridUI.cleanAfterGameExit();
   }
 
   toggleFullscreen() {
@@ -440,7 +443,7 @@ export default class GameUI {
   }
 
   loadAssets() {
-    if(!this.errorOccurred && this.outputType != GameConstants.OutputType.TEXT) {
+    if(!this.errorOccurred && !this.loadingResourcesErrorOccurred && this.outputType != GameConstants.OutputType.TEXT) {
       // Load images/textures
       this.imageLoader.load(["assets/images/skin/" + this.graphicSkin + "/snake_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_2.png", "assets/images/skin/" + this.graphicSkin + "/snake.png", "assets/images/skin/" + this.graphicSkin + "/body_4_end.png", "assets/images/skin/" + this.graphicSkin + "/body_3_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2_end.png", "assets/images/skin/" + this.graphicSkin + "/body_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2.png", "assets/images/skin/" + this.graphicSkin + "/body.png", "assets/images/skin/" + this.graphicSkin + "/wall.png", "assets/images/skin/" + this.graphicSkin + "/fruit.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/trophy.png", "assets/images/trophy_silver.png", "assets/images/trophy_bronze.png", "assets/images/clock.png", "assets/images/skin/" + this.graphicSkin + "/fruit_gold.png", "assets/images/ranking.png", "assets/images/skin/flat/fruit.png", "assets/images/skin/" + this.graphicSkin + "/unknown.png"], async () => {
         // Load 3D models
@@ -449,7 +452,7 @@ export default class GameUI {
         }
 
         if(this.imageLoader.hasError || this.modelLoader.hasError) {
-          this.errorOccurred = true;
+          this.loadingResourcesErrorOccurred = true;
         } else {
           this.assetsLoaded = true;
           this.btnFullScreen.loadImage(this.imageLoader);
@@ -462,7 +465,7 @@ export default class GameUI {
           this.start();
         }
       }, this);
-    } else if(!this.errorOccurred && this.outputType == GameConstants.OutputType.TEXT) {
+    } else if(!this.errorOccurred && !this.loadingResourcesErrorOccurred && this.outputType == GameConstants.OutputType.TEXT) {
       this.assetsLoaded = true;
       this.start();
     }
@@ -548,7 +551,7 @@ export default class GameUI {
         this.labelMenus.text = i18next.t("engine.loadingWorker");
         this.labelMenus.color = "white";
         this.menu.set(this.labelMenus);
-      } else if(this.assetsLoaded && !this.errorOccurred) {
+      } else if(this.assetsLoaded && !this.errorOccurred && !this.loadingResourcesErrorOccurred) {
         this.header.set(this.snakes, this.imageLoader, this.bestScoreToDisplay, this.header.height, this.numFruit, this.enablePause);
         this.header.draw(ctx);
 
@@ -590,7 +593,7 @@ export default class GameUI {
         this.gameRanking.forceClose();
       }
 
-      if(!this.gameFinished && !this.gameOver && this.assetsLoaded && !this.engineLoading && !this.errorOccurred) {
+      if(!this.gameFinished && !this.gameOver && this.assetsLoaded && !this.engineLoading && !this.errorOccurred && !this.loadingResourcesErrorOccurred) {
         this.gameRanking.set(this.snakes, this.fontSize, this.header.height, this.currentPlayer, this.imageLoader, this.spectatorMode);
         this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
       }
@@ -613,8 +616,8 @@ export default class GameUI {
         this.btnExitFullScreen.setClickAction(() => {
           this.toggleFullscreen();
         });
-      } else if(this.errorOccurred) {
-        this.labelMenus.text = this.imageLoader.hasError || this.modelLoader.hasError ? i18next.t("engine.errorLoading") : i18next.t("engine.error");
+      } else if(this.errorOccurred || this.loadingResourcesErrorOccurred) {
+        this.labelMenus.text = this.loadingResourcesErrorOccurred ? i18next.t("engine.errorLoading") : i18next.t("engine.error");
         this.labelMenus.color = "#E74C3C";
         this.menu.set(this.labelMenus, this.btnQuit);
         
@@ -846,7 +849,7 @@ export default class GameUI {
       this.labelMenus.fontSize = this.fontSize;
       this.menu.draw(this.canvasCtx);
 
-      if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1 && !this.errorOccurred) {
+      if((this.gameFinished || this.gameOver) && this.snakes != null && this.snakes.length > 1 && !this.errorOccurred && !this.loadingResourcesErrorOccurred) {
         this.gameRanking.open();
         this.gameRanking.enable();
         this.gameRanking.draw(this.canvasCtx, this, this.currentPlayer);
