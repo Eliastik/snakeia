@@ -325,6 +325,30 @@ export default class GridUI3D extends GridUI {
             const { fruitModel, pointLight } = this.constructFruit(xPosition, yPosition, caseType);
             this.gridGroup.add(fruitModel, pointLight);
           }
+
+          if(!Object.values(GameConstants.CaseType).includes(caseType)) {
+            const unknownModel = this.modelLoader.get("unknown");
+
+            if(unknownModel) {
+              const box = new THREE.Box3().setFromObject(unknownModel);
+
+              const size = new THREE.Vector3();
+              box.getSize(size);
+
+              unknownModel.scale.setScalar(0.4 / size.x);
+              unknownModel.position.set(xPosition - 0.3, yPosition - 0.4, 0.5);
+              unknownModel.rotation.x = Math.PI / 2;
+
+              unknownModel.traverse(child => {
+                if(child.isMesh) {
+                  child.castShadow = true;
+                  child.receiveShadow = true;
+                }
+              });
+            
+              this.gridGroup.add(unknownModel);
+            }
+          }
         }
       }
     }
