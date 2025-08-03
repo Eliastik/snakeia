@@ -22,7 +22,6 @@ import GameUtils from "../engine/GameUtils";
 import Position from "../engine/Position";
 import { Utils } from "jsgametools";
 import * as THREE from "three";
-import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import chroma from "chroma-js";
 
@@ -510,122 +509,80 @@ export default class GridUI3D extends GridUI {
   }
 
   animateSnakeHead(snakeIndex, snake) {
-    const headMesh = this.snakesMeshes[snakeIndex].headMesh;
-    const headPosition = snake.getHeadPosition();
-    const direction = headPosition.direction;
-
-    const animationPercentage = this.calculateAnimationPercentage(snake, 0);
-
-    const startPosHead = this.gridPositionTo3DPosition(snake.get(1));
-    const endPosHead = this.gridPositionTo3DPosition(headPosition);
-
-    const marginX = this.getSnakeHeadXMargin(direction);
-    const marginY = this.getSnakeHeadYMargin(direction);
-
-    const startPosHead3D = new THREE.Vector3(startPosHead.x + marginX, startPosHead.y + marginY, 0.3);
-    const endPosHead3D = new THREE.Vector3(endPosHead.x + marginX, endPosHead.y + marginY, 0.3);
-
-    const interpolated = new THREE.Vector3().lerpVectors(
-      startPosHead3D,
-      endPosHead3D,
-      animationPercentage
-    );
-
-    headMesh.position.copy(interpolated);
-
-    this.rotateSnakeHeadTailMesh(headMesh, direction);
+    this.animateSnake({
+      snakeIndex,
+      snake,
+      mesh: this.snakesMeshes[snakeIndex].headMesh,
+      from: snake.get(1),
+      to: snake.getHeadPosition(),
+      snakePart: 0,
+      type: "head"
+    });
   }
 
-  rotateSnakeHeadTailMesh(mesh, direction) {
-    mesh.rotation.z = 0;
-
-    switch (direction) {
-    case GameConstants.Direction.RIGHT:
-      mesh.rotation.z = Math.PI / 2;
-      break;
-    case GameConstants.Direction.LEFT:
-      mesh.rotation.z = -Math.PI / 2;
-      break;
-    case GameConstants.Direction.BOTTOM:
-      mesh.rotation.z = Math.PI;
-      break;
-    }
-  }
-
-  getSnakeHeadXMargin(direction) {
-    switch(direction) {
-    case GameConstants.Direction.RIGHT:
-      return -0.2;
-    case GameConstants.Direction.LEFT:
-      return 0.2;
-    default:
-      return 0;
-    }
-  }
-
-  getSnakeHeadYMargin(direction) {
-    switch(direction) {
-    case GameConstants.Direction.UP:
-      return -0.2;
-    case GameConstants.Direction.DOWN:
-      return 0.2;
-    default:
-      return 0;
-    }
-  }
-  
   animateSnakeTail(snakeIndex, snake) {
-    const tailMesh = this.snakesMeshes[snakeIndex].tailMesh;
-    const tailPosition = snake.getTailPosition();
-    const startPosition = snake.get(snake.length() - 2);
-    const direction = startPosition.direction;
+    this.animateSnake({
+      snakeIndex,
+      snake,
+      mesh: this.snakesMeshes[snakeIndex].tailMesh,
+      from: snake.getTailPosition(),
+      to: snake.get(snake.length() - 2),
+      snakePart: -1,
+      type: "tail"
+    });
+  }
 
-    const tail3DPosition = this.gridPositionTo3DPosition(tailPosition);
+  animateSnake({ snake, mesh, from, to, snakePart, type }) {
+    const direction = to.direction;
+    const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
 
-    tailMesh.position.set(tail3DPosition.x, tail3DPosition.y, 0.3);
+    const margin = this.getSnakeMargin(direction, type);
 
-    const animationPercentage = this.calculateAnimationPercentage(snake, -1);
+    const fromPos = this.gridPositionTo3DPosition(from);
+    const toPos = this.gridPositionTo3DPosition(to);
 
-    const startPosTail = this.gridPositionTo3DPosition(startPosition);
-    const endPosTail = this.gridPositionTo3DPosition(tailPosition);
-
-    const marginX = this.getSnakeTailXMargin(direction);
-    const marginY = this.getSnakeTailYMargin(direction);
-
-    const startPosTail3D = new THREE.Vector3(startPosTail.x + marginX, startPosTail.y + marginY, 0.3);
-    const endPosTail3D = new THREE.Vector3(endPosTail.x + marginX, endPosTail.y + marginY, 0.3);
+    const fromVec = new THREE.Vector3(fromPos.x + margin.x, fromPos.y + margin.y, 0.3);
+    const toVec = new THREE.Vector3(toPos.x + margin.x, toPos.y + margin.y, 0.3);
 
     const interpolated = new THREE.Vector3().lerpVectors(
-      endPosTail3D,
-      startPosTail3D,
+      fromVec,
+      toVec,
       animationPercentage
     );
 
-    tailMesh.position.copy(interpolated);
-    
-    this.rotateSnakeHeadTailMesh(tailMesh, direction);
+    mesh.position.copy(interpolated);
+
+    this.setMeshRotationFromDirection(mesh, direction);
   }
 
-  getSnakeTailXMargin(direction) {
-    switch(direction) {
-    case GameConstants.Direction.RIGHT:
-      return -0.6;
-    case GameConstants.Direction.LEFT:
-      return 0.6;
-    default:
-      return 0;
-    }
+  getSnakeMargin(direction, type) {
+    const marginMap = {
+      head: {
+        [GameConstants.Direction.RIGHT]: { x: -0.2, y: 0 },
+        [GameConstants.Direction.LEFT]:  { x:  0.2, y: 0 },
+        [GameConstants.Direction.UP]:    { x:  0,   y: -0.2 },
+        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.2 },
+      },
+      tail: {
+        [GameConstants.Direction.RIGHT]: { x: -0.6, y: 0 },
+        [GameConstants.Direction.LEFT]:  { x:  0.6, y: 0 },
+        [GameConstants.Direction.UP]:    { x:  0,   y: -0.6 },
+        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.6 },
+      }
+    };
+
+    return marginMap[type]?.[direction] || { x: 0, y: 0 };
   }
 
-  getSnakeTailYMargin(direction) {
-    switch(direction) {
-    case GameConstants.Direction.UP:
-      return -0.6;
-    case GameConstants.Direction.DOWN:
-      return 0.6;
-    default:
-      return 0;
-    }
+  setMeshRotationFromDirection(mesh, direction) {
+    const directionToZ = {
+      [GameConstants.Direction.RIGHT]: Math.PI / 2,
+      [GameConstants.Direction.LEFT]:  -Math.PI / 2,
+      [GameConstants.Direction.DOWN]:  Math.PI,
+      [GameConstants.Direction.UP]:    0
+    };
+
+    mesh.rotation.z = directionToZ[direction] ?? 0;
   }
 
   createSnakeMesh(snakeGeometry, material) {
