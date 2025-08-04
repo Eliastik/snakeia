@@ -2805,17 +2805,27 @@ function generateGraphicsFormFromPresets(presets, predefinedPresets, containerId
     label.textContent = i18next.t(`modal3DQualitySettings.${key}`);
 
     const inputCol = document.createElement("div");
-    inputCol.className = "col-sm-8";
+    inputCol.className = "col-sm-8 d-flex align-items-center";
 
     if(config.type === "boolean") {
+      const checkWrapper = document.createElement("div");
+      checkWrapper.className = "form-check d-flex align-items-center";
+
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
-      checkbox.className = "form-check-input";
+      checkbox.className = "form-check-input mt-1";
       checkbox.id = key;
       checkbox.checked = savedPreset[key] ?? false;
-      checkbox.style.marginTop = "0.5rem";
 
-      inputCol.appendChild(checkbox);
+      const tooltip = document.createElement("a");
+      tooltip.setAttribute("aria-label", i18next.t(`modal3DQualitySettings.${key}Description`));
+      tooltip.setAttribute("data-balloon-length", "large");
+      tooltip.setAttribute("data-balloon-pos", "up");
+      tooltip.innerHTML = "<span class=\"ml-2 fui-question-circle\"></span>";
+
+      checkWrapper.appendChild(checkbox);
+      checkWrapper.appendChild(tooltip);
+      inputCol.appendChild(checkWrapper);
     } else if(config.type === "choice" && config.presets) {
       const select = document.createElement("select");
       select.className = "custom-select";
@@ -2829,7 +2839,15 @@ function generateGraphicsFormFromPresets(presets, predefinedPresets, containerId
       });
 
       select.value = savedPreset[key] || Object.keys(config.presets)[0];
+
+      const tooltip = document.createElement("a");
+      tooltip.setAttribute("aria-label", i18next.t(`modal3DQualitySettings.${key}Description`));
+      tooltip.setAttribute("data-balloon-length", "large");
+      tooltip.setAttribute("data-balloon-pos", "up");
+      tooltip.innerHTML = "<span class=\"ml-2 fui-question-circle\"></span>";
+
       inputCol.appendChild(select);
+      inputCol.appendChild(tooltip);
     }
 
     group.appendChild(label);
