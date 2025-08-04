@@ -101,3 +101,7 @@ body.dark .modal-content {
 body.dark .modal-header {
     background-color: rgba(255, 255, 255, .05);
 }
+
+body.dark hr {
+  border-top: 1px solid rgba(255, 255, 255 ,.1);
+}

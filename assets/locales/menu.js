@@ -320,8 +320,36 @@ i18next.addResourceBundle("fr", "translation", {
     "default": "Ce modèle est le modèle par défaut",
     "notCompatible": "Ce modèle n'est pas compatible avec votre version du jeu. Vous risquez de rencontrer des problèmes si vous le sélectionnez",
     "modelID": "Identifiant du modèle :"
+  },
+  "modal3DQualitySettings": {
+    "title": "Paramètres de qualité 3D personnalisée",
+    "description": "Vous pouvez paramétrer ci-dessous les paramètres de qualité 3D.",
+    "selectPreset": "Pré-réglage :",
+    "3dMinimal": "Qualité minimale",
+    "3dLow": "Qualité faible",
+    "3dNormal": "Qualité normale",
+    "3dMedium": "Qualité moyenne",
+    "3dHigh": "Qualité élevée",
+    "loadPreset": "Charger",
+    "enableShadows": "Activer les ombres",
+    "enableAntialiasing": "Activer l'anti-crénelage",
+    "shadowResolution": "Résolution des ombres :",
+    "shadowType": "Qualité des ombres :",
+    "materialType": "Qualité des matériaux :",
+    "snakeSegments": "Qualité de la géométrie des Snake :",
+    "fruitLights": "Activer l'éclairage des fruits",
+    "disabled": "Désactivé",
+    "minimum": "Minimum",
+    "low": "Faible",
+    "normal": "Normal",
+    "medium": "Moyen",
+    "high": "Élevé",
+    "ultra": "Ultra",
+    "extreme": "Extrême",
+    "validate": "Valider",
+    "reset": "Réinitialiser",
+    "close": "Fermer"
   }
-
 }, true, false);
 
 // English
@@ -626,5 +654,34 @@ i18next.addResourceBundle("en", "translation", {
     "default": "This model is the default model",
     "notCompatible": "This model is not compatible with your game version. You may encounter problems if you select it",
     "modelID": "Model ID:"
+  },
+  "modal3DQualitySettings": {
+    "title": "Custom 3D quality settings",
+    "description": "You can configure the 3D quality settings below.",
+    "selectPreset": "Preset:",
+    "3dMinimal": "Minimum quality",
+    "3dLow": "Low quality",
+    "3dNormal": "Normal quality",
+    "3dMedium": "Medium quality",
+    "3dHigh": "High quality",
+    "loadPreset": "Load",
+    "enableShadows": "Enable shadows",
+    "enableAntialiasing": "Enable anti-aliasing",
+    "shadowResolution": "Shadow resolution:",
+    "shadowType": "Shadow quality:",
+    "materialType": "Material quality:",
+    "snakeSegments": "Snake geometry quality:",
+    "fruitLights": "Enable fruit lighting",
+    "disabled": "Disabled",
+    "minimum": "Minimum",
+    "low": "Low",
+    "normal": "Normal",
+    "medium": "Medium",
+    "high": "High",
+    "ultra": "Ultra",
+    "extreme": "Extreme",
+    "validate": "Validate",
+    "reset": "Reset",
+    "close": "Close"
   }
 }, true, false);

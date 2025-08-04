@@ -159,28 +159,30 @@ export default {
     AUTHENTICATION_SUCCESS: "AUTHENTICATION_SUCCESS"
   },
   QualitySettings3DIndividualPresets: {
-    enableShadows: {
-      type: "boolean"
-    },
     enableAntialiasing: {
       type: "boolean"
     },
-    shadowResolution: {
-      type: "choice",
-      presets: {
-        disabled: 0,
-        low: 512,
-        normal: 1024,
-        medium: 2048,
-        high: 4096,
-        ultra: 8192
-      }
+    fruitLights: {
+      type: "boolean"
+    },
+    enableShadows: {
+      type: "boolean"
     },
     shadowType: {
       type: "choice",
       presets: {
         low: "basic",
         high: "pcfsoft"
+      }
+    },
+    shadowResolution: {
+      type: "choice",
+      presets: {
+        low: 512,
+        normal: 1024,
+        medium: 2048,
+        high: 4096,
+        ultra: 8192
       }
     },
     materialType: {
@@ -243,16 +245,13 @@ export default {
           maxLength: 100
         }
       }
-    },
-    fruitLights: {
-      type: "boolean"
     }
   },
   QualitySettings3DPreset: {
     "3dMinimal": {
       enableShadows: false,
       enableAntialiasing: false,
-      shadowResolution: "disabled",
+      shadowResolution: "low",
       shadowType: "low",
       materialType: "low",
       snakeSegments: "minimum",

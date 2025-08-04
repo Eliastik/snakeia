@@ -116,7 +116,8 @@ function restoreSettings() {
     showDebugInfo: false,
     textOutput: false,
     graphicSkin: "flat",
-    graphicType: "2d",
+    graphicType: "3dMedium",
+    graphicCustomPreset: null,
     maxFPS: -1,
     unlockAllLevels: false,
     darkMode: "auto",
@@ -176,6 +177,18 @@ function showSettings() {
     document.getElementById("maxFPS").value = settings.maxFPS;
   } else {
     document.getElementById("maxFPS").value = -1;
+  }
+
+  if(settings.levelsAILevel === "ultra") {
+    document.getElementById("modalLevelSelectAIUltraModelButton").style.display = "block";
+  } else {
+    document.getElementById("modalLevelSelectAIUltraModelButton").style.display = "none";
+  }
+
+  if(settings.graphicType === "3dCustom") {
+    document.getElementById("modalCustom3DQuality").style.display = "block";
+  } else {
+    document.getElementById("modalCustom3DQuality").style.display = "none";
   }
 
   checkDarkMode();
@@ -277,6 +290,12 @@ document.getElementById("graphicSkin").onchange = function() {
 document.getElementById("graphicType").onchange = function() {
   customSettings.graphicType = this.value;
   saveSettings();
+
+  if(this.value === "3dCustom") {
+    document.getElementById("modalCustom3DQuality").style.display = "block";
+  } else {
+    document.getElementById("modalCustom3DQuality").style.display = "none";
+  }
 };
 
 document.getElementById("maxFPS").oninput = function() {
@@ -1108,6 +1127,14 @@ document.getElementById("levelsAILevelSelect").onchange = function() {
 
 const modalSelectAIUltraModelInstance = new BSN.Modal(
   "#modalSelectAIUltraModel",
+  {
+    backdrop: "static",
+    keyboard: false
+  }
+);
+
+const modal3DQualitySettingsInstance = new BSN.Modal(
+  "#modalAdvanced3DGraphicsSettings",
   {
     backdrop: "static",
     keyboard: false
@@ -2697,6 +2724,155 @@ function sellBonus(player) {
 
   return false;
 }
+
+function generateGraphicsFormFromPresets(presets, predefinedPresets, containerId, predefinedPresetsName, savedPreset) {
+  const container = document.getElementById(containerId);
+  if(!container) return;
+
+  container.textContent = "";
+
+  const form = document.createElement("form");
+  form.id = "formGraphicsSettingsAdvanced";
+
+  const selectRow = document.createElement("div");
+  selectRow.className = "form-group row align-items-center";
+
+  const labelCol = document.createElement("label");
+  labelCol.className = "col-sm-4 col-form-label mb-0";
+  labelCol.setAttribute("for", "presetSelect");
+  labelCol.textContent = i18next.t("modal3DQualitySettings.selectPreset") || "Preset:";
+
+  const selectCol = document.createElement("div");
+  selectCol.className = "col-sm-5";
+
+  const presetSelect = document.createElement("select");
+  presetSelect.id = "presetSelect";
+  presetSelect.className = "custom-select";
+  presetSelect.value = predefinedPresetsName;
+
+  Object.keys(predefinedPresets).forEach(presetKey => {
+    const option = document.createElement("option");
+    option.value = presetKey;
+    option.textContent = i18next.t(`modal3DQualitySettings.${presetKey}`);
+    presetSelect.appendChild(option);
+  });
+
+  selectCol.appendChild(presetSelect);
+
+  const buttonCol = document.createElement("div");
+  buttonCol.className = "col-sm-3";
+
+  const applyBtn = document.createElement("button");
+  applyBtn.type = "button";
+  applyBtn.className = "btn btn-secondary w-100";
+  applyBtn.textContent = i18next.t("modal3DQualitySettings.loadPreset") || "Load";
+
+  applyBtn.onclick = () => {
+    const selected = presetSelect.value;
+    const selectedPreset = predefinedPresets[selected];
+
+    Object.entries(presets).forEach(([key, config]) => {
+      const field = form.querySelector(`#${key}`);
+      if (!field || !(key in selectedPreset)) return;
+
+      if (config.type === "boolean") {
+        field.checked = selectedPreset[key];
+      } else if (config.type === "choice") {
+        field.value = selectedPreset[key];
+      }
+    });
+  };
+
+  buttonCol.appendChild(applyBtn);
+
+  selectRow.appendChild(labelCol);
+  selectRow.appendChild(selectCol);
+  selectRow.appendChild(buttonCol);
+  form.appendChild(document.createElement("hr"));
+  form.appendChild(selectRow);
+  form.appendChild(document.createElement("hr"));
+
+  const fieldset = document.createElement("fieldset");
+  fieldset.className = "form-group";
+
+  Object.entries(presets).forEach(([key, config]) => {
+    const group = document.createElement("div");
+    group.className = "form-group row";
+
+    const label = document.createElement("label");
+    label.className = "col-sm-4 col-form-label";
+    label.setAttribute("for", key);
+    label.textContent = i18next.t(`modal3DQualitySettings.${key}`);
+
+    const inputCol = document.createElement("div");
+    inputCol.className = "col-sm-8";
+
+    if(config.type === "boolean") {
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "form-check-input";
+      checkbox.id = key;
+      checkbox.checked = savedPreset[key] ?? false;
+      checkbox.style.marginTop = "0.5rem";
+
+      inputCol.appendChild(checkbox);
+    } else if(config.type === "choice" && config.presets) {
+      const select = document.createElement("select");
+      select.className = "custom-select";
+      select.id = key;
+
+      Object.entries(config.presets).forEach(([presetKey]) => {
+        const option = document.createElement("option");
+        option.value = presetKey;
+        option.textContent = i18next.t(`modal3DQualitySettings.${presetKey}`);
+        select.appendChild(option);
+      });
+
+      select.value = savedPreset[key] || Object.keys(config.presets)[0];
+      inputCol.appendChild(select);
+    }
+
+    group.appendChild(label);
+    group.appendChild(inputCol);
+    fieldset.appendChild(group);
+  });
+
+  form.appendChild(fieldset);
+  container.appendChild(form);
+}
+
+function displayAdvanced3DSettingsModal() {
+  const savedPreset = customSettings.graphicCustomPreset || GameConstants.QualitySettings3DPreset["3dMedium"];
+  generateGraphicsFormFromPresets(GameConstants.QualitySettings3DIndividualPresets, GameConstants.QualitySettings3DPreset, "formSettingsAdvanced3DSettings", "3dMedium", savedPreset);
+  modal3DQualitySettingsInstance.show();
+}
+
+document.getElementById("modalCustom3DQuality").onclick = () => {
+  displayAdvanced3DSettingsModal();
+};
+
+document.getElementById("resetAIUltraModel").onclick = () => {
+  displayAdvanced3DSettingsModal();
+};
+
+document.getElementById("validateAIUltraModel").onclick = () => {
+  const form = document.getElementById("formGraphicsSettingsAdvanced");
+  const newSettings = {};
+
+  Object.entries(GameConstants.QualitySettings3DIndividualPresets).forEach(([key, config]) => {
+    const input = form.querySelector(`#${key}`);
+    if(!input) return;
+
+    if(config.type === "boolean") {
+      newSettings[key] = input.checked;
+    } else if(config.type === "choice") {
+      newSettings[key] = input.value;
+    }
+  });
+
+  customSettings.graphicCustomPreset = newSettings;
+  saveSettings();
+};
 
 // Localization
 function listTranslations(languages) {

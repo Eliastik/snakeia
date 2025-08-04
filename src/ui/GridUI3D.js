@@ -64,7 +64,7 @@ export default class GridUI3D extends GridUI {
      * - Fix Snake drawing when the Snake cross the side of the grid
      * - Draw eyes on the Snake head
      * - Optimize Snake body generation when there are multiple parts (don't update not moving parts)
-     * - Advanced quality settings
+     * - Advanced quality settings -> OK
      */
   }
 
