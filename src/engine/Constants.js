@@ -158,5 +158,143 @@ export default {
     SEARCHING_PLAYERS: "SEARCHING_PLAYERS",
     AUTHENTICATION_SUCCESS: "AUTHENTICATION_SUCCESS"
   },
+  QualitySettings3DIndividualPresets: {
+    enableShadows: {
+      type: "boolean"
+    },
+    enableAntialiasing: {
+      type: "boolean"
+    },
+    shadowResolution: {
+      type: "choice",
+      presets: {
+        disabled: 0,
+        low: 512,
+        normal: 1024,
+        medium: 2048,
+        high: 4096,
+        ultra: 8192
+      }
+    },
+    shadowType: {
+      type: "choice",
+      presets: {
+        low: "basic",
+        high: "pcfsoft"
+      }
+    },
+    materialType: {
+      type: "choice",
+      presets: {
+        low: "basic",
+        high: "pbr"
+      }
+    },
+    snakeSegments: {
+      type: "choice",
+      presets: {
+        minimum: {
+          minTubular: 2,
+          maxTubular: 128,
+          minRadius: 2,
+          maxRadius: 64,
+          maxLength: 50
+        },
+        low: {
+          minTubular: 2,
+          maxTubular: 256,
+          minRadius: 2,
+          maxRadius: 64,
+          maxLength: 50
+        },
+        normal: {
+          minTubular: 2,
+          maxTubular: 256,
+          minRadius: 2,
+          maxRadius: 64,
+          maxLength: 50
+        },
+        medium: {
+          minTubular: 2,
+          maxTubular: 256,
+          minRadius: 2,
+          maxRadius: 64,
+          maxLength: 50
+        },
+        high: {
+          minTubular: 2,
+          maxTubular: 256,
+          minRadius: 2,
+          maxRadius: 64,
+          maxLength: 50
+        },
+        ultra: {
+          minTubular: 2,
+          maxTubular: 512,
+          minRadius: 2,
+          maxRadius: 128,
+          maxLength: 75
+        },
+        extreme: {
+          minTubular: 2,
+          maxTubular: 1024,
+          minRadius: 2,
+          maxRadius: 256,
+          maxLength: 100
+        }
+      }
+    },
+    fruitLights: {
+      type: "boolean"
+    }
+  },
+  QualitySettings3DPreset: {
+    "3dMinimal": {
+      enableShadows: false,
+      enableAntialiasing: false,
+      shadowResolution: "disabled",
+      shadowType: "low",
+      materialType: "low",
+      snakeSegments: "minimum",
+      fruitLights: false
+    },
+    "3dLow": {
+      enableShadows: true,
+      enableAntialiasing: false,
+      shadowResolution: "low",
+      shadowType: "high",
+      materialType: "high",
+      snakeSegments: "low",
+      fruitLights: false
+    },
+    "3dNormal": {
+      enableShadows: true,
+      enableAntialiasing: true,
+      shadowResolution: "normal",
+      shadowType: "high",
+      materialType: "high",
+      snakeSegments: "normal",
+      fruitLights: true
+    },
+    "3dMedium": {
+      enableShadows: true,
+      enableAntialiasing: true,
+      shadowResolution: "medium",
+      shadowType: "high",
+      materialType: "high",
+      snakeSegments: "medium",
+      fruitLights: true
+    },
+    "3dHigh": {
+      enableShadows: true,
+      enableAntialiasing: true,
+      shadowResolution: "high",
+      shadowType: "high",
+      materialType: "high",
+      snakeSegments: "high",
+      fruitLights: true
+    }
+  },
+  DefaultQualitySettings3D: "3dMedium",
   DefaultAIModelsListAPI: "https://www.eliastiksofts.com/snakeia/models/"
 };

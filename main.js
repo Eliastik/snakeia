@@ -109,7 +109,7 @@ WorkersAvailable(result => {
 
 function restoreSettings() {
   customSettings = {
-    enableAnimations: true,
+    enableAnimations: isAnimationsDefaultEnabled(),
     onlineEnableClientSidePredictions: false,
     renderBlur: false,
     enableMultithreading: true,
@@ -121,7 +121,8 @@ function restoreSettings() {
     unlockAllLevels: false,
     darkMode: "auto",
     aiUltraModelId: null,
-    aiUltraModelCustomURL: null
+    aiUltraModelCustomURL: null,
+    levelsAILevel: "high"
   };
 }
 
@@ -153,7 +154,7 @@ function showSettings() {
   document.getElementById("showDebugInfo").checked = false;
   document.getElementById("textOutput").checked = false;
 
-  if(settings.enableAnimations) document.getElementById("enableAnimations").checked = true;
+  if(isAnimationsEnabled()) document.getElementById("enableAnimations").checked = true;
   if(settings.renderBlur) document.getElementById("renderBlur").checked = true;
   if(settings.enableMultithreading && workersAvailable) document.getElementById("enableMultithreading").checked = true;
   if(settings.onlineEnableClientSidePredictions) document.getElementById("onlineEnableClientSidePredictions").checked = true;
@@ -161,6 +162,7 @@ function showSettings() {
   if(settings.textOutput) document.getElementById("textOutput").checked = true;
   document.getElementById("graphicSkin").value = settings.graphicSkin;
   document.getElementById("graphicType").value = settings.graphicType;
+  document.getElementById("levelsAILevelSelect").value = settings.levelsAILevel;
 
   if(!workersAvailable) {
     document.getElementById("enableMultithreading").disabled = true;
@@ -191,6 +193,20 @@ function isDarkModeEnabled() {
   }
 
   return false;
+}
+
+function isAnimationsDefaultEnabled() {
+  return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function isAnimationsEnabled() {
+  const settings = getSettings();
+
+  if(settings && typeof settings.enableAnimations !== "undefined") {
+    return settings.enableAnimations;
+  }
+
+  return isAnimationsDefaultEnabled();
 }
 
 function checkDarkMode() {
@@ -883,6 +899,7 @@ function displayLevelList(player) {
 
   if(player == PLAYER_HUMAN) {
     document.getElementById("titleLevelList").innerHTML = i18next.t("levels.titlePlayer");
+    document.getElementById("levelsAILevel").style.display = "none";
     document.getElementById("levelListDefault").innerHTML = getListLevel(PLAYER_HUMAN, DEFAULT_LEVEL);
     document.getElementById("levelListDownloadAI").style.display = "none";
     document.getElementById("levelListDownloadPlayer").style.display = "block";
@@ -891,6 +908,7 @@ function displayLevelList(player) {
     document.getElementById("bonusList").appendChild(getListBonus(PLAYER_HUMAN));
   } else if(player == PLAYER_AI) {
     document.getElementById("titleLevelList").innerHTML = i18next.t("levels.titleAI");
+    document.getElementById("levelsAILevel").style.display = "block";
     document.getElementById("levelListDefault").innerHTML = getListLevel(PLAYER_AI, DEFAULT_LEVEL);
     document.getElementById("levelListDownloadAI").style.display = "block";
     document.getElementById("levelListDownloadPlayer").style.display = "none";
@@ -1077,6 +1095,17 @@ document.getElementById("aiLevel").onchange = function() {
   }
 };
 
+document.getElementById("levelsAILevelSelect").onchange = function() {
+  if(this.value === "ultra" && selectedMode !== BATTLE_ROYALE_ONLINE) {
+    document.getElementById("modalLevelSelectAIUltraModelButton").style.display = "block";
+  } else {
+    document.getElementById("modalLevelSelectAIUltraModelButton").style.display = "none";
+  }
+
+  customSettings.levelsAILevel = this.value;
+  saveSettings();
+};
+
 const modalSelectAIUltraModelInstance = new BSN.Modal(
   "#modalSelectAIUltraModel",
   {
@@ -1093,7 +1122,7 @@ function displayCustomURLAIUltraModel(value) {
   }
 }
 
-document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
+async function setupAIModelPopup() {
   document.getElementById("errorLoadingModelList").style.display = "none";
   document.getElementById("formSettingsAIUltraModel").style.display = "none";
   document.getElementById("loadingModelList").style.display = "block";
@@ -1151,6 +1180,14 @@ document.getElementById("modalSelectAIUltraModelButton").onclick = async () => {
     document.getElementById("loadingModelList").style.display = "none";
     document.getElementById("formSettingsAIUltraModel").style.display = "none";
   }
+}
+
+document.getElementById("modalSelectAIUltraModelButton").onclick = () => {
+  setupAIModelPopup();
+};
+
+document.getElementById("modalLevelSelectAIUltraModelButton").onclick = () => {
+  setupAIModelPopup();
 };
 
 function updateModelDetails(model, isCompatible, isDefault) {
@@ -1629,7 +1666,7 @@ function validateSettings(returnValidation) {
       }
 
       const group = new GameGroup(games);
-      group.setDisplayFPS(customSettings.showDebugInfo ? true : false);
+      group.setDebugMode(customSettings.showDebugInfo ? true : false);
       group.start();
 
       if(group.games[0].canvas != undefined) {
@@ -2022,7 +2059,31 @@ window.playLevel = (level, player, type) => {
     }
 
     if(player == PLAYER_AI) {
-      playerSnake = new Snake(RIGHT, 3, grid, player, AI_LEVEL_HIGH);
+      const settings = getSettings();
+      let aiLevel = AI_LEVEL_HIGH;
+
+      switch(settings.levelsAILevel) {
+      case "random":
+        aiLevel = AI_LEVEL_RANDOM;
+        break;
+      case "low":
+        aiLevel = AI_LEVEL_LOW;
+        break;
+      case "normal":
+        aiLevel = AI_LEVEL_DEFAULT;
+        break;
+      case "high":
+        aiLevel = AI_LEVEL_HIGH;
+        break;
+      case "ultra":
+        aiLevel = AI_LEVEL_ULTRA;
+        break;
+      default:
+        aiLevel = AI_LEVEL_DEFAULT;
+        break;
+      }
+
+      playerSnake = new Snake(RIGHT, 3, grid, player, aiLevel);
     } else if(player == PLAYER_HUMAN) {
       if(bonus == "BONUS_AI_ASSISTANT" && !generateMaze) {
         playerSnake = new Snake(RIGHT, 3, grid, GameConstants.PlayerType.HYBRID_HUMAN_AI);
@@ -2085,7 +2146,7 @@ window.playLevel = (level, player, type) => {
     document.getElementById("titleGame").innerHTML = i18next.t("levels.level") + " " + level;
 
     const group = new GameGroup(games);
-    group.setDisplayFPS(customSettings.showDebugInfo ? true : false);
+    group.setDebugMode(customSettings.showDebugInfo ? true : false);
     group.start();
     group.closeRanking();
 

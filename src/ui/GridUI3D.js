@@ -25,20 +25,9 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import chroma from "chroma-js";
 
-const defaultQualitySettings = {
-  enableShadows: true,
-  enableAntialiasing: true,
-  shadowResolution: 4096,
-  minSnakeTubularSegments: 2,
-  maxSnakeTubularSegments: 512,
-  minSnakeRadiusSegments: 2,
-  maxSnakeRadiusSegments: 128,
-  maxSnakeLengthForMaxDetail: 50
-};
-
 export default class GridUI3D extends GridUI {
-  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, graphicType) {
-    super(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer);
+  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, graphicType, customGraphicsPreset, debugMode) {
+    super(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, debugMode);
 
     this.snakesMeshes = [];
 
@@ -60,48 +49,45 @@ export default class GridUI3D extends GridUI {
       100: { fov: 55, distance: 120, zoom: 1 }
     };
 
-    this.qualitySettings = {
-      ...defaultQualitySettings,
-      ...this.getQualityPresetSettings(graphicType)
-    };
+    this.qualitySettings = graphicType !== "3dCustom" ? 
+      this.getQualityPresetSettings(graphicType) :
+      customGraphicsPreset;
 
     this.initThreeJS();
 
     this.is3DRendering = true;
+
+    /**
+     * TODO :
+     * - Rotation animation (tail/head)
+     * - Fix animations when the Snake cross the side of the grid
+     * - Fix Snake drawing when the Snake cross the side of the grid
+     * - Draw eyes on the Snake head
+     * - Optimize Snake body generation when there are multiple parts (don't update not moving parts)
+     * - Advanced quality settings
+     */
+  }
+
+  resolveQualitySettings(presetName) {
+    const preset = GameConstants.QualitySettings3DPreset[presetName];
+    const resolved = {};
+
+    for(const key in GameConstants.QualitySettings3DIndividualPresets) {
+      const def = GameConstants.QualitySettings3DIndividualPresets[key];
+      const value = preset[key];
+
+      if(def.type === "choice" && typeof value === "string") {
+        resolved[key] = def.presets[value];
+      } else {
+        resolved[key] = value;
+      }
+    }
+
+    return resolved;
   }
 
   getQualityPresetSettings(graphicType) {
-    switch(graphicType) {
-    case "3dMinimal":
-      return {
-        enableShadows: false,
-        enableAntialiasing: false
-      };
-    case "3dLow":
-      return {
-        enableShadows: true,
-        enableAntialiasing: false,
-        shadowResolution: 512
-      };
-    case "3dNormal":
-      return {
-        enableShadows: true,
-        enableAntialiasing: true,
-        shadowResolution: 1024
-      };
-    case "3dMedium":
-      return {
-        enableShadows: true,
-        enableAntialiasing: true,
-        shadowResolution: 2048
-      };
-    case "3dHigh":
-      return {
-        enableShadows: true,
-        enableAntialiasing: true,
-        shadowResolution: 4096
-      };
-    }
+    return this.resolveQualitySettings(graphicType);
   }
 
   initThreeJS() {
@@ -117,7 +103,7 @@ export default class GridUI3D extends GridUI {
     this.renderer = new THREE.WebGLRenderer({ antialias: this.qualitySettings.enableAntialiasing, alpha: true });
 
     this.renderer.shadowMap.enabled = this.qualitySettings.enableShadows;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = this.qualitySettings.shadowType === "pcfsoft" ? THREE.PCFSoftShadowMap : THREE.BasicShadowMap;
 
     this.gridGroup = new THREE.Group();
     this.snakesGroup = new THREE.Group();
@@ -126,7 +112,7 @@ export default class GridUI3D extends GridUI {
   }
 
   setupControls(canvas) {
-    if(!this.areControlsInit) {
+    if(!this.areControlsInit && this.debugMode) {
       this.controls = new OrbitControls(this.camera, canvas);
       this.controls.enableDamping = true;
       this.controls.dampingFactor = 0.1;
@@ -187,7 +173,7 @@ export default class GridUI3D extends GridUI {
 
     Utils.drawImageData(ctx, this.renderer.domElement, offsetX, offsetY, totalWidth, totalHeight, 0, 0, totalWidth, totalHeight);
 
-    if (this.snakes.length > 1) {
+    if(this.snakes.length > 1) {
       this.drawSnakeInfos(ctx, offsetX, offsetY, caseSize, this.currentPlayer);
     }
   }
@@ -243,6 +229,13 @@ export default class GridUI3D extends GridUI {
       this.isCameraInit = true;
     }
 
+    if(!this.isCameraDebugInit && this.debugMode) {
+      this.cameraHelper = new THREE.CameraHelper(this.camera);
+      this.scene.add(this.cameraHelper);
+
+      this.isCameraDebugInit = true;
+    }
+
     this.renderer.setSize(this.width, this.height);
 
     if(this.controls) {
@@ -256,37 +249,49 @@ export default class GridUI3D extends GridUI {
       const halfGrid = gridSize / 2;
       const padding = 2;
 
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+      this.ambientLight = new THREE.AmbientLight(0xffffff, 1);
 
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-      dirLight.position.set(-halfGrid * 0.5, halfGrid * 0.5, halfGrid * 2);
-      dirLight.target.position.set(0, 0, 0);
+      this.dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
 
-      dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = this.qualitySettings.shadowResolution;
-      dirLight.shadow.mapSize.height = this.qualitySettings.shadowResolution;
+      this.dirLight.position.set(-halfGrid * 0.5, halfGrid * 0.5, halfGrid * 2);
+      this.dirLight.target.position.set(0, 0, 0);
 
-      dirLight.shadow.camera.near = 1;
-      dirLight.shadow.camera.far = 100;
+      this.dirLight.castShadow = true;
+      this.dirLight.shadow.mapSize.width = this.qualitySettings.shadowResolution;
+      this.dirLight.shadow.mapSize.height = this.qualitySettings.shadowResolution;
 
-      dirLight.shadow.camera.left = -halfGrid - padding;
-      dirLight.shadow.camera.right = halfGrid + padding;
-      dirLight.shadow.camera.top = halfGrid + padding;
-      dirLight.shadow.camera.bottom = -halfGrid - padding;
+      this.dirLight.shadow.camera.near = 1;
+      this.dirLight.shadow.camera.far = 100;
 
-      dirLight.shadow.camera.near = 0.1;
-      dirLight.shadow.camera.far = halfGrid * 4;
+      this.dirLight.shadow.camera.left = -halfGrid - padding;
+      this.dirLight.shadow.camera.right = halfGrid + padding;
+      this.dirLight.shadow.camera.top = halfGrid + padding;
+      this.dirLight.shadow.camera.bottom = -halfGrid - padding;
 
-      this.scene.add(ambientLight);
-      this.scene.add(dirLight);
+      this.dirLight.shadow.camera.near = 0.1;
+      this.dirLight.shadow.camera.far = halfGrid * 4;
+
+      this.scene.add(this.ambientLight, this.dirLight);
 
       this.isLightInit = true;
     }
+
+    if(!this.isLightDebugInit && this.debugMode) {
+      this.lightHelper = new THREE.DirectionalLightHelper(this.dirLight);
+      this.scene.add(this.lightHelper);
+
+      this.isLightDebugInit = true;
+    }
+  }
+
+  clearGrid() {
+    this.disposeGroup(this.gridGroup);
+    this.gridGroup.clear();
   }
   
   setupGrid() {
     if(this.forceRedraw || this.gridStateChanged) {
-      this.gridGroup.clear();
+      this.clearGrid();
 
       const totalCells = this.grid.width * this.grid.height;
       const halfCells = Math.floor(totalCells / 2);
@@ -323,7 +328,11 @@ export default class GridUI3D extends GridUI {
 
           if(caseType === GameConstants.CaseType.FRUIT || caseType === GameConstants.CaseType.FRUIT_GOLD) {
             const { fruitModel, pointLight } = this.constructFruit(xPosition, yPosition, caseType);
-            this.gridGroup.add(fruitModel, pointLight);
+            this.gridGroup.add(fruitModel);
+
+            if(pointLight) {
+              this.gridGroup.add(pointLight);
+            }
           }
 
           if(!Object.values(GameConstants.CaseType).includes(caseType)) {
@@ -357,8 +366,11 @@ export default class GridUI3D extends GridUI {
   constructGround() {
     const ground = new THREE.Mesh(
       new THREE.BoxGeometry(this.grid.width, this.grid.height, 2),
-      new THREE.MeshStandardMaterial({ color: 0x95a5a6 })
+      this.qualitySettings.materialType === "pbr" ?
+        new THREE.MeshStandardMaterial({ color: 0x95a5a6 }) :
+        new THREE.MeshPhongMaterial({ color: 0x95a5a6 })
     );
+
     ground.receiveShadow = false;
     ground.position.set(0, 0, -1);
     return ground;
@@ -386,7 +398,9 @@ export default class GridUI3D extends GridUI {
     wallTexture.colorSpace = THREE.SRGBColorSpace;
 
     const wallGeometry = new THREE.BoxGeometry(1, 1, 1.5);
-    const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture, toneMapped: false });
+    const wallMaterial = this.qualitySettings.materialType === "pbr" ?
+      new THREE.MeshStandardMaterial({ map: wallTexture, toneMapped: false }) :
+      new THREE.MeshPhongMaterial({ map: wallTexture, toneMapped: false });
     const wallInstancedMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.countWalls());
     wallInstancedMesh.receiveShadow = true;
     wallInstancedMesh.castShadow = true;
@@ -395,7 +409,9 @@ export default class GridUI3D extends GridUI {
 
   constructLightGrayCell(totalCells, halfCells) {
     const lightGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
-    const lightGrayCellMaterial = new THREE.MeshStandardMaterial({ color: 0x95a5a6 });
+    const lightGrayCellMaterial = this.qualitySettings.materialType === "pbr" ?
+      new THREE.MeshStandardMaterial({ color: 0x95a5a6 }) :
+      new THREE.MeshPhongMaterial({ color: 0x95a5a6 });
     const lightGrayCellInstancedMesh = new THREE.InstancedMesh(lightGrayCellGeometry, lightGrayCellMaterial, totalCells % 2 === 0 ? halfCells : halfCells + 1);
     lightGrayCellInstancedMesh.receiveShadow = true;
     lightGrayCellInstancedMesh.castShadow = false;
@@ -404,7 +420,9 @@ export default class GridUI3D extends GridUI {
 
   constructDarkGrayCell(halfCells) {
     const darkGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
-    const darkGrayCellMaterial = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
+    const darkGrayCellMaterial = this.qualitySettings.materialType === "pbr" ?
+      new THREE.MeshStandardMaterial({ color: 0x2c3e50 }) :
+      new THREE.MeshPhongMaterial({ color: 0x2c3e50 });
     const darkGrayCellInstancedMesh = new THREE.InstancedMesh(darkGrayCellGeometry, darkGrayCellMaterial, halfCells);
     darkGrayCellInstancedMesh.receiveShadow = true;
     darkGrayCellInstancedMesh.castShadow = false;
@@ -414,12 +432,15 @@ export default class GridUI3D extends GridUI {
   constructFruit(xPosition, yPosition, caseType) {
     const fruitModel = this.modelLoader.get("fruit");
 
-    if (fruitModel) {
+    if(fruitModel) {
       const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
       const fruitColor = isGoldFruit ? 0xFFD700 : 0xff1100;
 
-      const pointLight = new THREE.PointLight(fruitColor, 0.8, 2);
-      pointLight.position.set(xPosition, yPosition, 0.5);
+      const pointLight = this.qualitySettings.fruitLights ? new THREE.PointLight(fruitColor, 0.8, 2) : null;
+
+      if(pointLight) {
+        pointLight.position.set(xPosition, yPosition, 0.5);
+      }
 
       const box = new THREE.Box3().setFromObject(fruitModel);
 
@@ -723,7 +744,9 @@ export default class GridUI3D extends GridUI {
     const snakeColor = new THREE.Color(r / 255, g / 255, b / 255);
     snakeColor.convertSRGBToLinear();
 
-    return new THREE.MeshStandardMaterial({ color: snakeColor });
+    return this.qualitySettings.materialType === "pbr" ?
+      new THREE.MeshStandardMaterial({ color: snakeColor }) :
+      new THREE.MeshPhongMaterial({ color: snakeColor });
   }
 
   getSnakeBodyGeometry(snake, points) {
@@ -735,10 +758,10 @@ export default class GridUI3D extends GridUI {
   }
 
   calculateSnakeGeometryQuality(snake) {
-    const normalizedLength = Math.min(snake.length() / this.qualitySettings.maxSnakeLengthForMaxDetail, 1);
+    const normalizedLength = Math.min(snake.length() / this.qualitySettings.snakeSegments.maxLength, 1);
 
-    const tubularSegments = Math.floor(this.qualitySettings.minSnakeTubularSegments + normalizedLength * (this.qualitySettings.maxSnakeTubularSegments - this.qualitySettings.minSnakeTubularSegments));
-    const radiusSegments = Math.floor(this.qualitySettings.minSnakeRadiusSegments + normalizedLength * (this.qualitySettings.maxSnakeRadiusSegments - this.qualitySettings.minSnakeRadiusSegments));
+    const tubularSegments = Math.floor(this.qualitySettings.snakeSegments.minTubular + normalizedLength * (this.qualitySettings.snakeSegments.maxTubular - this.qualitySettings.snakeSegments.minTubular));
+    const radiusSegments = Math.floor(this.qualitySettings.snakeSegments.minRadius + normalizedLength * (this.qualitySettings.snakeSegments.maxRadius - this.qualitySettings.snakeSegments.minRadius));
 
     return { tubularSegments, radiusSegments };
   }
@@ -800,10 +823,10 @@ export default class GridUI3D extends GridUI {
 
   cleanAfterGameExit() {
     if(this.scene) {
-      this.scene.remove(this.gridGroup, this.snakesGroup);
-
       this.disposeGroup(this.gridGroup);
       this.disposeGroup(this.snakesGroup);
+
+      this.scene.remove(this.gridGroup, this.snakesGroup);
 
       this.gridGroup?.clear();
       this.snakesGroup?.clear();
@@ -811,16 +834,33 @@ export default class GridUI3D extends GridUI {
 
     this.snakesMeshes = [];
 
+    this.ambientLight?.dispose();
+    this.ambientLight?.clear();
+    this.ambientLight = null;
+
+    this.lightHelper?.dispose();
+    this.lightHelper?.clear();
+    this.lightHelper = null;
+
+    this.dirLight?.dispose();
+    this.dirLight?.clear();
+    this.dirLight = null;
+
+    this.cameraHelper?.dispose();
+    this.cameraHelper?.clear();
+    this.cameraHelper = null;
+
+    this.camera?.clear();
+    this.camera = null;
+
     this.controls?.dispose();
     this.controls = null;
-
-    this.renderer?.dispose();
-    this.renderer = null;
 
     this.scene?.clear();
     this.scene = null;
 
-    this.camera = null;
+    this.renderer?.dispose();
+    this.renderer = null;
   }
 
   set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {

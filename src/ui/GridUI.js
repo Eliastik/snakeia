@@ -23,7 +23,7 @@ import i18next from "i18next";
 import Position from "../engine/Position";
 
 export default class GridUI extends Component {
-  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer) {
+  constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, debugMode) {
     super();
 
     this.snakes = snakes;
@@ -49,6 +49,8 @@ export default class GridUI extends Component {
 
     this.baseSnakeColor = "#a0c432";
     this.is3DRendering = false;
+
+    this.setDebugMode(debugMode);
   }
 
   draw(context) {
@@ -605,6 +607,10 @@ export default class GridUI extends Component {
   cleanAfterGameExit() {
     this.canvasSnakes = null;
     this.canvasGrid = null;
+  }
+
+  setDebugMode(debugMode) {
+    this.debugMode = debugMode;
   }
 
   set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {

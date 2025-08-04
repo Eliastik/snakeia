@@ -29,7 +29,7 @@ import Header from "./Header";
 Constants.Setting.FONT_FAMILY = "DELIUS";
 
 export default class GameUI {
-  constructor(controller, appendTo, canvasWidth, canvasHeight, displayFPS, outputType, settings) {
+  constructor(controller, appendTo, canvasWidth, canvasHeight, debugMode, outputType, settings) {
     // Assets loader
     this.imageLoader;
     this.modelLoader;
@@ -37,7 +37,7 @@ export default class GameUI {
     // Game settings
     this.controller = controller;
     this.appendTo = appendTo;
-    this.displayFPS = displayFPS == undefined ? false : displayFPS;
+    this.debugMode = debugMode == undefined ? false : debugMode;
     this.outputType = outputType == undefined ? GameConstants.OutputType.GRAPHICAL : outputType;
     this.outputType = settings && settings.textOutput ? GameConstants.OutputType.TEXT : this.outputType;
     this.disableAnimation = settings && !settings.enableAnimations;
@@ -148,10 +148,10 @@ export default class GameUI {
 
   constructGridUI(settings) {
     if(settings.graphicType && settings.graphicType !== "2d") {
-      return new GridUI3D(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, settings.graphicType);
+      return new GridUI3D(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, settings.graphicType, null, this.debugMode);
     } 
     
-    return new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer);
+    return new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, this.debugMode);
   }
 
   init() {
@@ -441,33 +441,87 @@ export default class GameUI {
     }
   }
 
-  loadAssets() {
-    if(!this.errorOccurred && !this.loadingResourcesErrorOccurred && this.outputType != GameConstants.OutputType.TEXT) {
-      // Load images/textures
-      this.imageLoader.load(["assets/images/skin/" + this.graphicSkin + "/snake_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_2.png", "assets/images/skin/" + this.graphicSkin + "/snake.png", "assets/images/skin/" + this.graphicSkin + "/body_4_end.png", "assets/images/skin/" + this.graphicSkin + "/body_3_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2_end.png", "assets/images/skin/" + this.graphicSkin + "/body_end.png", "assets/images/skin/" + this.graphicSkin + "/body_2.png", "assets/images/skin/" + this.graphicSkin + "/body.png", "assets/images/skin/" + this.graphicSkin + "/wall.png", "assets/images/skin/" + this.graphicSkin + "/fruit.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_1.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_2.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_3.png", "assets/images/skin/" + this.graphicSkin + "/body_angle_4.png", "assets/images/pause.png", "assets/images/fullscreen.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_4.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_3.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead_2.png", "assets/images/skin/" + this.graphicSkin + "/snake_dead.png", "assets/images/up.png", "assets/images/left.png", "assets/images/right.png", "assets/images/bottom.png", "assets/images/trophy.png", "assets/images/trophy_silver.png", "assets/images/trophy_bronze.png", "assets/images/clock.png", "assets/images/skin/" + this.graphicSkin + "/fruit_gold.png", "assets/images/ranking.png", "assets/images/skin/flat/fruit.png", "assets/images/skin/" + this.graphicSkin + "/unknown.png"], async () => {
-        // Load 3D models
-        if(this.gridUI.is3DRendering) {
-          await this.modelLoader.preloadAll({ fruit: "assets/models/fruit.glb", unknown: "assets/models/unknown.glb" });
-        }
+  async loadAssets() {
+    if(this.errorOccurred || this.loadingResourcesErrorOccurred) return;
 
-        if(this.imageLoader.hasError || this.modelLoader.hasError) {
-          this.loadingResourcesErrorOccurred = true;
-        } else {
-          this.assetsLoaded = true;
-          this.btnFullScreen.loadImage(this.imageLoader);
-          this.btnPause.loadImage(this.imageLoader);
-          this.btnRank.loadImage(this.imageLoader);
-          this.btnTopArrow.loadImage(this.imageLoader);
-          this.btnBottomArrow.loadImage(this.imageLoader);
-          this.btnLeftArrow.loadImage(this.imageLoader);
-          this.btnRightArrow.loadImage(this.imageLoader);
-          this.start();
-        }
-      }, this);
-    } else if(!this.errorOccurred && !this.loadingResourcesErrorOccurred && this.outputType == GameConstants.OutputType.TEXT) {
+    if(this.outputType === GameConstants.OutputType.TEXT) {
       this.assetsLoaded = true;
       this.start();
+      return;
     }
+
+    const imageToLoad = [
+      `assets/images/skin/${this.graphicSkin}/snake_4.png`,
+      `assets/images/skin/${this.graphicSkin}/snake_3.png`,
+      `assets/images/skin/${this.graphicSkin}/snake_2.png`,
+      `assets/images/skin/${this.graphicSkin}/snake.png`,
+      `assets/images/skin/${this.graphicSkin}/body_4_end.png`,
+      `assets/images/skin/${this.graphicSkin}/body_3_end.png`,
+      `assets/images/skin/${this.graphicSkin}/body_2_end.png`,
+      `assets/images/skin/${this.graphicSkin}/body_end.png`,
+      `assets/images/skin/${this.graphicSkin}/body_2.png`,
+      `assets/images/skin/${this.graphicSkin}/body.png`,
+      `assets/images/skin/${this.graphicSkin}/wall.png`,
+      `assets/images/skin/${this.graphicSkin}/fruit.png`,
+      `assets/images/skin/${this.graphicSkin}/body_angle_1.png`,
+      `assets/images/skin/${this.graphicSkin}/body_angle_2.png`,
+      `assets/images/skin/${this.graphicSkin}/body_angle_3.png`,
+      `assets/images/skin/${this.graphicSkin}/body_angle_4.png`,
+      "assets/images/pause.png",
+      "assets/images/fullscreen.png",
+      `assets/images/skin/${this.graphicSkin}/snake_dead_4.png`,
+      `assets/images/skin/${this.graphicSkin}/snake_dead_3.png`,
+      `assets/images/skin/${this.graphicSkin}/snake_dead_2.png`,
+      `assets/images/skin/${this.graphicSkin}/snake_dead.png`,
+      "assets/images/up.png",
+      "assets/images/left.png",
+      "assets/images/right.png",
+      "assets/images/bottom.png",
+      "assets/images/trophy.png",
+      "assets/images/trophy_silver.png",
+      "assets/images/trophy_bronze.png",
+      "assets/images/clock.png",
+      `assets/images/skin/${this.graphicSkin}/fruit_gold.png`,
+      "assets/images/ranking.png",
+      "assets/images/skin/flat/fruit.png",
+      `assets/images/skin/${this.graphicSkin}/unknown.png`,
+    ];
+
+    try {
+      await Promise.all([
+        this.promisifiedImageLoad(imageToLoad),
+        this.gridUI.is3DRendering
+          ? this.modelLoader.preloadAll({
+            fruit: "assets/models/fruit.glb",
+            unknown: "assets/models/unknown.glb",
+          })
+          : Promise.resolve()
+      ]);
+
+      if(this.imageLoader.hasError || this.modelLoader.hasError) {
+        this.loadingResourcesErrorOccurred = true;
+        return;
+      }
+
+      this.assetsLoaded = true;
+      this.btnFullScreen.loadImage(this.imageLoader);
+      this.btnPause.loadImage(this.imageLoader);
+      this.btnRank.loadImage(this.imageLoader);
+      this.btnTopArrow.loadImage(this.imageLoader);
+      this.btnBottomArrow.loadImage(this.imageLoader);
+      this.btnLeftArrow.loadImage(this.imageLoader);
+      this.btnRightArrow.loadImage(this.imageLoader);
+      this.start();
+    } catch (err) {
+      console.error("Error while loading assets:", err);
+      this.loadingResourcesErrorOccurred = true;
+    }
+  }
+
+  promisifiedImageLoad(images) {
+    return new Promise((resolve) => {
+      this.imageLoader.load(images, () => resolve(), this);
+    });
   }
 
   startDraw() {
@@ -859,13 +913,15 @@ export default class GameUI {
         this.notificationMessage.draw(this.canvasCtx);
       }
 
-      if(this.displayFPS) {
+      if(this.debugMode) {
         Utils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.85)", Math.round(this.fontSize / 1.5), GameConstants.Setting.FONT_FAMILY, "right", "bottom", null, null, true);
       }
 
       if(this.spectatorMode) {
         Utils.drawText(ctx, i18next.t("engine.servers.spectatorMode"), "rgba(255, 255, 255, 0.5)", Math.round(this.fontSize), GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
       }
+
+      this.gridUI.debugMode = this.debugMode;
     }
   }
 
@@ -876,7 +932,12 @@ export default class GameUI {
   }
 
   setDisplayFPS(display) {
-    this.displayFPS = display;
+    console.warn("setDisplayFPS is deprecated. Please use setDebugMode with true to display FPS");
+    this.setDebugMode(display);
+  }
+
+  setDebugMode(display) {
+    this.debugMode = display;
   }
 
   disableAllButtons() {
@@ -938,6 +999,6 @@ export default class GameUI {
   }
 
   toString() {
-    return (this.grid != null ? this.grid.toString() : "") + "\n" + (this.snakes != null && this.snakes.length <= 1 ? i18next.t("engine.score") + " : " + (this.snakes != null ? this.snakes[0].score : "") : "") + (this.displayFPS ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
+    return (this.grid != null ? this.grid.toString() : "") + "\n" + (this.snakes != null && this.snakes.length <= 1 ? i18next.t("engine.score") + " : " + (this.snakes != null ? this.snakes[0].score : "") : "") + (this.debugMode ? "\n" + this.getDebugText() : "") + (this.gameOver && !this.scoreMax ? "\n" + i18next.t("engine.gameOver") : "") + (this.scoreMax ? "\n" + i18next.t("engine.scoreMax") : "") + (!this.gameOver && this.paused ? "\n" + i18next.t("engine.debug.paused") : "") + (this.countBeforePlay > 0 ? "\n" + this.countBeforePlay : "");
   }
 }

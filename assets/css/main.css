@@ -92,7 +92,7 @@ body {
   margin: auto;
 }
 
-#levelListDefault, #levelListDownload, #levelDownload, #localstorageDisabled, #authenticationServer, #parameters, #levelBonusShop {
+#levelListDefault, #levelListDownload, #levelDownload, #localstorageDisabled, #authenticationServer, #parameters, #levelBonusShop, #levelsAILevel {
   width: 100%;
   max-width: 450px;
   margin: auto;
@@ -159,6 +159,10 @@ textarea {
 }
 
 label[for="darkModeCheckbox"] {
-  font-size: 18px;
-  line-height: 1.35;
+  font-size: 12pt;
+  line-height: 1.5;
+}
+
+label.labelSettingsHome {
+  font-size: 12pt;
 }

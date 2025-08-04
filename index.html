@@ -96,48 +96,16 @@
             </div>
           </div>
         </div>
-        <p class="m-0"><small><span data-i18n="menu.version">Version</span> <span id="versionTxt"></span> (<span id="dateTxt"></span>) – <span data-i18n="menu.by">Par</span> <a href="http://www.eliastiksofts.com" target="_blank">Eliastik</a></small></p>
-        <p class="m-0"><small><a href="http://www.eliastiksofts.com/snakeia" target="_blank" data-i18n="menu.infos">Plus d'infos</a> – <a href="README.md" target="_blank" data-i18n="menu.readme">Fichier Lisez-moi</a> – <a href="http://www.eliastiksofts.com/snakeia/downloads" target="_blank" data-i18n="menu.source">Télécharger la source</a></small></p>
         <div class="language">
           <hr />
           <div class="mb-1 row">
-            <label for="languageSelect" class="col-sm-4 col-form-label" data-i18n="menu.language">Langue :</label>
+            <label for="languageSelect" class="col-sm-4 col-form-label labelSettingsHome" data-i18n="menu.language">Langue :</label>
             <div class="col-sm-8">
-              <select id="languageSelect" class="form-control" rows="10" disabled></select>
+              <select id="languageSelect" class="custom-select" rows="10" disabled></select>
             </div>
           </div>
           <div class="mb-1 row">
-            <div class="col">
-              <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" id="darkModeCheckbox">
-                <label class="custom-control-label" for="darkModeCheckbox" class="col-sm-4 col-form-label" data-i18n="menu.darkMode">Mode sombre</label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="parameters">
-        <img src="assets/images/logo/logo.png" width="325px" alt="Logo" class="logoLight" style="display: none;" />
-        <img src="assets/images/logo/logo-dark.png" width="325px" alt="Logo" class="logoDark" />
-        <h1 class="h3 mb-3 font-weight-normal" data-i18n="menu.othersSettings">Paramètres</h1>
-        <div class="mt-2">
-          <div class="form-group row">
-            <label for="graphicType" class="col-sm-4 col-form-label" data-i18n="menu.graphicType">Type de graphismes :</label>
-            <div class="col-sm-8">
-              <select class="custom-select" id="graphicType">
-                <option value="2d" data-i18n="menu.2d" selected>2D</option>
-                <option value="3dMinimal" data-i18n="menu.3dMinimal">3D - Qualité minimale</option>
-                <option value="3dLow" data-i18n="menu.3dLow">3D - Qualité faible</option>
-                <option value="3dNormal" data-i18n="menu.3dNormal">3D - Qualité normale</option>
-                <option value="3dMedium" data-i18n="menu.3dMedium">3D - Qualité moyenne</option>
-                <option value="3dHigh" data-i18n="menu.3dHigh">3D - Qualité élevée</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="mt-2">
-          <div class="form-group row">
-            <label for="graphicSkin" class="col-sm-4 col-form-label" data-i18n="menu.graphicSkin">Skin graphique :</label>
+            <label for="graphicSkin" class="col-sm-4 col-form-label labelSettingsHome" data-i18n="menu.graphicSkin">Skin graphique :</label>
             <div class="col-sm-8">
               <select class="custom-select" id="graphicSkin">
                 <option value="flat" data-i18n="menu.flat" selected>Flat (par défaut)</option>
@@ -146,6 +114,38 @@
               </select>
             </div>
           </div>
+          <div class="mb-1 row">
+            <label for="graphicType" class="col-sm-4 col-form-label labelSettingsHome" data-i18n="menu.graphicType">Type de graphismes :</label>
+            <div class="col-sm-8">
+              <select class="custom-select" id="graphicType">
+                <option value="2d" data-i18n="menu.2d" selected>2D</option>
+                <option value="3dMinimal" data-i18n="menu.3dMinimal">3D - Qualité minimale</option>
+                <option value="3dLow" data-i18n="menu.3dLow">3D - Qualité faible</option>
+                <option value="3dNormal" data-i18n="menu.3dNormal">3D - Qualité normale</option>
+                <option value="3dMedium" data-i18n="menu.3dMedium">3D - Qualité moyenne</option>
+                <option value="3dHigh" data-i18n="menu.3dHigh">3D - Qualité élevée</option>
+                <option value="3dHigh" data-i18n="menu.3dCustom">3D - Qualité personnalisée</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="darkModeCheckbox">
+                <label class="custom-control-label" for="darkModeCheckbox" class="col-sm-4 col-form-label" data-i18n="menu.darkMode">Mode sombre</label>
+              </div>
+            </div>
+          </div>
+          <hr />
+        </div>
+        <p class="m-0"><small><span data-i18n="menu.version">Version</span> <span id="versionTxt"></span> (<span id="dateTxt"></span>) – <span data-i18n="menu.by">Par</span> <a href="http://www.eliastiksofts.com" target="_blank">Eliastik</a></small></p>
+        <p class="m-0"><small><a href="http://www.eliastiksofts.com/snakeia" target="_blank" data-i18n="menu.infos">Plus d'infos</a> – <a href="README.md" target="_blank" data-i18n="menu.readme">Fichier Lisez-moi</a> – <a href="http://www.eliastiksofts.com/snakeia/downloads" target="_blank" data-i18n="menu.source">Télécharger la source</a></small></p>
+      </div>
+      <div id="parameters">
+        <img src="assets/images/logo/logo.png" width="325px" alt="Logo" class="logoLight" style="display: none;" />
+        <img src="assets/images/logo/logo-dark.png" width="325px" alt="Logo" class="logoDark" />
+        <h1 class="h3 mb-3 font-weight-normal" data-i18n="menu.othersSettings">Paramètres</h1>
+        <div class="mt-2">
           <div class="form-group row">
             <div class="col justify-content-center">
               <div class="custom-control custom-checkbox">
@@ -523,6 +523,29 @@
         <img src="assets/images/logo/logo.png" width="325px" alt="Logo" class="logoLight" style="display: none;" />
         <img src="assets/images/logo/logo-dark.png" width="325px" alt="Logo" class="logoDark" />
         <h1 class="h3 font-weight-normal" id="titleLevelList"></h1>
+        <div id="levelsAILevel">
+          <hr />
+          <div class="form-group row">
+            <label for="levelsAILevelSelect" class="col-sm-4 col-form-label" data-i18n="settings.aiLevel">Niveau de l'IA :</label>
+            <div class="col-sm-8">
+              <div class="col d-flex p-0">
+                <select class="custom-select" id="levelsAILevelSelect">
+                  <option value="random" data-i18n="settings.aiLevelSelect.random">Au hasard</option>
+                  <option value="low" data-i18n="settings.aiLevelSelect.low">Faible</option>
+                  <option value="normal" data-i18n="settings.aiLevelSelect.normal" selected>Normal</option>
+                  <option value="high" data-i18n="settings.aiLevelSelect.high">Élevé</option>
+                  <option value="ultra" data-i18n="settings.aiLevelSelect.ultra">Ultra</option>
+                </select>
+                <button class="btn btn-sm btn-primary ml-2" type="button" id="modalLevelSelectAIUltraModelButton" style="display: none;"><span class="fui-gear"></span></button>
+                <button class="btn btn-sm btn-secondary ml-2" type="button" data-toggle="modal" data-target="#modalAIInformations"><span class="fui-question-circle"></span></button>
+                <div class="invalid-feedback" id="levelInvalidaiLevel" data-i18n="settings.invalidaiLevel">
+                  Cette valeur est invalide
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr />
+        </div>
         <h1 class="h5 mb-3 mt-3 font-weight-normal" data-i18n="levels.default">Niveaux par défaut</h1>
         <div class="alert alert-danger mb-3 medium" id="localstorageDisabled">
           <span class="fui-cross-circle mr-2"></span> <span data-i18n="levels.localstorageDisabled">Les cookies sont désactivés sur votre navigateur. Vous perdrez votre progression au prochain rechargement de la page. Activez-les puis rechargez la page pour éviter cela.</span>

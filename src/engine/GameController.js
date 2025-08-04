@@ -299,6 +299,10 @@ export default class GameController {
     this.gameUI.setDisplayFPS(display);
   }
 
+  setDebugMode(display) {
+    this.gameUI.setDebugMode(display);
+  }
+
   setNotification(notification) {
     this.gameUI.setNotification(notification);
   }

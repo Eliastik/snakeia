@@ -174,8 +174,16 @@ export default class GameGroup {
   }
 
   setDisplayFPS(value) {
+    console.warn("setDisplayFPS is deprecated. Please use setDebugMode with true to display FPS");
+
     for(let i = 0; i < this.games.length; i++) {
       this.games[i].setDisplayFPS(value);
+    }
+  }
+
+  setDebugMode(value) {
+    for(let i = 0; i < this.games.length; i++) {
+      this.games[i].setDebugMode(value);
     }
   }
 

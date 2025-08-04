@@ -73,11 +73,12 @@ i18next.addResourceBundle("fr", "translation", {
     "3dNormal": "3D - Qualité normale",
     "3dMedium": "3D - Qualité moyenne",
     "3dHigh": "3D - Qualité élevée",
+    "3dCustom": "3D - Qualité personnalisée",
     "graphicSkin": "Skin graphique :",
     "flat": "Flat (par défaut)",
     "tropical": "Tropical",
     "pixel": "Pixel",
-    "maxFPS": "FPS maximum :"
+    "maxFPS": "Limite d'IPS (images par seconde) :"
   },
   "settings": {
     "title": "Paramètres de la partie :",
@@ -378,11 +379,12 @@ i18next.addResourceBundle("en", "translation", {
     "3dNormal": "3D - Normal quality",
     "3dMedium": "3D - Medium quality",
     "3dHigh": "3D - High quality",
+    "3dCustom": "3D - Custom quality",
     "graphicSkin": "Graphic skin:",
     "flat": "Flat (by default)",
     "tropical": "Tropical",
     "pixel": "Pixel",
-    "maxFPS": "Maximum FPS:"
+    "maxFPS": "FPS (frames per second) limit:"
   },
   "settings": {
     "title": "Game settings:",
