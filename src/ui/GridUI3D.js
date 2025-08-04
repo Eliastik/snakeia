@@ -56,8 +56,6 @@ export default class GridUI3D extends GridUI {
         ...this.resolveQualitySettings(customGraphicsPreset)
       };
 
-    console.log(this.qualitySettings);
-
     this.initThreeJS();
 
     this.is3DRendering = true;
@@ -377,9 +375,7 @@ export default class GridUI3D extends GridUI {
   constructGround() {
     const ground = new THREE.Mesh(
       new THREE.BoxGeometry(this.grid.width, this.grid.height, 2),
-      this.qualitySettings.materialType === "pbr" ?
-        new THREE.MeshStandardMaterial({ color: 0x95a5a6 }) :
-        new THREE.MeshPhongMaterial({ color: 0x95a5a6 })
+      this.getMaterial({ color: 0x95a5a6 })
     );
 
     ground.receiveShadow = false;
@@ -409,9 +405,7 @@ export default class GridUI3D extends GridUI {
     wallTexture.colorSpace = THREE.SRGBColorSpace;
 
     const wallGeometry = new THREE.BoxGeometry(1, 1, 1.5);
-    const wallMaterial = this.qualitySettings.materialType === "pbr" ?
-      new THREE.MeshStandardMaterial({ map: wallTexture, toneMapped: false }) :
-      new THREE.MeshPhongMaterial({ map: wallTexture, toneMapped: false });
+    const wallMaterial = this.getMaterial({ map: wallTexture, toneMapped: false });
     const wallInstancedMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.countWalls());
     wallInstancedMesh.receiveShadow = true;
     wallInstancedMesh.castShadow = true;
@@ -420,9 +414,7 @@ export default class GridUI3D extends GridUI {
 
   constructLightGrayCell(totalCells, halfCells) {
     const lightGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
-    const lightGrayCellMaterial = this.qualitySettings.materialType === "pbr" ?
-      new THREE.MeshStandardMaterial({ color: 0x95a5a6 }) :
-      new THREE.MeshPhongMaterial({ color: 0x95a5a6 });
+    const lightGrayCellMaterial = this.getMaterial({ color: 0x95a5a6 });
     const lightGrayCellInstancedMesh = new THREE.InstancedMesh(lightGrayCellGeometry, lightGrayCellMaterial, totalCells % 2 === 0 ? halfCells : halfCells + 1);
     lightGrayCellInstancedMesh.receiveShadow = true;
     lightGrayCellInstancedMesh.castShadow = false;
@@ -431,9 +423,7 @@ export default class GridUI3D extends GridUI {
 
   constructDarkGrayCell(halfCells) {
     const darkGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
-    const darkGrayCellMaterial = this.qualitySettings.materialType === "pbr" ?
-      new THREE.MeshStandardMaterial({ color: 0x2c3e50 }) :
-      new THREE.MeshPhongMaterial({ color: 0x2c3e50 });
+    const darkGrayCellMaterial = this.getMaterial({ color: 0x2c3e50 });
     const darkGrayCellInstancedMesh = new THREE.InstancedMesh(darkGrayCellGeometry, darkGrayCellMaterial, halfCells);
     darkGrayCellInstancedMesh.receiveShadow = true;
     darkGrayCellInstancedMesh.castShadow = false;
@@ -465,10 +455,17 @@ export default class GridUI3D extends GridUI {
       fruitModel.traverse(child => {
         if(child.isMesh) {
           if(isGoldFruit) {
-            child.material = new THREE.MeshStandardMaterial({
+            child.material = this.getMaterial({
               color: fruitColor,
               metalness: 0.75,
-              roughness: 0.2,
+              roughness: 0.2
+            });
+          } else {
+            child.material = this.getMaterial({
+              map: child.material.map,
+              normalMap: child.material.normalMap,
+              metalnessMap: child.material.metalnessMap,
+              roughnessMap: child.material.roughnessMap
             });
           }
 
@@ -748,6 +745,19 @@ export default class GridUI3D extends GridUI {
     return new THREE.CapsuleGeometry(0.35, 1, radiusSegments, 8);
   }
 
+  getMaterial(options) {
+    switch(this.qualitySettings.materialType) {
+    case "basic":
+      return new THREE.MeshBasicMaterial(options);
+    case "lambert":
+      return new THREE.MeshLambertMaterial(options);
+    case "phong":
+      return new THREE.MeshPhongMaterial(options);
+    default:
+      return new THREE.MeshStandardMaterial(options);
+    }
+  }
+
   getSnakeMaterial(snake) {
     const baseColor = chroma(this.baseSnakeColor);
     const rotated = baseColor.set("hsl.h", (baseColor.get("hsl.h") + snake.color) % 360);
@@ -755,9 +765,7 @@ export default class GridUI3D extends GridUI {
     const snakeColor = new THREE.Color(r / 255, g / 255, b / 255);
     snakeColor.convertSRGBToLinear();
 
-    return this.qualitySettings.materialType === "pbr" ?
-      new THREE.MeshStandardMaterial({ color: snakeColor }) :
-      new THREE.MeshPhongMaterial({ color: snakeColor });
+    return this.getMaterial({ color: snakeColor });
   }
 
   getSnakeBodyGeometry(snake, points) {

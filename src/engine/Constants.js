@@ -188,7 +188,9 @@ export default {
     materialType: {
       type: "choice",
       presets: {
-        low: "basic",
+        minimum: "basic",
+        low: "lambert",
+        medium: "phong",
         high: "pbr"
       }
     },
