@@ -49,9 +49,12 @@ export default class GridUI3D extends GridUI {
       100: { fov: 55, distance: 120, zoom: 1 }
     };
 
-    this.qualitySettings = graphicType !== "3dCustom" ? 
+    this.qualitySettings = graphicType !== "3dCustom" || !customGraphicsPreset ? 
       this.getQualityPresetSettings(graphicType) :
-      customGraphicsPreset;
+      {
+        ...this.getQualityPresetSettings(GameConstants.DefaultQualitySettings3D),
+        ...this.resolveQualitySettings(customGraphicsPreset)
+      };
 
     this.initThreeJS();
 
@@ -68,14 +71,16 @@ export default class GridUI3D extends GridUI {
      */
   }
 
-  resolveQualitySettings(presetName) {
-    const preset = GameConstants.QualitySettings3DPreset[presetName];
+  resolveQualitySettings(preset) {
+    if(!preset) return {};
     const resolved = {};
 
     for(const key in GameConstants.QualitySettings3DIndividualPresets) {
       const def = GameConstants.QualitySettings3DIndividualPresets[key];
       const value = preset[key];
 
+      if(!value) continue;
+      
       if(def.type === "choice" && typeof value === "string") {
         resolved[key] = def.presets[value];
       } else {
@@ -87,7 +92,11 @@ export default class GridUI3D extends GridUI {
   }
 
   getQualityPresetSettings(graphicType) {
-    return this.resolveQualitySettings(graphicType);
+    const preset = graphicType === "3dCustom" ?
+      GameConstants.QualitySettings3DPreset[GameConstants.DefaultQualitySettings3D] :
+      GameConstants.QualitySettings3DPreset[graphicType];
+
+    return this.resolveQualitySettings(preset);
   }
 
   initThreeJS() {

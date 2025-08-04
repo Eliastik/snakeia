@@ -116,7 +116,7 @@ function restoreSettings() {
     showDebugInfo: false,
     textOutput: false,
     graphicSkin: "flat",
-    graphicType: "3dMedium",
+    graphicType: GameConstants.DefaultQualitySettings3D,
     graphicCustomPreset: null,
     maxFPS: -1,
     unlockAllLevels: false,
@@ -2842,7 +2842,11 @@ function generateGraphicsFormFromPresets(presets, predefinedPresets, containerId
 }
 
 function displayAdvanced3DSettingsModal() {
-  const savedPreset = customSettings.graphicCustomPreset || GameConstants.QualitySettings3DPreset["3dMedium"];
+  const savedPreset = customSettings && customSettings.graphicCustomPreset ? {
+    ...GameConstants.QualitySettings3DPreset[GameConstants.DefaultQualitySettings3D],
+    ...customSettings.graphicCustomPreset,
+  } : GameConstants.QualitySettings3DPreset[GameConstants.DefaultQualitySettings3D];
+
   generateGraphicsFormFromPresets(GameConstants.QualitySettings3DIndividualPresets, GameConstants.QualitySettings3DPreset, "formSettingsAdvanced3DSettings", "3dMedium", savedPreset);
   modal3DQualitySettingsInstance.show();
 }
@@ -2851,11 +2855,11 @@ document.getElementById("modalCustom3DQuality").onclick = () => {
   displayAdvanced3DSettingsModal();
 };
 
-document.getElementById("resetAIUltraModel").onclick = () => {
+document.getElementById("resetAdvanced3DSettings").onclick = () => {
   displayAdvanced3DSettingsModal();
 };
 
-document.getElementById("validateAIUltraModel").onclick = () => {
+document.getElementById("validateAdvanced3DSettings").onclick = () => {
   const form = document.getElementById("formGraphicsSettingsAdvanced");
   const newSettings = {};
 
@@ -2872,6 +2876,8 @@ document.getElementById("validateAIUltraModel").onclick = () => {
 
   customSettings.graphicCustomPreset = newSettings;
   saveSettings();
+
+  modal3DQualitySettingsInstance.hide();
 };
 
 // Localization

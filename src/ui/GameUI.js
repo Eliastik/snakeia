@@ -148,7 +148,7 @@ export default class GameUI {
 
   constructGridUI(settings) {
     if(settings.graphicType && settings.graphicType !== "2d") {
-      return new GridUI3D(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, settings.graphicType, null, this.debugMode);
+      return new GridUI3D(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, settings.graphicType, settings.graphicCustomPreset, this.debugMode);
     } 
     
     return new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, this.debugMode);
