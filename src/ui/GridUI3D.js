@@ -177,6 +177,19 @@ export default class GridUI3D extends GridUI {
     }
   }
 
+  getMaterial(options) {
+    switch(this.qualitySettings.materialType) {
+    case "basic":
+      return new THREE.MeshBasicMaterial(options);
+    case "lambert":
+      return new THREE.MeshLambertMaterial(options);
+    case "phong":
+      return new THREE.MeshPhongMaterial(options);
+    default:
+      return new THREE.MeshStandardMaterial(options);
+    }
+  }
+
   drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize) {
     this.renderer.render(this.scene, this.camera);
 
@@ -359,6 +372,13 @@ export default class GridUI3D extends GridUI {
 
               unknownModel.traverse(child => {
                 if(child.isMesh) {
+                  child.material = this.getMaterial({
+                    map: child.material.map,
+                    normalMap: child.material.normalMap,
+                    metalnessMap: child.material.metalnessMap,
+                    roughnessMap: child.material.roughnessMap
+                  });
+
                   child.castShadow = true;
                   child.receiveShadow = true;
                 }
@@ -743,19 +763,6 @@ export default class GridUI3D extends GridUI {
   generateTailGeometry(snake) {
     const { radiusSegments } = this.calculateSnakeGeometryQuality(snake);
     return new THREE.CapsuleGeometry(0.35, 1, radiusSegments, 8);
-  }
-
-  getMaterial(options) {
-    switch(this.qualitySettings.materialType) {
-    case "basic":
-      return new THREE.MeshBasicMaterial(options);
-    case "lambert":
-      return new THREE.MeshLambertMaterial(options);
-    case "phong":
-      return new THREE.MeshPhongMaterial(options);
-    default:
-      return new THREE.MeshStandardMaterial(options);
-    }
   }
 
   getSnakeMaterial(snake) {
