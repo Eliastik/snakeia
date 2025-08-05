@@ -188,11 +188,6 @@ export default class GridUI extends Component {
   }
 
   snakeStateHasChanged() {
-    // Differential rendering is disabled with Pixel skin
-    if(this.graphicSkin === "pixel" || this.onlineMode) {
-      return true;
-    }
-
     const width = this.grid.width;
     const height = this.grid.height;
 
@@ -231,14 +226,17 @@ export default class GridUI extends Component {
       const canvasSnake = this.canvasSnakes;
       const ctxTmp = canvasSnake.getContext("2d");
 
-      if(this.forceRedraw || this.snakeStateHasChanged()) {
+      // Differential Snake rendering is enabled only when in maze mode
+      const snakeStateChanged = !this.grid.maze || this.snakeStateHasChanged();
+
+      if(this.forceRedraw || snakeStateChanged) {
         canvasSnake.width = ctx.canvas.width;
         canvasSnake.height = ctx.canvas.height;
   
         ctxTmp.clearRect(0, 0, canvasSnake.width, canvasSnake.height);
       }
     
-      if(this.forceRedraw || this.snakeStateHasChanged()) {
+      if(this.forceRedraw || snakeStateChanged) {
         // Full redraw
         for(const snake of this.snakes) {
           this.fullSnakeRendering(snake, caseSize, canvasSnake, totalWidth, offsetY, ctxTmp);

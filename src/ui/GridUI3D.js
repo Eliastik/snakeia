@@ -62,10 +62,9 @@ export default class GridUI3D extends GridUI {
 
     /**
      * TODO :
-     * - Rotation animation (tail/head)
-     * - Fix animations when the Snake cross the side of the grid
-     * - Fix Snake drawing when the Snake cross the side of the grid
      * - Draw eyes on the Snake head
+     * - Rotation animation (tail/head)
+     * - Fix animations/Snake drawing when the Snake cross the side of the grid
      * - Optimize Snake body generation when there are multiple parts (don't update not moving parts)
      * - Advanced quality settings -> OK
      */
