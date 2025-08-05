@@ -62,7 +62,7 @@ export default class GridUI3D extends GridUI {
 
     /**
      * TODO :
-     * - Draw eyes on the Snake head
+     * - Draw eyes on the Snake head -> OK
      * - Rotation animation (tail/head)
      * - Fix animations/Snake drawing when the Snake cross the side of the grid -> OK
      * - Optimize Snake body generation when there are multiple parts (don't update not moving parts)
@@ -570,7 +570,7 @@ export default class GridUI3D extends GridUI {
     this.snakesMeshes.forEach(({ bodyParts, snakeIndex }) => {
       const snake = this.snakes[snakeIndex];
 
-      if(snake && !snake.gameOver && !this.individualSnakeStateHasChanged(snake)) {
+      if(snake && (!snake.gameOver || this.individualSnakeStateHasChanged(snake))) {
         this.cleanSnakesBodyParts(bodyParts);
       }
     });
