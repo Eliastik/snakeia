@@ -64,7 +64,7 @@ export default class GridUI3D extends GridUI {
      * TODO :
      * - Draw eyes on the Snake head
      * - Rotation animation (tail/head)
-     * - Fix animations/Snake drawing when the Snake cross the side of the grid
+     * - Fix animations/Snake drawing when the Snake cross the side of the grid -> OK
      * - Optimize Snake body generation when there are multiple parts (don't update not moving parts)
      * - Advanced quality settings -> OK
      */
@@ -163,6 +163,9 @@ export default class GridUI3D extends GridUI {
       this.setupLights();
 
       this.setupCameraAndSize();
+
+      this.setupFruit();
+      this.setupGoldFruit();
   
       this.setupGrid();
 
@@ -349,11 +352,7 @@ export default class GridUI3D extends GridUI {
 
           if(caseType === GameConstants.CaseType.FRUIT || caseType === GameConstants.CaseType.FRUIT_GOLD) {
             const { fruitModel, pointLight } = this.constructFruit(xPosition, yPosition, caseType);
-            this.gridGroup.add(fruitModel);
-
-            if(pointLight) {
-              this.gridGroup.add(pointLight);
-            }
+            this.gridGroup.add(fruitModel, pointLight);
           }
 
           if(!Object.values(GameConstants.CaseType).includes(caseType)) {
@@ -449,49 +448,89 @@ export default class GridUI3D extends GridUI {
     return darkGrayCellInstancedMesh;
   }
 
-  constructFruit(xPosition, yPosition, caseType) {
-    const fruitModel = this.modelLoader.get("fruit");
+  setupFruit() {
+    if(this.fruitModel) {
+      return;
+    }
 
-    if(fruitModel) {
-      const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
-      const fruitColor = isGoldFruit ? 0xFFD700 : 0xff1100;
+    this.fruitModel = this.modelLoader.get("fruit");
 
-      const pointLight = this.qualitySettings.fruitLights ? new THREE.PointLight(fruitColor, 0.8, 2) : null;
+    if(this.fruitModel) {
+      this.fruitPointLight = new THREE.PointLight(0xff1100, 0.8, 2);
 
-      if(pointLight) {
-        pointLight.position.set(xPosition, yPosition, 0.5);
-      }
-
-      const box = new THREE.Box3().setFromObject(fruitModel);
+      const box = new THREE.Box3().setFromObject(this.fruitModel );
 
       const size = new THREE.Vector3();
       box.getSize(size);
 
-      fruitModel.scale.setScalar(0.8 / size.x);
-      fruitModel.position.set(xPosition, yPosition, 0.5);
-      fruitModel.rotation.x = Math.PI / 2;
+      this.fruitModel.scale.setScalar(0.8 / size.x);
+      this.fruitModel.rotation.x = Math.PI / 2;
 
-      fruitModel.traverse(child => {
+      this.fruitModel.traverse(child => {
         if(child.isMesh) {
-          if(isGoldFruit) {
-            child.material = this.getMaterial({
-              color: fruitColor,
-              metalness: 0.75,
-              roughness: 0.2
-            });
-          } else {
-            child.material = this.getMaterial({
-              map: child.material.map,
-              normalMap: child.material.normalMap,
-              metalnessMap: child.material.metalnessMap,
-              roughnessMap: child.material.roughnessMap
-            });
-          }
-
-          child.castShadow = true;
-          child.receiveShadow = true;
+          child.material = this.getMaterial({
+            map: child.material.map,
+            normalMap: child.material.normalMap,
+            metalnessMap: child.material.metalnessMap,
+            roughnessMap: child.material.roughnessMap
+          });
         }
+
+        child.castShadow = true;
+        child.receiveShadow = true;
       });
+    }
+  }
+
+  setupGoldFruit() {
+    if(this.fruitModelGold) {
+      return;
+    }
+
+    this.fruitModelGold = this.modelLoader.get("fruit");
+
+    if(this.fruitModel) {
+      const fruitGoldColor = 0xFFD700;
+
+      this.fruitGoldPointLight = new THREE.PointLight(fruitGoldColor, 0.8, 2);
+
+      const box = new THREE.Box3().setFromObject(this.fruitModelGold);
+
+      const size = new THREE.Vector3();
+      box.getSize(size);
+
+      this.fruitModelGold.scale.setScalar(0.8 / size.x);
+      this.fruitModelGold.rotation.x = Math.PI / 2;
+
+      this.fruitModelGold.traverse(child => {
+        if(child.isMesh) {
+          child.material = this.getMaterial({
+            color: fruitGoldColor,
+            metalness: 0.75,
+            roughness: 0.2
+          });
+        }
+
+        child.castShadow = true;
+        child.receiveShadow = true;
+      });
+    }
+  }
+
+  constructFruit(xPosition, yPosition, caseType) {
+    const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
+    const fruitModel = isGoldFruit ? this.fruitModelGold : this.fruitModel;
+    const pointLight = isGoldFruit ? this.fruitGoldPointLight : this.fruitPointLight;
+
+    if(fruitModel) {
+      if(this.qualitySettings.fruitLights) {
+        pointLight.visible = true;
+        pointLight.position.set(xPosition, yPosition, 0.5);
+      } else {
+        pointLight.visible = false;
+      }
+
+      fruitModel.position.set(xPosition, yPosition, 0.5);
 
       return { fruitModel, pointLight };
     }
@@ -613,6 +652,26 @@ export default class GridUI3D extends GridUI {
     const fromPos = this.gridPositionTo3DPosition(from);
     const toPos = this.gridPositionTo3DPosition(to);
 
+    const deltaX = toPos.x - fromPos.x;
+
+    if(Math.abs(deltaX) > this.grid.width / 2) {
+      if(deltaX > 0) {
+        fromPos.x += this.grid.width;
+      } else {
+        toPos.x += this.grid.width;
+      }
+    }
+
+    const deltaY = toPos.y - fromPos.y;
+
+    if(Math.abs(deltaY) > this.grid.height / 2) {
+      if(deltaY > 0) {
+        fromPos.y += this.grid.height;
+      } else {
+        toPos.y += this.grid.height;
+      }
+    }
+
     const fromVec = new THREE.Vector3(fromPos.x + margin.x, fromPos.y + margin.y, 0.3);
     const toVec = new THREE.Vector3(toPos.x + margin.x, toPos.y + margin.y, 0.3);
 
@@ -669,55 +728,63 @@ export default class GridUI3D extends GridUI {
     const segments = [];
     let currentSegment = [];
 
-    let prev = null;
+    let previousPosition = null;
 
     for(let i = 0; i < snake.length(); i++) {
-      const meshInfo = this.getSnakePart3DPosition(i, snake);
+      const currentPosition = snake.get(i);
+      const currentPosition3D = this.gridPositionTo3DPosition(currentPosition);
 
-      if(meshInfo) {
-        const { x, y, z } = meshInfo.position;
-        const current = new THREE.Vector3(x, y, z);
+      const currentPositionVector = new THREE.Vector3(
+        currentPosition3D.x,
+        currentPosition3D.y,
+        0.3
+      );
 
-        const direction = snake.get(i).direction;
+      const direction = snake.get(i).direction;
 
-        if(i === 0) {
-          switch(direction) {
-          case GameConstants.Direction.RIGHT:
-            current.x -= 0.6;
-            break;
-          case GameConstants.Direction.LEFT:
-            current.x += 0.6;
-            break;
-          case GameConstants.Direction.BOTTOM:
-            current.y += 0.6;
-            break;
-          case GameConstants.Direction.TOP:
-            current.y -= 0.6;
-            break;
-          }
+      if(i === 0) {
+        switch(direction) {
+        case GameConstants.Direction.RIGHT: currentPositionVector.x -= 0.6; break;
+        case GameConstants.Direction.LEFT:  currentPositionVector.x += 0.6; break;
+        case GameConstants.Direction.BOTTOM: currentPositionVector.y += 0.6; break;
+        case GameConstants.Direction.TOP:    currentPositionVector.y -= 0.6; break;
         }
-
-        if(prev) {
-          const gridSize3D = this.gridPositionTo3DPosition({ x: this.grid.width, y: this.grid.height });
-
-          const dx = current.x - prev.x;
-          const dy = current.y - prev.y;
-
-          const wrappedX = Math.abs(dx) > Math.abs(gridSize3D.x);
-          const wrappedY = Math.abs(dy) > Math.abs(gridSize3D.y);
-
-          if(wrappedX || wrappedY) {
-            if(currentSegment.length >= 2) {
-              segments.push(currentSegment);
-            }
-
-            currentSegment = [];
-          }
-        }
-
-        currentSegment.push(current);
-        prev = current;
       }
+
+      if(previousPosition) {
+        const dx = currentPosition.x - previousPosition.x;
+        const dy = currentPosition.y - previousPosition.y;
+
+        const wrappedX = Math.abs(dx) >= this.grid.width - 1;
+        const wrappedY = Math.abs(dy) >= this.grid.height - 1;
+
+        if(wrappedX || wrappedY) {
+          const previousPosition3D = this.gridPositionTo3DPosition(previousPosition);
+
+          const previousPositionVector = new THREE.Vector3(
+            previousPosition3D.x,
+            previousPosition3D.y,
+            0.3
+          );
+
+          const wrapOffset = new THREE.Vector3(
+            wrappedX ? -Math.sign(dx) : 0,
+            wrappedY ? Math.sign(dy) : 0,
+            0
+          );
+
+          const fakeEnd = previousPositionVector.clone().add(wrapOffset);
+          const fakeStart = currentPositionVector.clone().sub(wrapOffset);
+
+          currentSegment.push(fakeEnd);
+          segments.push(currentSegment);
+
+          currentSegment = [fakeStart];
+        }
+      }
+
+      currentSegment.push(currentPositionVector);
+      previousPosition = currentPosition;
     }
 
     if(currentSegment.length >= 2) {
@@ -791,30 +858,6 @@ export default class GridUI3D extends GridUI {
     return { tubularSegments, radiusSegments };
   }
 
-  getSnakePart3DPosition(partNumber, snake) {
-    let position;
-
-    if(partNumber === -1) {
-      position = snake.getTailPosition();
-    } else {
-      position = snake.get(partNumber);
-    }
-
-    const direction = this.getSnakeDirection(snake, partNumber, position);
-
-    const { currentPosition } = this.calculateSnakeAnimation(snake, partNumber, position, direction);
-
-    const position3D = this.gridPositionTo3DPosition(currentPosition);
-
-    return {
-      position: {
-        x: position3D.x,
-        y: position3D.y,
-        z: 0.3
-      }
-    };
-  }
-
   gridPositionTo3DPosition(position) {
     const halfGridWidth = this.grid.width / 2;
     const halfGridHeight = this.grid.height / 2;
@@ -850,6 +893,9 @@ export default class GridUI3D extends GridUI {
     if(this.scene) {
       this.disposeGroup(this.gridGroup);
       this.disposeGroup(this.snakesGroup);
+
+      this.fruitModel?.clear();
+      this.fruitModelGold?.clear();
 
       this.scene.remove(this.gridGroup, this.snakesGroup);
 
