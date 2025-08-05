@@ -101,7 +101,9 @@ export default class GridUI extends Component {
       this.oldSnakesState.push({
         tail: snake.getTailPosition(),
         head: snake.getHeadPosition(),
-        firstPosition: snake.get(1)
+        firstPosition: snake.get(1),
+        gameOver: snake.gameOver,
+        color: snake.color
       });
     }
   }
@@ -188,33 +190,41 @@ export default class GridUI extends Component {
   }
 
   snakeStateHasChanged() {
+    for(let i = 0; i < this.snakes.length; i++) {
+      if(this.individualSnakeStateHasChanged(i)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  individualSnakeStateHasChanged(snakeIndex) {
     const width = this.grid.width;
     const height = this.grid.height;
 
-    for(let i = 0; i < this.snakes.length; i++) {
-      const snake = this.snakes[i];
-      const oldState = this.oldSnakesState && this.oldSnakesState[i];
+    const snake = this.snakes[snakeIndex];
+    const oldState = this.oldSnakesState && this.oldSnakesState[snakeIndex];
 
-      if(oldState) {
-        const currentTail = snake.getTailPosition();
-        const currentHead = snake.getHeadPosition();
-        const currentFirstPosition = snake.get(1);
+    if(oldState) {
+      const currentTail = snake.getTailPosition();
+      const currentHead = snake.getHeadPosition();
+      const currentFirstPosition = snake.get(1);
 
-        if(!snake.lastTail) {
-          return true;
-        }
+      if(!snake.lastTail) {
+        return true;
+      }
 
-        const wrappedDistance = (current, old, max) =>
-          Math.min(Math.abs(current - old), max - Math.abs(current - old));
-  
-        if(wrappedDistance(currentHead.x, oldState.head.x, width) > 1 ||
-          wrappedDistance(currentHead.y, oldState.head.y, height) > 1 ||
-          wrappedDistance(currentTail.x, oldState.tail.x, width) > 1 ||
-          wrappedDistance(currentTail.y, oldState.tail.y, height) > 1 ||
-          wrappedDistance(currentFirstPosition.x, oldState.firstPosition.x, width) > 1 ||
-          wrappedDistance(currentFirstPosition.y, oldState.firstPosition.y, height) > 1) {
-          return true;
-        }
+      const wrappedDistance = (current, old, max) =>
+        Math.min(Math.abs(current - old), max - Math.abs(current - old));
+
+      if(wrappedDistance(currentHead.x, oldState.head.x, width) > 1 ||
+        wrappedDistance(currentHead.y, oldState.head.y, height) > 1 ||
+        wrappedDistance(currentTail.x, oldState.tail.x, width) > 1 ||
+        wrappedDistance(currentTail.y, oldState.tail.y, height) > 1 ||
+        wrappedDistance(currentFirstPosition.x, oldState.firstPosition.x, width) > 1 ||
+        wrappedDistance(currentFirstPosition.y, oldState.firstPosition.y, height) > 1) {
+        return true;
       }
     }
 
@@ -227,7 +237,7 @@ export default class GridUI extends Component {
       const ctxTmp = canvasSnake.getContext("2d");
 
       // Differential Snake rendering is enabled only when in maze mode
-      const snakeStateChanged = !this.grid.maze || this.snakeStateHasChanged();
+      const snakeStateChanged = !this.grid.maze || this.graphicSkin === "pixel" || this.onlineMode || this.snakeStateHasChanged();
 
       if(this.forceRedraw || snakeStateChanged) {
         canvasSnake.width = ctx.canvas.width;
