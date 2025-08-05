@@ -592,11 +592,15 @@ export default class GridUI3D extends GridUI {
       const headMesh = this.createSnakeMesh(headGeometry, snakeMaterial);
       const tailMesh = this.createSnakeMesh(tailGeometry, snakeMaterial);
 
+      const eyesGroup = this.createEyes(snake);
+      headMesh.add(eyesGroup);
+
       this.snakesMeshes[snakeIndex] = {
         bodyParts: null,
         headMesh: headMesh,
         tailMesh: tailMesh,
         snakeMaterial,
+        eyesGroup,
         snakeIndex
       };
 
@@ -707,8 +711,8 @@ export default class GridUI3D extends GridUI {
 
   setMeshRotationFromDirection(mesh, direction) {
     const directionToZ = {
-      [GameConstants.Direction.RIGHT]: Math.PI / 2,
-      [GameConstants.Direction.LEFT]:  -Math.PI / 2,
+      [GameConstants.Direction.RIGHT]: -Math.PI / 2,
+      [GameConstants.Direction.LEFT]:  Math.PI / 2,
       [GameConstants.Direction.DOWN]:  Math.PI,
       [GameConstants.Direction.UP]:    0
     };
@@ -824,6 +828,46 @@ export default class GridUI3D extends GridUI {
   generateHeadGeometry(snake) {
     const { radiusSegments } = this.calculateSnakeGeometryQuality(snake);
     return new THREE.CapsuleGeometry(0.35, 0.6, radiusSegments, 8);
+  }
+
+  createEyes(snake) {
+    const group = new THREE.Group();
+
+    if(snake.gameOver) {
+      const material = this.getMaterial({ color: 0xff0000 });
+      const barGeom = new THREE.BoxGeometry(0.15, 0.03, 0.01);
+
+      const bar1 = new THREE.Mesh(barGeom, material);
+      const bar2 = new THREE.Mesh(barGeom, material);
+
+      bar1.rotation.z = Math.PI / 4;
+      bar2.rotation.z = -Math.PI / 4;
+
+      group.add(bar1, bar2);
+      group.position.set(0, 0.25, 0.4);
+    } else {
+      const whiteMat = this.getMaterial({ color: 0xffffff });
+      const blackMat = this.getMaterial({ color: 0x000000 });
+
+      const eyeGeom = new THREE.SphereGeometry(0.07, 8, 8);
+      const pupilGeom = new THREE.SphereGeometry(0.03, 8, 8);
+
+      const eye1 = new THREE.Mesh(eyeGeom, whiteMat);
+      const eye2 = new THREE.Mesh(eyeGeom, whiteMat);
+
+      const pupil1 = new THREE.Mesh(pupilGeom, blackMat);
+      const pupil2 = new THREE.Mesh(pupilGeom, blackMat);
+
+      eye1.position.set(0.18, 0.15, 0.3);
+      eye2.position.set(-0.18, 0.15, 0.3);
+
+      pupil1.position.copy(eye1.position).add(new THREE.Vector3(0, 0.03, 0.03));
+      pupil2.position.copy(eye2.position).add(new THREE.Vector3(0, 0.03, 0.03));
+
+      group.add(eye1, eye2, pupil1, pupil2);
+    }
+
+    return group;
   }
 
   generateTailGeometry(snake) {
