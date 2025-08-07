@@ -64,7 +64,9 @@ export default class GridUI3D extends GridUI {
     /**
      * TODO :
      * - Rotation animation (tail/head)
-     * - Optimize Snake body generation when there are multiple parts (don't update not moving parts) + Fix bug when crossing grids
+     * - Optimize Snake body generation when there are multiple parts (don't update not moving parts)
+     * - Better graphical effects?
+     * - Fix bug when crossing grids -> OK
      * - Draw eyes on the Snake head -> OK
      * - Fix animations/Snake drawing when the Snake cross the side of the grid -> OK
      * - Advanced quality settings -> OK
@@ -730,25 +732,7 @@ export default class GridUI3D extends GridUI {
     const fromPos = this.gridPositionTo3DPosition(from);
     const toPos = this.gridPositionTo3DPosition(to);
 
-    const deltaX = toPos.x - fromPos.x;
-
-    if(Math.abs(deltaX) > this.grid.width / 2) {
-      if(deltaX > 0) {
-        fromPos.x += this.grid.width;
-      } else {
-        toPos.x += this.grid.width;
-      }
-    }
-
-    const deltaY = toPos.y - fromPos.y;
-
-    if(Math.abs(deltaY) > this.grid.height / 2) {
-      if(deltaY > 0) {
-        fromPos.y += this.grid.height;
-      } else {
-        toPos.y += this.grid.height;
-      }
-    }
+    this.handleSnakeGridCrossing(toPos, fromPos, snakePart);
 
     const fromVec = new THREE.Vector3(fromPos.x + margin.x, fromPos.y + margin.y, 0.3);
     const toVec = new THREE.Vector3(toPos.x + margin.x, toPos.y + margin.y, 0.3);
@@ -761,12 +745,55 @@ export default class GridUI3D extends GridUI {
 
     mesh.position.copy(interpolated);
 
+    this.animateSnakeRotation(targetDir, snakePart, snake, fromDir, animationPercentage, mesh);
+  }
+
+  handleSnakeGridCrossing(toPos, fromPos, snakePart) {
+    const deltaX = toPos.x - fromPos.x;
+    const deltaY = toPos.y - fromPos.y;
+
+    if(snakePart === -1) {
+      if(Math.abs(deltaX) > this.grid.width / 2) {
+        if(deltaX > 0) {
+          toPos.x -= this.grid.width;
+        } else {
+          toPos.x += this.grid.width;
+        }
+      }
+
+      if(Math.abs(deltaY) > this.grid.height / 2) {
+        if(deltaY > 0) {
+          toPos.y -= this.grid.height;
+        } else {
+          toPos.y += this.grid.height;
+        }
+      }
+    } else {
+      if(Math.abs(deltaX) > this.grid.width / 2) {
+        if (deltaX > 0) {
+          fromPos.x += this.grid.width;
+        } else {
+          fromPos.x -= this.grid.width;
+        }
+      }
+
+      if(Math.abs(deltaY) > this.grid.height / 2) {
+        if (deltaY > 0) {
+          fromPos.y += this.grid.height;
+        } else {
+          fromPos.y -= this.grid.height;
+        }
+      }
+    }
+  }
+
+  animateSnakeRotation(targetDir, snakePart, snake, fromDir, animationPercentage, mesh) {
     const baseAngle = this.getRotationFromDirection(targetDir);
 
     let graphicDirection;
 
-    if(snakePart == 0) {
-      if(snake.length() > 1) {
+    if (snakePart == 0) {
+      if (snake.length() > 1) {
         graphicDirection = snake.getGraphicDirection(1);
       } else {
         graphicDirection = snake.getGraphicDirection(0);
@@ -775,7 +802,7 @@ export default class GridUI3D extends GridUI {
       graphicDirection = snake.getGraphicDirectionFor(snake.getTailPosition(), snake.lastTail, snake.get(snake.length() - 2));
     }
 
-    if(fromDir !== targetDir && snakePart != -1) {
+    if (fromDir !== targetDir && snakePart != -1) {
       const animationAngle = this.calculateAnimationAngle(
         snakePart,
         animationPercentage,
