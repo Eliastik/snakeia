@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+import i18next from "i18next";
 import GridUI from "./GridUI";
 import GameConstants from "../engine/Constants";
 import GameUtils from "../engine/GameUtils";
@@ -174,9 +175,18 @@ export default class GridUI3D extends GridUI {
       this.saveCurrentState(canvas);
 
       this.drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize);
+
+      if(this.debugMode) {
+        Utils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.85)", Math.round(this.fontSize / 1.5), GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
+      }
   
       ctx.restore();
     }
+  }
+
+  getDebugText() {
+    const info = this.renderer.info;
+    return `${i18next.t("engine.debug.drawcalls")} ${info.render.calls} / ${i18next.t("engine.debug.geometries")} ${info.memory.geometries} / ${i18next.t("engine.debug.textures")} ${info.memory.textures} / ${i18next.t("engine.debug.triangles")} ${info.render.triangles}`;
   }
 
   getMaterial(options) {
@@ -765,7 +775,7 @@ export default class GridUI3D extends GridUI {
       graphicDirection = snake.getGraphicDirectionFor(snake.getTailPosition(), snake.lastTail, snake.get(snake.length() - 2));
     }
 
-    if(fromDir !== targetDir) {
+    if(fromDir !== targetDir && snakePart != -1) {
       const animationAngle = this.calculateAnimationAngle(
         snakePart,
         animationPercentage,

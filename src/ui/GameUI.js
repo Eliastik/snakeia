@@ -48,9 +48,12 @@ export default class GameUI {
     this.lastKey = -1;
     this.frame = 0;
     this.lastFrame = 0;
+    this.lastTicks = 0;
     this.offsetFrame = 0;
     this.lastFrameTime = 0;
     this.currentFPS = 0;
+    this.currentTPS = 0;
+    this.currentFrameTime = 0;
     this.engineLoading = false;
     this.loadingResourcesErrorOccurred = false;
     // Swipe detection variables
@@ -121,6 +124,7 @@ export default class GameUI {
     this.timerToDisplay = null;
     this.bestScoreToDisplay = null;
     // Intervals, timeouts, frames
+    this.intervalCountFPS;
     this.intervalCountFPS;
     // Buttons
     this.btnFullScreen;
@@ -277,6 +281,7 @@ export default class GameUI {
     }
     
     this.setIntervalCountFPS();
+    this.setIntervalCountTPS();
 
     document.addEventListener("keydown", (evt) => {
       if(!this.killed) {
@@ -333,13 +338,30 @@ export default class GameUI {
     }, 1000);
   }
 
+  setIntervalCountTPS() {
+    this.clearIntervalCountTPS();
+
+    this.intervalCountTPS = window.setInterval(() => {
+      this.countTPS();
+    }, 1000);
+  }
+
   countFPS() {
     if(this.lastFrame > 0) this.currentFPS = this.frame - this.lastFrame;
     this.lastFrame = this.frame;
   }
 
+  countTPS() {
+    if(this.ticks > 0) this.currentTPS = this.ticks - this.lastTicks;
+    this.lastTicks = this.ticks;
+  }
+
   clearIntervalCountFPS() {
     clearInterval(this.intervalCountFPS);
+  }
+
+  clearIntervalCountTPS() {
+    clearInterval(this.intervalCountTPS);
   }
 
   getNBPlayer(type) {
@@ -535,6 +557,7 @@ export default class GameUI {
       }
 
       const offsetFrame = time - this.lastFrameTime;
+
       if(this.maxFPS < 1 || offsetFrame > 1000 / this.maxFPS) {
         this.lastFrameTime = time;
         this.frame++;
@@ -558,6 +581,8 @@ export default class GameUI {
   }
 
   draw() {
+    const startTime = performance.now();
+
     if(this.outputType == GameConstants.OutputType.TEXT && !this.killed) {
       if(this.grid != null) {
         this.textarea.style.width = this.grid.width * 16.5 + "px";
@@ -579,6 +604,8 @@ export default class GameUI {
         this.fontSize *= 1.25;
         this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25;
       }
+      
+      this.gridUI.fontSize = this.fontSize;
 
       Constants.Setting.FONT_SIZE = this.fontSize;
       this.labelMenus.size = this.fontSize;
@@ -923,6 +950,8 @@ export default class GameUI {
 
       this.gridUI.debugMode = this.debugMode;
     }
+
+    this.currentFrameTime = performance.now() - startTime;
   }
 
   resetState() {
@@ -995,7 +1024,7 @@ export default class GameUI {
   }
 
   getDebugText() {
-    return i18next.t("engine.debug.fps") + " " + this.currentFPS + " / " + i18next.t("engine.debug.frames") + " " + this.frame + " / " + i18next.t("engine.debug.ticks") + " " + this.ticks + " / " + i18next.t("engine.debug.speed") + " " + this.speed + (this.pingLatency > -1 ? " / " + i18next.t("engine.ping") + " " + this.pingLatency + " ms" : "");
+    return i18next.t("engine.debug.fps") + " " + this.currentFPS + " / " + i18next.t("engine.debug.frames") + " " + this.frame + " / " + i18next.t("engine.debug.ticks") + " " + this.ticks + " / " + i18next.t("engine.debug.tps") + " " + this.currentTPS + " / " + i18next.t("engine.debug.speed") + " " + this.speed + (this.pingLatency > -1 ? " / " + i18next.t("engine.ping") + " " + this.pingLatency + " ms" : "");
   }
 
   toString() {

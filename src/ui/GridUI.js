@@ -40,6 +40,7 @@ export default class GridUI extends Component {
 
     this.canvasSnakes = document.createElement("canvas");
     this.canvasGrid = document.createElement("canvas");
+    this.fontSize = GameConstants.Setting.FONT_SIZE;
 
     this.forceRedraw = true;
     this.oldGridState = null;

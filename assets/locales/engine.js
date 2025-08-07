@@ -67,10 +67,15 @@ i18next.addResourceBundle("fr", "translation", {
     },
     "debug": {
       "fps": "IPS :",
+      "tps": "TPS :",
       "frames": "Images :",
       "ticks": "Tours :",
       "speed": "Vit. :",
-      "paused": "En pause"
+      "paused": "En pause",
+      "drawcalls": "Drawcalls :",
+      "geometries": "Géometries :",
+      "textures": "Textures :",
+      "triangles": "Triangles :"
     },
     "colors": {
       "white": "Blanc",
@@ -162,10 +167,15 @@ i18next.addResourceBundle("en", "translation", {
     },
     "debug": {
       "fps": "FPS:",
+      "tps": "TPS:",
       "frames": "Frames:",
       "ticks": "Ticks:",
       "speed": "Speed:",
-      "paused": "Paused"
+      "paused": "Paused",
+      "drawcalls": "Drawcalls:",
+      "geometries": "Geometries:",
+      "textures": "Textures:",
+      "triangles": "Triangles:"
     },
     "colors": {
       "white": "White",
