@@ -725,12 +725,12 @@ export default class GridUI3D extends GridUI {
     const fromDir = from.direction;
     const targetDir = to.direction;
 
+    const fromPos = this.gridPositionTo3DPosition(from);
+    const toPos = this.gridPositionTo3DPosition(to);
+
     const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
 
     const margin = this.getSnakeMargin(targetDir, type);
-
-    const fromPos = this.gridPositionTo3DPosition(from);
-    const toPos = this.gridPositionTo3DPosition(to);
 
     this.handleSnakeGridCrossing(toPos, fromPos, snakePart);
 
@@ -745,7 +745,7 @@ export default class GridUI3D extends GridUI {
 
     mesh.position.copy(interpolated);
 
-    this.animateSnakeRotation(targetDir, snakePart, snake, fromDir, animationPercentage, mesh);
+    this.animateSnakeRotation(snake, snakePart, fromDir, targetDir, animationPercentage, mesh);
   }
 
   handleSnakeGridCrossing(toPos, fromPos, snakePart) {
@@ -787,30 +787,28 @@ export default class GridUI3D extends GridUI {
     }
   }
 
-  animateSnakeRotation(targetDir, snakePart, snake, fromDir, animationPercentage, mesh) {
+  animateSnakeRotation(snake, snakePart, fromDir, targetDir, animationPercentage, mesh) {
     const baseAngle = this.getRotationFromDirection(targetDir);
 
     let graphicDirection;
 
-    if (snakePart == 0) {
-      if (snake.length() > 1) {
+    if(snakePart == 0) {
+      if(snake.length() > 1) {
         graphicDirection = snake.getGraphicDirection(1);
       } else {
         graphicDirection = snake.getGraphicDirection(0);
       }
-    } else if (snakePart == -1) {
-      graphicDirection = snake.getGraphicDirectionFor(snake.getTailPosition(), snake.lastTail, snake.get(snake.length() - 2));
     }
 
-    if (fromDir !== targetDir && snakePart != -1) {
+    if(fromDir !== targetDir && snakePart !== -1) {
       const animationAngle = this.calculateAnimationAngle(
         snakePart,
         animationPercentage,
         graphicDirection,
-        fromDir
+        targetDir
       );
 
-      mesh.rotation.z = baseAngle + (animationAngle * (Math.PI / 180));
+      mesh.rotation.z = baseAngle - (animationAngle * (Math.PI / 180));
     } else {
       mesh.rotation.z = baseAngle;
     }
