@@ -62,10 +62,10 @@ export default class GridUI3D extends GridUI {
 
     /**
      * TODO :
-     * - Draw eyes on the Snake head -> OK
      * - Rotation animation (tail/head)
+     * - Optimize Snake body generation when there are multiple parts (don't update not moving parts) + Fix bug when crossing grids
+     * - Draw eyes on the Snake head -> OK
      * - Fix animations/Snake drawing when the Snake cross the side of the grid -> OK
-     * - Optimize Snake body generation when there are multiple parts (don't update not moving parts)
      * - Advanced quality settings -> OK
      */
   }
@@ -558,22 +558,23 @@ export default class GridUI3D extends GridUI {
     }
   }
 
-  shouldUpdateSnakeBodyGeometry() {
-    return this.oldTicks < this.ticks || this.oldTicks === undefined || (this.ticks === 0 && this.oldTicks !== 0);
+  shouldUpdateSnakeBodyGeometry(snakeIndex, snake) {
+    const shouldUpdateBasedOnTicks = this.oldTicks < this.ticks || this.oldTicks === undefined || (this.ticks === 0 && this.oldTicks !== 0);
+    const shouldUpdateBasedOnState = !snake.gameOver || this.individualSnakeStateHasChanged(snakeIndex);
+
+    return shouldUpdateBasedOnTicks && shouldUpdateBasedOnState;
   }
 
-  cleanOldSnakes() {
+  cleanOldSnakeGeometry(snakeIndex) {
     if(!this.snakesMeshes) {
       return;
     }
     
-    this.snakesMeshes.forEach(({ bodyParts, snakeIndex }) => {
-      const snake = this.snakes[snakeIndex];
+    const meshes = this.snakesMeshes[snakeIndex];
 
-      if(snake && (!snake.gameOver || this.individualSnakeStateHasChanged(snake))) {
-        this.cleanSnakesBodyParts(bodyParts);
-      }
-    });
+    if(meshes && meshes.bodyParts) {
+      this.cleanSnakesBodyParts(meshes.bodyParts);
+    }
   }
 
   cleanSnakesBodyParts(bodyParts) {
@@ -602,10 +603,6 @@ export default class GridUI3D extends GridUI {
   }
 
   updateSnakes() {
-    if(this.shouldUpdateSnakeBodyGeometry()) {
-      this.cleanOldSnakes();
-    }
-
     for(let i = 0; i < this.snakes.length; i++) {
       this.updateSnake(i);
     }
@@ -621,10 +618,6 @@ export default class GridUI3D extends GridUI {
       this.updateSnakeEyes(snakeIndex, snake);
     }
 
-    if(snake.gameOver && !this.individualSnakeStateHasChanged(snakeIndex)) {
-      return;
-    }
-
     // If color has changed, we reset the meshes
     if(previousSnakeState && previousSnakeState.color != snake.color) {
       this.cleanSnakesMeshes(snakeIndex);
@@ -634,7 +627,8 @@ export default class GridUI3D extends GridUI {
       this.setupSnake(snake, snakeIndex);
     }
 
-    if(this.shouldUpdateSnakeBodyGeometry()) {
+    if(this.shouldUpdateSnakeBodyGeometry(snakeIndex, snake)) {
+      this.cleanOldSnakeGeometry(snakeIndex);
       this.updateSnakeGeometry(snakeIndex, snake);
     }
 
@@ -716,10 +710,12 @@ export default class GridUI3D extends GridUI {
   }
 
   animateSnake({ snake, mesh, from, to, snakePart, type }) {
-    const direction = to.direction;
+    const fromDir = from.direction;
+    const targetDir = to.direction;
+
     const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
 
-    const margin = this.getSnakeMargin(direction, type);
+    const margin = this.getSnakeMargin(targetDir, type);
 
     const fromPos = this.gridPositionTo3DPosition(from);
     const toPos = this.gridPositionTo3DPosition(to);
@@ -755,7 +751,32 @@ export default class GridUI3D extends GridUI {
 
     mesh.position.copy(interpolated);
 
-    this.setMeshRotationFromDirection(mesh, direction);
+    const baseAngle = this.getRotationFromDirection(targetDir);
+
+    let graphicDirection;
+
+    if(snakePart == 0) {
+      if(snake.length() > 1) {
+        graphicDirection = snake.getGraphicDirection(1);
+      } else {
+        graphicDirection = snake.getGraphicDirection(0);
+      }
+    } else if (snakePart == -1) {
+      graphicDirection = snake.getGraphicDirectionFor(snake.getTailPosition(), snake.lastTail, snake.get(snake.length() - 2));
+    }
+
+    if(fromDir !== targetDir) {
+      const animationAngle = this.calculateAnimationAngle(
+        snakePart,
+        animationPercentage,
+        graphicDirection,
+        fromDir
+      );
+
+      mesh.rotation.z = baseAngle + (animationAngle * (Math.PI / 180));
+    } else {
+      mesh.rotation.z = baseAngle;
+    }
   }
 
   getSnakeMargin(direction, type) {
@@ -777,15 +798,13 @@ export default class GridUI3D extends GridUI {
     return marginMap[type]?.[direction] || { x: 0, y: 0 };
   }
 
-  setMeshRotationFromDirection(mesh, direction) {
-    const directionToZ = {
+  getRotationFromDirection(direction) {
+    return {
       [GameConstants.Direction.RIGHT]: -Math.PI / 2,
-      [GameConstants.Direction.LEFT]:  Math.PI / 2,
-      [GameConstants.Direction.DOWN]:  Math.PI,
-      [GameConstants.Direction.UP]:    0
-    };
-
-    mesh.rotation.z = directionToZ[direction] ?? 0;
+      [GameConstants.Direction.LEFT]: Math.PI / 2,
+      [GameConstants.Direction.DOWN]: Math.PI,
+      [GameConstants.Direction.UP]: 0
+    }[direction] ?? 0;
   }
 
   createSnakeMesh(snakeGeometry, material) {
@@ -849,7 +868,10 @@ export default class GridUI3D extends GridUI {
           const fakeStart = currentPositionVector.clone().sub(wrapOffset);
 
           currentSegment.push(fakeEnd);
-          segments.push(currentSegment);
+
+          if(currentSegment.length >= 2) {
+            segments.push(currentSegment);
+          }
 
           currentSegment = [fakeStart];
         }

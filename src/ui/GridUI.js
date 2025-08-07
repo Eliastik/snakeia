@@ -102,6 +102,7 @@ export default class GridUI extends Component {
         tail: snake.getTailPosition(),
         head: snake.getHeadPosition(),
         firstPosition: snake.get(1),
+        length: snake.length(),
         gameOver: snake.gameOver,
         color: snake.color
       });
@@ -207,11 +208,12 @@ export default class GridUI extends Component {
     const oldState = this.oldSnakesState && this.oldSnakesState[snakeIndex];
 
     if(oldState) {
+      const currentLength = snake.length();
       const currentTail = snake.getTailPosition();
       const currentHead = snake.getHeadPosition();
       const currentFirstPosition = snake.get(1);
 
-      if(!snake.lastTail) {
+      if(!snake.lastTail || currentLength > oldState.length) {
         return true;
       }
 
