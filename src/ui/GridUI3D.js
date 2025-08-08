@@ -114,7 +114,22 @@ export default class GridUI3D extends GridUI {
     this.renderer = new THREE.WebGLRenderer({ antialias: this.qualitySettings.enableAntialiasing, alpha: true });
 
     this.renderer.shadowMap.enabled = this.qualitySettings.enableShadows;
-    this.renderer.shadowMap.type = this.qualitySettings.shadowType === "pcfsoft" ? THREE.PCFSoftShadowMap : THREE.BasicShadowMap;
+
+    let shadowType = THREE.BasicShadowMap;
+
+    switch(this.qualitySettings.shadowType) {
+    case "pcf":
+      shadowType = THREE.PCFShadowMap;
+      break;
+    case "pcfsoft":
+      shadowType = THREE.PCFSoftShadowMap;
+      break;
+    case "vms":
+      shadowType = THREE.VSMShadowMap;
+      break;
+    }
+
+    this.renderer.shadowMap.type = shadowType;
 
     this.gridGroup = new THREE.Group();
     this.snakesGroup = new THREE.Group();

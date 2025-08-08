@@ -172,7 +172,9 @@ export default {
       type: "choice",
       presets: {
         low: "basic",
-        high: "pcfsoft"
+        medium: "pcf",
+        high: "pcfsoft",
+        ultra: "vsm"
       }
     },
     shadowResolution: {
