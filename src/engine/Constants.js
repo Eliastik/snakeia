@@ -173,8 +173,7 @@ export default {
       presets: {
         low: "basic",
         medium: "pcf",
-        high: "pcfsoft",
-        ultra: "vsm"
+        high: "pcfsoft"
       }
     },
     shadowResolution: {

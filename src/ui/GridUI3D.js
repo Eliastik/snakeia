@@ -124,7 +124,7 @@ export default class GridUI3D extends GridUI {
     case "pcfsoft":
       shadowType = THREE.PCFSoftShadowMap;
       break;
-    case "vms":
+    case "vsm":
       shadowType = THREE.VSMShadowMap;
       break;
     }
@@ -467,12 +467,14 @@ export default class GridUI3D extends GridUI {
   }
 
   constructWallMesh() {
-    const wallImage = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/${GameUtils.getImageCase(GameConstants.CaseType.WALL)}`);
-    const wallTexture = new THREE.CanvasTexture(wallImage);
-    wallTexture.colorSpace = THREE.SRGBColorSpace;
+    if(!this.wallTexture) {
+      const wallImage = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/${GameUtils.getImageCase(GameConstants.CaseType.WALL)}`);
+      this.wallTexture = new THREE.CanvasTexture(wallImage);
+      this.wallTexture.colorSpace = THREE.SRGBColorSpace;
+    }
 
     const wallGeometry = new THREE.BoxGeometry(1, 1, 1.5);
-    const wallMaterial = this.getMaterial({ map: wallTexture, toneMapped: false });
+    const wallMaterial = this.getMaterial({ map: this.wallTexture, toneMapped: false });
     const wallInstancedMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.countWalls());
     wallInstancedMesh.receiveShadow = true;
     wallInstancedMesh.castShadow = true;
