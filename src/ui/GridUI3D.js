@@ -60,6 +60,7 @@ export default class GridUI3D extends GridUI {
     this.initThreeJS();
 
     this.is3DRendering = true;
+    this.hasGoldFruit = false;
 
     /**
      * TODO :
@@ -227,7 +228,7 @@ export default class GridUI3D extends GridUI {
   }
 
   drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize) {
-    if(this.qualitySettings && this.qualitySettings.enableReflections) {
+    if(this.qualitySettings && this.qualitySettings.enableReflections && this.hasGoldFruit) {
       this.cubeCamera.update(this.renderer, this.scene);
     }
 
@@ -583,6 +584,8 @@ export default class GridUI3D extends GridUI {
   }
 
   constructFruit(xPosition, yPosition, caseType) {
+    this.hasGoldFruit = false;
+
     const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
     const fruitModel = isGoldFruit ? this.fruitModelGold : this.fruitModel;
     const pointLight = isGoldFruit ? this.fruitGoldPointLight : this.fruitPointLight;
@@ -599,6 +602,7 @@ export default class GridUI3D extends GridUI {
 
       if(isGoldFruit && this.qualitySettings && this.qualitySettings.enableReflections) {
         this.cubeCamera.position.set(xPosition, yPosition, 0.5);
+        this.hasGoldFruit = true;
       }
 
       return { fruitModel, pointLight };
