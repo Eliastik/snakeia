@@ -106,6 +106,8 @@ export default class GridUI3D extends GridUI {
     this.isCameraInit = false;
 
     this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xCCCFD3);
+
     this.camera = new THREE.PerspectiveCamera(30, 1, 0.1, 1000);
 
     this.camera.position.set(0, 0, 0);
@@ -568,7 +570,7 @@ export default class GridUI3D extends GridUI {
 
           child.material = this.getMaterial({
             color: fruitGoldColor,
-            metalness: enableReflections ? 0.9 : 0.75,
+            metalness: enableReflections ? 0.85 : 0.75,
             roughness: 0.2,
             envMap: enableReflections ? this.cubeRenderTarget.texture : null
           });
