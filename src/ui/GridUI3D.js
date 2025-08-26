@@ -113,6 +113,11 @@ export default class GridUI3D extends GridUI {
   
     this.renderer = new THREE.WebGLRenderer({ antialias: this.qualitySettings.enableAntialiasing, alpha: true });
 
+    this.cubeRenderTarget = new THREE.WebGLCubeRenderTarget(128);
+    this.cubeRenderTarget.texture.type = THREE.HalfFloatType;
+    
+    this.cubeCamera = new THREE.CubeCamera(0.1, 1000, this.cubeRenderTarget);
+
     this.renderer.shadowMap.enabled = this.qualitySettings.enableShadows;
 
     let shadowType = THREE.BasicShadowMap;
@@ -220,6 +225,10 @@ export default class GridUI3D extends GridUI {
   }
 
   drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize) {
+    if(this.qualitySettings && this.qualitySettings.enableReflections) {
+      this.cubeCamera.update(this.renderer, this.scene);
+    }
+
     this.renderer.render(this.scene, this.camera);
 
     Utils.drawImageData(ctx, this.renderer.domElement, offsetX, offsetY, totalWidth, totalHeight, 0, 0, totalWidth, totalHeight);
@@ -555,10 +564,13 @@ export default class GridUI3D extends GridUI {
 
       this.fruitModelGold.traverse(child => {
         if(child.isMesh) {
+          const enableReflections = this.qualitySettings && this.qualitySettings.enableReflections;
+
           child.material = this.getMaterial({
             color: fruitGoldColor,
-            metalness: 0.75,
-            roughness: 0.2
+            metalness: enableReflections ? 0.9 : 0.75,
+            roughness: 0.2,
+            envMap: enableReflections ? this.cubeRenderTarget.texture : null
           });
         }
 
@@ -582,6 +594,10 @@ export default class GridUI3D extends GridUI {
       }
 
       fruitModel.position.set(xPosition, yPosition, 0.5);
+
+      if(isGoldFruit && this.qualitySettings && this.qualitySettings.enableReflections) {
+        this.cubeCamera.position.set(xPosition, yPosition, 0.5);
+      }
 
       return { fruitModel, pointLight };
     }

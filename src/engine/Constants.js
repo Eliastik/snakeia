@@ -168,6 +168,9 @@ export default {
     enableShadows: {
       type: "boolean"
     },
+    enableReflections: {
+      type: "boolean"
+    },
     shadowType: {
       type: "choice",
       presets: {
@@ -254,6 +257,7 @@ export default {
     "3dMinimal": {
       enableShadows: false,
       enableAntialiasing: false,
+      enableReflections: false,
       shadowResolution: "low",
       shadowType: "low",
       materialType: "low",
@@ -263,6 +267,7 @@ export default {
     "3dLow": {
       enableShadows: true,
       enableAntialiasing: false,
+      enableReflections: false,
       shadowResolution: "low",
       shadowType: "high",
       materialType: "high",
@@ -272,6 +277,7 @@ export default {
     "3dNormal": {
       enableShadows: true,
       enableAntialiasing: true,
+      enableReflections: false,
       shadowResolution: "normal",
       shadowType: "high",
       materialType: "high",
@@ -281,6 +287,7 @@ export default {
     "3dMedium": {
       enableShadows: true,
       enableAntialiasing: true,
+      enableReflections: false,
       shadowResolution: "medium",
       shadowType: "high",
       materialType: "high",
@@ -290,6 +297,7 @@ export default {
     "3dHigh": {
       enableShadows: true,
       enableAntialiasing: true,
+      enableReflections: true,
       shadowResolution: "high",
       shadowType: "high",
       materialType: "high",
