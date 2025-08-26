@@ -303,6 +303,16 @@ export default {
       materialType: "high",
       snakeSegments: "high",
       fruitLights: true
+    },
+    "3dUltra": {
+      enableShadows: true,
+      enableAntialiasing: true,
+      enableReflections: true,
+      shadowResolution: "ultra",
+      shadowType: "high",
+      materialType: "high",
+      snakeSegments: "ultra",
+      fruitLights: true
     }
   },
   DefaultQualitySettings3D: "3dMedium",
