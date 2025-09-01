@@ -251,6 +251,26 @@ export default {
           maxLength: 100
         }
       }
+    },
+    reflectionQuality: {
+      type: "choice",
+      presets: {
+        low: "static",
+        medium: "dynamicOnce",
+        high: "dynamicThrottled",
+        ultra: "dynamicFull"
+      }
+    },
+    reflectionResolution: {
+      type: "choice",
+      presets: {
+        minimum: 32,
+        low: 64,
+        medium: 128,
+        high: 256,
+        ultra: 512,
+        extreme: 1024
+      }
     }
   },
   QualitySettings3DPreset: {
@@ -262,7 +282,9 @@ export default {
       shadowType: "low",
       materialType: "low",
       snakeSegments: "minimum",
-      fruitLights: false
+      fruitLights: false,
+      reflectionQuality: "low",
+      reflectionResolution: "minimum"
     },
     "3dLow": {
       enableShadows: true,
@@ -272,7 +294,9 @@ export default {
       shadowType: "high",
       materialType: "high",
       snakeSegments: "low",
-      fruitLights: false
+      fruitLights: false,
+      reflectionQuality: "low",
+      reflectionResolution: "low"
     },
     "3dNormal": {
       enableShadows: true,
@@ -282,7 +306,9 @@ export default {
       shadowType: "high",
       materialType: "high",
       snakeSegments: "normal",
-      fruitLights: true
+      fruitLights: true,
+      reflectionQuality: "low",
+      reflectionResolution: "low"
     },
     "3dMedium": {
       enableShadows: true,
@@ -292,7 +318,9 @@ export default {
       shadowType: "high",
       materialType: "high",
       snakeSegments: "medium",
-      fruitLights: true
+      fruitLights: true,
+      reflectionQuality: "medium",
+      reflectionResolution: "medium"
     },
     "3dHigh": {
       enableShadows: true,
@@ -302,7 +330,9 @@ export default {
       shadowType: "high",
       materialType: "high",
       snakeSegments: "high",
-      fruitLights: true
+      fruitLights: true,
+      reflectionQuality: "high",
+      reflectionResolution: "high"
     },
     "3dUltra": {
       enableShadows: true,
@@ -312,7 +342,21 @@ export default {
       shadowType: "high",
       materialType: "high",
       snakeSegments: "ultra",
-      fruitLights: true
+      fruitLights: true,
+      reflectionQuality: "high",
+      reflectionResolution: "high"
+    },
+    "3dExtreme": {
+      enableShadows: true,
+      enableAntialiasing: true,
+      enableReflections: true,
+      shadowResolution: "ultra",
+      shadowType: "high",
+      materialType: "high",
+      snakeSegments: "extreme",
+      fruitLights: true,
+      reflectionQuality: "ultra",
+      reflectionResolution: "extreme"
     }
   },
   DefaultQualitySettings3D: "3dMedium",

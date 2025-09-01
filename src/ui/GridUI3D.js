@@ -61,6 +61,8 @@ export default class GridUI3D extends GridUI {
 
     this.is3DRendering = true;
     this.hasGoldFruit = false;
+    this.goldFruitPosition = null;
+    this.firstUpdatedReflections = false;
 
     /**
      * TODO :
@@ -116,7 +118,7 @@ export default class GridUI3D extends GridUI {
   
     this.renderer = new THREE.WebGLRenderer({ antialias: this.qualitySettings.enableAntialiasing, alpha: true });
 
-    this.cubeRenderTarget = new THREE.WebGLCubeRenderTarget(128);
+    this.cubeRenderTarget = new THREE.WebGLCubeRenderTarget((this.qualitySettings && this.qualitySettings.reflectionResolution) || 128);
     this.cubeRenderTarget.texture.type = THREE.HalfFloatType;
     
     this.cubeCamera = new THREE.CubeCamera(0.1, 1000, this.cubeRenderTarget);
@@ -197,9 +199,11 @@ export default class GridUI3D extends GridUI {
 
       this.updateSnakes();
 
-      this.saveCurrentState(canvas);
-
       this.drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize);
+
+      this.saveCurrentState(canvas);
+    
+      this.oldTicks = this.ticks;
 
       if(this.debugMode) {
         Utils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.85)", Math.round(this.fontSize / 1.5), GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
@@ -227,9 +231,32 @@ export default class GridUI3D extends GridUI {
     }
   }
 
+  shouldUpdateBasedOnTicks() {
+    return this.oldTicks < this.ticks || this.oldTicks === undefined || (this.ticks === 0 && this.oldTicks !== 0);
+  }
+
+  shouldUpdateDynamicReflections() {
+    const reflectionQuality = this.qualitySettings && this.qualitySettings.reflectionQuality;
+    const reflectionsEnabled = this.qualitySettings && this.qualitySettings.enableReflections;
+
+    const shouldUpdateBasedOnTicks = this.shouldUpdateBasedOnTicks();
+    
+    const shouldUpdateDynamicThrottled = reflectionQuality === "dynamicThrottled" && shouldUpdateBasedOnTicks;
+    const shouldUpdateDynamicOnce = reflectionQuality === "dynamicOnce" && this.gridStateChanged;
+    const shouldUpdateStatic = reflectionQuality === "static" && !this.firstUpdatedReflections;
+
+    const shouldUpdateBasedOnQuality = reflectionQuality === "dynamicFull" || shouldUpdateDynamicThrottled || shouldUpdateDynamicOnce || shouldUpdateStatic;
+
+    const hasGoldFruit = this.hasGoldFruit;
+
+    return reflectionsEnabled && shouldUpdateBasedOnQuality && hasGoldFruit;
+  }
+
   drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize) {
-    if(this.qualitySettings && this.qualitySettings.enableReflections && this.hasGoldFruit) {
+    if(this.shouldUpdateDynamicReflections()) {
+      this.cubeCamera.position.set(this.goldFruitPosition.x, this.goldFruitPosition.y, 0.5);
       this.cubeCamera.update(this.renderer, this.scene);
+      this.firstUpdatedReflections = true;
     }
 
     this.renderer.render(this.scene, this.camera);
@@ -600,9 +627,9 @@ export default class GridUI3D extends GridUI {
 
       fruitModel.position.set(xPosition, yPosition, 0.5);
 
-      if(isGoldFruit && this.qualitySettings && this.qualitySettings.enableReflections) {
-        this.cubeCamera.position.set(xPosition, yPosition, 0.5);
+      if(isGoldFruit) {
         this.hasGoldFruit = true;
+        this.goldFruitPosition = { x: xPosition, y: yPosition };
       }
 
       return { fruitModel, pointLight };
@@ -610,7 +637,7 @@ export default class GridUI3D extends GridUI {
   }
 
   shouldUpdateSnakeBodyGeometry(snakeIndex, snake) {
-    const shouldUpdateBasedOnTicks = this.oldTicks < this.ticks || this.oldTicks === undefined || (this.ticks === 0 && this.oldTicks !== 0);
+    const shouldUpdateBasedOnTicks = this.shouldUpdateBasedOnTicks();
     const shouldUpdateBasedOnState = !snake.gameOver || this.individualSnakeStateHasChanged(snakeIndex);
 
     return shouldUpdateBasedOnTicks && shouldUpdateBasedOnState;
@@ -657,8 +684,6 @@ export default class GridUI3D extends GridUI {
     for(let i = 0; i < this.snakes.length; i++) {
       this.updateSnake(i);
     }
-    
-    this.oldTicks = this.ticks;
   }
 
   updateSnake(snakeIndex) {
