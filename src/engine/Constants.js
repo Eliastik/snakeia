@@ -301,7 +301,7 @@ export default {
     "3dNormal": {
       enableShadows: true,
       enableAntialiasing: true,
-      enableReflections: false,
+      enableReflections: true,
       shadowResolution: "normal",
       shadowType: "high",
       materialType: "high",
@@ -313,7 +313,7 @@ export default {
     "3dMedium": {
       enableShadows: true,
       enableAntialiasing: true,
-      enableReflections: false,
+      enableReflections: true,
       shadowResolution: "medium",
       shadowType: "high",
       materialType: "high",
