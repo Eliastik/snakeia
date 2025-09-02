@@ -403,6 +403,8 @@ export default class GridUI3D extends GridUI {
   
   setupGrid() {
     if(this.forceRedraw || this.gridStateChanged) {
+      this.hasGoldFruit = false;
+
       this.clearGrid();
 
       const totalCells = this.grid.width * this.grid.height;
@@ -599,7 +601,7 @@ export default class GridUI3D extends GridUI {
           child.material = this.getMaterial({
             color: fruitGoldColor,
             metalness: enableReflections ? 0.85 : 0.75,
-            roughness: 0.2,
+            roughness: 0.18,
             envMap: enableReflections ? this.cubeRenderTarget.texture : null
           });
         }
@@ -611,8 +613,6 @@ export default class GridUI3D extends GridUI {
   }
 
   constructFruit(xPosition, yPosition, caseType) {
-    this.hasGoldFruit = false;
-
     const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
     const fruitModel = isGoldFruit ? this.fruitModelGold : this.fruitModel;
     const pointLight = isGoldFruit ? this.fruitGoldPointLight : this.fruitPointLight;

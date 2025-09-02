@@ -186,7 +186,8 @@ export default {
         normal: 1024,
         medium: 2048,
         high: 4096,
-        ultra: 8192
+        ultra: 8192,
+        extreme: 16384
       }
     },
     materialType: {
