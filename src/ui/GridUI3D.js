@@ -1148,6 +1148,12 @@ export default class GridUI3D extends GridUI {
     this.camera?.clear();
     this.camera = null;
 
+    this.cubeCamera?.clear();
+    this.cubeCamera = null;
+
+    this.cubeRenderTarget?.clear();
+    this.cubeCamera = null;
+
     this.controls?.dispose();
     this.controls = null;
 
