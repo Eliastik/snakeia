@@ -515,6 +515,7 @@ export default class GameUI {
         this.gridUI.is3DRendering
           ? this.modelLoader.preloadAll({
             fruit: "assets/models/fruit.glb",
+            head: "assets/models/head.glb",
             unknown: "assets/models/unknown.glb",
           })
           : Promise.resolve()

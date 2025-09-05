@@ -203,51 +203,51 @@ export default {
       type: "choice",
       presets: {
         minimum: {
-          minTubular: 2,
+          minTubular: 4,
           maxTubular: 128,
-          minRadius: 2,
+          minRadius: 4,
           maxRadius: 64,
           maxLength: 50
         },
         low: {
-          minTubular: 2,
+          minTubular: 4,
           maxTubular: 256,
-          minRadius: 2,
+          minRadius: 4,
           maxRadius: 64,
           maxLength: 50
         },
         normal: {
-          minTubular: 2,
+          minTubular: 6,
           maxTubular: 256,
-          minRadius: 2,
+          minRadius: 6,
           maxRadius: 64,
           maxLength: 50
         },
         medium: {
-          minTubular: 2,
+          minTubular: 6,
           maxTubular: 256,
-          minRadius: 2,
+          minRadius: 6,
           maxRadius: 64,
           maxLength: 50
         },
         high: {
-          minTubular: 2,
+          minTubular: 6,
           maxTubular: 256,
-          minRadius: 2,
+          minRadius: 6,
           maxRadius: 64,
           maxLength: 50
         },
         ultra: {
-          minTubular: 2,
+          minTubular: 6,
           maxTubular: 512,
-          minRadius: 2,
+          minRadius: 6,
           maxRadius: 128,
           maxLength: 75
         },
         extreme: {
-          minTubular: 2,
+          minTubular: 6,
           maxTubular: 1024,
-          minRadius: 2,
+          minRadius: 6,
           maxRadius: 256,
           maxLength: 100
         }

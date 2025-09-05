@@ -116,7 +116,10 @@ export default class GridUI3D extends GridUI {
     this.camera.position.set(0, 0, 0);
     this.camera.lookAt(0, 0, 0);
   
-    this.renderer = new THREE.WebGLRenderer({ antialias: this.qualitySettings.enableAntialiasing, alpha: true });
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: this.qualitySettings.enableAntialiasing,
+      alpha: true
+    });
 
     this.cubeRenderTarget = new THREE.WebGLCubeRenderTarget((this.qualitySettings && this.qualitySettings.reflectionResolution) || 128);
     this.cubeRenderTarget.texture.type = THREE.HalfFloatType;
@@ -550,7 +553,7 @@ export default class GridUI3D extends GridUI {
     if(this.fruitModel) {
       this.fruitPointLight = new THREE.PointLight(0xff1100, 0.8, 2);
 
-      const box = new THREE.Box3().setFromObject(this.fruitModel );
+      const box = new THREE.Box3().setFromObject(this.fruitModel);
 
       const size = new THREE.Vector3();
       box.getSize(size);
@@ -728,10 +731,19 @@ export default class GridUI3D extends GridUI {
   setupSnake(snake, snakeIndex) {
     const snakeMaterial = this.getSnakeMaterial(snake);
 
-    const headGeometry = this.generateHeadGeometry(snake);
     const tailGeometry = this.generateTailGeometry(snake);
 
-    const headMesh = this.createSnakeMesh(headGeometry, snakeMaterial);
+    const headMesh = this.modelLoader.get("head");
+
+    headMesh.traverse(child => {
+      if(child.isMesh) {
+        child.material = snakeMaterial;
+      }
+
+      child.castShadow = true;
+      child.receiveShadow = true;
+    });
+    
     const tailMesh = this.createSnakeMesh(tailGeometry, snakeMaterial);
 
     const eyesGroup = this.createSnakeEyes(snake);
@@ -881,10 +893,10 @@ export default class GridUI3D extends GridUI {
   getSnakeMargin(direction, type) {
     const marginMap = {
       head: {
-        [GameConstants.Direction.RIGHT]: { x: -0.2, y: 0 },
-        [GameConstants.Direction.LEFT]:  { x:  0.2, y: 0 },
-        [GameConstants.Direction.UP]:    { x:  0,   y: -0.2 },
-        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.2 },
+        [GameConstants.Direction.RIGHT]: { x: -0.35, y: 0 },
+        [GameConstants.Direction.LEFT]:  { x:  0.35, y: 0 },
+        [GameConstants.Direction.UP]:    { x:  0,   y: -0.35 },
+        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.35 },
       },
       tail: {
         [GameConstants.Direction.RIGHT]: { x: -0.6, y: 0 },
