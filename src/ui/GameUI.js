@@ -516,6 +516,7 @@ export default class GameUI {
           ? this.modelLoader.preloadAll({
             fruit: "assets/models/fruit.glb",
             head: "assets/models/head.glb",
+            tail: "assets/models/tail.glb",
             unknown: "assets/models/unknown.glb",
           })
           : Promise.resolve()

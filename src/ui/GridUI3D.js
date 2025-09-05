@@ -731,8 +731,6 @@ export default class GridUI3D extends GridUI {
   setupSnake(snake, snakeIndex) {
     const snakeMaterial = this.getSnakeMaterial(snake);
 
-    const tailGeometry = this.generateTailGeometry(snake);
-
     const headMesh = this.modelLoader.get("head");
 
     headMesh.traverse(child => {
@@ -743,8 +741,17 @@ export default class GridUI3D extends GridUI {
       child.castShadow = true;
       child.receiveShadow = true;
     });
-    
-    const tailMesh = this.createSnakeMesh(tailGeometry, snakeMaterial);
+
+    const tailMesh = this.modelLoader.get("tail");
+
+    tailMesh.traverse(child => {
+      if(child.isMesh) {
+        child.material = snakeMaterial;
+      }
+
+      child.castShadow = true;
+      child.receiveShadow = true;
+    });
 
     const eyesGroup = this.createSnakeEyes(snake);
     headMesh.add(eyesGroup);
@@ -899,10 +906,10 @@ export default class GridUI3D extends GridUI {
         [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.35 },
       },
       tail: {
-        [GameConstants.Direction.RIGHT]: { x: -0.6, y: 0 },
-        [GameConstants.Direction.LEFT]:  { x:  0.6, y: 0 },
-        [GameConstants.Direction.UP]:    { x:  0,   y: -0.6 },
-        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.6 },
+        [GameConstants.Direction.RIGHT]: { x: -0.3, y: 0 },
+        [GameConstants.Direction.LEFT]:  { x:  0.3, y: 0 },
+        [GameConstants.Direction.UP]:    { x:  0,   y: -0.3 },
+        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.3 },
       }
     };
 
@@ -1026,11 +1033,6 @@ export default class GridUI3D extends GridUI {
     return tubesMeshes;
   }
 
-  generateHeadGeometry(snake) {
-    const { radiusSegments } = this.calculateSnakeGeometryQuality(snake);
-    return new THREE.CapsuleGeometry(0.35, 0.6, radiusSegments, 8);
-  }
-
   createSnakeEyes(snake) {
     const group = new THREE.Group();
     const whiteMat = this.getMaterial({ color: 0xffffff });
@@ -1077,12 +1079,6 @@ export default class GridUI3D extends GridUI {
     }
 
     return group;
-  }
-
-
-  generateTailGeometry(snake) {
-    const { radiusSegments } = this.calculateSnakeGeometryQuality(snake);
-    return new THREE.CapsuleGeometry(0.35, 1, radiusSegments, 8);
   }
 
   getSnakeMaterial(snake) {
