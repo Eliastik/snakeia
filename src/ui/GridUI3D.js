@@ -728,7 +728,9 @@ export default class GridUI3D extends GridUI {
     meshes.eyesGroup = crossGroup;
   }
 
-  createSnakeSegmentPrototypes(material) {
+  createSnakeSegmentPrototypes(snake, material) {
+    const { radiusSegments, tubularSegments } = this.calculateSnakeGeometryQuality(snake);
+
     const straightCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(-0.5, 0, 0),
       new THREE.Vector3(0.5, 0, 0)
@@ -740,8 +742,8 @@ export default class GridUI3D extends GridUI {
       new THREE.Vector3(0.5, 0.5, 0)
     ]);
 
-    const straightGeometry = new THREE.TubeGeometry(straightCurve, 8, 0.35, 8, false);
-    const curveGeometry = new THREE.TubeGeometry(curveCurve, 8, 0.35, 8, false);
+    const straightGeometry = new THREE.TubeGeometry(straightCurve, tubularSegments, 0.35, radiusSegments, false);
+    const curveGeometry = new THREE.TubeGeometry(curveCurve, tubularSegments, 0.35, radiusSegments, false);
 
     const straightMesh = new THREE.Mesh(straightGeometry, material);
     const curveMesh = new THREE.Mesh(curveGeometry, material);
@@ -777,7 +779,7 @@ export default class GridUI3D extends GridUI {
     const eyesGroup = this.createSnakeEyes(snake);
     headMesh.add(eyesGroup);
 
-    const { straightMesh, curveMesh } = this.createSnakeSegmentPrototypes(snakeMaterial);
+    const { straightMesh, curveMesh } = this.createSnakeSegmentPrototypes(snake, snakeMaterial);
 
     this.snakesMeshes[snakeIndex] = {
       bodyParts: null,
@@ -794,27 +796,23 @@ export default class GridUI3D extends GridUI {
   }
 
   updateSnakeGeometry(snakeIndex, snake) {
+    const snakeMeshes = this.snakesMeshes[snakeIndex];
+    const segments = this.calculateSnakeSegmentsPositions(snake);
+
     const snakeMesh = [];
-    const positions = [];
 
-    for(let i = 0; i < snake.length(); i++) {
-      positions.push(snake.get(i));
-    }
-
-    for(let i = 1; i < positions.length - 1; i++) {
-      const prevPos = positions[i - 1];
-      const currPos = positions[i];
-      const nextPos = positions[i + 1];
-
-      const type = this.getSegmentType(prevPos, currPos, nextPos, snake.grid.width, snake.grid.height);
-      const mesh = this.createSegmentMesh(type, prevPos, currPos, nextPos, this.snakesMeshes[snakeIndex].straightMesh, this.snakesMeshes[snakeIndex].curveMesh);
-
-      snakeMesh.push(mesh);
+    for(const segment of segments) {
+      for(let i = 1; i < segment.length - 1; i++) {
+        const mesh = this.createSegmentMesh(segment[i], snakeMeshes.straightMesh, snakeMeshes.curveMesh);
+      
+        snakeMesh.push(mesh);
+        this.snakesGroup.add(mesh);
+      }
     }
 
     this.snakesGroup.add(...snakeMesh);
 
-    this.snakesMeshes[snakeIndex].bodyParts = snakeMesh;
+    snakeMeshes.bodyParts = snakeMesh;
   }
 
   animateSnakeHead(snakeIndex, snake) {
@@ -970,7 +968,7 @@ export default class GridUI3D extends GridUI {
     return mesh;
   }
 
-  /* calculateSnakeSegmentsPositions(snake) {
+  calculateSnakeSegmentsPositions(snake) {
     const segments = [];
     let currentSegment = [];
 
@@ -980,20 +978,23 @@ export default class GridUI3D extends GridUI {
       const currentPosition = snake.get(i);
       const currentPosition3D = this.gridPositionTo3DPosition(currentPosition);
 
-      const currentPositionVector = new THREE.Vector3(
-        currentPosition3D.x,
-        currentPosition3D.y,
-        0.3
-      );
+      const currentPositionData = {
+        vector: new THREE.Vector3(
+          currentPosition3D.x,
+          currentPosition3D.y,
+          0.3
+        ),
+        direction: this.getSnakeDirection(snake, i, currentPosition)
+      };
 
       const direction = snake.get(i).direction;
 
       if(i === 0) {
         switch(direction) {
-        case GameConstants.Direction.RIGHT: currentPositionVector.x -= 0.6; break;
-        case GameConstants.Direction.LEFT:  currentPositionVector.x += 0.6; break;
-        case GameConstants.Direction.BOTTOM: currentPositionVector.y += 0.6; break;
-        case GameConstants.Direction.TOP:    currentPositionVector.y -= 0.6; break;
+        case GameConstants.Direction.RIGHT: currentPositionData.vector.x -= 0.6; break;
+        case GameConstants.Direction.LEFT:  currentPositionData.vector.x += 0.6; break;
+        case GameConstants.Direction.BOTTOM: currentPositionData.vector.y += 0.6; break;
+        case GameConstants.Direction.TOP:    currentPositionData.vector.y -= 0.6; break;
         }
       }
 
@@ -1019,8 +1020,15 @@ export default class GridUI3D extends GridUI {
             0
           );
 
-          const fakeEnd = previousPositionVector.clone().add(wrapOffset);
-          const fakeStart = currentPositionVector.clone().sub(wrapOffset);
+          const fakeEnd = {
+            vector: previousPositionVector.clone().add(wrapOffset),
+            direction: null
+          };
+
+          const fakeStart = {
+            vector: currentPositionData.vector.clone().sub(wrapOffset),
+            direction: null
+          };
 
           currentSegment.push(fakeEnd);
 
@@ -1032,7 +1040,7 @@ export default class GridUI3D extends GridUI {
         }
       }
 
-      currentSegment.push(currentPositionVector);
+      currentSegment.push(currentPositionData);
       previousPosition = currentPosition;
     }
 
@@ -1041,74 +1049,48 @@ export default class GridUI3D extends GridUI {
     }
 
     return segments;
-  }*/
-
-  getSegmentType(prevPos, currPos, nextPos, gridWidth, gridHeight) {
-    let dx1 = currPos.x - prevPos.x;
-    let dy1 = currPos.y - prevPos.y;
-    let dx2 = nextPos.x - currPos.x;
-    let dy2 = nextPos.y - currPos.y;
-
-    if(Math.abs(dx1) >= gridWidth - 1) dx1 = -Math.sign(dx1);
-    if(Math.abs(dx2) >= gridWidth - 1) dx2 = -Math.sign(dx2);
-
-    if(Math.abs(dy1) >= gridHeight - 1) dy1 = -Math.sign(dy1);
-    if(Math.abs(dy2) >= gridHeight - 1) dy2 = -Math.sign(dy2);
-
-    if((dx1 === dx2 && dy1 === dy2) || (dx1 === 0 && dx2 === 0) || (dy1 === 0 && dy2 === 0)) {
-      return "straight";
-    }
-
-    return "curve";
   }
 
-  createSegmentMesh(type, prevPos, currPos, nextPos, straightMesh, curveMesh) {
-    const mesh = type === "straight" ? straightMesh.clone() : curveMesh.clone();
+  createSegmentMesh(segment, straightMesh, curveMesh) {
+    const angleDirections = [GameConstants.Direction.ANGLE_1, GameConstants.Direction.ANGLE_2, GameConstants.Direction.ANGLE_3, GameConstants.Direction.ANGLE_4];
+    const mesh = angleDirections.includes(segment.direction) ? curveMesh.clone() : straightMesh.clone();
 
-    const curr3D = this.gridPositionTo3DPosition(currPos);
-    const next3D = this.gridPositionTo3DPosition(nextPos);
+    let positionX = segment.vector.x;
+    let positionY = segment.vector.y;
+    const positionZ = segment.vector.z;
+
+    switch(segment.direction) {
+    case GameConstants.Direction.ANGLE_1:
+      mesh.rotation.z = Math.PI / 2;
+      positionY -= 0.5;
+      break;
+    case GameConstants.Direction.ANGLE_2:
+      mesh.rotation.z = -Math.PI;
+      positionX += 0.5;
+      break;
+    case GameConstants.Direction.ANGLE_3:
+      mesh.rotation.z = -Math.PI / 2;
+      positionY += 0.5;
+      break;
+    case GameConstants.Direction.ANGLE_4:
+      mesh.rotation.z = 0;
+      positionX -= 0.5;
+      break;
+    case GameConstants.Direction.TOP:
+    case GameConstants.Direction.BOTTOM:
+      mesh.rotation.z = Math.PI / 2;
+    }
 
     mesh.position.set(
-      (curr3D.x + next3D.x) / 2,
-      (curr3D.y + next3D.y) / 2,
-      0.3
+      positionX,
+      positionY,
+      positionZ
     );
-
-    const dir = new THREE.Vector3(next3D.x - curr3D.x, next3D.y - curr3D.y, 0);
-    const angle = Math.atan2(dir.y, dir.x);
-    mesh.rotation.z = angle;
 
     mesh.castShadow = true;
     mesh.receiveShadow = true;
 
     return mesh;
-  }
-
-  /*generateSnakeBodyGeometry(segments, snake) {
-    const tubesGeometries = [];
-
-    for(const segment of segments) {
-      const geometry = this.getSnakeBodyGeometry(snake, segment);
-      tubesGeometries.push(geometry);
-    }
-
-    return tubesGeometries;
-  }*/
-
-  generateSnakeBodyMesh(tubesGeometries, material) {
-    const tubesMeshes = [];
-
-    for(const geometry of tubesGeometries) {
-      const tube = new THREE.Mesh(geometry, material);
-      tube.castShadow = true;
-      tube.receiveShadow = true;
-
-      this.snakesGroup.add(tube);
-
-      tubesMeshes.push(tube);
-    }
-
-    return tubesMeshes;
   }
 
   createSnakeEyes(snake) {
@@ -1168,14 +1150,6 @@ export default class GridUI3D extends GridUI {
 
     return this.getMaterial({ color: snakeColor });
   }
-
-  /*getSnakeBodyGeometry(snake, points) {
-    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQuality(snake);
-
-    const curve = new THREE.CatmullRomCurve3(points, false);
-   
-    return new THREE.TubeGeometry(curve, tubularSegments, 0.35, radiusSegments, false);
-  }*/
 
   calculateSnakeGeometryQuality(snake) {
     const normalizedLength = Math.min(snake.length() / this.qualitySettings.snakeSegments.maxLength, 1);
