@@ -482,6 +482,11 @@ export default class GridUI extends Component {
     return snake.getGraphicDirection(partNumber);
   }
 
+  isAngleDirection(direction) {
+    const angleDirections = [GameConstants.Direction.ANGLE_1, GameConstants.Direction.ANGLE_2, GameConstants.Direction.ANGLE_3, GameConstants.Direction.ANGLE_4];
+    return angleDirections.includes(direction);
+  }
+
   getSnakeHeadImage(snake, direction, imageLoc) {
     if(snake.gameOver && !snake.scoreMax) {
       switch(direction) {

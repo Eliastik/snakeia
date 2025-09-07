@@ -719,29 +719,6 @@ export default class GridUI3D extends GridUI {
     meshes.eyesGroup = crossGroup;
   }
 
-  createSnakeSegmentPrototypes(snake, material) {
-    const { radiusSegments, tubularSegments } = this.calculateSnakeGeometryQuality(snake);
-
-    const straightCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-0.5, 0, 0),
-      new THREE.Vector3(0.5, 0, 0)
-    ]);
-      
-    const curveCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(0.5, 0, 0),
-      new THREE.Vector3(0.5, 0.5, 0)
-    ]);
-
-    const straightGeometry = new THREE.TubeGeometry(straightCurve, tubularSegments, 0.35, radiusSegments, false);
-    const curveGeometry = new THREE.TubeGeometry(curveCurve, tubularSegments, 0.35, radiusSegments, false);
-
-    const straightMesh = new THREE.Mesh(straightGeometry, material);
-    const curveMesh = new THREE.Mesh(curveGeometry, material);
-
-    return { straightMesh, curveMesh };
-  }
-
   setupSnake(snake, snakeIndex) {
     const snakeMaterial = this.getSnakeMaterial(snake);
 
@@ -770,17 +747,13 @@ export default class GridUI3D extends GridUI {
     const eyesGroup = this.createSnakeEyes(snake);
     headMesh.add(eyesGroup);
 
-    const { straightMesh, curveMesh } = this.createSnakeSegmentPrototypes(snake, snakeMaterial);
-
     this.snakesMeshes[snakeIndex] = {
       bodyParts: null,
       headMesh: headMesh,
       tailMesh: tailMesh,
       snakeMaterial,
       eyesGroup,
-      snakeIndex,
-      straightMesh,
-      curveMesh
+      snakeIndex
     };
 
     this.snakesGroup.add(headMesh, tailMesh);
@@ -1022,41 +995,42 @@ export default class GridUI3D extends GridUI {
     return segments;
   }
 
-  createSegmentMesh(segment, straightMesh, curveMesh) {
-    const angleDirections = [GameConstants.Direction.ANGLE_1, GameConstants.Direction.ANGLE_2, GameConstants.Direction.ANGLE_3, GameConstants.Direction.ANGLE_4];
-    const mesh = angleDirections.includes(segment.direction) ? curveMesh.clone() : straightMesh.clone();
+  createSegmentMesh(index, segment, straightMesh, curveMesh) {
+    const isAngle = this.isAngleDirection(segment.direction);
+    const mesh = isAngle ? curveMesh : straightMesh;
 
-    let positionX = segment.vector.x;
-    let positionY = segment.vector.y;
-    const positionZ = segment.vector.z;
+    const segmentTransform = new THREE.Object3D();
+    segmentTransform.position.set(segment.vector.x, segment.vector.y, segment.vector.z);
 
     switch(segment.direction) {
     case GameConstants.Direction.ANGLE_1:
-      mesh.rotation.z = Math.PI / 2;
-      positionY -= 0.5;
+      segmentTransform.rotation.z = Math.PI / 2;
+      segmentTransform.position.y -= 0.5;
       break;
     case GameConstants.Direction.ANGLE_2:
-      mesh.rotation.z = -Math.PI;
-      positionX += 0.5;
+      segmentTransform.rotation.z = Math.PI;
+      segmentTransform.position.x += 0.5;
       break;
     case GameConstants.Direction.ANGLE_3:
-      mesh.rotation.z = -Math.PI / 2;
-      positionY += 0.5;
+      segmentTransform.rotation.z = -Math.PI / 2;
+      segmentTransform.position.y += 0.5;
       break;
     case GameConstants.Direction.ANGLE_4:
-      mesh.rotation.z = 0;
-      positionX -= 0.5;
+      segmentTransform.rotation.z = 0;
+      segmentTransform.position.x -= 0.5;
       break;
     case GameConstants.Direction.TOP:
     case GameConstants.Direction.BOTTOM:
-      mesh.rotation.z = Math.PI / 2;
+      segmentTransform.rotation.z = Math.PI / 2;
+      break;
+    case GameConstants.Direction.LEFT:
+    case GameConstants.Direction.RIGHT:
+      segmentTransform.rotation.z = 0;
+      break;
     }
 
-    mesh.position.set(
-      positionX,
-      positionY,
-      positionZ
-    );
+    segmentTransform.updateMatrix();
+    mesh.setMatrixAt(index, segmentTransform.matrix);
 
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -1071,7 +1045,7 @@ export default class GridUI3D extends GridUI {
 
     const snakeMesh = this.snakeBodyRenderingMethod === "TUBES" ? 
       this.generateSnakeBodyMeshTubes(segmentsPositions, snake, snakeMaterial) :
-      this.generateSnakeBodyMeshIndividual(segmentsPositions, snakeMeshes);
+      this.generateSnakeBodyMeshIndividual(segmentsPositions, snake, snakeMaterial);
 
     this.snakesGroup.add(...snakeMesh);
 
@@ -1109,19 +1083,59 @@ export default class GridUI3D extends GridUI {
     return tubesMeshes;
   }
 
-  generateSnakeBodyMeshIndividual(segmentsPositions, snakeMeshes) {
-    const snakeMesh = [];
+  createSnakeSegmentMeshes(snake, material, segmentsPositions) {
+    // TODO optimize geometry quality for instanced mesh in this case
+    const { radiusSegments, tubularSegments } = this.calculateSnakeGeometryQuality(snake);
+
+    const straightCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.5, 0, 0),
+      new THREE.Vector3(0.5, 0, 0)
+    ]);
+      
+    const curveCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0.5, 0, 0),
+      new THREE.Vector3(0.5, 0.5, 0)
+    ]);
+
+    const straightGeometry = new THREE.TubeGeometry(straightCurve, tubularSegments, 0.35, radiusSegments, false);
+    const curveGeometry = new THREE.TubeGeometry(curveCurve, tubularSegments, 0.35, radiusSegments, false);
+
+    const gridFlat = segmentsPositions
+      .map(segment => segment.slice(1, -1))
+      .flat();
+
+    const straightCount = gridFlat.filter(part => !this.isAngleDirection(part.direction)).length;
+    const curveCount = gridFlat.filter(part => this.isAngleDirection(part.direction)).length;
+
+    const straightMesh = new THREE.InstancedMesh(straightGeometry, material, straightCount);
+    const curveMesh = new THREE.InstancedMesh(curveGeometry, material, curveCount);
+
+    return { straightMesh, curveMesh };
+  }
+
+  generateSnakeBodyMeshIndividual(segmentsPositions, snake, snakeMaterial) {
+    const { straightMesh, curveMesh } = this.createSnakeSegmentMeshes(snake, snakeMaterial, segmentsPositions);
+
+    let straightIndex = 0;
+    let curveIndex = 0;
 
     for(const segment of segmentsPositions) {
       for(let i = 1; i < segment.length - 1; i++) {
-        const mesh = this.createSegmentMesh(segment[i], snakeMeshes.straightMesh, snakeMeshes.curveMesh);
+        const part = segment[i];
+        const isAngle = this.isAngleDirection(part.direction);
+        
+        this.createSegmentMesh(isAngle ? curveIndex : straightIndex, part, straightMesh, curveMesh);
 
-        snakeMesh.push(mesh);
-        this.snakesGroup.add(mesh);
+        if(isAngle) {
+          curveIndex++;
+        } else {
+          straightIndex++;
+        }
       }
     }
     
-    return snakeMesh;
+    return [straightMesh, curveMesh];
   }
 
   createSnakeEyes(snake) {
