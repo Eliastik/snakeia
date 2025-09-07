@@ -50,6 +50,8 @@ export default class GridUI3D extends GridUI {
       100: { fov: 55, distance: 120, zoom: 1 }
     };
 
+    this.snakeBodyRenderingMethod = "INDIVIDUAL"; // or TUBES (old method) or INDIVIDUAL (new method)
+
     this.qualitySettings = graphicType !== "3dCustom" || !customGraphicsPreset ? 
       this.getQualityPresetSettings(graphicType) :
       {
@@ -63,17 +65,6 @@ export default class GridUI3D extends GridUI {
     this.hasGoldFruit = false;
     this.goldFruitPosition = null;
     this.firstUpdatedReflections = false;
-
-    /**
-     * TODO :
-     * - Rotation animation (tail/head)
-     * - Optimize Snake body generation when there are multiple parts (don't update not moving parts)
-     * - Better graphical effects?
-     * - Fix bug when crossing grids -> OK
-     * - Draw eyes on the Snake head -> OK
-     * - Fix animations/Snake drawing when the Snake cross the side of the grid -> OK
-     * - Advanced quality settings -> OK
-     */
   }
 
   resolveQualitySettings(preset) {
@@ -795,26 +786,6 @@ export default class GridUI3D extends GridUI {
     this.snakesGroup.add(headMesh, tailMesh);
   }
 
-  updateSnakeGeometry(snakeIndex, snake) {
-    const snakeMeshes = this.snakesMeshes[snakeIndex];
-    const segments = this.calculateSnakeSegmentsPositions(snake);
-
-    const snakeMesh = [];
-
-    for(const segment of segments) {
-      for(let i = 1; i < segment.length - 1; i++) {
-        const mesh = this.createSegmentMesh(segment[i], snakeMeshes.straightMesh, snakeMeshes.curveMesh);
-      
-        snakeMesh.push(mesh);
-        this.snakesGroup.add(mesh);
-      }
-    }
-
-    this.snakesGroup.add(...snakeMesh);
-
-    snakeMeshes.bodyParts = snakeMesh;
-  }
-
   animateSnakeHead(snakeIndex, snake) {
     this.animateSnake({
       snakeIndex,
@@ -906,7 +877,7 @@ export default class GridUI3D extends GridUI {
   }
 
   animateSnakeRotation(snake, snakePart, fromDir, targetDir, animationPercentage, mesh) {
-    const baseAngle = this.getRotationFromDirection(targetDir);
+    const baseAngle = this.getHeadAndTailRotationFromDirection(targetDir);
 
     let graphicDirection;
 
@@ -951,7 +922,7 @@ export default class GridUI3D extends GridUI {
     return marginMap[type]?.[direction] || { x: 0, y: 0 };
   }
 
-  getRotationFromDirection(direction) {
+  getHeadAndTailRotationFromDirection(direction) {
     return {
       [GameConstants.Direction.RIGHT]: -Math.PI / 2,
       [GameConstants.Direction.LEFT]: Math.PI / 2,
@@ -1091,6 +1062,66 @@ export default class GridUI3D extends GridUI {
     mesh.receiveShadow = true;
 
     return mesh;
+  }
+
+  updateSnakeGeometry(snakeIndex, snake) {
+    const snakeMeshes = this.snakesMeshes[snakeIndex];
+    const snakeMaterial = snakeMeshes.snakeMaterial;
+    const segmentsPositions = this.calculateSnakeSegmentsPositions(snake);
+
+    const snakeMesh = this.snakeBodyRenderingMethod === "TUBES" ? 
+      this.generateSnakeBodyMeshTubes(segmentsPositions, snake, snakeMaterial) :
+      this.generateSnakeBodyMeshIndividual(segmentsPositions, snakeMeshes);
+
+    this.snakesGroup.add(...snakeMesh);
+
+    snakeMeshes.bodyParts = snakeMesh;
+  }
+
+  getSnakeBodyGeometryTubes(snake, points) {
+    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQuality(snake);
+
+    const curve = new THREE.CatmullRomCurve3(points, false);
+   
+    return new THREE.TubeGeometry(curve, tubularSegments, 0.35, radiusSegments, false);
+  }
+
+  generateSnakeBodyMeshTubes(segmentsPositions, snake, snakeMaterial) {
+    const tubesGeometries = [];
+
+    for(const segment of segmentsPositions) {
+      const geometry = this.getSnakeBodyGeometryTubes(snake, segment.map(segment => segment.vector));
+      tubesGeometries.push(geometry);
+    }
+
+    const tubesMeshes = [];
+
+    for(const geometry of tubesGeometries) {
+      const tube = new THREE.Mesh(geometry, snakeMaterial);
+      tube.castShadow = true;
+      tube.receiveShadow = true;
+
+      this.snakesGroup.add(tube);
+
+      tubesMeshes.push(tube);
+    }
+
+    return tubesMeshes;
+  }
+
+  generateSnakeBodyMeshIndividual(segmentsPositions, snakeMeshes) {
+    const snakeMesh = [];
+
+    for(const segment of segmentsPositions) {
+      for(let i = 1; i < segment.length - 1; i++) {
+        const mesh = this.createSegmentMesh(segment[i], snakeMeshes.straightMesh, snakeMeshes.curveMesh);
+
+        snakeMesh.push(mesh);
+        this.snakesGroup.add(mesh);
+      }
+    }
+    
+    return snakeMesh;
   }
 
   createSnakeEyes(snake) {
