@@ -885,10 +885,10 @@ export default class GridUI3D extends GridUI {
         [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.35 },
       },
       tail: {
-        [GameConstants.Direction.RIGHT]: { x: -0.3, y: 0 },
-        [GameConstants.Direction.LEFT]:  { x:  0.3, y: 0 },
-        [GameConstants.Direction.UP]:    { x:  0,   y: -0.3 },
-        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.3 },
+        [GameConstants.Direction.RIGHT]: { x: -0.7, y: 0 },
+        [GameConstants.Direction.LEFT]:  { x:  0.7, y: 0 },
+        [GameConstants.Direction.UP]:    { x:  0,   y: -0.7 },
+        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.7 },
       }
     };
 
@@ -1053,7 +1053,7 @@ export default class GridUI3D extends GridUI {
   }
 
   getSnakeBodyGeometryTubes(snake, points) {
-    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQuality(snake);
+    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQualityTubes(snake);
 
     const curve = new THREE.CatmullRomCurve3(points, false);
    
@@ -1084,8 +1084,7 @@ export default class GridUI3D extends GridUI {
   }
 
   createSnakeSegmentMeshes(snake, material, segmentsPositions) {
-    // TODO optimize geometry quality for instanced mesh in this case
-    const { radiusSegments, tubularSegments } = this.calculateSnakeGeometryQuality(snake);
+    const { radiusSegments, tubularSegments } = this.calculateSnakeGeometryQualityIndividual(snake);
 
     const straightCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(-0.5, 0, 0),
@@ -1196,7 +1195,7 @@ export default class GridUI3D extends GridUI {
     return this.getMaterial({ color: snakeColor });
   }
 
-  calculateSnakeGeometryQuality(snake) {
+  calculateSnakeGeometryQualityTubes(snake) {
     const normalizedLength = Math.min(snake.length() / this.qualitySettings.snakeSegments.maxLength, 1);
 
     const tubularSegments = Math.floor(this.qualitySettings.snakeSegments.minTubular + normalizedLength * (this.qualitySettings.snakeSegments.maxTubular - this.qualitySettings.snakeSegments.minTubular));
@@ -1204,6 +1203,26 @@ export default class GridUI3D extends GridUI {
 
     return { tubularSegments, radiusSegments };
   }
+
+  calculateSnakeGeometryQualityIndividual(snake) {
+    const gridArea = this.grid.width * this.grid.height;
+    const normalizedGrid = Math.min(gridArea / this.qualitySettings.snakeSegments.maxGridArea, 1);
+
+    const normalizedLength = Math.min(snake.length() / this.qualitySettings.snakeSegments.maxLength, 1);
+
+    const factor = (0.8 * normalizedGrid) + (0.2 * normalizedLength);
+
+    const tubularSegments = Math.floor(
+      this.qualitySettings.snakeSegments.maxTubular - factor * (this.qualitySettings.snakeSegments.maxTubular - this.qualitySettings.snakeSegments.minTubular)
+    );
+
+    const radiusSegments = Math.floor(
+      this.qualitySettings.snakeSegments.maxRadius - factor * (this.qualitySettings.snakeSegments.maxRadius - this.qualitySettings.snakeSegments.minRadius)
+    );
+
+    return { tubularSegments, radiusSegments };
+  }
+
 
   gridPositionTo3DPosition(position) {
     const halfGridWidth = this.grid.width / 2;

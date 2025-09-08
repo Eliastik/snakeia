@@ -207,49 +207,56 @@ export default {
           maxTubular: 128,
           minRadius: 4,
           maxRadius: 64,
-          maxLength: 50
+          maxLength: 50,
+          maxGridArea: 10000
         },
         low: {
           minTubular: 4,
           maxTubular: 256,
           minRadius: 4,
           maxRadius: 64,
-          maxLength: 50
+          maxLength: 50,
+          maxGridArea: 10000
         },
         normal: {
           minTubular: 6,
           maxTubular: 256,
           minRadius: 6,
           maxRadius: 64,
-          maxLength: 50
+          maxLength: 50,
+          maxGridArea: 10000
         },
         medium: {
           minTubular: 6,
           maxTubular: 256,
           minRadius: 6,
           maxRadius: 64,
-          maxLength: 50
+          maxLength: 50,
+          maxGridArea: 10000
         },
         high: {
           minTubular: 6,
           maxTubular: 256,
           minRadius: 6,
           maxRadius: 64,
-          maxLength: 50
+          maxLength: 50,
+          maxGridArea: 10000
         },
         ultra: {
           minTubular: 6,
           maxTubular: 512,
           minRadius: 6,
           maxRadius: 128,
-          maxLength: 75
+          maxLength: 75,
+          maxGridArea: 10000
         },
         extreme: {
           minTubular: 6,
           maxTubular: 1024,
           minRadius: 6,
           maxRadius: 256,
-          maxLength: 100
+          maxLength: 100,
+          maxGridArea: 10000
         }
       }
     },
