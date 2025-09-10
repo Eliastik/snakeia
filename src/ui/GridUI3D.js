@@ -814,6 +814,7 @@ export default class GridUI3D extends GridUI {
   }
   
   updateSnakeTransition(snakeIndex, snake, options) {
+    // TODO throttle this method
     const { type } = options;
     const snakeMeshes = this.snakesMeshes[snakeIndex];
     const transitionMeshKey = type + "TransitionMesh";
@@ -1322,22 +1323,28 @@ export default class GridUI3D extends GridUI {
   calculateSnakeGeometryQualityIndividual(snake) {
     const gridArea = this.grid.width * this.grid.height;
     const normalizedGrid = Math.min(gridArea / this.qualitySettings.snakeSegments.maxGridArea, 1);
-
     const normalizedLength = Math.min(snake.length() / this.qualitySettings.snakeSegments.maxLength, 1);
 
-    const factor = (0.8 * normalizedGrid) + (0.2 * normalizedLength);
+    const rawFactor = (0.8 * normalizedGrid) + (0.2 * normalizedLength);
 
-    const tubularSegments = Math.floor(
-      this.qualitySettings.snakeSegments.maxTubular - factor * (this.qualitySettings.snakeSegments.maxTubular - this.qualitySettings.snakeSegments.minTubular)
-    );
+    const factor = Math.pow(rawFactor, 0.5);
 
-    const radiusSegments = Math.floor(
-      this.qualitySettings.snakeSegments.maxRadius - factor * (this.qualitySettings.snakeSegments.maxRadius - this.qualitySettings.snakeSegments.minRadius)
-    );
+    function snapToStep(value, step, min) {
+      return Math.max(min, Math.round(value / step) * step);
+    }
+
+    const softMaxTubular = this.qualitySettings.snakeSegments.maxTubular / 2;
+    const softMaxRadius = this.qualitySettings.snakeSegments.maxRadius / 2;
+
+    const tubularSegmentsRaw = softMaxTubular - factor * (softMaxTubular - this.qualitySettings.snakeSegments.minTubular);
+
+    const radiusSegmentsRaw = softMaxRadius - factor * (softMaxRadius - this.qualitySettings.snakeSegments.minRadius);
+
+    const tubularSegments = snapToStep(tubularSegmentsRaw, 16, this.qualitySettings.snakeSegments.minTubular);
+    const radiusSegments = snapToStep(radiusSegmentsRaw, 8, this.qualitySettings.snakeSegments.minRadius);
 
     return { tubularSegments, radiusSegments };
   }
-
 
   gridPositionTo3DPosition(position) {
     const halfGridWidth = this.grid.width / 2;
