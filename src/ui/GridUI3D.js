@@ -804,24 +804,45 @@ export default class GridUI3D extends GridUI {
 
     if(!mainMesh) return;
 
-    let curvePoints = [];
+    const positionPoints = [];
 
     if(type === "head") {
-      const firstPosition3D = this.gridPositionTo3DPosition(snake.get(1));
-      const secondPosition3D = this.gridPositionTo3DPosition(snake.get(2));
-      const headPosition3D = mainMesh.position;
-      curvePoints = [
-        new THREE.Vector3(headPosition3D.x, headPosition3D.y, 0.3),
-        new THREE.Vector3(firstPosition3D.x, firstPosition3D.y, 0.3),
-        new THREE.Vector3(secondPosition3D.x, secondPosition3D.y, 0.3)
-      ];
-    } else if (type === "tail") {
-      const lastPosition3D = this.gridPositionTo3DPosition(snake.get(snake.length() - 2));
-      const tailPosition3D = mainMesh.position;
-      curvePoints = [
-        new THREE.Vector3(lastPosition3D.x, lastPosition3D.y, 0.3),
-        new THREE.Vector3(tailPosition3D.x, tailPosition3D.y, 0.3)
-      ];
+      positionPoints.push(mainMesh.position);
+      positionPoints.push(this.gridPositionTo3DPosition(snake.get(1)));
+      positionPoints.push(this.gridPositionTo3DPosition(snake.get(2)));
+    } else if(type === "tail") {
+      positionPoints.push(this.gridPositionTo3DPosition(snake.get(snake.length() - 2)));
+      positionPoints.push(mainMesh.position);
+    }
+
+    const halfWidth = this.grid.width / 2;
+    const halfHeight = this.grid.height / 2;
+
+    const curvePoints = [];
+
+    for(let i = 0; i < positionPoints.length; i++) {
+      const currentPosition = positionPoints[i];
+
+      if(i < positionPoints.length - 1) {
+        const nextPosition = positionPoints[i + 1];
+        const deltaX = nextPosition.x - currentPosition.x;
+        const deltaY = nextPosition.y - currentPosition.y;
+
+        if(Math.abs(deltaX) > this.grid.width / 2) {
+          if(deltaX > 0) nextPosition.x -= this.grid.width;
+          else nextPosition.x += this.grid.width;
+        }
+
+        if(Math.abs(deltaY) > this.grid.height / 2) {
+          if(deltaY > 0) nextPosition.y -= this.grid.height;
+          else nextPosition.y += this.grid.height;
+        }
+      }
+
+      const clampedX = Math.max(-halfWidth, Math.min(currentPosition.x, halfWidth));
+      const clampedY = Math.max(-halfHeight, Math.min(currentPosition.y, halfHeight));
+
+      curvePoints.push(new THREE.Vector3(clampedX, clampedY, 0.3));
     }
 
     const curve = new THREE.CatmullRomCurve3(curvePoints);
@@ -1156,7 +1177,11 @@ export default class GridUI3D extends GridUI {
     const curveGeometry = new THREE.TubeGeometry(curveCurve, tubularSegments, 0.35, radiusSegments, false);
 
     const gridFlat = segmentsPositions
-      .map(segment => segment.slice(1, -1))
+      .map((segment, segIndex) => 
+        segIndex === 0 
+          ? segment.slice(2, -1)
+          : segment.slice(1, -1)
+      )
       .flat();
 
     const straightCount = gridFlat.filter(part => !this.isAngleDirection(part.direction)).length;
