@@ -434,8 +434,7 @@ export default class GridUI extends Component {
         currentPosition = snake.getTailPosition();
       }
 
-      if((partNumber == 0 || partNumber == -1) &&
-        (graphicDirection == GameConstants.Direction.ANGLE_1 || graphicDirection == GameConstants.Direction.ANGLE_2 || graphicDirection == GameConstants.Direction.ANGLE_3 || graphicDirection == GameConstants.Direction.ANGLE_4)) {
+      if((partNumber == 0 || partNumber == -1) && this.isAngleDirection(graphicDirection)) {
         angle = this.calculateAnimationAngle(partNumber, animationPercentage, graphicDirection, direction);
         eraseBelow = false;
       }

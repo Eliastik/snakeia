@@ -65,6 +65,13 @@ export default class GridUI3D extends GridUI {
     this.hasGoldFruit = false;
     this.goldFruitPosition = null;
     this.firstUpdatedReflections = false;
+
+    /**
+     * TODO :
+     * - Animate tail + Fix head animation with new model
+     * - Optimize gold fruit displaying (slight delay)
+     * - Optimize TubeGeomtry geometry (reduce geometry quality)
+     */
   }
 
   resolveQualitySettings(preset) {
@@ -860,15 +867,14 @@ export default class GridUI3D extends GridUI {
   }
 
   animateSnake({ snake, mesh, from, to, snakePart, type }) {
-    const fromDir = from.direction;
-    const targetDir = to.direction;
+    const targetDir = this.getSnakeDirection(snake, snakePart, to);
 
     const fromPos = this.gridPositionTo3DPosition(from);
     const toPos = this.gridPositionTo3DPosition(to);
 
     const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
 
-    const margin = this.getSnakeMargin(targetDir, type);
+    const margin = this.getSnakeMargin(to.direction, type);
 
     this.handleSnakeGridCrossing(toPos, fromPos, snakePart);
 
@@ -883,7 +889,7 @@ export default class GridUI3D extends GridUI {
 
     mesh.position.copy(interpolated);
 
-    this.animateSnakeRotation(snake, snakePart, fromDir, targetDir, animationPercentage, mesh);
+    this.animateSnakeRotation(snake, snakePart, targetDir, animationPercentage, mesh);
   }
 
   handleSnakeGridCrossing(toPos, fromPos, snakePart) {
@@ -925,27 +931,29 @@ export default class GridUI3D extends GridUI {
     }
   }
 
-  animateSnakeRotation(snake, snakePart, fromDir, targetDir, animationPercentage, mesh) {
+  animateSnakeRotation(snake, snakePart, targetDir, animationPercentage, mesh) {
     const baseAngle = this.getHeadAndTailRotationFromDirection(targetDir);
 
     let graphicDirection;
 
-    if(snakePart == 0) {
+    if(snakePart === 0) {
       if(snake.length() > 1) {
         graphicDirection = snake.getGraphicDirection(1);
       } else {
         graphicDirection = snake.getGraphicDirection(0);
       }
+    } else if(snakePart === -1) {
+      graphicDirection = snake.getGraphicDirectionFor(snake.getTailPosition(), snake.lastTail, snake.get(snake.length() - 2));
     }
 
-    if(fromDir !== targetDir && snakePart !== -1) {
+    if((snakePart == 0 || snakePart == -1) && this.isAngleDirection(graphicDirection)) {
       const animationAngle = this.calculateAnimationAngle(
         snakePart,
         animationPercentage,
         graphicDirection,
         targetDir
       );
-
+      
       mesh.rotation.z = baseAngle - (animationAngle * (Math.PI / 180));
     } else {
       mesh.rotation.z = baseAngle;
