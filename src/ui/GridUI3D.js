@@ -143,9 +143,10 @@ export default class GridUI3D extends GridUI {
     this.renderer.shadowMap.type = shadowType;
 
     this.gridGroup = new THREE.Group();
+    this.fruitsGroup = new THREE.Group();
     this.snakesGroup = new THREE.Group();
 
-    this.scene.add(this.gridGroup, this.snakesGroup);
+    this.scene.add(this.gridGroup, this.fruitsGroup, this.snakesGroup);
   }
 
   setupControls(canvas) {
@@ -401,12 +402,20 @@ export default class GridUI3D extends GridUI {
     this.disposeGroup(this.gridGroup);
     this.gridGroup.clear();
   }
+
+  hideFruits() {
+    this.fruitModel.visible = false;
+    this.fruitModelGold.visible = false;
+    this.fruitPointLight.visible = false;
+    this.fruitGoldPointLight.visible = false;
+  }
   
   setupGrid() {
     if(this.forceRedraw || this.gridStateChanged) {
       this.hasGoldFruit = false;
 
       this.clearGrid();
+      this.hideFruits();
 
       const totalCells = this.grid.width * this.grid.height;
       const halfCells = Math.floor(totalCells / 2);
@@ -442,43 +451,50 @@ export default class GridUI3D extends GridUI {
           }
 
           if(caseType === GameConstants.CaseType.FRUIT || caseType === GameConstants.CaseType.FRUIT_GOLD) {
-            const { fruitModel, pointLight } = this.constructFruit(xPosition, yPosition, caseType);
-            this.gridGroup.add(fruitModel, pointLight);
+            this.displayFruit(xPosition, yPosition, caseType);
           }
 
           if(!Object.values(GameConstants.CaseType).includes(caseType)) {
-            const unknownModel = this.modelLoader.get("unknown");
-
-            if(unknownModel) {
-              const box = new THREE.Box3().setFromObject(unknownModel);
-
-              const size = new THREE.Vector3();
-              box.getSize(size);
-
-              unknownModel.scale.setScalar(0.4 / size.x);
-              unknownModel.position.set(xPosition - 0.3, yPosition - 0.4, 0.5);
-              unknownModel.rotation.x = Math.PI / 2;
-
-              unknownModel.traverse(child => {
-                if(child.isMesh) {
-                  child.material = this.getMaterial({
-                    map: child.material.map,
-                    normalMap: child.material.normalMap,
-                    metalnessMap: child.material.metalnessMap,
-                    roughnessMap: child.material.roughnessMap
-                  });
-
-                  child.castShadow = true;
-                  child.receiveShadow = true;
-                }
-              });
+            const unknownModel = this.constructUnknownModel(xPosition, yPosition);
             
+            if(unknownModel) {
               this.gridGroup.add(unknownModel);
             }
           }
         }
       }
     }
+  }
+
+  constructUnknownModel(xPosition, yPosition) {
+    const unknownModel = this.modelLoader.get("unknown");
+
+    if(unknownModel) {
+      const box = new THREE.Box3().setFromObject(unknownModel);
+
+      const size = new THREE.Vector3();
+      box.getSize(size);
+
+      unknownModel.scale.setScalar(0.4 / size.x);
+      unknownModel.position.set(xPosition - 0.3, yPosition - 0.4, 0.5);
+      unknownModel.rotation.x = Math.PI / 2;
+
+      unknownModel.traverse(child => {
+        if(child.isMesh) {
+          child.material = this.getMaterial({
+            map: child.material.map,
+            normalMap: child.material.normalMap,
+            metalnessMap: child.material.metalnessMap,
+            roughnessMap: child.material.roughnessMap
+          });
+
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+    }
+
+    return unknownModel;
   }
 
   constructGround() {
@@ -572,6 +588,8 @@ export default class GridUI3D extends GridUI {
         child.castShadow = true;
         child.receiveShadow = true;
       });
+
+      this.fruitsGroup.add(this.fruitModel, this.fruitPointLight);
     }
   }
 
@@ -610,10 +628,12 @@ export default class GridUI3D extends GridUI {
         child.castShadow = true;
         child.receiveShadow = true;
       });
+
+      this.fruitsGroup.add(this.fruitModelGold, this.fruitGoldPointLight);
     }
   }
 
-  constructFruit(xPosition, yPosition, caseType) {
+  displayFruit(xPosition, yPosition, caseType) {
     const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
     const fruitModel = isGoldFruit ? this.fruitModelGold : this.fruitModel;
     const pointLight = isGoldFruit ? this.fruitGoldPointLight : this.fruitPointLight;
@@ -626,14 +646,13 @@ export default class GridUI3D extends GridUI {
         pointLight.visible = false;
       }
 
+      fruitModel.visible = true;
       fruitModel.position.set(xPosition, yPosition, 0.5);
 
       if(isGoldFruit) {
         this.hasGoldFruit = true;
         this.goldFruitPosition = { x: xPosition, y: yPosition };
       }
-
-      return { fruitModel, pointLight };
     }
   }
 
@@ -1337,14 +1356,18 @@ export default class GridUI3D extends GridUI {
     if(this.scene) {
       this.disposeGroup(this.gridGroup);
       this.disposeGroup(this.snakesGroup);
+      this.disposeGroup(this.fruitsGroup);
 
       this.fruitModel?.clear();
       this.fruitModelGold?.clear();
+      this.fruitPointLight?.clear();
+      this.fruitGoldPointLight?.clear();
 
-      this.scene.remove(this.gridGroup, this.snakesGroup);
+      this.scene.remove(this.gridGroup, this.snakesGroup, this.fruitsGroup);
 
       this.gridGroup?.clear();
       this.snakesGroup?.clear();
+      this.fruitsGroup?.clear();
     }
 
     this.snakesMeshes = [];
