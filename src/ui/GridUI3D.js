@@ -885,6 +885,20 @@ export default class GridUI3D extends GridUI {
     return newTransitionMesh;
   }
 
+  getSnakePartGraphicDirection(snakePart, snake) {
+    if(snakePart === 0) {
+      if(snake.length() > 1) {
+        return snake.getGraphicDirection(1);
+      }
+      
+      return snake.getGraphicDirection(0);
+    } else if(snakePart === -1) {
+      return snake.getGraphicDirectionFor(snake.getTailPosition(), snake.lastTail, snake.get(snake.length() - 2));
+    }
+
+    return null;
+  }
+
   animateSnake({ snake, mesh, position, snakePart, type }) {
     const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
 
@@ -962,17 +976,7 @@ export default class GridUI3D extends GridUI {
   animateSnakeRotation(snake, snakePart, targetDir, animationPercentage, mesh) {
     const baseAngle = this.getHeadAndTailRotationFromDirection(targetDir);
 
-    let graphicDirection;
-
-    if(snakePart === 0) {
-      if(snake.length() > 1) {
-        graphicDirection = snake.getGraphicDirection(1);
-      } else {
-        graphicDirection = snake.getGraphicDirection(0);
-      }
-    } else if(snakePart === -1) {
-      graphicDirection = snake.getGraphicDirectionFor(snake.getTailPosition(), snake.lastTail, snake.get(snake.length() - 2));
-    }
+    const graphicDirection = this.getSnakePartGraphicDirection(snakePart, snake);
 
     if((snakePart == 0 || snakePart == -1) && this.isAngleDirection(graphicDirection)) {
       const animationAngle = this.calculateAnimationAngle(
@@ -994,13 +998,13 @@ export default class GridUI3D extends GridUI {
         [GameConstants.Direction.RIGHT]: { x: -0.35, y: 0 },
         [GameConstants.Direction.LEFT]:  { x:  0.35, y: 0 },
         [GameConstants.Direction.UP]:    { x:  0,   y: -0.35 },
-        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.35 },
+        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.35 }
       },
       tail: {
-        [GameConstants.Direction.RIGHT]: { x: 0, y: 0 },
-        [GameConstants.Direction.LEFT]:  { x:  -0, y: 0 },
-        [GameConstants.Direction.UP]:    { x:  0,   y: 0 },
-        [GameConstants.Direction.DOWN]:  { x:  0,   y:  -0 },
+        [GameConstants.Direction.RIGHT]: { x:  0.35, y: 0 },
+        [GameConstants.Direction.LEFT]:  { x:  -0.35, y: 0 },
+        [GameConstants.Direction.UP]:    { x:  0,   y: -0.35 },
+        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.35 },
       }
     };
 
