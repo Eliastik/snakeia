@@ -790,8 +790,7 @@ export default class GridUI3D extends GridUI {
       snakeIndex,
       snake,
       mesh: this.snakesMeshes[snakeIndex].headMesh,
-      from: snake.get(1),
-      to: snake.getHeadPosition(),
+      position: snake.getHeadPosition(),
       snakePart: 0,
       type: "head"
     });
@@ -804,8 +803,7 @@ export default class GridUI3D extends GridUI {
       snakeIndex,
       snake,
       mesh: this.snakesMeshes[snakeIndex].tailMesh,
-      from: snake.getTailPosition(),
-      to: snake.get(snake.length() - 2),
+      position: snake.getTailPosition(),
       snakePart: -1,
       type: "tail"
     });
@@ -838,8 +836,9 @@ export default class GridUI3D extends GridUI {
       positionPoints.push(this.gridPositionTo3DPosition(snake.get(1)));
       positionPoints.push(this.gridPositionTo3DPosition(snake.get(2)));
     } else if(type === "tail") {
-      positionPoints.push(this.gridPositionTo3DPosition(snake.get(snake.length() - 2)));
       positionPoints.push(mainMesh.position);
+      positionPoints.push(this.gridPositionTo3DPosition(snake.getTailPosition()));
+      positionPoints.push(this.gridPositionTo3DPosition(snake.get(snake.length() - 2)));
     }
 
     const halfWidth = this.grid.width / 2;
@@ -886,28 +885,37 @@ export default class GridUI3D extends GridUI {
     return newTransitionMesh;
   }
 
-  animateSnake({ snake, mesh, from, to, snakePart, type }) {
-    const targetDir = this.getSnakeDirection(snake, snakePart, to);
-
-    const fromPos = this.gridPositionTo3DPosition(from);
-    const toPos = this.gridPositionTo3DPosition(to);
-
+  animateSnake({ snake, mesh, position, snakePart, type }) {
     const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
 
-    const margin = this.getSnakeMargin(to.direction, type);
+    const position3D = this.gridPositionTo3DPosition(position);
 
-    this.handleSnakeGridCrossing(toPos, fromPos, snakePart);
+    const margin = this.getSnakeMargin(position.direction, type);
 
-    const fromVec = new THREE.Vector3(fromPos.x + margin.x, fromPos.y + margin.y, 0.3);
-    const toVec = new THREE.Vector3(toPos.x + margin.x, toPos.y + margin.y, 0.3);
+    const caseSize = 1;
 
-    const interpolated = new THREE.Vector3().lerpVectors(
-      fromVec,
-      toVec,
-      animationPercentage
-    );
+    const animationOffset = (caseSize * animationPercentage) - caseSize;
 
-    mesh.position.copy(interpolated);
+    const offset = new THREE.Vector3(margin.x, margin.y, 0);
+
+    switch(position.direction) {
+    case GameConstants.Direction.UP:
+      offset.y += animationOffset;
+      break;
+    case GameConstants.Direction.BOTTOM:
+      offset.y -= animationOffset;
+      break;
+    case GameConstants.Direction.RIGHT:
+      offset.x += animationOffset;
+      break;
+    case GameConstants.Direction.LEFT:
+      offset.x -= animationOffset;
+      break;
+    }
+
+    mesh.position.set(position3D.x + offset.x, position3D.y + offset.y, 0.3);
+
+    const targetDir = this.getSnakeDirection(snake, snakePart, position);
 
     this.animateSnakeRotation(snake, snakePart, targetDir, animationPercentage, mesh);
   }
@@ -989,10 +997,10 @@ export default class GridUI3D extends GridUI {
         [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.35 },
       },
       tail: {
-        [GameConstants.Direction.RIGHT]: { x: -0.7, y: 0 },
-        [GameConstants.Direction.LEFT]:  { x:  0.7, y: 0 },
-        [GameConstants.Direction.UP]:    { x:  0,   y: -0.7 },
-        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.7 },
+        [GameConstants.Direction.RIGHT]: { x: 0, y: 0 },
+        [GameConstants.Direction.LEFT]:  { x:  -0, y: 0 },
+        [GameConstants.Direction.UP]:    { x:  0,   y: 0 },
+        [GameConstants.Direction.DOWN]:  { x:  0,   y:  -0 },
       }
     };
 
