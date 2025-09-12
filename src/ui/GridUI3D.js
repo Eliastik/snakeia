@@ -812,9 +812,27 @@ export default class GridUI3D extends GridUI {
   }
   
   updateSnakeTransition(snakeIndex, snake, options) {
-    // TODO throttle this method
-    const { type } = options;
+    const now = performance.now();
+    const throttleMs = 10;
+
     const snakeMeshes = this.snakesMeshes[snakeIndex];
+
+    if(!snakeMeshes._lastUpdateTransition) {
+      snakeMeshes._lastUpdateTransition = {};
+    }
+
+    const { type } = options;
+
+    if(!snakeMeshes._lastUpdateTransition[type]) {
+      snakeMeshes._lastUpdateTransition[type] = 0;
+    }
+
+    if(now - snakeMeshes._lastUpdateTransition[type] < throttleMs) {
+      return;
+    }
+
+    snakeMeshes._lastUpdateTransition[type] = now;
+
     const transitionMeshKey = type + "TransitionMesh";
     const mainMeshKey = type + "Mesh";
 
@@ -826,7 +844,6 @@ export default class GridUI3D extends GridUI {
     }
 
     const mainMesh = snakeMeshes[mainMeshKey];
-
     if(!mainMesh) return;
 
     const positionPoints = [];
@@ -845,7 +862,6 @@ export default class GridUI3D extends GridUI {
     const halfHeight = this.grid.height / 2;
 
     const curvePoints = [];
-
     for(let i = 0; i < positionPoints.length; i++) {
       const currentPosition = positionPoints[i];
 
@@ -855,13 +871,11 @@ export default class GridUI3D extends GridUI {
         const deltaY = nextPosition.y - currentPosition.y;
 
         if(Math.abs(deltaX) > this.grid.width / 2) {
-          if(deltaX > 0) nextPosition.x -= this.grid.width;
-          else nextPosition.x += this.grid.width;
+          nextPosition.x += deltaX > 0 ? -this.grid.width : this.grid.width;
         }
 
         if(Math.abs(deltaY) > this.grid.height / 2) {
-          if(deltaY > 0) nextPosition.y -= this.grid.height;
-          else nextPosition.y += this.grid.height;
+          nextPosition.y += deltaY > 0 ? -this.grid.height : this.grid.height;
         }
       }
 
@@ -1335,25 +1349,28 @@ export default class GridUI3D extends GridUI {
   calculateSnakeGeometryQualityIndividual(snake) {
     const gridArea = this.grid.width * this.grid.height;
     const normalizedGrid = Math.min(gridArea / this.qualitySettings.snakeSegments.maxGridArea, 1);
-    const normalizedLength = Math.min(snake.length() / this.qualitySettings.snakeSegments.maxLength, 1);
+    const normalizedLength = Math.min(
+      snake.length() / this.qualitySettings.snakeSegments.maxLength,
+      1
+    );
 
     const rawFactor = (0.8 * normalizedGrid) + (0.2 * normalizedLength);
-
     const factor = Math.pow(rawFactor, 0.5);
 
-    function snapToStep(value, step, min) {
-      return Math.max(min, Math.round(value / step) * step);
-    }
+    const snakeCount = this.snakes.length;
 
-    const softMaxTubular = this.qualitySettings.snakeSegments.maxTubular / 2;
-    const softMaxRadius = this.qualitySettings.snakeSegments.maxRadius / 2;
+    const qualityScale = Math.max(1 / (1 + snakeCount / 5), 0.1);
 
-    const tubularSegmentsRaw = softMaxTubular - factor * (softMaxTubular - this.qualitySettings.snakeSegments.minTubular);
+    const { minTubular, maxTubular, minRadius, maxRadius } = this.qualitySettings.snakeSegments;
 
-    const radiusSegmentsRaw = softMaxRadius - factor * (softMaxRadius - this.qualitySettings.snakeSegments.minRadius);
+    const softMaxTubular = Math.min((maxTubular / 2) * qualityScale, 128);
+    const softMaxRadius = Math.min((maxRadius / 2) * qualityScale, 64);
 
-    const tubularSegments = snapToStep(tubularSegmentsRaw, 16, this.qualitySettings.snakeSegments.minTubular);
-    const radiusSegments = snapToStep(radiusSegmentsRaw, 8, this.qualitySettings.snakeSegments.minRadius);
+    const tubularSegmentsRaw = softMaxTubular - factor * (softMaxTubular - minTubular);
+    const radiusSegmentsRaw = softMaxRadius - factor * (softMaxRadius - minRadius);
+
+    const tubularSegments = Math.max(minTubular, Math.round(tubularSegmentsRaw / 16) * 16);
+    const radiusSegments = Math.max(minRadius, Math.round(radiusSegmentsRaw / 8) * 8);
 
     return { tubularSegments, radiusSegments };
   }
