@@ -794,8 +794,6 @@ export default class GridUI3D extends GridUI {
       snakePart: 0,
       type: "head"
     });
-
-    this.updateSnakeTransition(snakeIndex, snake, { type: "head" });
   }
 
   animateSnakeTail(snakeIndex, snake) {
@@ -807,41 +805,35 @@ export default class GridUI3D extends GridUI {
       snakePart: -1,
       type: "tail"
     });
-
-    this.updateSnakeTransition(snakeIndex, snake, { type: "tail" });
   }
   
   updateSnakeTransition(snakeIndex, snake, options) {
-    const now = performance.now();
-    const throttleMs = 10;
-
+    const { type } = options;
     const snakeMeshes = this.snakesMeshes[snakeIndex];
 
-    if(!snakeMeshes._lastUpdateTransition) {
-      snakeMeshes._lastUpdateTransition = {};
+    if(type === "head") {
+      const now = performance.now();
+      const throttleMs = 10;
+
+      if(!snakeMeshes._lastUpdateTransition) {
+        snakeMeshes._lastUpdateTransition = {};
+      }
+
+      if(!snakeMeshes._lastUpdateTransition[type]) {
+        snakeMeshes._lastUpdateTransition[type] = 0;
+      }
+
+      if(now - snakeMeshes._lastUpdateTransition[type] < throttleMs) {
+        return;
+      }
+
+      snakeMeshes._lastUpdateTransition[type] = now;
     }
-
-    const { type } = options;
-
-    if(!snakeMeshes._lastUpdateTransition[type]) {
-      snakeMeshes._lastUpdateTransition[type] = 0;
-    }
-
-    if(now - snakeMeshes._lastUpdateTransition[type] < throttleMs) {
-      return;
-    }
-
-    snakeMeshes._lastUpdateTransition[type] = now;
 
     const transitionMeshKey = type + "TransitionMesh";
     const mainMeshKey = type + "Mesh";
 
-    const oldTransitionMesh = snakeMeshes[transitionMeshKey];
-
-    if(oldTransitionMesh) {
-      this.disposeMesh(oldTransitionMesh);
-      this.snakesGroup.remove(oldTransitionMesh);
-    }
+    this.clearSnakeTransition(snakeIndex, options);
 
     const mainMesh = snakeMeshes[mainMeshKey];
     if(!mainMesh) return;
@@ -899,6 +891,20 @@ export default class GridUI3D extends GridUI {
     return newTransitionMesh;
   }
 
+  clearSnakeTransition(snakeIndex, options) {
+    const { type } = options;
+    const snakeMeshes = this.snakesMeshes[snakeIndex];
+
+    const transitionMeshKey = type + "TransitionMesh";
+
+    const oldTransitionMesh = snakeMeshes[transitionMeshKey];
+
+    if(oldTransitionMesh) {
+      this.disposeMesh(oldTransitionMesh);
+      this.snakesGroup.remove(oldTransitionMesh);
+    }
+  }
+
   getSnakePartGraphicDirection(snakePart, snake) {
     if(snakePart === 0) {
       if(snake.length() > 1) {
@@ -913,12 +919,14 @@ export default class GridUI3D extends GridUI {
     return null;
   }
 
-  animateSnake({ snake, mesh, position, snakePart, type }) {
+  animateSnake({ snake, snakeIndex, mesh, position, snakePart, type }) {
     const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
+
+    const targetDir = this.getSnakeDirection(snake, snakePart, position);
 
     const position3D = this.gridPositionTo3DPosition(position);
 
-    const margin = this.getSnakeMargin(position.direction, type);
+    const margin = this.getSnakeMargin(targetDir, type);
 
     const caseSize = 1;
 
@@ -926,7 +934,7 @@ export default class GridUI3D extends GridUI {
 
     const offset = new THREE.Vector3(margin.x, margin.y, 0);
 
-    switch(position.direction) {
+    switch(targetDir) {
     case GameConstants.Direction.UP:
       offset.y += animationOffset;
       break;
@@ -943,9 +951,12 @@ export default class GridUI3D extends GridUI {
 
     mesh.position.set(position3D.x + offset.x, position3D.y + offset.y, 0.3);
 
-    const targetDir = this.getSnakeDirection(snake, snakePart, position);
-
-    this.animateSnakeRotation(snake, snakePart, targetDir, animationPercentage, mesh);
+    if(this.shouldDisplayAnimation(snake, snakePart)) {
+      this.animateSnakeRotation(snake, snakePart, targetDir, animationPercentage, mesh);
+      this.updateSnakeTransition(snakeIndex, snake, { type });
+    } else if(type === "tail") {
+      this.clearSnakeTransition(snakeIndex, { type });
+    }
   }
 
   handleSnakeGridCrossing(toPos, fromPos, snakePart) {
@@ -1017,8 +1028,8 @@ export default class GridUI3D extends GridUI {
       tail: {
         [GameConstants.Direction.RIGHT]: { x:  0.35, y: 0 },
         [GameConstants.Direction.LEFT]:  { x:  -0.35, y: 0 },
-        [GameConstants.Direction.UP]:    { x:  0,   y: -0.35 },
-        [GameConstants.Direction.DOWN]:  { x:  0,   y:  0.35 },
+        [GameConstants.Direction.UP]:    { x:  0,   y: 0.35 },
+        [GameConstants.Direction.DOWN]:  { x:  0,   y: -0.35 },
       }
     };
 
