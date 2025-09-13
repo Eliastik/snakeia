@@ -569,52 +569,71 @@ export default class GridUI extends Component {
     return imageLoc;
   }
 
+  getSnakeScreenPosition(ctx, snake, caseSize, offsetX, offsetY) {
+    const head = snake.get(0);
+    if(!head) return { x: 0, y: 0};
+
+    let caseX = Math.floor(head.x * caseSize + offsetX);
+    let caseY = Math.floor(head.y * caseSize + offsetY);
+
+    if(!this.disableAnimation && !snake.gameOver && !this.gameFinished && !this.gameOver) {
+      let progress = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
+      progress = Math.min(progress, 1);
+
+      const animOffset = (caseSize * progress) - caseSize;
+
+      switch(head.direction) {
+      case GameConstants.Direction.UP: caseY -= animOffset; break;
+      case GameConstants.Direction.BOTTOM: caseY += animOffset; break;
+      case GameConstants.Direction.RIGHT: caseX += animOffset; break;
+      case GameConstants.Direction.LEFT: caseX -= animOffset; break;
+      }
+    }
+
+    return { x: caseX, y: caseY };
+  }
+
   drawSnakeInfos(ctx, offsetX, offsetY, caseSize, currentPlayer) {
     let numPlayer = 0;
     let numAI = 0;
 
     for(let i = 0; i < this.snakes.length; i++) {
-      if(this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
+      const snake = this.snakes[i];
+
+      if(snake.player === GameConstants.PlayerType.HUMAN || snake.player === GameConstants.PlayerType.HYBRID_HUMAN_AI) {
         numPlayer++;
       } else {
         numAI++;
       }
 
-      const position = this.snakes[i].get(0);
+      const screenPos = this.getSnakeScreenPosition(ctx, snake, caseSize, offsetX, offsetY);
 
-      if(position != null) {
-        const posX = position.x;
-        const posY = position.y;
-        let caseX = Math.floor(posX * caseSize + offsetX);
-        let caseY = offsetY + posY * caseSize;
-    
-        if(!this.disableAnimation && !this.snakes[i].gameOver && !this.gameFinished && !this.gameOver) {
-          let offset = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
-          offset = (offset > 1 ? 1 : offset);
-          const offsetX = (caseSize * offset) - caseSize;
-          const offsetY = (caseSize * offset) - caseSize;
-    
-          switch(position.direction) {
-          case GameConstants.Direction.UP:
-            caseY -= offsetY;
-            break;
-          case GameConstants.Direction.BOTTOM:
-            caseY += offsetY;
-            break;
-          case GameConstants.Direction.RIGHT:
-            caseX += offsetX;
-            break;
-          case GameConstants.Direction.LEFT:
-            caseX -= offsetX;
-            break;
-          }
-        }
-    
-        Utils.drawText(ctx, ((this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI) + "\n× " + this.snakes[i].score, "rgb(255, 255, 255)", Math.round(caseSize / 2), GameConstants.Setting.FONT_FAMILY, null, null, caseX, caseY - Math.round(caseSize / 1.75), false, true);
-    
-        if(!this.spectatorMode && (currentPlayer == i && this.countBeforePlay >= 0 && (currentPlayer != null || (this.isFilterHueAvailable && this.snakes.length > 2) || (!this.isFilterHueAvailable && this.snakes.length > 1)))) {
-          Utils.drawArrow(ctx, Math.round(caseX + (caseSize / 2)), Math.round(caseY - caseSize * 2), Math.round(caseX + (caseSize / 2)), Math.round(caseY - 5));
-        }
+      const label = (snake.player === GameConstants.PlayerType.HUMAN || snake.player === GameConstants.PlayerType.HYBRID_HUMAN_AI)
+        ? i18next.t("engine.playerMin") + numPlayer
+        : i18next.t("engine.aiMin") + numAI;
+
+      Utils.drawText(
+        ctx,
+        `${label}\n× ${snake.score}`,
+        "rgb(255, 255, 255)",
+        Math.round(caseSize / 2),
+        GameConstants.Setting.FONT_FAMILY,
+        null,
+        null,
+        screenPos.x,
+        screenPos.y - Math.round(caseSize / 1.75),
+        false,
+        true
+      );
+
+      if(!this.spectatorMode && currentPlayer === i && this.countBeforePlay >= 0) {
+        Utils.drawArrow(
+          ctx,
+          Math.round(screenPos.x + (caseSize / 2)),
+          Math.round(screenPos.y - caseSize * 2),
+          Math.round(screenPos.x + (caseSize / 2)),
+          Math.round(screenPos.y - 5)
+        );
       }
     }
   }

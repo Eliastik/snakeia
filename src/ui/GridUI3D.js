@@ -1442,6 +1442,36 @@ export default class GridUI3D extends GridUI {
     };
   }
 
+  getSnakeScreenPosition(ctx, snake) {
+    const head = snake.get(0);
+    if(!head) return { x: 0, y: 0};
+
+    const pos3D = this.gridPositionTo3DPosition(head);
+    const worldPos = new THREE.Vector3(pos3D.x, pos3D.y, 0);
+
+    if(!this.disableAnimation && !snake.gameOver && !this.gameFinished && !this.gameOver) {
+      let progress = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
+      progress = Math.min(progress, 1);
+
+      switch(head.direction) {
+      case GameConstants.Direction.UP: worldPos.y += progress; break;
+      case GameConstants.Direction.BOTTOM: worldPos.y -= progress; break;
+      case GameConstants.Direction.RIGHT: worldPos.x += progress; break;
+      case GameConstants.Direction.LEFT: worldPos.x -= progress; break;
+      }
+    }
+
+    const vector = worldPos.clone().project(this.camera);
+
+    const gridOffsetX = (ctx.canvas.width - this.width) / 2;
+    const gridOffsetY = (ctx.canvas.height - this.height) / 2;
+
+    const x = Math.round((vector.x + 1) / 2 * this.width + gridOffsetX);
+    const y = Math.round((-vector.y + 1) / 2 * this.height + gridOffsetY);
+
+    return { x, y };
+  }
+
   cleanAfterGameExit() {
     if(this.scene) {
       this.disposeGroup(this.gridGroup);
