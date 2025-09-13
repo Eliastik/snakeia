@@ -970,12 +970,13 @@ export default class GridUI3D extends GridUI {
 
     mesh.position.set(position3D.x + offset.x, position3D.y + offset.y, 0.3);
 
-    if(this.shouldDisplayAnimation(snake, snakePart)) {
-      this.animateSnakeRotation(snake, snakePart, currentDirection, animationPercentage, mesh);
-      this.updateSnakeTransition(snakeIndex, snake, { type, margin });
-    } else if(type === "tail") {
+    this.animateSnakeRotation(snake, snakePart, currentDirection, animationPercentage, mesh);
+
+    if(type === "tail") {
       this.clearSnakeTransition(snakeIndex, { type });
     }
+    
+    this.updateSnakeTransition(snakeIndex, snake, { type, margin });
   }
 
   handleSnakeGridCrossing(toPos, fromPos, snakePart) {
@@ -1022,7 +1023,8 @@ export default class GridUI3D extends GridUI {
 
     const graphicDirection = this.getSnakePartGraphicDirection(snakePart, snake);
 
-    if((snakePart == 0 || snakePart == -1) && this.isAngleDirection(graphicDirection)) {
+    if((snakePart == 0 || snakePart == -1) && this.isAngleDirection(graphicDirection)
+      && this.shouldDisplayAnimation(snake, snakePart)) {
       const animationAngle = this.calculateAnimationAngle(
         snakePart,
         animationPercentage,
