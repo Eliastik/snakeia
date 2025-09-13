@@ -68,9 +68,9 @@ export default class GridUI3D extends GridUI {
 
     /**
      * TODO :
-     * - Animate tail + Fix head animation with new model
      * - Optimize gold fruit displaying (slight delay)
      * - Optimize TubeGeomtry geometry (reduce geometry quality)
+     * - Fix texts/arrows
      */
   }
 
@@ -791,6 +791,7 @@ export default class GridUI3D extends GridUI {
       snake,
       mesh: this.snakesMeshes[snakeIndex].headMesh,
       position: snake.getHeadPosition(),
+      nextDirection: this.getSnakeDirection(snake, 1, snake.getHeadPosition()),
       snakePart: 0,
       type: "head"
     });
@@ -802,6 +803,7 @@ export default class GridUI3D extends GridUI {
       snake,
       mesh: this.snakesMeshes[snakeIndex].tailMesh,
       position: snake.getTailPosition(),
+      nextDirection: snake.get(snake.length() - 2).direction,
       snakePart: -1,
       type: "tail"
     });
@@ -845,9 +847,9 @@ export default class GridUI3D extends GridUI {
       positionPoints.push(this.gridPositionTo3DPosition(snake.get(1)));
       positionPoints.push(this.gridPositionTo3DPosition(snake.get(2)));
     } else if(type === "tail") {
-      positionPoints.push(mainMesh.position);
-      positionPoints.push(this.gridPositionTo3DPosition(snake.getTailPosition()));
       positionPoints.push(this.gridPositionTo3DPosition(snake.get(snake.length() - 2)));
+      positionPoints.push(this.gridPositionTo3DPosition(snake.getTailPosition()));
+      positionPoints.push(mainMesh.position);
     }
 
     const halfWidth = this.grid.width / 2;
@@ -919,15 +921,10 @@ export default class GridUI3D extends GridUI {
     return null;
   }
 
-  animateSnake({ snake, snakeIndex, mesh, position, snakePart, type }) {
+  animateSnake({ snake, snakeIndex, mesh, position, nextDirection, snakePart, type }) {
     const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
 
-    const currentDir = this.getSnakeDirection(snake, snakePart, position);
-    const nextDir = this.getSnakeDirection(
-      snake,
-      snakePart === -1 ? snake.length() -1 : 1,
-      position
-    );
+    const currentDirection = this.getSnakeDirection(snake, snakePart, position);
 
     const position3D = this.gridPositionTo3DPosition(position);
 
@@ -935,14 +932,14 @@ export default class GridUI3D extends GridUI {
                  && (snakePart === 0 || snakePart === -1)
                  && this.isAngleDirection(this.getSnakePartGraphicDirection(snakePart, snake));
 
-    const margin = this.getSnakeMargin(currentDir, nextDir, type, isTurning, animationPercentage);
+    const margin = this.getSnakeMargin(currentDirection, nextDirection, type, isTurning, animationPercentage);
 
     const caseSize = 1;
     const animationOffset = (caseSize * animationPercentage) - caseSize;
 
     const offset = new THREE.Vector3(margin.x, margin.y, 0);
 
-    switch(currentDir) {
+    switch(currentDirection) {
     case GameConstants.Direction.UP:
       offset.y += animationOffset;
       break;
@@ -960,7 +957,7 @@ export default class GridUI3D extends GridUI {
     mesh.position.set(position3D.x + offset.x, position3D.y + offset.y, 0.3);
 
     if(this.shouldDisplayAnimation(snake, snakePart)) {
-      this.animateSnakeRotation(snake, snakePart, currentDir, animationPercentage, mesh);
+      this.animateSnakeRotation(snake, snakePart, currentDirection, animationPercentage, mesh);
       this.updateSnakeTransition(snakeIndex, snake, { type });
     } else if(type === "tail") {
       this.clearSnakeTransition(snakeIndex, { type });
@@ -1054,10 +1051,15 @@ export default class GridUI3D extends GridUI {
         y: endMargin.y * (1 - t) + startMargin.y * t
       };
     } else {
-      return {
-        x: startMargin.x * (1 - t) + endMargin.x * t,
-        y: startMargin.y * (1 - t) + endMargin.y * t
-      };
+      if (t < 0.6) {
+        return startMargin;
+      } else {
+        const localT = (t - 0.6) / 0.4;
+        return {
+          x: startMargin.x * (1 - localT) + endMargin.x * localT,
+          y: startMargin.y * (1 - localT) + endMargin.y * localT
+        };
+      }
     }
   }
 

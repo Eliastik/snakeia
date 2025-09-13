@@ -42,7 +42,7 @@ i18next.addResourceBundle("fr", "translation", {
       "low": "Faible",
       "normal": "Normal",
       "high": "Élevé",
-      "ultra": "Ultra",
+      "ultra": "Ultra (preview)",
       "custom": "Personnalisé",
       "mock": "Mock"
     },
@@ -142,7 +142,7 @@ i18next.addResourceBundle("en", "translation", {
       "low": "Low",
       "normal": "Normal",
       "high": "High",
-      "ultra": "Ultra",
+      "ultra": "Ultra (preview)",
       "custom": "Custom",
       "mock": "Mock"
     },
