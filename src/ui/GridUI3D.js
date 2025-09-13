@@ -261,6 +261,11 @@ export default class GridUI3D extends GridUI {
       this.firstUpdatedReflections = true;
     }
 
+    if(!this.shadersCompiled) {
+      this.buildShaders();
+      this.shadersCompiled = true;
+    }
+
     this.renderer.render(this.scene, this.camera);
 
     Utils.drawImageData(ctx, this.renderer.domElement, offsetX, offsetY, totalWidth, totalHeight, 0, 0, totalWidth, totalHeight);
@@ -374,6 +379,15 @@ export default class GridUI3D extends GridUI {
 
       this.isLightDebugInit = true;
     }
+  }
+
+  buildShaders() {
+    this.fruitModelGold.visible = true;
+    this.fruitModelGold.position.set(0, 0, 0.5);
+
+    this.renderer.compile(this.scene, this.camera);
+
+    this.fruitModelGold.visible = false;
   }
 
   disposeGroup(group) {
@@ -630,13 +644,6 @@ export default class GridUI3D extends GridUI {
       });
 
       this.fruitsGroup.add(this.fruitModelGold, this.fruitGoldPointLight);
-
-      this.fruitModelGold.visible = true;
-      this.fruitModelGold.position.set(0, 0, 0.5);
-
-      this.renderer.compile(this.scene, this.camera);
-
-      this.fruitModelGold.visible = false;
     }
   }
 
@@ -1429,6 +1436,49 @@ export default class GridUI3D extends GridUI {
     return { tubularSegments, radiusSegments };
   }
 
+  calculateCaseSize(availableHeight, availableWidth) {
+    if(!this.camera || !this.width || !this.height) {
+      return super.calculateCaseSize(availableHeight, availableWidth);
+    }
+
+    try {
+      const depth = 0.5;
+
+      const p0 = new THREE.Vector3(0, 0, depth);
+      const p1 = new THREE.Vector3(1, 0, depth);
+      const p2 = new THREE.Vector3(0, 1, depth);
+
+      const projectToPixels = (v) => {
+        const projected = v.clone().project(this.camera);
+        const x = (projected.x + 1) / 2 * this.width;
+        const y = (1 - projected.y) / 2 * this.height;
+        return {
+          x,
+          y
+        };
+      };
+
+      const pos0 = projectToPixels(p0);
+      const pos1 = projectToPixels(p1);
+      const pos2 = projectToPixels(p2);
+
+      const caseWidth = Math.abs(pos1.x - pos0.x);
+      const caseHeight = Math.abs(pos2.y - pos0.y);
+
+      let caseSize = Math.min(caseWidth, caseHeight);
+      const widthPercent = availableWidth / (caseSize * this.grid.width);
+      const heightPercent = availableHeight / (caseSize * this.grid.height);
+
+      const percent = Math.min(widthPercent, heightPercent);
+      caseSize *= percent;
+
+      return Math.floor(caseSize);
+    } catch (e) {
+      console.warn("Fallback calculate case size", e);
+      return super.calculateCaseSize(availableHeight, availableWidth);
+    }
+  }
+
   gridPositionTo3DPosition(position) {
     const halfGridWidth = this.grid.width / 2;
     const halfGridHeight = this.grid.height / 2;
@@ -1442,18 +1492,24 @@ export default class GridUI3D extends GridUI {
     };
   }
 
-  getSnakeScreenPosition(ctx, snake) {
-    const head = snake.get(0);
-    if(!head) return { x: 0, y: 0};
+  getSnakeScreenPosition(snake, caseSize, offsetX, offsetY) {
+    const snakeHead = snake.get(0);
+    const snakeFirstSegment = snake.get(1);
+    if(!snakeHead || !snakeFirstSegment) return { x: 0, y: 0};
 
-    const pos3D = this.gridPositionTo3DPosition(head);
-    const worldPos = new THREE.Vector3(pos3D.x, pos3D.y, 0);
+    const shouldAnimateText = !this.disableAnimation && !snake.gameOver && !this.gameFinished && !this.gameOver;
+    const pos3D = this.gridPositionTo3DPosition(shouldAnimateText ? snakeFirstSegment : snakeHead);
 
-    if(!this.disableAnimation && !snake.gameOver && !this.gameFinished && !this.gameOver) {
+    const worldPos = new THREE.Vector3(
+      pos3D.x - 0.5,
+      pos3D.y + 0.5,
+      0.5
+    );
+
+    if(shouldAnimateText) {
       let progress = this.offsetFrame / (this.speed * GameConstants.Setting.TIME_MULTIPLIER);
       progress = Math.min(progress, 1);
-
-      switch(head.direction) {
+      switch (snakeHead.direction) {
       case GameConstants.Direction.UP: worldPos.y += progress; break;
       case GameConstants.Direction.BOTTOM: worldPos.y -= progress; break;
       case GameConstants.Direction.RIGHT: worldPos.x += progress; break;
@@ -1463,13 +1519,13 @@ export default class GridUI3D extends GridUI {
 
     const vector = worldPos.clone().project(this.camera);
 
-    const gridOffsetX = (ctx.canvas.width - this.width) / 2;
-    const gridOffsetY = (ctx.canvas.height - this.height) / 2;
+    const xInWebGL = (vector.x + 1) / 2 * this.width;
+    const yInWebGL = (1 - vector.y) / 2 * this.height;
 
-    const x = Math.round((vector.x + 1) / 2 * this.width + gridOffsetX);
-    const y = Math.round((-vector.y + 1) / 2 * this.height + gridOffsetY);
+    const x = offsetX + xInWebGL;
+    const y = offsetY + yInWebGL;
 
-    return { x, y };
+    return { x: Math.round(x), y: Math.round(y) };
   }
 
   cleanAfterGameExit() {

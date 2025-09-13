@@ -569,7 +569,7 @@ export default class GridUI extends Component {
     return imageLoc;
   }
 
-  getSnakeScreenPosition(ctx, snake, caseSize, offsetX, offsetY) {
+  getSnakeScreenPosition(snake, caseSize, offsetX, offsetY) {
     const head = snake.get(0);
     if(!head) return { x: 0, y: 0};
 
@@ -606,7 +606,7 @@ export default class GridUI extends Component {
         numAI++;
       }
 
-      const screenPos = this.getSnakeScreenPosition(ctx, snake, caseSize, offsetX, offsetY);
+      const screenPos = this.getSnakeScreenPosition(snake, caseSize, offsetX, offsetY);
 
       const label = (snake.player === GameConstants.PlayerType.HUMAN || snake.player === GameConstants.PlayerType.HYBRID_HUMAN_AI)
         ? i18next.t("engine.playerMin") + numPlayer
