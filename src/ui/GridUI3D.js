@@ -65,12 +65,11 @@ export default class GridUI3D extends GridUI {
     this.hasGoldFruit = false;
     this.goldFruitPosition = null;
     this.firstUpdatedReflections = false;
+    this.goldFruitFirstFrame = true;
 
     /**
      * TODO :
-     * - Optimize gold fruit displaying (slight delay)
      * - Optimize TubeGeomtry geometry (reduce geometry quality)
-     * - Fix texts/arrows
      */
   }
 
@@ -251,19 +250,21 @@ export default class GridUI3D extends GridUI {
 
     const hasGoldFruit = this.hasGoldFruit;
 
-    return reflectionsEnabled && shouldUpdateBasedOnQuality && hasGoldFruit;
+    const isFirstGoldFrame = this.goldFruitFirstFrame === true;
+
+    return reflectionsEnabled && shouldUpdateBasedOnQuality && hasGoldFruit && !isFirstGoldFrame;
   }
 
   drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize) {
-    if(this.shouldUpdateDynamicReflections()) {
-      this.cubeCamera.position.set(this.goldFruitPosition.x, this.goldFruitPosition.y, 0.5);
-      this.cubeCamera.update(this.renderer, this.scene);
-      this.firstUpdatedReflections = true;
-    }
-
     if(!this.shadersCompiled) {
       this.buildShaders();
       this.shadersCompiled = true;
+    }
+
+    if(this.shouldUpdateDynamicReflections()) {
+      this.updateReflections(this.goldFruitPosition.x, this.goldFruitPosition.y, 0.5);
+      this.firstUpdatedReflections = true;
+      this.goldFruitFirstFrame = false;
     }
 
     this.renderer.render(this.scene, this.camera);
@@ -273,6 +274,11 @@ export default class GridUI3D extends GridUI {
     if(this.snakes.length > 1) {
       this.drawSnakeInfos(ctx, offsetX, offsetY, caseSize, this.currentPlayer);
     }
+  }
+
+  updateReflections(cameraX, cameraY, cameraZ) {
+    this.cubeCamera.position.set(cameraX, cameraY, cameraZ);
+    this.cubeCamera.update(this.renderer, this.scene);
   }
 
   interpolateCameraSettings(gridSize, presets) {
@@ -385,6 +391,9 @@ export default class GridUI3D extends GridUI {
     this.fruitModelGold.visible = true;
     this.fruitModelGold.position.set(0, 0, 0.5);
 
+    this.updateReflections(0, 0, 0.5);
+
+    this.renderer.render(this.scene, this.camera);
     this.renderer.compile(this.scene, this.camera);
 
     this.fruitModelGold.visible = false;
@@ -614,7 +623,7 @@ export default class GridUI3D extends GridUI {
 
     this.fruitModelGold = this.modelLoader.get("fruit");
 
-    if(this.fruitModel) {
+    if(this.fruitModelGold) {
       const fruitGoldColor = 0xFFD700;
 
       this.fruitGoldPointLight = new THREE.PointLight(fruitGoldColor, 0.8, 2);
