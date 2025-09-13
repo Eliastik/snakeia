@@ -812,7 +812,7 @@ export default class GridUI3D extends GridUI {
   }
   
   updateSnakeTransition(snakeIndex, snake, options) {
-    const { type } = options;
+    const { type, margin } = options;
     const snakeMeshes = this.snakesMeshes[snakeIndex];
 
     if(type === "head") {
@@ -849,9 +849,14 @@ export default class GridUI3D extends GridUI {
       positionPoints.push(this.gridPositionTo3DPosition(snake.get(1)));
       positionPoints.push(this.gridPositionTo3DPosition(snake.get(2)));
     } else if(type === "tail") {
-      positionPoints.push(this.gridPositionTo3DPosition(snake.get(snake.length() - 2)));
-      positionPoints.push(this.gridPositionTo3DPosition(snake.getTailPosition()));
-      positionPoints.push(mainMesh.position);
+      const secondLastPos = this.gridPositionTo3DPosition(snake.get(snake.length() - 2));
+      const tailPos = this.gridPositionTo3DPosition(snake.getTailPosition());
+
+      const tailTop = mainMesh.position.clone().add(new THREE.Vector3(-margin.x / 2, -margin.y / 2, 0));
+
+      positionPoints.push(tailTop);
+      positionPoints.push(tailPos);
+      positionPoints.push(secondLastPos);
     }
 
     const halfWidth = this.grid.width / 2;
@@ -960,7 +965,7 @@ export default class GridUI3D extends GridUI {
 
     if(this.shouldDisplayAnimation(snake, snakePart)) {
       this.animateSnakeRotation(snake, snakePart, currentDirection, animationPercentage, mesh);
-      this.updateSnakeTransition(snakeIndex, snake, { type });
+      this.updateSnakeTransition(snakeIndex, snake, { type, margin });
     } else if(type === "tail") {
       this.clearSnakeTransition(snakeIndex, { type });
     }
