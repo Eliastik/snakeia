@@ -630,6 +630,13 @@ export default class GridUI3D extends GridUI {
       });
 
       this.fruitsGroup.add(this.fruitModelGold, this.fruitGoldPointLight);
+
+      this.fruitModelGold.visible = true;
+      this.fruitModelGold.position.set(0, 0, 0.5);
+
+      this.renderer.compile(this.scene, this.camera);
+
+      this.fruitModelGold.visible = false;
     }
   }
 
