@@ -690,6 +690,8 @@ export default class GridUI3D extends GridUI {
     const meshes = this.snakesMeshes[snakeIndex];
 
     this.cleanSnakesBodyParts(meshes.bodyParts);
+    this.clearSnakeTransition(snakeIndex, { type: "head" });
+    this.clearSnakeTransition(snakeIndex, { type: "tail" });
     this.disposeMesh(meshes.headMesh);
     this.disposeMesh(meshes.tailMesh);
     this.disposeMesh(meshes.snakeMaterial);
@@ -1468,8 +1470,8 @@ export default class GridUI3D extends GridUI {
     this.cubeCamera?.clear();
     this.cubeCamera = null;
 
-    this.cubeRenderTarget?.clear();
-    this.cubeCamera = null;
+    this.cubeRenderTarget?.dispose();
+    this.cubeRenderTarget = null;
 
     this.controls?.dispose();
     this.controls = null;
