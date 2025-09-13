@@ -922,23 +922,31 @@ export default class GridUI3D extends GridUI {
   animateSnake({ snake, snakeIndex, mesh, position, snakePart, type }) {
     const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
 
-    const targetDir = this.getSnakeDirection(snake, snakePart, position);
+    const currentDir = this.getSnakeDirection(snake, snakePart, position);
+    const nextDir = this.getSnakeDirection(
+      snake,
+      snakePart === -1 ? snake.length() -1 : 1,
+      position
+    );
 
     const position3D = this.gridPositionTo3DPosition(position);
 
-    const margin = this.getSnakeMargin(targetDir, type);
+    const isTurning = this.shouldDisplayAnimation(snake, snakePart) 
+                 && (snakePart === 0 || snakePart === -1)
+                 && this.isAngleDirection(this.getSnakePartGraphicDirection(snakePart, snake));
+
+    const margin = this.getSnakeMargin(currentDir, nextDir, type, isTurning, animationPercentage);
 
     const caseSize = 1;
-
     const animationOffset = (caseSize * animationPercentage) - caseSize;
 
     const offset = new THREE.Vector3(margin.x, margin.y, 0);
 
-    switch(targetDir) {
+    switch(currentDir) {
     case GameConstants.Direction.UP:
       offset.y += animationOffset;
       break;
-    case GameConstants.Direction.BOTTOM:
+    case GameConstants.Direction.DOWN:
       offset.y -= animationOffset;
       break;
     case GameConstants.Direction.RIGHT:
@@ -952,7 +960,7 @@ export default class GridUI3D extends GridUI {
     mesh.position.set(position3D.x + offset.x, position3D.y + offset.y, 0.3);
 
     if(this.shouldDisplayAnimation(snake, snakePart)) {
-      this.animateSnakeRotation(snake, snakePart, targetDir, animationPercentage, mesh);
+      this.animateSnakeRotation(snake, snakePart, currentDir, animationPercentage, mesh);
       this.updateSnakeTransition(snakeIndex, snake, { type });
     } else if(type === "tail") {
       this.clearSnakeTransition(snakeIndex, { type });
@@ -1017,8 +1025,8 @@ export default class GridUI3D extends GridUI {
     }
   }
 
-  getSnakeMargin(direction, type) {
-    const marginMap = {
+  getSnakeMargin(currentDir, nextDir, type, isTurning, t) {
+    const straightMargin = {
       head: {
         [GameConstants.Direction.RIGHT]: { x: -0.35, y: 0 },
         [GameConstants.Direction.LEFT]:  { x:  0.35, y: 0 },
@@ -1027,13 +1035,30 @@ export default class GridUI3D extends GridUI {
       },
       tail: {
         [GameConstants.Direction.RIGHT]: { x:  0.35, y: 0 },
-        [GameConstants.Direction.LEFT]:  { x:  -0.35, y: 0 },
+        [GameConstants.Direction.LEFT]:  { x: -0.35, y: 0 },
         [GameConstants.Direction.UP]:    { x:  0,   y: 0.35 },
-        [GameConstants.Direction.DOWN]:  { x:  0,   y: -0.35 },
+        [GameConstants.Direction.DOWN]:  { x:  0,   y: -0.35 }
       }
     };
 
-    return marginMap[type]?.[direction] || { x: 0, y: 0 };
+    if(!isTurning) {
+      return straightMargin[type]?.[currentDir] || { x: 0, y: 0 };
+    }
+
+    const startMargin = straightMargin[type]?.[currentDir] || { x: 0, y: 0 };
+    const endMargin   = straightMargin[type]?.[nextDir]    || { x: 0, y: 0 };
+
+    if(type === "head") {
+      return {
+        x: endMargin.x * (1 - t) + startMargin.x * t,
+        y: endMargin.y * (1 - t) + startMargin.y * t
+      };
+    } else {
+      return {
+        x: startMargin.x * (1 - t) + endMargin.x * t,
+        y: startMargin.y * (1 - t) + endMargin.y * t
+      };
+    }
   }
 
   getHeadAndTailRotationFromDirection(direction) {
