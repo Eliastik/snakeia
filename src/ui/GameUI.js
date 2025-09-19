@@ -509,6 +509,10 @@ export default class GameUI {
       `assets/images/skin/${this.graphicSkin}/unknown.png`,
     ];
 
+    if(this.gridUI.is3DRendering) {
+      imageToLoad.push(`assets/images/skin/${this.graphicSkin}/wall_normal.png`, `assets/images/skin/${this.graphicSkin}/wall_ao.png`, `assets/images/skin/${this.graphicSkin}/wall_height.png`);
+    }
+
     try {
       await Promise.all([
         this.promisifiedImageLoad(imageToLoad),

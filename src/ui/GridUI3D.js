@@ -554,11 +554,39 @@ export default class GridUI3D extends GridUI {
       this.wallTexture.colorSpace = THREE.SRGBColorSpace;
     }
 
+    if(!this.wallTextureNormal) {
+      const wallTextureNormal = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/wall_normal.png`);
+      this.wallTextureNormal = new THREE.CanvasTexture(wallTextureNormal);
+      this.wallTextureNormal.colorSpace = THREE.SRGBColorSpace;
+    }
+
+    if(!this.wallTextureHeight) {
+      const wallTextureHeight = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/wall_height.png`);
+      this.wallTextureHeight = new THREE.CanvasTexture(wallTextureHeight);
+      this.wallTextureHeight.colorSpace = THREE.SRGBColorSpace;
+    }
+
+    if(!this.wallTextureAO) {
+      const wallTextureAO = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/wall_ao.png`);
+      this.wallTextureAO = new THREE.CanvasTexture(wallTextureAO);
+      this.wallTextureAO.colorSpace = THREE.SRGBColorSpace;
+    }
+
     const wallGeometry = new THREE.BoxGeometry(1, 1, 1.5);
-    const wallMaterial = this.getMaterial({ map: this.wallTexture, toneMapped: false });
+    const wallMaterial = this.getMaterial({
+      map: this.wallTexture,
+      toneMapped: false,
+      normalMap: this.wallTextureNormal,
+      bumpMap: this.wallTextureHeight,
+      bumpScale: 2.0,
+      aoMap: this.wallTextureAO,
+      aoMapIntensity: 0.75
+    });
+
     const wallInstancedMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.countWalls());
     wallInstancedMesh.receiveShadow = true;
     wallInstancedMesh.castShadow = true;
+
     return wallInstancedMesh;
   }
 
@@ -604,7 +632,8 @@ export default class GridUI3D extends GridUI {
             map: child.material.map,
             normalMap: child.material.normalMap,
             metalnessMap: child.material.metalnessMap,
-            roughnessMap: child.material.roughnessMap
+            roughnessMap: child.material.roughnessMap,
+            roughness: 0.4,
           });
         }
 
