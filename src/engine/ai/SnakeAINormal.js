@@ -23,15 +23,65 @@ import Position from "../Position.js";
 import Lowlight from "../../../libs/lowlight.astar.min.js";
 
 export default class SnakeAINormal extends SnakeAI {
+
   constructor(enableTorus) {
     super();
     this.enableTorus = enableTorus;
     this.aiLevelText = "normal";
+
+    this.path = [];
+    this.oldFruitPosition = null;
+    this.oldFruitPositionGold = null;
   }
 
   ai(snake) {
     super.ai(snake);
 
+    if(this.shouldUpdatePath(snake)) {
+      this.updatePath(snake);
+    }
+
+    const currentPosition = snake.getHeadPosition();
+
+    if(this.path.length > 0) {
+      const nextPositionPath = this.path.pop();
+      const nextPosition = new Position(nextPositionPath.x, nextPositionPath.y);
+      return new Position(null, null, snake.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
+    }
+
+    return null;
+  }
+
+  shouldUpdatePath(snake) {
+    if(this.path.length === 0) {
+      return true;
+    }
+
+    const fruitPos = snake.grid.fruitPos;
+    const fruitPosGold = snake.grid.fruitPosGold;
+
+    if(this.aiFruitGoal === GameConstants.CaseType.FRUIT_GOLD
+      && !fruitPosGold.equals(this.oldFruitPositionGold)
+    ) {
+      return true;
+    }
+
+    if(this.aiFruitGoal === GameConstants.CaseType.FRUIT
+      && !fruitPos.equals(this.oldFruitPosition)
+    ) {
+      return true;
+    }
+
+    for(const position of this.path) {
+      if(snake.grid.isDeadPosition(new Position(position.x, position.y))) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  updatePath(snake) {
     const currentPosition = snake.getHeadPosition();
     const fruitPos = snake.grid.fruitPos;
     const fruitPosGold = snake.grid.fruitPosGold;
@@ -49,28 +99,29 @@ export default class SnakeAINormal extends SnakeAI {
         cost(a, b) { return b == 1 ? null : 1; }
       });
 
-      if(fruitPosGold && this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD) {
+      if(fruitPosGold && this.aiFruitGoal === GameConstants.CaseType.FRUIT_GOLD) {
         fruitTarget = fruitPosGold;
       }
 
-      let path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: fruitTarget ? fruitTarget.x : null, y: fruitTarget ? fruitTarget.y : null });
+      let calculatedPath = this.calculatePath(graph, currentPosition, fruitTarget);
 
-      if(path.length < 1) {
-        if(this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold) {
+      if(calculatedPath.length < 1) {
+        if(this.aiFruitGoal === GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold) {
           fruitTarget = fruitPos;
         }
 
-        path = graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: fruitTarget ? fruitTarget.x : null, y: fruitTarget ? fruitTarget.y : null });
+        calculatedPath = this.calculatePath(graph, currentPosition, fruitTarget);
       }
 
-      if(path.length > 1) {
-        const nextPosition = new Position(path[1].x, path[1].y);
-        return new Position(null, null, snake.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
-      }
+      this.path = calculatedPath.reverse();
+      this.path.pop();
 
-      grid, graph, path = null;
+      this.oldFruitPosition = fruitPos;
+      this.oldFruitPositionGold = fruitPosGold;
     }
+  }
 
-    return null;
+  calculatePath(graph, currentPosition, fruitTarget) {
+    return graph.path({ x: currentPosition.x, y: currentPosition.y }, { x: fruitTarget ? fruitTarget.x : null, y: fruitTarget ? fruitTarget.y : null });
   }
 }
