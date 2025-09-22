@@ -31,6 +31,7 @@ export default class GridUI3D extends GridUI {
     super(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, debugMode);
 
     this.snakesMeshes = [];
+    this.snakeTransitionCache = {};
 
     this.cameraPresetsByHeight = {
       5: { fov: 5, distance: 60, zoom: 1 },
@@ -448,7 +449,11 @@ export default class GridUI3D extends GridUI {
       const lightGrayCellInstancedMesh = this.constructLightGrayCell(totalCells, halfCells);
       const darkGrayCellInstancedMesh = this.constructDarkGrayCell(halfCells);
 
-      this.gridGroup.add(ground, wallInstancedMesh, lightGrayCellInstancedMesh, darkGrayCellInstancedMesh);
+      this.gridGroup.add(ground, lightGrayCellInstancedMesh, darkGrayCellInstancedMesh);
+
+      if(wallInstancedMesh) {
+        this.gridGroup.add(wallInstancedMesh);
+      }
 
       const halfGridWidth = this.grid.width / 2;
       const halfGridHeight = this.grid.height / 2;
@@ -548,6 +553,12 @@ export default class GridUI3D extends GridUI {
   }
 
   constructWallMesh() {
+    const wallsCount = this.countWalls();
+
+    if(wallsCount <= 0) {
+      return null;
+    }
+
     if(!this.wallTexture) {
       const wallImage = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/${GameUtils.getImageCase(GameConstants.CaseType.WALL)}`);
       this.wallTexture = new THREE.CanvasTexture(wallImage);
@@ -583,7 +594,7 @@ export default class GridUI3D extends GridUI {
       aoMapIntensity: 0.75
     });
 
-    const wallInstancedMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, this.countWalls());
+    const wallInstancedMesh = new THREE.InstancedMesh(wallGeometry, wallMaterial, wallsCount);
     wallInstancedMesh.receiveShadow = true;
     wallInstancedMesh.castShadow = true;
 
@@ -1276,7 +1287,9 @@ export default class GridUI3D extends GridUI {
       this.generateSnakeBodyMeshTubes(segmentsPositions, snake, snakeMaterial) :
       this.generateSnakeBodyMeshIndividual(segmentsPositions, snake, snakeMaterial);
 
-    this.snakesGroup.add(...snakeMesh);
+    if(snakeMesh && snakeMesh.length > 0) {
+      this.snakesGroup.add(...snakeMesh);
+    }
 
     snakeMeshes.bodyParts = snakeMesh;
   }
@@ -1315,20 +1328,6 @@ export default class GridUI3D extends GridUI {
   createSnakeSegmentMeshes(snake, material, segmentsPositions) {
     const { radiusSegments, tubularSegments } = this.calculateSnakeGeometryQualityIndividual(snake);
 
-    const straightCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-0.5, 0, 0),
-      new THREE.Vector3(0.5, 0, 0)
-    ]);
-      
-    const curveCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(0.5, 0, 0),
-      new THREE.Vector3(0.5, 0.5, 0)
-    ]);
-
-    const straightGeometry = new THREE.TubeGeometry(straightCurve, tubularSegments, 0.35, radiusSegments, false);
-    const curveGeometry = new THREE.TubeGeometry(curveCurve, tubularSegments, 0.35, radiusSegments, false);
-
     const gridFlat = segmentsPositions
       .map((segment, segIndex) => 
         segIndex === 0 
@@ -1340,10 +1339,32 @@ export default class GridUI3D extends GridUI {
     const straightCount = gridFlat.filter(part => !this.isAngleDirection(part.direction)).length;
     const curveCount = gridFlat.filter(part => this.isAngleDirection(part.direction)).length;
 
-    const straightMesh = new THREE.InstancedMesh(straightGeometry, material, straightCount);
-    const curveMesh = new THREE.InstancedMesh(curveGeometry, material, curveCount);
+    const segmentsMeshes = { straightMesh: null, curveMesh: null };
 
-    return { straightMesh, curveMesh };
+    if(straightCount > 0) {
+      const straightCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-0.5, 0, 0),
+        new THREE.Vector3(0.5, 0, 0)
+      ]);
+
+      const straightGeometry = new THREE.TubeGeometry(straightCurve, tubularSegments, 0.35, radiusSegments, false);
+
+      segmentsMeshes.straightMesh = new THREE.InstancedMesh(straightGeometry, material, straightCount);
+    }
+      
+    if(curveCount > 0) {
+      const curveCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0.5, 0, 0),
+        new THREE.Vector3(0.5, 0.5, 0)
+      ]);
+
+      const curveGeometry = new THREE.TubeGeometry(curveCurve, tubularSegments, 0.35, radiusSegments, false);
+
+      segmentsMeshes.curveMesh = new THREE.InstancedMesh(curveGeometry, material, curveCount);
+    }
+
+    return segmentsMeshes;
   }
 
   generateSnakeBodyMeshIndividual(segmentsPositions, snake, snakeMaterial) {
@@ -1375,7 +1396,7 @@ export default class GridUI3D extends GridUI {
       segmentIndex++;
     }
     
-    return [straightMesh, curveMesh];
+    return [straightMesh, curveMesh].filter(mesh => mesh != null);
   }
 
   createSnakeEyes(snake) {
