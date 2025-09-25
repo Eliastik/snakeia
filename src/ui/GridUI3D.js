@@ -31,7 +31,9 @@ export default class GridUI3D extends GridUI {
     super(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, debugMode);
 
     this.snakesMeshes = [];
-    this.snakeTransitionCache = {};
+
+    this.segmentGeometryCache = {};
+    this.transitionSegmentGeometryCache = {};
 
     this.cameraPresetsByHeight = {
       5: { fov: 5, distance: 60, zoom: 1 },
@@ -766,6 +768,8 @@ export default class GridUI3D extends GridUI {
   }
 
   updateSnakes() {
+    this.resetSnakeTransitionCache();
+
     for(let i = 0; i < this.snakes.length; i++) {
       this.updateSnake(i);
     }
@@ -873,94 +877,100 @@ export default class GridUI3D extends GridUI {
       type: "tail"
     });
   }
-  
-  updateSnakeTransition(snakeIndex, snake, options) {
-    const { type, margin } = options;
+
+  createGenericSnakeSegmentGeometry(length, tubularSegments = 20, radiusSegments = 8, radius = 0.35) {
+    const points = [
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(length, 0, 0),
+      new THREE.Vector3(length + 0.5, 0, 0)
+    ];
+    const curve = new THREE.CatmullRomCurve3(points);
+    return new THREE.TubeGeometry(curve, tubularSegments, radius, radiusSegments, false);
+  }
+
+  getCacheKey(type, animationPercentage) {
+    return `${type}_${animationPercentage.toFixed(2)}`;
+  }
+
+  updateSnakeTransition(snakeIndex, snake, type) {
     const snakeMeshes = this.snakesMeshes[snakeIndex];
+    const meshKey = type + "TransitionMesh";
+    const snakePart = type === "head" ? 0 : -1;
 
-    if(type === "head") {
-      const now = performance.now();
-      const throttleMs = 10;
+    const parentMesh = type === "head" ? snakeMeshes.headMesh : snakeMeshes.tailMesh;
 
-      if(!snakeMeshes._lastUpdateTransition) {
-        snakeMeshes._lastUpdateTransition = {};
-      }
-
-      if(!snakeMeshes._lastUpdateTransition[type]) {
-        snakeMeshes._lastUpdateTransition[type] = 0;
-      }
-
-      if(now - snakeMeshes._lastUpdateTransition[type] < throttleMs) {
-        return;
-      }
-
-      snakeMeshes._lastUpdateTransition[type] = now;
+    if(!parentMesh) {
+      return;
     }
 
-    const transitionMeshKey = type + "TransitionMesh";
-    const mainMeshKey = type + "Mesh";
+    const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
+    const caseSize = 1;
+    const length = caseSize * animationPercentage;
 
-    this.clearSnakeTransition(snakeIndex, options);
+    const currentDir = type === "head"
+      ? this.getSnakeDirection(snake, 0, snake.getHeadPosition())
+      : this.getSnakeDirection(snake, -1, snake.getTailPosition());
 
-    const mainMesh = snakeMeshes[mainMeshKey];
-    if(!mainMesh) return;
+    const margin = this.getSnakeMargin(currentDir, currentDir, type, false, animationPercentage);
 
-    const positionPoints = [];
+    const offset = new THREE.Vector3(0, 0, 0);
 
-    if(type === "head") {
-      positionPoints.push(mainMesh.position);
-      positionPoints.push(this.gridPositionTo3DPosition(snake.get(1)));
-      positionPoints.push(this.gridPositionTo3DPosition(snake.get(2)));
-    } else if(type === "tail") {
-      const secondLastPos = this.gridPositionTo3DPosition(snake.get(snake.length() - 2));
-      const tailPos = this.gridPositionTo3DPosition(snake.getTailPosition());
-
-      const tailTop = mainMesh.position.clone().add(new THREE.Vector3(-margin.x / 2, -margin.y / 2, 0));
-
-      positionPoints.push(tailTop);
-      positionPoints.push(tailPos);
-      positionPoints.push(secondLastPos);
+    switch(currentDir) {
+    case GameConstants.Direction.UP:    offset.y = -length; break;
+    case GameConstants.Direction.DOWN:  offset.y = length; break;
+    case GameConstants.Direction.RIGHT: offset.x = -length; break;
+    case GameConstants.Direction.LEFT:  offset.x = length; break;
     }
 
-    const halfWidth = this.grid.width / 2;
-    const halfHeight = this.grid.height / 2;
+    offset.add(new THREE.Vector3(margin.x, margin.y, 0));
 
-    const curvePoints = [];
-    for(let i = 0; i < positionPoints.length; i++) {
-      const currentPosition = positionPoints[i];
-
-      if(i < positionPoints.length - 1) {
-        const nextPosition = positionPoints[i + 1];
-        const deltaX = nextPosition.x - currentPosition.x;
-        const deltaY = nextPosition.y - currentPosition.y;
-
-        if(Math.abs(deltaX) > this.grid.width / 2) {
-          nextPosition.x += deltaX > 0 ? -this.grid.width : this.grid.width;
-        }
-
-        if(Math.abs(deltaY) > this.grid.height / 2) {
-          nextPosition.y += deltaY > 0 ? -this.grid.height : this.grid.height;
-        }
-      }
-
-      const clampedX = Math.max(-halfWidth, Math.min(currentPosition.x, halfWidth));
-      const clampedY = Math.max(-halfHeight, Math.min(currentPosition.y, halfHeight));
-
-      curvePoints.push(new THREE.Vector3(clampedX, clampedY, 0.3));
-    }
-
-    const curve = new THREE.CatmullRomCurve3(curvePoints);
     const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQualityIndividual(snake);
+    const cacheKey = this.getCacheKey(type, animationPercentage);
 
-    const tubeGeometry = new THREE.TubeGeometry(curve, tubularSegments, 0.35, radiusSegments, false);
-    const newTransitionMesh = new THREE.Mesh(tubeGeometry, snakeMeshes.snakeMaterial);
-    newTransitionMesh.castShadow = true;
-    newTransitionMesh.receiveShadow = true;
+    if(!this.transitionSegmentGeometryCache) {
+      this.transitionSegmentGeometryCache = {};
+    }
+    
+    let geometry = this.transitionSegmentGeometryCache[cacheKey];
 
-    snakeMeshes[transitionMeshKey] = newTransitionMesh;
-    this.snakesGroup.add(newTransitionMesh);
+    if(!geometry) {
+      geometry = this.createGenericSnakeSegmentGeometry(length, tubularSegments, radiusSegments, 0.35);
+      this.transitionSegmentGeometryCache[cacheKey] = geometry;
+    }
 
-    return newTransitionMesh;
+    if(!snakeMeshes[meshKey]) {
+      const mesh = new THREE.Mesh(geometry, snakeMeshes.snakeMaterial);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      this.snakesGroup.add(mesh);
+      snakeMeshes[meshKey] = mesh;
+    } else if (snakeMeshes[meshKey].geometry !== geometry) {
+      snakeMeshes[meshKey].geometry.dispose();
+      snakeMeshes[meshKey].geometry = geometry;
+    }
+
+    snakeMeshes[meshKey].position.copy(parentMesh.position).add(offset);
+
+    snakeMeshes[meshKey].rotation.z = this.getSnakeTransitionRotationFromDirection(currentDir);
+  }
+
+  getSnakeTransitionRotationFromDirection(direction) {
+    return {
+      [GameConstants.Direction.RIGHT]: 0,
+      [GameConstants.Direction.LEFT]: -Math.PI,
+      [GameConstants.Direction.DOWN]: -Math.PI / 2,
+      [GameConstants.Direction.UP]: Math.PI / 2
+    }[direction] ?? 0;
+  }
+
+  resetSnakeTransitionCache() {
+    if(this.transitionSegmentGeometryCache) {
+      for(const k in this.transitionSegmentGeometryCache) {
+        this.transitionSegmentGeometryCache[k].dispose();
+      }
+    }
+
+    this.transitionSegmentGeometryCache = {};
   }
 
   clearSnakeTransition(snakeIndex, options) {
@@ -1032,7 +1042,7 @@ export default class GridUI3D extends GridUI {
       this.clearSnakeTransition(snakeIndex, { type });
     }
     
-    this.updateSnakeTransition(snakeIndex, snake, { type, margin });
+    this.updateSnakeTransition(snakeIndex, snake, type, margin);
   }
 
   handleSnakeGridCrossing(toPos, fromPos, snakePart) {
@@ -1325,6 +1335,33 @@ export default class GridUI3D extends GridUI {
     return tubesMeshes;
   }
 
+  getSegmentGeometries(tubularSegments, radiusSegments, radius = 0.35) {
+    const key = `${tubularSegments}_${radiusSegments}_${radius}`;
+
+    if(this.segmentGeometryCache[key]) {
+      return this.segmentGeometryCache[key];
+    }
+
+    const straightCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.5, 0, 0),
+      new THREE.Vector3(0.5, 0, 0)
+    ]);
+
+    const straightGeometry = new THREE.TubeGeometry(straightCurve, tubularSegments, radius, radiusSegments, false);
+
+    const curveCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0.5, 0, 0),
+      new THREE.Vector3(0.5, 0.5, 0)
+    ]);
+
+    const curveGeometry = new THREE.TubeGeometry(curveCurve, tubularSegments, radius, radiusSegments, false);
+
+    this.segmentGeometryCache[key] = { straight: straightGeometry, curve: curveGeometry };
+
+    return this.segmentGeometryCache[key];
+  }
+
   createSnakeSegmentMeshes(snake, material, segmentsPositions) {
     const { radiusSegments, tubularSegments } = this.calculateSnakeGeometryQualityIndividual(snake);
 
@@ -1341,30 +1378,27 @@ export default class GridUI3D extends GridUI {
 
     const segmentsMeshes = { straightMesh: null, curveMesh: null };
 
+    const { straight, curve } = this.getSegmentGeometries(tubularSegments, radiusSegments);
+
     if(straightCount > 0) {
-      const straightCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-0.5, 0, 0),
-        new THREE.Vector3(0.5, 0, 0)
-      ]);
-
-      const straightGeometry = new THREE.TubeGeometry(straightCurve, tubularSegments, 0.35, radiusSegments, false);
-
-      segmentsMeshes.straightMesh = new THREE.InstancedMesh(straightGeometry, material, straightCount);
+      segmentsMeshes.straightMesh = new THREE.InstancedMesh(straight, material, straightCount);
     }
-      
+
     if(curveCount > 0) {
-      const curveCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(0.5, 0, 0),
-        new THREE.Vector3(0.5, 0.5, 0)
-      ]);
-
-      const curveGeometry = new THREE.TubeGeometry(curveCurve, tubularSegments, 0.35, radiusSegments, false);
-
-      segmentsMeshes.curveMesh = new THREE.InstancedMesh(curveGeometry, material, curveCount);
+      segmentsMeshes.curveMesh = new THREE.InstancedMesh(curve, material, curveCount);
     }
 
     return segmentsMeshes;
+  }
+
+  resetSnakeSegmentCache() {
+    if(this.segmentGeometryCache) {
+      for(const k in this.segmentGeometryCache) {
+        this.segmentGeometryCache[k].dispose();
+      }
+    }
+
+    this.segmentGeometryCache = {};
   }
 
   generateSnakeBodyMeshIndividual(segmentsPositions, snake, snakeMaterial) {
@@ -1592,6 +1626,9 @@ export default class GridUI3D extends GridUI {
       this.disposeGroup(this.gridGroup);
       this.disposeGroup(this.snakesGroup);
       this.disposeGroup(this.fruitsGroup);
+
+      this.resetSnakeSegmentCache();
+      this.resetSnakeTransitionCache();
 
       this.fruitModel?.clear();
       this.fruitModelGold?.clear();
