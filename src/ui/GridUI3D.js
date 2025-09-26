@@ -267,8 +267,9 @@ export default class GridUI3D extends GridUI {
     if(this.shouldUpdateDynamicReflections()) {
       this.updateReflections(this.goldFruitPosition.x, this.goldFruitPosition.y, 0.5);
       this.firstUpdatedReflections = true;
-      this.goldFruitFirstFrame = false;
     }
+    
+    this.goldFruitFirstFrame = false;
 
     this.renderer.render(this.scene, this.camera);
 
@@ -878,13 +879,25 @@ export default class GridUI3D extends GridUI {
     });
   }
 
-  createGenericSnakeSegmentGeometry(length, tubularSegments = 20, radiusSegments = 8, radius = 0.35) {
-    const points = [
-      new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(length, 0, 0),
-      new THREE.Vector3(length + 0.5, 0, 0)
-    ];
+  createGenericSnakeSegmentGeometry(length, type, tubularSegments = 20, radiusSegments = 8, radius = 0.35) {
+    let points;
+
+    if(type === "head") {
+      points = [
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(length, 0, 0),
+        new THREE.Vector3(length + 0.5, 0, 0)
+      ];
+    } else {
+      points = [
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(-length - 0.25, 0, 0),
+        new THREE.Vector3(-(length - 1), 0, 0)
+      ];
+    }
+
     const curve = new THREE.CatmullRomCurve3(points);
+
     return new THREE.TubeGeometry(curve, tubularSegments, radius, radiusSegments, false);
   }
 
@@ -911,20 +924,24 @@ export default class GridUI3D extends GridUI {
       ? this.getSnakeDirection(snake, 0, snake.getHeadPosition())
       : this.getSnakeDirection(snake, -1, snake.getTailPosition());
 
-    const margin = this.getSnakeMargin(currentDir, currentDir, type, false, animationPercentage);
+    const nextDir = type === "head"
+      ? this.getSnakeDirection(snake, 0, snake.get(1))
+      : this.getSnakeDirection(snake, -1, snake.get(snake.length() - 2));
+
+    const margin = this.getSnakeMargin(currentDir, nextDir, type, false, animationPercentage);
 
     const offset = new THREE.Vector3(0, 0, 0);
 
     switch(currentDir) {
-    case GameConstants.Direction.UP:    offset.y = -length; break;
-    case GameConstants.Direction.DOWN:  offset.y = length; break;
-    case GameConstants.Direction.RIGHT: offset.x = -length; break;
-    case GameConstants.Direction.LEFT:  offset.x = length; break;
+    case GameConstants.Direction.UP:    offset.y = (type === "head" ? -length : length); break;
+    case GameConstants.Direction.DOWN:  offset.y = (type === "head" ? length : -length); break;
+    case GameConstants.Direction.RIGHT: offset.x = (type === "head" ? -length : length); break;
+    case GameConstants.Direction.LEFT:  offset.x = (type === "head" ? length : -length); break;
     }
 
     offset.add(new THREE.Vector3(margin.x, margin.y, 0));
 
-    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQualityIndividual(snake);
+    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQualityIndividual(snake, type);
     const cacheKey = this.getCacheKey(type, animationPercentage);
 
     if(!this.transitionSegmentGeometryCache) {
@@ -934,7 +951,7 @@ export default class GridUI3D extends GridUI {
     let geometry = this.transitionSegmentGeometryCache[cacheKey];
 
     if(!geometry) {
-      geometry = this.createGenericSnakeSegmentGeometry(length, tubularSegments, radiusSegments, 0.35);
+      geometry = this.createGenericSnakeSegmentGeometry(length, type, tubularSegments, radiusSegments, 0.35);
       this.transitionSegmentGeometryCache[cacheKey] = geometry;
     }
 
@@ -966,7 +983,11 @@ export default class GridUI3D extends GridUI {
   resetSnakeTransitionCache() {
     if(this.transitionSegmentGeometryCache) {
       for(const k in this.transitionSegmentGeometryCache) {
-        this.transitionSegmentGeometryCache[k].dispose();
+        const segment = this.transitionSegmentGeometryCache[k];
+
+        if(segment) {
+          this.transitionSegmentGeometryCache[k].dispose();
+        }
       }
     }
 
@@ -1037,10 +1058,6 @@ export default class GridUI3D extends GridUI {
     mesh.position.set(position3D.x + offset.x, position3D.y + offset.y, 0.3);
 
     this.animateSnakeRotation(snake, snakePart, currentDirection, animationPercentage, mesh);
-
-    if(type === "tail") {
-      this.clearSnakeTransition(snakeIndex, { type });
-    }
     
     this.updateSnakeTransition(snakeIndex, snake, type, margin);
   }
@@ -1394,7 +1411,12 @@ export default class GridUI3D extends GridUI {
   resetSnakeSegmentCache() {
     if(this.segmentGeometryCache) {
       for(const k in this.segmentGeometryCache) {
-        this.segmentGeometryCache[k].dispose();
+        const segment = this.segmentGeometryCache[k];
+
+        if(segment) {
+          segment.straight.dispose();
+          segment.curve.dispose();
+        }
       }
     }
 
