@@ -879,135 +879,6 @@ export default class GridUI3D extends GridUI {
     });
   }
 
-  createGenericSnakeSegmentGeometry(length, type, tubularSegments = 20, radiusSegments = 8, radius = 0.35) {
-    let points;
-
-    if(type === "head") {
-      points = [
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(length, 0, 0),
-        new THREE.Vector3(length + 0.5, 0, 0)
-      ];
-    } else {
-      points = [
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(-length - 0.25, 0, 0),
-        new THREE.Vector3(-(length - 1), 0, 0)
-      ];
-    }
-
-    const curve = new THREE.CatmullRomCurve3(points);
-
-    return new THREE.TubeGeometry(curve, tubularSegments, radius, radiusSegments, false);
-  }
-
-  getCacheKey(type, animationPercentage) {
-    return `${type}_${animationPercentage.toFixed(2)}`;
-  }
-
-  updateSnakeTransition(snakeIndex, snake, type) {
-    const snakeMeshes = this.snakesMeshes[snakeIndex];
-    const meshKey = type + "TransitionMesh";
-    const snakePart = type === "head" ? 0 : -1;
-
-    const parentMesh = type === "head" ? snakeMeshes.headMesh : snakeMeshes.tailMesh;
-
-    if(!parentMesh) {
-      return;
-    }
-
-    const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
-    const caseSize = 1;
-    const length = caseSize * animationPercentage;
-
-    const currentDir = type === "head"
-      ? this.getSnakeDirection(snake, 0, snake.getHeadPosition())
-      : this.getSnakeDirection(snake, -1, snake.getTailPosition());
-
-    const nextDir = type === "head"
-      ? this.getSnakeDirection(snake, 0, snake.get(1))
-      : this.getSnakeDirection(snake, -1, snake.get(snake.length() - 2));
-
-    const margin = this.getSnakeMargin(currentDir, nextDir, type, false, animationPercentage);
-
-    const offset = new THREE.Vector3(0, 0, 0);
-
-    switch(currentDir) {
-    case GameConstants.Direction.UP:    offset.y = (type === "head" ? -length : length); break;
-    case GameConstants.Direction.DOWN:  offset.y = (type === "head" ? length : -length); break;
-    case GameConstants.Direction.RIGHT: offset.x = (type === "head" ? -length : length); break;
-    case GameConstants.Direction.LEFT:  offset.x = (type === "head" ? length : -length); break;
-    }
-
-    offset.add(new THREE.Vector3(margin.x, margin.y, 0));
-
-    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQualityIndividual(snake, type);
-    const cacheKey = this.getCacheKey(type, animationPercentage);
-
-    if(!this.transitionSegmentGeometryCache) {
-      this.transitionSegmentGeometryCache = {};
-    }
-    
-    let geometry = this.transitionSegmentGeometryCache[cacheKey];
-
-    if(!geometry) {
-      geometry = this.createGenericSnakeSegmentGeometry(length, type, tubularSegments, radiusSegments, 0.35);
-      this.transitionSegmentGeometryCache[cacheKey] = geometry;
-    }
-
-    if(!snakeMeshes[meshKey]) {
-      const mesh = new THREE.Mesh(geometry, snakeMeshes.snakeMaterial);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      this.snakesGroup.add(mesh);
-      snakeMeshes[meshKey] = mesh;
-    } else if (snakeMeshes[meshKey].geometry !== geometry) {
-      snakeMeshes[meshKey].geometry.dispose();
-      snakeMeshes[meshKey].geometry = geometry;
-    }
-
-    snakeMeshes[meshKey].position.copy(parentMesh.position).add(offset);
-
-    snakeMeshes[meshKey].rotation.z = this.getSnakeTransitionRotationFromDirection(currentDir);
-  }
-
-  getSnakeTransitionRotationFromDirection(direction) {
-    return {
-      [GameConstants.Direction.RIGHT]: 0,
-      [GameConstants.Direction.LEFT]: -Math.PI,
-      [GameConstants.Direction.DOWN]: -Math.PI / 2,
-      [GameConstants.Direction.UP]: Math.PI / 2
-    }[direction] ?? 0;
-  }
-
-  resetSnakeTransitionCache() {
-    if(this.transitionSegmentGeometryCache) {
-      for(const k in this.transitionSegmentGeometryCache) {
-        const segment = this.transitionSegmentGeometryCache[k];
-
-        if(segment) {
-          this.transitionSegmentGeometryCache[k].dispose();
-        }
-      }
-    }
-
-    this.transitionSegmentGeometryCache = {};
-  }
-
-  clearSnakeTransition(snakeIndex, options) {
-    const { type } = options;
-    const snakeMeshes = this.snakesMeshes[snakeIndex];
-
-    const transitionMeshKey = type + "TransitionMesh";
-
-    const oldTransitionMesh = snakeMeshes[transitionMeshKey];
-
-    if(oldTransitionMesh) {
-      this.disposeMesh(oldTransitionMesh);
-      this.snakesGroup.remove(oldTransitionMesh);
-    }
-  }
-
   getSnakePartGraphicDirection(snakePart, snake) {
     if(snakePart === 0) {
       if(snake.length() > 1) {
@@ -1029,9 +900,7 @@ export default class GridUI3D extends GridUI {
 
     const position3D = this.gridPositionTo3DPosition(position);
 
-    const isTurning = this.shouldDisplayAnimation(snake, snakePart) 
-                 && (snakePart === 0 || snakePart === -1)
-                 && this.isAngleDirection(this.getSnakePartGraphicDirection(snakePart, snake));
+    const isTurning = this.isSnakePartTurning(snake, snakePart);
 
     const margin = this.getSnakeMargin(currentDirection, nextDirection, type, isTurning, animationPercentage);
 
@@ -1060,6 +929,12 @@ export default class GridUI3D extends GridUI {
     this.animateSnakeRotation(snake, snakePart, currentDirection, animationPercentage, mesh);
     
     this.updateSnakeTransition(snakeIndex, snake, type, margin);
+  }
+
+  isSnakePartTurning(snake, snakePart) {
+    return this.shouldDisplayAnimation(snake, snakePart)
+      && (snakePart === 0 || snakePart === -1)
+      && this.isAngleDirection(this.getSnakePartGraphicDirection(snakePart, snake));
   }
 
   handleSnakeGridCrossing(toPos, fromPos, snakePart) {
@@ -1171,12 +1046,192 @@ export default class GridUI3D extends GridUI {
     }[direction] ?? 0;
   }
 
-  createSnakeMesh(snakeGeometry, material) {
-    const mesh = new THREE.Mesh(snakeGeometry, material);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+  createGenericSnakeSegmentGeometry(snake, length, type, isTurning) {
+    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQualityIndividual(snake, type);
 
-    return mesh;
+    let points;
+
+    if(!isTurning) {
+      if(type === "head") {
+        points = [
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(length, 0, 0),
+          new THREE.Vector3(length + 0.5, 0, 0)
+        ];
+      } else {
+        points = [
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(-length - 0.25, 0, 0),
+          new THREE.Vector3(-(length - 1), 0, 0)
+        ];
+      }
+    } else {
+      points = [
+        new THREE.Vector3(0.5, 0.5 * length, 0),
+        new THREE.Vector3(0.5, 0, 0),
+        new THREE.Vector3(0, 0, 0)
+      ];
+    }
+
+    const curve = new THREE.CatmullRomCurve3(points);
+
+    return new THREE.TubeGeometry(curve, tubularSegments, 0.35, radiusSegments, false);
+  }
+
+  getCacheKey(type, animationPercentage, isTurning) {
+    if(isTurning) {
+      return `turn_${animationPercentage.toFixed(2)}`;
+    }
+
+    return `${type}_${animationPercentage.toFixed(2)}`;
+  }
+
+  updateSnakeTransition(snakeIndex, snake, type) {
+    const snakeMeshes = this.snakesMeshes[snakeIndex];
+    const meshKey = type + "TransitionMesh";
+    const snakePart = type === "head" ? 0 : -1;
+
+    const parentMesh = type === "head" ? snakeMeshes.headMesh : snakeMeshes.tailMesh;
+
+    if(!parentMesh) {
+      return;
+    }
+
+    const animationPercentage = this.calculateAnimationPercentage(snake, snakePart);
+    const caseSize = 1;
+    const length = caseSize * animationPercentage;
+
+    const currentDir = type === "head"
+      ? this.getSnakeDirection(snake, 0, snake.getHeadPosition())
+      : this.getSnakeDirection(snake, -1, snake.getTailPosition());
+
+    const nextDir = type === "head"
+      ? this.getSnakeDirection(snake, 0, snake.get(1))
+      : this.getSnakeDirection(snake, -1, snake.get(snake.length() - 2));
+
+    const margin = this.getSnakeMargin(currentDir, nextDir, type, false, animationPercentage);
+    const isTurning = this.isSnakePartTurning(snake, snakePart);
+
+    const offset = new THREE.Vector3(0, 0, 0);
+
+    const currentGraphicDirection = this.getSnakePartGraphicDirection(snakePart, snake);
+
+    switch(currentGraphicDirection) {
+    case GameConstants.Direction.UP:    offset.y = (type === "head" ? -length : length); break;
+    case GameConstants.Direction.DOWN:  offset.y = (type === "head" ? length : -length); break;
+    case GameConstants.Direction.RIGHT: offset.x = (type === "head" ? -length : length); break;
+    case GameConstants.Direction.LEFT:  offset.x = (type === "head" ? length : -length); break;
+    case GameConstants.Direction.ANGLE_1:  offset.y = (type === "head" ? -0.5 : 0.5); break;
+    case GameConstants.Direction.ANGLE_2:  offset.x = (type === "head" ? 0.5 : -0.5); break;
+    case GameConstants.Direction.ANGLE_3:  offset.y = (type === "head" ? 0.5 : -0.5); break;
+    case GameConstants.Direction.ANGLE_4:  offset.x = (type === "head" ? -0.5 : 0.5); break;
+    }
+
+    offset.add(new THREE.Vector3(margin.x, margin.y, 0));
+
+    const cacheKey = this.getCacheKey(type, animationPercentage, isTurning);
+
+    if(!this.transitionSegmentGeometryCache) {
+      this.transitionSegmentGeometryCache = {};
+    }
+    
+    let geometry = this.transitionSegmentGeometryCache[cacheKey];
+
+    if(!geometry) {
+      geometry = this.createGenericSnakeSegmentGeometry(snake, length, type, isTurning);
+      this.transitionSegmentGeometryCache[cacheKey] = geometry;
+    }
+
+    if(!snakeMeshes[meshKey]) {
+      const mesh = new THREE.Mesh(geometry, snakeMeshes.snakeMaterial);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      this.snakesGroup.add(mesh);
+      snakeMeshes[meshKey] = mesh;
+    } else if (snakeMeshes[meshKey].geometry !== geometry) {
+      snakeMeshes[meshKey].geometry.dispose();
+      snakeMeshes[meshKey].geometry = geometry;
+    }
+
+    if(!isTurning) {
+      snakeMeshes[meshKey].position.copy(parentMesh.position).add(offset);
+    } else {
+      const currentPosition = type === "head"
+        ? snake.get(1)
+        : snake.get(snake.length() - 2);
+      
+      const position3D = this.gridPositionTo3DPosition(currentPosition);
+
+      switch(currentDir) {
+      case GameConstants.Direction.UP:
+        position3D.y += 0.35; break;
+      case GameConstants.Direction.RIGHT:
+        position3D.x += 0.35; break;
+      case GameConstants.Direction.DOWN:
+        position3D.y -= 0.35; break;
+      case GameConstants.Direction.LEFT:
+        position3D.x -= 0.35; break;
+      }
+  
+      snakeMeshes[meshKey].position.copy(new THREE.Vector3(position3D.x, position3D.y, 0.3)).add(offset);
+    }
+    
+    snakeMeshes[meshKey].rotation.z = isTurning ? this.getSnakeTurningTransitionRotationFromDirection(currentGraphicDirection)
+      : this.getSnakeStraightTransitionRotationFromDirection(currentGraphicDirection);
+  }
+
+  getSnakeStraightTransitionRotationFromDirection(direction) {
+    return {
+      [GameConstants.Direction.RIGHT]: 0,
+      [GameConstants.Direction.LEFT]: -Math.PI,
+      [GameConstants.Direction.DOWN]: -Math.PI / 2,
+      [GameConstants.Direction.UP]: Math.PI / 2,
+      [GameConstants.Direction.ANGLE_1]: Math.PI / 2,
+      [GameConstants.Direction.ANGLE_2]: Math.PI,
+      [GameConstants.Direction.ANGLE_3]: -Math.PI / 2,
+      [GameConstants.Direction.ANGLE_4]: 0
+    }[direction] ?? 0;
+  }
+
+  getSnakeTurningTransitionRotationFromDirection(direction) {
+    return {
+      [GameConstants.Direction.RIGHT]: 0,
+      [GameConstants.Direction.LEFT]: -Math.PI,
+      [GameConstants.Direction.DOWN]: -Math.PI / 2,
+      [GameConstants.Direction.UP]: Math.PI / 2,
+      [GameConstants.Direction.ANGLE_1]: Math.PI / 2,
+      [GameConstants.Direction.ANGLE_2]: Math.PI,
+      [GameConstants.Direction.ANGLE_3]: -Math.PI / 2,
+      [GameConstants.Direction.ANGLE_4]: 0
+    }[direction] ?? 0;
+  }
+
+  resetSnakeTransitionCache() {
+    if(this.transitionSegmentGeometryCache) {
+      for(const k in this.transitionSegmentGeometryCache) {
+        const segment = this.transitionSegmentGeometryCache[k];
+
+        if(segment) {
+          this.transitionSegmentGeometryCache[k].dispose();
+        }
+      }
+    }
+
+    this.transitionSegmentGeometryCache = {};
+  }
+
+  clearSnakeTransition(snakeIndex, options) {
+    const { type } = options;
+    const snakeMeshes = this.snakesMeshes[snakeIndex];
+
+    const transitionMeshKey = type + "TransitionMesh";
+
+    const oldTransitionMesh = snakeMeshes[transitionMeshKey];
+
+    if(oldTransitionMesh) {
+      this.disposeMesh(oldTransitionMesh);
+      this.snakesGroup.remove(oldTransitionMesh);
+    }
   }
 
   calculateSnakeSegmentsPositions(snake) {
