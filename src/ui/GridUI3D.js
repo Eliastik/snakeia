@@ -769,6 +769,7 @@ export default class GridUI3D extends GridUI {
   }
 
   updateSnakes() {
+    this.resetSnakeSegmentCache();
     this.resetSnakeTransitionCache();
 
     for(let i = 0; i < this.snakes.length; i++) {
@@ -1086,12 +1087,8 @@ export default class GridUI3D extends GridUI {
     return new THREE.TubeGeometry(curve, tubularSegments, 0.35, radiusSegments, false);
   }
 
-  getCacheKey(type, animationPercentage, isTurning) {
-    if(isTurning) {
-      return `turn_${animationPercentage.toFixed(2)}`;
-    }
-
-    return `${type}_${animationPercentage.toFixed(2)}`;
+  getTransitionCacheKey(type, animationPercentage, isTurning) {
+    return `${type}${isTurning ? "_turn_" : "_"}${animationPercentage.toFixed(2)}`;
   }
 
   updateSnakeTransition(snakeIndex, snake, type) {
@@ -1137,7 +1134,7 @@ export default class GridUI3D extends GridUI {
 
     offset.add(new THREE.Vector3(margin.x, margin.y, 0));
 
-    const cacheKey = this.getCacheKey(type, animationPercentage, isTurning);
+    const cacheKey = this.getTransitionCacheKey(type, animationPercentage, isTurning);
 
     if(!this.transitionSegmentGeometryCache) {
       this.transitionSegmentGeometryCache = {};
