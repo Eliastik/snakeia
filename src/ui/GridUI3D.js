@@ -900,7 +900,8 @@ export default class GridUI3D extends GridUI {
 
     const position3D = this.gridPositionTo3DPosition(position);
 
-    const isTurning = this.isSnakePartTurning(snake, snakePart);
+    const isTurning = this.shouldDisplayAnimation(snake, snakePart)
+      && this.isSnakePartTurning(snake, snakePart);
 
     const margin = this.getSnakeMargin(currentDirection, nextDirection, type, isTurning, animationPercentage);
 
@@ -932,8 +933,7 @@ export default class GridUI3D extends GridUI {
   }
 
   isSnakePartTurning(snake, snakePart) {
-    return this.shouldDisplayAnimation(snake, snakePart)
-      && (snakePart === 0 || snakePart === -1)
+    return (snakePart === 0 || snakePart === -1)
       && this.isAngleDirection(this.getSnakePartGraphicDirection(snakePart, snake));
   }
 
