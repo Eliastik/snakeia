@@ -1066,11 +1066,19 @@ export default class GridUI3D extends GridUI {
         ];
       }
     } else {
-      points = [
-        new THREE.Vector3(0.5, 0.5 * length, 0),
-        new THREE.Vector3(0.5, 0, 0),
-        new THREE.Vector3(0, 0, 0)
-      ];
+      if(type === "head") {
+        points = [
+          new THREE.Vector3(0.5, 0.5 * length, 0),
+          new THREE.Vector3(0.5, 0, 0),
+          new THREE.Vector3(0, 0, 0)
+        ];
+      } else {
+        points = [
+          new THREE.Vector3(-0.5, -0.5 * (1 - length), 0),
+          new THREE.Vector3(-0.5, 0, 0),
+          new THREE.Vector3(0, 0, 0)
+        ];
+      }
     }
 
     const curve = new THREE.CatmullRomCurve3(points);
@@ -1087,7 +1095,6 @@ export default class GridUI3D extends GridUI {
   }
 
   updateSnakeTransition(snakeIndex, snake, type) {
-    if(type === "tail") return;
     const snakeMeshes = this.snakesMeshes[snakeIndex];
     const meshKey = type + "TransitionMesh";
     const snakePart = type === "head" ? 0 : -1;
@@ -1122,10 +1129,10 @@ export default class GridUI3D extends GridUI {
     case GameConstants.Direction.DOWN:  offset.y = (type === "head" ? length : -length); break;
     case GameConstants.Direction.RIGHT: offset.x = (type === "head" ? -length : length); break;
     case GameConstants.Direction.LEFT:  offset.x = (type === "head" ? length : -length); break;
-    case GameConstants.Direction.ANGLE_1:  offset.y = (type === "head" ? -0.5 : 0.5); break;
-    case GameConstants.Direction.ANGLE_2:  offset.x = (type === "head" ? 0.5 : -0.5); break;
-    case GameConstants.Direction.ANGLE_3:  offset.y = (type === "head" ? 0.5 : -0.5); break;
-    case GameConstants.Direction.ANGLE_4:  offset.x = (type === "head" ? -0.5 : 0.5); break;
+    case GameConstants.Direction.ANGLE_1:  offset.y = -0.5; break;
+    case GameConstants.Direction.ANGLE_2:  offset.x = 0.5; break;
+    case GameConstants.Direction.ANGLE_3:  offset.y = 0.5; break;
+    case GameConstants.Direction.ANGLE_4:  offset.x = -0.5; break;
     }
 
     offset.add(new THREE.Vector3(margin.x, margin.y, 0));
@@ -1159,41 +1166,55 @@ export default class GridUI3D extends GridUI {
     } else {
       const currentPosition = type === "head"
         ? snake.get(1)
-        : snake.get(snake.length() - 2);
+        : snake.get(snake.length() - 1);
       
       const position3D = this.gridPositionTo3DPosition(currentPosition);
 
-      switch(currentDir) {
-      case GameConstants.Direction.UP:
-        position3D.y += 0.35; break;
-      case GameConstants.Direction.RIGHT:
-        position3D.x += 0.35; break;
-      case GameConstants.Direction.DOWN:
-        position3D.y -= 0.35; break;
-      case GameConstants.Direction.LEFT:
-        position3D.x -= 0.35; break;
+      if(type === "head") {
+        switch(currentDir) {
+        case GameConstants.Direction.UP:
+          position3D.y += 0.35; break;
+        case GameConstants.Direction.RIGHT:
+          position3D.x += 0.35; break;
+        case GameConstants.Direction.DOWN:
+          position3D.y -= 0.35; break;
+        case GameConstants.Direction.LEFT:
+          position3D.x -= 0.35; break;
+        }
+      } else {
+        switch(currentDir) {
+        case GameConstants.Direction.UP:
+          position3D.y -= 0.35; break;
+        case GameConstants.Direction.RIGHT:
+          position3D.x -= 0.35; break;
+        case GameConstants.Direction.DOWN:
+          position3D.y += 0.35; break;
+        case GameConstants.Direction.LEFT:
+          position3D.x += 0.35; break;
+        }
       }
   
       snakeMeshes[meshKey].position.copy(new THREE.Vector3(position3D.x, position3D.y, 0.3)).add(offset);
     }
     
+    snakeMeshes[meshKey].rotation.x = 0;
     snakeMeshes[meshKey].rotation.y = 0;
-    snakeMeshes[meshKey].rotation.z = isTurning ? this.getSnakeTurningTransitionRotationFromDirection(currentGraphicDirection)
+    snakeMeshes[meshKey].rotation.z = isTurning ? this.getSnakeTurningTransitionRotationFromDirection(currentGraphicDirection, type)
       : this.getSnakeStraightTransitionRotationFromDirection(currentGraphicDirection);
 
     if(isTurning) {
-      const mirror = this.isTurningMirror(currentGraphicDirection, currentDir);
-      snakeMeshes[meshKey].rotation.z += mirror.rotation.z;
+      const mirror = type === "head" ? this.isTurningMirrorHead(currentGraphicDirection, currentDir)
+        : this.isTurningMirrorTail(currentGraphicDirection, currentDir);
+
       snakeMeshes[meshKey].rotation.y += mirror.rotation.y;
+      snakeMeshes[meshKey].rotation.z += mirror.rotation.z;
 
       snakeMeshes[meshKey].position.x += mirror.position.x;
       snakeMeshes[meshKey].position.y += mirror.position.y;
-    } else {
-      snakeMeshes[meshKey].rotation.y = 0;
     }
   }
 
-  isTurningMirror(currentGraphicDirection, headDir) {
+  isTurningMirrorHead(currentGraphicDirection, headDir) {
     if(currentGraphicDirection === GameConstants.Direction.ANGLE_2 && headDir === GameConstants.Direction.RIGHT) {
       return {
         rotation: {
@@ -1242,6 +1263,55 @@ export default class GridUI3D extends GridUI {
     };
   }
 
+  isTurningMirrorTail(currentGraphicDirection, tailDir) {
+    if(currentGraphicDirection === GameConstants.Direction.ANGLE_2 && tailDir === GameConstants.Direction.LEFT) {
+      return {
+        rotation: {
+          z: -Math.PI / 2, y: Math.PI
+        },
+        position: {
+          x: -0.5, y: -0.5
+        }
+      };
+    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_4 && tailDir === GameConstants.Direction.RIGHT) {
+      return {
+        rotation: {
+          z: -Math.PI / 2, y: Math.PI
+        },
+        position: {
+          x: 0.5, y: 0.5
+        }
+      };
+    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_1 && tailDir === GameConstants.Direction.UP) {
+      return {
+        rotation: {
+          z: Math.PI / 2, y: -Math.PI
+        },
+        position: {
+          x: -0.5, y: 0.5
+        }
+      };
+    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_3 && tailDir === GameConstants.Direction.DOWN) {
+      return {
+        rotation: {
+          z: Math.PI / 2, y: -Math.PI
+        },
+        position: {
+          x: 0.5, y: -0.5
+        }
+      };
+    }
+
+    return {
+      rotation: {
+        z: 0, y: 0
+      },
+      position: {
+        x: 0, y: 0
+      }
+    };
+  }
+
   getSnakeStraightTransitionRotationFromDirection(direction) {
     return {
       [GameConstants.Direction.RIGHT]: 0,
@@ -1255,17 +1325,30 @@ export default class GridUI3D extends GridUI {
     }[direction] ?? 0;
   }
 
-  getSnakeTurningTransitionRotationFromDirection(direction) {
-    return {
-      [GameConstants.Direction.RIGHT]: 0,
-      [GameConstants.Direction.LEFT]: -Math.PI,
-      [GameConstants.Direction.DOWN]: -Math.PI / 2,
-      [GameConstants.Direction.UP]: Math.PI / 2,
-      [GameConstants.Direction.ANGLE_1]: Math.PI / 2,
-      [GameConstants.Direction.ANGLE_2]: Math.PI,
-      [GameConstants.Direction.ANGLE_3]: -Math.PI / 2,
-      [GameConstants.Direction.ANGLE_4]: 0
-    }[direction] ?? 0;
+  getSnakeTurningTransitionRotationFromDirection(direction, type) {
+    if(type === "head") {
+      return {
+        [GameConstants.Direction.RIGHT]: 0,
+        [GameConstants.Direction.LEFT]: -Math.PI,
+        [GameConstants.Direction.DOWN]: -Math.PI / 2,
+        [GameConstants.Direction.UP]: Math.PI / 2,
+        [GameConstants.Direction.ANGLE_1]: Math.PI / 2,
+        [GameConstants.Direction.ANGLE_2]: Math.PI,
+        [GameConstants.Direction.ANGLE_3]: -Math.PI / 2,
+        [GameConstants.Direction.ANGLE_4]: 0
+      }[direction] ?? 0;
+    } else {
+      return {
+        [GameConstants.Direction.RIGHT]: 0,
+        [GameConstants.Direction.LEFT]: -Math.PI,
+        [GameConstants.Direction.DOWN]: -Math.PI / 2,
+        [GameConstants.Direction.UP]: Math.PI / 2,
+        [GameConstants.Direction.ANGLE_1]: -Math.PI / 2,
+        [GameConstants.Direction.ANGLE_2]: 0,
+        [GameConstants.Direction.ANGLE_3]: Math.PI / 2,
+        [GameConstants.Direction.ANGLE_4]: Math.PI
+      }[direction] ?? 0;
+    }
   }
 
   resetSnakeTransitionCache() {
