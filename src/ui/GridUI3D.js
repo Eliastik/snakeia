@@ -1087,6 +1087,7 @@ export default class GridUI3D extends GridUI {
   }
 
   updateSnakeTransition(snakeIndex, snake, type) {
+    if(type === "tail") return;
     const snakeMeshes = this.snakesMeshes[snakeIndex];
     const meshKey = type + "TransitionMesh";
     const snakePart = type === "head" ? 0 : -1;
@@ -1176,8 +1177,69 @@ export default class GridUI3D extends GridUI {
       snakeMeshes[meshKey].position.copy(new THREE.Vector3(position3D.x, position3D.y, 0.3)).add(offset);
     }
     
+    snakeMeshes[meshKey].rotation.y = 0;
     snakeMeshes[meshKey].rotation.z = isTurning ? this.getSnakeTurningTransitionRotationFromDirection(currentGraphicDirection)
       : this.getSnakeStraightTransitionRotationFromDirection(currentGraphicDirection);
+
+    if(isTurning) {
+      const mirror = this.isTurningMirror(currentGraphicDirection, currentDir);
+      snakeMeshes[meshKey].rotation.z += mirror.rotation.z;
+      snakeMeshes[meshKey].rotation.y += mirror.rotation.y;
+
+      snakeMeshes[meshKey].position.x += mirror.position.x;
+      snakeMeshes[meshKey].position.y += mirror.position.y;
+    } else {
+      snakeMeshes[meshKey].rotation.y = 0;
+    }
+  }
+
+  isTurningMirror(currentGraphicDirection, headDir) {
+    if(currentGraphicDirection === GameConstants.Direction.ANGLE_2 && headDir === GameConstants.Direction.RIGHT) {
+      return {
+        rotation: {
+          z: -Math.PI / 2, y: Math.PI
+        },
+        position: {
+          x: -0.5, y: -0.5
+        }
+      };
+    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_4 && headDir === GameConstants.Direction.LEFT) {
+      return {
+        rotation: {
+          z: -Math.PI / 2, y: Math.PI
+        },
+        position: {
+          x: 0.5, y: 0.5
+        }
+      };
+    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_1 && headDir === GameConstants.Direction.DOWN) {
+      return {
+        rotation: {
+          z: Math.PI / 2, y: -Math.PI
+        },
+        position: {
+          x: -0.5, y: 0.5
+        }
+      };
+    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_3 && headDir === GameConstants.Direction.UP) {
+      return {
+        rotation: {
+          z: Math.PI / 2, y: -Math.PI
+        },
+        position: {
+          x: 0.5, y: -0.5
+        }
+      };
+    }
+
+    return {
+      rotation: {
+        z: 0, y: 0
+      },
+      position: {
+        x: 0, y: 0
+      }
+    };
   }
 
   getSnakeStraightTransitionRotationFromDirection(direction) {
