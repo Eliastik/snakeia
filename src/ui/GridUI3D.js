@@ -69,11 +69,6 @@ export default class GridUI3D extends GridUI {
     this.goldFruitPosition = null;
     this.firstUpdatedReflections = false;
     this.goldFruitFirstFrame = true;
-
-    /**
-     * TODO :
-     * - Optimize TubeGeomtry geometry (reduce geometry quality)
-     */
   }
 
   resolveQualitySettings(preset) {
@@ -1194,12 +1189,10 @@ export default class GridUI3D extends GridUI {
     
     snakeMeshes[meshKey].rotation.x = 0;
     snakeMeshes[meshKey].rotation.y = 0;
-    snakeMeshes[meshKey].rotation.z = isTurning ? this.getSnakeTurningTransitionRotationFromDirection(currentGraphicDirection, type)
-      : this.getSnakeStraightTransitionRotationFromDirection(currentGraphicDirection, type);
+    snakeMeshes[meshKey].rotation.z = this.getSnakeTransitionRotationFromDirection(currentGraphicDirection, type);
 
     if(isTurning) {
-      const mirror = type === "head" ? this.isTurningMirrorHead(currentGraphicDirection, currentDir)
-        : this.isTurningMirrorTail(currentGraphicDirection, currentDir);
+      const mirror = this.getTurningMirror(currentGraphicDirection, currentDir, type);
 
       snakeMeshes[meshKey].rotation.y += mirror.rotation.y;
       snakeMeshes[meshKey].rotation.z += mirror.rotation.z;
@@ -1209,131 +1202,35 @@ export default class GridUI3D extends GridUI {
     }
   }
 
-  isTurningMirrorHead(currentGraphicDirection, headDir) {
-    if(currentGraphicDirection === GameConstants.Direction.ANGLE_2 && headDir === GameConstants.Direction.RIGHT) {
-      return {
-        rotation: {
-          z: -Math.PI / 2, y: Math.PI
-        },
-        position: {
-          x: -0.5, y: -0.5
-        }
-      };
-    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_4 && headDir === GameConstants.Direction.LEFT) {
-      return {
-        rotation: {
-          z: -Math.PI / 2, y: Math.PI
-        },
-        position: {
-          x: 0.5, y: 0.5
-        }
-      };
-    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_1 && headDir === GameConstants.Direction.DOWN) {
-      return {
-        rotation: {
-          z: Math.PI / 2, y: -Math.PI
-        },
-        position: {
-          x: -0.5, y: 0.5
-        }
-      };
-    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_3 && headDir === GameConstants.Direction.UP) {
-      return {
-        rotation: {
-          z: Math.PI / 2, y: -Math.PI
-        },
-        position: {
-          x: 0.5, y: -0.5
-        }
-      };
-    }
-
-    return {
-      rotation: {
-        z: 0, y: 0
+  getTurningMirror(currentGraphicDirection, dir, type) {
+    const mirrorCases = {
+      head: {
+        [GameConstants.Direction.ANGLE_2]: { dir: GameConstants.Direction.RIGHT, rot: [-Math.PI / 2, Math.PI], pos: [-0.5, -0.5] },
+        [GameConstants.Direction.ANGLE_4]: { dir: GameConstants.Direction.LEFT, rot: [-Math.PI / 2, Math.PI], pos: [0.5, 0.5] },
+        [GameConstants.Direction.ANGLE_1]: { dir: GameConstants.Direction.DOWN, rot: [Math.PI / 2, -Math.PI], pos: [-0.5, 0.5] },
+        [GameConstants.Direction.ANGLE_3]: { dir: GameConstants.Direction.UP, rot: [Math.PI / 2, -Math.PI], pos: [0.5, -0.5] }
       },
-      position: {
-        x: 0, y: 0
+      tail: {
+        [GameConstants.Direction.ANGLE_2]: { dir: GameConstants.Direction.LEFT, rot: [-Math.PI / 2, Math.PI], pos: [-0.5, -0.5] },
+        [GameConstants.Direction.ANGLE_4]: { dir: GameConstants.Direction.RIGHT, rot: [-Math.PI / 2, Math.PI], pos: [0.5, 0.5] },
+        [GameConstants.Direction.ANGLE_1]: { dir: GameConstants.Direction.UP, rot: [Math.PI / 2, -Math.PI], pos: [-0.5, 0.5] },
+        [GameConstants.Direction.ANGLE_3]: { dir: GameConstants.Direction.DOWN, rot: [Math.PI / 2, -Math.PI], pos: [0.5, -0.5] }
       }
     };
-  }
 
-  isTurningMirrorTail(currentGraphicDirection, tailDir) {
-    if(currentGraphicDirection === GameConstants.Direction.ANGLE_2 && tailDir === GameConstants.Direction.LEFT) {
+    const cases = mirrorCases[type][currentGraphicDirection];
+
+    if(cases && dir === cases.dir) {
       return {
-        rotation: {
-          z: -Math.PI / 2, y: Math.PI
-        },
-        position: {
-          x: -0.5, y: -0.5
-        }
-      };
-    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_4 && tailDir === GameConstants.Direction.RIGHT) {
-      return {
-        rotation: {
-          z: -Math.PI / 2, y: Math.PI
-        },
-        position: {
-          x: 0.5, y: 0.5
-        }
-      };
-    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_1 && tailDir === GameConstants.Direction.UP) {
-      return {
-        rotation: {
-          z: Math.PI / 2, y: -Math.PI
-        },
-        position: {
-          x: -0.5, y: 0.5
-        }
-      };
-    } else if(currentGraphicDirection === GameConstants.Direction.ANGLE_3 && tailDir === GameConstants.Direction.DOWN) {
-      return {
-        rotation: {
-          z: Math.PI / 2, y: -Math.PI
-        },
-        position: {
-          x: 0.5, y: -0.5
-        }
+        rotation: { z: cases.rot[0], y: cases.rot[1] },
+        position: { x: cases.pos[0], y: cases.pos[1] }
       };
     }
 
-    return {
-      rotation: {
-        z: 0, y: 0
-      },
-      position: {
-        x: 0, y: 0
-      }
-    };
+    return { rotation: { z: 0, y: 0 }, position: { x: 0, y: 0 } };
   }
 
-  getSnakeStraightTransitionRotationFromDirection(direction, type) {
-    if(type === "head") {
-      return {
-        [GameConstants.Direction.RIGHT]: 0,
-        [GameConstants.Direction.LEFT]: -Math.PI,
-        [GameConstants.Direction.DOWN]: -Math.PI / 2,
-        [GameConstants.Direction.UP]: Math.PI / 2,
-        [GameConstants.Direction.ANGLE_1]: Math.PI / 2,
-        [GameConstants.Direction.ANGLE_2]: Math.PI,
-        [GameConstants.Direction.ANGLE_3]: -Math.PI / 2,
-        [GameConstants.Direction.ANGLE_4]: 0
-      }[direction] ?? 0;
-    } else {
-      return {
-        [GameConstants.Direction.RIGHT]: 0,
-        [GameConstants.Direction.LEFT]: -Math.PI,
-        [GameConstants.Direction.DOWN]: -Math.PI / 2,
-        [GameConstants.Direction.UP]: Math.PI / 2,
-        [GameConstants.Direction.ANGLE_1]: -Math.PI / 2,
-        [GameConstants.Direction.ANGLE_2]: 0,
-        [GameConstants.Direction.ANGLE_3]: Math.PI / 2,
-        [GameConstants.Direction.ANGLE_4]: Math.PI
-      }[direction] ?? 0;
-    }
-  }
-
-  getSnakeTurningTransitionRotationFromDirection(direction, type) {
+  getSnakeTransitionRotationFromDirection(direction, type) {
     if(type === "head") {
       return {
         [GameConstants.Direction.RIGHT]: 0,
@@ -1718,7 +1615,7 @@ export default class GridUI3D extends GridUI {
     const snakeColor = new THREE.Color(r / 255, g / 255, b / 255);
     snakeColor.convertSRGBToLinear();
 
-    return this.getMaterial({ color: snakeColor });
+    return this.getMaterial({ color: snakeColor, roughness: 0.6, metalness: 0.28 });
   }
 
   calculateSnakeGeometryQualityTubes(snake) {
