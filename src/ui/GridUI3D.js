@@ -1056,14 +1056,12 @@ export default class GridUI3D extends GridUI {
       if(type === "head") {
         points = [
           new THREE.Vector3(0, 0, 0),
-          new THREE.Vector3(length, 0, 0),
           new THREE.Vector3(length + 0.5, 0, 0)
         ];
       } else {
         points = [
           new THREE.Vector3(0, 0, 0),
-          new THREE.Vector3(-length - 0.25, 0, 0),
-          new THREE.Vector3(-(length - 1), 0, 0)
+          new THREE.Vector3((1 - length), 0, 0)
         ];
       }
     } else {
@@ -1122,10 +1120,10 @@ export default class GridUI3D extends GridUI {
     const currentGraphicDirection = this.getSnakePartGraphicDirection(snakePart, snake);
 
     switch(currentGraphicDirection) {
-    case GameConstants.Direction.UP:    offset.y = (type === "head" ? -length : length); break;
-    case GameConstants.Direction.DOWN:  offset.y = (type === "head" ? length : -length); break;
-    case GameConstants.Direction.RIGHT: offset.x = (type === "head" ? -length : length); break;
-    case GameConstants.Direction.LEFT:  offset.x = (type === "head" ? length : -length); break;
+    case GameConstants.Direction.UP:    offset.y = (type === "head" ? -length : -0.15); break;
+    case GameConstants.Direction.DOWN:  offset.y = (type === "head" ? length : 0.15); break;
+    case GameConstants.Direction.RIGHT: offset.x = (type === "head" ? -length : -0.15); break;
+    case GameConstants.Direction.LEFT:  offset.x = (type === "head" ? length : 0.15); break;
     case GameConstants.Direction.ANGLE_1:  offset.y = -0.5; break;
     case GameConstants.Direction.ANGLE_2:  offset.x = 0.5; break;
     case GameConstants.Direction.ANGLE_3:  offset.y = 0.5; break;
@@ -1197,7 +1195,7 @@ export default class GridUI3D extends GridUI {
     snakeMeshes[meshKey].rotation.x = 0;
     snakeMeshes[meshKey].rotation.y = 0;
     snakeMeshes[meshKey].rotation.z = isTurning ? this.getSnakeTurningTransitionRotationFromDirection(currentGraphicDirection, type)
-      : this.getSnakeStraightTransitionRotationFromDirection(currentGraphicDirection);
+      : this.getSnakeStraightTransitionRotationFromDirection(currentGraphicDirection, type);
 
     if(isTurning) {
       const mirror = type === "head" ? this.isTurningMirrorHead(currentGraphicDirection, currentDir)
@@ -1309,17 +1307,30 @@ export default class GridUI3D extends GridUI {
     };
   }
 
-  getSnakeStraightTransitionRotationFromDirection(direction) {
-    return {
-      [GameConstants.Direction.RIGHT]: 0,
-      [GameConstants.Direction.LEFT]: -Math.PI,
-      [GameConstants.Direction.DOWN]: -Math.PI / 2,
-      [GameConstants.Direction.UP]: Math.PI / 2,
-      [GameConstants.Direction.ANGLE_1]: Math.PI / 2,
-      [GameConstants.Direction.ANGLE_2]: Math.PI,
-      [GameConstants.Direction.ANGLE_3]: -Math.PI / 2,
-      [GameConstants.Direction.ANGLE_4]: 0
-    }[direction] ?? 0;
+  getSnakeStraightTransitionRotationFromDirection(direction, type) {
+    if(type === "head") {
+      return {
+        [GameConstants.Direction.RIGHT]: 0,
+        [GameConstants.Direction.LEFT]: -Math.PI,
+        [GameConstants.Direction.DOWN]: -Math.PI / 2,
+        [GameConstants.Direction.UP]: Math.PI / 2,
+        [GameConstants.Direction.ANGLE_1]: Math.PI / 2,
+        [GameConstants.Direction.ANGLE_2]: Math.PI,
+        [GameConstants.Direction.ANGLE_3]: -Math.PI / 2,
+        [GameConstants.Direction.ANGLE_4]: 0
+      }[direction] ?? 0;
+    } else {
+      return {
+        [GameConstants.Direction.RIGHT]: 0,
+        [GameConstants.Direction.LEFT]: -Math.PI,
+        [GameConstants.Direction.DOWN]: -Math.PI / 2,
+        [GameConstants.Direction.UP]: Math.PI / 2,
+        [GameConstants.Direction.ANGLE_1]: -Math.PI / 2,
+        [GameConstants.Direction.ANGLE_2]: 0,
+        [GameConstants.Direction.ANGLE_3]: Math.PI / 2,
+        [GameConstants.Direction.ANGLE_4]: Math.PI
+      }[direction] ?? 0;
+    }
   }
 
   getSnakeTurningTransitionRotationFromDirection(direction, type) {
