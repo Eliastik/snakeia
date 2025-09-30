@@ -39,9 +39,9 @@ export default class GridUI3D extends GridUI {
       5: { fov: 5, distance: 60, zoom: 1 },
       10: { fov: 8, distance: 75, zoom: 1 },
       20: { fov: 12, distance: 100, zoom: 1 },
-      50: { fov: 30, distance: 125, zoom: 1 },
-      75: { fov: 45, distance: 135, zoom: 1 },
-      100: { fov: 55, distance: 120, zoom: 1 }
+      50: { fov: 24, distance: 125, zoom: 1 },
+      75: { fov: 32, distance: 135, zoom: 1 },
+      100: { fov: 46, distance: 120, zoom: 1 }
     };
 
     this.cameraPresetsByWidth = {
