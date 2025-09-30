@@ -53,6 +53,12 @@ export default class GridUI3D extends GridUI {
       100: { fov: 55, distance: 120, zoom: 1 }
     };
 
+    /**
+     * TODO finishing :
+     * - Fix memory leaks (dispose geometries, materials, textures...)
+     * - Verify FOV and distance presets
+     */
+
     this.snakeBodyRenderingMethod = "INDIVIDUAL"; // or TUBES (old method) or INDIVIDUAL (new method)
 
     this.qualitySettings = graphicType !== "3dCustom" || !customGraphicsPreset ? 
@@ -415,9 +421,13 @@ export default class GridUI3D extends GridUI {
       mesh.material?.dispose();
     }
 
-    if(mesh.texture?.dispose) {
-      mesh.texture.dispose();
-    }
+    if(mesh.texture?.dispose)  mesh.texture.dispose();
+    if(mesh.material?.map) mesh.material.map.dispose();
+    if(mesh.material?.normalMap) mesh.material.normalMap.dispose();
+    if(mesh.material?.metalnessMap) mesh.material.metalnessMap.dispose();
+    if(mesh.material?.roughnessMap) mesh.material.roughnessMap.dispose();
+    if(mesh.material?.bumpMap) mesh.material.bumpMap.dispose();
+    if(mesh.material?.aoMap) mesh.material.aoMap.dispose();
   }
 
   clearGrid() {
@@ -1805,6 +1815,12 @@ export default class GridUI3D extends GridUI {
 
     this.controls?.dispose();
     this.controls = null;
+
+    this.ambientLight?.dispose();
+    this.ambientLight = null;
+
+    this.dirLight?.dispose();
+    this.dirLight = null;
 
     this.scene?.clear();
     this.scene = null;
