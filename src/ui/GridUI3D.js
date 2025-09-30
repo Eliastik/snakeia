@@ -1146,9 +1146,16 @@ export default class GridUI3D extends GridUI {
       mesh.receiveShadow = true;
       this.snakesGroup.add(mesh);
       snakeMeshes[meshKey] = mesh;
-    } else if (snakeMeshes[meshKey].geometry !== geometry) {
+    } else if(snakeMeshes[meshKey].geometry !== geometry) {
       snakeMeshes[meshKey].geometry.dispose();
       snakeMeshes[meshKey].geometry = geometry;
+    }
+
+    if(type === "tail" && animationPercentage === 1.0) {
+      snakeMeshes[meshKey].visible = false;
+      return;
+    } else {
+      snakeMeshes[meshKey].visible = true;
     }
 
     if(!isTurning) {
@@ -1615,7 +1622,7 @@ export default class GridUI3D extends GridUI {
     const snakeColor = new THREE.Color(r / 255, g / 255, b / 255);
     snakeColor.convertSRGBToLinear();
 
-    return this.getMaterial({ color: snakeColor, roughness: 0.6, metalness: 0.28 });
+    return this.getMaterial({ color: snakeColor, roughness: 0.6, metalness: 0.25 });
   }
 
   calculateSnakeGeometryQualityTubes(snake) {
