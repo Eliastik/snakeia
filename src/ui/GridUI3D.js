@@ -62,13 +62,15 @@ export default class GridUI3D extends GridUI {
         ...this.resolveQualitySettings(customGraphicsPreset)
       };
 
-    this.initThreeJS();
-
     this.is3DRendering = true;
     this.hasGoldFruit = false;
     this.goldFruitPosition = null;
     this.firstUpdatedReflections = false;
     this.goldFruitFirstFrame = true;
+  }
+
+  init() {
+    this.initThreeJS();
   }
 
   resolveQualitySettings(preset) {
