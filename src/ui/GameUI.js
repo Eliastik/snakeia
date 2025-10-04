@@ -155,7 +155,7 @@ export default class GameUI {
       const gridUI3D = new GridUI3D(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, settings.graphicType, settings.graphicCustomPreset, this.debugMode);
 
       try {
-        gridUI3D.init();
+        gridUI3D.init3DEngine();
         return gridUI3D;
       } catch(e) {
         console.error("Error while initializing 3D rendering, switching to 2D rendering.", e);

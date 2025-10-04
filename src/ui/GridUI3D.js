@@ -69,7 +69,7 @@ export default class GridUI3D extends GridUI {
     this.goldFruitFirstFrame = true;
   }
 
-  init() {
+  init3DEngine() {
     this.initThreeJS();
   }
 
@@ -778,9 +778,6 @@ export default class GridUI3D extends GridUI {
   /** Snakes update handling */
 
   updateSnakes() {
-    this.resetSnakeSegmentCache();
-    this.resetSnakeTransitionCache();
-
     for(let i = 0; i < this.snakes.length; i++) {
       this.updateSnake(i);
     }
