@@ -53,12 +53,6 @@ export default class GridUI3D extends GridUI {
       100: { fov: 55, distance: 120, zoom: 1 }
     };
 
-    /**
-     * TODO finishing :
-     * - Fix memory leaks (dispose geometries, materials, textures...)
-     * - Verify FOV and distance presets
-     */
-
     this.snakeBodyRenderingMethod = "INDIVIDUAL"; // or TUBES (old method) or INDIVIDUAL (new method)
 
     this.qualitySettings = graphicType !== "3dCustom" || !customGraphicsPreset ? 
@@ -430,10 +424,7 @@ export default class GridUI3D extends GridUI {
     if(mesh.material?.aoMap) mesh.material.aoMap.dispose();
   }
 
-  clearGrid() {
-    this.disposeGroup(this.gridGroup);
-    this.gridGroup.clear();
-  }
+  /** Grid handling */
 
   hideFruits() {
     this.fruitModel.visible = false;
@@ -502,6 +493,39 @@ export default class GridUI3D extends GridUI {
     }
   }
 
+  clearGrid() {
+    this.disposeGroup(this.gridGroup);
+    this.gridGroup.clear();
+  }
+
+  constructGround() {
+    const ground = new THREE.Mesh(
+      new THREE.BoxGeometry(this.grid.width, this.grid.height, 2),
+      this.getMaterial({ color: 0x95a5a6 })
+    );
+
+    ground.receiveShadow = false;
+    ground.position.set(0, 0, -1);
+
+    return ground;
+  }
+
+  countWalls() {
+    let wallsCount = 0;
+
+    for(let y = 0; y < this.grid.height; y++) {
+      for(let x = 0; x < this.grid.width; x++) {
+        const caseType = this.grid.get(new Position(x, y));
+
+        if(caseType === GameConstants.CaseType.WALL) {
+          wallsCount++;
+        }
+      }
+    }
+
+    return wallsCount;
+  }
+
   constructUnknownModel(xPosition, yPosition) {
     const unknownModel = this.modelLoader.get("unknown");
 
@@ -533,32 +557,7 @@ export default class GridUI3D extends GridUI {
     return unknownModel;
   }
 
-  constructGround() {
-    const ground = new THREE.Mesh(
-      new THREE.BoxGeometry(this.grid.width, this.grid.height, 2),
-      this.getMaterial({ color: 0x95a5a6 })
-    );
-
-    ground.receiveShadow = false;
-    ground.position.set(0, 0, -1);
-    return ground;
-  }
-
-  countWalls() {
-    let wallsCount = 0;
-
-    for(let y = 0; y < this.grid.height; y++) {
-      for(let x = 0; x < this.grid.width; x++) {
-        const caseType = this.grid.get(new Position(x, y));
-
-        if(caseType === GameConstants.CaseType.WALL) {
-          wallsCount++;
-        }
-      }
-    }
-
-    return wallsCount;
-  }
+  /** Wall and cell meshes handling */
 
   constructWallMesh() {
     const wallsCount = this.countWalls();
@@ -626,6 +625,8 @@ export default class GridUI3D extends GridUI {
     darkGrayCellInstancedMesh.castShadow = false;
     return darkGrayCellInstancedMesh;
   }
+
+  /** Fruit meshes handling */
 
   setupFruit() {
     if(this.fruitModel) {
@@ -727,12 +728,109 @@ export default class GridUI3D extends GridUI {
     }
   }
 
+  /**
+   * Initialize snake meshes (head, tail, eyes, material)
+   * @param {*} snake The Snake instance
+   * @param {*} snakeIndex The index of the Snake in the snakes array
+   */
+  setupSnake(snake, snakeIndex) {
+    const snakeMaterial = this.getSnakeMaterial(snake);
+
+    const headMesh = this.modelLoader.get("head");
+
+    headMesh.traverse(child => {
+      if(child.isMesh) {
+        child.material = snakeMaterial;
+      }
+
+      child.castShadow = true;
+      child.receiveShadow = true;
+    });
+
+    const tailMesh = this.modelLoader.get("tail");
+
+    tailMesh.traverse(child => {
+      if(child.isMesh) {
+        child.material = snakeMaterial;
+      }
+
+      child.castShadow = true;
+      child.receiveShadow = true;
+    });
+
+    const eyesGroup = this.createSnakeEyes(snake);
+    headMesh.add(eyesGroup);
+
+    this.snakesMeshes[snakeIndex] = {
+      bodyParts: null,
+      headMesh: headMesh,
+      tailMesh: tailMesh,
+      snakeMaterial,
+      eyesGroup,
+      snakeIndex
+    };
+
+    this.snakesGroup.add(headMesh, tailMesh);
+  }
+
+  /** Snakes update handling */
+
+  updateSnakes() {
+    this.resetSnakeSegmentCache();
+    this.resetSnakeTransitionCache();
+
+    for(let i = 0; i < this.snakes.length; i++) {
+      this.updateSnake(i);
+    }
+  }
+
   shouldUpdateSnakeBodyGeometry(snakeIndex, snake) {
     const shouldUpdateBasedOnTicks = this.shouldUpdateBasedOnTicks();
     const shouldUpdateBasedOnState = !snake.gameOver || this.individualSnakeStateHasChanged(snakeIndex);
 
     return shouldUpdateBasedOnTicks && shouldUpdateBasedOnState;
   }
+
+  updateSnake(snakeIndex) {
+    const snake = this.snakes[snakeIndex];
+    const previousSnakeState = this.oldSnakesState ? this.oldSnakesState[snakeIndex] : null;
+
+    if(previousSnakeState && previousSnakeState.gameOver != snake.gameOver) {
+      this.updateSnakeEyes(snakeIndex, snake);
+    }
+
+    // If color has changed, we reset the meshes
+    if(previousSnakeState && previousSnakeState.color != snake.color) {
+      this.cleanSnakesMeshes(snakeIndex);
+    }
+
+    if(!this.snakesMeshes[snakeIndex]) {
+      this.setupSnake(snake, snakeIndex);
+    }
+
+    if(this.shouldUpdateSnakeBodyGeometry(snakeIndex, snake)) {
+      this.cleanOldSnakeGeometry(snakeIndex);
+      this.updateSnakeBodyGeometry(snakeIndex, snake);
+    }
+
+    this.animateSnakeHead(snakeIndex, snake);
+    this.animateSnakeTail(snakeIndex, snake);
+  }
+
+  updateSnakeEyes(snakeIndex, snake) {
+    const meshes = this.snakesMeshes[snakeIndex];
+
+    if(meshes && meshes.eyesGroup) {
+      this.disposeGroup(meshes.eyesGroup);
+      meshes.headMesh.remove(meshes.eyesGroup);
+    }
+
+    const crossGroup = this.createSnakeEyes(snake);
+    meshes.headMesh.add(crossGroup);
+    meshes.eyesGroup = crossGroup;
+  }
+
+  /** Snake meshes cleanup methods */
 
   cleanOldSnakeGeometry(snakeIndex) {
     if(!this.snakesMeshes) {
@@ -773,93 +871,7 @@ export default class GridUI3D extends GridUI {
     this.snakesMeshes[snakeIndex] = null;
   }
 
-  updateSnakes() {
-    this.resetSnakeSegmentCache();
-    this.resetSnakeTransitionCache();
-
-    for(let i = 0; i < this.snakes.length; i++) {
-      this.updateSnake(i);
-    }
-  }
-
-  updateSnake(snakeIndex) {
-    const snake = this.snakes[snakeIndex];
-    const previousSnakeState = this.oldSnakesState ? this.oldSnakesState[snakeIndex] : null;
-
-    if(previousSnakeState && previousSnakeState.gameOver != snake.gameOver) {
-      this.updateSnakeEyes(snakeIndex, snake);
-    }
-
-    // If color has changed, we reset the meshes
-    if(previousSnakeState && previousSnakeState.color != snake.color) {
-      this.cleanSnakesMeshes(snakeIndex);
-    }
-
-    if(!this.snakesMeshes[snakeIndex]) {
-      this.setupSnake(snake, snakeIndex);
-    }
-
-    if(this.shouldUpdateSnakeBodyGeometry(snakeIndex, snake)) {
-      this.cleanOldSnakeGeometry(snakeIndex);
-      this.updateSnakeGeometry(snakeIndex, snake);
-    }
-
-    this.animateSnakeHead(snakeIndex, snake);
-    this.animateSnakeTail(snakeIndex, snake);
-  }
-
-  updateSnakeEyes(snakeIndex, snake) {
-    const meshes = this.snakesMeshes[snakeIndex];
-
-    if(meshes && meshes.eyesGroup) {
-      this.disposeGroup(meshes.eyesGroup);
-      meshes.headMesh.remove(meshes.eyesGroup);
-    }
-
-    const crossGroup = this.createSnakeEyes(snake);
-    meshes.headMesh.add(crossGroup);
-    meshes.eyesGroup = crossGroup;
-  }
-
-  setupSnake(snake, snakeIndex) {
-    const snakeMaterial = this.getSnakeMaterial(snake);
-
-    const headMesh = this.modelLoader.get("head");
-
-    headMesh.traverse(child => {
-      if(child.isMesh) {
-        child.material = snakeMaterial;
-      }
-
-      child.castShadow = true;
-      child.receiveShadow = true;
-    });
-
-    const tailMesh = this.modelLoader.get("tail");
-
-    tailMesh.traverse(child => {
-      if(child.isMesh) {
-        child.material = snakeMaterial;
-      }
-
-      child.castShadow = true;
-      child.receiveShadow = true;
-    });
-
-    const eyesGroup = this.createSnakeEyes(snake);
-    headMesh.add(eyesGroup);
-
-    this.snakesMeshes[snakeIndex] = {
-      bodyParts: null,
-      headMesh: headMesh,
-      tailMesh: tailMesh,
-      snakeMaterial,
-      eyesGroup,
-      snakeIndex
-    };
-
-    this.snakesGroup.add(headMesh, tailMesh);
-  }
+  /** Snake head/tail animation handling */
 
   animateSnakeHead(snakeIndex, snake) {
     this.animateSnake({
@@ -1052,6 +1064,8 @@ export default class GridUI3D extends GridUI {
     }[direction] ?? 0;
   }
 
+  /** Snake transitions meshes handling (meshes between head/tail and first/last part of the Snake, used for the animation) */
+
   createGenericSnakeSegmentGeometry(snake, length, type, isTurning) {
     const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQualityIndividual(snake, type);
 
@@ -1117,92 +1131,29 @@ export default class GridUI3D extends GridUI {
       ? this.getSnakeDirection(snake, 0, snake.get(1))
       : this.getSnakeDirection(snake, -1, snake.get(snake.length() - 2));
 
-    const margin = this.getSnakeMargin(currentDir, nextDir, type, false, animationPercentage);
-    const isTurning = this.isSnakePartTurning(snake, snakePart);
-
-    const offset = new THREE.Vector3(0, 0, 0);
-
     const currentGraphicDirection = this.getSnakePartGraphicDirection(snakePart, snake);
-
-    switch(currentGraphicDirection) {
-    case GameConstants.Direction.UP:    offset.y = (type === "head" ? -length : -0.15); break;
-    case GameConstants.Direction.DOWN:  offset.y = (type === "head" ? length : 0.15); break;
-    case GameConstants.Direction.RIGHT: offset.x = (type === "head" ? -length : -0.15); break;
-    case GameConstants.Direction.LEFT:  offset.x = (type === "head" ? length : 0.15); break;
-    case GameConstants.Direction.ANGLE_1:  offset.y = -0.5; break;
-    case GameConstants.Direction.ANGLE_2:  offset.x = 0.5; break;
-    case GameConstants.Direction.ANGLE_3:  offset.y = 0.5; break;
-    case GameConstants.Direction.ANGLE_4:  offset.x = -0.5; break;
-    }
-
-    offset.add(new THREE.Vector3(margin.x, margin.y, 0));
-
+    const isTurning = this.isSnakePartTurning(snake, snakePart);
     const cacheKey = this.getTransitionCacheKey(type, animationPercentage, isTurning);
-
-    if(!this.transitionSegmentGeometryCache) {
-      this.transitionSegmentGeometryCache = {};
-    }
     
-    let geometry = this.transitionSegmentGeometryCache[cacheKey];
+    this.updateSnakeTransitionGeometry(cacheKey, snake, length, type, isTurning, snakeMeshes, meshKey);
 
-    if(!geometry) {
-      geometry = this.createGenericSnakeSegmentGeometry(snake, length, type, isTurning);
-      this.transitionSegmentGeometryCache[cacheKey] = geometry;
-    }
+    const meshPosition = this.calculateSnakeTransitionMeshPosition(currentDir, nextDir, type, animationPercentage,
+      currentGraphicDirection, length, isTurning, parentMesh, snake);
 
-    if(!snakeMeshes[meshKey]) {
-      const mesh = new THREE.Mesh(geometry, snakeMeshes.snakeMaterial);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      this.snakesGroup.add(mesh);
-      snakeMeshes[meshKey] = mesh;
-    } else if(snakeMeshes[meshKey].geometry !== geometry) {
-      snakeMeshes[meshKey].geometry.dispose();
-      snakeMeshes[meshKey].geometry = geometry;
-    }
+    const inGrid =
+      meshPosition.x >= -this.grid.width / 2 - 1 &&
+      meshPosition.x <= this.grid.width / 2 + 1 &&
+      meshPosition.y >= -this.grid.height / 2 - 1 &&
+      meshPosition.y <= this.grid.height / 2 + 1;
 
     if(type === "tail" && animationPercentage === 1.0) {
       snakeMeshes[meshKey].visible = false;
       return;
     } else {
-      snakeMeshes[meshKey].visible = true;
+      snakeMeshes[meshKey].visible = inGrid;
     }
-
-    if(!isTurning) {
-      snakeMeshes[meshKey].position.copy(parentMesh.position).add(offset);
-    } else {
-      const currentPosition = type === "head"
-        ? snake.get(1)
-        : snake.get(snake.length() - 1);
-      
-      const position3D = this.gridPositionTo3DPosition(currentPosition);
-
-      if(type === "head") {
-        switch(currentDir) {
-        case GameConstants.Direction.UP:
-          position3D.y += 0.35; break;
-        case GameConstants.Direction.RIGHT:
-          position3D.x += 0.35; break;
-        case GameConstants.Direction.DOWN:
-          position3D.y -= 0.35; break;
-        case GameConstants.Direction.LEFT:
-          position3D.x -= 0.35; break;
-        }
-      } else {
-        switch(currentDir) {
-        case GameConstants.Direction.UP:
-          position3D.y -= 0.35; break;
-        case GameConstants.Direction.RIGHT:
-          position3D.x -= 0.35; break;
-        case GameConstants.Direction.DOWN:
-          position3D.y += 0.35; break;
-        case GameConstants.Direction.LEFT:
-          position3D.x += 0.35; break;
-        }
-      }
-  
-      snakeMeshes[meshKey].position.copy(new THREE.Vector3(position3D.x, position3D.y, 0.3)).add(offset);
-    }
+    
+    snakeMeshes[meshKey].position.copy(meshPosition);
     
     snakeMeshes[meshKey].rotation.x = 0;
     snakeMeshes[meshKey].rotation.y = 0;
@@ -1216,6 +1167,88 @@ export default class GridUI3D extends GridUI {
 
       snakeMeshes[meshKey].position.x += mirror.position.x;
       snakeMeshes[meshKey].position.y += mirror.position.y;
+    }
+  }
+
+  calculateSnakeTransitionMeshPosition(currentDir, nextDir, type, animationPercentage, currentGraphicDirection, length, isTurning, parentMesh, snake) {
+    const margin = this.getSnakeMargin(currentDir, nextDir, type, false, animationPercentage);
+    const offset = new THREE.Vector3(0, 0, 0);
+
+    switch(currentGraphicDirection) {
+    case GameConstants.Direction.UP: offset.y = (type === "head" ? -length : -0.15); break;
+    case GameConstants.Direction.DOWN: offset.y = (type === "head" ? length : 0.15); break;
+    case GameConstants.Direction.RIGHT: offset.x = (type === "head" ? -length : -0.15); break;
+    case GameConstants.Direction.LEFT: offset.x = (type === "head" ? length : 0.15); break;
+    case GameConstants.Direction.ANGLE_1: offset.y = -0.5; break;
+    case GameConstants.Direction.ANGLE_2: offset.x = 0.5; break;
+    case GameConstants.Direction.ANGLE_3: offset.y = 0.5; break;
+    case GameConstants.Direction.ANGLE_4: offset.x = -0.5; break;
+    }
+
+    offset.add(new THREE.Vector3(margin.x, margin.y, 0));
+
+    let meshPosition = null;
+
+    if(!isTurning) {
+      meshPosition = parentMesh.position.clone().add(offset);
+    } else {
+      const currentPosition = type === "head"
+        ? snake.get(1)
+        : snake.get(snake.length() - 1);
+
+      const position3D = this.gridPositionTo3DPosition(currentPosition);
+
+      if(type === "head") {
+        switch (currentDir) {
+        case GameConstants.Direction.UP:
+          position3D.y += 0.35; break;
+        case GameConstants.Direction.RIGHT:
+          position3D.x += 0.35; break;
+        case GameConstants.Direction.DOWN:
+          position3D.y -= 0.35; break;
+        case GameConstants.Direction.LEFT:
+          position3D.x -= 0.35; break;
+        }
+      } else {
+        switch (currentDir) {
+        case GameConstants.Direction.UP:
+          position3D.y -= 0.35; break;
+        case GameConstants.Direction.RIGHT:
+          position3D.x -= 0.35; break;
+        case GameConstants.Direction.DOWN:
+          position3D.y += 0.35; break;
+        case GameConstants.Direction.LEFT:
+          position3D.x += 0.35; break;
+        }
+      }
+
+      meshPosition = new THREE.Vector3(position3D.x, position3D.y, 0.3).clone().add(offset);
+    }
+
+    return meshPosition;
+  }
+
+  updateSnakeTransitionGeometry(cacheKey, snake, length, type, isTurning, snakeMeshes, meshKey) {
+    if(!this.transitionSegmentGeometryCache) {
+      this.transitionSegmentGeometryCache = {};
+    }
+
+    let geometry = this.transitionSegmentGeometryCache[cacheKey];
+
+    if (!geometry) {
+      geometry = this.createGenericSnakeSegmentGeometry(snake, length, type, isTurning);
+      this.transitionSegmentGeometryCache[cacheKey] = geometry;
+    }
+
+    if (!snakeMeshes[meshKey]) {
+      const mesh = new THREE.Mesh(geometry, snakeMeshes.snakeMaterial);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      this.snakesGroup.add(mesh);
+      snakeMeshes[meshKey] = mesh;
+    } else if (snakeMeshes[meshKey].geometry !== geometry) {
+      snakeMeshes[meshKey].geometry.dispose();
+      snakeMeshes[meshKey].geometry = geometry;
     }
   }
 
@@ -1300,6 +1333,8 @@ export default class GridUI3D extends GridUI {
       this.snakesGroup.remove(oldTransitionMesh);
     }
   }
+
+  /** Snake body (segments) meshes handling */
 
   calculateSnakeSegmentsPositions(snake) {
     const segments = [];
@@ -1427,7 +1462,7 @@ export default class GridUI3D extends GridUI {
     return mesh;
   }
 
-  updateSnakeGeometry(snakeIndex, snake) {
+  updateSnakeBodyGeometry(snakeIndex, snake) {
     const snakeMeshes = this.snakesMeshes[snakeIndex];
     const snakeMaterial = snakeMeshes.snakeMaterial;
     const segmentsPositions = this.calculateSnakeSegmentsPositions(snake);
@@ -1577,6 +1612,8 @@ export default class GridUI3D extends GridUI {
     return [straightMesh, curveMesh].filter(mesh => mesh != null);
   }
 
+  /** Snake eyes handling */
+
   createSnakeEyes(snake) {
     const group = new THREE.Group();
     const whiteMat = this.getMaterial({ color: 0xffffff });
@@ -1624,6 +1661,8 @@ export default class GridUI3D extends GridUI {
 
     return group;
   }
+
+  /** Snake meshes utility methods */
 
   getSnakeMaterial(snake) {
     const baseColor = chroma(this.baseSnakeColor);
