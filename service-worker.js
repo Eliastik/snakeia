@@ -17,7 +17,7 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 const CACHE_BASENAME = "snake-ia";
-const CACHE_VER = "-v2.2.0";
+const CACHE_VER = "-v3.0.0";
 const CACHE = CACHE_BASENAME + CACHE_VER;
 
 const CACHE_URLS = [
@@ -30,8 +30,10 @@ const CACHE_URLS = [
   "LICENCE.txt",
   "assets/css/balloon.min.css",
   "assets/css/bootstrap.min.css",
+  "assets/css/dark-theme.css",
   "assets/css/flat-ui.min.css",
   "assets/css/main.css",
+  "assets/js/bootstrap-native-v4.min.js",
   "dist/SnakeIA.js",
   "dist/GameEngineWorker.js",
   "assets/fonts/delius-regular.ttf",
@@ -44,6 +46,7 @@ const CACHE_URLS = [
   "assets/images/icon/icon_512.png",
   "assets/images/logo/logo_text.png",
   "assets/images/logo/logo.png",
+  "assets/images/logo/logo-dark.png",
   "assets/images/skin/flat/snake_4.png",
   "assets/images/skin/flat/snake_3.png",
   "assets/images/skin/flat/snake_2.png",
@@ -65,6 +68,9 @@ const CACHE_URLS = [
   "assets/images/skin/flat/fruit.png",
   "assets/images/skin/flat/fruit_gold.png",
   "assets/images/skin/flat/wall.png",
+  "assets/images/skin/flat/wall_ao.png",
+  "assets/images/skin/flat/wall_height.png",
+  "assets/images/skin/flat/wall_normal.png",
   "assets/images/skin/flat/unknown.png",
   "assets/images/skin/tropical/snake_4.png",
   "assets/images/skin/tropical/snake_3.png",
@@ -87,6 +93,9 @@ const CACHE_URLS = [
   "assets/images/skin/tropical/fruit.png",
   "assets/images/skin/tropical/fruit_gold.png",
   "assets/images/skin/tropical/wall.png",
+  "assets/images/skin/tropical/wall_ao.png",
+  "assets/images/skin/tropical/wall_height.png",
+  "assets/images/skin/tropical/wall_normal.png",
   "assets/images/skin/tropical/unknown.png",
   "assets/images/skin/pixel/snake_4.png",
   "assets/images/skin/pixel/snake_3.png",
@@ -109,6 +118,9 @@ const CACHE_URLS = [
   "assets/images/skin/pixel/fruit.png",
   "assets/images/skin/pixel/fruit_gold.png",
   "assets/images/skin/pixel/wall.png",
+  "assets/images/skin/pixel/wall_ao.png",
+  "assets/images/skin/pixel/wall_height.png",
+  "assets/images/skin/pixel/wall_normal.png",
   "assets/images/skin/pixel/unknown.png",
   "assets/images/pause.png",
   "assets/images/fullscreen.png",
@@ -120,7 +132,11 @@ const CACHE_URLS = [
   "assets/images/trophy_silver.png",
   "assets/images/trophy_bronze.png",
   "assets/images/clock.png",
-  "assets/images/ranking.png"
+  "assets/images/ranking.png",
+  "assets/models/fruit.glb",
+  "assets/models/head.glb",
+  "assets/models/tail.glb",
+  "assets/models/unknown.glb"
 ];
 
 self.addEventListener("install", event => {

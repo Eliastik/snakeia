@@ -28,7 +28,8 @@ Other AI modes include:
 
 ## About this game
 
-* Version: 2.2
+* Version: 3.0.0
+* Version date: 10/5/2025
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -46,6 +47,29 @@ Other AI modes include:
 * Uses a 3D model of an apple created by [bariacg](https://sketchfab.com/bariacg), available on [Sketchfab website](https://sketchfab.com/3d-models/apple-8cc60d44baec49558156ac767839c2ed), licensed under [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## Changelog
+
+* Version 3.0.0 (10/5/2025):
+  - Added **"Ultra" AI level** *(preview)*:
+    - AI based on an artificial neural network, trained using the **Deep Q-Learning** algorithm;
+    - Several AI models have been trained, currently compatible only with **5x5 to 10x10** grids;
+    - The AI is therefore **not yet usable** in other configurations (hence the *preview* status);
+    - You can **choose which AI model** to use directly in the game interface;
+    - More powerful models will be released in this version or in future updates;
+    - *Developer note*: you can train your own AI using the `train-ai.mjs` script (requires **Node.js** and a **dedicated GPU**).
+  - Introduced a new **3D rendering engine** (enabled by default, with the old 2D engine still available):
+    - Richer and more immersive graphics;
+    - Several **graphics quality levels**, plus a **Custom mode** for advanced visual settings.
+  - Added a **dark mode** for the user interface.
+  - **Gameplay improvements**:
+    - In *Levels (Solo AI)* mode, it’s now possible to **select the AI difficulty level**;
+    - Added **information about AI behavior** for each difficulty level;
+    - In *Maze* mode, bumping into walls **no longer causes a game over**;
+    - Improved **detection of stuck AIs**: the game now ends automatically if only stuck AIs remain.
+  - **Game engine improvements**:
+    - A large portion of the engine has been **rewritten** for better clarity and maintainability;
+    - Significant **performance optimizations**.
+  - Various **bug fixes**.
+  - **Updated dependencies** (security vulnerabilities fixed).
 
 * Version 2.2 (10/18/2020):
   - Addition of a bonus shop for the Levels game mode: this store allows you to buy bonuses among 6 available, in exchange for apples (which can be collected in the levels);
@@ -261,7 +285,8 @@ Les autres modes d’IA sont :
 
 ## À propos du jeu
 
-* Version du jeu : 2.2
+* Version du jeu : 3.0.0
+* Date de version : 05/10/2025
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -279,6 +304,29 @@ Les autres modes d’IA sont :
 * Utilise un modèle 3D de pomme réalisé par [bariacg](https://sketchfab.com/bariacg) et disponible sur le [site Sketchfab](https://sketchfab.com/3d-models/apple-8cc60d44baec49558156ac767839c2ed), sous [licence Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## Journal des changements
+
+* Version 3.0.0 (05/10/2025) :
+  - Mise en place du niveau d’IA **"Ultra"** *(en preview)* :
+    - IA basée sur un réseau de neurones artificiels, entraînée avec l’algorithme de **Deep Q-Learning** ;
+    - Plusieurs modèles d’IA ont été entraînés, compatibles uniquement avec des grilles de taille **5x5 à 10x10** ;
+    - L’IA n’est donc pas encore utilisable dans d’autres configurations (d’où le statut *preview*) ;
+    - Possibilité de choisir le modèle d’IA à utiliser dans l’interface du jeu ;
+    - Des modèles plus puissants seront disponibles dans cette version ou les suivantes ;
+    - *Note développeurs* : entraînement possible via le script `train-ai.mjs` (nécessite **Node.js** et une **carte graphique performante**).
+  - Mise en place d’un **moteur de rendu 3D** (par défaut, l’ancien moteur 2D reste disponible) :
+    - Graphismes plus riches et immersifs ;
+    - Plusieurs niveaux de qualité graphique, avec un mode **Personnalisé** pour les réglages avancés.
+  - Ajout d’un **mode sombre** pour l’interface.
+  - Améliorations du **gameplay** :
+    - En mode *Niveaux (IA solo)*, possibilité de **sélectionner le niveau de l’IA** ;
+    - Ajout d’**informations sur le comportement** des différents niveaux d’IA ;
+    - En mode *Labyrinthe*, se cogner contre les murs **ne fait plus perdre la partie** ;
+    - Détection améliorée des **IAs bloquées** : la partie se termine automatiquement s’il ne reste que des IAs bloquées.
+  - Améliorations du **moteur de jeu** :
+    - Une grande partie du code a été **réécrite** pour plus de clarté et de maintenabilité ;
+    - **Optimisations de performances** notables.
+  - **Corrections de bugs** divers.
+  - **Mise à jour des dépendances** (correction de failles de sécurité).
 
 * Version 2.2 (18/10/2020) :
   - Ajout d'une boutique de bonus pour le mode de jeu Niveaux : cette boutique permet d'acheter des bonus parmi 6 disponibles, en échange de pommes (qui peuvent être ramassées dans les niveaux) ;
@@ -469,9 +517,15 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 
 ## TO-DO list
 
-### Prochaine version (3.0 ?)
+### Prochaine version (3.1 ?)
 
-- [ ] Améliorer l'IA (défi : machine learning -> deep Q-learning) (En cours)
+- [ ] Finaliser l'entraînement de l'IA Deep-Q-Learning
+- [ ] Ajouter plus d'effets visuels à la version 3D
+- [ ] Opti l'anti aliasing sur la version 3D (anti aliasing post processing plutôt que MSAA ? Pour que ce soit plus fluide sur les appareils faibles)
+
+### Prochaine version (3.0)
+
+- [x] Améliorer l'IA (défi : machine learning -> deep Q-learning)
   - [x] Récupération du modèle : API à appeler qui retourne la version + date version + URL vers le modèle / éventuellement une liste de version pour choisir la version du modèle ?
     - [x] Vérifier que ça ne casse pas la partie serveur => il faut gérer pour que ça charge un modèle par défaut
     - [x] Permettre de charger une URL personnalisée
@@ -479,8 +533,8 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
     - [x] Côté serveur : paramètre pour l'API liste des modèles + URL modèle personnalisée ?
   - [x] Corriger les pommes qui disparaissent en fin de partie (pour permettre d'avoir le vrai état de fin)
   - [x] Afficher informations sur les niveaux de l'IA
-- [ ] Bug graphique suite à l'opti du draw
-- [ ] Rendu 3D (le rendu 2D reste sélectionnable/par défaut ?)
+- [x] Bug graphique suite à l'opti du draw
+- [x] Rendu 3D (le rendu 2D reste sélectionnable/par défaut ?)
 - [x] Mettre à jour socket.io
   - [x] Bug en chargeant la liste des salles après avoir quitté une partie
 - [x] Bug sur la détection des objectifs atteints dans le mode niveaux (il y a l'air d'y avoir un délai) suite à l'opti et refactor du moteur de jeu
