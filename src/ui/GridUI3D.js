@@ -153,6 +153,22 @@ export default class GridUI3D extends GridUI {
     this.scene.add(this.gridGroup, this.fruitsGroup, this.snakesGroup);
   }
 
+  buildGoldFruitShaders() {
+    this.fruitModelGold.visible = true;
+    this.fruitGoldPointLight.visible = true;
+    
+    this.fruitModelGold.position.set(0, 0, 0.5);
+    this.fruitGoldPointLight.position.set(0, 0, 0.5);
+
+    this.updateReflections(0, 0, 0.5);
+
+    this.renderer.render(this.scene, this.camera);
+    this.renderer.compile(this.scene, this.camera);
+
+    this.fruitModelGold.visible = false;
+    this.fruitGoldPointLight.visible = false;
+  }
+
   setupControls(canvas) {
     if(!this.areControlsInit && this.debugMode) {
       this.controls = new OrbitControls(this.camera, canvas);
@@ -277,7 +293,7 @@ export default class GridUI3D extends GridUI {
 
   drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize) {
     if(!this.shadersCompiled) {
-      this.buildShaders();
+      this.buildGoldFruitShaders();
       this.shadersCompiled = true;
     }
 
@@ -406,18 +422,6 @@ export default class GridUI3D extends GridUI {
 
       this.isLightDebugInit = true;
     }
-  }
-
-  buildShaders() {
-    this.fruitModelGold.visible = true;
-    this.fruitModelGold.position.set(0, 0, 0.5);
-
-    this.updateReflections(0, 0, 0.5);
-
-    this.renderer.render(this.scene, this.camera);
-    this.renderer.compile(this.scene, this.camera);
-
-    this.fruitModelGold.visible = false;
   }
 
   disposeGroup(group) {
