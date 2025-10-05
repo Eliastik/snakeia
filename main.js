@@ -2865,7 +2865,7 @@ function displayAdvanced3DSettingsModal() {
     ...customSettings.graphicCustomPreset,
   } : GameConstants.QualitySettings3DPreset[GameConstants.DefaultQualitySettings3D];
 
-  generateGraphicsFormFromPresets(GameConstants.QualitySettings3DIndividualPresets, GameConstants.QualitySettings3DPreset, "formSettingsAdvanced3DSettings", "3dMedium", savedPreset);
+  generateGraphicsFormFromPresets(GameConstants.QualitySettings3DIndividualPresets, GameConstants.QualitySettings3DPreset, "formSettingsAdvanced3DSettings", GameConstants.DefaultQualitySettings3D, savedPreset);
   modal3DQualitySettingsInstance.show();
 }
 

@@ -42,4 +42,21 @@ export default class ModelLoader {
     const promises = Object.entries(assets).map(([key, url]) => this.preload(key, url));
     return Promise.all(promises);
   }
+
+  clearAll() {
+    for(const gltf of this.cache.values()) {
+      gltf.scene.traverse((child) => {
+        if(child.isMesh) {
+          child.geometry.dispose();
+          if(Array.isArray(child.material)) {
+            child.material.forEach(mat => mat.dispose());
+          } else {
+            child.material.dispose();
+          }
+        }
+      });
+    }
+
+    this.cache.clear();
+  }
 }

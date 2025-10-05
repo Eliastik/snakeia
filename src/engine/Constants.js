@@ -367,6 +367,6 @@ export default {
       reflectionResolution: "extreme"
     }
   },
-  DefaultQualitySettings3D: "3dMedium",
+  DefaultQualitySettings3D: "3dNormal",
   DefaultAIModelsListAPI: "https://www.eliastiksofts.com/snakeia/models/"
 };

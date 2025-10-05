@@ -33,7 +33,9 @@ export default class GridUI3D extends GridUI {
     this.snakesMeshes = [];
 
     this.segmentGeometryCache = {};
+    this.segmentGeometryCacheParams = {};
     this.transitionSegmentGeometryCache = {};
+    this.transitionSegmentGeometryCacheParams = {};
 
     this.cameraPresetsByHeight = {
       5: { fov: 5, distance: 60, zoom: 1 },
@@ -63,6 +65,9 @@ export default class GridUI3D extends GridUI {
       };
 
     this.is3DRendering = true;
+    this.oldCanvasWidth = null;
+    this.oldCanvasHeight = null;
+    this.currentRenderingSizeAndPosition = null;
     this.hasGoldFruit = false;
     this.goldFruitPosition = null;
     this.firstUpdatedReflections = false;
@@ -162,6 +167,33 @@ export default class GridUI3D extends GridUI {
     }
   }
 
+  calculateRenderingSizeAndPosition(canvas) {
+    if(this.oldCanvasWidth === canvas.width && this.oldCanvasHeight === canvas.height) {
+      return this.currentRenderingSizeAndPosition;
+    }
+
+    const availableHeight = canvas.height - this.headerHeight;
+    const availableWidth = canvas.width;
+
+    const caseSize = this.calculateCaseSize(availableHeight, availableWidth);
+
+    const totalWidth = caseSize * this.grid.width;
+    const totalHeight = caseSize * this.grid.height;
+
+    const offsetX = Math.floor((availableWidth - totalWidth) / 2);
+    const offsetY = Math.floor((availableHeight - totalHeight) / 2) + this.headerHeight;
+
+    this.width = totalWidth;
+    this.height = totalHeight;
+
+    this.oldCanvasWidth = canvas.width;
+    this.oldCanvasHeight = canvas.height;
+
+    this.currentRenderingSizeAndPosition = { offsetX, offsetY, totalWidth, totalHeight, caseSize };
+
+    return this.currentRenderingSizeAndPosition;
+  }
+
   draw(context) {
     if(this.grid && this.grid.grid) {
       const canvas = context.canvas;
@@ -173,19 +205,7 @@ export default class GridUI3D extends GridUI {
   
       ctx.save();
 
-      const availableHeight = canvas.height - this.headerHeight;
-      const availableWidth = canvas.width;
-  
-      const caseSize = this.calculateCaseSize(availableHeight, availableWidth);
-
-      const totalWidth = caseSize * this.grid.width;
-      const totalHeight = caseSize * this.grid.height;
-
-      const offsetX = Math.floor((availableWidth - totalWidth) / 2);
-      const offsetY = Math.floor((availableHeight - totalHeight) / 2) + this.headerHeight;
-
-      this.width = totalWidth;
-      this.height = totalHeight;
+      const { offsetX, offsetY, totalWidth, totalHeight, caseSize } = this.calculateRenderingSizeAndPosition(canvas);
 
       this.setupControls(canvas);
 
@@ -417,7 +437,7 @@ export default class GridUI3D extends GridUI {
       mesh.material?.dispose();
     }
 
-    if(mesh.texture?.dispose)  mesh.texture.dispose();
+    if(mesh.texture?.dispose) mesh.texture.dispose();
     if(mesh.material?.map) mesh.material.map.dispose();
     if(mesh.material?.normalMap) mesh.material.normalMap.dispose();
     if(mesh.material?.metalnessMap) mesh.material.metalnessMap.dispose();
@@ -777,7 +797,23 @@ export default class GridUI3D extends GridUI {
 
   /** Snakes update handling */
 
+  resetCacheIfNeeded() {
+    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQualityIndividual();
+
+    if(this.segmentGeometryCacheParams?.tubularSegments !== tubularSegments
+      || this.segmentGeometryCacheParams?.radiusSegments !== radiusSegments) {
+      this.resetSnakeSegmentCache();
+    }
+
+    if(this.transitionSegmentGeometryCacheParams?.tubularSegments !== tubularSegments
+      || this.transitionSegmentGeometryCacheParams?.radiusSegments !== radiusSegments) {
+      this.resetSnakeTransitionCache();
+    }
+  }
+
   updateSnakes() {
+    this.resetCacheIfNeeded();
+
     for(let i = 0; i < this.snakes.length; i++) {
       this.updateSnake(i);
     }
@@ -1065,8 +1101,8 @@ export default class GridUI3D extends GridUI {
 
   /** Snake transitions meshes handling (meshes between head/tail and first/last part of the Snake, used for the animation) */
 
-  createGenericSnakeSegmentGeometry(snake, length, type, isTurning) {
-    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQualityIndividual(snake, type);
+  createGenericSnakeSegmentGeometry(length, type, isTurning) {
+    const { tubularSegments, radiusSegments } = this.calculateSnakeGeometryQualityIndividual();
 
     let points;
 
@@ -1099,6 +1135,8 @@ export default class GridUI3D extends GridUI {
     }
 
     const curve = new THREE.CatmullRomCurve3(points);
+
+    this.transitionSegmentGeometryCacheParams = { tubularSegments, radiusSegments };
 
     return new THREE.TubeGeometry(curve, tubularSegments, 0.35, radiusSegments, false);
   }
@@ -1134,7 +1172,7 @@ export default class GridUI3D extends GridUI {
     const isTurning = this.isSnakePartTurning(snake, snakePart);
     const cacheKey = this.getTransitionCacheKey(type, animationPercentage, isTurning);
     
-    this.updateSnakeTransitionGeometry(cacheKey, snake, length, type, isTurning, snakeMeshes, meshKey);
+    this.updateSnakeTransitionGeometry(cacheKey, length, type, isTurning, snakeMeshes, meshKey);
 
     const meshPosition = this.calculateSnakeTransitionMeshPosition(currentDir, nextDir, type, animationPercentage,
       currentGraphicDirection, length, isTurning, parentMesh, snake);
@@ -1227,7 +1265,7 @@ export default class GridUI3D extends GridUI {
     return meshPosition;
   }
 
-  updateSnakeTransitionGeometry(cacheKey, snake, length, type, isTurning, snakeMeshes, meshKey) {
+  updateSnakeTransitionGeometry(cacheKey, length, type, isTurning, snakeMeshes, meshKey) {
     if(!this.transitionSegmentGeometryCache) {
       this.transitionSegmentGeometryCache = {};
     }
@@ -1235,7 +1273,7 @@ export default class GridUI3D extends GridUI {
     let geometry = this.transitionSegmentGeometryCache[cacheKey];
 
     if (!geometry) {
-      geometry = this.createGenericSnakeSegmentGeometry(snake, length, type, isTurning);
+      geometry = this.createGenericSnakeSegmentGeometry(length, type, isTurning);
       this.transitionSegmentGeometryCache[cacheKey] = geometry;
     }
 
@@ -1311,7 +1349,7 @@ export default class GridUI3D extends GridUI {
         const segment = this.transitionSegmentGeometryCache[k];
 
         if(segment) {
-          this.transitionSegmentGeometryCache[k].dispose();
+          segment.dispose();
         }
       }
     }
@@ -1468,7 +1506,7 @@ export default class GridUI3D extends GridUI {
 
     const snakeMesh = this.snakeBodyRenderingMethod === "TUBES" ? 
       this.generateSnakeBodyMeshTubes(segmentsPositions, snake, snakeMaterial) :
-      this.generateSnakeBodyMeshIndividual(segmentsPositions, snake, snakeMaterial);
+      this.generateSnakeBodyMeshIndividual(segmentsPositions, snakeMaterial);
 
     if(snakeMesh && snakeMesh.length > 0) {
       this.snakesGroup.add(...snakeMesh);
@@ -1531,12 +1569,13 @@ export default class GridUI3D extends GridUI {
     const curveGeometry = new THREE.TubeGeometry(curveCurve, tubularSegments, radius, radiusSegments, false);
 
     this.segmentGeometryCache[key] = { straight: straightGeometry, curve: curveGeometry };
+    this.segmentGeometryCacheParams = { tubularSegments, radiusSegments };
 
     return this.segmentGeometryCache[key];
   }
 
-  createSnakeSegmentMeshes(snake, material, segmentsPositions) {
-    const { radiusSegments, tubularSegments } = this.calculateSnakeGeometryQualityIndividual(snake);
+  createSnakeSegmentMeshes(material, segmentsPositions) {
+    const { radiusSegments, tubularSegments } = this.calculateSnakeGeometryQualityIndividual();
 
     const gridFlat = segmentsPositions
       .map((segment, segIndex) => 
@@ -1570,8 +1609,8 @@ export default class GridUI3D extends GridUI {
         const segment = this.segmentGeometryCache[k];
 
         if(segment) {
-          segment.straight.dispose();
-          segment.curve.dispose();
+          segment.straight?.dispose();
+          segment.curve?.dispose();
         }
       }
     }
@@ -1579,8 +1618,8 @@ export default class GridUI3D extends GridUI {
     this.segmentGeometryCache = {};
   }
 
-  generateSnakeBodyMeshIndividual(segmentsPositions, snake, snakeMaterial) {
-    const { straightMesh, curveMesh } = this.createSnakeSegmentMeshes(snake, snakeMaterial, segmentsPositions);
+  generateSnakeBodyMeshIndividual(segmentsPositions, snakeMaterial) {
+    const { straightMesh, curveMesh } = this.createSnakeSegmentMeshes(snakeMaterial, segmentsPositions);
 
     let segmentIndex = 0;
     let straightIndex = 0;
@@ -1682,11 +1721,13 @@ export default class GridUI3D extends GridUI {
     return { tubularSegments, radiusSegments };
   }
 
-  calculateSnakeGeometryQualityIndividual(snake) {
+  calculateSnakeGeometryQualityIndividual() {
     const gridArea = this.grid.width * this.grid.height;
     const normalizedGrid = Math.min(gridArea / this.qualitySettings.snakeSegments.maxGridArea, 1);
+
+    const allSnakesLength = this.snakes.reduce((sum, s) => sum + s.length(), 0);
     const normalizedLength = Math.min(
-      snake.length() / this.qualitySettings.snakeSegments.maxLength,
+      allSnakesLength / (this.qualitySettings.snakeSegments.maxLength * this.snakes.length),
       1
     );
 
@@ -1862,6 +1903,9 @@ export default class GridUI3D extends GridUI {
 
     this.scene?.clear();
     this.scene = null;
+
+    this.modelLoader?.clearAll();
+    this.modelLoader = null;
 
     this.renderer?.dispose();
     this.renderer = null;
