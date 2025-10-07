@@ -793,7 +793,8 @@ export default class GridUI3D extends GridUI {
       tailMesh: tailMesh,
       snakeMaterial,
       eyesGroup,
-      snakeIndex
+      snakeIndex,
+      firstRender: true
     };
 
     this.snakesGroup.add(headMesh, tailMesh);
@@ -818,14 +819,23 @@ export default class GridUI3D extends GridUI {
   updateSnakes() {
     this.resetCacheIfNeeded();
 
-    for(let i = 0; i < this.snakes.length; i++) {
-      this.updateSnake(i);
+    // If number of snakes has changed, we clean the meshes of the removed snakes
+    if(this.snakesMeshes.length > 0 && this.snakes.length < this.snakesMeshes.length) {
+      for(let snakeIndex = this.snakes.length; snakeIndex < this.snakesMeshes.length; snakeIndex++) {
+        this.cleanSnakesMeshes(snakeIndex);
+      }
+    }
+
+    // Update the snakes
+    for(let snakeIndex = 0; snakeIndex < this.snakes.length; snakeIndex++) {
+      this.updateSnake(snakeIndex);
     }
   }
 
   shouldUpdateSnakeBodyGeometry(snakeIndex, snake) {
     const shouldUpdateBasedOnTicks = this.shouldUpdateBasedOnTicks();
-    const shouldUpdateBasedOnState = !snake.gameOver || this.individualSnakeStateHasChanged(snakeIndex);
+    const shouldUpdateBasedOnState = !snake.gameOver || this.individualSnakeStateHasChanged(snakeIndex)
+      || this.snakesMeshes[snakeIndex].firstRender;
 
     return shouldUpdateBasedOnTicks && shouldUpdateBasedOnState;
   }
@@ -896,6 +906,10 @@ export default class GridUI3D extends GridUI {
 
   cleanSnakesMeshes(snakeIndex) {
     const meshes = this.snakesMeshes[snakeIndex];
+
+    if(!meshes) {
+      return;
+    }
 
     this.cleanSnakesBodyParts(meshes.bodyParts);
     this.clearSnakeTransition(snakeIndex, { type: "head" });
@@ -1517,6 +1531,7 @@ export default class GridUI3D extends GridUI {
     }
 
     snakeMeshes.bodyParts = snakeMesh;
+    snakeMeshes.firstRender = false;
   }
 
   getSnakeBodyGeometryTubes(snake, points) {
