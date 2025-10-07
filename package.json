@@ -1,6 +1,6 @@
 {
   "name": "snakeia",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A Snake version with an artificial intelligence. This version has many game modes. You can play against the AI, or let it play alone. A Battle Royale mode is also available, this mode sees between 2 and 100 AI fight! Many settings are available to vary the games. A Levels mode (for the player and the AI) is also available, it's a series of level with a particular goal to achieve (get a minimum score, get a score in time, …). Downloadable levels are available.",
   "main": "dist/SnakeIA-node.js",
   "scripts": {
@@ -52,7 +52,7 @@
     "globals": "^16.4.0",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
-    "webpack": "^5.102.0",
+    "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
   },
@@ -63,7 +63,7 @@
     "i18next-browser-languagedetector": "^8.2.0",
     "jsgametools": "git+https://github.com/Eliastik/JSGameTools.git#cf5bbf3",
     "seedrandom": "^3.0.5",
-    "semver": "^7.7.2",
+    "semver": "^7.7.3",
     "socket.io-client": "~4.8.1",
     "three": "^0.180.0"
   }

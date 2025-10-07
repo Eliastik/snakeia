@@ -28,8 +28,8 @@ Other AI modes include:
 
 ## About this game
 
-* Version: 3.0.0
-* Version date: 10/5/2025
+* Version: 3.0.1
+* Version date: 10/7/2025
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -48,6 +48,9 @@ Other AI modes include:
 * Uses a 3D model of an apple created by [bariacg](https://sketchfab.com/bariacg), available on [Sketchfab website](https://sketchfab.com/3d-models/apple-8cc60d44baec49558156ac767839c2ed), licensed under [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## Changelog
+
+* Version 3.0.1 (10/7/2025) :
+  - Fixed bugs with the 3D rendering engine during online gameplay.
 
 * Version 3.0.0 (10/5/2025):
   - Added **"Ultra" AI level** *(preview)*:
@@ -286,8 +289,8 @@ Les autres modes d’IA sont :
 
 ## À propos du jeu
 
-* Version du jeu : 3.0.0
-* Date de version : 05/10/2025
+* Version du jeu : 3.0.1
+* Date de version : 07/10/2025
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -306,6 +309,9 @@ Les autres modes d’IA sont :
 * Utilise un modèle 3D de pomme réalisé par [bariacg](https://sketchfab.com/bariacg) et disponible sur le [site Sketchfab](https://sketchfab.com/3d-models/apple-8cc60d44baec49558156ac767839c2ed), sous [licence Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## Journal des changements
+
+* Version 3.0.1 (07/10/2025) :
+  - Correction de bugs avec le moteur de rendu 3D lors d'une partie en mode de jeu ligne.
 
 * Version 3.0.0 (05/10/2025) :
   - Mise en place du niveau d’IA **"Ultra"** *(en preview)* :
