@@ -44,6 +44,7 @@ export default class GameUI {
     this.renderBlur = settings && settings.renderBlur;
     this.graphicSkin = (settings && settings.graphicSkin) || "flat";
     this.maxFPS = (settings && settings.maxFPS) || -1;
+    this.settings = settings || {};
     // UI variables
     this.lastKey = -1;
     this.frame = 0;
@@ -110,7 +111,7 @@ export default class GameUI {
     this.isFilterHueAvailable = Utils.isFilterHueAvailable();
     this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader);
     this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
-    this.gridUI = this.constructGridUI(settings);
+    this.gridUI = null;
     this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, null, null, null, 0.5, this.disableAnimation, "center");
     this.notificationMessage;
     this.labelMenus;
@@ -202,6 +203,8 @@ export default class GameUI {
       this.btnEnterFullScreen = new Button(i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnStartGame = new Button(i18next.t("engine.servers.startGame"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.labelMenus = new Label("", null, null, GameConstants.Setting.FONT_SIZE, GameConstants.Setting.FONT_FAMILY, "white", "center");
+
+      this.gridUI = this.constructGridUI(this.settings);
 
       this.header.setButtons(this.btnFullScreen, this.btnPause, this.btnRank);
 

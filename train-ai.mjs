@@ -14,18 +14,18 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const EPISODES_TYPES            = ["DEFAULT"];
+const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
 // OR:
-// const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE"];
-const NUM_EPISODES_PER_TYPE     = 1500;
+// const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE"];
+const NUM_EPISODES_PER_TYPE     = 2500;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 15;
 const MAX_TICKS                 = 1000;
-const INITAL_GRID_WIDTH         = 15;
-const INITAL_GRID_HEIGHT        = 15;
+const INITAL_GRID_WIDTH         = 10;
+const INITAL_GRID_HEIGHT        = 10;
 const GRID_INCREASE_INCREMENT   = 5;
-const MAX_GRID_WIDTH            = 15;
-const MAX_GRID_HEIGHT           = 15;
+const MAX_GRID_WIDTH            = 20;
+const MAX_GRID_HEIGHT           = 20;
 const ENABLE_TENSORBOARD_LOGS   = true;
 const AI_LEVEL_OPPONENTS        = Constants.AiLevel.DEFAULT;
 const NUMBER_OPPONENTS          = 5;
@@ -37,7 +37,7 @@ const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = true; // Export memory
 // Path to a model to load before beginning training (for fine tuning)
 // Example: ./models/2025-06-29T20-08-14-389Z/5x5_RANDOM_WALLS
-const LOAD_MODEL_PATH           = null;
+const LOAD_MODEL_PATH           = "./models/2025-10-09T11-47-48-273Z";
 // End of settings
 
 // Setup and run training
