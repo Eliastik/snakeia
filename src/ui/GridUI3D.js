@@ -24,6 +24,11 @@ import Position from "../engine/Position";
 import { Utils } from "jsgametools";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { FXAAPass } from "three/addons/postprocessing/FXAAPass.js";
+import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import chroma from "chroma-js";
 
 export default class GridUI3D extends GridUI {
@@ -65,6 +70,7 @@ export default class GridUI3D extends GridUI {
       };
 
     this.is3DRendering = true;
+    this.postProcessingEnabled = false;
     this.oldCanvasWidth = null;
     this.oldCanvasHeight = null;
     this.currentRenderingSizeAndPosition = null;
@@ -119,7 +125,7 @@ export default class GridUI3D extends GridUI {
     this.camera.lookAt(0, 0, 0);
   
     this.renderer = new THREE.WebGLRenderer({
-      antialias: this.qualitySettings.enableAntialiasing,
+      antialias: this.qualitySettings.enableAntialiasing || this.qualitySettings.antialiasing === "msaa",
       alpha: true
     });
 
@@ -149,6 +155,28 @@ export default class GridUI3D extends GridUI {
     this.gridGroup = new THREE.Group();
     this.fruitsGroup = new THREE.Group();
     this.snakesGroup = new THREE.Group();
+
+    if(this.qualitySettings.antialiasing === "fxaa" || this.qualitySettings.antialiasing === "smaa") {
+      this.composer = new EffectComposer(this.renderer);
+      this.renderPass = new RenderPass(this.scene, this.camera);
+      this.composer.addPass(this.renderPass);
+
+      if(this.qualitySettings.antialiasing === "fxaa") {
+        this.outputPass = new OutputPass();
+        this.composer.addPass(this.outputPass);
+
+        this.fxaaPass = new FXAAPass();
+        this.composer.addPass(this.fxaaPass);
+      } else if(this.qualitySettings.antialiasing === "smaa") {
+        this.smaaPass = new SMAAPass();
+        this.composer.addPass(this.smaaPass);
+        
+        this.outputPass = new OutputPass();
+        this.composer.addPass(this.outputPass);
+      }
+
+      this.postProcessingEnabled = true;
+    }
 
     this.scene.add(this.gridGroup, this.fruitsGroup, this.snakesGroup);
   }
@@ -304,7 +332,11 @@ export default class GridUI3D extends GridUI {
     
     this.goldFruitFirstFrame = false;
 
-    this.renderer.render(this.scene, this.camera);
+    if(this.postProcessingEnabled) {
+      this.composer.render();
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
 
     Utils.drawImageData(ctx, this.renderer.domElement, offsetX, offsetY, totalWidth, totalHeight, 0, 0, totalWidth, totalHeight);
 
@@ -377,6 +409,12 @@ export default class GridUI3D extends GridUI {
     }
 
     this.renderer.setSize(this.width, this.height);
+
+    if(this.postProcessingEnabled) {
+      this.renderPass.setSize(this.width, this.height);
+      this.composer.setSize(this.width, this.height);
+      this.outputPass.setSize(this.width, this.height);
+    }
 
     if(this.controls) {
       this.controls.update();

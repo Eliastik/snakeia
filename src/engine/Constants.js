@@ -159,9 +159,6 @@ export default {
     AUTHENTICATION_SUCCESS: "AUTHENTICATION_SUCCESS"
   },
   QualitySettings3DIndividualPresets: {
-    enableAntialiasing: {
-      type: "boolean"
-    },
     fruitLights: {
       type: "boolean"
     },
@@ -170,6 +167,15 @@ export default {
     },
     enableReflections: {
       type: "boolean"
+    },
+    antialiasing: {
+      type: "choice",
+      presets: {
+        disabled: "disabled",
+        fxaa: "fxaa",
+        smaa: "smaa",
+        msaa: "msaa"
+      }
     },
     shadowType: {
       type: "choice",
@@ -284,8 +290,8 @@ export default {
   QualitySettings3DPreset: {
     "3dMinimal": {
       enableShadows: false,
-      enableAntialiasing: false,
       enableReflections: false,
+      antialiasing: "disabled",
       shadowResolution: "low",
       shadowType: "low",
       materialType: "low",
@@ -296,8 +302,8 @@ export default {
     },
     "3dLow": {
       enableShadows: true,
-      enableAntialiasing: false,
       enableReflections: false,
+      antialiasing: "disabled",
       shadowResolution: "low",
       shadowType: "high",
       materialType: "high",
@@ -308,8 +314,8 @@ export default {
     },
     "3dNormal": {
       enableShadows: true,
-      enableAntialiasing: true,
       enableReflections: true,
+      antialiasing: "fxaa",
       shadowResolution: "normal",
       shadowType: "high",
       materialType: "high",
@@ -320,8 +326,8 @@ export default {
     },
     "3dMedium": {
       enableShadows: true,
-      enableAntialiasing: true,
       enableReflections: true,
+      antialiasing: "smaa",
       shadowResolution: "medium",
       shadowType: "high",
       materialType: "high",
@@ -332,8 +338,8 @@ export default {
     },
     "3dHigh": {
       enableShadows: true,
-      enableAntialiasing: true,
       enableReflections: true,
+      antialiasing: "msaa",
       shadowResolution: "high",
       shadowType: "high",
       materialType: "high",
@@ -344,8 +350,8 @@ export default {
     },
     "3dUltra": {
       enableShadows: true,
-      enableAntialiasing: true,
       enableReflections: true,
+      antialiasing: "msaa",
       shadowResolution: "ultra",
       shadowType: "high",
       materialType: "high",
@@ -356,8 +362,8 @@ export default {
     },
     "3dExtreme": {
       enableShadows: true,
-      enableAntialiasing: true,
       enableReflections: true,
+      antialiasing: "msaa",
       shadowResolution: "ultra",
       shadowType: "high",
       materialType: "high",

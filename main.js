@@ -2865,8 +2865,19 @@ function displayAdvanced3DSettingsModal() {
     ...customSettings.graphicCustomPreset,
   } : GameConstants.QualitySettings3DPreset[GameConstants.DefaultQualitySettings3D];
 
+  migratePresetSettings(savedPreset);
   generateGraphicsFormFromPresets(GameConstants.QualitySettings3DIndividualPresets, GameConstants.QualitySettings3DPreset, "formSettingsAdvanced3DSettings", GameConstants.DefaultQualitySettings3D, savedPreset);
   modal3DQualitySettingsInstance.show();
+}
+
+function migratePresetSettings(preset) {
+  if(Object.keys(preset).includes("enableAntialiasing")) {
+    if(preset.enableAntialiasing) {
+      preset.antialiasing = "msaa";
+    } else {
+      preset.antialiasing = "disabled";
+    }
+  }
 }
 
 document.getElementById("modalCustom3DQuality").onclick = () => {
