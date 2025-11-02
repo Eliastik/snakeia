@@ -481,7 +481,7 @@ export default class GridUI3D extends GridUI {
 
     if(mesh.texture?.dispose) mesh.texture.dispose();
     if(mesh.material?.map) mesh.material.map.dispose();
-    if(mesh.material?.normalMap) mesh.material.normalMap.dispose();
+    //if(mesh.material?.normalMap) mesh.material.normalMap.dispose();
     if(mesh.material?.metalnessMap) mesh.material.metalnessMap.dispose();
     if(mesh.material?.roughnessMap) mesh.material.roughnessMap.dispose();
     if(mesh.material?.bumpMap) mesh.material.bumpMap.dispose();
@@ -811,6 +811,8 @@ export default class GridUI3D extends GridUI {
       child.receiveShadow = true;
     });
 
+    headMesh.renderOrder = 2;
+
     const tailMesh = this.modelLoader.get("tail");
 
     tailMesh.traverse(child => {
@@ -821,6 +823,8 @@ export default class GridUI3D extends GridUI {
       child.castShadow = true;
       child.receiveShadow = true;
     });
+
+    tailMesh.renderOrder = 1;
 
     const eyesGroup = this.createSnakeEyes(snake);
     headMesh.add(eyesGroup);
@@ -1034,7 +1038,9 @@ export default class GridUI3D extends GridUI {
       break;
     }
 
-    mesh.position.set(position3D.x + offset.x, position3D.y + offset.y, 0.3);
+    const baseZ = type === "head" ? 0.305 : (type === "tail" ? 0.295 : 0.3);
+
+    mesh.position.set(position3D.x + offset.x, position3D.y + offset.y, baseZ);
 
     this.animateSnakeRotation(snake, snakePart, currentDirection, animationPercentage, mesh);
     
@@ -1517,7 +1523,7 @@ export default class GridUI3D extends GridUI {
     const mesh = isAngle ? curveMesh : straightMesh;
 
     const segmentTransform = new THREE.Object3D();
-    segmentTransform.position.set(segment.vector.x, segment.vector.y, segment.vector.z);
+    segmentTransform.position.set(segment.vector.x, segment.vector.y, (segment.vector.z || 0.3) - 0.001);
 
     switch(segment.direction) {
     case GameConstants.Direction.ANGLE_1:
@@ -1766,7 +1772,19 @@ export default class GridUI3D extends GridUI {
     const snakeColor = new THREE.Color(r / 255, g / 255, b / 255);
     snakeColor.convertSRGBToLinear();
 
-    return this.getMaterial({ color: snakeColor, roughness: 0.6, metalness: 0.25 });
+    if(!this.snakeTextureNormal) {
+      const snakeTextureNormal = this.imageLoader.get("assets/images/snake_skin-normal.png");
+      this.snakeTextureNormal = new THREE.CanvasTexture(snakeTextureNormal);
+      this.snakeTextureNormal.colorSpace = THREE.SRGBColorSpace;
+    }
+
+    const material = this.getMaterial({ color: snakeColor, roughness: 0.6, metalness: 0.25, normalMap: this.snakeTextureNormal });
+
+    material.polygonOffset = true;
+    material.polygonOffsetFactor = 1;
+    material.polygonOffsetUnits = 1;
+
+    return material;
   }
 
   calculateSnakeGeometryQualityTubes(snake) {
