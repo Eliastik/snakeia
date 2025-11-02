@@ -433,7 +433,7 @@ export default class GridUI3D extends GridUI {
 
       this.dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
 
-      this.dirLight.position.set(-halfGrid * 0.5, halfGrid * 0.5, halfGrid * 2);
+      this.dirLight.position.set(-halfGrid * 0.5, halfGrid * 0.5, halfGrid * 3);
       this.dirLight.target.position.set(0, 0, 0);
 
       this.dirLight.castShadow = true;
@@ -483,7 +483,7 @@ export default class GridUI3D extends GridUI {
 
     if(mesh.texture?.dispose) mesh.texture.dispose();
     if(mesh.material?.map) mesh.material.map.dispose();
-    if(mesh.material?.normalMap) mesh.material.normalMap.dispose();
+    //if(mesh.material?.normalMap) mesh.material.normalMap.dispose();
     if(mesh.material?.metalnessMap) mesh.material.metalnessMap.dispose();
     if(mesh.material?.roughnessMap) mesh.material.roughnessMap.dispose();
     if(mesh.material?.bumpMap) mesh.material.bumpMap.dispose();
@@ -683,6 +683,9 @@ export default class GridUI3D extends GridUI {
   constructLightGrayCell(totalCells, halfCells) {
     const lightGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
     const lightGrayCellMaterial = this.getMaterial({ color: 0x95a5a6 });
+    lightGrayCellMaterial.polygonOffset = true;
+    lightGrayCellMaterial.polygonOffsetFactor = 2;
+    lightGrayCellMaterial.polygonOffsetUnits = 2;
     const lightGrayCellInstancedMesh = new THREE.InstancedMesh(lightGrayCellGeometry, lightGrayCellMaterial, totalCells % 2 === 0 ? halfCells : halfCells + 1);
     lightGrayCellInstancedMesh.receiveShadow = true;
     lightGrayCellInstancedMesh.castShadow = false;
@@ -692,6 +695,9 @@ export default class GridUI3D extends GridUI {
   constructDarkGrayCell(halfCells) {
     const darkGrayCellGeometry = new THREE.BoxGeometry(1, 1, 0.1);
     const darkGrayCellMaterial = this.getMaterial({ color: 0x2c3e50 });
+    darkGrayCellMaterial.polygonOffset = true;
+    darkGrayCellMaterial.polygonOffsetFactor = 2;
+    darkGrayCellMaterial.polygonOffsetUnits = 2;
     const darkGrayCellInstancedMesh = new THREE.InstancedMesh(darkGrayCellGeometry, darkGrayCellMaterial, halfCells);
     darkGrayCellInstancedMesh.receiveShadow = true;
     darkGrayCellInstancedMesh.castShadow = false;
@@ -820,6 +826,7 @@ export default class GridUI3D extends GridUI {
     const headMesh = this.graphicSkin === "pixel" ?
       new THREE.Mesh(new THREE.BoxGeometry(1, 1, 0.7), snakeMaterial) :
       this.modelLoader.get("head");
+    headMesh.renderOrder = 2;
 
     headMesh.traverse(child => {
       if(child.isMesh) {
@@ -833,6 +840,7 @@ export default class GridUI3D extends GridUI {
     const tailMesh = this.graphicSkin === "pixel" ?
       new THREE.Mesh(new THREE.BoxGeometry(1, 1, 0.7), snakeMaterial) :
       this.modelLoader.get("tail");
+    tailMesh.renderOrder = 2;
 
     tailMesh.traverse(child => {
       if(child.isMesh) {
@@ -842,6 +850,8 @@ export default class GridUI3D extends GridUI {
       child.castShadow = true;
       child.receiveShadow = true;
     });
+
+    tailMesh.renderOrder = 1;
 
     const eyesGroup = this.createSnakeEyes(snake);
     headMesh.add(eyesGroup);
@@ -1056,6 +1066,8 @@ export default class GridUI3D extends GridUI {
       offset.x -= animationOffset;
       break;
     }
+
+    const baseZ = type === "head" ? 0.305 : (type === "tail" ? 0.295 : 0.3);
 
     mesh.position.set(position3D.x + offset.x, position3D.y + offset.y, 0.3);
 
@@ -1579,7 +1591,7 @@ export default class GridUI3D extends GridUI {
     const mesh = isAngle ? curveMesh : straightMesh;
 
     const segmentTransform = new THREE.Object3D();
-    segmentTransform.position.set(segment.vector.x, segment.vector.y, segment.vector.z);
+    segmentTransform.position.set(segment.vector.x, segment.vector.y, (segment.vector.z || 0.3));
 
     switch(segment.direction) {
     case GameConstants.Direction.ANGLE_1:
@@ -1790,6 +1802,17 @@ export default class GridUI3D extends GridUI {
 
       segmentIndex++;
     }
+
+    if(straightMesh) {
+      straightMesh.renderOrder = 0;
+    }
+    if(curveMesh) {
+      curveMesh.renderOrder = 0;
+    }
+
+    if(curveMesh2) {
+      curveMesh2.renderOrder = 0;
+    }
     
     return [straightMesh, curveMesh, curveMesh2].filter(mesh => mesh != null);
   }
@@ -1980,7 +2003,19 @@ export default class GridUI3D extends GridUI {
     const snakeColor = new THREE.Color(r / 255, g / 255, b / 255);
     snakeColor.convertSRGBToLinear();
 
-    return this.getMaterial({ color: snakeColor, roughness: 0.6, metalness: 0.25 });
+    if(!this.snakeTextureNormal) {
+      const snakeTextureNormal = this.imageLoader.get("assets/images/snake_skin-normal.png");
+      this.snakeTextureNormal = new THREE.CanvasTexture(snakeTextureNormal);
+      this.snakeTextureNormal.colorSpace = THREE.SRGBColorSpace;
+    }
+
+    const material = this.getMaterial({ color: snakeColor, roughness: 0.6, metalness: 0.25, normalMap: this.snakeTextureNormal });
+
+    material.polygonOffset = true;
+    material.polygonOffsetFactor = 1;
+    material.polygonOffsetUnits = 1;
+
+    return material;
   }
 
   calculateSnakeGeometryQualityTubes(snake) {
