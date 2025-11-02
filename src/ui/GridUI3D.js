@@ -74,10 +74,12 @@ export default class GridUI3D extends GridUI {
     this.oldCanvasWidth = null;
     this.oldCanvasHeight = null;
     this.currentRenderingSizeAndPosition = null;
-    this.hasGoldFruit = false;
-    this.goldFruitPosition = null;
     this.firstUpdatedReflections = false;
     this.goldFruitFirstFrame = true;
+
+    this.hasGoldFruit = false;
+    this.goldFruitPosition = null;
+    this.fruitsWorldList = [];
   }
 
   init3DEngine() {
@@ -495,11 +497,17 @@ export default class GridUI3D extends GridUI {
     this.fruitModelGold.visible = false;
     this.fruitPointLight.visible = false;
     this.fruitGoldPointLight.visible = false;
+
+    this.goldFruitPosition = null;
+    this.fruitsWorldList = [];
   }
   
   setupGrid() {
     if(this.forceRedraw || this.gridStateChanged) {
       this.hasGoldFruit = false;
+
+      this.goldFruitPosition = null;
+      this.fruitsWorldList = [];
 
       this.clearGrid();
       this.hideFruits();
@@ -788,6 +796,8 @@ export default class GridUI3D extends GridUI {
       if(isGoldFruit) {
         this.hasGoldFruit = true;
         this.goldFruitPosition = { x: xPosition, y: yPosition };
+      } else {
+        this.fruitsWorldList.push(new THREE.Vector3(xPosition, yPosition, 0.5));
       }
     }
   }
@@ -902,6 +912,8 @@ export default class GridUI3D extends GridUI {
 
     this.animateSnakeHead(snakeIndex, snake);
     this.animateSnakeTail(snakeIndex, snake);
+
+    this.updateEyesForSnake(snakeIndex);
   }
 
   updateSnakeEyes(snakeIndex, snake) {
@@ -1721,6 +1733,11 @@ export default class GridUI3D extends GridUI {
     eye1.position.set(0.18, 0.15, 0.3);
     eye2.position.set(-0.18, 0.15, 0.3);
 
+    const eye1Base = new THREE.Vector3(0.18, 0.15, 0.3);
+    const eye2Base = new THREE.Vector3(-0.18, 0.15, 0.3);
+    eye1.position.copy(eye1Base);
+    eye2.position.copy(eye2Base);
+
     group.add(eye1, eye2);
 
     if(snake.gameOver) {
@@ -1743,6 +1760,9 @@ export default class GridUI3D extends GridUI {
       bar2b.position.copy(eye2.position).add(new THREE.Vector3(0, 0, zOffset));
 
       group.add(bar1a, bar1b, bar2a, bar2b);
+
+      group.userData.pupils = null;
+      group.userData.eyeBases = [eye1Base, eye2Base];
     } else {
       const pupilGeom = new THREE.SphereGeometry(0.045, 8, 8);
       const pupil1 = new THREE.Mesh(pupilGeom, blackMat);
@@ -1752,9 +1772,136 @@ export default class GridUI3D extends GridUI {
       pupil2.position.copy(eye2.position).add(new THREE.Vector3(0, 0.03, 0.03));
 
       group.add(pupil1, pupil2);
+
+      group.userData.pupils = [pupil1, pupil2];
+      group.userData.eyeBases = [eye1Base.clone(), eye2Base.clone()];
+      group.userData.pupilBases = [pupil1.position.clone(), pupil2.position.clone()];
     }
 
     return group;
+  }
+
+  updateEyesForSnake(snakeIndex) {
+    const meshes = this.snakesMeshes[snakeIndex];
+
+    if(!meshes || !meshes.eyesGroup) {
+      return;
+    }
+
+    const group = meshes.eyesGroup;
+    const pupils = group.userData.pupils;
+    const pupilBases = group.userData.pupilBases;
+
+    if(!pupils || !pupilBases || pupils.length !== 2) {
+      return;
+    }
+
+    const headMesh = meshes.headMesh;
+
+    if(!headMesh) {
+      return;
+    }
+
+    const headPosWorld = headMesh.getWorldPosition(new THREE.Vector3());
+
+    const maxDistanceToTrack = 6;
+    const maxPupilOffset = 0.035;
+    const lerpFactor = 0.25;
+    const influencePow = 1.4;
+    const maxStep = 0.06;
+    const goldPriorityDelta = 1.0;
+
+    let nearestRegular = null;
+    let nearestRegularDist = Infinity;
+
+    if(Array.isArray(this.fruitsWorldList)) {
+      for(const w of this.fruitsWorldList) {
+        const d = headPosWorld.distanceTo(w);
+        if(d < nearestRegularDist) {
+          nearestRegularDist = d;
+          nearestRegular = w;
+        }
+      }
+    }
+
+    const goldWorld = this.goldFruitPosition ? new THREE.Vector3(this.goldFruitPosition.x, this.goldFruitPosition.y, 0.5) : null;
+    const goldDist = goldWorld ? headPosWorld.distanceTo(goldWorld) : Infinity;
+
+    let selectedFruitWorld = null;
+    let selectedDist = Infinity;
+
+    if(nearestRegular && goldWorld) {
+      if(goldDist <= nearestRegularDist + goldPriorityDelta) {
+        selectedFruitWorld = goldWorld;
+        selectedDist = goldDist;
+      } else {
+        selectedFruitWorld = nearestRegular;
+        selectedDist = nearestRegularDist;
+      }
+    } else if(goldWorld) {
+      selectedFruitWorld = goldWorld;
+      selectedDist = goldDist;
+    } else if(nearestRegular) {
+      selectedFruitWorld = nearestRegular;
+      selectedDist = nearestRegularDist;
+    }
+
+    if(!selectedFruitWorld) {
+      for(let i = 0; i < 2; i++) {
+        pupils[i].position.lerp(pupilBases[i], 0.25);
+      }
+      return;
+    }
+
+    if(selectedDist > maxDistanceToTrack) {
+      for(let i = 0; i < 2; i++) {
+        pupils[i].position.lerp(pupilBases[i], 0.25);
+      }
+      return;
+    }
+
+    const localFruit = selectedFruitWorld.clone();
+    headMesh.worldToLocal(localFruit);
+
+    const rawInfluence = Math.max(0, (maxDistanceToTrack - selectedDist) / maxDistanceToTrack);
+    const influence = Math.pow(rawInfluence, influencePow);
+
+    for(let i = 0; i < 2; i++) {
+      const base = pupilBases[i].clone();
+      const current = pupils[i].position.clone();
+
+      const dirLocal = localFruit.clone().sub(base);
+      dirLocal.z = 0;
+
+      if(dirLocal.lengthSq() < 1e-6) {
+        const desired = current.lerp(base, lerpFactor);
+        desired.z = pupilBases[i].z;
+        pupils[i].position.copy(desired);
+        continue;
+      }
+
+      dirLocal.normalize();
+      const target = base.clone().add(dirLocal.multiplyScalar(maxPupilOffset * influence));
+      target.z = pupilBases[i].z;
+
+      let desiredPos = current.lerp(target, lerpFactor);
+
+      const fromBase = desiredPos.clone().sub(base);
+      if(fromBase.length() > maxPupilOffset) {
+        fromBase.setLength(maxPupilOffset);
+        desiredPos = base.clone().add(fromBase);
+        desiredPos.z = pupilBases[i].z;
+      }
+
+      const stepDelta = desiredPos.clone().sub(current);
+      if(stepDelta.length() > maxStep) {
+        stepDelta.setLength(maxStep);
+        desiredPos = current.clone().add(stepDelta);
+        desiredPos.z = pupilBases[i].z;
+      }
+
+      pupils[i].position.copy(desiredPos);
+    }
   }
 
   /** Snake meshes utility methods */
