@@ -2450,17 +2450,17 @@ window.playLevel = (level, player, type) => {
     });
 
     playerGame.onStart(() => {
-      if(!notificationEndDisplayed && !notificationStartDisplayed) {
-        notifInfo = new NotificationMessage(textToDisplayGoal, null, notifInfosColor, 10);
-        playerGame.setNotification(notifInfo);
-        notificationStartDisplayed = true;
-      }
-      
       if(destroyAis) {
         group.destroySnakes([0], [GameConstants.PlayerType.AI]);
         buyBonus(null, player);
       }
     });
+
+    if(!notificationEndDisplayed && !notificationStartDisplayed) {
+      notifInfo = new NotificationMessage(textToDisplayGoal, null, notifInfosColor, 5, null, null, null, true);
+      playerGame.setNotification(notifInfo);
+      notificationStartDisplayed = true;
+    }
   } else {
     return false;
   }
