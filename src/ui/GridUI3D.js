@@ -1806,7 +1806,7 @@ export default class GridUI3D extends GridUI {
 
     const maxDistanceToTrack = 6;
     const maxPupilOffset = 0.045;
-    const lerpFactor = 0.1;
+    const lerpFactor = 0.5;
     const influencePow = 1.4;
     const maxStep = 0.06;
     const goldPriorityDelta = 1.0;
