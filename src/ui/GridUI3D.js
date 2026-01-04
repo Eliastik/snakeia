@@ -145,7 +145,7 @@ export default class GridUI3D extends GridUI {
       shadowType = THREE.PCFShadowMap;
       break;
     case "pcfsoft":
-      shadowType = THREE.PCFSoftShadowMap;
+      shadowType = THREE.PCFShadowMap;
       break;
     case "vsm":
       shadowType = THREE.VSMShadowMap;
