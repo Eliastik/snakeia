@@ -1784,7 +1784,7 @@ export default class GridUI3D extends GridUI {
   updateEyesForSnake(snakeIndex) {
     const meshes = this.snakesMeshes[snakeIndex];
 
-    if(!meshes || !meshes.eyesGroup) {
+    if(!meshes?.eyesGroup) {
       return;
     }
 
@@ -1804,19 +1804,17 @@ export default class GridUI3D extends GridUI {
 
     const headPosWorld = headMesh.getWorldPosition(new THREE.Vector3());
 
-    const maxDistanceToTrack = 6;
-    const maxPupilOffset = 0.045;
-    const lerpFactor = 0.5;
-    const influencePow = 1.4;
-    const maxStep = 0.06;
-    const goldPriorityDelta = 1.0;
+    const MAX_DIST   = 6;
+    const MAX_OFFSET = 0.045;
+    const LERP_ANGLE = 0.12;
+    const GOLD_DELTA = 1.0;
 
-    let nearestRegular = null;
-    let nearestRegularDist = Infinity;
+    let nearestRegular = null, nearestRegularDist = Infinity;
 
     if(Array.isArray(this.fruitsWorldList)) {
       for(const w of this.fruitsWorldList) {
         const d = headPosWorld.distanceTo(w);
+
         if(d < nearestRegularDist) {
           nearestRegularDist = d;
           nearestRegular = w;
@@ -1824,83 +1822,77 @@ export default class GridUI3D extends GridUI {
       }
     }
 
-    const goldWorld = this.goldFruitPosition ? new THREE.Vector3(this.goldFruitPosition.x, this.goldFruitPosition.y, 0.5) : null;
+    const goldWorld = this.goldFruitPosition
+      ? new THREE.Vector3(this.goldFruitPosition.x, this.goldFruitPosition.y, 0.5)
+      : null;
     const goldDist = goldWorld ? headPosWorld.distanceTo(goldWorld) : Infinity;
 
-    let selectedFruitWorld = null;
-    let selectedDist = Infinity;
+    let selectedFruit = null, selectedDist = Infinity;
 
     if(nearestRegular && goldWorld) {
-      if(goldDist <= nearestRegularDist + goldPriorityDelta) {
-        selectedFruitWorld = goldWorld;
-        selectedDist = goldDist;
-      } else {
-        selectedFruitWorld = nearestRegular;
-        selectedDist = nearestRegularDist;
-      }
+      const pickGold = goldDist <= nearestRegularDist + GOLD_DELTA;
+      selectedFruit  = pickGold ? goldWorld       : nearestRegular;
+      selectedDist   = pickGold ? goldDist        : nearestRegularDist;
     } else if(goldWorld) {
-      selectedFruitWorld = goldWorld;
+      selectedFruit = goldWorld;
       selectedDist = goldDist;
     } else if(nearestRegular) {
-      selectedFruitWorld = nearestRegular;
+      selectedFruit = nearestRegular;
       selectedDist = nearestRegularDist;
     }
 
-    if(!selectedFruitWorld) {
-      for(let i = 0; i < 2; i++) {
-        pupils[i].position.lerp(pupilBases[i], 0.25);
-      }
-      return;
+    const hasFruit = !!(selectedFruit && selectedDist <= MAX_DIST);
+
+    let localFruit = null;
+
+    if(hasFruit) {
+      localFruit = selectedFruit.clone();
+      group.worldToLocal(localFruit);
     }
-
-    if(selectedDist > maxDistanceToTrack) {
-      for(let i = 0; i < 2; i++) {
-        pupils[i].position.lerp(pupilBases[i], 0.25);
-      }
-      return;
-    }
-
-    const localFruit = selectedFruitWorld.clone();
-    headMesh.worldToLocal(localFruit);
-
-    const rawInfluence = Math.max(0, (maxDistanceToTrack - selectedDist) / maxDistanceToTrack);
-    const influence = Math.pow(rawInfluence, influencePow);
 
     for(let i = 0; i < 2; i++) {
       const base = pupilBases[i].clone();
-      const current = pupils[i].position.clone();
+
+      const fromBase = pupils[i].position.clone().sub(base);
+      fromBase.z = 0;
+      const currentRadius = fromBase.length();
+      const currentAngle = currentRadius > 1e-6
+        ? Math.atan2(fromBase.y, fromBase.x)
+        : 0;
+
+      if(!hasFruit) {
+        const newR = currentRadius * (1 - LERP_ANGLE);
+        const pos = base.clone().add(
+          new THREE.Vector3(Math.cos(currentAngle) * newR, Math.sin(currentAngle) * newR, 0)
+        );
+        pos.z = pupilBases[i].z;
+        pupils[i].position.copy(pos);
+        continue;
+      }
 
       const dirLocal = localFruit.clone().sub(base);
       dirLocal.z = 0;
 
       if(dirLocal.lengthSq() < 1e-6) {
-        const desired = current.lerp(base, lerpFactor);
-        desired.z = pupilBases[i].z;
-        pupils[i].position.copy(desired);
         continue;
       }
 
       dirLocal.normalize();
-      const target = base.clone().add(dirLocal.multiplyScalar(maxPupilOffset * influence));
-      target.z = pupilBases[i].z;
+      
+      const targetAngle = Math.atan2(dirLocal.y, dirLocal.x);
 
-      let desiredPos = current.lerp(target, lerpFactor);
+      let delta = targetAngle - currentAngle;
+      while(delta >  Math.PI) delta -= 2 * Math.PI;
+      while(delta < -Math.PI) delta += 2 * Math.PI;
+      const newAngle = currentAngle + delta * LERP_ANGLE;
 
-      const fromBase = desiredPos.clone().sub(base);
-      if(fromBase.length() > maxPupilOffset) {
-        fromBase.setLength(maxPupilOffset);
-        desiredPos = base.clone().add(fromBase);
-        desiredPos.z = pupilBases[i].z;
-      }
+      const newRadius = currentRadius + (MAX_OFFSET - currentRadius) * LERP_ANGLE;
 
-      const stepDelta = desiredPos.clone().sub(current);
-      if(stepDelta.length() > maxStep) {
-        stepDelta.setLength(maxStep);
-        desiredPos = current.clone().add(stepDelta);
-        desiredPos.z = pupilBases[i].z;
-      }
-
-      pupils[i].position.copy(desiredPos);
+      const pos = base.clone().add(
+        new THREE.Vector3(Math.cos(newAngle) * newRadius, Math.sin(newAngle) * newRadius, 0)
+      );
+      pos.z = pupilBases[i].z;
+      pupils[i].position.copy(pos);
     }
   }
 
