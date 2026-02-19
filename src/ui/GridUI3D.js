@@ -1806,7 +1806,7 @@ export default class GridUI3D extends GridUI {
 
     const MAX_DIST   = 6;
     const MAX_OFFSET = 0.045;
-    const LERP_ANGLE = 0.12;
+    const LERP_ANGLE = this.disableAnimation ? 1 : 0.12;
     const GOLD_DELTA = 1.0;
 
     let nearestRegular = null, nearestRegularDist = Infinity;
