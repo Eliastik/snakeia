@@ -705,7 +705,11 @@ export default class GridUI3D extends GridUI {
       return;
     }
 
-    this.fruitModel = this.modelLoader.get("fruit");
+    const fruitColor = 0xff1100;
+
+    this.fruitModel = this.graphicSkin === "pixel" ?
+      new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), this.getMaterial({ color: fruitColor })) :
+      this.modelLoader.get("fruit");
 
     if(this.fruitModel) {
       this.fruitPointLight = new THREE.PointLight(0xff1100, 0.8, 2);
@@ -725,6 +729,7 @@ export default class GridUI3D extends GridUI {
             normalMap: child.material.normalMap,
             metalnessMap: child.material.metalnessMap,
             roughnessMap: child.material.roughnessMap,
+            color: child.material.color,
             roughness: 0.4,
           });
         }
@@ -741,12 +746,14 @@ export default class GridUI3D extends GridUI {
     if(this.fruitModelGold) {
       return;
     }
+      
+    const fruitGoldColor = 0xFFD700;
 
-    this.fruitModelGold = this.modelLoader.get("fruit");
+    this.fruitModelGold = this.graphicSkin === "pixel" ?
+      new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), this.getMaterial({ color: fruitGoldColor })) :
+      this.modelLoader.get("fruit");
 
     if(this.fruitModelGold) {
-      const fruitGoldColor = 0xFFD700;
-
       this.fruitGoldPointLight = new THREE.PointLight(fruitGoldColor, 0.8, 2);
 
       const box = new THREE.Box3().setFromObject(this.fruitModelGold);
@@ -1375,7 +1382,7 @@ export default class GridUI3D extends GridUI {
       this.transitionSegmentGeometryCache[cacheKey] = geometry;
     }
 
-    if(this.graphicSkin === "pixel") {
+    if(this.graphicSkin === "pixel" && geometry.isLShape) {
       if(!snakeMeshes[meshKey]) {
         const meshH = new THREE.Mesh(geometry.geoH, snakeMeshes.snakeMaterial);
         meshH.castShadow = true;
