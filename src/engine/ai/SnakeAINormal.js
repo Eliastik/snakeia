@@ -53,7 +53,7 @@ export default class SnakeAINormal extends SnakeAI {
   }
 
   shouldUpdatePath(snake) {
-    if(this.path.length === 0) {
+    if(this.path.length === 0 || snake.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
       return true;
     }
 

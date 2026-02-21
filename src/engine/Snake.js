@@ -124,7 +124,7 @@ export default class Snake {
       this.player = GameConstants.PlayerType.HUMAN;
     }
 
-    // If Assistant AI mode is enabled, the AI assistant level is "High"
+    // If Assistant AI mode is enabled, the AI level is "High"
     if(this.player == GameConstants.PlayerType.HYBRID_HUMAN_AI) {
       this.aiLevel = GameConstants.AiLevel.HIGH;
     }
