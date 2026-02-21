@@ -138,17 +138,17 @@ export default class GridUI3D extends GridUI {
 
     this.renderer.shadowMap.enabled = this.qualitySettings.enableShadows;
 
-    let shadowType = THREE.BasicShadowMap;
+    let shadowType = THREE.PCFShadowMap;
 
     switch(this.qualitySettings.shadowType) {
+    case "basic":
+      shadowType = THREE.BasicShadowMap;
+      break;
     case "pcf":
       shadowType = THREE.PCFShadowMap;
       break;
     case "pcfsoft":
       shadowType = THREE.PCFShadowMap;
-      break;
-    case "vsm":
-      shadowType = THREE.VSMShadowMap;
       break;
     }
 

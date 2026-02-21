@@ -181,7 +181,6 @@ export default {
       type: "choice",
       presets: {
         low: "basic",
-        medium: "pcf",
         high: "pcfsoft"
       }
     },
