@@ -184,19 +184,38 @@ export default class GridUI3D extends GridUI {
   }
 
   buildGoldFruitShaders() {
+    const wasVisibleGold = this.fruitModelGold.visible;
+    const savedPositionGold = this.fruitModelGold.position.clone();
+
+    const haloGold = this.fruitModelGold?.userData?.halo;
+    const wasVisibleHaloGold = haloGold?.visible ?? false;
+    const savedHaloGoldPosition = haloGold?.position.clone();
+
     this.fruitModelGold.visible = true;
     this.fruitGoldPointLight.visible = true;
     
+    if(haloGold) {
+      haloGold.visible = true;
+    }
+
     this.fruitModelGold.position.set(0, 0, 0.5);
     this.fruitGoldPointLight.position.set(0, 0, 0.5);
 
     this.updateReflections(0, 0, 0.5);
-
     this.renderer.render(this.scene, this.camera);
     this.renderer.compile(this.scene, this.camera);
 
-    this.fruitModelGold.visible = false;
-    this.fruitGoldPointLight.visible = false;
+    this.fruitModelGold.visible = wasVisibleGold;
+    this.fruitGoldPointLight.visible = wasVisibleGold && this.qualitySettings.fruitLights;
+    this.fruitModelGold.position.copy(savedPositionGold);
+
+    if(haloGold) {
+      haloGold.visible = wasVisibleHaloGold;
+      
+      if(savedHaloGoldPosition) {
+        haloGold.position.copy(savedHaloGoldPosition);
+      }
+    }
   }
 
   setupControls(canvas) {
