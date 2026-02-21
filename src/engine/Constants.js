@@ -162,6 +162,9 @@ export default {
     fruitLights: {
       type: "boolean"
     },
+    fruitsAnimation: {
+      type: "boolean"
+    },
     enableShadows: {
       type: "boolean"
     },
@@ -296,6 +299,7 @@ export default {
       materialType: "low",
       snakeSegments: "minimum",
       fruitLights: false,
+      fruitsAnimation: false,
       reflectionQuality: "low",
       reflectionResolution: "minimum"
     },
@@ -308,6 +312,7 @@ export default {
       materialType: "high",
       snakeSegments: "low",
       fruitLights: false,
+      fruitsAnimation: true,
       reflectionQuality: "low",
       reflectionResolution: "low"
     },
@@ -320,6 +325,7 @@ export default {
       materialType: "high",
       snakeSegments: "normal",
       fruitLights: true,
+      fruitsAnimation: true,
       reflectionQuality: "low",
       reflectionResolution: "low"
     },
@@ -332,6 +338,7 @@ export default {
       materialType: "high",
       snakeSegments: "medium",
       fruitLights: true,
+      fruitsAnimation: true,
       reflectionQuality: "medium",
       reflectionResolution: "medium"
     },
@@ -344,6 +351,7 @@ export default {
       materialType: "high",
       snakeSegments: "high",
       fruitLights: true,
+      fruitsAnimation: true,
       reflectionQuality: "high",
       reflectionResolution: "high"
     },
@@ -356,6 +364,7 @@ export default {
       materialType: "high",
       snakeSegments: "ultra",
       fruitLights: true,
+      fruitsAnimation: true,
       reflectionQuality: "high",
       reflectionResolution: "high"
     },
@@ -368,6 +377,7 @@ export default {
       materialType: "high",
       snakeSegments: "extreme",
       fruitLights: true,
+      fruitsAnimation: true,
       reflectionQuality: "ultra",
       reflectionResolution: "extreme"
     }

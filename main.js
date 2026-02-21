@@ -133,7 +133,13 @@ function saveSettings() {
 }
 
 function getSettings() {
-  const settingsFromStorage = (storageGlobal.getItem("snakeia_settings") && JSON.parse(storageGlobal.getItem("snakeia_settings")));
+  let settingsFromStorage = null;
+
+  try {
+    settingsFromStorage = (storageGlobal.getItem("snakeia_settings") && JSON.parse(storageGlobal.getItem("snakeia_settings")));
+  } catch(e) {
+    console.error("Error while getting settings from storage, restoring default settings.", e);
+  }
 
   if(!settingsFromStorage) {
     return customSettings;
@@ -2877,6 +2883,10 @@ function migratePresetSettings(preset) {
     } else {
       preset.antialiasing = "disabled";
     }
+  }
+
+  if(!Object.keys(preset).includes("fruitsAnimation")) {
+    preset.fruitsAnimation = true;
   }
 }
 

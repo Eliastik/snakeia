@@ -285,7 +285,7 @@ export default class GridUI3D extends GridUI {
 
       this.updateSnakes();
 
-      if(!this.disableAnimation) {
+      if(!this.disableAnimation && (!Object.keys(this.qualitySettings).includes("fruitsAnimation") || this.qualitySettings.fruitsAnimation)) {
         this.animateFruits();
       }
 
