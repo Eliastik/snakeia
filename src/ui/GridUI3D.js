@@ -501,6 +501,8 @@ export default class GridUI3D extends GridUI {
     this.fruitModelGold.visible = false;
     this.fruitPointLight.visible = false;
     this.fruitGoldPointLight.visible = false;
+    this.fruitHalo.visible = false;
+    this.fruitGoldHalo.visible = false;
 
     this.goldFruitPosition = null;
     this.fruitsWorldList = [];
@@ -717,6 +719,7 @@ export default class GridUI3D extends GridUI {
 
     if(this.fruitModel) {
       this.fruitPointLight = new THREE.PointLight(0xff1100, 0.8, 2);
+      this.fruitHalo = this.setupFruitHalo(new THREE.Color(0xff1100));
 
       const box = new THREE.Box3().setFromObject(this.fruitModel);
 
@@ -743,7 +746,7 @@ export default class GridUI3D extends GridUI {
         child.receiveShadow = true;
       });
 
-      this.fruitsGroup.add(this.fruitModel, this.fruitPointLight);
+      this.fruitsGroup.add(this.fruitModel, this.fruitPointLight, this.fruitHalo);
     }
   }
 
@@ -760,6 +763,7 @@ export default class GridUI3D extends GridUI {
 
     if(this.fruitModelGold) {
       this.fruitGoldPointLight = new THREE.PointLight(fruitGoldColor, 0.8, 2);
+      this.fruitGoldHalo = this.setupFruitHalo(new THREE.Color(0xFFD700));
 
       const box = new THREE.Box3().setFromObject(this.fruitModelGold);
 
@@ -786,21 +790,65 @@ export default class GridUI3D extends GridUI {
         child.receiveShadow = true;
       });
 
-      this.fruitsGroup.add(this.fruitModelGold, this.fruitGoldPointLight);
+      this.fruitsGroup.add(this.fruitModelGold, this.fruitGoldPointLight, this.fruitGoldHalo);
     }
+  }
+
+  setupFruitHalo(color) {
+    const spriteMat = new THREE.SpriteMaterial({
+      map: this.createHaloTexture(),
+      color: color,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(1.2, 1.2, 1);
+
+    return sprite;
+  }
+
+  createHaloTexture() {
+    if(this.haloTexture) {
+      return this.haloTexture;
+    }
+
+    const size = 128;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+
+    const center = size / 2;
+    const gradient = ctx.createRadialGradient(center, center, 0, center, center, center);
+    gradient.addColorStop(0,   "rgba(255,255,255,0.6)");
+    gradient.addColorStop(0.4, "rgba(255,255,255,0.2)");
+    gradient.addColorStop(1,   "rgba(255,255,255,0)");
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+
+    this.haloTexture = new THREE.CanvasTexture(canvas);
+    return this.haloTexture;
   }
 
   displayFruit(xPosition, yPosition, caseType) {
     const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
     const fruitModel = isGoldFruit ? this.fruitModelGold : this.fruitModel;
     const pointLight = isGoldFruit ? this.fruitGoldPointLight : this.fruitPointLight;
+    const halo = isGoldFruit ? this.fruitGoldHalo : this.fruitHalo;
 
     if(fruitModel) {
       if(this.qualitySettings.fruitLights) {
         pointLight.visible = true;
+        halo.visible = true;
         pointLight.position.set(xPosition, yPosition, 0.5);
+        halo.position.set(xPosition, yPosition, 0.5);
       } else {
         pointLight.visible = false;
+        halo.visible = false;
       }
 
       fruitModel.visible = true;
@@ -839,9 +887,9 @@ export default class GridUI3D extends GridUI {
     const t = performance.now() / 1000;
 
     [
-      { model: this.fruitModel, light: this.fruitPointLight, speed: 1.5, bobFreq: 2.5 },
-      { model: this.fruitModelGold, light: this.fruitGoldPointLight, speed: 2.0, bobFreq: 2.5 }
-    ].forEach(({ model, light, speed, bobFreq }) => {
+      { model: this.fruitModel, light: this.fruitPointLight, speed: 1.5, bobFreq: 2.5, halo: this.fruitHalo },
+      { model: this.fruitModelGold, light: this.fruitGoldPointLight, speed: 2.0, bobFreq: 2.5, halo: this.fruitGoldHalo }
+    ].forEach(({ model, light, speed, bobFreq, halo }) => {
       if(!model?.visible) return;
 
       const baseScale = model.userData.baseScale ?? 1.0;
@@ -872,6 +920,13 @@ export default class GridUI3D extends GridUI {
 
       if(light?.visible) {
         light.intensity = 0.8 + Math.sin(t * 3) * 0.2;
+      }
+
+      if(halo) {
+        halo.position.set(model.position.x, model.position.y, model.position.z);
+        halo.material.opacity = 0.65 + Math.sin(t * 3) * 0.15;
+        const haloScale = 1.8 + Math.sin(t * 2.5) * 0.15;
+        halo.scale.set(haloScale, haloScale, 1);
       }
     });
   }
@@ -2198,6 +2253,13 @@ export default class GridUI3D extends GridUI {
       this.fruitModelGold?.clear();
       this.fruitPointLight?.clear();
       this.fruitGoldPointLight?.clear();
+      this.fruitHalo?.clear();
+      this.fruitGoldHalo?.clear();
+
+      this.fruitModel?.userData?.halo?.material?.dispose();
+      this.fruitModelGold?.userData?.halo?.material?.dispose();
+      this.haloTexture?.dispose();
+      this.haloTexture = null;
 
       this.scene.remove(this.gridGroup, this.snakesGroup, this.fruitsGroup);
 
@@ -2235,12 +2297,6 @@ export default class GridUI3D extends GridUI {
 
     this.controls?.dispose();
     this.controls = null;
-
-    this.ambientLight?.dispose();
-    this.ambientLight = null;
-
-    this.dirLight?.dispose();
-    this.dirLight = null;
 
     this.scene?.clear();
     this.scene = null;
