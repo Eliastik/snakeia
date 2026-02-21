@@ -375,7 +375,7 @@ export default class GridUI extends Component {
     ctxTmp.filter = "none";
   }
 
-  shouldDisplayAnimation(snake, partNumber) {
+  shouldDisplaySnakeAnimation(snake, partNumber) {
     const animationDisabled = this.disableAnimation;
     const isHead = partNumber == 0;
     const isTailAndShouldAnimateTail = partNumber == -1 && snake.lastTailMoved;
@@ -391,7 +391,7 @@ export default class GridUI extends Component {
   }
 
   calculateAnimationPercentage(snake, partNumber) {
-    if(!this.shouldDisplayAnimation(snake, partNumber)) {
+    if(!this.shouldDisplaySnakeAnimation(snake, partNumber)) {
       return 1;
     }
 
@@ -415,7 +415,7 @@ export default class GridUI extends Component {
     let animationPercentage = 1;
     let currentPosition = position;
 
-    if(this.shouldDisplayAnimation(snake, partNumber)) {
+    if(this.shouldDisplaySnakeAnimation(snake, partNumber)) {
       animationPercentage = this.calculateAnimationPercentage(snake, partNumber);
 
       let graphicDirection;
@@ -647,7 +647,7 @@ export default class GridUI extends Component {
     this.debugMode = debugMode;
   }
 
-  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
+  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode, paused) {
     this.snakes = snakes;
     this.grid = grid;
     this.speed = speed;
@@ -662,5 +662,6 @@ export default class GridUI extends Component {
     this.ticks = ticks;
     this.gameOver = gameOver;
     this.onlineMode = onlineMode;
+    this.gamePaused = paused;
   }
 }

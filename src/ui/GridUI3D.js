@@ -266,6 +266,10 @@ export default class GridUI3D extends GridUI {
 
       this.updateSnakes();
 
+      if(!this.disableAnimation) {
+        this.animateFruits();
+      }
+
       this.drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize);
 
       this.saveCurrentState(canvas);
@@ -720,6 +724,7 @@ export default class GridUI3D extends GridUI {
       box.getSize(size);
 
       this.fruitModel.scale.setScalar(0.8 / size.x);
+      this.fruitModel.userData.baseScale = 0.8 / size.x;
       this.fruitModel.rotation.x = Math.PI / 2;
 
       this.fruitModel.traverse(child => {
@@ -762,6 +767,7 @@ export default class GridUI3D extends GridUI {
       box.getSize(size);
 
       this.fruitModelGold.scale.setScalar(0.8 / size.x);
+      this.fruitModelGold.userData.baseScale = 0.8 / size.x;
       this.fruitModelGold.rotation.x = Math.PI / 2;
 
       this.fruitModelGold.traverse(child => {
@@ -798,7 +804,21 @@ export default class GridUI3D extends GridUI {
       }
 
       fruitModel.visible = true;
+
+      const prevX = fruitModel.position.x;
+      const prevY = fruitModel.position.y;
+
       fruitModel.position.set(xPosition, yPosition, 0.5);
+
+      const positionChanged = prevX !== xPosition || prevY !== yPosition;
+
+      if(positionChanged) {
+        fruitModel.userData.spawnAnim = {
+          progress: 0,
+          duration: 0.7,
+          startTime: performance.now()
+        };
+      }
 
       if(isGoldFruit) {
         this.hasGoldFruit = true;
@@ -807,6 +827,53 @@ export default class GridUI3D extends GridUI {
         this.fruitsWorldList.push(new THREE.Vector3(xPosition, yPosition, 0.5));
       }
     }
+  }
+
+  springEase(t) {
+    const c1 = 1.15;
+    const c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  }
+
+  animateFruits() {
+    const t = performance.now() / 1000;
+
+    [
+      { model: this.fruitModel, light: this.fruitPointLight, speed: 1.5, bobFreq: 2.5 },
+      { model: this.fruitModelGold, light: this.fruitGoldPointLight, speed: 2.0, bobFreq: 2.5 }
+    ].forEach(({ model, light, speed, bobFreq }) => {
+      if(!model?.visible) return;
+
+      const baseScale = model.userData.baseScale ?? 1.0;
+
+      const anim = model.userData.spawnAnim;
+      let spawnScale = 1.0;
+
+      if(anim) {
+        const elapsed = (performance.now() - anim.startTime) / 1000;
+        const p = Math.min(elapsed / anim.duration, 1);
+        spawnScale = this.springEase(p);
+
+        if(p >= 1) {
+          model.userData.spawnAnim = null;
+        }
+      }
+
+      const bobRaw = Math.sin(t * bobFreq);
+      const bob = bobRaw > 0 
+        ? Math.pow(bobRaw, 0.7) * 0.3
+        : -Math.pow(-bobRaw, 1.4) * 0.08;
+      model.position.z = 0.5 + bob;
+
+      model.rotation.y = t * speed;
+
+      const breathe = 1 + Math.sin(t * bobFreq * 2) * 0.02;
+      model.scale.setScalar(baseScale * spawnScale * breathe);
+
+      if(light?.visible) {
+        light.intensity = 0.8 + Math.sin(t * 3) * 0.2;
+      }
+    });
   }
 
   /**
@@ -1032,7 +1099,7 @@ export default class GridUI3D extends GridUI {
 
     const position3D = this.gridPositionTo3DPosition(position);
 
-    const isTurning = this.shouldDisplayAnimation(snake, snakePart)
+    const isTurning = this.shouldDisplaySnakeAnimation(snake, snakePart)
       && this.isSnakePartTurning(snake, snakePart);
 
     const margin = this.getSnakeMargin(currentDirection, nextDirection, type, isTurning, animationPercentage);
@@ -1114,7 +1181,7 @@ export default class GridUI3D extends GridUI {
     const graphicDirection = this.getSnakePartGraphicDirection(snakePart, snake);
 
     if((snakePart == 0 || snakePart == -1) && this.isAngleDirection(graphicDirection)
-      && this.shouldDisplayAnimation(snake, snakePart)) {
+      && this.shouldDisplaySnakeAnimation(snake, snakePart)) {
       const animationAngle = this.calculateAnimationAngle(
         snakePart,
         animationPercentage,
@@ -1880,7 +1947,7 @@ export default class GridUI3D extends GridUI {
     const headPosWorld = headMesh.getWorldPosition(new THREE.Vector3());
 
     const MAX_DIST   = 6;
-    const MAX_OFFSET = 0.045;
+    const MAX_OFFSET = 0.04;
     const LERP_ANGLE = this.disableAnimation ? 1 : 0.12;
     const GOLD_DELTA = 1.0;
 
@@ -1930,7 +1997,7 @@ export default class GridUI3D extends GridUI {
 
       const fromBase = pupils[i].position.clone().sub(base);
       fromBase.z = 0;
-      const currentRadius = fromBase.length();
+      const currentRadius = Math.min(fromBase.length(), MAX_OFFSET);
       const currentAngle = currentRadius > 1e-6
         ? Math.atan2(fromBase.y, fromBase.x)
         : 0;
@@ -1961,7 +2028,10 @@ export default class GridUI3D extends GridUI {
       while(delta < -Math.PI) delta += 2 * Math.PI;
       const newAngle = currentAngle + delta * LERP_ANGLE;
 
-      const newRadius = currentRadius + (MAX_OFFSET - currentRadius) * LERP_ANGLE;
+      const newRadius = Math.min(
+        currentRadius + (MAX_OFFSET - currentRadius) * LERP_ANGLE,
+        MAX_OFFSET
+      );
 
       const pos = base.clone().add(
         new THREE.Vector3(Math.cos(newAngle) * newRadius, Math.sin(newAngle) * newRadius, 0)
@@ -2182,7 +2252,7 @@ export default class GridUI3D extends GridUI {
     this.renderer = null;
   }
 
-  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode) {
-    super.set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode);
+  set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode, paused) {
+    super.set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode, paused);
   }
 }
