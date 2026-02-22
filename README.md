@@ -28,8 +28,8 @@ Other AI modes include:
 
 ## About this game
 
-* Version: 3.0.1
-* Version date: 10/7/2025
+* Version: 3.1.0
+* Version date: 02/22/2026
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -48,6 +48,17 @@ Other AI modes include:
 * Uses a 3D model of an apple created by [bariacg](https://sketchfab.com/bariacg), available on [Sketchfab website](https://sketchfab.com/3d-models/apple-8cc60d44baec49558156ac767839c2ed), licensed under [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## Changelog
+
+* Version 3.1.0 (02/22/2026):
+  - 3D rendering engine improvements:
+    - The "Pixel" graphic skin is now properly handled and the rendering is adjusted when selected;
+    - Fruits are now animated and have a glow around them;
+    - Snake eyes are now animated and look toward the nearest fruit (with a preference for gold fruits);
+    - New lighter anti-aliasing methods have been implemented: FXAA and SMAA, used instead of MSAA
+      for the lowest graphic presets. This improves performance;
+    - Shadow quality now only has two settings: Low and High;
+  - Fixed a bug with AI Assistant mode: sometimes the AI would not take over;
+  - Updated dependencies.
 
 * Version 3.0.1 (10/7/2025) :
   - Fixed bugs with the 3D rendering engine during online gameplay.
@@ -289,8 +300,8 @@ Les autres modes d’IA sont :
 
 ## À propos du jeu
 
-* Version du jeu : 3.0.1
-* Date de version : 07/10/2025
+* Version du jeu : 3.1.0
+* Date de version : 22/02/2026
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -309,6 +320,17 @@ Les autres modes d’IA sont :
 * Utilise un modèle 3D de pomme réalisé par [bariacg](https://sketchfab.com/bariacg) et disponible sur le [site Sketchfab](https://sketchfab.com/3d-models/apple-8cc60d44baec49558156ac767839c2ed), sous [licence Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## Journal des changements
+
+* Version 3.1.0 (22/02/2026) :
+  - Améliorations du moteur de rendu 3D :
+    - Le skin graphique "Pixel" est désormais pris en compte et le rendu graphique est modifié s'il est sélectioné ;
+    - Les pommes sont désormais animées et ont une lueur autour d'eux ;
+    - Les yeux des Snake sont désormais animés, et regardent la pomme la plus proche (avec une préférence pour les pommes en or) ;
+    - De nouvelles méthodes d'anti-aliasing plus légères ont été implémentées : FXAA et SMAA, qui sont utilisées à la place de MSAA pour les préréglages graphiques les plus faibles.
+      Cela améliore les performances ;
+    - Il n'y a plus que deux réglages de qualité d'ombres : Faible et Elevé ;
+  - Correction d'un bug avec le mode Assistant IA : parfois, l'IA n'intervenait pas ;
+  - Mise à jour des dépendances.
 
 * Version 3.0.1 (07/10/2025) :
   - Correction de bugs avec le moteur de rendu 3D lors d'une partie en mode de jeu ligne.
