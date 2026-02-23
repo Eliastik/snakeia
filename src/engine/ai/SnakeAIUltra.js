@@ -294,6 +294,12 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   ai(snake) {
+    if(this.enableTrainingMode && snake._precomputedAction !== undefined) {
+      const action = snake._precomputedAction;
+      delete snake._precomputedAction;
+      return this.actionToKey(snake, action);
+    }
+
     let action = null;
 
     if(this.trainingRng() < this.epsilon && this.enableTrainingMode && !this.enableNoisyNetwork) {
@@ -330,6 +336,53 @@ export default class SnakeAIUltra extends SnakeAI {
 
       return maxIndex;
     });
+  }
+
+  aiBatch(snakes) {
+    if(this.enableTrainingMode) {
+      this.resetNoisyLayers();
+    }
+
+    const actions = new Array(snakes.length);
+    const snakesForInference = [];
+    const inferenceIndices = [];
+
+    for(let i = 0; i < snakes.length; i++) {
+      if(this.trainingRng() < this.epsilon && this.enableTrainingMode && !this.enableNoisyNetwork) {
+        actions[i] = this.getRandomAction();
+      } else {
+        snakesForInference.push(snakes[i]);
+        inferenceIndices.push(i);
+      }
+    }
+
+    if(snakesForInference.length > 0) {
+      const stateTensors = snakesForInference.map(snake =>
+        this.stateToTensor(this.getState(snake))
+      );
+
+      try {
+        const batchResults = tf.tidy(() => {
+          const batch = tf.stack(stateTensors);
+          const qValuesBatch = this.mainModel.predict(batch);
+          const qValuesArray = qValuesBatch.arraySync();
+
+          return qValuesArray.map((qValues) => {
+            const { maxValue, maxIndex } = GameUtils.fastArgMax(qValues);
+            if(this.summaryWriter) this.currentQValue = maxValue;
+            return maxIndex;
+          });
+        });
+
+        inferenceIndices.forEach((originalIndex, i) => {
+          actions[originalIndex] = batchResults[i];
+        });
+      } finally {
+        stateTensors.forEach(t => t.dispose());
+      }
+    }
+
+    return actions;
   }
 
   actionToKey(snake, actionIndex) {
@@ -462,6 +515,8 @@ export default class SnakeAIUltra extends SnakeAI {
 
     const batch = this.loadBatches();
 
+    if(!batch.samples || batch.samples.length === 0) return;
+
     const { inputs, targets, meanTDError } = tf.tidy(() => {
       const nextStates = tf.stack(batch.samples.map(({ nextState }) => this.stateToTensor(nextState)));
       const states = tf.stack(batch.samples.map(({ state }) => this.stateToTensor(state)));
@@ -491,6 +546,8 @@ export default class SnakeAIUltra extends SnakeAI {
 
       const updatedQValues = qValues.mul(tf.scalar(1).sub(actionMask)).add(actionMask.mul(targetQs.expandDims(1)));
 
+      qValues.dispose();
+
       return { inputs: states, targets: updatedQValues, meanTDError };
     });
 
@@ -505,6 +562,7 @@ export default class SnakeAIUltra extends SnakeAI {
     // Cleanup tensors
     inputs.dispose();
     targets.dispose();
+    meanTDError.dispose();
 
     if(this.stepsSinceLastSync >= this.syncTargetEvery) {
       this.synchronizeTargetNetwork();
@@ -571,11 +629,11 @@ export default class SnakeAIUltra extends SnakeAI {
     return GameConstants.AIRewards.MOVE;
   }
 
-  async step(snake, currentState, done) {
+  step(snake, currentState, done, action = null) {
     const nextState = this.getState(snake);
     const reward = this.calculateReward(snake, currentState, done);
 
-    this.remember(currentState, this.lastAction, reward, nextState, done);
+    this.remember(currentState, action ?? this.lastAction, reward, nextState, done);
   }
 
   changeEnvironment(envId) {
