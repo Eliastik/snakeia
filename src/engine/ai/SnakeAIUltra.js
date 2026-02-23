@@ -562,7 +562,6 @@ export default class SnakeAIUltra extends SnakeAI {
     // Cleanup tensors
     inputs.dispose();
     targets.dispose();
-    meanTDError.dispose();
 
     if(this.stepsSinceLastSync >= this.syncTargetEvery) {
       this.synchronizeTargetNetwork();
