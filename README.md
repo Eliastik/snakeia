@@ -547,11 +547,30 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 
 ## TO-DO list
 
-### Prochaine version (3.1 ?)
+### Prochaines versions
 
-- [ ] Finaliser l'entraînement de l'IA Deep-Q-Learning
-- [ ] Ajouter plus d'effets visuels à la version 3D
-- [ ] Opti l'anti aliasing sur la version 3D (anti aliasing post processing plutôt que MSAA ? Pour que ce soit plus fluide sur les appareils faibles)
+- [ ] Finaliser l'entraînement de l'IA Deep-Q-Learning : optimisation mémoire et perfs pour faire fonctionner les plus gros environnements + sûrement d'autres trucs
+- [ ] Améliorer l'adaptation aux appareils mobiles :
+  - [ ] Rendu graphique : appliquer la bonne résolution (aujourd'hui c'est flou à cause de l'échelle de résolution sur mobile - voir : https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio)
+  - [ ] Plein écran auto au lancement d'une partie ? (uniquement sur mobile !)
+  - [ ] Ajouter information concernant : il est possible de déplacer le Snake en faisant glisser le doigt sur l'écran vers la direction souhaitée (ne l'afficher que sur mobile)
+    - [ ] Voir s'il faut ajouter le même type d'info sur desktop (possibilité de bouger avec les flèches ou z/q/s/d...)
+    - A afficher sur l'écran de chargement de partie + compteur avant partie (+ peut être menu pause ?)
+- [ ] Ajouter pomme en argent (+2 score) ?
+- [ ] Autres effets graphiques à ajouter à la version 3D ? (idées)
+  - [ ] Effet normal map d'écailles sur les Snakes
+  - [ ] Améliorer l'animation de mort des Snakes (avec particules ?)
+  - [ ] Effet "tilt shift" ?
+  - [ ] Meilleures textures que le damier gris ? (idée : plusieurs environnements type plaine avec herbe, banquise avec glace, désert etc...)
+  - [ ] Afficher une couronne animée au Snake qui lead la partie ?
+  - [ ] Animation quand un Snake mange une pomme ?
+
+### Prochaine version (3.1)
+
+- [x] Ajouter plus d'effets visuels à la version 3D
+  - [x] Animation yeux Snakes
+  - [x] Animation pommes
+- [x] Opti l'anti aliasing sur la version 3D (anti aliasing post processing plutôt que MSAA ? Pour que ce soit plus fluide sur les appareils faibles)
 
 ### Prochaine version (3.0)
 
