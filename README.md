@@ -259,6 +259,10 @@ SnakeIA contains some unit tests. To execute them, launch the command `npm run t
 
 The Ultra AI mode is powered by a Deep Q-Learning algorithm, trained on multiple games using TensorFlow.js.
 
+Training AI requires a powerful machine with a dedicated graphics card (it is possible to run the training without a graphics card, but it will be very slow).
+
+Training AI needs NodeJS 22 (higher versions doesn't work yet).
+
 To train the AI, first install the dependencies:
 
 ````
@@ -272,6 +276,17 @@ npm run train-ai
 ```
 
 You can customize the training settings in the train-ai.mjs script.
+
+### Troubleshooting during training:
+
+- If you encounter an error similar to the following: TypeError: (0, util_1.isNullOrUndefined) is not a function
+  This may be because you are using a version of NodeJS that is too recent. The version of Tensorflow.js used is not compatible with versions of NodeJS higher than 22 (only for the training part).
+- You may encounter memory issues when training AI on very large grids.
+  To avoid this, you can force NodeJS to allocate more memory by launching the training as follows:
+  ```
+  node --max-old-space-size=16384 train-ai.mjs
+  ```
+  Customize the pre-allocated memory value (here 16384 for 16 GB of RAM).
 
 # Français
 
@@ -531,6 +546,10 @@ SnakeIA contient quelques tests unitaires. Pour les exécuter, lancer la command
 
 Le mode IA Ultra fonctionne avec un algorithme de Deep Q-Learning, entraîné sur de nombreuses parties grâce à TensorFlow.js.
 
+L'entrainement de l'IA nécessite une machine puissante avec une carte graphique dédiée (il est possible de lancer l'entrainement sans carte graphique, mais il sera très lent).
+
+L'entrainement nécessite NodeJS 22 (les versions supérieures ne sont pas encore compatibles).
+
 Pour entraîner l’IA, commencez par installer les dépendances :
 
 ```
@@ -544,6 +563,17 @@ npm run train-ai
 ```
 
 Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train-ai.mjs`.
+
+### Résolution de problèmes lors de l'entrainement :
+
+- Si vous rencontrez une erreur similaire à l'erreur suivante : TypeError: (0 , util_1.isNullOrUndefined) is not a function
+  C'est possiblement car vous utilisez une version de NodeJS trop récente. La version de Tensorflow.js utilisée n'est pas compatible avec les versions des NodeJS supérieures à 22 (uniquement pour la partie entrainement)
+- Il est possible que vous rencontrez des problèmes de mémoire lors de l'entrainement de l'IA sur de très grandes grilles
+  Pour les éviter, vous pouvez forcer NodeJS à allouer plus de mémoire en lançant l'entrainement comme suit :
+  ```
+  node --max-old-space-size=16384 train-ai.mjs
+  ```
+  Personnalisez la valeur de mémoire pré-allouée (ici 16384 pour 16 Go de RAM)
 
 ## TO-DO list
 
