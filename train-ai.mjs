@@ -17,9 +17,9 @@ const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE"];
-const NUM_EPISODES_PER_TYPE     = 2000;
+const NUM_EPISODES_PER_TYPE     = 10;
 const MAX_EPISODES              = "auto"; // number OR "auto"
-const TRAIN_EVERY               = 30;     // Increased from 15 - less train() calls, bigger batches
+const TRAIN_EVERY               = 30;
 const MAX_TICKS                 = 1000;
 const INITAL_GRID_WIDTH         = 20;
 const INITAL_GRID_HEIGHT        = 20;
@@ -41,7 +41,14 @@ const NUM_PARALLEL_ENVS         = 4;
 
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
 
-const multiBar = new cliProgress.MultiBar({
+class MultiBarCustom extends cliProgress.MultiBar {
+  log(text) {
+    super.log(`[${new Date().toISOString()}] ${text}`);
+    this.update();
+  }
+}
+
+const multiBar = new MultiBarCustom({
   format: "Training |{bar}| {percentage}% | ETA: {eta_formatted} | Elapsed time: {duration_formatted} | Episode {value}/{total}",
   hideCursor: false,
   barCompleteChar: "\u2588",
@@ -243,33 +250,42 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
   return { currentTotalReward, currentTotalScore };
 }
 
-async function saveModel(fullPath) {
+async function saveModel(fullPath, isFinal = false) {
   multiBar.log(`Saving model to ${fullPath}...\n`);
-  multiBar.update();
+
   theSnakeAI.synchronizeTargetNetwork();
+
+  if(theSnakeAI.targetModel) {
+    theSnakeAI.targetModel.dispose();
+    theSnakeAI.targetModel = null;
+  }
+
   await theSnakeAI.mainModel.save(`file://${fullPath}`);
+
+  if(theSnakeAI.enableTargetModel && !isFinal) {
+    theSnakeAI.targetModel = theSnakeAI.createModel();
+    theSnakeAI.targetModel.setWeights(theSnakeAI.mainModel.getWeights());
+  }
+
   multiBar.log(`Model saved to ${fullPath} directory\n`);
-  multiBar.update();
 }
 
 function saveMetadata(fullPath) {
   const metadataJSON = JSON.stringify(theSnakeAI.exportMetadata(), null, 0);
   fs.writeFileSync(`${fullPath}/metadata.json`, metadataJSON);
   multiBar.log(`Metadata saved to ${fullPath} directory\n`);
-  multiBar.update();
 }
 
 function saveMemory(fullPath) {
   const checkpointJSON = JSON.stringify(theSnakeAI.exportMemory(), null, 0);
   fs.writeFileSync(`${fullPath}/memory.json`, checkpointJSON);
   multiBar.log(`Memory saved to ${fullPath} directory\n`);
-  multiBar.update();
 }
 
-async function saveState(subDirectory = "") {
+async function saveState(isFinal = false, subDirectory = "") {
   const fullPath = `${MODEL_SAVE_DIRECTORY}/${subDirectory}`;
   fs.mkdirSync(fullPath, { recursive: true });
-  await saveModel(fullPath);
+  await saveModel(fullPath, isFinal);
   saveMetadata(fullPath);
   if(EXPORT_MEMORY) saveMemory(fullPath);
 }
@@ -320,14 +336,13 @@ async function train() {
       `Average reward: ${currentEpisodeTypeReward / currentMaxEpisodes} - ` +
       `Time: ${performance.now() - startTime} ms\n`
     );
-    multiBar.update();
 
     // Reset epsilon for next episode type
     theSnakeAI.epsilonMax = 0.75;
     theSnakeAI.epsilon = 0.75;
 
     if(SAVE_CHECKPOINT_MODELS && currentEpisodeNumber <= currentMaxEpisodes) {
-      await saveState(theSnakeAI.currentEnv);
+      await saveState(false, theSnakeAI.currentEnv);
     }
 
     currentEpisodeType = getNextEpisodeType(currentEpisodeType);
@@ -344,9 +359,8 @@ multiBar.log(
   `Average reward: ${totalReward / currentMaxEpisodes} - ` +
   `Time: ${performance.now() - trainStartTime} ms\n`
 );
-multiBar.update();
 
-await saveState();
+await saveState(true);
 
 progressBar.stop();
 multiBar.stop();

@@ -580,6 +580,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 ### Prochaines versions
 
 - [ ] Finaliser l'entraînement de l'IA Deep-Q-Learning : optimisation mémoire et perfs pour faire fonctionner les plus gros environnements + sûrement d'autres trucs
+- [x] Corriger memory leak ThreeJS
 - [ ] Améliorer l'adaptation aux appareils mobiles :
   - [ ] Rendu graphique : appliquer la bonne résolution (aujourd'hui c'est flou à cause de l'échelle de résolution sur mobile - voir : https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio)
   - [ ] Plein écran auto au lancement d'une partie ? (uniquement sur mobile !)
@@ -668,7 +669,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 
 ## Déclaration de licence
 
-Copyright (C) 2019-2025 Eliastik (eliastiksofts.com)
+Copyright (C) 2019-2026 Eliastik (eliastiksofts.com)
 
 Ce programme est un logiciel libre ; vous pouvez le redistribuer ou le modifier suivant les termes de la GNU General Public License telle que publiée par la Free Software Foundation ; soit la version 3 de la licence, soit (à votre gré) toute version ultérieure.
 
@@ -678,7 +679,7 @@ Vous devez avoir reçu une copie de la GNU General Public License en même temps
 
 ----
 
-Copyright (C) 2019-2025 Eliastik (eliastiksofts.com)
+Copyright (C) 2019-2026 Eliastik (eliastiksofts.com)
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

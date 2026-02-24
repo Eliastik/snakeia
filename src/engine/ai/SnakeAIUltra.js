@@ -578,6 +578,8 @@ export default class SnakeAIUltra extends SnakeAI {
 
   synchronizeTargetNetwork() {
     if(this.enableTargetModel) {
+      this.logger.info("Synchronizing target network...\n");
+
       this.targetModel.setWeights(this.mainModel.getWeights());
 
       this.logger.info("Target network synchronized!\n");

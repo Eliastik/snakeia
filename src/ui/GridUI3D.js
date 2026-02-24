@@ -1607,8 +1607,11 @@ export default class GridUI3D extends GridUI {
       for(const k in this.transitionSegmentGeometryCache) {
         const segment = this.transitionSegmentGeometryCache[k];
 
-        if(segment && segment.dispose) {
-          segment.dispose();
+        if(segment?.isLShape) {
+          segment.geoH?.dispose();
+          segment.geoV?.dispose();
+        } else {
+          segment?.dispose();
         }
       }
     }
@@ -1896,6 +1899,7 @@ export default class GridUI3D extends GridUI {
         if(segment) {
           segment.straight?.dispose();
           segment.curve?.dispose();
+          segment.curve2?.dispose();
         }
       }
     }
@@ -2260,51 +2264,57 @@ export default class GridUI3D extends GridUI {
   }
 
   cleanAfterGameExit() {
+    this.disposeScene();
+    this.disposeLights();
+    this.disposeCameras();
+    this.disposePostProcessing();
+    this.disposeTextures();
+    this.disposeSnakes();
+
+    this.controls?.dispose();
+    this.controls = null;
+
+    this.modelLoader?.clearAll();
+    this.modelLoader = null;
+
+    this.renderer?.dispose();
+    this.renderer?.forceContextLoss();
+    this.renderer?.domElement?.remove();
+    this.renderer = null;
+  }
+
+  disposeScene() {
     if(this.scene) {
       this.disposeGroup(this.gridGroup);
       this.disposeGroup(this.snakesGroup);
       this.disposeGroup(this.fruitsGroup);
-
-      this.resetSnakeSegmentCache();
-      this.resetSnakeTransitionCache();
-
-      this.fruitModel?.clear();
-      this.fruitModelGold?.clear();
-      this.fruitPointLight?.clear();
-      this.fruitGoldPointLight?.clear();
-      this.fruitHalo?.clear();
-      this.fruitGoldHalo?.clear();
-
-      this.fruitModel?.userData?.halo?.material?.dispose();
-      this.fruitModelGold?.userData?.halo?.material?.dispose();
-      this.haloTexture?.dispose();
-      this.haloTexture = null;
 
       this.scene.remove(this.gridGroup, this.snakesGroup, this.fruitsGroup);
 
       this.gridGroup?.clear();
       this.snakesGroup?.clear();
       this.fruitsGroup?.clear();
+
+      this.scene?.clear();
+      this.scene = null;
+    }
+  }
+
+  disposeLights() {
+    for(const light of ["ambientLight", "dirLight"]) {
+      this[light]?.dispose();
+      this[light]?.clear();
+      this[light] = null;
     }
 
-    this.snakesMeshes = [];
+    for(const helper of ["lightHelper", "cameraHelper"]) {
+      this[helper]?.dispose();
+      this[helper]?.clear();
+      this[helper] = null;
+    }
+  }
 
-    this.ambientLight?.dispose();
-    this.ambientLight?.clear();
-    this.ambientLight = null;
-
-    this.lightHelper?.dispose();
-    this.lightHelper?.clear();
-    this.lightHelper = null;
-
-    this.dirLight?.dispose();
-    this.dirLight?.clear();
-    this.dirLight = null;
-
-    this.cameraHelper?.dispose();
-    this.cameraHelper?.clear();
-    this.cameraHelper = null;
-
+  disposeCameras() {
     this.camera?.clear();
     this.camera = null;
 
@@ -2313,18 +2323,34 @@ export default class GridUI3D extends GridUI {
 
     this.cubeRenderTarget?.dispose();
     this.cubeRenderTarget = null;
+  }
 
-    this.controls?.dispose();
-    this.controls = null;
+  disposePostProcessing() {
+    for(const pass of ["composer", "renderPass", "fxaaPass", "smaaPass", "outputPass"]) {
+      this[pass]?.dispose();
+      this[pass] = null;
+    }
+  }
 
-    this.scene?.clear();
-    this.scene = null;
+  disposeTextures() {
+    for(const tex of ["wallTexture", "wallTextureNormal", "wallTextureHeight", "wallTextureAO", "haloTexture"]) {
+      this[tex]?.dispose();
+      this[tex] = null;
+    }
 
-    this.modelLoader?.clearAll();
-    this.modelLoader = null;
+    this.fruitModel?.userData?.halo?.material?.dispose();
+    this.fruitModelGold?.userData?.halo?.material?.dispose();
 
-    this.renderer?.dispose();
-    this.renderer = null;
+    for(const obj of ["fruitModel", "fruitModelGold", "fruitPointLight", "fruitGoldPointLight", "fruitHalo", "fruitGoldHalo"]) {
+      this[obj]?.clear();
+      this[obj] = null;
+    }
+  }
+
+  disposeSnakes() {
+    this.resetSnakeSegmentCache();
+    this.resetSnakeTransitionCache();
+    this.snakesMeshes = [];
   }
 
   set(snakes, grid, speed, offsetFrame, headerHeight, imageLoader, modelLoader, currentPlayer, gameFinished, countBeforePlay, spectatorMode, ticks, gameOver, onlineMode, paused) {
