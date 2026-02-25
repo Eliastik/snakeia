@@ -99,6 +99,7 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Feed the input with N previous frames?
     // - Distributional RL - Categorical DQN - Multi step learning?
     // - Reproducible training with seed: some fixes needed?
+    // - Always keep the grid "UP"
   }
 
   async setup(summaryWriter) {
@@ -197,6 +198,7 @@ export default class SnakeAIUltra extends SnakeAI {
       dtype: this.dtype
     }).apply(conv1);
   
+    // TODO always globalAveragePooling2d?
     const flattenOrPooling = this.enableVariableInputSize ?
       tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true, dtype: this.dtype }).apply(conv2) :
       tf.layers.flatten({ dtype: this.dtype }).apply(conv2);
@@ -470,28 +472,44 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   stateToTensor(stateArray) {
-    const inputHeight = stateArray.snakesLayer.length;
-    const inputWidth = stateArray.snakesLayer[0].length;
+    // Memory already stored as FLoat32Array format
+    if(stateArray && stateArray.data instanceof Float32Array) {
+      return tf.tensor(stateArray.data, [stateArray.height, stateArray.width, stateArray.channels], this.dtype);
+    }
+
+    // Old memory format (directly from getState)
+    const { data, width: targetWidth, height: targetHeight, channels } = this.stateToFlatArray(stateArray);
+
+    return tf.tensor(data, [targetHeight, targetWidth, channels], this.dtype);
+  }
+
+  stateToFlatArray(stateArray) {
+    const firstChannel = stateArray[Object.keys(stateArray)[0]];
+    
+    const inputHeight = firstChannel.length;
+    const inputWidth = firstChannel[0].length;
 
     const targetHeight = this.enableVariableInputSize ? inputHeight : this.modelHeight;
     const targetWidth = this.enableVariableInputSize ? inputWidth : this.modelWidth;
 
-    const channels = 2;
+    const layers = Object.values(stateArray).filter(v => Array.isArray(v));
+    const channels = layers.length;
+
     const padValue = -1;
     const data = new Float32Array(targetHeight * targetWidth * channels);
 
     for(let y = 0; y < targetHeight; y++) {
       for(let x = 0; x < targetWidth; x++) {
         const index = (y * targetWidth + x) * channels;
-
         const isInside = y < inputHeight && x < inputWidth;
 
-        data[index]     = isInside ? stateArray.snakesLayer[y][x] : padValue;
-        data[index + 1] = isInside ? stateArray.fruitsAndWallsLayer[y][x] : padValue;
+        for(let c = 0; c < channels; c++) {
+          data[index + c] = isInside ? layers[c][y][x] : padValue;
+        }
       }
     }
 
-    return tf.tensor(data, [targetHeight, targetWidth, channels], this.dtype);
+    return { data, width: targetWidth, height: targetHeight, channels };
   }
 
   findPositionInState(stateArray, targetValue) {
@@ -507,7 +525,10 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   remember(state, action, reward, nextState, done) {
-    this.memory.add(state, action, reward, nextState, done);
+    const stateFlat = this.stateToFlatArray(state);
+    const nextStateFlat = this.stateToFlatArray(nextState);
+
+    this.memory.add(stateFlat, action, reward, nextStateFlat, done);
   }
 
   async train() {
@@ -543,8 +564,9 @@ export default class SnakeAIUltra extends SnakeAI {
       tdErrors.dataSync().forEach((error, index) => {
         this.memory.updatePriority(batch.indices[index], error, batch.envAssignments ? batch.envAssignments[index] : null);
       });
-
-      const updatedQValues = qValues.mul(tf.scalar(1).sub(actionMask)).add(actionMask.mul(targetQs.expandDims(1)));
+      
+      const one = tf.scalar(1);
+      const updatedQValues = qValues.mul(one.sub(actionMask)).add(actionMask.mul(targetQs.expandDims(1)));
 
       qValues.dispose();
 
