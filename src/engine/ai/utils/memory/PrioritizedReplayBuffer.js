@@ -162,6 +162,9 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
     this.capacity = memory.capacity;
     this.calculateWeight = memory.calculateWeight;
     this.alpha = memory.alpha;
+    this.beta = memory.beta;
+    this.espilon = memory.espilon;
+    this.betaIncrementPerSampling = memory.betaIncrementPerSampling;
 
     this.sumTree.deserializeFromJSON(memory.sumtree);
   }
