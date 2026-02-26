@@ -4,6 +4,7 @@ import Snake from "./src/engine/Snake.js";
 import GameEngine from "./src/engine/GameEngine.js";
 import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 import cliProgress from "cli-progress";
+import { encode, decode } from "@msgpack/msgpack";
 import fs from "fs";
 import process from "process";
 
@@ -20,7 +21,7 @@ const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
 const NUM_EPISODES_PER_TYPE     = 10;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 30;
-const MAX_TICKS                 = 1000;
+const MAX_TICKS                 = 10000;
 const INITAL_GRID_WIDTH         = 5;
 const INITAL_GRID_HEIGHT        = 5;
 const GRID_INCREASE_INCREMENT   = 5;
@@ -64,7 +65,16 @@ const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, TRAINING_SEED, {
   warn: (text) => multiBar.log(`[WARNING] ${text}`),
   error: (text) => multiBar.log(`[ERROR] ${text}`)
 }, {
-  readJSON: async (location) => JSON.parse(fs.readFileSync(location, "utf-8"))
+  readJSON: async (location) => {
+    const binPath = location.replace(".json", ".bin");
+
+    if(fs.existsSync(binPath)) {
+      const buffer = fs.readFileSync(binPath);
+      return decode(buffer);
+    }
+
+    return JSON.parse(fs.readFileSync(location, "utf-8"));
+  }
 });
 
 const currentMaxEpisodes = getMaxEpisodesCount();
@@ -271,22 +281,34 @@ async function saveModel(fullPath, isFinal = false) {
 }
 
 function saveMetadata(fullPath) {
+  multiBar.log(`Saving metadata to ${fullPath} directory...\n`);
+
   const metadataJSON = JSON.stringify(theSnakeAI.exportMetadata(), null, 0);
   fs.writeFileSync(`${fullPath}/metadata.json`, metadataJSON);
+
   multiBar.log(`Metadata saved to ${fullPath} directory\n`);
 }
 
 function saveMemory(fullPath) {
-  const checkpointJSON = JSON.stringify(theSnakeAI.exportMemory(), null, 0);
-  fs.writeFileSync(`${fullPath}/memory.json`, checkpointJSON);
+  multiBar.log(`Saving memory to ${fullPath} directory...\n`);
+
+  const exportedMemory = theSnakeAI.exportMemory();
+  const encodedMemory = encode(exportedMemory);
+  
+  fs.writeFileSync(`${fullPath}/memory.bin`, encodedMemory);
+
   multiBar.log(`Memory saved to ${fullPath} directory\n`);
 }
 
 async function saveState(isFinal = false, subDirectory = "") {
   const fullPath = `${MODEL_SAVE_DIRECTORY}/${subDirectory}`;
+
   fs.mkdirSync(fullPath, { recursive: true });
+
   await saveModel(fullPath, isFinal);
+
   saveMetadata(fullPath);
+
   if(EXPORT_MEMORY) saveMemory(fullPath);
 }
 
