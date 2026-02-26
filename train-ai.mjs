@@ -289,14 +289,30 @@ function saveMetadata(fullPath) {
   multiBar.log(`Metadata saved to ${fullPath} directory\n`);
 }
 
-function saveMemory(fullPath) {
+async function saveMemory(fullPath) {
   multiBar.log(`Saving memory to ${fullPath} directory...\n`);
 
   const exportedMemory = theSnakeAI.exportMemory();
   const encodedMemory = encode(exportedMemory);
-  
-  fs.writeFileSync(`${fullPath}/memory.bin`, encodedMemory);
 
+  const stream = fs.createWriteStream(`${fullPath}/memory.bin`);
+
+  const CHUNK_SIZE = 1024 * 1024;
+
+  for(let i = 0; i < encodedMemory.length; i += CHUNK_SIZE) {
+    const chunk = encodedMemory.slice(i, i + CHUNK_SIZE);
+
+    if(!stream.write(chunk)) {
+      await new Promise(res => stream.once("drain", res));
+    }
+  }
+
+  await new Promise((resolve, reject) => {
+    stream.end();
+    stream.on("finish", resolve);
+    stream.on("error", reject);
+  });
+  
   multiBar.log(`Memory saved to ${fullPath} directory\n`);
 }
 
@@ -309,7 +325,7 @@ async function saveState(isFinal = false, subDirectory = "") {
 
   saveMetadata(fullPath);
 
-  if(EXPORT_MEMORY) saveMemory(fullPath);
+  if(EXPORT_MEMORY) await saveMemory(fullPath);
 }
 
 function getNextEpisodeType(currentEpisodeType) {
