@@ -472,9 +472,21 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   stateToTensor(stateArray) {
-    // Memory already stored as FLoat32Array format
-    if(stateArray && stateArray.data instanceof Float32Array) {
-      return tf.tensor(stateArray.data, [stateArray.height, stateArray.width, stateArray.channels], this.dtype);
+    if(stateArray?.data) {
+      let data;
+
+      if(stateArray.data instanceof Float32Array) {
+        // Memory already stored as FLoat32Array format
+        data = stateArray.data;
+      } else if(stateArray && stateArray.data instanceof Uint8Array) {
+        // Memory already stored as Uint8Array format (msgpack)
+        const bytes = stateArray.data;
+        const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+
+        data = new Float32Array(buffer);
+      }
+
+      return tf.tensor(data, [stateArray.height, stateArray.width, stateArray.channels], this.dtype);
     }
 
     // Old memory format (directly from getState)

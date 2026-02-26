@@ -36,7 +36,7 @@ const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = true;
-const LOAD_MODEL_PATH           = "models/2026-02-23T07-26-16-518Z/15x15_DEFAULT";
+const LOAD_MODEL_PATH           = "models/2026-02-26T20-54-08-260Z";
 const NUM_PARALLEL_ENVS         = 4;
 // End of settings
 
