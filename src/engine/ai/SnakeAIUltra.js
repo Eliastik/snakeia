@@ -30,7 +30,7 @@ import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
 export default class SnakeAIUltra extends SnakeAI {
-  constructor(enableTrainingMode, modelLocation, seed, logger, fileReader, loadHyperParametersFromMetadata) {
+  constructor(enableTrainingMode, modelLocation, seed, logger, fileReader, loadHyperParametersFromMetadata, loadMemoryFromSave) {
     super();
 
     this.aiLevelText = "ultra";
@@ -43,6 +43,7 @@ export default class SnakeAIUltra extends SnakeAI {
       readJSON: async (location) => await (await fetch(location)).json()
     };
     this.loadHyperParametersFromMetadata = loadHyperParametersFromMetadata || true;
+    this.loadMemoryFromSave = loadMemoryFromSave || true;
 
     // Models
     this.mainModel = null;
@@ -71,7 +72,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.001;
-    this.batchSize = 128;
+    this.batchSize = 32;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
     this.maxMemoryLength = 30000;
     // END OF SETTINGS
@@ -135,11 +136,48 @@ export default class SnakeAIUltra extends SnakeAI {
       if(this.enableNoisyNetwork) {
         this.resetNoisyLayers();
       }
+
+      this.logModelCharacteristics();
     } else {
       if(this.enableNoisyNetwork) {
         this.clearNoisyLayers();
       }
     }
+  }
+
+  logModelCharacteristics() {
+    if(this.enableDuelingQLearning) {
+      this.logger.info("Dueling DQN enabled\n");
+    } else {
+      this.logger.info("Dueling DQN disabled\n");
+    }
+
+    if(this.enableNoisyNetwork) {
+      this.logger.info("Noisy Network enabled\n");
+    } else {
+      this.logger.info("Noisy Network disabled\n");
+    }
+
+    if(this.enableVariableInputSize) {
+      this.logger.info("Variable input size enabled\n");
+    } else {
+      this.logger.info("Variable input size disabled\n");
+    }
+
+    if(this.enableStateRotation) {
+      this.logger.info("State rotation enabled\n");
+    } else {
+      this.logger.info("State rotation disabled\n");
+    }
+
+    if(this.enableTargetModel) {
+      this.logger.info("Target model enabled\n");
+    } else {
+      this.logger.info("Target model disabled\n");
+    }
+
+    this.logger.info(`Model input shape: [${this.enableVariableInputSize ? "variable" : this.modelHeight}, ${this.enableVariableInputSize ? "variable" : this.modelWidth}, ${this.modelDepth}]\n`);
+    this.logger.info(`Model output (number of possible actions): ${this.numberOfPossibleActions}\n`);
   }
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
@@ -810,6 +848,11 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   async loadMemory(memoryLocation) {
+    if(!this.loadMemoryFromSave) {
+      this.logger.info("Memory loading from file is disabled. Skipping memory loading.\n");
+      return;
+    }
+
     try {
       this.logger.info(`Loading memory from file: ${memoryLocation}\n`);
 
@@ -899,6 +942,8 @@ export default class SnakeAIUltra extends SnakeAI {
           if(typeof config.epsilon === "number") this.epsilon = config.epsilon;
           if(typeof config.learningRate === "number") this.learningRate = config.learningRate;
           if(typeof config.batchSize === "number") this.batchSize = config.batchSize;
+        } else {
+          this.logger.info("Loading hyperparameters from metadata is disabled. Skipping hyperparameters loading.\n");
         }
       }
 
