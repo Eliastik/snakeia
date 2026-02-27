@@ -792,7 +792,7 @@ export default class GridUI3D extends GridUI {
           child.material = this.getMaterial({
             color: fruitGoldColor,
             metalness: enableReflections ? 0.85 : 0.75,
-            roughness: 0.12,
+            roughness: 0.095,
             envMap: enableReflections ? this.cubeRenderTarget.texture : null
           });
         }
