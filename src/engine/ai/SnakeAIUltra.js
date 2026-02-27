@@ -30,7 +30,7 @@ import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
 export default class SnakeAIUltra extends SnakeAI {
-  constructor(enableTrainingMode, modelLocation, seed, logger, fileReader) {
+  constructor(enableTrainingMode, modelLocation, seed, logger, fileReader, loadHyperParametersFromMetadata) {
     super();
 
     this.aiLevelText = "ultra";
@@ -42,35 +42,44 @@ export default class SnakeAIUltra extends SnakeAI {
     this.fileReader = fileReader || {
       readJSON: async (location) => await (await fetch(location)).json()
     };
+    this.loadHyperParametersFromMetadata = loadHyperParametersFromMetadata || true;
 
+    // Models
     this.mainModel = null;
     this.targetModel = null;
 
-    // Model and training settings
+    // SETTINGS
+    // Model settings
     this.modelHeight = 25;
     this.modelWidth = 25;
     this.modelDepth = 2;
-    this.numberOfPossibleActions = 4;
+    this.numberOfPossibleActions = 3;
     this.dtype = "float32";
 
+    // Model features settings
     this.enableTargetModel = true; // Enable Double DQN
     this.enableDuelingQLearning = true; // Enable Dueling DQN
     this.enableNoisyNetwork = true; // Enable Noisy Network for exploration
     /* Enable Variable Input Size for the model (experimental).
        If disabled and the input (grid size) of the game is different than the input size of the model, the input will be padded. */
     this.enableVariableInputSize = false;
-    this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
+    this.enableStateRotation = true; // Rotate the state so that the snake head is always facing "UP"
 
-    this.gamma = 0.95;
+    // Hyperparameters
+    this.gamma = 0.99;
     this.epsilonMax = 1.0; // Not used if Noisy Network is enabled
     this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.001;
-    this.batchSize = 32;
-    this.maxMemoryLength = 100000;
-    // End of model and training settings
+    this.batchSize = 128;
+    this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
+    this.maxMemoryLength = 30000;
+    // END OF SETTINGS
 
+    // Replay memory
     this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger, "prioritized");
+
+    // Training state
     this.currentEnv = null;
     this.lastAction = null;
     this.currentQValue = 0;
@@ -429,6 +438,51 @@ export default class SnakeAIUltra extends SnakeAI {
     throw new Error(`Error: no action was mapped for actionIndex ${actionIndex}`);
   }
 
+  rotateStateLayers(state, direction) {
+    const rotateMatrix = (matrix, times) => {
+      let result = matrix;
+
+      for(let t = 0; t < times; t++) {
+        const h = result.length;
+        const w = result[0].length;
+
+        const rotated = new Array(w).fill(0).map(() => new Array(h).fill(0));
+
+        for(let y = 0; y < h; y++) {
+          for(let x = 0; x < w; x++) {
+            rotated[x][h - y - 1] = result[y][x];
+          }
+        }
+
+        result = rotated;
+      }
+
+      return result;
+    };
+
+    let rotations = 0;
+
+    switch(direction) {
+    case GameConstants.Direction.UP:
+      rotations = 0;
+      break;
+    case GameConstants.Direction.RIGHT:
+      rotations = 3;
+      break;
+    case GameConstants.Direction.BOTTOM:
+      rotations = 2;
+      break;
+    case GameConstants.Direction.LEFT:
+      rotations = 1;
+      break;
+    }
+
+    return {
+      snakesLayer: rotateMatrix(state.snakesLayer, rotations),
+      fruitsAndWallsLayer: rotateMatrix(state.fruitsAndWallsLayer, rotations)
+    };
+  }
+
   getState(snake) {
     const grid = snake.grid;
 
@@ -468,7 +522,15 @@ export default class SnakeAIUltra extends SnakeAI {
       }
     }
 
-    return { snakesLayer, fruitsAndWallsLayer };
+    const state = { snakesLayer, fruitsAndWallsLayer };
+
+    if(!this.enableStateRotation) {
+      return state;
+    }
+
+    const headDirection = snake.getHeadPosition().direction;
+
+    return { ...this.rotateStateLayers(state, headDirection), headDirection };
   }
 
   stateToTensor(stateArray) {
@@ -521,7 +583,7 @@ export default class SnakeAIUltra extends SnakeAI {
       }
     }
 
-    return { data, width: targetWidth, height: targetHeight, channels };
+    return { data, width: targetWidth, height: targetHeight, channels, headDirection: stateArray.headDirection };
   }
 
   findPositionInState(stateArray, targetValue) {
@@ -607,7 +669,15 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   loadBatches() {
-    return this.memory.sample(this.batchSize);
+    const memory = this.memory.sample(this.batchSize);
+
+    if(!this.enableStateRotation) {
+      return memory;
+    }
+
+    memory.samples = memory.samples.filter(sample => sample.state.headDirection !== undefined && sample.nextState.headDirection !== undefined);
+    
+    return memory;
   }
 
   synchronizeTargetNetwork() {
@@ -665,10 +735,10 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   step(snake, currentState, done, action = null) {
-    const nextState = this.getState(snake);
+    const nextStateData = this.getState(snake);
     const reward = this.calculateReward(snake, currentState, done);
 
-    this.remember(currentState, action ?? this.lastAction, reward, nextState, done);
+    this.remember(currentState, action ?? this.lastAction, reward, nextStateData, done);
   }
 
   changeEnvironment(envId) {
@@ -718,7 +788,8 @@ export default class SnakeAIUltra extends SnakeAI {
         epsilonMin: this.epsilonMin,
         epsilon: this.epsilon,
         learningRate: this.learningRate,
-        batchSize: this.batchSize
+        batchSize: this.batchSize,
+        enableStateRotation: this.enableStateRotation
       },
       modelInfo: {
         modelHeight: this.modelHeight,
@@ -811,13 +882,24 @@ export default class SnakeAIUltra extends SnakeAI {
 
         if(typeof config.enableDuelingQLearning === "boolean") this.enableDuelingQLearning = config.enableDuelingQLearning;
         if(typeof config.enableNoisyNetwork === "boolean") this.enableNoisyNetwork = config.enableNoisyNetwork;
-        if(typeof config.syncTargetEvery === "number") this.syncTargetEvery = config.syncTargetEvery;
-        if(typeof config.gamma === "number") this.gamma = config.gamma;
-        if(typeof config.epsilonMax === "number") this.epsilonMax = config.epsilonMax;
-        if(typeof config.epsilonMin === "number") this.epsilonMin = config.epsilonMin;
-        if(typeof config.epsilon === "number") this.epsilon = config.epsilon;
-        if(typeof config.learningRate === "number") this.learningRate = config.learningRate;
-        if(typeof config.batchSize === "number") this.batchSize = config.batchSize;
+
+        if(typeof config.enableStateRotation === "boolean") {
+          this.enableStateRotation = config.enableStateRotation;
+        } else if(typeof config.enableStateRotation === "undefined") {
+          // To stay compatible with old models
+          this.enableStateRotation = false;
+        }
+
+        // Only used in training mode
+        if(this.loadHyperParametersFromMetadata) {
+          if(typeof config.syncTargetEvery === "number") this.syncTargetEvery = config.syncTargetEvery;
+          if(typeof config.gamma === "number") this.gamma = config.gamma;
+          if(typeof config.epsilonMax === "number") this.epsilonMax = config.epsilonMax;
+          if(typeof config.epsilonMin === "number") this.epsilonMin = config.epsilonMin;
+          if(typeof config.epsilon === "number") this.epsilon = config.epsilon;
+          if(typeof config.learningRate === "number") this.learningRate = config.learningRate;
+          if(typeof config.batchSize === "number") this.batchSize = config.batchSize;
+        }
       }
 
       if(metadata.modelInfo) {

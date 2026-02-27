@@ -15,10 +15,10 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
+const EPISODES_TYPES            = ["DEFAULT"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE"];
-const NUM_EPISODES_PER_TYPE     = 10;
+const NUM_EPISODES_PER_TYPE     = 2000;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 30;
 const MAX_TICKS                 = 10000;
@@ -36,8 +36,9 @@ const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = true;
-const LOAD_MODEL_PATH           = "models/2026-02-26T20-54-08-260Z";
-const NUM_PARALLEL_ENVS         = 4;
+const LOAD_MODEL_PATH           = null;
+const LOAD_HYPERPARAMETERS      = false;
+const NUM_PARALLEL_ENVS         = 1;
 // End of settings
 
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
@@ -75,7 +76,7 @@ const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, TRAINING_SEED, {
 
     return JSON.parse(fs.readFileSync(location, "utf-8"));
   }
-});
+}, LOAD_HYPERPARAMETERS);
 
 const currentMaxEpisodes = getMaxEpisodesCount();
 const progressBar = multiBar.create(currentMaxEpisodes, 0);
