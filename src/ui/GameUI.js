@@ -112,7 +112,7 @@ export default class GameUI {
     this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader);
     this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
     this.gridUI = null;
-    this.progressBarLoading = new ProgressBar(null, null, this.canvasWidth / 4, 25, null, null, null, 0.5, this.disableAnimation, "center");
+    this.progressBarLoading;
     this.notificationMessage;
     this.labelMenus;
     // DOM elements and others settings
@@ -149,6 +149,17 @@ export default class GameUI {
     this.btnRank;
 
     this.init();
+
+    // Patch to fix mouse position on high DPI screens, need to be removed if upgrading JSGameTools
+    Button.prototype.getMousePos = (canvas, event) => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = this.getDevicePixelRatio ? this.getDevicePixelRatio() : 1;
+      
+      return {
+        x: (event.clientX - rect.left) * dpr,
+        y: (event.clientY - rect.top) * dpr
+      };
+    };
   }
 
   constructGridUI(settings) {
@@ -178,14 +189,16 @@ export default class GameUI {
       this.appendTo.appendChild(this.textarea);
       this.assetsLoaded = true;
     } else if(this.outputType == GameConstants.OutputType.GRAPHICAL) {
+      const dpr = this.getDevicePixelRatio();
+      
       this.canvas = document.createElement("canvas");
       this.canvas.width = this.canvasWidth;
       this.canvas.height = this.canvasHeight;
       this.canvasCtx = this.canvas.getContext("2d");
       this.appendTo.appendChild(this.canvas);
-      this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", null, 64, 64);
-      this.btnPause = new ButtonImage("assets/images/pause.png", null, 5, null, null, 64, 64);
-      this.btnRank = new ButtonImage("assets/images/ranking.png", null, 5, null, null, 64, 64);
+      this.btnFullScreen = new ButtonImage("assets/images/fullscreen.png", null, 5, "right", null, 64 * dpr, 64 * dpr);
+      this.btnPause = new ButtonImage("assets/images/pause.png", null, 5, null, null, 64 * dpr, 64 * dpr);
+      this.btnRank = new ButtonImage("assets/images/ranking.png", null, 5, null, null, 64 * dpr, 64 * dpr);
       this.btnContinue = new Button(i18next.t("engine.continue"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnRetry = new Button(i18next.t("engine.reset"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnQuit = new Button(i18next.t("engine.exit"), null, null, "center", "#3498db", "#246A99", "#184766");
@@ -195,14 +208,15 @@ export default class GameUI {
       this.btnAbout = new Button(i18next.t("engine.about"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnInfosGame = new Button(i18next.t("engine.infosGame"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnAdvanced = new Button(i18next.t("engine.infosGameAdvanced"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.btnTopArrow = new ButtonImage("assets/images/up.png", 64, 92, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
-      this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
-      this.btnLeftArrow = new ButtonImage("assets/images/left.png", 128, 46, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
-      this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 64, 0, "right", "bottom", 64, 64, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
+      this.btnTopArrow = new ButtonImage("assets/images/up.png", 64 * dpr, 92 * dpr, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
+      this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
+      this.btnLeftArrow = new ButtonImage("assets/images/left.png", 128 * dpr, 46 * dpr, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
+      this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 64 * dpr, 0 * dpr, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
       this.btnExitFullScreen = new Button(i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnEnterFullScreen = new Button(i18next.t("engine.enterFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnStartGame = new Button(i18next.t("engine.servers.startGame"), null, null, "center", "#3498db", "#246A99", "#184766");
-      this.labelMenus = new Label("", null, null, GameConstants.Setting.FONT_SIZE, GameConstants.Setting.FONT_FAMILY, "white", "center");
+      this.labelMenus = new Label("", null, null, GameConstants.Setting.FONT_SIZE * dpr, GameConstants.Setting.FONT_FAMILY, "white", "center");
+      this.progressBarLoading = new ProgressBar(null, null, (this.canvasWidth / 4) * dpr, 25 * dpr, null, null, null, 0.5, this.disableAnimation, "center");
 
       this.gridUI = this.constructGridUI(this.settings);
 
@@ -319,11 +333,8 @@ export default class GameUI {
       }
     });
 
-    window.addEventListener("resize", () => {
-      this.autoResizeCanvas();
-    }, true);
+    Utils.enableAutoResizeCanvas(this.canvas, this.canvasWidth, this.canvasHeight);
 
-    this.autoResizeCanvas();
     this.loadAssets();
     this.startDraw();
   }
@@ -335,12 +346,6 @@ export default class GameUI {
       x: event.clientX - rect.left,
       y: event.clientY - rect.top
     };
-  }
-
-  autoResizeCanvas() {
-    if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
-      Utils.autoResizeCanvas(this.canvas, this.canvasWidth, this.canvasHeight);
-    }
   }
 
   setIntervalCountFPS() {
@@ -442,6 +447,7 @@ export default class GameUI {
     this.gridUI.cleanAfterGameExit();
   }
 
+  // TODO fix fullscreen on mobile : when exiting fullscreen, the canvas size is not reset to the initial size
   toggleFullscreen() {
     if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
       Utils.toggleFullscreen(this.canvas);
@@ -452,10 +458,13 @@ export default class GameUI {
             this.fullscreen = true;
           } else {
             this.fullscreen = false;
+
+            this.canvas.width = this.canvasWidth;
+            this.canvas.height = this.canvasHeight;
           }
 
           if(document.fullscreenElement == this.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
-            screen.orientation.lock("landscape").catch(() => {});
+            screen.orientation.lock("landscape").catch(error => console.error("Error while locking screen orientation:", error));
           }
         }
       };
@@ -597,6 +606,8 @@ export default class GameUI {
             this.ticks++;
           }
         }
+
+        this.autoDPI();
   
         this.draw();
         this.lastTime = Date.now();  
@@ -604,6 +615,31 @@ export default class GameUI {
 
       this.startDraw();
     }
+  }
+
+  getDevicePixelRatio() {
+    //return window.devicePixelRatio || 1;
+    return 2;
+  }
+
+  autoDPI() {
+    const rect = this.canvas.getBoundingClientRect();
+    const dpr = this.getDevicePixelRatio();
+
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    
+    this.canvas.style.width = rect.width + "px";
+    this.canvas.style.height =  rect.height + "px";
+  }
+
+  getMousePos(canvas, event) {
+    const rect = canvas.getBoundingClientRect();
+    
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top
+    };
   }
 
   draw() {
@@ -618,17 +654,19 @@ export default class GameUI {
       this.textarea.innerHTML = this.toString();
     } else if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
       const ctx = this.canvasCtx;
+      const dpr = this.getDevicePixelRatio();
+
       this.currentPlayer = this.controller.getCurrentPlayer();
 
       this.fontSize = GameConstants.Setting.FONT_SIZE;
       this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
 
       if(this.canvas.width <= GameConstants.Setting.CANVAS_WIDTH / 1.25) {
-        this.fontSize /= 1.25;
+        this.fontSize /= (1.25 * dpr);
         this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25;
       } else if(this.canvas.width >= GameConstants.Setting.CANVAS_WIDTH * 1.5) {
-        this.fontSize *= 1.25;
-        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25;
+        this.fontSize *= 1.2 * dpr;
+        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25 * dpr;
       }
       
       this.gridUI.fontSize = this.fontSize;
