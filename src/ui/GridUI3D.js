@@ -78,8 +78,6 @@ export default class GridUI3D extends GridUI {
     this.goldFruitFirstFrame = true;
 
     this.hasGoldFruit = false;
-    this.goldFruitPosition = null;
-    this.fruitsWorldList = [];
   }
 
   init3DEngine() {
@@ -351,7 +349,7 @@ export default class GridUI3D extends GridUI {
     }
 
     if(this.shouldUpdateDynamicReflections()) {
-      this.updateReflections(this.goldFruitPosition.x, this.goldFruitPosition.y, 0.5);
+      this.updateReflections(this.fruitModelGold.position.x, this.fruitModelGold.position.y, this.fruitModelGold.position.z);
       this.firstUpdatedReflections = true;
     }
     
@@ -522,17 +520,11 @@ export default class GridUI3D extends GridUI {
     this.fruitGoldPointLight.visible = false;
     this.fruitHalo.visible = false;
     this.fruitGoldHalo.visible = false;
-
-    this.goldFruitPosition = null;
-    this.fruitsWorldList = [];
   }
   
   setupGrid() {
     if(this.forceRedraw || this.gridStateChanged) {
       this.hasGoldFruit = false;
-
-      this.goldFruitPosition = null;
-      this.fruitsWorldList = [];
 
       this.clearGrid();
       this.hideFruits();
@@ -800,7 +792,7 @@ export default class GridUI3D extends GridUI {
           child.material = this.getMaterial({
             color: fruitGoldColor,
             metalness: enableReflections ? 0.85 : 0.75,
-            roughness: 0.18,
+            roughness: 0.12,
             envMap: enableReflections ? this.cubeRenderTarget.texture : null
           });
         }
@@ -889,9 +881,6 @@ export default class GridUI3D extends GridUI {
 
       if(isGoldFruit) {
         this.hasGoldFruit = true;
-        this.goldFruitPosition = { x: xPosition, y: yPosition };
-      } else {
-        this.fruitsWorldList.push(new THREE.Vector3(xPosition, yPosition, 0.5));
       }
     }
   }
@@ -2029,36 +2018,26 @@ export default class GridUI3D extends GridUI {
     const LERP_ANGLE = this.disableAnimation ? 1 : 0.12;
     const GOLD_DELTA = 1.0;
 
-    let nearestRegular = null, nearestRegularDist = Infinity;
+    const regularWorld = new THREE.Vector3(this.fruitModel.position.x, this.fruitModel.position.y, this.fruitModel.position.z);
+    const regularDist = headPosWorld.distanceTo(regularWorld);
 
-    if(Array.isArray(this.fruitsWorldList)) {
-      for(const w of this.fruitsWorldList) {
-        const d = headPosWorld.distanceTo(w);
-
-        if(d < nearestRegularDist) {
-          nearestRegularDist = d;
-          nearestRegular = w;
-        }
-      }
-    }
-
-    const goldWorld = this.goldFruitPosition
-      ? new THREE.Vector3(this.goldFruitPosition.x, this.goldFruitPosition.y, 0.5)
+    const goldWorld = this.fruitModelGold?.visible
+      ? new THREE.Vector3(this.fruitModelGold.position.x, this.fruitModelGold.position.y, this.fruitModelGold.position.z)
       : null;
     const goldDist = goldWorld ? headPosWorld.distanceTo(goldWorld) : Infinity;
 
     let selectedFruit = null, selectedDist = Infinity;
 
-    if(nearestRegular && goldWorld) {
-      const pickGold = goldDist <= nearestRegularDist + GOLD_DELTA;
-      selectedFruit  = pickGold ? goldWorld       : nearestRegular;
-      selectedDist   = pickGold ? goldDist        : nearestRegularDist;
+    if(regularDist && goldWorld) {
+      const pickGold = goldDist <= regularDist + GOLD_DELTA;
+      selectedFruit  = pickGold ? goldWorld       : regularWorld;
+      selectedDist   = pickGold ? goldDist        : regularDist;
     } else if(goldWorld) {
       selectedFruit = goldWorld;
       selectedDist = goldDist;
-    } else if(nearestRegular) {
-      selectedFruit = nearestRegular;
-      selectedDist = nearestRegularDist;
+    } else if(regularDist) {
+      selectedFruit = regularWorld;
+      selectedDist = regularDist;
     }
 
     const hasFruit = !!(selectedFruit && selectedDist <= MAX_DIST);

@@ -102,14 +102,14 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Enhance multi environment -> OK
     // - Retest NoisyDenseLayers changes -> OK
     // - Store memory with the model? To improve fine tuning -> OK
-    // - Variable grid size -> OK, need some more tests
+    // - Variable grid size -> OK
+    // - Always keep the grid "UP" -> OK
     // * Ideas:
-    // - Add direction information for Snake head?
+    // - Add direction information for Snake head? -> Not needed with state rotation
     // - Data augmentation (reverse the grid etc...)?
     // - Feed the input with N previous frames?
     // - Distributional RL - Categorical DQN - Multi step learning?
     // - Reproducible training with seed: some fixes needed?
-    // - Always keep the grid "UP"
   }
 
   async setup(summaryWriter) {
