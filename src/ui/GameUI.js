@@ -219,6 +219,8 @@ export default class GameUI {
       this.labelMenus = new Label("", null, null, GameConstants.Setting.FONT_SIZE * dpr, GameConstants.Setting.FONT_FAMILY, "white", "center");
       this.progressBarLoading = new ProgressBar(null, null, (this.canvasWidth / 4) * dpr, 25 * dpr, null, null, null, 0.5, this.disableAnimation, "center");
 
+      this.setupAdviceLabel(dpr);
+
       this.gridUI = this.constructGridUI(this.settings);
 
       this.header.setButtons(this.btnFullScreen, this.btnPause, this.btnRank);
@@ -338,8 +340,41 @@ export default class GameUI {
 
     this.loadAssets();
     this.startDraw();
+
+    if(this.isMobileDevice()) {
+      this.toggleFullscreen();
+    }
+  }
+
+  isMobileDevice() {
+    if(window.matchMedia && window.matchMedia("(pointer: coarse)").matches) {
+      return true;
+    }
+
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+
+    if(/android|iphone|ipad|ipod|windows phone/i.test(ua.toLowerCase())) {
+      return true;
+    }
+
+    return false;
   }
   
+  setupAdviceLabel(dpr) {
+    const hasTouch = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) || navigator.maxTouchPoints > 0;
+    const hasKeyboard = !hasTouch || window.matchMedia("(pointer: fine)").matches;
+
+    this.labelAdvice = new Label("", null, null, (GameConstants.Setting.FONT_SIZE * dpr) / 1.5, GameConstants.Setting.FONT_FAMILY, "white", "center");
+
+    if(hasTouch && hasKeyboard) {
+      this.labelAdvice.text = "\n\n" + i18next.t("engine.adviceTouchAndKeyboard");
+    } else if(hasTouch) {
+      this.labelAdvice.text = "\n\n" + i18next.t("engine.adviceTouch");
+    } else {
+      this.labelAdvice.text = "\n\n" + i18next.t("engine.adviceKeyboard");
+    }
+  }
+
   getTouchPos(canvas, event) {
     const rect = canvas.getBoundingClientRect();
     
@@ -622,7 +657,7 @@ export default class GameUI {
     if(!this.highRes) {
       return 1;
     }
-    
+
     //return window.devicePixelRatio || 1;
     return 2;
   }
@@ -823,24 +858,9 @@ export default class GameUI {
           this.confirmExit = false;
         });
       } else if(this.assetsLoaded && !this.engineLoading && this.countBeforePlay >= 0) {
+        const { playerHuman, colorName, colorRgb } = this.getCurrentPlayerInfos();
+
         if(this.snakes != null && ((this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HUMAN) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) || (this.snakes.length > 1 && this.getNBPlayer(GameConstants.PlayerType.HYBRID_HUMAN_AI) <= 1 && this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) != null) || (this.currentPlayer != null && this.snakes.length > 1))) {
-          let playerHuman, colorName, colorRgb;
-
-          if(!this.spectatorMode) {
-            if(this.currentPlayer != null && this.currentPlayer > -1) {
-              playerHuman = this.getPlayer(this.currentPlayer + 1, GameConstants.PlayerType.HUMAN) || this.getPlayer(this.currentPlayer + 1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
-            } else if(this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) {
-              playerHuman = this.getPlayer(1, GameConstants.PlayerType.HUMAN);
-            } else {
-              playerHuman = this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
-            }
-          }
-
-          if(playerHuman != null) {
-            colorName = GraphicsUtils.hslToName(GameUtils.addHue(GameConstants.Setting.IMAGE_SNAKE_HUE, playerHuman.color), GameConstants.Setting.IMAGE_SNAKE_SATURATION, GameConstants.Setting.IMAGE_SNAKE_VALUE);
-            colorRgb = GraphicsUtils.hsvToRgb(GameUtils.addHue(GameConstants.Setting.IMAGE_SNAKE_HUE, playerHuman.color) / 360, GameConstants.Setting.IMAGE_SNAKE_SATURATION / 100, GameConstants.Setting.IMAGE_SNAKE_VALUE / 100);
-          }
-
           if(this.countBeforePlay > 0) {
             this.labelMenus.text = "" + this.countBeforePlay;
           } else {
@@ -864,7 +884,8 @@ export default class GameUI {
           this.labelMenus.color = "white";
         }
 
-        !this.fullscreen ? this.menu.set(this.labelMenus, this.btnEnterFullScreen) : this.menu.set(this.labelMenus);
+        !this.fullscreen ? this.menu.set(this.labelMenus, this.btnEnterFullScreen, (playerHuman && !this.spectatorMode ? this.labelAdvice : null)) :
+          this.menu.set(this.labelMenus, (playerHuman && !this.spectatorMode ? this.labelAdvice : null));
           
         this.btnEnterFullScreen.setClickAction(() => {
           this.toggleFullscreen();
@@ -1021,6 +1042,26 @@ export default class GameUI {
     }
 
     this.currentFrameTime = performance.now() - startTime;
+  }
+
+  getCurrentPlayerInfos() {
+    let playerHuman, colorName, colorRgb;
+
+    if (!this.spectatorMode) {
+      if (this.currentPlayer != null && this.currentPlayer > -1) {
+        playerHuman = this.getPlayer(this.currentPlayer + 1, GameConstants.PlayerType.HUMAN) || this.getPlayer(this.currentPlayer + 1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+      } else if (this.getPlayer(1, GameConstants.PlayerType.HUMAN) != null) {
+        playerHuman = this.getPlayer(1, GameConstants.PlayerType.HUMAN);
+      } else {
+        playerHuman = this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI);
+      }
+    }
+
+    if (playerHuman != null) {
+      colorName = GraphicsUtils.hslToName(GameUtils.addHue(GameConstants.Setting.IMAGE_SNAKE_HUE, playerHuman.color), GameConstants.Setting.IMAGE_SNAKE_SATURATION, GameConstants.Setting.IMAGE_SNAKE_VALUE);
+      colorRgb = GraphicsUtils.hsvToRgb(GameUtils.addHue(GameConstants.Setting.IMAGE_SNAKE_HUE, playerHuman.color) / 360, GameConstants.Setting.IMAGE_SNAKE_SATURATION / 100, GameConstants.Setting.IMAGE_SNAKE_VALUE / 100);
+    }
+    return { playerHuman, colorName, colorRgb };
   }
 
   resetState() {

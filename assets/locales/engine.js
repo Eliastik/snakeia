@@ -53,7 +53,7 @@ i18next.addResourceBundle("fr", "translation", {
     "exited": "Cette partie a été définitivement quittée. En attente de la fin des autres parties…",
     "error": "Une erreur est survenue !",
     "errorLoading": "Une erreur est survenue lors du chargement des ressources. Vérifiez votre connexion Internet.",
-    "errorInit3D": "Une erreur est survenue lors de l'initialisation du moteur 3D. Le moteur 2D sera utilisé à la place.",
+    "errorInit3D": "Une erreur est survenue lors de l'initialisation du moteur 3D. Le moteur 2D sera utilisé à la place. Vérifiez que votre navigateur supporte WebGL.",
     "exitConfirm": "Êtes-vous sûr de vouloir quitter la partie ?",
     "resetConfirm": "Êtes-vous sûr de vouloir recommencer la partie ?",
     "scoreMax": "Score maximal atteint !",
@@ -115,7 +115,10 @@ i18next.addResourceBundle("fr", "translation", {
       "spectatorMode": "Mode spectateur",
       "startGame": "Commencer la partie"
     },
-    "loadingWorker": "Chargement…"
+    "loadingWorker": "Chargement…",
+    "adviceTouch": "\n\nDéplacer le Snake : Glissez le doigt ou utilisez les flèches tactiles",
+    "adviceKeyboard": "\n\nDéplacer le Snake : Utilisez les flèches du clavier ou ZQSD / WASD",
+    "adviceTouchAndKeyboard": "\n\nDéplacer le Snake : Glissez le doigt\nOu utilisez les flèches du clavier ou ZQSD / WASD"
   }
 }, true, false);
 
@@ -154,7 +157,7 @@ i18next.addResourceBundle("en", "translation", {
     "exited": "This game has been definitively exited. Waiting for the end of the other games…",
     "error": "An error has occurred!",
     "errorLoading": "An error occurred while loading resources. Check your Internet connection.",
-    "errorInit3D": "An error occurred while initializing 3D engine. The game will continue in 2D mode.",
+    "errorInit3D": "An error occurred while initializing 3D engine. The game will continue in 2D mode. Check that your browser supports WebGL.",
     "exitConfirm": "Are you sure that you want to exit the game?",
     "resetConfirm": "Are you sure that you want to reset the game?",
     "scoreMax": "Maximum score reached!",
@@ -216,6 +219,9 @@ i18next.addResourceBundle("en", "translation", {
       "spectatorMode": "Spectator mode",
       "startGame": "Start the game"
     },
-    "loadingWorker": "Loading…"
+    "loadingWorker": "Loading…",
+    "adviceTouch": "\n\nMove the Snake: Swipe your finger or use the on-screen arrows",
+    "adviceKeyboard": "\n\nMove the Snake: Use the keyboard arrows or WASD / ZQSD",
+    "adviceTouchAndKeyboard": "\n\nMove the Snake: Swipe your finger\nOr use the keyboard arrows or WASD / ZQSD"
   }
 }, true, false);
