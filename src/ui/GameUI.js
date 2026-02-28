@@ -45,6 +45,7 @@ export default class GameUI {
     this.graphicSkin = (settings && settings.graphicSkin) || "flat";
     this.maxFPS = (settings && settings.maxFPS) || -1;
     this.settings = settings || {};
+    this.highRes = settings && settings.highRes;
     // UI variables
     this.lastKey = -1;
     this.frame = 0;
@@ -618,6 +619,10 @@ export default class GameUI {
   }
 
   getDevicePixelRatio() {
+    if(!this.highRes) {
+      return 1;
+    }
+    
     //return window.devicePixelRatio || 1;
     return 2;
   }

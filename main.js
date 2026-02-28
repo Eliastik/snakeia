@@ -123,7 +123,8 @@ function restoreSettings() {
     darkMode: "auto",
     aiUltraModelId: null,
     aiUltraModelCustomURL: null,
-    levelsAILevel: "high"
+    levelsAILevel: "high",
+    highRes: true
   };
 }
 
@@ -198,6 +199,7 @@ function showSettings() {
   }
 
   checkDarkMode();
+  checkHighRes();
 }
 
 function isDarkModeEnabled() {
@@ -247,6 +249,22 @@ function checkDarkMode() {
 
     document.querySelectorAll(".logoLight").forEach(logo => logo.style.display = "inline");
     document.querySelectorAll(".logoDark").forEach(logo => logo.style.display = "none");
+  }
+}
+
+function checkHighRes() {
+  if(window.devicePixelRatio && window.devicePixelRatio >= 1) {
+    const settings = getSettings();
+
+    if(settings && !settings.highRes) {
+      document.getElementById("highResCheckbox").checked = false;
+    } else {
+      document.getElementById("highResCheckbox").checked = true;
+    }
+
+    document.getElementById("highResCheckboxContainer").style.display = "block";
+  } else {
+    document.getElementById("highResCheckboxContainer").style.display = "none";
   }
 }
 
@@ -311,6 +329,11 @@ document.getElementById("maxFPS").oninput = function() {
 
 document.getElementById("darkModeCheckbox").onchange = function() {
   customSettings.darkMode = this.checked ? "enabled" : "disabled";
+  saveSettings();
+};
+
+document.getElementById("highResCheckbox").onchange = function() {
+  customSettings.highRes = this.checked;
   saveSettings();
 };
 
@@ -2959,6 +2982,7 @@ function translateContent() {
   document.getElementById("multithreadingInfos").setAttribute("aria-label", i18next.t("menu.multithreadingInfos"));
   document.getElementById("seedGridInfos").setAttribute("aria-label", i18next.t("settings.seedGridInfos"));
   document.getElementById("seedGameInfos").setAttribute("aria-label", i18next.t("settings.seedGameInfos"));
+  document.getElementById("highResInfos").setAttribute("aria-label", i18next.t("menu.highResInfos"));
   document.getElementById("onlineEnableClientSidePredictionsInfos").setAttribute("aria-label", i18next.t("menu.onlineEnableClientSidePredictionsInfos"));
   document.querySelectorAll(".settingNotAvailable").forEach(e => {
     e.setAttribute("aria-label", i18next.t("menu.settingNotAvailable"));

@@ -158,11 +158,15 @@ textarea {
   width: 100%;
 }
 
-label[for="darkModeCheckbox"] {
+label[for="darkModeCheckbox"], label[for="highResCheckbox"] {
   font-size: 12pt;
   line-height: 1.5;
 }
 
 label.labelSettingsHome {
   font-size: 12pt;
+}
+
+#highResCheckboxContainer {
+  display: block;
 }
