@@ -396,7 +396,11 @@ export default class GameUI {
       }
     }
 
+    console.log("Canvas resized to: " + this.canvas.width + "x" + this.canvas.height);
+
     this.autoDPI();
+
+    console.log("Canvas resized to: " + this.canvas.width + "x" + this.canvas.height);
   }
 
   enableAutoResizeCanvas() {
@@ -727,6 +731,10 @@ export default class GameUI {
     const rect = this.canvas.getBoundingClientRect();
     const dpr = this.getDevicePixelRatio();
 
+    if(rect.width == 0 || rect.height == 0) {
+      return;
+    }
+
     this.canvas.width = rect.width * dpr;
     this.canvas.height = rect.height * dpr;
   }
@@ -896,10 +904,26 @@ export default class GameUI {
         } else {
           this.labelMenus.text = (this.snakes != null && this.snakes.length <= 1 && !this.spectatorMode ? i18next.t("engine.player") + " " + (((this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HUMAN && !this.spectatorMode) || (this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI)) ? i18next.t("engine.playerHuman") : i18next.t("engine.playerAI")) : "") + (this.getNBPlayer(GameConstants.PlayerType.AI) > 0 ? "\n" +  i18next.t("engine.aiLevel") + " " + i18next.t("engine.aiLevelList." + this.getPlayer(1, GameConstants.PlayerType.AI).getAILevelText()) : "") + "\n" + i18next.t("engine.sizeGrid") + " " + (this.grid != null && this.grid.width ? this.grid.width : "???") + "×" + (this.grid != null && this.grid.height ? this.grid.height : "???") + "\n" + i18next.t("engine.currentSpeed") + " " + (this.initialSpeed != null ? this.initialSpeed : "???") + (this.snakes != null && this.snakes.length <= 1 && this.progressiveSpeed ? "\n" + i18next.t("engine.progressiveSpeed") : "") + (this.grid != null && !this.grid.maze && this.snakes != null && this.snakes[0].player == GameConstants.PlayerType.HYBRID_HUMAN_AI ? "\n" + i18next.t("engine.assistAI") : "") + (this.grid != null && this.grid.maze ? "\n" + i18next.t("engine.mazeModeMin") : "") + (this.onlineMode ? "\n" + i18next.t("engine.onlineMode") : "") + (this.pingLatency > -1 ? "\n" + i18next.t("engine.ping") + " " + this.pingLatency + " ms" : "");
 
-          (this.grid && (this.grid.seedGrid || this.grid.seedGame)) ? this.menu.set(this.labelMenus, this.btnAdvanced, this.btnOK) : this.menu.set(this.labelMenus, this.btnOK);
+          if(this.grid && (this.grid.seedGrid || this.grid.seedGame)) {
+            if(this.goalMessage) {
+              this.menu.set(this.labelMenus, this.btnGoal, this.btnAdvanced, this.btnOK);
+            } else {
+              this.menu.set(this.labelMenus, this.btnAdvanced, this.btnOK);
+            }
+          } else {
+            if(this.goalMessage) {
+              this.menu.set(this.labelMenus, this.btnGoal, this.btnOK);
+            } else {
+              this.menu.set(this.labelMenus, this.btnOK);
+            }
+          }
           
           this.btnOK.setClickAction(() => {
             this.getInfosGame = false;
+          });
+          
+          this.btnGoal.setClickAction(() => {
+            this.getInfosGoal = true;
           });
     
           this.btnAdvanced.setClickAction(() => {
@@ -911,23 +935,11 @@ export default class GameUI {
       } else if(this.getInfos) {
         this.labelMenus.text = i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + i18next.t("engine.aboutScreen.versionAndDate", { version: GameConstants.Setting.APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(GameConstants.Setting.DATE_VERSION)), interpolation: { escapeValue: false } });
         this.labelMenus.color = "white";
-
-        if(this.goalMessage) {
-          this.menu.set(this.labelMenus, this.btnInfosGame, this.btnGoal, this.btnControls, this.btnOK);
-        } else {
-          this.menu.set(this.labelMenus, this.btnInfosGame, this.btnControls, this.btnOK);
-        }
         
-        this.btnInfosGame.setClickAction(() => {
-          this.getInfosGame = true;
-        });
+        this.menu.set(this.labelMenus, this.btnControls, this.btnOK);
           
         this.btnControls.setClickAction(() => {
           this.getInfosControls = true;
-        });
-          
-        this.btnGoal.setClickAction(() => {
-          this.getInfosGoal = true;
         });
 
         this.btnOK.setClickAction(() => {
@@ -1068,7 +1080,10 @@ export default class GameUI {
       } else if(this.paused && !this.gameOver && this.assetsLoaded && !this.engineLoading) {
         this.labelMenus.text = i18next.t("engine.pause");
         this.labelMenus.color = "white";
-        this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ? this.menu.set(this.labelMenus, this.btnContinue, this.btnRetry, this.btnAbout, this.btnQuit) : this.menu.set(this.labelMenus, this.btnContinue, this.btnAbout, this.btnQuit)) : (this.menu.set(this.labelMenus, this.btnContinue, this.btnAbout));
+        this.enablePause ? (this.enableRetry && this.enableRetryPauseMenu ?
+          this.menu.set(this.labelMenus, this.btnContinue, this.btnRetry, this.btnAbout, this.btnInfosGame, this.btnQuit) :
+          this.menu.set(this.labelMenus, this.btnContinue, this.btnAbout, this.btnInfosGame, this.btnQuit)) :
+          (this.menu.set(this.labelMenus, this.btnContinue, this.btnInfosGame, this.btnAbout));
         
         this.btnContinue.setClickAction(() => {
           this.start();
@@ -1076,6 +1091,10 @@ export default class GameUI {
 
         this.btnRetry.setClickAction(() => {
           this.confirmReset = true;
+        });
+        
+        this.btnInfosGame.setClickAction(() => {
+          this.getInfosGame = true;
         });
 
         this.btnQuit.setClickAction(() => {
