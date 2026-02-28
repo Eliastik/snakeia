@@ -121,6 +121,8 @@ onmessage = async e => {
           "confirmExit": false,
           "getInfos": false,
           "getInfosGame": false,
+          "getInfosControls": false,
+          "getInfosGoal": false,
           "errorOccurred": game.errorOccurred
         }]);
       });
@@ -167,6 +169,8 @@ onmessage = async e => {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": game.errorOccurred,
         "aiStuck": game.aiStuck,
         "precAiStuck": false
@@ -185,6 +189,8 @@ onmessage = async e => {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": game.errorOccurred
       }]);
     });
@@ -196,6 +202,8 @@ onmessage = async e => {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": game.errorOccurred
       }]);
     });
@@ -206,6 +214,8 @@ onmessage = async e => {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": game.errorOccurred
       }]);
     });
@@ -220,6 +230,8 @@ onmessage = async e => {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": game.errorOccurred
       }]);
     });
@@ -236,6 +248,8 @@ onmessage = async e => {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": game.errorOccurred
       }]);
     });

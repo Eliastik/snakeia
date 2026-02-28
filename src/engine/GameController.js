@@ -90,6 +90,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": this.gameEngine.errorOccurred,
         "offsetFrame": this.gameEngine.speed * GameConstants.Setting.TIME_MULTIPLIER,
         "aiStuck": this.gameEngine.aiStuck,
@@ -112,6 +114,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": this.gameEngine.errorOccurred,
         "engineLoading": this.gameEngine.engineLoading
       });
@@ -125,6 +129,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": this.gameEngine.errorOccurred,
         "engineLoading": this.gameEngine.engineLoading
       });
@@ -137,6 +143,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": this.gameEngine.errorOccurred,
         "engineLoading": this.gameEngine.engineLoading
       });
@@ -153,6 +161,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": this.gameEngine.errorOccurred,
         "engineLoading": this.gameEngine.engineLoading
       });
@@ -169,6 +179,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": this.gameEngine.errorOccurred,
         "engineLoading": this.gameEngine.engineLoading
       });
@@ -187,6 +199,8 @@ export default class GameController {
         "confirmExit": false,
         "getInfos": false,
         "getInfosGame": false,
+        "getInfosControls": false,
+        "getInfosGoal": false,
         "errorOccurred": this.gameEngine.errorOccurred,
         "engineLoading": this.gameEngine.engineLoading
       });
