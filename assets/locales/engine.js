@@ -116,9 +116,9 @@ i18next.addResourceBundle("fr", "translation", {
       "startGame": "Commencer la partie"
     },
     "loadingWorker": "Chargement…",
-    "adviceTouch": "\n\nDéplacer le Snake : Glissez le doigt ou utilisez les flèches tactiles",
-    "adviceKeyboard": "\n\nDéplacer le Snake : Utilisez les flèches du clavier ou ZQSD / WASD",
-    "adviceTouchAndKeyboard": "\n\nDéplacer le Snake : Glissez le doigt\nOu utilisez les flèches du clavier ou ZQSD / WASD"
+    "adviceTouch": "Déplacer le Snake : Glissez le doigt ou utilisez les flèches tactiles",
+    "adviceKeyboard": "Déplacer le Snake : Utilisez les flèches du clavier ou ZQSD / WASD",
+    "adviceTouchAndKeyboard": "Déplacer le Snake : Glissez le doigt\nOu utilisez les flèches du clavier ou ZQSD / WASD"
   }
 }, true, false);
 
@@ -220,8 +220,8 @@ i18next.addResourceBundle("en", "translation", {
       "startGame": "Start the game"
     },
     "loadingWorker": "Loading…",
-    "adviceTouch": "\n\nMove the Snake: Swipe your finger or use the on-screen arrows",
-    "adviceKeyboard": "\n\nMove the Snake: Use the keyboard arrows or WASD / ZQSD",
-    "adviceTouchAndKeyboard": "\n\nMove the Snake: Swipe your finger\nOr use the keyboard arrows or WASD / ZQSD"
+    "adviceTouch": "Move the Snake: Swipe your finger or use the on-screen arrows",
+    "adviceKeyboard": "Move the Snake: Use the keyboard arrows or WASD / ZQSD",
+    "adviceTouchAndKeyboard": "Move the Snake: Swipe your finger\nOr use the keyboard arrows or WASD / ZQSD"
   }
 }, true, false);

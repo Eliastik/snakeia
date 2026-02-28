@@ -884,10 +884,21 @@ export default class GameUI {
           this.labelMenus.color = "white";
         }
 
-        !this.fullscreen ? this.menu.set(this.labelMenus, this.btnEnterFullScreen, (playerHuman && !this.spectatorMode ? this.labelAdvice : null)) :
-          this.menu.set(this.labelMenus, (playerHuman && !this.spectatorMode ? this.labelAdvice : null));
+        if(this.fullscreen && playerHuman && !this.spectatorMode) {
+          this.menu.set(this.labelMenus, this.btnExitFullScreen, this.labelAdvice);
+        } else if(!this.fullscreen && playerHuman && !this.spectatorMode) {
+          this.menu.set(this.labelMenus, this.btnEnterFullScreen, this.labelAdvice);
+        } else if(this.fullscreen && !(playerHuman && !this.spectatorMode)) {
+          this.menu.set(this.labelMenus, this.btnExitFullScreen);
+        } else if(!this.fullscreen && !(playerHuman && !this.spectatorMode)) {
+          this.menu.set(this.labelMenus, this.btnEnterFullScreen);
+        }
           
         this.btnEnterFullScreen.setClickAction(() => {
+          this.toggleFullscreen();
+        });
+          
+        this.btnExitFullScreen.setClickAction(() => {
           this.toggleFullscreen();
         });
       } else if(this.confirmReset && !this.gameOver) {
