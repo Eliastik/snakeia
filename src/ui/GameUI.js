@@ -211,7 +211,7 @@ export default class GameUI {
       this.btnInfosGame = new Button(i18next.t("engine.infosGame"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnAdvanced = new Button(i18next.t("engine.infosGameAdvanced"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnTopArrow = new ButtonImage("assets/images/up.png", 64 * dpr, 92 * dpr, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
-      this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
+      this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46 * dpr, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
       this.btnLeftArrow = new ButtonImage("assets/images/left.png", 128 * dpr, 46 * dpr, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
       this.btnBottomArrow = new ButtonImage("assets/images/bottom.png", 64 * dpr, 0 * dpr, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
       this.btnExitFullScreen = new Button(i18next.t("engine.exitFullScreen"), null, null, "center", "#3498db", "#246A99", "#184766");
@@ -704,10 +704,10 @@ export default class GameUI {
 
       if(this.canvas.width <= GameConstants.Setting.CANVAS_WIDTH / 1.25) {
         this.fontSize /= (1.25 * dpr);
-        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25;
+        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25 * (Math.max(1, dpr / 1.5));
       } else if(this.canvas.width >= GameConstants.Setting.CANVAS_WIDTH * 1.5) {
-        this.fontSize *= 1.2 * dpr;
-        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25 * dpr;
+        this.fontSize *= (1.2 * dpr);
+        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25 * (Math.max(1, dpr / 1.5));
       }
       
       this.gridUI.fontSize = this.fontSize;
