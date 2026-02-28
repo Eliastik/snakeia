@@ -7,6 +7,7 @@ import Snake from "../src/engine/Snake.js";
 import GameEngine from "../src/engine/GameEngine.js";
 import SnakeAI from "../src/engine/ai/SnakeAI.js";
 import "@tensorflow/tfjs-node";
+import { t } from "i18next";
 
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);
@@ -33,6 +34,7 @@ test("get state from ai test - test 1", async () => {
     theGrid.setFruit();
 
     const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
     const currentState = theSnakeAI.getState(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
@@ -80,6 +82,7 @@ test("get state from ai test - test 2", async () => {
     theGrid.setFruit();
 
     const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
     const currentState = theSnakeAI.getState(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
@@ -130,6 +133,7 @@ test("get state from ai test - test 3", async () => {
     theGrid.setFruit();
 
     const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
     const currentState = theSnakeAI.getState(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
@@ -355,6 +359,7 @@ test("calculate reward - fruit eaten", async () => {
     engine.started = true;
 
     const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
     const currentState = theSnakeAI.getState(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
