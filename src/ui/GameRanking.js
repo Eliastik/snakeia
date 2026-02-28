@@ -21,7 +21,7 @@ import { Component, Utils, EasingFunctions } from "jsgametools";
 import i18next from "i18next";
 
 export default class GameRanking extends Component {
-  constructor(snakes, currentPlayer, fontSize, fontFamily, headerHeight, backgroundColor, scrollBarColor, disableAnimation, imageLoader, spectatorMode, scrollbarWidth) {
+  constructor(snakes, currentPlayer, fontSize, fontFamily, headerHeight, backgroundColor, scrollBarColor, disableAnimation, imageLoader, spectatorMode, devicePixelRatio) {
     super();
 
     this.snakes = snakes;
@@ -46,11 +46,12 @@ export default class GameRanking extends Component {
     this.imageLoader = imageLoader;
     this.currentPlayer = currentPlayer;
     this.spectatorMode = spectatorMode;
-    this.scrollbarWidth = scrollbarWidth || 15;
+    this.devicePixelRatio = devicePixelRatio || 1;
+    this.scrollbarWidth = 15 * devicePixelRatio;
 
     this.addScrollAction((deltaX, deltaY) => {
       if((this.lastLine && deltaY > 0)) {
-        this.offsetScrollY -= deltaY;
+        this.offsetScrollY -= (deltaY * this.devicePixelRatio);
         this.back = false;
         this.overflow = false;
       }
@@ -92,7 +93,7 @@ export default class GameRanking extends Component {
         }
 
         const text = snake.name + " × " + snake.score + " (" + ((this.currentPlayer == i && !this.spectatorMode ? i18next.t("engine.playerHuman") : (this.snakes[i].player == GameConstants.PlayerType.HUMAN || this.snakes[i].player == GameConstants.PlayerType.HYBRID_HUMAN_AI) ? i18next.t("engine.playerMin") + numPlayer : i18next.t("engine.aiMin") + numAI)) + ")";
-        const sizeText = ctx.measureText(text).width + 30;
+        const sizeText = ctx.measureText(text).width + 30 * this.devicePixelRatio;
 
         if(sizeText > maxSizeName) maxSizeName = sizeText;
 
@@ -218,14 +219,14 @@ export default class GameRanking extends Component {
 
         if(this.totalTime > 5000) {
           if(this.offsetScrollY > 0) {
-            this.offsetScrollY -= offsetTime / 20;
+            this.offsetScrollY -= (offsetTime / 20) * this.devicePixelRatio;
           } else {
             this.back = false;
             this.totalTime = 0;
           }
         }
       } else if(this.overflow) {
-        this.offsetScrollY += offsetTime / 20;
+        this.offsetScrollY += (offsetTime / 20) * this.devicePixelRatio;
       }
 
       if(this.disableAnimation && this.closing) {
@@ -236,7 +237,7 @@ export default class GameRanking extends Component {
           if(this.forceClosing) {
             this.offsetX = this.width;
           } else {
-            this.offsetX += offsetTime / 3;
+            this.offsetX += (offsetTime / 3) * this.devicePixelRatio;
           }
     
           if(this.offsetX >= this.width) {
@@ -245,7 +246,7 @@ export default class GameRanking extends Component {
             this.forceClosing = false;
           }
         } else if(this.opening) {
-          this.offsetX -= offsetTime / 3;
+          this.offsetX -= (offsetTime / 3) * this.devicePixelRatio;
     
           if(this.offsetX <= 0) {
             this.offsetX = 0;

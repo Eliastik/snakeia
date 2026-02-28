@@ -587,9 +587,9 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
   - [x] Ajouter information concernant : il est possible de déplacer le Snake en faisant glisser le doigt sur l'écran vers la direction souhaitée (ne l'afficher que sur mobile)
     - [x] Voir s'il faut ajouter le même type d'info sur desktop (possibilité de bouger avec les flèches ou z/q/s/d...)
     - A afficher sur l'écran de chargement de partie + compteur avant partie (+ peut être menu pause ?)
-  - [ ] Corriger soucis restants :
-    - [ ] Bug fullscreen puis sortie full screen : le canvas ne revient pas à la taille de base
-    - [ ] Quelques petits bugs liés à la mise à l'échelle
+  - [x] Corriger soucis restants :
+    - [x] Bug fullscreen puis sortie full screen : le canvas ne revient pas à la taille de base
+    - [x] Quelques petits bugs liés à la mise à l'échelle
 - [ ] Ajouter pomme en argent (+2 score) ?
 - [ ] Autres effets graphiques à ajouter à la version 3D ? (idées)
   - [ ] Effet normal map d'écailles sur les Snakes

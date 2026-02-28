@@ -111,7 +111,7 @@ export default class GameUI {
     this.timeoutAutoRetry = null;
     // Components
     this.isFilterHueAvailable = Utils.isFilterHueAvailable();
-    this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader, null, 15 * this.getDevicePixelRatio());
+    this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader, null, this.getDevicePixelRatio());
     this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
     this.gridUI = null;
     this.progressBarLoading;
@@ -754,17 +754,15 @@ export default class GameUI {
       this.fontSize = GameConstants.Setting.FONT_SIZE;
       this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT;
 
-      if(this.canvas.width <= GameConstants.Setting.CANVAS_WIDTH / 1.25) {
-        this.fontSize /= (1.25 * dpr);
-        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25 * (Math.max(1, dpr / 1.35));
-      } else if(this.canvas.width >= GameConstants.Setting.CANVAS_WIDTH * 1.5) {
-        this.fontSize *= (1.2 * dpr);
-        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25 * (Math.max(1, dpr / 1.35));
-      }
+      const dprMultiplier = Math.max(1, dpr / 1.25);
 
-      // TODO fix notification message button size
-      // TODO fix font size (too big with dpr)
-      // TODO fix exit fullscreen
+      if(this.canvas.width <= GameConstants.Setting.CANVAS_WIDTH / 1.25) {
+        this.fontSize /= (1.25 * dprMultiplier);
+        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25 * dprMultiplier;
+      } else if(this.canvas.width >= GameConstants.Setting.CANVAS_WIDTH * 1.5) {
+        this.fontSize *= (1.2 * dprMultiplier);
+        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25 * dprMultiplier;
+      }
       
       this.gridUI.fontSize = this.fontSize;
 
