@@ -47,6 +47,7 @@ export default class GameUI {
     this.settings = settings || {};
     this.highRes = settings && settings.highRes;
     this.autoFullscreenMobile = settings && settings.autoFullscreenMobile;
+    this.goalMessage = null;
     // UI variables
     this.lastKey = -1;
     this.frame = 0;
@@ -107,6 +108,8 @@ export default class GameUI {
     this.confirmExit = false;
     this.getInfos = false;
     this.getInfosGame = false;
+    this.getInfosControls = false;
+    this.getInfosGoal = false;
     this.getAdvancedInfosGame = false;
     this.timeoutAutoRetry = null;
     // Components
@@ -210,6 +213,8 @@ export default class GameUI {
       this.btnAbout = new Button(i18next.t("engine.about"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnInfosGame = new Button(i18next.t("engine.infosGame"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnAdvanced = new Button(i18next.t("engine.infosGameAdvanced"), null, null, "center", "#3498db", "#246A99", "#184766");
+      this.btnControls = new Button(i18next.t("engine.infosControls"), null, null, "center", "#3498db", "#246A99", "#184766");
+      this.btnGoal = new Button(i18next.t("engine.infosGoal"), null, null, "center", "#3498db", "#246A99", "#184766");
       this.btnTopArrow = new ButtonImage("assets/images/up.png", 64 * dpr, 92 * dpr, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
       this.btnRightArrow = new ButtonImage("assets/images/right.png", 0, 46 * dpr, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
       this.btnLeftArrow = new ButtonImage("assets/images/left.png", 128 * dpr, 46 * dpr, "right", "bottom", 64 * dpr, 64 * dpr, "rgba(255, 255, 255, 0.25)", "rgba(149, 165, 166, 0.25)");
@@ -864,6 +869,22 @@ export default class GameUI {
           this.confirmExit = false;
           this.exit();
         });
+      } else if(this.getInfosControls) {
+        this.menu.set(this.labelMenus, this.btnOK);
+
+        this.labelMenus.text = this.labelAdvice.text;
+
+        this.btnOK.setClickAction(() => {
+          this.getInfosControls = false;
+        });
+      }  else if(this.getInfosGoal) {
+        this.menu.set(this.labelMenus, this.btnOK);
+
+        this.labelMenus.text = this.goalMessage;
+
+        this.btnOK.setClickAction(() => {
+          this.getInfosGoal = false;
+        });
       } else if(this.getInfosGame) {
         if(this.getAdvancedInfosGame && (this.grid && (this.grid.seedGrid || this.grid.seedGame))) {
           this.labelMenus.text = (this.grid.seedGrid ? i18next.t("engine.seedGrid") + "\n" + this.grid.seedGrid : "") + (this.grid.seedGame ? "\n" + i18next.t("engine.seedGame") + "\n" + this.grid.seedGame : "");
@@ -890,10 +911,23 @@ export default class GameUI {
       } else if(this.getInfos) {
         this.labelMenus.text = i18next.t("engine.aboutScreen.title") + "\nwww.eliastiksofts.com\n\n" + i18next.t("engine.aboutScreen.versionAndDate", { version: GameConstants.Setting.APP_VERSION, date: new Intl.DateTimeFormat(i18next.language).format(new Date(GameConstants.Setting.DATE_VERSION)), interpolation: { escapeValue: false } });
         this.labelMenus.color = "white";
-        this.menu.set(this.labelMenus, this.btnInfosGame, this.btnOK);
+
+        if(this.goalMessage) {
+          this.menu.set(this.labelMenus, this.btnInfosGame, this.btnGoal, this.btnControls, this.btnOK);
+        } else {
+          this.menu.set(this.labelMenus, this.btnInfosGame, this.btnControls, this.btnOK);
+        }
         
         this.btnInfosGame.setClickAction(() => {
           this.getInfosGame = true;
+        });
+          
+        this.btnControls.setClickAction(() => {
+          this.getInfosControls = true;
+        });
+          
+        this.btnGoal.setClickAction(() => {
+          this.getInfosGoal = true;
         });
 
         this.btnOK.setClickAction(() => {
@@ -1192,6 +1226,10 @@ export default class GameUI {
 
       this.notificationMessage.open();
     }
+  }
+
+  setGoal(goal) {
+    this.goalMessage = goal;
   }
 
   setTimeToDisplay(time) {

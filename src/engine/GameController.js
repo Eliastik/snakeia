@@ -307,6 +307,10 @@ export default class GameController {
     this.gameUI.setNotification(notification);
   }
 
+  setGoal(goal) {
+    this.gameUI.setGoal(goal);
+  }
+
   closeRanking() {
     this.gameUI.gameRanking && this.gameUI.gameRanking.forceClose();
   }

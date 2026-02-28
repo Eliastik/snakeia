@@ -2496,6 +2496,7 @@ window.playLevel = (level, player, type) => {
     if(!notificationEndDisplayed && !notificationStartDisplayed) {
       notifInfo = new NotificationMessage(textToDisplayGoal, null, notifInfosColor, 5, null, null, null, true);
       playerGame.setNotification(notifInfo);
+      playerGame.setGoal(textToDisplayGoal);
       notificationStartDisplayed = true;
     }
   } else {

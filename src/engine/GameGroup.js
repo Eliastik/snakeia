@@ -193,6 +193,12 @@ export default class GameGroup {
     }
   }
 
+  setGoal(goal) {
+    for(let i = 0; i < this.games.length; i++) {
+      this.games[i].setGoal(goal);
+    }
+  }
+
   closeNotification() {
     for(let i = 0; i < this.games.length; i++) {
       this.games[i].setNotification(null);
