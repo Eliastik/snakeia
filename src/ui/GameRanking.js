@@ -21,7 +21,7 @@ import { Component, Utils, EasingFunctions } from "jsgametools";
 import i18next from "i18next";
 
 export default class GameRanking extends Component {
-  constructor(snakes, currentPlayer, fontSize, fontFamily, headerHeight, backgroundColor, scrollBarColor, disableAnimation, imageLoader, spectatorMode) {
+  constructor(snakes, currentPlayer, fontSize, fontFamily, headerHeight, backgroundColor, scrollBarColor, disableAnimation, imageLoader, spectatorMode, scrollbarWidth) {
     super();
 
     this.snakes = snakes;
@@ -46,6 +46,7 @@ export default class GameRanking extends Component {
     this.imageLoader = imageLoader;
     this.currentPlayer = currentPlayer;
     this.spectatorMode = spectatorMode;
+    this.scrollbarWidth = scrollbarWidth || 15;
 
     this.addScrollAction((deltaX, deltaY) => {
       if((this.lastLine && deltaY > 0)) {
@@ -79,7 +80,7 @@ export default class GameRanking extends Component {
       let numAI = 0;
 
       ctx.font = (this.fontSize / 1.5) + "px " + this.fontFamily;
-      const sizeNumber = ctx.measureText("" + this.snakes.length).width + 15;
+      const sizeNumber = ctx.measureText("" + this.snakes.length).width + this.scrollbarWidth;
 
       for(let i = 0; i < this.snakes.length; i++) {
         const snake = this.snakes[i];
@@ -109,7 +110,7 @@ export default class GameRanking extends Component {
       
       this.x = -(EasingFunctions.easeInOutCubic(this.offsetX / this.width) * this.width);
       this.y = this.headerHeight;
-      this.width = maxSizeName + sizeNumber + 15;
+      this.width = maxSizeName + sizeNumber + this.scrollbarWidth;
       this.height = canvas.height - this.headerHeight;
 
       ctx.fillStyle = "rgba(75, 75, 75, 0.35)";
@@ -257,7 +258,7 @@ export default class GameRanking extends Component {
       // Scrollbar drawing
       if(clientHeight <= this.height) {
         ctx.fillStyle = this.scrollBarColor;
-        ctx.fillRect(this.x + this.width - 15, this.headerHeight + scrollAreaSize * percentScrollbar, 15, clientHeight);
+        ctx.fillRect(this.x + this.width - this.scrollbarWidth, this.headerHeight + scrollAreaSize * percentScrollbar, this.scrollbarWidth, clientHeight);
       }
 
       Utils.drawImageData(context, this.canvasTmp, 0, this.headerHeight, this.width, this.height, 0, this.headerHeight, this.width, this.height);

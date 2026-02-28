@@ -111,7 +111,7 @@ export default class GameUI {
     this.timeoutAutoRetry = null;
     // Components
     this.isFilterHueAvailable = Utils.isFilterHueAvailable();
-    this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader);
+    this.gameRanking = new GameRanking(this.snakes, null, null, null, GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, null, this.disableAnimation, this.imageLoader, null, 15 * this.getDevicePixelRatio());
     this.header = new Header(GameConstants.Setting.HEADER_HEIGHT_DEFAULT, null, this.snakes, this.enablePause, null, null, null, this.gameRanking, this.bestScoreToDisplay, this.numFruit, this.imageLoader);
     this.gridUI = null;
     this.progressBarLoading;
@@ -337,13 +337,71 @@ export default class GameUI {
       }
     });
 
-    Utils.enableAutoResizeCanvas(this.canvas, this.canvasWidth, this.canvasHeight);
-
     this.loadAssets();
     this.startDraw();
 
     if(this.isMobileDevice() && this.autoFullscreenMobile) {
       this.toggleFullscreen();
+    }
+
+    this.enableAutoResizeCanvas();
+  }
+  
+  autoResizeCanvas() {
+    if(!document.fullscreenElement) {
+      if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
+        const ratio = this.canvasWidth / this.canvasHeight;
+
+        this.canvas.width = document.documentElement.clientWidth * 0.85;
+        this.canvas.height = this.canvas.width / ratio;
+
+        if(this.canvas.style) {
+          this.canvas.style.width = this.canvas.width + "px";
+          this.canvas.style.height = this.canvas.height + "px";
+        }
+      } else {
+        this.canvas.width = this.canvasWidth;
+        this.canvas.height = this.canvasHeight;
+
+        if(this.canvas.style) {
+          this.canvas.style.width = this.canvasWidth + "px";
+          this.canvas.style.height = this.canvasHeight + "px";
+        }
+      }
+    } else if(document.fullscreenElement == this.canvas || document.fullscreenElement == this.container) {
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = window.innerHeight;
+
+      if(this.canvas.style) {
+        this.canvas.style.width = window.innerWidth + "px";
+        this.canvas.style.height = window.innerHeight + "px";
+      }
+
+      if(this.container) {
+        this.container.width = window.innerWidth;
+        this.container.height = window.innerHeight;
+      }
+    } else {
+      this.canvas.width = this.canvasWidth;
+      this.canvas.height = this.canvasHeight;
+
+      if(this.canvas.style) {
+        this.canvas.style.width = this.canvasWidth + "px";
+        this.canvas.style.height = this.canvasHeight + "px";
+      }
+    }
+
+    this.autoDPI();
+  }
+
+  enableAutoResizeCanvas() {
+    if (this.canvas && this.canvas.getAttribute("autoresize-canvas-event") != "true") {
+      this.autoResizeCanvas();
+
+      window.addEventListener("resize", () => {
+        this.canvas.setAttribute("autoresize-canvas-event", "true");
+        this.autoResizeCanvas();
+      });
     }
   }
 
@@ -495,9 +553,6 @@ export default class GameUI {
             this.fullscreen = true;
           } else {
             this.fullscreen = false;
-
-            this.canvas.width = this.canvasWidth;
-            this.canvas.height = this.canvasHeight;
           }
 
           if(document.fullscreenElement == this.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
@@ -643,8 +698,6 @@ export default class GameUI {
             this.ticks++;
           }
         }
-
-        this.autoDPI();
   
         this.draw();
         this.lastTime = Date.now();  
@@ -659,19 +712,18 @@ export default class GameUI {
       return 1;
     }
 
-    //return window.devicePixelRatio || 1;
-    return 2;
+    return window.devicePixelRatio || 1;
   }
 
   autoDPI() {
+    this.canvas.style.width = this.canvas.width + "px";
+    this.canvas.style.height =  this.canvas.height + "px";
+
     const rect = this.canvas.getBoundingClientRect();
     const dpr = this.getDevicePixelRatio();
 
     this.canvas.width = rect.width * dpr;
     this.canvas.height = rect.height * dpr;
-    
-    this.canvas.style.width = rect.width + "px";
-    this.canvas.style.height =  rect.height + "px";
   }
 
   getMousePos(canvas, event) {
@@ -704,11 +756,15 @@ export default class GameUI {
 
       if(this.canvas.width <= GameConstants.Setting.CANVAS_WIDTH / 1.25) {
         this.fontSize /= (1.25 * dpr);
-        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25 * (Math.max(1, dpr / 1.5));
+        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT / 1.25 * (Math.max(1, dpr / 1.35));
       } else if(this.canvas.width >= GameConstants.Setting.CANVAS_WIDTH * 1.5) {
         this.fontSize *= (1.2 * dpr);
-        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25 * (Math.max(1, dpr / 1.5));
+        this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25 * (Math.max(1, dpr / 1.35));
       }
+
+      // TODO fix notification message button size
+      // TODO fix font size (too big with dpr)
+      // TODO fix exit fullscreen
       
       this.gridUI.fontSize = this.fontSize;
 
@@ -1132,7 +1188,12 @@ export default class GameUI {
       this.notificationMessage.disableAnimation = true;
     }
 
-    if(this.notificationMessage) this.notificationMessage.open();
+    if(this.notificationMessage) {
+      this.notificationMessage.closeButton.width = 32 * this.getDevicePixelRatio();
+      this.notificationMessage.closeButton.height = 32 * this.getDevicePixelRatio();
+
+      this.notificationMessage.open();
+    }
   }
 
   setTimeToDisplay(time) {
