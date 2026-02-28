@@ -581,12 +581,15 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 
 - [ ] Finaliser l'entraînement de l'IA Deep-Q-Learning : optimisation mémoire et perfs pour faire fonctionner les plus gros environnements + sûrement d'autres trucs
 - [x] Corriger memory leak ThreeJS
-- [ ] Améliorer l'adaptation aux appareils mobiles :
-  - [ ] Rendu graphique : appliquer la bonne résolution (aujourd'hui c'est flou à cause de l'échelle de résolution sur mobile - voir : https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio)
-  - [ ] Plein écran auto au lancement d'une partie ? (uniquement sur mobile !)
-  - [ ] Ajouter information concernant : il est possible de déplacer le Snake en faisant glisser le doigt sur l'écran vers la direction souhaitée (ne l'afficher que sur mobile)
-    - [ ] Voir s'il faut ajouter le même type d'info sur desktop (possibilité de bouger avec les flèches ou z/q/s/d...)
+- [x] Améliorer l'adaptation aux appareils mobiles :
+  - [x] Rendu graphique : appliquer la bonne résolution (aujourd'hui c'est flou à cause de l'échelle de résolution sur mobile - voir : https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio)
+  - [x] Plein écran auto au lancement d'une partie ? (uniquement sur mobile !)
+  - [x] Ajouter information concernant : il est possible de déplacer le Snake en faisant glisser le doigt sur l'écran vers la direction souhaitée (ne l'afficher que sur mobile)
+    - [x] Voir s'il faut ajouter le même type d'info sur desktop (possibilité de bouger avec les flèches ou z/q/s/d...)
     - A afficher sur l'écran de chargement de partie + compteur avant partie (+ peut être menu pause ?)
+  - [ ] Corriger soucis restants :
+    - [ ] Bug fullscreen puis sortie full screen : le canvas ne revient pas à la taille de base
+    - [ ] Quelques petits bugs liés à la mise à l'échelle
 - [ ] Ajouter pomme en argent (+2 score) ?
 - [ ] Autres effets graphiques à ajouter à la version 3D ? (idées)
   - [ ] Effet normal map d'écailles sur les Snakes

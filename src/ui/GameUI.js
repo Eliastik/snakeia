@@ -46,6 +46,7 @@ export default class GameUI {
     this.maxFPS = (settings && settings.maxFPS) || -1;
     this.settings = settings || {};
     this.highRes = settings && settings.highRes;
+    this.autoFullscreenMobile = settings && settings.autoFullscreenMobile;
     // UI variables
     this.lastKey = -1;
     this.frame = 0;
@@ -341,7 +342,7 @@ export default class GameUI {
     this.loadAssets();
     this.startDraw();
 
-    if(this.isMobileDevice()) {
+    if(this.isMobileDevice() && this.autoFullscreenMobile) {
       this.toggleFullscreen();
     }
   }

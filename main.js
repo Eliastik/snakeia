@@ -112,6 +112,7 @@ function restoreSettings() {
     enableAnimations: isAnimationsDefaultEnabled(),
     onlineEnableClientSidePredictions: false,
     renderBlur: false,
+    autoFullscreenMobile: true,
     enableMultithreading: true,
     showDebugInfo: false,
     textOutput: false,
@@ -157,6 +158,7 @@ function showSettings() {
 
   document.getElementById("enableAnimations").checked = false;
   document.getElementById("renderBlur").checked = false;
+  document.getElementById("autoFullscreenMobile").checked = false;
   document.getElementById("enableMultithreading").checked = false;
   document.getElementById("onlineEnableClientSidePredictions").checked = false;
   document.getElementById("showDebugInfo").checked = false;
@@ -164,6 +166,7 @@ function showSettings() {
 
   if(isAnimationsEnabled()) document.getElementById("enableAnimations").checked = true;
   if(settings.renderBlur) document.getElementById("renderBlur").checked = true;
+  if(settings.autoFullscreenMobile) document.getElementById("autoFullscreenMobile").checked = true;
   if(settings.enableMultithreading && workersAvailable) document.getElementById("enableMultithreading").checked = true;
   if(settings.onlineEnableClientSidePredictions) document.getElementById("onlineEnableClientSidePredictions").checked = true;
   if(settings.showDebugInfo) document.getElementById("showDebugInfo").checked = true;
@@ -283,6 +286,11 @@ document.getElementById("enableAnimations").onchange = function() {
 
 document.getElementById("renderBlur").onchange = function() {
   customSettings.renderBlur = this.checked;
+  saveSettings();
+};
+
+document.getElementById("autoFullscreenMobile").onchange = function() {
+  customSettings.autoFullscreenMobile = this.checked;
   saveSettings();
 };
 
