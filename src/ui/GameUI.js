@@ -102,6 +102,7 @@ export default class GameUI {
     this.spectatorMode = null;
     this.onlineMaster = false;
     this.pingLatency = -1;
+    this.launchedInitialAutoDPI = false;
     // Menus state variables
     this.menu = new Menu(null, this.renderBlur);
     this.confirmReset = false;
@@ -396,21 +397,21 @@ export default class GameUI {
       }
     }
 
-    console.log("Canvas resized to: " + this.canvas.width + "x" + this.canvas.height);
-
     this.autoDPI();
-
-    console.log("Canvas resized to: " + this.canvas.width + "x" + this.canvas.height);
   }
 
   enableAutoResizeCanvas() {
-    if (this.canvas && this.canvas.getAttribute("autoresize-canvas-event") != "true") {
+    if(this.canvas && this.canvas.getAttribute("autoresize-canvas-event") != "true") {
       this.autoResizeCanvas();
 
-      window.addEventListener("resize", () => {
-        this.canvas.setAttribute("autoresize-canvas-event", "true");
-        this.autoResizeCanvas();
-      });
+      this.listenerCanvasResize = () => {
+        if(this.canvas) {
+          this.canvas.setAttribute("autoresize-canvas-event", "true");
+          this.autoResizeCanvas();
+        }
+      };
+
+      window.addEventListener("resize", this.listenerCanvasResize);
     }
   }
 
@@ -549,6 +550,10 @@ export default class GameUI {
     }
 
     this.gridUI.cleanAfterGameExit();
+
+    if(this.listenerCanvasResize) {
+      window.removeEventListener("resize", this.listenerCanvasResize);
+    }
   }
 
   // TODO fix fullscreen on mobile : when exiting fullscreen, the canvas size is not reset to the initial size
@@ -709,7 +714,12 @@ export default class GameUI {
         }
   
         this.draw();
-        this.lastTime = Date.now();  
+        this.lastTime = Date.now();
+
+        if(!this.launchedInitialAutoDPI) {
+          this.autoDPI();
+          this.launchedInitialAutoDPI = true;
+        }
       }
 
       this.startDraw();

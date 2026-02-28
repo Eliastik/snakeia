@@ -566,6 +566,7 @@ export default class SnakeAIUltra extends SnakeAI {
       return state;
     }
 
+    // TODO add unit tests for this
     const headDirection = snake.getHeadPosition().direction;
 
     return { ...this.rotateStateLayers(state, headDirection), headDirection };
