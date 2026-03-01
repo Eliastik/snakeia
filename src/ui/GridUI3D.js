@@ -539,7 +539,7 @@ export default class GridUI3D extends GridUI {
         this.updateGrid();
       }
 
-      const unknownHaveChanged = gridStateChanged.changedValues.entries()
+      const unknownHaveChanged = gridStateChanged.changedValues.values()
         .some(value => !Object.values(GameConstants.CaseType).includes(value));
 
       if(unknownHaveChanged) {

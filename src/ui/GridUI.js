@@ -138,11 +138,11 @@ export default class GridUI extends Component {
 
     for(let i = 0; i < this.grid.height; i++) {
       for(let j = 0; j < this.grid.width; j++) {
-        const currentCellValue = new Position(j, i);
+        const currentCellValue = this.grid.get(new Position(j, i));
         const oldCellValue = this.oldGridState[i][j];
 
         const oldCellImage = GameUtils.getImageCase(oldCellValue);
-        const newCellImage = this.grid.getImageCase(currentCellValue);
+        const newCellImage = GameUtils.getImageCase(currentCellValue);
 
         if(oldCellImage !== newCellImage) {
           changed = true;
