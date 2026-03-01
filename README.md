@@ -590,6 +590,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
   - [x] Corriger soucis restants :
     - [x] Bug fullscreen puis sortie full screen : le canvas ne revient pas à la taille de base
     - [x] Quelques petits bugs liés à la mise à l'échelle
+- [x] Optimiser redraw grille 3D (quand murs, léger lag sur mobiles)
 - [ ] Ajouter pomme en argent (+2 score) ?
 - [ ] Autres effets graphiques à ajouter à la version 3D ? (idées)
   - [ ] Effet normal map d'écailles sur les Snakes

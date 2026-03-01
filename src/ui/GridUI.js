@@ -130,30 +130,36 @@ export default class GridUI extends Component {
     if(!this.oldGridState
       || this.oldGridState.length != this.grid.height
       || this.oldGridState[0].length != this.grid.width) {
-      return true;
+      return { changed: true, changedValues: new Set(Object.values(GameConstants.CaseType)) };
     }
+
+    const changedValues = new Set();
+    let changed = false;
 
     for(let i = 0; i < this.grid.height; i++) {
       for(let j = 0; j < this.grid.width; j++) {
         const currentPosition = new Position(j, i);
 
-        const oldGridValue = GameUtils.getImageCase(this.oldGridState[i][j]);
+        const oldStateValue = this.oldGridState[i][j];
+
+        const oldGridValue = GameUtils.getImageCase(oldStateValue);
         const newGridValue = this.grid.getImageCase(currentPosition);
 
         if(oldGridValue !== newGridValue) {
-          return true;
+          changed = true;
+          changedValues.add(oldStateValue);
         }
       }
     }
 
-    return false;
+    return { changed, changedValues };
   }
   
   drawGrid(ctx, caseSize, totalWidth, offsetX, offsetY) {
     const canvasGrid = this.canvasGrid;
     const ctxGrid = canvasGrid.getContext("2d");
 
-    if(this.forceRedraw || this.gridStateChanged) {
+    if(this.forceRedraw || this.gridStateChanged.changed) {
       canvasGrid.width = ctx.canvas.width;
       canvasGrid.height = ctx.canvas.height;
       

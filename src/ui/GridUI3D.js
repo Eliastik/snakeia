@@ -330,7 +330,7 @@ export default class GridUI3D extends GridUI {
     const shouldUpdateBasedOnTicks = this.shouldUpdateBasedOnTicks();
     
     const shouldUpdateDynamicThrottled = reflectionQuality === "dynamicThrottled" && shouldUpdateBasedOnTicks;
-    const shouldUpdateDynamicOnce = reflectionQuality === "dynamicOnce" && this.gridStateChanged;
+    const shouldUpdateDynamicOnce = reflectionQuality === "dynamicOnce" && this.gridStateChanged.changed;
     const shouldUpdateStatic = reflectionQuality === "static" && !this.firstUpdatedReflections;
 
     const shouldUpdateBasedOnQuality = reflectionQuality === "dynamicFull" || shouldUpdateDynamicThrottled || shouldUpdateDynamicOnce || shouldUpdateStatic;
@@ -523,59 +523,111 @@ export default class GridUI3D extends GridUI {
   }
   
   setupGrid() {
-    if(this.forceRedraw || this.gridStateChanged) {
-      this.hasGoldFruit = false;
+    const gridStateChanged = this.gridStateChanged;
 
-      this.clearGrid();
-      this.hideFruits();
+    if(this.forceRedraw || gridStateChanged.changed) {
+      const fruitStateHaveChanged = gridStateChanged.changedValues.has(GameConstants.CaseType.FRUIT)
+        || gridStateChanged.changedValues.has(GameConstants.CaseType.FRUIT_GOLD);
 
-      const totalCells = this.grid.width * this.grid.height;
-      const halfCells = Math.floor(totalCells / 2);
-
-      const ground = this.constructGround();
-      const wallInstancedMesh = this.constructWallMesh();
-      const lightGrayCellInstancedMesh = this.constructLightGrayCell(totalCells, halfCells);
-      const darkGrayCellInstancedMesh = this.constructDarkGrayCell(halfCells);
-
-      this.gridGroup.add(ground, lightGrayCellInstancedMesh, darkGrayCellInstancedMesh);
-
-      if(wallInstancedMesh) {
-        this.gridGroup.add(wallInstancedMesh);
+      if(fruitStateHaveChanged) {
+        this.placeFruits();
       }
 
-      const halfGridWidth = this.grid.width / 2;
-      const halfGridHeight = this.grid.height / 2;
+      const wallsHaveChanged = gridStateChanged.changedValues.has(GameConstants.CaseType.WALL);
 
-      let wallIndex = 0;
-      let lightGrayCellIndex = 0;
-      let darkGrayCellIndex = 0;
+      if(wallsHaveChanged) {
+        this.updateGrid();
+      }
 
-      for(let y = 0; y < this.grid.height; y++) {
-        for(let x = 0; x < this.grid.width; x++) {
-          const xPosition = x - halfGridWidth + 0.5;
-          const yPosition = (this.grid.height - 1 - y) - halfGridHeight + 0.5;
+      const unknownHaveChanged = gridStateChanged.changedValues.entries()
+        .some(value => !Object.values(GameConstants.CaseType).includes(value));
 
-          const caseType = this.grid.get(new Position(x, y));
+      if(unknownHaveChanged) {
+        this.placeUnknown();
+      }
+    }
+  }
 
-          if(caseType === GameConstants.CaseType.WALL) {
-            const matrix = new THREE.Matrix4().makeTranslation(xPosition, yPosition, 0.75);
-            wallInstancedMesh.setMatrixAt(wallIndex++, matrix);
-          } else {
-            const matrix = new THREE.Matrix4().makeTranslation(xPosition, yPosition, 0.05);
-            const cellMesh = (x + y) % 2 === 0 ? lightGrayCellInstancedMesh : darkGrayCellInstancedMesh;
-            cellMesh.setMatrixAt((x + y) % 2 === 0 ? lightGrayCellIndex++ : darkGrayCellIndex++, matrix);
-          }
+  updateGrid() {
+    this.clearGrid();
 
-          if(caseType === GameConstants.CaseType.FRUIT || caseType === GameConstants.CaseType.FRUIT_GOLD) {
-            this.displayFruit(xPosition, yPosition, caseType);
-          }
+    const totalCells = this.grid.width * this.grid.height;
+    const halfCells = Math.floor(totalCells / 2);
 
-          if(!Object.values(GameConstants.CaseType).includes(caseType)) {
-            const unknownModel = this.constructUnknownModel(xPosition, yPosition);
-            
-            if(unknownModel) {
-              this.gridGroup.add(unknownModel);
-            }
+    const ground = this.constructGround();
+    const wallInstancedMesh = this.constructWallMesh();
+    const lightGrayCellInstancedMesh = this.constructLightGrayCell(totalCells, halfCells);
+    const darkGrayCellInstancedMesh = this.constructDarkGrayCell(halfCells);
+
+    this.gridGroup.add(ground, lightGrayCellInstancedMesh, darkGrayCellInstancedMesh);
+
+    if (wallInstancedMesh) {
+      this.gridGroup.add(wallInstancedMesh);
+    }
+
+    const halfGridWidth = this.grid.width / 2;
+    const halfGridHeight = this.grid.height / 2;
+
+    let wallIndex = 0;
+    let lightGrayCellIndex = 0;
+    let darkGrayCellIndex = 0;
+
+    for(let y = 0; y < this.grid.height; y++) {
+      for(let x = 0; x < this.grid.width; x++) {
+        const xPosition = x - halfGridWidth + 0.5;
+        const yPosition = (this.grid.height - 1 - y) - halfGridHeight + 0.5;
+
+        const caseType = this.grid.get(new Position(x, y));
+
+        if (caseType === GameConstants.CaseType.WALL) {
+          const matrix = new THREE.Matrix4().makeTranslation(xPosition, yPosition, 0.75);
+          wallInstancedMesh.setMatrixAt(wallIndex++, matrix);
+        } else {
+          const matrix = new THREE.Matrix4().makeTranslation(xPosition, yPosition, 0.05);
+          const cellMesh = (x + y) % 2 === 0 ? lightGrayCellInstancedMesh : darkGrayCellInstancedMesh;
+          cellMesh.setMatrixAt((x + y) % 2 === 0 ? lightGrayCellIndex++ : darkGrayCellIndex++, matrix);
+        }
+      }
+    }
+  }
+
+  placeFruits() {
+    this.hasGoldFruit = false;
+    this.hideFruits();
+
+    const halfGridWidth = this.grid.width / 2;
+    const halfGridHeight = this.grid.height / 2;
+
+    for(let y = 0; y < this.grid.height; y++) {
+      for(let x = 0; x < this.grid.width; x++) {
+        const xPosition = x - halfGridWidth + 0.5;
+        const yPosition = (this.grid.height - 1 - y) - halfGridHeight + 0.5;
+
+        const caseType = this.grid.get(new Position(x, y));
+
+        if(caseType === GameConstants.CaseType.FRUIT || caseType === GameConstants.CaseType.FRUIT_GOLD) {
+          this.displayFruit(xPosition, yPosition, caseType);
+        }
+      }
+    }
+  }
+
+  placeUnknown() {
+    const halfGridWidth = this.grid.width / 2;
+    const halfGridHeight = this.grid.height / 2;
+
+    for(let y = 0; y < this.grid.height; y++) {
+      for(let x = 0; x < this.grid.width; x++) {
+        const xPosition = x - halfGridWidth + 0.5;
+        const yPosition = (this.grid.height - 1 - y) - halfGridHeight + 0.5;
+
+        const caseType = this.grid.get(new Position(x, y));
+
+        if(!Object.values(GameConstants.CaseType).includes(caseType)) {
+          const unknownModel = this.constructUnknownModel(xPosition, yPosition);
+          
+          if(unknownModel) {
+            this.gridGroup.add(unknownModel);
           }
         }
       }
