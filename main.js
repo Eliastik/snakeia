@@ -256,7 +256,7 @@ function checkDarkMode() {
 }
 
 function checkHighRes() {
-  if(window.devicePixelRatio && window.devicePixelRatio >= 1) {
+  if(window.devicePixelRatio && window.devicePixelRatio > 1) {
     const settings = getSettings();
 
     if(settings && !settings.highRes) {

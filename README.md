@@ -586,7 +586,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
   - [x] Plein écran auto au lancement d'une partie ? (uniquement sur mobile !)
   - [x] Ajouter information concernant : il est possible de déplacer le Snake en faisant glisser le doigt sur l'écran vers la direction souhaitée (ne l'afficher que sur mobile)
     - [x] Voir s'il faut ajouter le même type d'info sur desktop (possibilité de bouger avec les flèches ou z/q/s/d...)
-    - A afficher sur l'écran de chargement de partie + compteur avant partie (+ peut être menu pause ?)
+    - [x] A afficher sur l'écran de chargement de partie + compteur avant partie (+ peut être menu pause ?) -> les deux
   - [x] Corriger soucis restants :
     - [x] Bug fullscreen puis sortie full screen : le canvas ne revient pas à la taille de base
     - [x] Quelques petits bugs liés à la mise à l'échelle
