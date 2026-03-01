@@ -76,6 +76,8 @@ export default class GridUI3D extends GridUI {
     this.currentRenderingSizeAndPosition = null;
     this.firstUpdatedReflections = false;
     this.goldFruitFirstFrame = true;
+    this.lastRendererWidth = 0;
+    this.lastRendererHeight = 0;
 
     this.hasGoldFruit = false;
   }
@@ -154,6 +156,7 @@ export default class GridUI3D extends GridUI {
 
     this.gridGroup = new THREE.Group();
     this.fruitsGroup = new THREE.Group();
+    this.unknownGroup = new THREE.Group();
     this.snakesGroup = new THREE.Group();
 
     if(this.qualitySettings.antialiasing === "fxaa" || this.qualitySettings.antialiasing === "smaa") {
@@ -178,7 +181,7 @@ export default class GridUI3D extends GridUI {
       this.postProcessingEnabled = true;
     }
 
-    this.scene.add(this.gridGroup, this.fruitsGroup, this.snakesGroup);
+    this.scene.add(this.gridGroup, this.fruitsGroup, this.snakesGroup, this.unknownGroup);
   }
 
   buildGoldFruitShaders() {
@@ -431,12 +434,17 @@ export default class GridUI3D extends GridUI {
       this.isCameraDebugInit = true;
     }
 
-    this.renderer.setSize(this.width, this.height);
+    if(this.width !== this.lastRendererWidth || this.height !== this.lastRendererHeight) {
+      this.renderer.setSize(this.width, this.height);
 
-    if(this.postProcessingEnabled) {
-      this.renderPass.setSize(this.width, this.height);
-      this.composer.setSize(this.width, this.height);
-      this.outputPass.setSize(this.width, this.height);
+      if(this.postProcessingEnabled) {
+        this.renderPass.setSize(this.width, this.height);
+        this.composer.setSize(this.width, this.height);
+        this.outputPass.setSize(this.width, this.height);
+      }
+
+      this.lastRendererWidth = this.width;
+      this.lastRendererHeight = this.height;
     }
 
     if(this.controls) {
@@ -554,15 +562,15 @@ export default class GridUI3D extends GridUI {
     const totalCells = this.grid.width * this.grid.height;
     const halfCells = Math.floor(totalCells / 2);
 
-    const ground = this.constructGround();
-    const wallInstancedMesh = this.constructWallMesh();
-    const lightGrayCellInstancedMesh = this.constructLightGrayCell(totalCells, halfCells);
-    const darkGrayCellInstancedMesh = this.constructDarkGrayCell(halfCells);
+    this.ground = this.constructGround();
+    this.wallInstancedMesh = this.constructWallMesh();
+    this.lightGrayCellInstancedMesh = this.constructLightGrayCell(totalCells, halfCells);
+    this.darkGrayCellInstancedMesh = this.constructDarkGrayCell(halfCells);
 
-    this.gridGroup.add(ground, lightGrayCellInstancedMesh, darkGrayCellInstancedMesh);
+    this.gridGroup.add(this.ground, this.lightGrayCellInstancedMesh, this.darkGrayCellInstancedMesh);
 
-    if (wallInstancedMesh) {
-      this.gridGroup.add(wallInstancedMesh);
+    if(this.wallInstancedMesh) {
+      this.gridGroup.add(this.wallInstancedMesh);
     }
 
     const halfGridWidth = this.grid.width / 2;
@@ -581,10 +589,10 @@ export default class GridUI3D extends GridUI {
 
         if (caseType === GameConstants.CaseType.WALL) {
           const matrix = new THREE.Matrix4().makeTranslation(xPosition, yPosition, 0.75);
-          wallInstancedMesh.setMatrixAt(wallIndex++, matrix);
+          this.wallInstancedMesh.setMatrixAt(wallIndex++, matrix);
         } else {
           const matrix = new THREE.Matrix4().makeTranslation(xPosition, yPosition, 0.05);
-          const cellMesh = (x + y) % 2 === 0 ? lightGrayCellInstancedMesh : darkGrayCellInstancedMesh;
+          const cellMesh = (x + y) % 2 === 0 ? this.lightGrayCellInstancedMesh : this.darkGrayCellInstancedMesh;
           cellMesh.setMatrixAt((x + y) % 2 === 0 ? lightGrayCellIndex++ : darkGrayCellIndex++, matrix);
         }
       }
@@ -592,6 +600,11 @@ export default class GridUI3D extends GridUI {
   }
 
   clearGrid() {
+    this.ground?.clear();
+    this.wallInstancedMesh?.clear();
+    this.lightGrayCellInstancedMesh?.clear();
+    this.darkGrayCellInstancedMesh?.clear();
+
     this.disposeGroup(this.gridGroup);
     this.gridGroup.clear();
   }
@@ -618,7 +631,7 @@ export default class GridUI3D extends GridUI {
   }
 
   placeUnknown() {
-    this.unknownInstancedMesh?.dispose();
+    this.clearUnknwown();
 
     const halfGridWidth = this.grid.width / 2;
     const halfGridHeight = this.grid.height / 2;
@@ -655,7 +668,14 @@ export default class GridUI3D extends GridUI {
 
     dummy.clear();
 
-    this.gridGroup.add(this.unknownInstancedMesh);
+    this.unknownGroup.add(this.unknownInstancedMesh);
+  }
+
+  clearUnknwown() {
+    this.unknownInstancedMesh?.dispose();
+    
+    this.disposeGroup(this.unknownGroup);
+    this.unknownGroup.clear();
   }
 
   constructGround() {
@@ -732,8 +752,6 @@ export default class GridUI3D extends GridUI {
 
     unknownInstancedMesh.castShadow = true;
     unknownInstancedMesh.receiveShadow = true;
-
-    this.gridGroup.add(unknownInstancedMesh);
 
     return unknownInstancedMesh;
   }
@@ -984,7 +1002,8 @@ export default class GridUI3D extends GridUI {
   }
 
   animateFruits() {
-    const t = performance.now() / 1000;
+    const now = performance.now();
+    const t = now / 1000;
 
     [
       { model: this.fruitModel, light: this.fruitPointLight, speed: 1.5, bobFreq: 2.5, halo: this.fruitHalo },
@@ -998,7 +1017,7 @@ export default class GridUI3D extends GridUI {
       let spawnScale = 1.0;
 
       if(anim) {
-        const elapsed = (performance.now() - anim.startTime) / 1000;
+        const elapsed = (now - anim.startTime) / 1000;
         const p = Math.min(elapsed / anim.duration, 1);
         spawnScale = this.springEase(p);
 
@@ -2356,17 +2375,17 @@ export default class GridUI3D extends GridUI {
 
   disposeScene() {
     if(this.scene) {
-      this.clearGrid();
-
       this.disposeGroup(this.gridGroup);
       this.disposeGroup(this.snakesGroup);
       this.disposeGroup(this.fruitsGroup);
+      this.disposeGroup(this.unknownGroup);
 
-      this.scene.remove(this.gridGroup, this.snakesGroup, this.fruitsGroup);
+      this.scene.remove(this.gridGroup, this.snakesGroup, this.fruitsGroup, this.unknownGroup);
 
       this.gridGroup?.clear();
       this.snakesGroup?.clear();
       this.fruitsGroup?.clear();
+      this.unknownGroup?.clear();
 
       this.unknownMaterial?.dispose();
       this.unknownInstancedMesh?.dispose();
