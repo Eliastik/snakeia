@@ -22,7 +22,7 @@ import GraphicsUtils from "./GraphicsUtils";
 import GameConstants from "../engine/Constants";
 import GameRanking from "./GameRanking";
 import ModelLoader from "./ModelLoader";
-import { ImageLoader, Button, ButtonImage, NotificationMessage, Utils, Menu, Label, ProgressBar, Constants, EasingFunctions } from "jsgametools";
+import { ImageLoader, Button, ButtonImage, NotificationMessage, Utils, Menu, Label, ProgressBar, Constants, EasingFunctions, Component } from "jsgametools";
 import GridUI from "./GridUI";
 import GridUI3D from "./GridUI3D";
 import Header from "./Header";
@@ -157,7 +157,7 @@ export default class GameUI {
     this.init();
 
     // Patch to fix mouse position on high DPI screens, need to be removed if upgrading JSGameTools
-    Button.prototype.getMousePos = (canvas, event) => {
+    Component.prototype.getMousePos = (canvas, event) => {
       const rect = canvas.getBoundingClientRect();
       const dpr = this.getDevicePixelRatio ? this.getDevicePixelRatio() : 1;
       
@@ -320,7 +320,7 @@ export default class GameUI {
     this.setIntervalCountFPS();
     this.setIntervalCountTPS();
 
-    document.addEventListener("keydown", (evt) => {
+    this.listenerKeyDown = (evt) => {
       if(!this.killed) {
         let keyCode = evt.keyCode;
     
@@ -341,7 +341,9 @@ export default class GameUI {
       
         evt.preventDefault();
       }
-    });
+    };
+
+    document.addEventListener("keydown", this.listenerKeyDown);
 
     this.loadAssets();
     this.startDraw();
@@ -550,6 +552,14 @@ export default class GameUI {
     if(this.listenerCanvasResize) {
       window.removeEventListener("resize", this.listenerCanvasResize);
     }
+
+    if(this.listenerOnFullScreenChangeEvent) {
+      document.removeEventListener("fullscreenchange", this.listenerOnFullScreenChangeEvent);
+    }
+
+    if(this.listenerKeyDown) {
+      document.removeEventListener("keydown", this.listenerKeyDown);
+    }
   }
 
   toggleFullscreen() {
@@ -575,7 +585,7 @@ export default class GameUI {
       if(this.canvas.getAttribute("fullscreenchange-canvas-event") != "true") {
         this.canvas.setAttribute("fullscreenchange-canvas-event", "true");
 
-        const onfullscreenchange = () => {
+        this.listenerOnFullScreenChangeEvent = () => {
           if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
             if(document.fullscreenElement == this.canvas) {
               this.fullscreen = true;
@@ -587,24 +597,16 @@ export default class GameUI {
             }
 
             if(document.fullscreenElement == this.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
-              screen.orientation.lock("landscape").catch();
+              screen.orientation.lock("landscape").catch(() => {});
             }
+
+            this.autoResizeCanvas();
           }
         };
 
-        if(typeof(document.onfullscreenchange) !== "undefined") {
-          document.onfullscreenchange = onfullscreenchange;
-        } else if(typeof(document.onmsfullscreenchange) !== "undefined") {
-          document.onmsfullscreenchange = onfullscreenchange;
-        } else if(typeof(document.onmozfullscreenchange) !== "undefined") {
-          document.onmozfullscreenchange = onfullscreenchange;
-        } else if(typeof(document.onwebkitfullscreenchange) !== "undefined") {
-          document.onwebkitfullscreenchange = onfullscreenchange;
-        } else if(typeof(document.onokitfullscreenchange) !== "undefined") {
-          document.onofullscreenchange = onfullscreenchange;
-        }
+        document.addEventListener("fullscreenchange", this.listenerOnFullScreenChangeEvent);
 
-        onfullscreenchange();
+        this.listenerOnFullScreenChangeEvent();
       }
     }
   }
