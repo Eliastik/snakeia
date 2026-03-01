@@ -374,18 +374,13 @@ export default class GameUI {
           this.canvas.style.height = this.canvasHeight + "px";
         }
       }
-    } else if(document.fullscreenElement == this.canvas || document.fullscreenElement == this.container) {
+    } else if(document.fullscreenElement == this.canvas) {
       this.canvas.width = window.innerWidth;
       this.canvas.height = window.innerHeight;
 
       if(this.canvas.style) {
         this.canvas.style.width = window.innerWidth + "px";
         this.canvas.style.height = window.innerHeight + "px";
-      }
-
-      if(this.container) {
-        this.container.width = window.innerWidth;
-        this.container.height = window.innerHeight;
       }
     } else {
       this.canvas.width = this.canvasWidth;
@@ -402,11 +397,12 @@ export default class GameUI {
 
   enableAutoResizeCanvas() {
     if(this.canvas && this.canvas.getAttribute("autoresize-canvas-event") != "true") {
+      this.canvas.setAttribute("autoresize-canvas-event", "true");
+
       this.autoResizeCanvas();
 
       this.listenerCanvasResize = () => {
         if(this.canvas) {
-          this.canvas.setAttribute("autoresize-canvas-event", "true");
           this.autoResizeCanvas();
         }
       };
@@ -556,38 +552,60 @@ export default class GameUI {
     }
   }
 
-  // TODO fix fullscreen on mobile : when exiting fullscreen, the canvas size is not reset to the initial size
   toggleFullscreen() {
     if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
-      Utils.toggleFullscreen(this.canvas);
-    
-      const onfullscreenchange = () => {
-        if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
-          if(document.fullscreenElement == this.canvas) {
-            this.fullscreen = true;
-          } else {
-            this.fullscreen = false;
-          }
-
-          if(document.fullscreenElement == this.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
-            screen.orientation.lock("landscape").catch(error => console.error("Error while locking screen orientation:", error));
-          }
+      if(!document.fullscreenElement) {
+        if(this.canvas.requestFullscreen) {
+          this.canvas.requestFullscreen();
+        } else if(this.canvas.mozRequestFullScreen) {
+          this.canvas.mozRequestFullScreen();
+        } else if(this.canvas.webkitRequestFullscreen) {
+          this.canvas.webkitRequestFullscreen();
+        } else if(this.canvas.msRequestFullscreen) {
+          this.canvas.msRequestFullscreen();
+        } else if(this.canvas.oRequestFullscreen) {
+          this.canvas.oRequestFullscreen();
         }
-      };
-
-      if(typeof(document.onfullscreenchange) !== "undefined") {
-        document.onfullscreenchange = onfullscreenchange;
-      } else if(typeof(document.onmsfullscreenchange) !== "undefined") {
-        document.onmsfullscreenchange = onfullscreenchange;
-      } else if(typeof(document.onmozfullscreenchange) !== "undefined") {
-        document.onmozfullscreenchange = onfullscreenchange;
-      } else if(typeof(document.onwebkitfullscreenchange) !== "undefined") {
-        document.onwebkitfullscreenchange = onfullscreenchange;
-      } else if(typeof(document.onokitfullscreenchange) !== "undefined") {
-        document.onofullscreenchange = onfullscreenchange;
+      } else {
+        if(document.exitFullscreen) {
+          document.exitFullscreen();
+        }
       }
+    
+      if(this.canvas.getAttribute("fullscreenchange-canvas-event") != "true") {
+        this.canvas.setAttribute("fullscreenchange-canvas-event", "true");
 
-      onfullscreenchange();
+        const onfullscreenchange = () => {
+          if(this.outputType == GameConstants.OutputType.GRAPHICAL && !this.killed) {
+            if(document.fullscreenElement == this.canvas) {
+              this.fullscreen = true;
+            } else {
+              this.fullscreen = false;
+
+              this.canvas.width = this.canvasWidth;
+              this.canvas.height = this.canvasHeight;
+            }
+
+            if(document.fullscreenElement == this.canvas && typeof(screen.orientation) !== "undefined" && typeof(screen.orientation.lock) !== "undefined") {
+              screen.orientation.lock("landscape").catch();
+            }
+          }
+        };
+
+        if(typeof(document.onfullscreenchange) !== "undefined") {
+          document.onfullscreenchange = onfullscreenchange;
+        } else if(typeof(document.onmsfullscreenchange) !== "undefined") {
+          document.onmsfullscreenchange = onfullscreenchange;
+        } else if(typeof(document.onmozfullscreenchange) !== "undefined") {
+          document.onmozfullscreenchange = onfullscreenchange;
+        } else if(typeof(document.onwebkitfullscreenchange) !== "undefined") {
+          document.onwebkitfullscreenchange = onfullscreenchange;
+        } else if(typeof(document.onokitfullscreenchange) !== "undefined") {
+          document.onofullscreenchange = onfullscreenchange;
+        }
+
+        onfullscreenchange();
+      }
     }
   }
 
@@ -735,15 +753,15 @@ export default class GameUI {
   }
 
   autoDPI() {
-    this.canvas.style.width = this.canvas.width + "px";
-    this.canvas.style.height =  this.canvas.height + "px";
-
     const rect = this.canvas.getBoundingClientRect();
     const dpr = this.getDevicePixelRatio();
 
     if(rect.width == 0 || rect.height == 0) {
       return;
     }
+
+    this.canvas.style.width = rect.width + "px";
+    this.canvas.style.height =  rect.height + "px";
 
     this.canvas.width = rect.width * dpr;
     this.canvas.height = rect.height * dpr;
