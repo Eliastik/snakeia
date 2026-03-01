@@ -673,7 +673,7 @@ export default class GridUI3D extends GridUI {
 
   clearUnknwown() {
     this.unknownInstancedMesh?.dispose();
-    
+
     this.disposeGroup(this.unknownGroup);
     this.unknownGroup.clear();
   }
@@ -2388,7 +2388,7 @@ export default class GridUI3D extends GridUI {
       this.unknownGroup?.clear();
 
       this.unknownMaterial?.dispose();
-      this.unknownInstancedMesh?.dispose();
+      this.unknownGeometry?.dispose();
 
       this.scene?.clear();
       this.scene = null;
