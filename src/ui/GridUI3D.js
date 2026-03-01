@@ -591,6 +591,11 @@ export default class GridUI3D extends GridUI {
     }
   }
 
+  clearGrid() {
+    this.disposeGroup(this.gridGroup);
+    this.gridGroup.clear();
+  }
+
   placeFruits() {
     this.hasGoldFruit = false;
     this.hideFruits();
@@ -613,8 +618,12 @@ export default class GridUI3D extends GridUI {
   }
 
   placeUnknown() {
+    this.unknownInstancedMesh?.dispose();
+
     const halfGridWidth = this.grid.width / 2;
     const halfGridHeight = this.grid.height / 2;
+
+    const unknownPositions = [];
 
     for(let y = 0; y < this.grid.height; y++) {
       for(let x = 0; x < this.grid.width; x++) {
@@ -624,19 +633,29 @@ export default class GridUI3D extends GridUI {
         const caseType = this.grid.get(new Position(x, y));
 
         if(!Object.values(GameConstants.CaseType).includes(caseType)) {
-          const unknownModel = this.constructUnknownModel(xPosition, yPosition);
-          
-          if(unknownModel) {
-            this.gridGroup.add(unknownModel);
-          }
+          unknownPositions.push({ xPosition, yPosition });
         }
       }
     }
-  }
+    
+    this.unknownInstancedMesh = this.constructUnknownMesh(unknownPositions.length);
 
-  clearGrid() {
-    this.disposeGroup(this.gridGroup);
-    this.gridGroup.clear();
+    const dummy = new THREE.Object3D();
+
+    for(const [index, { xPosition, yPosition }] of unknownPositions.entries()) {
+      dummy.position.set(xPosition - 0.3, yPosition - 0.4, 0.5);
+
+      dummy.rotation.x = Math.PI / 2;
+      dummy.scale.setScalar(this.unknownModelScaleFactor);
+
+      dummy.updateMatrix();
+
+      this.unknownInstancedMesh.setMatrixAt(index, dummy.matrix);
+    }
+
+    dummy.clear();
+
+    this.gridGroup.add(this.unknownInstancedMesh);
   }
 
   constructGround() {
@@ -667,35 +686,56 @@ export default class GridUI3D extends GridUI {
     return wallsCount;
   }
 
-  constructUnknownModel(xPosition, yPosition) {
-    const unknownModel = this.modelLoader.get("unknown");
+  constructUnknownMesh(instanceCount) {
+    if(!this.unknownGeometry && !this.unknownMaterial) {
+      const unknownModel = this.modelLoader.get("unknown");
 
-    if(unknownModel) {
+      if(!unknownModel) {
+        return;
+      }
+
+      let baseMesh = null;
+
+      unknownModel.traverse(child => {
+        if(child.isMesh && !baseMesh) {
+          baseMesh = child;
+        }
+      });
+
+      if(!baseMesh) {
+        return;
+      }
+
       const box = new THREE.Box3().setFromObject(unknownModel);
-
       const size = new THREE.Vector3();
       box.getSize(size);
 
-      unknownModel.scale.setScalar(0.4 / size.x);
-      unknownModel.position.set(xPosition - 0.3, yPosition - 0.4, 0.5);
-      unknownModel.rotation.x = Math.PI / 2;
+      this.unknownModelScaleFactor = 0.4 / size.x;
 
-      unknownModel.traverse(child => {
-        if(child.isMesh) {
-          child.material = this.getMaterial({
-            map: child.material.map,
-            normalMap: child.material.normalMap,
-            metalnessMap: child.material.metalnessMap,
-            roughnessMap: child.material.roughnessMap
-          });
+      this.unknownGeometry = baseMesh.geometry;
 
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
+      this.unknownMaterial = this.getMaterial({
+        map: baseMesh.material.map,
+        normalMap: baseMesh.material.normalMap,
+        metalnessMap: baseMesh.material.metalnessMap,
+        roughnessMap: baseMesh.material.roughnessMap
       });
+
+      unknownModel.clear();
     }
 
-    return unknownModel;
+    const unknownInstancedMesh = new THREE.InstancedMesh(
+      this.unknownGeometry,
+      this.unknownMaterial,
+      instanceCount
+    );
+
+    unknownInstancedMesh.castShadow = true;
+    unknownInstancedMesh.receiveShadow = true;
+
+    this.gridGroup.add(unknownInstancedMesh);
+
+    return unknownInstancedMesh;
   }
 
   /** Wall and cell meshes handling */
@@ -2316,6 +2356,8 @@ export default class GridUI3D extends GridUI {
 
   disposeScene() {
     if(this.scene) {
+      this.clearGrid();
+
       this.disposeGroup(this.gridGroup);
       this.disposeGroup(this.snakesGroup);
       this.disposeGroup(this.fruitsGroup);
@@ -2325,6 +2367,9 @@ export default class GridUI3D extends GridUI {
       this.gridGroup?.clear();
       this.snakesGroup?.clear();
       this.fruitsGroup?.clear();
+
+      this.unknownMaterial?.dispose();
+      this.unknownInstancedMesh?.dispose();
 
       this.scene?.clear();
       this.scene = null;
