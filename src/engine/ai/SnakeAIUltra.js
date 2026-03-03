@@ -42,8 +42,8 @@ export default class SnakeAIUltra extends SnakeAI {
     this.fileReader = fileReader || {
       readJSON: async (location) => await (await fetch(location)).json()
     };
-    this.loadHyperParametersFromMetadata = loadHyperParametersFromMetadata || true;
-    this.loadMemoryFromSave = loadMemoryFromSave || true;
+    this.loadHyperParametersFromMetadata = loadHyperParametersFromMetadata;
+    this.loadMemoryFromSave = loadMemoryFromSave;
 
     // Models
     this.mainModel = null;
@@ -72,7 +72,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.001;
-    this.batchSize = 32;
+    this.batchSize = 128;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
     this.maxMemoryLength = 30000;
     // END OF SETTINGS
@@ -86,6 +86,8 @@ export default class SnakeAIUltra extends SnakeAI {
     this.currentQValue = 0;
     this.currentEpoch = 0;
     this.stepsSinceLastSync = 0;
+
+    this.memoryRestoredFromState = false;
 
     this.summaryWriter = null;
 
@@ -114,16 +116,16 @@ export default class SnakeAIUltra extends SnakeAI {
 
   async setup(summaryWriter) {
     this.mainModel = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
+
+    if(this.enableTrainingMode && this.modelLocation) {
+      await this.loadMemory(`${this.modelLocation}/memory.json`);
+    }
       
     if(this.modelLocation) {
       await this.loadMetadata(`${this.modelLocation}/metadata.json`);
     }
 
     if(this.enableTrainingMode) {
-      if(this.modelLocation) {
-        await this.loadMemory(`${this.modelLocation}/memory.json`);
-      }
-
       if(this.enableTargetModel) {
         this.targetModel = this.createModel();
         this.targetModel.setWeights(this.mainModel.getWeights());
@@ -477,48 +479,43 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   rotateStateLayers(state, direction) {
-    const rotateMatrix = (matrix, times) => {
-      let result = matrix;
-
-      for(let t = 0; t < times; t++) {
-        const h = result.length;
-        const w = result[0].length;
-
-        const rotated = new Array(w).fill(0).map(() => new Array(h).fill(0));
-
-        for(let y = 0; y < h; y++) {
-          for(let x = 0; x < w; x++) {
-            rotated[x][h - y - 1] = result[y][x];
-          }
-        }
-
-        result = rotated;
-      }
-
-      return result;
-    };
-
     let rotations = 0;
 
     switch(direction) {
-    case GameConstants.Direction.UP:
-      rotations = 0;
-      break;
-    case GameConstants.Direction.RIGHT:
-      rotations = 3;
-      break;
-    case GameConstants.Direction.BOTTOM:
-      rotations = 2;
-      break;
-    case GameConstants.Direction.LEFT:
-      rotations = 1;
-      break;
+    case GameConstants.Direction.UP:     rotations = 0; break;
+    case GameConstants.Direction.RIGHT:  rotations = 3; break;
+    case GameConstants.Direction.BOTTOM: rotations = 2; break;
+    case GameConstants.Direction.LEFT:   rotations = 1; break;
     }
 
-    return {
-      snakesLayer: rotateMatrix(state.snakesLayer, rotations),
-      fruitsAndWallsLayer: rotateMatrix(state.fruitsAndWallsLayer, rotations)
-    };
+    if(rotations === 0) return state;
+
+    const { snakesLayer, fruitsAndWallsLayer } = state;
+    const h = snakesLayer.length;
+    const w = snakesLayer[0].length;
+
+    const newH = (rotations % 2 === 1) ? w : h;
+    const newW = (rotations % 2 === 1) ? h : w;
+
+    const newSnakes = Array.from({ length: newH }, () => new Array(newW).fill(0));
+    const newFruits = Array.from({ length: newH }, () => new Array(newW).fill(0));
+
+    for(let y = 0; y < h; y++) {
+      for(let x = 0; x < w; x++) {
+        let dstX, dstY;
+
+        switch(rotations) {
+        case 1: dstX = h - y - 1; dstY = x; break;
+        case 2: dstX = w - x - 1; dstY = h - y - 1; break;
+        case 3: dstX = y; dstY = w - x - 1; break;
+        }
+
+        newSnakes[dstY][dstX] = snakesLayer[y][x];
+        newFruits[dstY][dstX] = fruitsAndWallsLayer[y][x];
+      }
+    }
+
+    return { snakesLayer: newSnakes, fruitsAndWallsLayer: newFruits };
   }
 
   getState(snake) {
@@ -851,6 +848,7 @@ export default class SnakeAIUltra extends SnakeAI {
   async loadMemory(memoryLocation) {
     if(!this.loadMemoryFromSave) {
       this.logger.info("Memory loading from file is disabled. Skipping memory loading.\n");
+      this.memoryRestoredFromState = false;
       return;
     }
 
@@ -895,9 +893,13 @@ export default class SnakeAIUltra extends SnakeAI {
       this.memory.deserializeFromJSON(memoryJSON.memory);
 
       this.logger.info("Memory correctly loaded from file\n");
+
+      this.memoryRestoredFromState = true;
     } catch (err) {
       this.logger.error(`Error loading memory: ${err.message}\n`);
       this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger);
+
+      this.memoryRestoredFromState = false;
     }
   }
 
@@ -965,7 +967,7 @@ export default class SnakeAIUltra extends SnakeAI {
           this.trainingRng = seedrandom("", { state: state.trainingRng });
         }
 
-        if(state.currentEnv !== undefined) this.currentEnv = state.currentEnv;
+        if(state.currentEnv !== undefined && this.memoryRestoredFromState) this.currentEnv = state.currentEnv;
         if(state.lastAction !== undefined) this.lastAction = state.lastAction;
         if(state.currentQValue !== undefined) this.currentQValue = state.currentQValue;
         if(state.currentEpoch !== undefined) this.currentEpoch = state.currentEpoch;

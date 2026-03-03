@@ -15,13 +15,13 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const EPISODES_TYPES            = ["DEFAULT"];
+const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE"];
-const NUM_EPISODES_PER_TYPE     = 200;
+const NUM_EPISODES_PER_TYPE     = 1000;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 30;
-const MAX_TICKS                 = 10000;
+const MAX_TICKS                 = 1000;
 const INITAL_GRID_WIDTH         = 5;
 const INITAL_GRID_HEIGHT        = 5;
 const GRID_INCREASE_INCREMENT   = 5;
@@ -36,10 +36,10 @@ const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = true;
-const LOAD_MODEL_PATH           = "models/2026-02-27T19-39-47-838Z";
+const LOAD_MODEL_PATH           = null;
 const LOAD_HYPERPARAMETERS      = false;
-const LOAD_MEMORY               = true;
-const NUM_PARALLEL_ENVS         = 20;
+const LOAD_MEMORY               = false;
+const NUM_PARALLEL_ENVS         = 1;
 // End of settings
 
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");

@@ -119,8 +119,8 @@ i18next.addResourceBundle("fr", "translation", {
     },
     "loadingWorker": "Chargement…",
     "adviceTouch": "Déplacer le Snake : Glissez le doigt ou utilisez les flèches tactiles",
-    "adviceKeyboard": "Déplacer le Snake : Utilisez les flèches du clavier ou ZQSD / WASD\nPause : Appuyez sur Entrée",
-    "adviceTouchAndKeyboard": "Déplacer le Snake : Glissez le doigt\nOu utilisez les flèches du clavier ou ZQSD / WASD\nPause : Appuyez sur Entrée"
+    "adviceKeyboard": "Déplacer le Snake : Utilisez les flèches du clavier ou ZQSD / WASD\n\nPause : Appuyez sur Entrée",
+    "adviceTouchAndKeyboard": "Déplacer le Snake : Glissez le doigt\nOu utilisez les flèches du clavier ou ZQSD / WASD\n\nPause : Appuyez sur Entrée"
   }
 }, true, false);
 
@@ -225,7 +225,7 @@ i18next.addResourceBundle("en", "translation", {
     },
     "loadingWorker": "Loading…",
     "adviceTouch": "Move the Snake: Swipe your finger or use the on-screen arrows",
-    "adviceKeyboard": "Move the Snake: Use the keyboard arrows or WASD / ZQSD\nPause: Press Enter",
-    "adviceTouchAndKeyboard": "Move the Snake: Swipe your finger\nOr use the keyboard arrows or WASD / ZQSD\nPause: Press Enter"
+    "adviceKeyboard": "Move the Snake: Use the keyboard arrows or WASD / ZQSD\n\nPause: Press Enter",
+    "adviceTouchAndKeyboard": "Move the Snake: Swipe your finger\nOr use the keyboard arrows or WASD / ZQSD\n\nPause: Press Enter"
   }
 }, true, false);
