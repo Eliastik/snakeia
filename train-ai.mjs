@@ -36,7 +36,7 @@ const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = true;
-const LOAD_MODEL_PATH           = null;
+const LOAD_MODEL_PATH           = "models/2026-03-03T22-25-36-033Z/5x5_DEFAULT";
 const LOAD_HYPERPARAMETERS      = false;
 const LOAD_MEMORY               = false;
 const NUM_PARALLEL_ENVS         = 1;
@@ -173,7 +173,7 @@ async function executeTickBatch(envs, currentTick) {
     const done = gameEngine.gameFinished || gameEngine.gameOver || snake.gameOver || currentTick + 1 >= MAX_TICKS;
     const currentReward = theSnakeAI.calculateReward(snake, currentStates[i], done);
 
-    theSnakeAI.step(snake, currentStates[i], done, actions[i]);
+    theSnakeAI.step(snake, currentStates[i], done, actions[i], envs[i].id);
     batchTotalReward += currentReward;
   }
 

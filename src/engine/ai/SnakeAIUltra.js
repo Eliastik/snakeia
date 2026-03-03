@@ -65,6 +65,7 @@ export default class SnakeAIUltra extends SnakeAI {
        If disabled and the input (grid size) of the game is different than the input size of the model, the input will be padded. */
     this.enableVariableInputSize = false;
     this.enableStateRotation = true; // Rotate the state so that the snake head is always facing "UP"
+    this.enableNStepsLearning = true; // Enable N-Steps learning
 
     // Hyperparameters
     this.gamma = 0.99;
@@ -75,10 +76,14 @@ export default class SnakeAIUltra extends SnakeAI {
     this.batchSize = 128;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
     this.maxMemoryLength = 30000;
+    this.nStep = 3;
     // END OF SETTINGS
 
     // Replay memory
     this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger, "prioritized");
+
+    // N-Steps buffers
+    this.nStepBuffers = new Map();
 
     // Training state
     this.currentEnv = null;
@@ -106,11 +111,13 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Store memory with the model? To improve fine tuning -> OK
     // - Variable grid size -> OK
     // - Always keep the grid "UP" -> OK
-    // * Ideas:
     // - Add direction information for Snake head? -> Not needed with state rotation
+    // - Multi step learning -> OK, need tests
+    // * Ideas:
     // - Data augmentation (reverse the grid etc...)?
     // - Feed the input with N previous frames?
-    // - Distributional RL - Categorical DQN - Multi step learning?
+    // - Distributional RL - Categorical DQN?
+    // - Performance optimizations
     // - Reproducible training with seed: some fixes needed?
   }
 
@@ -238,6 +245,11 @@ export default class SnakeAIUltra extends SnakeAI {
       padding: "same",
       dtype: this.dtype
     }).apply(input);
+
+    const pool1 = tf.layers.maxPooling2d({
+      poolSize: [2, 2],
+      strides: [2, 2]
+    }).apply(conv1);
   
     const conv2 = tf.layers.conv2d({
       filters: 64,
@@ -245,15 +257,14 @@ export default class SnakeAIUltra extends SnakeAI {
       activation: "relu",
       padding: "same",
       dtype: this.dtype
-    }).apply(conv1);
+    }).apply(pool1);
   
-    // TODO always globalAveragePooling2d?
     const flattenOrPooling = this.enableVariableInputSize ?
       tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true, dtype: this.dtype }).apply(conv2) :
       tf.layers.flatten({ dtype: this.dtype }).apply(conv2);
   
     const dense1 = DenseLayer({
-      units: 64,
+      units: 32,
       activation: "relu",
       dtype: this.dtype,
       seed: this.trainingRng()
@@ -270,7 +281,7 @@ export default class SnakeAIUltra extends SnakeAI {
   
     if(this.enableDuelingQLearning) {
       const dense2 = DenseLayer({
-        units: 64,
+        units: 32,
         activation: "relu",
         dtype: this.dtype,
         seed: this.trainingRng()
@@ -634,11 +645,59 @@ export default class SnakeAIUltra extends SnakeAI {
     return null;
   }
 
+  getNStepBuffer(envId) {
+    if(!this.nStepBuffers.has(envId)) {
+      this.nStepBuffers.set(envId, []);
+    }
+
+    return this.nStepBuffers.get(envId);
+  }
+
   remember(state, action, reward, nextState, done) {
     const stateFlat = this.stateToFlatArray(state);
     const nextStateFlat = this.stateToFlatArray(nextState);
 
     this.memory.add(stateFlat, action, reward, nextStateFlat, done);
+  }
+
+  rememberNStep(state, action, reward, nextState, done, envId) {
+    const buffer = this.getNStepBuffer(envId);
+    buffer.push({ state, action, reward, nextState, done });
+
+    if(done) {
+      this.flushNStepBuffer(envId);
+      return;
+    }
+
+    if(buffer.length >= this.nStep) {
+      this.commitNStep(buffer);
+      buffer.shift();
+    }
+  }
+
+  commitNStep(buffer) {
+    let cumulatedReward = 0;
+    let discount = 1;
+
+    for(let i = 0; i < buffer.length; i++) {
+      cumulatedReward += discount * buffer[i].reward;
+      discount *= this.gamma;
+      if(buffer[i].done) break;
+    }
+
+    const first = buffer[0];
+    const last = buffer[buffer.length - 1];
+
+    this.remember(first.state, first.action, cumulatedReward, last.nextState, last.done);
+  }
+
+  flushNStepBuffer(envId) {
+    const buffer = this.getNStepBuffer(envId);
+
+    while(buffer.length > 0) {
+      this.commitNStep(buffer, envId);
+      buffer.shift();
+    }
   }
 
   async train() {
@@ -662,7 +721,15 @@ export default class SnakeAIUltra extends SnakeAI {
       const qValues = qCurrentBatch.clone();
 
       // Bellman Equation
-      const discountedFutureRewards = qNextMax.mul(this.gamma).mul(dones);
+      let discountedFutureRewards;
+
+      if(this.enableNStepsLearning) {
+        const gammaN = Math.pow(this.gamma, this.nStep);
+        discountedFutureRewards = qNextMax.mul(gammaN).mul(dones);
+      } else {
+        discountedFutureRewards = qNextMax.mul(this.gamma).mul(dones);
+      }
+
       const targetQs = rewards.add(discountedFutureRewards);
 
       const actionMask = tf.oneHot(actions, qValues.shape[1], undefined, undefined, this.dtype);
@@ -770,11 +837,15 @@ export default class SnakeAIUltra extends SnakeAI {
     return GameConstants.AIRewards.MOVE;
   }
 
-  step(snake, currentState, done, action = null) {
+  step(snake, currentState, done, action = null, envId = null) {
     const nextStateData = this.getState(snake);
     const reward = this.calculateReward(snake, currentState, done);
 
-    this.remember(currentState, action ?? this.lastAction, reward, nextStateData, done);
+    if(this.enableNStepsLearning && this.nStep > 1 && envId) {
+      this.rememberNStep(currentState, action ?? this.lastAction, reward, nextStateData, done, envId);
+    } else {
+      this.remember(currentState, action ?? this.lastAction, reward, nextStateData, done);
+    }
   }
 
   changeEnvironment(envId) {
@@ -825,7 +896,9 @@ export default class SnakeAIUltra extends SnakeAI {
         epsilon: this.epsilon,
         learningRate: this.learningRate,
         batchSize: this.batchSize,
-        enableStateRotation: this.enableStateRotation
+        enableStateRotation: this.enableStateRotation,
+        enableNStepsLearning: this.enableNStepsLearning,
+        nStep: this.nStep
       },
       modelInfo: {
         modelHeight: this.modelHeight,
@@ -936,6 +1009,13 @@ export default class SnakeAIUltra extends SnakeAI {
           this.enableStateRotation = false;
         }
 
+        if(typeof config.enableNStepsLearning === "boolean") {
+          this.enableNStepsLearning = config.enableNStepsLearning;
+        } else if(typeof config.enableNStepsLearning === "undefined") {
+          // To stay compatible with old models
+          this.enableNStepsLearning = false;
+        }
+
         // Only used in training mode
         if(this.loadHyperParametersFromMetadata) {
           if(typeof config.syncTargetEvery === "number") this.syncTargetEvery = config.syncTargetEvery;
@@ -945,6 +1025,7 @@ export default class SnakeAIUltra extends SnakeAI {
           if(typeof config.epsilon === "number") this.epsilon = config.epsilon;
           if(typeof config.learningRate === "number") this.learningRate = config.learningRate;
           if(typeof config.batchSize === "number") this.batchSize = config.batchSize;
+          if(typeof config.nStep === "number") this.nStep = config.nStep;
         } else {
           this.logger.info("Loading hyperparameters from metadata is disabled. Skipping hyperparameters loading.\n");
         }
