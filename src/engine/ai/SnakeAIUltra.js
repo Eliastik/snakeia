@@ -58,7 +58,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.dtype = "float32";
 
     // Model features settings
-    this.enableTargetModel = true; // Enable Double DQN
+    this.enableDoubleDQN = true; // Enable Double DQN
     this.enableDuelingQLearning = true; // Enable Dueling DQN
     this.enableNoisyNetwork = true; // Enable Noisy Network for exploration
     /* Enable Variable Input Size for the model (experimental).
@@ -95,6 +95,8 @@ export default class SnakeAIUltra extends SnakeAI {
     this.memoryRestoredFromState = false;
 
     this.summaryWriter = null;
+
+    this.tfOne = tf.scalar(1);
 
     // TODO
     // - Fix double Qlearning -> OK
@@ -133,7 +135,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     if(this.enableTrainingMode) {
-      if(this.enableTargetModel) {
+      if(this.enableDoubleDQN) {
         this.targetModel = this.createModel();
         this.targetModel.setWeights(this.mainModel.getWeights());
       }
@@ -179,10 +181,16 @@ export default class SnakeAIUltra extends SnakeAI {
       this.logger.info("State rotation disabled\n");
     }
 
-    if(this.enableTargetModel) {
-      this.logger.info("Target model enabled\n");
+    if(this.enableDoubleDQN) {
+      this.logger.info("Double DQN enabled\n");
     } else {
-      this.logger.info("Target model disabled\n");
+      this.logger.info("Double DQN disabled\n");
+    }
+
+    if(this.enableNStepsLearning) {
+      this.logger.info("N Steps Learning enabled\n");
+    } else {
+      this.logger.info("N Steps Learning disabled\n");
     }
 
     this.logger.info(`Model input shape: [${this.enableVariableInputSize ? "variable" : this.modelHeight}, ${this.enableVariableInputSize ? "variable" : this.modelWidth}, ${this.modelDepth}]\n`);
@@ -327,7 +335,7 @@ export default class SnakeAIUltra extends SnakeAI {
         }
       });
   
-      if(this.enableTargetModel && this.targetModel) {
+      if(this.enableDoubleDQN && this.targetModel) {
         this.targetModel.layers.forEach(layer => {
           if(layer instanceof NoisyDense) {
             layer.resetNoise();
@@ -345,7 +353,7 @@ export default class SnakeAIUltra extends SnakeAI {
         }
       });
   
-      if(this.enableTargetModel && this.targetModel) {
+      if(this.enableDoubleDQN && this.targetModel) {
         this.targetModel.layers.forEach(layer => {
           if(layer instanceof NoisyDense) {
             layer.removeNoise();
@@ -713,11 +721,25 @@ export default class SnakeAIUltra extends SnakeAI {
       const rewards = tf.tensor1d(batch.samples.map(({ reward }) => reward), this.dtype);
       const dones = tf.tensor1d(batch.samples.map(({ done }) => done ? 0 : 1), this.dtype);
       const actions = tf.tensor1d(batch.samples.map(({ action }) => action), "int32");
+
+      let qNextMax;
+
+      if(this.enableDoubleDQN) {
+        const qNextMain = this.mainModel.predict(nextStates);
+        const qNextTarget = this.targetModel.predict(nextStates);
+
+        const bestNextActions = qNextMain.argMax(1);
+
+        const batchIndices = tf.range(0, this.batchSize, 1, "int32");
+        const stackedIndices = tf.stack([batchIndices, bestNextActions], 1);
+
+        qNextMax = tf.gatherND(qNextTarget, stackedIndices);
+      } else {
+        const qNext = this.mainModel.predict(nextStates);
+        qNextMax = qNext.max(1);
+      }
   
-      const qNextBatch = (this.enableTargetModel ? this.targetModel : this.mainModel).predict(nextStates);
       const qCurrentBatch = this.mainModel.predict(states);
-  
-      const qNextMax = qNextBatch.max(1);
       const qValues = qCurrentBatch.clone();
 
       // Bellman Equation
@@ -736,14 +758,15 @@ export default class SnakeAIUltra extends SnakeAI {
       const qCurrentActions = qCurrentBatch.mul(actionMask).sum(1);
 
       const tdErrors = targetQs.sub(qCurrentActions).abs();
-      const meanTDError = tdErrors.mean().dataSync()[0];
+      const tdErrorsArray = tdErrors.dataSync();
 
-      tdErrors.dataSync().forEach((error, index) => {
+      const meanTDError = tdErrorsArray.reduce((a, b) => a + b, 0) / tdErrorsArray.length;
+
+      tdErrorsArray.forEach((error, index) => {
         this.memory.updatePriority(batch.indices[index], error, batch.envAssignments ? batch.envAssignments[index] : null);
       });
       
-      const one = tf.scalar(1);
-      const updatedQValues = qValues.mul(one.sub(actionMask)).add(actionMask.mul(targetQs.expandDims(1)));
+      const updatedQValues = qValues.mul(this.tfOne.sub(actionMask)).add(actionMask.mul(targetQs.expandDims(1)));
 
       qValues.dispose();
 
@@ -784,7 +807,7 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   synchronizeTargetNetwork() {
-    if(this.enableTargetModel) {
+    if(this.enableDoubleDQN) {
       this.logger.info("Synchronizing target network...\n");
 
       this.targetModel.setWeights(this.mainModel.getWeights());
@@ -896,6 +919,7 @@ export default class SnakeAIUltra extends SnakeAI {
         epsilon: this.epsilon,
         learningRate: this.learningRate,
         batchSize: this.batchSize,
+        enableDoubleDQN: this.enableDoubleDQN,
         enableStateRotation: this.enableStateRotation,
         enableNStepsLearning: this.enableNStepsLearning,
         nStep: this.nStep
@@ -999,6 +1023,7 @@ export default class SnakeAIUltra extends SnakeAI {
           this.trainingRng = new seedrandom(this.trainingRandomSeed, { state: true });
         }
 
+        if(typeof config.enableDoubleDQN === "boolean") this.enableDoubleDQN = config.enableDoubleDQN;
         if(typeof config.enableDuelingQLearning === "boolean") this.enableDuelingQLearning = config.enableDuelingQLearning;
         if(typeof config.enableNoisyNetwork === "boolean") this.enableNoisyNetwork = config.enableNoisyNetwork;
 
