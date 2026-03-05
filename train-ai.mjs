@@ -36,7 +36,7 @@ const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = true;
-const LOAD_MODEL_PATH           = "models/2026-03-03T22-25-36-033Z/5x5_DEFAULT";
+const LOAD_MODEL_PATH           = null;
 const LOAD_HYPERPARAMETERS      = false;
 const LOAD_MEMORY               = false;
 const NUM_PARALLEL_ENVS         = 1;
@@ -92,6 +92,9 @@ let currentGridSeed = GRID_SEED;
 let currentGameSeed = GAME_SEED;
 let currentGridWidth = INITAL_GRID_WIDTH;
 let currentGridHeight = INITAL_GRID_HEIGHT;
+
+// Counter for unique instance IDs across all envs and episodes
+let instanceCounter = 0;
 
 function getMaxEpisodesCount() {
   if(MAX_EPISODES === "auto") {
@@ -149,16 +152,22 @@ function createEnv(episodeType, seedOffset = 0) {
     theSnakes,
     gameEngine: null,
     episodeType,
-    id: `${currentGridWidth}x${currentGridHeight}_${episodeType}`
+    envId: `${currentGridWidth}x${currentGridHeight}_${episodeType}`,
+    instanceId: `${currentGridWidth}x${currentGridHeight}_${episodeType}_${instanceCounter++}`
   };
 }
 
 async function executeTickBatch(envs, currentTick) {
-  const currentStates = envs.map(env => theSnakeAI.getState(env.snake));
+  const rawStates = envs.map(env => theSnakeAI.getStateRaw(env.snake));
 
-  const actions = theSnakeAI.aiBatch(envs.map(env => env.snake));
+  const currentStates = envs.map(env => theSnakeAI.getState(env.snake, env.instanceId));
 
-  // Apply actions
+  const actions = theSnakeAI.aiBatch(
+    envs.map(env => env.snake),
+    envs.map(env => env.instanceId),
+    currentStates
+  );
+
   envs.forEach((env, i) => {
     env.snake.lastAction = actions[i];
     env.snake._precomputedAction = actions[i];
@@ -171,10 +180,11 @@ async function executeTickBatch(envs, currentTick) {
   for(let i = 0; i < envs.length; i++) {
     const { snake, gameEngine } = envs[i];
     const done = gameEngine.gameFinished || gameEngine.gameOver || snake.gameOver || currentTick + 1 >= MAX_TICKS;
-    const currentReward = theSnakeAI.calculateReward(snake, currentStates[i], done);
 
-    theSnakeAI.step(snake, currentStates[i], done, actions[i], envs[i].id);
-    batchTotalReward += currentReward;
+    const reward = theSnakeAI.calculateReward(snake, rawStates[i], done);
+    batchTotalReward += reward;
+
+    theSnakeAI.step(snake, currentStates[i], done, reward, actions[i], envs[i].instanceId);
   }
 
   if(currentTick % TRAIN_EVERY === 0) {
@@ -203,21 +213,18 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
       gameEngine.paused = false;
       env.gameEngine = gameEngine;
 
-      // Register each env in the replay buffer
-      theSnakeAI.changeEnvironment(env.id);
+      theSnakeAI.changeEnvironment(env.envId);
 
       return env;
     })
   );
 
+  envs.forEach(env => theSnakeAI.beginEpisode(env.instanceId));
+
   let currentTotalReward = 0;
-  let currentTotalScore = 0;
   let tick = 0;
 
-  envs.forEach(() => theSnakeAI.beginEpisode());
-
   while(tick <= MAX_TICKS) {
-    // Only process active environments
     const activeEnvs = envs.filter(env =>
       !env.gameEngine.gameFinished &&
       !env.gameEngine.gameOver &&
@@ -252,14 +259,13 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
     tensorboardSummaryWriter.scalar("score_max", maxScore, episode);
   }
 
-  currentTotalScore += avgScore;
   totalScore += avgScore;
 
   // Increment seeds by NUM_PARALLEL_ENVS to avoid reusing the same seeds
   currentGridSeed += NUM_PARALLEL_ENVS;
   currentGameSeed += NUM_PARALLEL_ENVS;
 
-  return { currentTotalReward, currentTotalScore };
+  return { currentTotalReward, currentTotalScore: avgScore };
 }
 
 async function saveModel(fullPath, isFinal = false) {
@@ -274,7 +280,7 @@ async function saveModel(fullPath, isFinal = false) {
 
   await theSnakeAI.mainModel.save(`file://${fullPath}`);
 
-  if(theSnakeAI.enableTargetModel && !isFinal) {
+  if(theSnakeAI.enableDoubleDQN && !isFinal) {
     theSnakeAI.targetModel = theSnakeAI.createModel();
     theSnakeAI.targetModel.setWeights(theSnakeAI.mainModel.getWeights());
   }
@@ -352,7 +358,6 @@ async function train() {
         currentEpisodeType = getNextEpisodeType(currentEpisodeType);
       }
 
-      // Note: changeEnvironment and seed increments are handled inside executeTrainingEpisode
       const { currentTotalReward, currentTotalScore } = await executeTrainingEpisode(currentEpisodeType, episode);
 
       currentEpisodeTypeReward += currentTotalReward;
@@ -372,8 +377,8 @@ async function train() {
 
     multiBar.log(
       `Episode type ${currentEpisodeType} finished! ` +
-      `Average score: ${currentEpisodeTypeScore / currentMaxEpisodes} - ` +
-      `Average reward: ${currentEpisodeTypeReward / currentMaxEpisodes} - ` +
+      `Average score: ${currentEpisodeTypeScore / NUM_EPISODES_PER_TYPE} - ` +
+      `Average reward: ${currentEpisodeTypeReward / NUM_EPISODES_PER_TYPE} - ` +
       `Time: ${performance.now() - startTime} ms\n`
     );
 
