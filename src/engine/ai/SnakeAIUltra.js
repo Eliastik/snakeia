@@ -880,6 +880,15 @@ export default class SnakeAIUltra extends SnakeAI {
       return GameConstants.AIRewards.GOLD_FRUIT_EATEN;
     }
 
+    if(fruit) {
+      const prevHead = snake.get(1);
+
+      const distBefore = Math.abs(prevHead.x - fruit.x) + Math.abs(prevHead.y - fruit.y);
+      const distAfter = Math.abs(head.x - fruit.x) + Math.abs(head.y - fruit.y);
+
+      return GameConstants.AIRewards.MOVE + (distBefore - distAfter) * 0.05;
+    }
+
     return GameConstants.AIRewards.MOVE;
   }
 
