@@ -340,9 +340,9 @@ export default class Snake {
     return this.get(this.length() - 1);
   }
 
-  positionInQueue(position) {
+  positionInQueue(x, y) {
     for(const value of this.queue) {
-      if(value && value.x == position.x && value.y == position.y) {
+      if(value && value.x == x && value.y == y) {
         return true;
       }
     }

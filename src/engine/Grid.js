@@ -185,7 +185,11 @@ export default class Grid {
   }
 
   get(position) {
-    return this.grid[position.y][position.x];
+    return this.getXY(position.x, position.y);
+  }
+
+  getXY(x, y) {
+    return this.grid[y][x];
   }
 
   valToChar(value) {

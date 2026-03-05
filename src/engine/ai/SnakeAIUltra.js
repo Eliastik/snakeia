@@ -18,7 +18,6 @@
  */
 import SnakeAI from "./SnakeAI.js";
 import GameConstants from "../Constants.js";
-import Position from "../Position.js";
 import GameUtils from "../GameUtils.js";
 import SnakeAIUltraModelLoader from "./SnakeAIUltraModelLoader.js";
 import MultiEnvironmentReplayBuffer from "./utils/memory/MultiEnvironmentReplayBuffer.js";
@@ -58,18 +57,18 @@ export default class SnakeAIUltra extends SnakeAI {
     this.dtype = "float32";
 
     // Model features settings
-    this.enableDoubleDQN = true;       // Enable Double DQN
+    this.enableDoubleDQN = true; // Enable Double DQN
     this.enableDuelingQLearning = true; // Enable Dueling DQN
-    this.enableNoisyNetwork = true;     // Enable Noisy Network for exploration
+    this.enableNoisyNetwork = true; // Enable Noisy Network for exploration
     /* Enable Variable Input Size for the model (experimental).
        If disabled and the input (grid size) of the game is different than the input size of the model, the input will be padded. */
     this.enableVariableInputSize = false;
-    this.enableStateRotation = true;   // Rotate the state so that the snake head is always facing "UP"
-    this.enableNStepsLearning = true;  // Enable N-Steps learning
+    this.enableStateRotation = true; // Rotate the state so that the snake head is always facing "UP"
+    this.enableNStepsLearning = true; // Enable N-Steps learning
 
     // Hyperparameters
     this.gamma = 0.99;
-    this.epsilonMax = 1.0;   // Not used if Noisy Network is enabled
+    this.epsilonMax = 1.0; // Not used if Noisy Network is enabled
     this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.001;
@@ -407,7 +406,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
     if(snakesForInference.length > 0) {
       const stateTensors = snakesForInference.map(({ snake, instanceId }, i) => {
-        const state = precomputedStates?.[i] ?? this.getState(snake, instanceId);
+        const state = precomputedStates?.[inferenceIndices[i]] ?? this.getState(snake, instanceId);
         return this.stateToTensor(state);
       });
 
@@ -525,14 +524,13 @@ export default class SnakeAIUltra extends SnakeAI {
 
     for(let y = 0; y < grid.height; y++) {
       for(let x = 0; x < grid.width; x++) {
-        const position = new Position(x, y);
-        const cellValue = grid.get(position);
+        const cellValue = grid.getXY(x, y);
 
         // AI Snake
-        if(snake.positionInQueue(position)) {
-          if(snake.getHeadPosition().equals(position)) {
+        if(snake.positionInQueue(x, y)) {
+          if(snake.getHeadPosition().equalsXY(x, y)) {
             snakesLayer[y][x] = 3;
-          } else if (snake.getTailPosition().equals(position)) {
+          } else if (snake.getTailPosition().equalsXY(x, y)) {
             snakesLayer[y][x] = 2;
           } else {
             snakesLayer[y][x] = 1;
@@ -602,15 +600,16 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   stateToFlatArray(stateArray) {
-    const firstChannel = stateArray[Object.keys(stateArray)[0]];
-    
+    // Filter to get only arrays (not headDirection)
+    const layers = Object.values(stateArray).filter(v => Array.isArray(v));
+
+    const firstChannel = layers[0];
     const inputHeight = firstChannel.length;
     const inputWidth = firstChannel[0].length;
 
     const targetHeight = this.enableVariableInputSize ? inputHeight : this.modelHeight;
     const targetWidth = this.enableVariableInputSize ? inputWidth : this.modelWidth;
 
-    const layers = Object.values(stateArray).filter(v => Array.isArray(v));
     const channels = layers.length;
 
     const padValue = -1;

@@ -60,10 +60,14 @@ export default class Position {
   }
 
   equals(otherPosition) {
-    if(otherPosition != null) {
-      return this.x == otherPosition.x && this.y == otherPosition.y;
-    } else {
-      return false;
+    if(otherPosition) {
+      return this.equalsXY(otherPosition.x, otherPosition.y);
     }
+    
+    return false;
+  }
+
+  equalsXY(x, y) {
+    return this.x == x && this.y == y;
   }
 }
