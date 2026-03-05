@@ -25,7 +25,7 @@ export default class OnlineClient {
     this.url;
     this.port;
     this.socket;
-    this.token;
+    this.tokens = new Map();
     this.id;
     this.serverSettings;
     this.currentRoom;
@@ -51,11 +51,13 @@ export default class OnlineClient {
     if(this.url != null && this.url.charAt(this.url.length - 1) == "/") {
       this.url = this.url.substring(0, this.url.length - 1);
     }
-    
+
+    const token = this.getCurrentToken();
+
     this.socket = io(this.getURL(), {
       withCredentials: true,
-      auth: this.token ? {
-        token: this.token
+      auth: token ? {
+        token
       } : null
     });
 
@@ -69,7 +71,7 @@ export default class OnlineClient {
       });
     
       this.socket.once("token", token => {
-        this.token = token;
+        this.tokens.set(this.getURL(), token);
         this.connect(this.url, this.port, callback);
       });
     });
@@ -121,10 +123,12 @@ export default class OnlineClient {
     if(!this.loadingRooms) {
       this.loadingRooms = true;
 
+      const token = this.getCurrentToken();
+
       const ioRooms = io(this.getURL() + "/rooms", {
         withCredentials: true,
-        auth: this.token ? {
-          token: this.token
+        auth: token ? {
+          token
         } : null
       });
     
@@ -162,11 +166,13 @@ export default class OnlineClient {
   createRoom(data, callback) {
     if(!this.creatingRoom) {
       this.creatingRoom = true;
+
+      const token = this.getCurrentToken();
       
       const ioCreate = io(this.getURL() + "/createRoom", {
         withCredentials: true,
-        auth: this.token ? {
-          token: this.token
+        auth: token ? {
+          token
         } : null
       });
 
@@ -270,6 +276,10 @@ export default class OnlineClient {
       this.ui = ui;
       return this.game;
     }
+  }
+
+  getCurrentToken() {
+    return this.tokens && this.tokens.get(this.getURL());
   }
 
   getURL() {
