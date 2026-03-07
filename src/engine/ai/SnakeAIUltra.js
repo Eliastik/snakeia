@@ -67,6 +67,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.enableStateRotation = true; // Rotate the state so that the snake head is always facing "UP"
     this.enableNStepsLearning = true; // Enable N-Steps learning
     this.enableDataAugmentation = true; // Enable automatic data augmentation
+    this.enableActionMasking = true; // Enable Action Masking (avoid dead actions)
 
     // Hyperparameters
     this.gamma = 0.99;
@@ -176,6 +177,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.logger.info(this.enableNStepsLearning ? `N Steps Learning enabled (n=${this.nStep})\n` : "N Steps Learning disabled\n");
     this.logger.info(this.enableFrameStacking ? `Frame stacking enabled (size=${this.frameStackSize})\n` : "Frame stacking disabled\n");
     this.logger.info(this.enableDataAugmentation ? "Data augmentation enabled\n" : "Data augmentation disabled\n");
+    this.logger.info(this.enableActionMasking ? "Action masking enabled\n" : "Action masking disabled\n");
     this.logger.info(`Model input shape: [${this.enableVariableInputSize ? "variable" : this.modelHeight}, ${this.enableVariableInputSize ? "variable" : this.modelWidth}, ${this.modelDepth * this.frameStackSize}]\n`);
     this.logger.info(`Model output (number of possible actions): ${this.numberOfPossibleActions}\n`);
   }
@@ -374,7 +376,12 @@ export default class SnakeAIUltra extends SnakeAI {
       const currentStateTensor = this.stateToTensor(this.getState(snake, instanceId)).expandDims(0);
   
       const qValues = this.mainModel.predict(currentStateTensor);
-      const values = qValues.dataSync();
+      const values = Array.from(qValues.dataSync());
+
+      if(this.enableActionMasking) {
+        const deadActions = this.getDeadActions(snake);
+        deadActions.forEach(a => { values[a] = -Infinity; });
+      }
 
       const { maxValue, maxIndex } = GameUtils.fastArgMax(values);
 
@@ -416,9 +423,21 @@ export default class SnakeAIUltra extends SnakeAI {
           const qValuesBatch = this.mainModel.predict(batch);
           const qValuesArray = qValuesBatch.arraySync();
 
-          return qValuesArray.map((qValues) => {
-            const { maxValue, maxIndex } = GameUtils.fastArgMax(qValues);
-            if(this.summaryWriter) this.currentQValue = maxValue;
+          return qValuesArray.map((qValues, i) => {
+            let values = qValues;
+
+            if(this.enableActionMasking) {
+              values = Array.from(qValues);
+              const deadActions = this.getDeadActions(snakesForInference[i].snake);
+              deadActions.forEach(a => { values[a] = -Infinity; });
+            }
+
+            const { maxValue, maxIndex } = GameUtils.fastArgMax(values);
+
+            if(this.summaryWriter) {
+              this.currentQValue = maxValue;
+            }
+
             return maxIndex;
           });
         });
@@ -474,6 +493,54 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     throw new Error(`Error: no action was mapped for actionIndex ${actionIndex}`);
+  }
+
+  getDeadActions(snake) {
+    const head = snake.getHeadPosition();
+    const deadActions = new Set();
+
+    const actionDirections = this.numberOfPossibleActions === 3 ? [
+      { action: GameConstants.AIActions.CONTINUE,   dir: head.direction },
+      { action: GameConstants.AIActions.TURN_LEFT,  dir: this.turnLeft(head.direction) },
+      { action: GameConstants.AIActions.TURN_RIGHT, dir: this.turnRight(head.direction) }
+    ] : [
+      { action: GameConstants.ActionMapping[GameConstants.Direction.UP],    dir: GameConstants.Direction.UP },
+      { action: GameConstants.ActionMapping[GameConstants.Direction.DOWN],  dir: GameConstants.Direction.DOWN },
+      { action: GameConstants.ActionMapping[GameConstants.Direction.LEFT],  dir: GameConstants.Direction.LEFT },
+      { action: GameConstants.ActionMapping[GameConstants.Direction.RIGHT], dir: GameConstants.Direction.RIGHT }
+    ];
+
+    for(const { action, dir } of actionDirections) {
+      const next = snake.getNextPosition(head, dir);
+      
+      if(snake.grid.isDeadPosition(next)) {
+        deadActions.add(action);
+      }
+    }
+
+    if(deadActions.size >= this.numberOfPossibleActions) {
+      return new Set();
+    }
+
+    return deadActions;
+  }
+
+  turnLeft(direction) {
+    switch(direction) {
+    case GameConstants.Direction.UP:     return GameConstants.Direction.LEFT;
+    case GameConstants.Direction.LEFT:   return GameConstants.Direction.BOTTOM;
+    case GameConstants.Direction.BOTTOM: return GameConstants.Direction.RIGHT;
+    case GameConstants.Direction.RIGHT:  return GameConstants.Direction.UP;
+    }
+  }
+
+  turnRight(direction) {
+    switch(direction) {
+    case GameConstants.Direction.UP:     return GameConstants.Direction.RIGHT;
+    case GameConstants.Direction.RIGHT:  return GameConstants.Direction.BOTTOM;
+    case GameConstants.Direction.BOTTOM: return GameConstants.Direction.LEFT;
+    case GameConstants.Direction.LEFT:   return GameConstants.Direction.UP;
+    }
   }
 
   rotateStateLayers(state, direction) {
@@ -937,6 +1004,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   calculateReward(snake, currentState, done) {
     const { gameOver } = snake;
     const head = snake.getHeadPosition();
@@ -1106,6 +1174,7 @@ export default class SnakeAIUltra extends SnakeAI {
         enableStateRotation: this.enableStateRotation,
         enableNStepsLearning: this.enableNStepsLearning,
         enableDataAugmentation: this.enableDataAugmentation,
+        enableActionMasking: this.enableActionMasking,
         nStep: this.nStep,
         softTargetUpdatesCoefficient: this.softTargetUpdatesCoefficient
       },
@@ -1218,6 +1287,13 @@ export default class SnakeAIUltra extends SnakeAI {
         } else if(config.enableStateRotation === undefined) {
           // To stay compatible with old models
           this.enableStateRotation = false;
+        }
+
+        if(typeof config.enableActionMasking === "boolean") {
+          this.enableActionMasking = config.enableActionMasking;
+        } else if(config.enableActionMasking === undefined) {
+          // To stay compatible with old models
+          this.enableActionMasking = false;
         }
 
         if(this.loadHyperParametersFromMetadata) {
