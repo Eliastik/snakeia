@@ -504,12 +504,12 @@ async function connectToServer(url, port) {
 
   await preloadAuthentication(url, port);
 
-  onlineClient.connect(url, port, (success, data) => {
+  onlineClient.connect(url, port, (success, data, id) => {
     document.getElementById("connectingToServer").style.display = "none";
 
     if(!success) {
       if(data == GameConstants.Error.AUTHENTICATION_REQUIRED || data == GameConstants.Error.BANNED) {
-        setupServerAuthentication();
+        setupServerAuthentication(id);
       } else if(data == GameConstants.Error.DISCONNECTED) {
         alert(i18next.t("servers.disconnectedError"));
         displayServerList();
@@ -534,11 +534,11 @@ async function preloadAuthentication(url, port) {
   });
 }
 
-function setupServerAuthentication() {
+function setupServerAuthentication(id) {
   document.getElementById("authenticationServerContainer").innerHTML = "";
 
   const authentIframe = document.createElement("iframe");
-  const authentUrl = onlineClient.getURL() + `/authentication?lang=${i18next.language.substring(0, 2)}&theme=${isDarkModeEnabled() ? "dark" : "light"}`;
+  const authentUrl = onlineClient.getURL() + `/authentication?lang=${i18next.language.substring(0, 2)}&theme=${isDarkModeEnabled() ? "dark" : "light"}` + (id ? `&id=${id}` : "");
 
   authentIframe.id = "authent_frame";
   authentIframe.src = authentUrl;

@@ -66,7 +66,7 @@ export default class OnlineClient {
         if(data == GameConstants.GameState.AUTHENTICATION_SUCCESS) {
           callback(true);
         } else {
-          callback(false, data);
+          callback(false, data, this.socket.id);
         }
       });
     
