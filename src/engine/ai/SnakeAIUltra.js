@@ -79,7 +79,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
     this.maxMemoryLength = 50000;
     this.nStep = 3;
-    this.frameStackSize = 3; // Number of frames to stack (1 = disabled)
+    this.frameStackSize = 4; // Number of frames to stack (1 = disabled)
     this.softTargetUpdatesCoefficient = 0.005;
     // END OF SETTINGS
 
@@ -121,12 +121,12 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Variable grid size -> OK
     // - Always keep the grid "UP" -> OK
     // - Add direction information for Snake head? -> Not needed with state rotation
-    // - Multi step learning -> OK, need tests
+    // - N Step Learning -> OK
     // - Frame stacking -> OK, need tests
+    // - Data augmentation (reverse the grid etc...)? -> OK, need tests
+    // - Performance optimizations -> OK
     // * Ideas:
-    // - Data augmentation (reverse the grid etc...)?
     // - Distributional RL - Categorical DQN?
-    // - Performance optimizations
     // - Reproducible training with seed: some fixes needed?
   }
 
@@ -344,6 +344,19 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   ai(snake) {
+    if(this.enableFrameStacking) {
+      const currentScore = snake.score;
+
+      if(this._lastScore === undefined) {
+        this._lastScore = currentScore;
+      }
+    
+      if(currentScore !== this._lastScore) {
+        this.resetFrameStack("inference");
+        this._lastScore = currentScore;
+      }
+    }
+  
     if(this.enableTrainingMode && snake._precomputedAction !== undefined) {
       const action = snake._precomputedAction;
       delete snake._precomputedAction;
@@ -624,7 +637,7 @@ export default class SnakeAIUltra extends SnakeAI {
     return { snakesLayer, fruitsAndWallsLayer };
   }
 
-  getState(snake, instanceId = null) {
+  getState(snake, instanceId = "inference") {
     const { snakesLayer, fruitsAndWallsLayer } = this.getStateRaw(snake);
 
     let state = { snakesLayer, fruitsAndWallsLayer };
@@ -714,6 +727,7 @@ export default class SnakeAIUltra extends SnakeAI {
     if(!this.frameStacks.has(instanceId)) {
       this.frameStacks.set(instanceId, []);
     }
+
     return this.frameStacks.get(instanceId);
   }
 
@@ -750,6 +764,10 @@ export default class SnakeAIUltra extends SnakeAI {
       channels: currentStateFlat.channels * this.frameStackSize,
       headDirection: currentStateFlat.headDirection
     };
+  }
+
+  resetFrameStack(instanceId) {
+    this.frameStacks.delete(instanceId);
   }
 
   // N-Step learning
@@ -1091,7 +1109,7 @@ export default class SnakeAIUltra extends SnakeAI {
         if(visited.has(key)) {
           continue;
         }
-        
+
         visited.add(key);
 
         if(!grid.isDeadPositionXY(nx, ny)) {
@@ -1103,7 +1121,7 @@ export default class SnakeAIUltra extends SnakeAI {
     return -1;
   }
 
-  step(snake, currentState, done, reward, action = null, instanceId = null) {
+  step(snake, currentState, done, reward, action = null, instanceId = "inference") {
     const nextStateData = this.getState(snake, instanceId);
 
     if(this.enableNStepsLearning && this.nStep > 1 && instanceId) {
@@ -1125,8 +1143,10 @@ export default class SnakeAIUltra extends SnakeAI {
     }
   }
 
-  beginEpisode(instanceId = null) {
+  beginEpisode(instanceId = "inference") {
     this.resetNoisyLayers();
+
+    this._lastScore = undefined;
 
     if(instanceId) {
       if(this.enableNStepsLearning) {
@@ -1134,7 +1154,7 @@ export default class SnakeAIUltra extends SnakeAI {
       }
 
       if(this.enableFrameStacking) {
-        this.frameStacks.delete(instanceId);
+        this.resetFrameStack(instanceId);
       }
 
       this.nStepBuffers.delete(instanceId);

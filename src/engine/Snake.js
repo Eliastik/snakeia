@@ -253,6 +253,7 @@ export default class Snake {
         try {
           const aiUltra = new SnakeAIUltra(false);
           await aiUltra.setup();
+          await aiUltra.beginEpisode();
           this.snakeAI = aiUltra;
         } catch(e) {
           console.error(e);

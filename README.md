@@ -17,7 +17,7 @@ Game written in pure JavaScript and object oriented.
 The game features multiple AI modes that play the game autonomously.
 
 The AI Ultra mode is a trained AI using the Deep Q-Learning algorithm along with several enhancements, including Dueling Layers, Double Q-Learning, Noisy Networks, Prioritized Experience Replay, and more.
-It is developed using the TensorFlow.js framework.
+It is developed using the TensorFlow.js framework. The [principal class of this AI is available here](https://github.com/Eliastik/snakeia/blob/master/src/engine/ai/SnakeAIUltra.js) ([complete folder here](https://github.com/Eliastik/snakeia/tree/master/src/engine/ai)).
 
 Other AI modes include:
 
@@ -304,7 +304,8 @@ Jeu programmé en JavaScript pur et en orienté objet.
 Le jeu propose plusieurs modes d’IA capables de jouer de manière autonome.
 
 Le mode IA Ultra est une intelligence artificielle entraînée avec l’algorithme de Deep Q-Learning, amélioré par plusieurs optimisations telles que les Dueling Layers, le Double Q-Learning, les Noisy Networks, le Prioritized Experience Replay, et d'autres encore.
-Elle a été développée grâce au framework TensorFlow.js.
+
+Elle a été développée grâce au framework TensorFlow.js. La [classe principale de cette IA est disponible ici](https://github.com/Eliastik/snakeia/blob/master/src/engine/ai/SnakeAIUltra.js) ([dossier complet ici](https://github.com/Eliastik/snakeia/tree/master/src/engine/ai)).
 
 Les autres modes d’IA sont :
 

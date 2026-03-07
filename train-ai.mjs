@@ -42,7 +42,7 @@ const EXPORT_MEMORY             = true;
 const LOAD_MODEL_PATH           = null;
 const LOAD_HYPERPARAMETERS      = false;
 const LOAD_MEMORY               = true;
-const NUM_PARALLEL_ENVS         = 4;
+const NUM_PARALLEL_ENVS         = 1;
 // End of settings
 
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
@@ -179,7 +179,15 @@ async function executeTickBatch(envs, currentTick) {
     env.snake._precomputedAction = actions[i];
   });
 
-  envs.forEach(env => env.gameEngine.doTick());
+  envs.forEach(env => {
+    const scoreBefore = env.snake.score;
+
+    env.gameEngine.doTick();
+
+    if(env.snake.score > scoreBefore) {
+      theSnakeAI.resetFrameStack(env.instanceId);
+    }
+  });
 
   let batchTotalReward = 0;
 
