@@ -508,6 +508,7 @@ export default class SnakeAIUltra extends SnakeAI {
     throw new Error(`Error: no action was mapped for actionIndex ${actionIndex}`);
   }
 
+  // TODO fix
   getDeadActions(snake) {
     const head = snake.getHeadPosition();
     const deadActions = new Set();

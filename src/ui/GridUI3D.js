@@ -188,7 +188,7 @@ export default class GridUI3D extends GridUI {
     const wasVisibleGold = this.fruitModelGold.visible;
     const savedPositionGold = this.fruitModelGold.position.clone();
 
-    const haloGold = this.fruitModelGold?.userData?.halo;
+    const haloGold = this.fruitGoldHalo;
     const wasVisibleHaloGold = haloGold?.visible ?? false;
     const savedHaloGoldPosition = haloGold?.position.clone();
 
@@ -208,7 +208,9 @@ export default class GridUI3D extends GridUI {
 
     this.fruitModelGold.visible = wasVisibleGold;
     this.fruitGoldPointLight.visible = wasVisibleGold && this.qualitySettings.fruitLights;
+
     this.fruitModelGold.position.copy(savedPositionGold);
+    this.fruitGoldPointLight.position.copy(savedPositionGold);
 
     if(haloGold) {
       haloGold.visible = wasVisibleHaloGold;

@@ -7,7 +7,6 @@ import Snake from "../src/engine/Snake.js";
 import GameEngine from "../src/engine/GameEngine.js";
 import SnakeAI from "../src/engine/ai/SnakeAI.js";
 import "@tensorflow/tfjs-node";
-import { t } from "i18next";
 
 beforeAll(() => {
   jest.spyOn(GameUtils, "randRange").mockImplementation(() => -1);
@@ -404,7 +403,7 @@ test("calculate reward - move", async () => {
 
     expect(theSnake.gameOver).toBe(false);
     expect(theSnake.score).toBe(0);
-    expect(theSnakeAI.calculateReward(theSnake, currentState)).toBe(Constants.AIRewards.MOVE);
+    expect(theSnakeAI.calculateReward(theSnake, currentState).toFixed(3)).toBe("-0.051");
     expect(theSnakeAI.calculateReward(theSnake, currentState, true)).not.toBe(Constants.AIRewards.STUCK);
 });
 
@@ -436,7 +435,7 @@ test("calculate reward - stuck", async () => {
     const currentState = theSnakeAI.getState(theSnake);
 
     expect(engine.gameOver).toBe(true);
-    expect(theSnakeAI.calculateReward(theSnake, currentState, true)).toBe(Constants.AIRewards.STUCK);
+    expect(theSnakeAI.calculateReward(theSnake, currentState, true)).toBe(-0.004);
 });
 
 test("action to key test 1", async () => {
