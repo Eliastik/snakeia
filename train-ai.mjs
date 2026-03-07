@@ -1,3 +1,8 @@
+
+import fs from "fs";
+import process from "process";
+import { once } from "events";
+import { setImmediate } from "timers/promises";
 import Grid from "./src/engine/Grid.js";
 import Constants from "./src/engine/Constants.js";
 import Snake from "./src/engine/Snake.js";
@@ -5,8 +10,6 @@ import GameEngine from "./src/engine/GameEngine.js";
 import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 import cliProgress from "cli-progress";
 import { encode, decode } from "@msgpack/msgpack";
-import fs from "fs";
-import process from "process";
 
 // import tf from "@tensorflow/tfjs-node";
 // Uncomment to enable GPU, and comment above import
@@ -22,8 +25,8 @@ const NUM_EPISODES_PER_TYPE     = 100;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 30;
 const MAX_TICKS                 = 1000;
-const INITAL_GRID_WIDTH         = 5;
-const INITAL_GRID_HEIGHT        = 5;
+const INITAL_GRID_WIDTH         = 20;
+const INITAL_GRID_HEIGHT        = 20;
 const GRID_INCREASE_INCREMENT   = 5;
 const MAX_GRID_WIDTH            = 20;
 const MAX_GRID_HEIGHT           = 20;
@@ -36,9 +39,9 @@ const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = true;
-const LOAD_MODEL_PATH           = "models/2026-03-05T22-31-15-502Z/";
+const LOAD_MODEL_PATH           = "models/2026-03-07T17-13-49-910Z";
 const LOAD_HYPERPARAMETERS      = false;
-const LOAD_MEMORY               = false;
+const LOAD_MEMORY               = true;
 const NUM_PARALLEL_ENVS         = 1;
 // End of settings
 
@@ -52,7 +55,7 @@ class MultiBarCustom extends cliProgress.MultiBar {
 }
 
 const multiBar = new MultiBarCustom({
-  format: "Training |{bar}| {percentage}% | ETA: {eta_formatted} | Elapsed time: {duration_formatted} | Episode {value}/{total}",
+  format: "{task} |{bar}| {percentage}% | ETA: {eta_formatted} | Elapsed time: {duration_formatted} | {step} {value}/{total}",
   hideCursor: false,
   barCompleteChar: "\u2588",
   barIncompleteChar: "\u2591",
@@ -80,7 +83,10 @@ const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, TRAINING_SEED, {
 }, LOAD_HYPERPARAMETERS, LOAD_MEMORY);
 
 const currentMaxEpisodes = getMaxEpisodesCount();
-const progressBar = multiBar.create(currentMaxEpisodes, 0);
+const progressBar = multiBar.create(currentMaxEpisodes, 0, {
+  task: "Training",
+  step: "Episode"
+});
 
 await theSnakeAI.setup(ENABLE_TENSORBOARD_LOGS ? tensorboardSummaryWriter : null);
 multiBar.update();
@@ -297,45 +303,72 @@ function saveMetadata(fullPath) {
   multiBar.log(`Metadata saved to ${fullPath} directory\n`);
 }
 
-// TODO fix saveMemory stuck/freeze
 async function saveMemory(fullPath) {
-  multiBar.log(`Saving memory to ${fullPath} directory...\n`);
+  const startTime = Date.now();
 
+  multiBar.log("Exporting memory...\n");
   const exportedMemory = theSnakeAI.exportMemory();
 
   multiBar.log(`Encoding memory (${theSnakeAI.memory.size()} entries)...\n`);
   const encodedMemory = encode(exportedMemory);
-  multiBar.log(`Encoded: ${(encodedMemory.length / 1024 / 1024).toFixed(2)} MB, writing...\n`);
 
-  const stream = fs.createWriteStream(`${fullPath}/memory.bin`);
-  const CHUNK_SIZE = 1024 * 1024;
+  const totalBytes = encodedMemory.length;
+  const totalMB = totalBytes / 1024 / 1024;
 
-  await new Promise((resolve, reject) => {
-    stream.once("error", reject);
-    stream.once("finish", resolve);
+  multiBar.log(`Encoded size: ${totalMB.toFixed(2)} MB\n`);
 
-    let offset = 0;
+  const filePath = `${fullPath}/memory.bin`;
 
-    const writeNextChunk = () => {
-      while(offset < encodedMemory.length) {
-        const chunk = encodedMemory.slice(offset, offset + CHUNK_SIZE);
-        offset += CHUNK_SIZE;
+  const CHUNK_SIZE = 256 * 1024 * 1024;
+  const YIELD_EVERY = 16;
 
-        const canContinue = stream.write(chunk);
-
-        if(!canContinue) {
-          stream.once("drain", () => writeNextChunk);
-          return;
-        }
-      }
-
-      stream.end();
-    };
-
-    writeNextChunk();
+  const stream = fs.createWriteStream(filePath, {
+    highWaterMark: 512 * 1024 * 1024
   });
 
-  multiBar.log(`Memory saved to ${fullPath} directory\n`);
+  stream.on("error", err => multiBar.log(`[ERROR] Save stream error: ${err}\n`));
+
+  let written = 0;
+  let chunkIndex = 0;
+
+  const saveBar = multiBar.create(Math.round((totalBytes / 1024 / 1024) * 100) / 100, 0, {
+    task: "Saving memory",
+    step: "MB written:"
+  });
+  multiBar.update();
+
+  for(let offset = 0; offset < totalBytes; offset += CHUNK_SIZE) {
+    const chunk = encodedMemory.subarray(offset, offset + CHUNK_SIZE);
+
+    written += chunk.length;
+    chunkIndex++;
+
+    if(!stream.write(chunk)) {
+      await once(stream, "drain");
+    }
+
+    saveBar.update(Math.round((written / 1024 / 1024) * 100) / 100);
+    multiBar.update();
+
+    if(chunkIndex % YIELD_EVERY === 0) {
+      await new Promise(r => setImmediate(r));
+    }
+  }
+
+  stream.end();
+
+  await once(stream, "finish");
+
+  stream.close();
+  saveBar.stop();
+  multiBar.remove(saveBar);
+
+  const duration = (Date.now() - startTime) / 1000;
+  const speed = totalMB / duration;
+
+  multiBar.log(
+    `Memory saved (${totalMB.toFixed(2)} MB) in ${duration.toFixed(2)}s (${speed.toFixed(0)} MB/s)\n`
+  );
 }
 
 async function saveState(isFinal = false, subDirectory = "") {
