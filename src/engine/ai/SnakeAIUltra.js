@@ -958,7 +958,9 @@ export default class SnakeAIUltra extends SnakeAI {
     inputs.dispose();
     targets.dispose();
 
-    if(this.stepsSinceLastSync >= this.syncTargetEvery) {
+    if(this.enableSoftTargetUpdates) {
+      this.synchronizeTargetNetwork();
+    } else if(this.stepsSinceLastSync >= this.syncTargetEvery) {
       this.synchronizeTargetNetwork();
       this.stepsSinceLastSync = 0;
     }
@@ -984,8 +986,6 @@ export default class SnakeAIUltra extends SnakeAI {
 
   synchronizeTargetNetwork(forceHardTargetUpdates = false) {
     if(this.enableDoubleDQN) {
-      this.logger.info("Synchronizing target network...\n");
-
       if(!forceHardTargetUpdates && this.enableSoftTargetUpdates) {
         const mainWeights = this.mainModel.getWeights();
         const targetWeights = this.targetModel.getWeights();
@@ -997,10 +997,10 @@ export default class SnakeAIUltra extends SnakeAI {
         this.targetModel.setWeights(updatedWeights);
         updatedWeights.forEach(w => w.dispose());
       } else {
+        this.logger.info("Synchronizing target network...\n");
         this.targetModel.setWeights(this.mainModel.getWeights());
+        this.logger.info("Target network synchronized!\n");
       }
-
-      this.logger.info("Target network synchronized!\n");
     }
   }
 
@@ -1069,7 +1069,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const visited = new Set();
     const queue = [[fromX, fromY, 0]];
   
-    visited.add(`${fromX},${fromY}`);
+    visited.add(fromY * grid.width + fromX);
 
     while(queue.length > 0) {
       const [x, y, dist] = queue.shift();
@@ -1086,8 +1086,12 @@ export default class SnakeAIUltra extends SnakeAI {
           continue;
         }
 
-        const key = `${nx},${ny}`;
-        if(visited.has(key)) continue;
+        const key = ny * grid.width + nx;
+
+        if(visited.has(key)) {
+          continue;
+        }
+        
         visited.add(key);
 
         if(!grid.isDeadPositionXY(nx, ny)) {
@@ -1155,44 +1159,63 @@ export default class SnakeAIUltra extends SnakeAI {
     };
   }
 
-  exportMetadata() {
+  static get METADATA_SCHEMA() {
     return {
       trainingConfig: {
-        dtype: this.dtype,
-        trainingRandomSeed: this.trainingRandomSeed,
-        enableDuelingQLearning: this.enableDuelingQLearning,
-        enableDoubleDQN: this.enableDoubleDQN,
-        enableSoftTargetUpdates: this.enableSoftTargetUpdates,
-        enableNoisyNetwork: this.enableNoisyNetwork,
-        syncTargetEvery: this.syncTargetEvery,
-        gamma: this.gamma,
-        epsilonMax: this.epsilonMax,
-        epsilonMin: this.epsilonMin,
-        epsilon: this.epsilon,
-        learningRate: this.learningRate,
-        batchSize: this.batchSize,
-        enableStateRotation: this.enableStateRotation,
-        enableNStepsLearning: this.enableNStepsLearning,
-        enableDataAugmentation: this.enableDataAugmentation,
-        enableActionMasking: this.enableActionMasking,
-        nStep: this.nStep,
-        softTargetUpdatesCoefficient: this.softTargetUpdatesCoefficient
+        dtype:                        { type: "string",  target: "dtype" },
+        enableDuelingQLearning:       { type: "boolean", target: "enableDuelingQLearning" },
+        enableDoubleDQN:              { type: "boolean", target: "enableDoubleDQN" },
+        enableSoftTargetUpdates:      { type: "boolean", target: "enableSoftTargetUpdates" },
+        enableNoisyNetwork:           { type: "boolean", target: "enableNoisyNetwork" },
+        enableStateRotation:          { type: "boolean", target: "enableStateRotation", fallback: false },
+        enableNStepsLearning:         { type: "boolean", target: "enableNStepsLearning", fallback: false },
+        enableDataAugmentation:       { type: "boolean", target: "enableDataAugmentation" },
+        enableActionMasking:          { type: "boolean", target: "enableActionMasking", fallback: false },
+        syncTargetEvery:              { type: "number",  target: "syncTargetEvery", hyperParam: true },
+        gamma:                        { type: "number",  target: "gamma", hyperParam: true },
+        epsilonMax:                   { type: "number",  target: "epsilonMax", hyperParam: true },
+        epsilonMin:                   { type: "number",  target: "epsilonMin", hyperParam: true },
+        epsilon:                      { type: "number",  target: "epsilon", hyperParam: true },
+        learningRate:                 { type: "number",  target: "learningRate", hyperParam: true },
+        batchSize:                    { type: "number",  target: "batchSize", hyperParam: true },
+        nStep:                        { type: "number",  target: "nStep", hyperParam: true },
+        softTargetUpdatesCoefficient: { type: "number",  target: "softTargetUpdatesCoefficient", hyperParam: true }
       },
       modelInfo: {
-        modelHeight: this.modelHeight,
-        modelWidth: this.modelWidth,
-        modelDepth: this.modelDepth,
-        frameStackSize: this.frameStackSize,
-        numberOfPossibleActions: this.numberOfPossibleActions,
-        enableVariableInputSize: this.enableVariableInputSize
+        modelHeight:            { type: "number",  target: "modelHeight" },
+        modelWidth:             { type: "number",  target: "modelWidth" },
+        modelDepth:             { type: "number",  target: "modelDepth" },
+        numberOfPossibleActions:{ type: "number",  target: "numberOfPossibleActions" },
+        enableVariableInputSize:{ type: "boolean", target: "enableVariableInputSize" },
+        frameStackSize:         { type: "number",  target: "frameStackSize", fallback: 1 },
       },
       trainingState: {
+        lastAction:         { type: "number",  target: "lastAction" },
+        currentQValue:      { type: "number",  target: "currentQValue" },
+        currentEpoch:       { type: "number",  target: "currentEpoch" },
+        stepsSinceLastSync: { type: "number",  target: "stepsSinceLastSync" }
+      }
+    };
+  }
+
+  exportMetadata() {
+    const schema = SnakeAIUltra.METADATA_SCHEMA;
+
+    const buildSection = (sectionSchema) =>
+      Object.fromEntries(
+        Object.entries(sectionSchema).map(([key, { target }]) => [key, this[target]])
+      );
+
+    return {
+      trainingConfig: {
+        ...buildSection(schema.trainingConfig),
+        trainingRandomSeed: this.trainingRandomSeed
+      },
+      modelInfo: buildSection(schema.modelInfo),
+      trainingState: {
+        ...buildSection(schema.trainingState),
         trainingRng: this.trainingRng.state(),
-        currentEnv: this.currentEnv,
-        lastAction: this.lastAction,
-        currentQValue: this.currentQValue,
-        currentEpoch: this.currentEpoch,
-        stepsSinceLastSync: this.stepsSinceLastSync
+        currentEnv:  this.currentEnv
       }
     };
   }
@@ -1265,85 +1288,48 @@ export default class SnakeAIUltra extends SnakeAI {
         return;
       }
 
+      const schema = SnakeAIUltra.METADATA_SCHEMA;
+
+      const loadSection = (source, sectionSchema) => {
+        if(!source) return;
+
+        for(const [key, { type, target, fallback, hyperParam }] of Object.entries(sectionSchema)) {
+          if(hyperParam && !this.loadHyperParametersFromMetadata) continue;
+
+          if(typeof source[key] === type) {
+            this[target] = source[key];
+          } else if(source[key] === undefined && fallback !== undefined) {
+            this[target] = fallback;
+          }
+        }
+      };
+
       if(metadata.trainingConfig) {
         const config = metadata.trainingConfig;
-
-        if(config.dtype) this.dtype = config.dtype;
 
         if(typeof config.trainingRandomSeed === "number") {
           this.trainingRandomSeed = config.trainingRandomSeed;
           this.trainingRng = new seedrandom(this.trainingRandomSeed, { state: true });
         }
-
-        if(typeof config.enableDoubleDQN === "boolean") this.enableDoubleDQN = config.enableDoubleDQN;
-        if(typeof config.enableSoftTargetUpdates === "boolean") this.enableSoftTargetUpdates = config.enableSoftTargetUpdates;
-        if(typeof config.enableDuelingQLearning === "boolean") this.enableDuelingQLearning = config.enableDuelingQLearning;
-        if(typeof config.enableNoisyNetwork === "boolean") this.enableNoisyNetwork = config.enableNoisyNetwork;
-        if(typeof config.enableNStepsLearning === "boolean") this.enableNStepsLearning = config.enableNStepsLearning;
-        if(typeof config.enableDataAugmentation === "boolean") this.enableDataAugmentation = config.enableDataAugmentation;
-
-        if(typeof config.enableStateRotation === "boolean") {
-          this.enableStateRotation = config.enableStateRotation;
-        } else if(config.enableStateRotation === undefined) {
-          // To stay compatible with old models
-          this.enableStateRotation = false;
-        }
-
-        if(typeof config.enableActionMasking === "boolean") {
-          this.enableActionMasking = config.enableActionMasking;
-        } else if(config.enableActionMasking === undefined) {
-          // To stay compatible with old models
-          this.enableActionMasking = false;
-        }
-
-        if(this.loadHyperParametersFromMetadata) {
-          if(typeof config.syncTargetEvery === "number") this.syncTargetEvery = config.syncTargetEvery;
-          if(typeof config.gamma === "number") this.gamma = config.gamma;
-          if(typeof config.epsilonMax === "number") this.epsilonMax = config.epsilonMax;
-          if(typeof config.epsilonMin === "number") this.epsilonMin = config.epsilonMin;
-          if(typeof config.epsilon === "number") this.epsilon = config.epsilon;
-          if(typeof config.learningRate === "number") this.learningRate = config.learningRate;
-          if(typeof config.batchSize === "number") this.batchSize = config.batchSize;
-          if(typeof config.nStep === "number") this.nStep = config.nStep;
-          if(typeof config.softTargetUpdatesCoefficient === "number") this.softTargetUpdatesCoefficient = config.softTargetUpdatesCoefficient;
-        } else {
-          this.logger.info("Loading hyperparameters from metadata is disabled. Skipping hyperparameters loading.\n");
-        }
       }
 
-      if(metadata.modelInfo) {
-        const modelInfo = metadata.modelInfo;
+      loadSection(metadata.trainingConfig, schema.trainingConfig);
+      loadSection(metadata.modelInfo, schema.modelInfo);
+      loadSection(metadata.trainingState, schema.trainingState);
 
-        if(typeof modelInfo.modelHeight === "number") this.modelHeight = modelInfo.modelHeight;
-        if(typeof modelInfo.modelWidth === "number") this.modelWidth = modelInfo.modelWidth;
-        if(typeof modelInfo.modelDepth === "number") this.modelDepth = modelInfo.modelDepth;
-        if(typeof modelInfo.numberOfPossibleActions === "number") this.numberOfPossibleActions = modelInfo.numberOfPossibleActions;
-        if(typeof modelInfo.enableVariableInputSize === "boolean") this.enableVariableInputSize = modelInfo.enableVariableInputSize;
-
-        if(typeof modelInfo.frameStackSize === "number") {
-          this.frameStackSize = modelInfo.frameStackSize;
-        } else {
-          // To stay compatible with old models
-          this.frameStackSize = 1;
-        }
+      if(!this.loadHyperParametersFromMetadata) {
+        this.logger.info("Loading hyperparameters from metadata is disabled. Skipping hyperparameters loading.\n");
       }
 
       if(metadata.trainingState) {
         const state = metadata.trainingState;
 
-        if(state.trainingRng) {
-          this.trainingRng = seedrandom("", { state: state.trainingRng });
-        }
-
+        if(state.trainingRng) this.trainingRng = seedrandom("", { state: state.trainingRng });
         if(state.currentEnv !== undefined && this.memoryRestoredFromState) this.currentEnv = state.currentEnv;
-        if(state.lastAction !== undefined) this.lastAction = state.lastAction;
-        if(state.currentQValue !== undefined) this.currentQValue = state.currentQValue;
-        if(state.currentEpoch !== undefined) this.currentEpoch = state.currentEpoch;
-        if(state.stepsSinceLastSync !== undefined) this.stepsSinceLastSync = state.stepsSinceLastSync;
       }
 
       this.logger.info("Metadata correctly loaded from file\n");
-    } catch (err) {
+    } catch(err) {
       this.logger.error(`Error loading metadata: ${err.message}\n`);
     }
   }

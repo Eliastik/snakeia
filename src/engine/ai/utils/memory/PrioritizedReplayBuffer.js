@@ -20,7 +20,7 @@ import BaseReplayBuffer from "./BaseReplayBuffer.js";
 import SumTree from "./SumTree.js";
 
 export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
-  constructor(capacity, rng, logger, calculateWeight = false, alpha = 0.6, beta = 0.4, espilon = 1e-5, betaIncrementPerSampling = 0.001) {
+  constructor(capacity, rng, logger, calculateWeight = false, alpha = 0.6, beta = 0.4, espilon = 1e-5, betaIncrementPerSampling = 0.0001) {
     super();
 
     this.capacity = capacity;
@@ -89,7 +89,7 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
     return {
       samples,
       indices,
-      weights: this.calculateWeight ? weights.map(w => w / maxWeight) : null
+      weight: this.calculateWeight ? weights.map(w => w / maxWeight) : null
     };
   }
 
