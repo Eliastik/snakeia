@@ -130,12 +130,12 @@ export default {
     3: 37
   },
   AIRewards: {
-    GAME_OVER: -1,
+    GAME_OVER: -0.5,
     GAME_OVER_WITH_EMPTY_CASES_AROUND: -1,
     FRUIT_EATEN: 0.5,
     GOLD_FRUIT_EATEN: 1,
     MOVE: -0.001,
-    STUCK: 0
+    STUCK_MAX_PENALTY: 0.5
   },
   AIActions: {
     TURN_LEFT: 0,

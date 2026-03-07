@@ -58,6 +58,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
     // Model features settings
     this.enableDoubleDQN = true; // Enable Double DQN
+    this.enableSoftTargetUpdates = true; // Enable Soft Targets Updates for DQN
     this.enableDuelingQLearning = true; // Enable Dueling DQN
     this.enableNoisyNetwork = true; // Enable Noisy Network for exploration
     /* Enable Variable Input Size for the model (experimental).
@@ -65,6 +66,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.enableVariableInputSize = false;
     this.enableStateRotation = true; // Rotate the state so that the snake head is always facing "UP"
     this.enableNStepsLearning = true; // Enable N-Steps learning
+    this.enableDataAugmentation = true; // Enable automatic data augmentation
 
     // Hyperparameters
     this.gamma = 0.99;
@@ -72,11 +74,12 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.001;
-    this.batchSize = 128;
+    this.batchSize = 64;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
-    this.maxMemoryLength = 30000;
+    this.maxMemoryLength = 50000;
     this.nStep = 3;
     this.frameStackSize = 3; // Number of frames to stack (1 = disabled)
+    this.softTargetUpdatesCoefficient = 0.005;
     // END OF SETTINGS
 
     // Replay memory
@@ -166,11 +169,13 @@ export default class SnakeAIUltra extends SnakeAI {
   logModelCharacteristics() {
     this.logger.info(this.enableDuelingQLearning ? "Dueling DQN enabled\n" : "Dueling DQN disabled\n");
     this.logger.info(this.enableDoubleDQN ? "Double DQN enabled\n" : "Double DQN disabled\n");
+    this.logger.info(this.enableSoftTargetUpdates ? `Soft target updates enabled (coefficient: ${this.softTargetUpdatesCoefficient})\n` : "Soft target updates disabled\n");
     this.logger.info(this.enableNoisyNetwork ? "Noisy Network enabled\n" : "Noisy Network disabled\n");
     this.logger.info(this.enableVariableInputSize ? "Variable input size enabled\n" : "Variable input size disabled\n");
     this.logger.info(this.enableStateRotation ? "State rotation enabled\n" : "State rotation disabled\n");
     this.logger.info(this.enableNStepsLearning ? `N Steps Learning enabled (n=${this.nStep})\n` : "N Steps Learning disabled\n");
     this.logger.info(this.enableFrameStacking ? `Frame stacking enabled (size=${this.frameStackSize})\n` : "Frame stacking disabled\n");
+    this.logger.info(this.enableDataAugmentation ? "Data augmentation enabled\n" : "Data augmentation disabled\n");
     this.logger.info(`Model input shape: [${this.enableVariableInputSize ? "variable" : this.modelHeight}, ${this.enableVariableInputSize ? "variable" : this.modelWidth}, ${this.modelDepth * this.frameStackSize}]\n`);
     this.logger.info(`Model output (number of possible actions): ${this.numberOfPossibleActions}\n`);
   }
@@ -231,11 +236,6 @@ export default class SnakeAIUltra extends SnakeAI {
       padding: "same",
       dtype: this.dtype
     }).apply(input);
-
-    const pool1 = tf.layers.maxPooling2d({
-      poolSize: [2, 2],
-      strides: [2, 2]
-    }).apply(conv1);
   
     const conv2 = tf.layers.conv2d({
       filters: 64,
@@ -243,14 +243,14 @@ export default class SnakeAIUltra extends SnakeAI {
       activation: "relu",
       padding: "same",
       dtype: this.dtype
-    }).apply(pool1);
+    }).apply(conv1);
   
     const flattenOrPooling = this.enableVariableInputSize ?
       tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true, dtype: this.dtype }).apply(conv2) :
       tf.layers.flatten({ dtype: this.dtype }).apply(conv2);
   
     const dense1 = DenseLayer({
-      units: 32,
+      units: 64,
       activation: "relu",
       dtype: this.dtype,
       seed: this.trainingRng()
@@ -267,7 +267,7 @@ export default class SnakeAIUltra extends SnakeAI {
   
     if(this.enableDuelingQLearning) {
       const dense2 = DenseLayer({
-        units: 32,
+        units: 64,
         activation: "relu",
         dtype: this.dtype,
         seed: this.trainingRng()
@@ -740,6 +740,87 @@ export default class SnakeAIUltra extends SnakeAI {
     const nextStateFlat = nextState.data ? nextState : this.stateToFlatArray(nextState);
 
     this.memory.add(stateFlat, action, reward, nextStateFlat, done);
+
+    if(this.enableDataAugmentation) {
+      // Horizontal flip
+      const flippedH = this.flipState(stateFlat, true, false);
+      const flippedHNext = this.flipState(nextStateFlat, true, false);
+
+      this.memory.add(flippedH, this.flipActionHorizontal(action), reward, flippedHNext, done);
+
+      // Vertical flip
+      const flippedV = this.flipState(stateFlat, false, true);
+      const flippedVNext = this.flipState(nextStateFlat, false, true);
+
+      this.memory.add(flippedV, this.flipActionVertical(action), reward, flippedVNext, done);
+
+      // Horizontal + vertical flip combined
+      const flippedHV = this.flipState(stateFlat, true, true);
+      const flippedHVNext = this.flipState(nextStateFlat, true, true);
+
+      this.memory.add(flippedHV, this.flipActionHorizontal(this.flipActionVertical(action)), reward, flippedHVNext, done);
+    }
+  }
+
+  flipState(stateFlat, flipH = false, flipV = false) {
+    const { data, width, height, channels, headDirection } = stateFlat;
+    const flipped = new Float32Array(data.length);
+
+    for(let y = 0; y < height; y++) {
+      for(let x = 0; x < width; x++) {
+        const srcIndex = (y * width + x) * channels;
+        const dstX = flipH ? (width - 1 - x) : x;
+        const dstY = flipV ? (height - 1 - y) : y;
+        const dstIndex = (dstY * width + dstX) * channels;
+
+        for(let c = 0; c < channels; c++) {
+          flipped[dstIndex + c] = data[srcIndex + c];
+        }
+      }
+    }
+
+    return { data: flipped, width, height, channels, headDirection };
+  }
+
+  flipActionHorizontal(action) {
+    if(this.numberOfPossibleActions === 3) {
+      if(!this.enableStateRotation) {
+        return GameConstants.AIActions.CONTINUE;
+      }
+
+      switch(action) {
+      case GameConstants.AIActions.TURN_LEFT:
+        return GameConstants.AIActions.TURN_RIGHT;
+      case GameConstants.AIActions.TURN_RIGHT:
+        return GameConstants.AIActions.TURN_LEFT;
+      }
+    } else if(this.numberOfPossibleActions === 4) {
+      switch(action) {
+      case GameConstants.ActionMapping[GameConstants.Direction.LEFT]:
+        return GameConstants.ActionMapping[GameConstants.Direction.RIGHT];
+      case GameConstants.ActionMapping[GameConstants.Direction.RIGHT]:
+        return GameConstants.ActionMapping[GameConstants.Direction.LEFT];
+      }
+    }
+
+    return action;
+  }
+
+  flipActionVertical(action) {
+    if(this.numberOfPossibleActions === 3) {
+      return GameConstants.AIActions.CONTINUE;
+    } else if(this.numberOfPossibleActions === 4) {
+      switch(action) {
+      case GameConstants.ActionMapping[GameConstants.Direction.UP]:
+        return GameConstants.ActionMapping[GameConstants.Direction.DOWN];
+      case GameConstants.ActionMapping[GameConstants.Direction.DOWN]:
+        return GameConstants.ActionMapping[GameConstants.Direction.UP];
+      default:
+        return action;
+      }
+    }
+
+    return action;
   }
 
   async train() {
@@ -834,10 +915,24 @@ export default class SnakeAIUltra extends SnakeAI {
     return memory;
   }
 
-  synchronizeTargetNetwork() {
+  synchronizeTargetNetwork(forceHardTargetUpdates = false) {
     if(this.enableDoubleDQN) {
       this.logger.info("Synchronizing target network...\n");
-      this.targetModel.setWeights(this.mainModel.getWeights());
+
+      if(!forceHardTargetUpdates && this.enableSoftTargetUpdates) {
+        const mainWeights = this.mainModel.getWeights();
+        const targetWeights = this.targetModel.getWeights();
+
+        const updatedWeights = mainWeights.map((w, i) =>
+          tf.tidy(() => w.mul(this.softTargetUpdatesCoefficient).add(targetWeights[i].mul(1 - this.softTargetUpdatesCoefficient)))
+        );
+
+        this.targetModel.setWeights(updatedWeights);
+        updatedWeights.forEach(w => w.dispose());
+      } else {
+        this.targetModel.setWeights(this.mainModel.getWeights());
+      }
+
       this.logger.info("Target network synchronized!\n");
     }
   }
@@ -864,12 +959,15 @@ export default class SnakeAIUltra extends SnakeAI {
         }
       }
 
-      return numberOfEmptyCaseAround >= 1 ? GameConstants.AIRewards.GAME_OVER_WITH_EMPTY_CASES_AROUND
-        : GameConstants.AIRewards.GAME_OVER;
+      return numberOfEmptyCaseAround >= 1 ?
+        GameConstants.AIRewards.GAME_OVER_WITH_EMPTY_CASES_AROUND :
+        GameConstants.AIRewards.GAME_OVER;
     }
 
-    if(done && snake.isAIStuck(3)) {
-      return GameConstants.AIRewards.STUCK;
+    if(snake.isAIStuck(1)) {
+      const stuckRatio = snake.stuckCounter / snake.maxLastMoves;
+      const penalty = Math.min(0.001 * stuckRatio, GameConstants.AIRewards.STUCK_MAX_PENALTY);
+      return GameConstants.AIRewards.MOVE - penalty;
     }
 
     if(fruit && head.x === fruit.x && head.y === fruit.y) {
@@ -883,13 +981,54 @@ export default class SnakeAIUltra extends SnakeAI {
     if(fruit) {
       const prevHead = snake.get(1);
 
-      const distBefore = Math.abs(prevHead.x - fruit.x) + Math.abs(prevHead.y - fruit.y);
-      const distAfter = Math.abs(head.x - fruit.x) + Math.abs(head.y - fruit.y);
+      if(prevHead) {
+        const distBefore = this.bfsDistance(snake, prevHead.x, prevHead.y, fruit.x, fruit.y);
+        const distAfter = this.bfsDistance(snake, head.x, head.y, fruit.x, fruit.y);
 
-      return GameConstants.AIRewards.MOVE + (distBefore - distAfter) * 0.05;
+        if(distAfter === -1) {
+          return GameConstants.AIRewards.MOVE - 0.05;
+        }
+
+        return GameConstants.AIRewards.MOVE + (distBefore - distAfter) * 0.05;
+      }
     }
 
     return GameConstants.AIRewards.MOVE;
+  }
+
+  bfsDistance(snake, fromX, fromY, toX, toY) {
+    const grid = snake.grid;
+    const visited = new Set();
+    const queue = [[fromX, fromY, 0]];
+  
+    visited.add(`${fromX},${fromY}`);
+
+    while(queue.length > 0) {
+      const [x, y, dist] = queue.shift();
+
+      if(x === toX && y === toY) {
+        return dist;
+      }
+
+      for(const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+        const nx = x + dx;
+        const ny = y + dy;
+
+        if(nx < 0 || ny < 0 || nx >= grid.width || ny >= grid.height) {
+          continue;
+        }
+
+        const key = `${nx},${ny}`;
+        if(visited.has(key)) continue;
+        visited.add(key);
+
+        if(!grid.isDeadPositionXY(nx, ny)) {
+          queue.push([nx, ny, dist + 1]);
+        }
+      }
+    }
+
+    return -1;
   }
 
   step(snake, currentState, done, reward, action = null, instanceId = null) {
@@ -955,6 +1094,7 @@ export default class SnakeAIUltra extends SnakeAI {
         trainingRandomSeed: this.trainingRandomSeed,
         enableDuelingQLearning: this.enableDuelingQLearning,
         enableDoubleDQN: this.enableDoubleDQN,
+        enableSoftTargetUpdates: this.enableSoftTargetUpdates,
         enableNoisyNetwork: this.enableNoisyNetwork,
         syncTargetEvery: this.syncTargetEvery,
         gamma: this.gamma,
@@ -965,7 +1105,9 @@ export default class SnakeAIUltra extends SnakeAI {
         batchSize: this.batchSize,
         enableStateRotation: this.enableStateRotation,
         enableNStepsLearning: this.enableNStepsLearning,
-        nStep: this.nStep
+        enableDataAugmentation: this.enableDataAugmentation,
+        nStep: this.nStep,
+        softTargetUpdatesCoefficient: this.softTargetUpdatesCoefficient
       },
       modelInfo: {
         modelHeight: this.modelHeight,
@@ -1065,21 +1207,17 @@ export default class SnakeAIUltra extends SnakeAI {
         }
 
         if(typeof config.enableDoubleDQN === "boolean") this.enableDoubleDQN = config.enableDoubleDQN;
+        if(typeof config.enableSoftTargetUpdates === "boolean") this.enableSoftTargetUpdates = config.enableSoftTargetUpdates;
         if(typeof config.enableDuelingQLearning === "boolean") this.enableDuelingQLearning = config.enableDuelingQLearning;
         if(typeof config.enableNoisyNetwork === "boolean") this.enableNoisyNetwork = config.enableNoisyNetwork;
+        if(typeof config.enableNStepsLearning === "boolean") this.enableNStepsLearning = config.enableNStepsLearning;
+        if(typeof config.enableDataAugmentation === "boolean") this.enableDataAugmentation = config.enableDataAugmentation;
 
         if(typeof config.enableStateRotation === "boolean") {
           this.enableStateRotation = config.enableStateRotation;
         } else if(config.enableStateRotation === undefined) {
           // To stay compatible with old models
           this.enableStateRotation = false;
-        }
-
-        if(typeof config.enableNStepsLearning === "boolean") {
-          this.enableNStepsLearning = config.enableNStepsLearning;
-        } else if(config.enableNStepsLearning === undefined) {
-          // To stay compatible with old models
-          this.enableNStepsLearning = false;
         }
 
         if(this.loadHyperParametersFromMetadata) {
@@ -1091,6 +1229,7 @@ export default class SnakeAIUltra extends SnakeAI {
           if(typeof config.learningRate === "number") this.learningRate = config.learningRate;
           if(typeof config.batchSize === "number") this.batchSize = config.batchSize;
           if(typeof config.nStep === "number") this.nStep = config.nStep;
+          if(typeof config.softTargetUpdatesCoefficient === "number") this.softTargetUpdatesCoefficient = config.softTargetUpdatesCoefficient;
         } else {
           this.logger.info("Loading hyperparameters from metadata is disabled. Skipping hyperparameters loading.\n");
         }

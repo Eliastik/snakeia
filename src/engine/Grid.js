@@ -494,7 +494,14 @@ export default class Grid {
   }
 
   isDeadPosition(position, excludeSnake, includeSurrounded) {
-    return (!excludeSnake && this.get(position) == GameConstants.CaseType.SNAKE) || (this.get(position) == GameConstants.CaseType.WALL) || (this.get(position) == GameConstants.CaseType.SNAKE_DEAD) || (!!includeSurrounded && this.get(position) == GameConstants.CaseType.SURROUNDED);
+    return this.isDeadPositionXY(position.x, position.y, excludeSnake, includeSurrounded);
+  }
+
+  isDeadPositionXY(x, y, excludeSnake, includeSurrounded) {
+    return (!excludeSnake && this.getXY(x, y) == GameConstants.CaseType.SNAKE)
+      || (this.getXY(x, y) == GameConstants.CaseType.WALL)
+      || (this.getXY(x, y) == GameConstants.CaseType.SNAKE_DEAD)
+      || (!!includeSurrounded && this.getXY(x, y) == GameConstants.CaseType.SURROUNDED);
   }
 
   toString() {
