@@ -18,7 +18,7 @@ const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE"];
-const NUM_EPISODES_PER_TYPE     = 1000;
+const NUM_EPISODES_PER_TYPE     = 100;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 30;
 const MAX_TICKS                 = 1000;
@@ -36,7 +36,7 @@ const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = true;
-const LOAD_MODEL_PATH           = null;
+const LOAD_MODEL_PATH           = "models/2026-03-05T22-31-15-502Z/";
 const LOAD_HYPERPARAMETERS      = false;
 const LOAD_MEMORY               = false;
 const NUM_PARALLEL_ENVS         = 1;
@@ -297,30 +297,44 @@ function saveMetadata(fullPath) {
   multiBar.log(`Metadata saved to ${fullPath} directory\n`);
 }
 
+// TODO fix saveMemory stuck/freeze
 async function saveMemory(fullPath) {
   multiBar.log(`Saving memory to ${fullPath} directory...\n`);
 
   const exportedMemory = theSnakeAI.exportMemory();
+
+  multiBar.log(`Encoding memory (${theSnakeAI.memory.size()} entries)...\n`);
   const encodedMemory = encode(exportedMemory);
+  multiBar.log(`Encoded: ${(encodedMemory.length / 1024 / 1024).toFixed(2)} MB, writing...\n`);
 
   const stream = fs.createWriteStream(`${fullPath}/memory.bin`);
-
   const CHUNK_SIZE = 1024 * 1024;
 
-  for(let i = 0; i < encodedMemory.length; i += CHUNK_SIZE) {
-    const chunk = encodedMemory.slice(i, i + CHUNK_SIZE);
-
-    if(!stream.write(chunk)) {
-      await new Promise(res => stream.once("drain", res));
-    }
-  }
-
   await new Promise((resolve, reject) => {
-    stream.end();
-    stream.on("finish", resolve);
-    stream.on("error", reject);
+    stream.once("error", reject);
+    stream.once("finish", resolve);
+
+    let offset = 0;
+
+    const writeNextChunk = () => {
+      while(offset < encodedMemory.length) {
+        const chunk = encodedMemory.slice(offset, offset + CHUNK_SIZE);
+        offset += CHUNK_SIZE;
+
+        const canContinue = stream.write(chunk);
+
+        if(!canContinue) {
+          stream.once("drain", () => writeNextChunk);
+          return;
+        }
+      }
+
+      stream.end();
+    };
+
+    writeNextChunk();
   });
-  
+
   multiBar.log(`Memory saved to ${fullPath} directory\n`);
 }
 

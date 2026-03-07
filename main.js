@@ -489,7 +489,7 @@ document.getElementById("linkCustomServer").onclick = () => {
   }
 };
 
-function connectToServer(url, port) {
+async function connectToServer(url, port) {
   document.getElementById("menu").style.display = "none";
   document.getElementById("levelContainer").style.display = "none";
   document.getElementById("gameContainer").style.display = "none";
@@ -502,24 +502,14 @@ function connectToServer(url, port) {
   document.getElementById("roomsOnlineJoin").style.display = "none";
   document.getElementById("authenticationServer").style.display = "none";
 
-  onlineClient.connect(url, port, (success, data, id) => {
+  await preloadAuthentication(url, port);
+
+  onlineClient.connect(url, port, (success, data) => {
     document.getElementById("connectingToServer").style.display = "none";
 
     if(!success) {
       if(data == GameConstants.Error.AUTHENTICATION_REQUIRED || data == GameConstants.Error.BANNED) {
-        document.getElementById("authenticationServerContainer").innerHTML = "";
-        
-        const authentIframe = document.createElement("iframe");
-        const authentUrl = onlineClient.getURL() + `/authentication?lang=${i18next.language.substring(0, 2)}&theme=${isDarkModeEnabled() ? "dark" : "light"}` + (id ? "&id=" + id : "");
-
-        authentIframe.id = "authent_frame";
-        authentIframe.src = authentUrl;
-        authentIframe.classList.add("frame-responsive");
-
-        document.getElementById("authenticationServerContainer").appendChild(authentIframe);
-        document.getElementById("linkAuthenticationServer").href = authentUrl;
-
-        displayAuthentication();
+        setupServerAuthentication();
       } else if(data == GameConstants.Error.DISCONNECTED) {
         alert(i18next.t("servers.disconnectedError"));
         displayServerList();
@@ -531,6 +521,33 @@ function connectToServer(url, port) {
       displayRoomsList();
     }
   });
+}
+
+async function preloadAuthentication(url, port) {
+  await new Promise(resolve => {
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = `${url}${port ? ":" + port : ""}/authentication`;
+    iframe.addEventListener("load", resolve, { once: true });
+    document.body.appendChild(iframe);
+    iframe.addEventListener("load", () => document.body.removeChild(iframe), { once: true });
+  });
+}
+
+function setupServerAuthentication() {
+  document.getElementById("authenticationServerContainer").innerHTML = "";
+
+  const authentIframe = document.createElement("iframe");
+  const authentUrl = onlineClient.getURL() + `/authentication?lang=${i18next.language.substring(0, 2)}&theme=${isDarkModeEnabled() ? "dark" : "light"}`;
+
+  authentIframe.id = "authent_frame";
+  authentIframe.src = authentUrl;
+  authentIframe.classList.add("frame-responsive");
+
+  document.getElementById("authenticationServerContainer").appendChild(authentIframe);
+  document.getElementById("linkAuthenticationServer").href = authentUrl;
+
+  displayAuthentication();
 }
 
 document.getElementById("cancelConnectingToServer").onclick = () => {
