@@ -1,4 +1,3 @@
-
 import fs from "fs";
 import process from "process";
 import { once } from "events";
@@ -9,7 +8,7 @@ import Snake from "./src/engine/Snake.js";
 import GameEngine from "./src/engine/GameEngine.js";
 import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 import cliProgress from "cli-progress";
-import { encode, decode } from "@msgpack/msgpack";
+import { encode, decodeAsync } from "@msgpack/msgpack";
 
 // import tf from "@tensorflow/tfjs-node";
 // Uncomment to enable GPU, and comment above import
@@ -39,10 +38,10 @@ const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = true;
-const LOAD_MODEL_PATH           = null;
+const LOAD_MODEL_PATH           = "models/2026-03-07T21-33-59-302Z/5x5_DEFAULT";
 const LOAD_HYPERPARAMETERS      = false;
 const LOAD_MEMORY               = true;
-const NUM_PARALLEL_ENVS         = 1;
+const NUM_PARALLEL_ENVS         = 8;
 // End of settings
 
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
@@ -74,11 +73,22 @@ const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, TRAINING_SEED, {
     const binPath = location.replace(".json", ".bin");
 
     if(fs.existsSync(binPath)) {
-      const buffer = fs.readFileSync(binPath);
-      return decode(buffer);
+      const stream = fs.createReadStream(binPath, {
+        highWaterMark: 64 * 1024 * 1024
+      });
+
+      return await decodeAsync(stream);
     }
 
-    return JSON.parse(fs.readFileSync(location, "utf-8"));
+    const stream = fs.createReadStream(location, { encoding: "utf8" });
+
+    let data = "";
+    
+    for await(const chunk of stream) {
+      data += chunk;
+    }
+
+    return JSON.parse(data);
   }
 }, LOAD_HYPERPARAMETERS, LOAD_MEMORY);
 

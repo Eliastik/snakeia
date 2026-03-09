@@ -1327,6 +1327,15 @@ function updateModelDetails(model, isCompatible, isDefault) {
 }
 
 document.getElementById("validateAIUltraModel").onclick = () => {
+  validateCustomAIModel();
+};
+
+document.getElementById("formSettingsAIUltraModel").onsubmit = function(event) {
+  event.preventDefault();
+  validateCustomAIModel();
+};
+
+function validateCustomAIModel() {
   const selectElementValue = document.getElementById("aiModelList").value;
 
   customSettings.aiUltraModelId = selectElementValue;
@@ -1338,7 +1347,7 @@ document.getElementById("validateAIUltraModel").onclick = () => {
   saveSettings();
 
   modalSelectAIUltraModelInstance.hide();
-};
+}
 
 document.getElementById("aiModelList").onchange = async function() {
   const modelLoader = SnakeAIUltraModelLoader.getInstance();
@@ -2789,6 +2798,11 @@ function generateGraphicsFormFromPresets(presets, predefinedPresets, containerId
   const form = document.createElement("form");
   form.id = "formGraphicsSettingsAdvanced";
 
+  form.onsubmit = function(event) {
+    event.preventDefault();
+    validateAdvanced3DSettings();
+  };
+
   const selectRow = document.createElement("div");
   selectRow.className = "form-group row align-items-center";
 
@@ -2948,6 +2962,10 @@ document.getElementById("resetAdvanced3DSettings").onclick = () => {
 };
 
 document.getElementById("validateAdvanced3DSettings").onclick = () => {
+  validateAdvanced3DSettings();
+};
+
+function validateAdvanced3DSettings() {
   const form = document.getElementById("formGraphicsSettingsAdvanced");
   const newSettings = {};
 
@@ -2966,7 +2984,7 @@ document.getElementById("validateAdvanced3DSettings").onclick = () => {
   saveSettings();
 
   modal3DQualitySettingsInstance.hide();
-};
+}
 
 // Localization
 function listTranslations(languages) {
@@ -3019,6 +3037,10 @@ document.getElementById("languageSelect").onchange = () => {
   i18next.changeLanguage(document.getElementById("languageSelect").value, () => {
     translateContent();
   });
+};
+
+document.getElementById("formSettings").onsubmit = function(event) {
+  event.preventDefault();
 };
 
 window.addEventListener("load", () => {
