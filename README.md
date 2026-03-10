@@ -595,6 +595,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 - [x] A check => bug possible Online : les pseudos ne s'affichent plus dans le classement
 - [ ] Ajouter pomme en argent (+2 score) ?
 - [ ] Autres effets graphiques à ajouter à la version 3D ? (idées)
+  - [ ] Ne plus faire en sorte que le Snake regarde la pomme derrière lui : système de champ de vision (yeux qui bougent vers le fruit que s'il est dans son champ de vision, devant lui)
   - [ ] Effet normal map d'écailles sur les Snakes
   - [ ] Améliorer l'animation de mort des Snakes (avec particules ?)
   - [ ] Effet "tilt shift" ?

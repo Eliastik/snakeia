@@ -75,7 +75,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.001;
-    this.batchSize = 64;
+    this.batchSize = 128;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
     this.maxMemoryLength = 50000;
     this.nStep = 3;
@@ -386,7 +386,8 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     return tf.tidy(() => {
-      const currentStateTensor = this.stateToTensor(this.getState(snake, instanceId)).expandDims(0);
+      const state = this.getState(snake, instanceId);
+      const currentStateTensor = this.stateToTensor(state).expandDims(0);
   
       const qValues = this.mainModel.predict(currentStateTensor);
       const values = Array.from(qValues.dataSync());
@@ -638,7 +639,7 @@ export default class SnakeAIUltra extends SnakeAI {
     return { snakesLayer, fruitsAndWallsLayer };
   }
 
-  getState(snake, instanceId = "inference") {
+  getState(snake, instanceId = "inference", pushToFrameStack = true) {
     const { snakesLayer, fruitsAndWallsLayer } = this.getStateRaw(snake);
 
     let state = { snakesLayer, fruitsAndWallsLayer };
@@ -650,8 +651,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
     if(this.enableFrameStacking && instanceId) {
       const flat = this.stateToFlatArray(state);
-      this.pushFrame(instanceId, flat);
-      return this.getStackedState(instanceId, flat);
+      return this.getStackedState(instanceId, flat, pushToFrameStack);
     }
 
     return state;
@@ -741,14 +741,26 @@ export default class SnakeAIUltra extends SnakeAI {
     }
   }
 
-  getStackedState(instanceId, currentStateFlat) {
+  getStackedState(instanceId, currentStateFlat, pushToFrameStack = true) {
     const stack = this.getFrameStack(instanceId);
+
+    if(pushToFrameStack) {
+      this.pushFrame(instanceId, currentStateFlat);
+    }
+
+    const virtualLength = pushToFrameStack ? stack.length : stack.length + 1;
     const frames = [];
 
     for(let i = 0; i < this.frameStackSize; i++) {
-      const frameIdx = stack.length - this.frameStackSize + i;
-      // Duplicate first frame when not enough history
-      frames.push(frameIdx < 0 ? currentStateFlat : stack[frameIdx]);
+      const frameIdx = virtualLength - this.frameStackSize + i;
+
+      if(frameIdx < 0) {
+        frames.push(currentStateFlat);
+      } else if(frameIdx < stack.length) {
+        frames.push(stack[frameIdx]);
+      } else {
+        frames.push(currentStateFlat);
+      }
     }
 
     const totalLength = currentStateFlat.data.length * this.frameStackSize;
@@ -1123,7 +1135,7 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   step(snake, currentState, done, reward, action = null, instanceId = "inference") {
-    const nextStateData = this.getState(snake, instanceId);
+    const nextStateData = this.getState(snake, instanceId, false);
 
     if(this.enableNStepsLearning && this.nStep > 1 && instanceId) {
       this.rememberNStep(currentState, action ?? this.lastAction, reward, nextStateData, done, instanceId);
