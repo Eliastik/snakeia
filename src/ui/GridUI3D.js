@@ -35,13 +35,7 @@ export default class GridUI3D extends GridUI {
   constructor(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, graphicType, customGraphicsPreset, debugMode) {
     super(snakes, grid, speed, disableAnimation, graphicSkin, isFilterHueAvailable, headerHeight, imageLoader, modelLoader, currentPlayer, debugMode);
 
-    this.snakesMeshes = [];
-
-    this.segmentGeometryCache = {};
-    this.segmentGeometryCacheParams = {};
-    this.transitionSegmentGeometryCache = {};
-    this.transitionSegmentGeometryCacheParams = {};
-
+    // Constants
     this.cameraPresetsByHeight = {
       5: { fov: 5, distance: 60, zoom: 1 },
       10: { fov: 8, distance: 75, zoom: 1 },
@@ -60,7 +54,14 @@ export default class GridUI3D extends GridUI {
       100: { fov: 55, distance: 120, zoom: 1 }
     };
 
+    // Snake eyes animation constants
+    this.EYE_MAX_DIST = 6;
+    this.EYE_MAX_OFFSET = 0.04;
+    this.EYE_GOLD_DELTA = 1.0;
+    this.EYE_FOV_DEG = 180;
+
     this.snakeBodyRenderingMethod = "INDIVIDUAL"; // or TUBES (old method) or INDIVIDUAL (new method)
+    // End of constants
 
     this.qualitySettings = graphicType !== "3dCustom" || !customGraphicsPreset ? 
       this.getQualityPresetSettings(graphicType) :
@@ -78,14 +79,14 @@ export default class GridUI3D extends GridUI {
     this.goldFruitFirstFrame = true;
     this.lastRendererWidth = 0;
     this.lastRendererHeight = 0;
-
-    // Snake eyes animation constants
-    this.EYE_MAX_DIST = 6;
-    this.EYE_MAX_OFFSET = 0.04;
-    this.EYE_GOLD_DELTA = 1.0;
-    this.EYE_FOV_DEG = 180;
-
     this.hasGoldFruit = false;
+
+    this.snakesMeshes = [];
+
+    this.segmentGeometryCache = {};
+    this.segmentGeometryCacheParams = {};
+    this.transitionSegmentGeometryCache = {};
+    this.transitionSegmentGeometryCacheParams = {};
   }
 
   init3DEngine() {
@@ -2135,8 +2136,7 @@ export default class GridUI3D extends GridUI {
     const headPosWorld = headMesh.getWorldPosition(new THREE.Vector3());
     const resolved     = this.resolveTargetFruit(headPosWorld);
 
-    const inRange  = resolved.dist <= this.EYE_MAX_DIST;
-    const hasFruit = !!(resolved.fruit && inRange);
+    const hasFruit = !!(resolved && resolved.fruit && resolved.dist <= this.EYE_MAX_DIST);
 
     let localFruit = null;
 
