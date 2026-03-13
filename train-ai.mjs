@@ -24,8 +24,8 @@ const NUM_EPISODES_PER_TYPE     = 2000;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 30;
 const MAX_TICKS                 = 1000;
-const INITAL_GRID_WIDTH         = 20;
-const INITAL_GRID_HEIGHT        = 20;
+const INITAL_GRID_WIDTH         = 10;
+const INITAL_GRID_HEIGHT        = 10;
 const GRID_INCREASE_INCREMENT   = 5;
 const MAX_GRID_WIDTH            = 25;
 const MAX_GRID_HEIGHT           = 25;
@@ -38,9 +38,9 @@ const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
 const EXPORT_MEMORY             = false;
-const LOAD_MODEL_PATH           = "models/2026-03-10T09-11-33-495Z/15x15_DEFAULT";
+const LOAD_MODEL_PATH           = "models/2026-03-11T22-12-10-045Z/5x5_DEFAULT";
 const LOAD_HYPERPARAMETERS      = false;
-const LOAD_MEMORY               = true;
+const LOAD_MEMORY               = false;
 const NUM_PARALLEL_ENVS         = 4;
 // End of settings
 

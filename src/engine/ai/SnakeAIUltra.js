@@ -74,7 +74,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMax = 1.0; // Not used if Noisy Network is enabled
     this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
-    this.learningRate = 0.001;
+    this.learningRate = 0.0001;
     this.batchSize = 128;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
     this.maxMemoryLength = 50000;

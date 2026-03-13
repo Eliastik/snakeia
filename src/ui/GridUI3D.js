@@ -2131,8 +2131,10 @@ export default class GridUI3D extends GridUI {
     const LERP_ANGLE = this.disableAnimation ? 1 : 0.12;
     const GOLD_DELTA = 1.0;
 
-    const regularWorld = new THREE.Vector3(this.fruitModel.position.x, this.fruitModel.position.y, this.fruitModel.position.z);
-    const regularDist = headPosWorld.distanceTo(regularWorld);
+    const regularWorld = this.fruitModel?.visible
+      ? new THREE.Vector3(this.fruitModel.position.x, this.fruitModel.position.y, this.fruitModel.position.z)
+      : null;
+    const regularDist = regularWorld ? headPosWorld.distanceTo(regularWorld) : Infinity;
 
     const goldWorld = this.fruitModelGold?.visible
       ? new THREE.Vector3(this.fruitModelGold.position.x, this.fruitModelGold.position.y, this.fruitModelGold.position.z)
