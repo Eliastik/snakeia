@@ -593,7 +593,7 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
     - [x] Quelques petits bugs liés à la mise à l'échelle
 - [x] Optimiser redraw grille 3D (quand murs, léger lag sur mobiles)
 - [x] A check => bug possible Online : les pseudos ne s'affichent plus dans le classement
-- [ ] Ajouter pomme en argent (+2 score) ?
+- [ ] Ajouter pomme en argent (+2 score) ? Et/Ou plus de pommes si plusieurs Snake présent (par exemple une pomme par Snake, plafond à X pommes au bout d'un moment) ?
 - [ ] Autres effets graphiques à ajouter à la version 3D ? (idées)
   - [ ] Ne plus faire en sorte que le Snake regarde la pomme derrière lui : système de champ de vision (yeux qui bougent vers le fruit que s'il est dans son champ de vision, devant lui)
   - [ ] Effet normal map d'écailles sur les Snakes
