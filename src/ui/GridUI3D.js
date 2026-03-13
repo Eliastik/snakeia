@@ -2145,20 +2145,24 @@ export default class GridUI3D extends GridUI {
       group.worldToLocal(localFruit);
     }
 
+    const forwardAngle = this.calculateForwardAngle(headMesh, group);
+    const eyeCenter = pupilBases[0].clone().add(pupilBases[1]).multiplyScalar(0.5);
+    const isInFOV = this.isInFieldOfView(localFruit, eyeCenter, forwardAngle);
+
     for(let i = 0; i < 2; i++) {
       const base   = pupilBases[i].clone();
-      const target = this.computePupilTarget(localFruit, base);
+      const target = isInFOV ? this.computePupilTarget(localFruit, base) : null;
       this.applyPupilAnimation(pupils[i], base, pupilBases[i].z, target, lerpT);
     }
   }
 
   calculateForwardAngle(headMesh, group) {
-    const localForward = new THREE.Vector3(1, 0, 0);
+    const worldForward = new THREE.Vector3(0, 1, 0);
 
-    localForward.transformDirection(headMesh.matrixWorld);
-    localForward.transformDirection(group.matrixWorld.clone().invert());
+    worldForward.transformDirection(headMesh.matrixWorld);
+    worldForward.transformDirection(group.matrixWorld.clone().invert());
 
-    return Math.atan2(localForward.y, localForward.x);
+    return Math.atan2(worldForward.y, worldForward.x);
   }
 
   resolveTargetFruit(headPosWorld) {
@@ -2182,6 +2186,37 @@ export default class GridUI3D extends GridUI {
     }
 
     return null;
+  }
+
+  isInFieldOfView(localFruit, base, forwardAngle = 0) {
+    if(!localFruit) {
+      return false;
+    }
+    
+    const fruitXY = new THREE.Vector2(localFruit.x, localFruit.y);
+    const baseXY  = new THREE.Vector2(base.x, base.y);
+
+    const dir = fruitXY.sub(baseXY);
+
+    if(dir.lengthSq() < 1e-6) {
+      return false;
+    }
+
+    const fruitAngle   = Math.atan2(dir.y, dir.x);
+
+    let delta = fruitAngle - forwardAngle;
+
+    while(delta >  Math.PI) {
+      delta -= 2 * Math.PI;
+    }
+
+    while(delta < -Math.PI) {
+      delta += 2 * Math.PI;
+    }
+
+    const halfFov = (this.EYE_FOV_DEG / 2) * (Math.PI / 180);
+
+    return Math.abs(delta) <= halfFov;
   }
 
   computePupilTarget(localFruit, base) {
