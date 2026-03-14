@@ -2148,7 +2148,9 @@ export default class GridUI3D extends GridUI {
 
     const forwardAngle = this.calculateForwardAngle(headMesh, group);
     const eyeCenter = pupilBases[0].clone().add(pupilBases[1]).multiplyScalar(0.5);
-    const isInFOV = this.isInFieldOfView(localFruit, eyeCenter, forwardAngle);
+    const headGridPos = this.snakes[snakeIndex].getHeadPosition();
+    const isInFOV = this.isInFieldOfView(localFruit, eyeCenter, forwardAngle)
+      && this.isLineOfSightClear(headGridPos, resolved.fruit);
 
     for(let i = 0; i < 2; i++) {
       const base   = pupilBases[i].clone();
@@ -2219,6 +2221,42 @@ export default class GridUI3D extends GridUI {
     const halfFov = (this.EYE_FOV_DEG / 2) * (Math.PI / 180);
 
     return Math.abs(delta) <= halfFov + angularRadius;
+  }
+
+  isLineOfSightClear(headGridPos, fruitWorldPos) {
+    const halfW = this.grid.width / 2;
+    const halfH = this.grid.height / 2;
+
+    const fruitGridX = Math.round(fruitWorldPos.x + halfW - 0.5);
+    const fruitGridY = Math.round((this.grid.height - 1) - (fruitWorldPos.y + halfH - 0.5));
+
+    let x0 = headGridPos.x, y0 = headGridPos.y;
+    const x1 = fruitGridX,  y1 = fruitGridY;
+
+    const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    const dy = Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+    let err = dx - dy;
+
+    while(true) {
+      if(!(x0 === headGridPos.x && y0 === headGridPos.y)) {
+        const caseType = this.grid.get(new Position(x0, y0));
+
+        if(caseType === GameConstants.CaseType.WALL) {
+          return false;
+        }
+      }
+
+      if(x0 === x1 && y0 === y1) {
+        break;
+      }
+
+      const e2 = 2 * err;
+
+      if(e2 > -dy) { err -= dy; x0 += sx; }
+      if(e2 <  dx) { err += dx; y0 += sy; }
+    }
+
+    return true;
   }
 
   computePupilTarget(localFruit, base) {
