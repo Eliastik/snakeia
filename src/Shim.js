@@ -96,6 +96,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   }
   
   if(onlineMode) controller.onlineMode = true;
+
+  controller.gameUI.init();
   controller.init();
   
   return controller;

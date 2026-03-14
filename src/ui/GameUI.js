@@ -154,8 +154,6 @@ export default class GameUI {
     this.btnStartGame;
     this.btnRank;
 
-    this.init();
-
     // Patch to fix mouse position on high DPI screens, need to be removed if upgrading JSGameTools
     Component.prototype.getMousePos = (canvas, event) => {
       const rect = canvas.getBoundingClientRect();
