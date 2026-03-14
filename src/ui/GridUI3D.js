@@ -58,7 +58,8 @@ export default class GridUI3D extends GridUI {
     this.EYE_MAX_DIST = 6;
     this.EYE_MAX_OFFSET = 0.04;
     this.EYE_GOLD_DELTA = 1.0;
-    this.EYE_FOV_DEG = 180;
+    this.EYE_FOV_DEG = 250;
+    this.EYE_FRUIT_RADIUS = 0.4;
 
     this.snakeBodyRenderingMethod = "INDIVIDUAL"; // or TUBES (old method) or INDIVIDUAL (new method)
     // End of constants
@@ -2195,14 +2196,15 @@ export default class GridUI3D extends GridUI {
     
     const fruitXY = new THREE.Vector2(localFruit.x, localFruit.y);
     const baseXY  = new THREE.Vector2(base.x, base.y);
-
-    const dir = fruitXY.sub(baseXY);
+    const dir     = fruitXY.clone().sub(baseXY);
 
     if(dir.lengthSq() < 1e-6) {
       return false;
     }
 
-    const fruitAngle   = Math.atan2(dir.y, dir.x);
+    const d = dir.length();
+    const angularRadius = Math.atan2(this.EYE_FRUIT_RADIUS, d);
+    const fruitAngle    = Math.atan2(dir.y, dir.x);
 
     let delta = fruitAngle - forwardAngle;
 
@@ -2216,7 +2218,7 @@ export default class GridUI3D extends GridUI {
 
     const halfFov = (this.EYE_FOV_DEG / 2) * (Math.PI / 180);
 
-    return Math.abs(delta) <= halfFov;
+    return Math.abs(delta) <= halfFov + angularRadius;
   }
 
   computePupilTarget(localFruit, base) {
