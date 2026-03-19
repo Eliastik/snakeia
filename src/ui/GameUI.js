@@ -176,7 +176,7 @@ export default class GameUI {
         return gridUI3D;
       } catch(e) {
         console.error("Error while initializing 3D rendering, switching to 2D rendering.", e);
-        this.setNotification(new NotificationMessage(i18next.t("engine.errorInit3D"), null, GameConstants.Setting.ERROR_NOTIF_COLOR, 10));
+        this.setNotification(new NotificationMessage(i18next.t("engine.errorInit3D"), null, GameConstants.Setting.ERROR_NOTIF_COLOR, 10, null, null, null, true));
       }
     }
 
