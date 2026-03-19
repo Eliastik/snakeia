@@ -859,7 +859,7 @@ export default class GameUI {
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.font = this.fontSize + "px " + GameConstants.Setting.FONT_FAMILY;
 
-      if(this.assetsLoaded && this.engineLoading) {
+      if(this.engineLoading) {
         this.labelMenus.text = i18next.t("engine.loadingWorker");
         this.labelMenus.color = "white";
         this.menu.set(this.labelMenus);
