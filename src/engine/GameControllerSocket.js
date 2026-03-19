@@ -153,7 +153,7 @@ export default class GameControllerSocket extends GameController {
       this.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, GameConstants.Setting.ERROR_NOTIF_COLOR, null, null, null, null, true));
     });
     
-    await this.gameUI.init();
+    await this.gameUI.startAfterEngineInit();
   }
 
   reset() {

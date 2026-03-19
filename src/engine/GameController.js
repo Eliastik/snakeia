@@ -64,6 +64,7 @@ export default class GameController {
       "grid": this.gameEngine.grid,
       "enablePause": this.gameEngine.enablePause,
       "enableRetry": this.gameEngine.enableRetry,
+      "paused": this.gameEngine.paused,
       "progressiveSpeed": this.gameEngine.progressiveSpeed,
       "offsetFrame": this.gameEngine.speed * GameConstants.Setting.TIME_MULTIPLIER,
       "errorOccurred": this.gameEngine.errorOccurred,
@@ -264,7 +265,7 @@ export default class GameController {
 
     if(!this.gameEngine.isInit) {
       await this.gameEngine.init();
-      await this.gameUI.init();
+      await this.gameUI.startAfterEngineInit();
     }
   }
 

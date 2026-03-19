@@ -681,6 +681,7 @@ function joinRoom(code) {
       const ui = new GameUI(null, document.getElementById("gameContainer"), null, null, (customSettings.showDebugInfo ? true : false), null, customSettings);
       const game = onlineClient.getGame(ui, customSettings);
 
+      ui.init();
       game.init();
 
       document.getElementById("gameContainer").style.display = "block";

@@ -78,6 +78,10 @@ WorkersAvailable(result => {
 
 // Old game API
 function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiveSpeed, canvasWidth, canvasHeight, displayFPS, outputType, settings, ui, onlineMode) {
+  if(!Array.isArray(snake)) {
+    snake = [snake];
+  }
+
   let controller;
 
   const aiUltraSettings = { modelID: settings.aiUltraModelId, customURL: settings.aiUltraModelCustomURL };
@@ -96,6 +100,8 @@ function Game(grid, snake, speed, appendTo, enablePause, enableRetry, progressiv
   }
   
   if(onlineMode) controller.onlineMode = true;
+
+  controller.gameUI.init();
   
   return controller;
 }

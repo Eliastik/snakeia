@@ -67,7 +67,6 @@ export default class GameGroup {
 
   async start() {
     await this.initAll(null);
-    this.startAll(null);
   }
 
   async initAll(game) {

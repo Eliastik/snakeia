@@ -106,7 +106,7 @@ export default class GameControllerWorker extends GameController {
             this.workerReady = true;
             this.update("init", { "engineLoading": false });
             this.passQueuedMessages();
-            await this.gameUI.init();
+            await this.gameUI.startAfterEngineInit();
             resolve();
             break;
           case "reset":

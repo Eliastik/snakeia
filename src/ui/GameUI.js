@@ -168,15 +168,11 @@ export default class GameUI {
   }
 
   constructGridUI(settings) {
-    const engineWasPrecLoading = this.engineLoading;
-    this.engineLoading = true;
-
     if(this.is3DRendering) {
       const gridUI3D = new GridUI3D(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, settings.graphicType, settings.graphicCustomPreset, this.debugMode);
 
       try {
         gridUI3D.init3DEngine();
-        this.engineLoading = engineWasPrecLoading;
         return gridUI3D;
       } catch(e) {
         console.error("Error while initializing 3D rendering, switching to 2D rendering.", e);
@@ -185,7 +181,6 @@ export default class GameUI {
     }
 
     this.is3DRendering = false;
-    this.engineLoading = engineWasPrecLoading;
     
     return new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, this.debugMode);
   }
@@ -231,6 +226,8 @@ export default class GameUI {
       this.progressBarLoading = new ProgressBar(null, null, (this.canvasWidth / 4) * dpr, 25 * dpr, null, null, null, 0.5, this.disableAnimation, "center");
 
       this.setupAdviceLabel(dpr);
+      
+      this.gridUI = this.constructGridUI(this.settings);
 
       this.header.setButtons(this.btnFullScreen, this.btnPause, this.btnRank);
 
@@ -354,12 +351,28 @@ export default class GameUI {
     }
 
     this.enableAutoResizeCanvas();
-
-    await this.loadAssets();
-      
-    this.gridUI = this.constructGridUI(this.settings);
   }
   
+  async startAfterEngineInit() {
+    await this.loadAssets();
+
+    if (this.is3DRendering) {
+      this.preload3DRendering();
+    }
+
+    this.start();
+  }
+
+  preload3DRendering() {
+    const engineWasPrecLoading = this.engineLoading;
+    this.engineLoading = true;
+
+    this.draw();
+    this.gridUI.draw();
+
+    this.engineLoading = engineWasPrecLoading;
+  }
+
   autoResizeCanvas() {
     if(!document.fullscreenElement) {
       if(this.canvasWidth >= document.documentElement.clientWidth * 0.85) {
@@ -621,7 +634,6 @@ export default class GameUI {
 
     if(this.outputType === GameConstants.OutputType.TEXT) {
       this.assetsLoaded = true;
-      this.start();
       return;
     }
 
@@ -699,7 +711,6 @@ export default class GameUI {
       this.btnBottomArrow.loadImage(this.imageLoader);
       this.btnLeftArrow.loadImage(this.imageLoader);
       this.btnRightArrow.loadImage(this.imageLoader);
-      this.start();
     } catch (err) {
       console.error("Error while loading assets:", err);
       this.loadingResourcesErrorOccurred = true;
