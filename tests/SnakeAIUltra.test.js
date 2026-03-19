@@ -34,7 +34,7 @@ test("get state from ai test - test 1", async () => {
 
     const theSnakeAI = new SnakeAIUltra();
     theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
-    const currentState = theSnakeAI.getState(theSnake);
+    const currentState = theSnakeAI.getStateRaw(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
     expect(theGrid.grid).toEqual([
@@ -82,7 +82,7 @@ test("get state from ai test - test 2", async () => {
 
     const theSnakeAI = new SnakeAIUltra();
     theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
-    const currentState = theSnakeAI.getState(theSnake);
+    const currentState = theSnakeAI.getStateRaw(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
     expect(theGrid.grid).toEqual([
@@ -133,7 +133,7 @@ test("get state from ai test - test 3", async () => {
 
     const theSnakeAI = new SnakeAIUltra();
     theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
-    const currentState = theSnakeAI.getState(theSnake);
+    const currentState = theSnakeAI.getStateRaw(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
     expect(theGrid.grid).toEqual([
@@ -262,7 +262,7 @@ test("calculate reward - game over reward when there are no empty cases around",
     }
 
     expect(theSnake.gameOver).toBe(true);
-    expect(theSnakeAI.calculateReward(theSnake, theSnakeAI.getState(theSnake))).toBe(Constants.AIRewards.GAME_OVER);
+    expect(theSnakeAI.calculateReward(theSnake, theSnakeAI.getStateRaw(theSnake))).toBe(Constants.AIRewards.GAME_OVER);
 });
 
 test("calculate reward - game over reward when there are 1 empty case around", async () => {
@@ -297,7 +297,7 @@ test("calculate reward - game over reward when there are 1 empty case around", a
     }
 
     expect(theSnake.gameOver).toBe(true);
-    expect(theSnakeAI.calculateReward(theSnake, theSnakeAI.getState(theSnake))).toBe(Constants.AIRewards.GAME_OVER_WITH_EMPTY_CASES_AROUND);
+    expect(theSnakeAI.calculateReward(theSnake, theSnakeAI.getStateRaw(theSnake))).toBe(Constants.AIRewards.GAME_OVER_WITH_EMPTY_CASES_AROUND);
 });
 
 test("calculate reward - game over reward when there are 2 empty cases around", async () => {
@@ -332,7 +332,7 @@ test("calculate reward - game over reward when there are 2 empty cases around", 
     }
 
     expect(theSnake.gameOver).toBe(true);
-    expect(theSnakeAI.calculateReward(theSnake, theSnakeAI.getState(theSnake))).toBe(Constants.AIRewards.GAME_OVER_WITH_EMPTY_CASES_AROUND);
+    expect(theSnakeAI.calculateReward(theSnake, theSnakeAI.getStateRaw(theSnake))).toBe(Constants.AIRewards.GAME_OVER_WITH_EMPTY_CASES_AROUND);
 });
 
 test("calculate reward - fruit eaten", async () => {
@@ -359,7 +359,7 @@ test("calculate reward - fruit eaten", async () => {
 
     const theSnakeAI = new SnakeAIUltra();
     theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
-    const currentState = theSnakeAI.getState(theSnake);
+    const currentState = theSnakeAI.getStateRaw(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
     expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 2, direction: Constants.Direction.RIGHT });
@@ -394,7 +394,7 @@ test("calculate reward - move", async () => {
     engine.started = true;
 
     const theSnakeAI = new SnakeAIUltra();
-    const currentState = theSnakeAI.getState(theSnake);
+    const currentState = theSnakeAI.getStateRaw(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
     expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 2, direction: Constants.Direction.RIGHT });
@@ -432,7 +432,7 @@ test("calculate reward - stuck", async () => {
     }
 
     const theSnakeAI = new SnakeAIUltra();
-    const currentState = theSnakeAI.getState(theSnake);
+    const currentState = theSnakeAI.getStateRaw(theSnake);
 
     expect(engine.gameOver).toBe(true);
     expect(theSnakeAI.calculateReward(theSnake, currentState, true)).toBe(-0.004);
