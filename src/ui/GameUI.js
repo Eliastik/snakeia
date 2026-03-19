@@ -356,19 +356,31 @@ export default class GameUI {
   async startAfterEngineInit() {
     await this.loadAssets();
 
-    if (this.is3DRendering) {
-      this.preload3DRendering();
+    if(this.is3DRendering) {
+      await this.preload3DRendering();
     }
 
     this.start();
   }
 
-  preload3DRendering() {
+  async nextFrame() {
+    return new Promise(resolve => requestAnimationFrame(resolve));
+  }
+
+  async preload3DRendering() {
     const engineWasPrecLoading = this.engineLoading;
     this.engineLoading = true;
 
     this.draw();
-    this.gridUI.draw();
+
+    for(let i = 0; i < 3; i++) {
+      await this.nextFrame();
+    }
+
+    for(let i = 0; i < 3; i++) {
+      this.drawGridUI(this.canvasCtx, true);
+      await this.nextFrame();
+    }
 
     this.engineLoading = engineWasPrecLoading;
   }
@@ -856,8 +868,7 @@ export default class GameUI {
         this.header.draw(ctx);
 
         if(this.grid != null && (!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished)))) {
-          this.gridUI?.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, this.gameFinished, this.countBeforePlay, this.spectatorMode, this.ticks, this.gameOver, this.onlineMode, this.paused);
-          this.gridUI?.draw(ctx);
+          this.drawGridUI(ctx);
         }
 
         if(this.timerToDisplay != undefined && this.timerToDisplay != null && !isNaN(this.timerToDisplay) && this.timerToDisplay >= 0) {
@@ -1211,6 +1222,11 @@ export default class GameUI {
     }
 
     this.currentFrameTime = performance.now() - startTime;
+  }
+
+  drawGridUI(ctx, dryRun) {
+    this.gridUI?.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, this.gameFinished, this.countBeforePlay, this.spectatorMode, this.ticks, this.gameOver, this.onlineMode, this.paused);
+    this.gridUI?.draw(ctx, dryRun);
   }
 
   getCurrentPlayerInfos() {

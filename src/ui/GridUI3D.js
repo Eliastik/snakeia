@@ -273,7 +273,7 @@ export default class GridUI3D extends GridUI {
     return this.currentRenderingSizeAndPosition;
   }
 
-  draw(context) {
+  draw(context, dryRun) {
     if(!this.grid || !this.grid.grid) {
       return;
     }
@@ -306,7 +306,7 @@ export default class GridUI3D extends GridUI {
       this.animateFruits();
     }
 
-    this.drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize);
+    this.drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize, dryRun);
 
     this.saveCurrentState(canvas);
   
@@ -360,7 +360,7 @@ export default class GridUI3D extends GridUI {
     return reflectionsEnabled && shouldUpdateBasedOnQuality && hasGoldFruit && !isFirstGoldFrame;
   }
 
-  drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize) {
+  drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize, dryRun) {
     if(!this.shadersCompiled) {
       this.buildGoldFruitShaders();
       this.shadersCompiled = true;
@@ -379,7 +379,7 @@ export default class GridUI3D extends GridUI {
       this.renderer.render(this.scene, this.camera);
     }
 
-    if(ctx) {
+    if(ctx && !dryRun) {
       Utils.drawImageData(ctx, this.renderer.domElement, offsetX, offsetY, totalWidth, totalHeight, 0, 0, totalWidth, totalHeight);
 
       if(this.snakes.length > 1) {
