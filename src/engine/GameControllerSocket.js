@@ -57,7 +57,7 @@ export default class GameControllerSocket extends GameController {
     }
   }
 
-  init() {
+  async init() {
     this.socket.on("init", data => {
       this.parseData("init", data, this.enableClientSidePredictions);
 
@@ -152,6 +152,8 @@ export default class GameControllerSocket extends GameController {
     this.socket.once("reconnect_error", () => {
       this.gameUI.setNotification(new NotificationMessage(i18next.t("engine.servers.errorConnection"), null, GameConstants.Setting.ERROR_NOTIF_COLOR, null, null, null, null, true));
     });
+    
+    await this.gameUI.init();
   }
 
   reset() {

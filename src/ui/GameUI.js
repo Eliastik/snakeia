@@ -47,6 +47,7 @@ export default class GameUI {
     this.settings = settings || {};
     this.highRes = settings && settings.highRes;
     this.autoFullscreenMobile = settings && settings.autoFullscreenMobile;
+    this.is3DRendering = settings.graphicType && settings.graphicType !== "2d";
     this.goalMessage = null;
     // UI variables
     this.lastKey = -1;
@@ -167,11 +168,15 @@ export default class GameUI {
   }
 
   constructGridUI(settings) {
-    if(settings.graphicType && settings.graphicType !== "2d") {
+    const engineWasPrecLoading = this.engineLoading;
+    this.engineLoading = true;
+
+    if(this.is3DRendering) {
       const gridUI3D = new GridUI3D(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, settings.graphicType, settings.graphicCustomPreset, this.debugMode);
 
       try {
         gridUI3D.init3DEngine();
+        this.engineLoading = engineWasPrecLoading;
         return gridUI3D;
       } catch(e) {
         console.error("Error while initializing 3D rendering, switching to 2D rendering.", e);
@@ -180,11 +185,12 @@ export default class GameUI {
     }
 
     this.is3DRendering = false;
+    this.engineLoading = engineWasPrecLoading;
     
     return new GridUI(this.snakes, this.grid, this.speed, this.disableAnimation, this.graphicSkin, this.isFilterHueAvailable, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, this.debugMode);
   }
 
-  init() {
+  async init() {
     this.imageLoader = new ImageLoader();
     this.modelLoader = new ModelLoader();
 
@@ -225,8 +231,6 @@ export default class GameUI {
       this.progressBarLoading = new ProgressBar(null, null, (this.canvasWidth / 4) * dpr, 25 * dpr, null, null, null, 0.5, this.disableAnimation, "center");
 
       this.setupAdviceLabel(dpr);
-
-      this.gridUI = this.constructGridUI(this.settings);
 
       this.header.setButtons(this.btnFullScreen, this.btnPause, this.btnRank);
 
@@ -343,7 +347,6 @@ export default class GameUI {
 
     document.addEventListener("keydown", this.listenerKeyDown);
 
-    this.loadAssets();
     this.startDraw();
 
     if(this.isMobileDevice() && this.autoFullscreenMobile) {
@@ -351,6 +354,10 @@ export default class GameUI {
     }
 
     this.enableAutoResizeCanvas();
+
+    await this.loadAssets();
+      
+    this.gridUI = this.constructGridUI(this.settings);
   }
   
   autoResizeCanvas() {
@@ -634,7 +641,7 @@ export default class GameUI {
       "assets/images/skin/flat/fruit.png"
     ];
 
-    if(this.gridUI.is3DRendering) {
+    if(this.is3DRendering) {
       imageToLoad.push(
         `assets/images/skin/${this.graphicSkin}/wall_normal.png`,
         `assets/images/skin/${this.graphicSkin}/wall_ao.png`,
@@ -669,7 +676,7 @@ export default class GameUI {
     try {
       await Promise.all([
         this.promisifiedImageLoad(imageToLoad),
-        this.gridUI.is3DRendering
+        this.is3DRendering
           ? this.modelLoader.preloadAll({
             fruit: "assets/models/fruit.glb",
             head: "assets/models/head.glb",
@@ -805,7 +812,9 @@ export default class GameUI {
         this.header.height = GameConstants.Setting.HEADER_HEIGHT_DEFAULT * 1.25 * dprMultiplier;
       }
       
-      this.gridUI.fontSize = this.fontSize;
+      if(this.gridUI) {
+        this.gridUI.fontSize = this.fontSize;
+      }
 
       Constants.Setting.FONT_SIZE = this.fontSize;
       this.labelMenus.size = this.fontSize;
@@ -836,8 +845,8 @@ export default class GameUI {
         this.header.draw(ctx);
 
         if(this.grid != null && (!this.grid.maze || (this.grid.maze && (!this.paused || this.gameOver || this.gameFinished)))) {
-          this.gridUI.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, this.gameFinished, this.countBeforePlay, this.spectatorMode, this.ticks, this.gameOver, this.onlineMode, this.paused);
-          this.gridUI.draw(ctx);
+          this.gridUI?.set(this.snakes, this.grid, this.speed, this.offsetFrame, this.header.height, this.imageLoader, this.modelLoader, this.currentPlayer, this.gameFinished, this.countBeforePlay, this.spectatorMode, this.ticks, this.gameOver, this.onlineMode, this.paused);
+          this.gridUI?.draw(ctx);
         }
 
         if(this.timerToDisplay != undefined && this.timerToDisplay != null && !isNaN(this.timerToDisplay) && this.timerToDisplay >= 0) {
@@ -1185,7 +1194,9 @@ export default class GameUI {
         Utils.drawText(ctx, i18next.t("engine.servers.spectatorMode"), "rgba(255, 255, 255, 0.5)", Math.round(this.fontSize), GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
       }
 
-      this.gridUI.debugMode = this.debugMode;
+      if(this.gridUI) {
+        this.gridUI.debugMode = this.debugMode;
+      }
     }
 
     this.currentFrameTime = performance.now() - startTime;

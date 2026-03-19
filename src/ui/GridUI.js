@@ -55,47 +55,49 @@ export default class GridUI extends Component {
   }
 
   draw(context) {
-    if(this.grid && this.grid.grid) {
-      super.draw(context);
-
-      const canvas = context.canvas;
-      const ctx = canvas.getContext("2d");
-
-      if(this.oldHeight != canvas.height || this.oldWidth != canvas.width) {
-        this.forceRedraw = true;
-      }
-  
-      ctx.save();
-
-      const availableHeight = canvas.height - this.headerHeight;
-      const availableWidth = canvas.width;
-  
-      const caseSize = this.calculateCaseSize(availableHeight, availableWidth);
-
-      const totalWidth = caseSize * this.grid.width;
-      const totalHeight = caseSize * this.grid.height;
-
-      const offsetX = Math.floor((availableWidth - totalWidth) / 2);
-      const offsetY = Math.floor((availableHeight - totalHeight) / 2) + this.headerHeight;
-
-      this.width = totalWidth;
-      this.height = totalHeight;
-        
-      this.drawGrid(ctx, caseSize, totalWidth, offsetX, offsetY);
-  
-      this.drawSnakes(ctx, caseSize, offsetX, offsetY, totalWidth, this.currentPlayer);
-
-      this.saveCurrentState(canvas);
-  
-      ctx.restore();
+    if(!this.grid || !this.grid.grid) {
+      return;
     }
+    
+    super.draw(context);
+
+    const canvas = context.canvas;
+    const ctx = canvas.getContext("2d");
+
+    if(this.oldHeight != canvas.height || this.oldWidth != canvas.width) {
+      this.forceRedraw = true;
+    }
+
+    ctx.save();
+
+    const availableHeight = canvas.height - this.headerHeight;
+    const availableWidth = canvas.width;
+
+    const caseSize = this.calculateCaseSize(availableHeight, availableWidth);
+
+    const totalWidth = caseSize * this.grid.width;
+    const totalHeight = caseSize * this.grid.height;
+
+    const offsetX = Math.floor((availableWidth - totalWidth) / 2);
+    const offsetY = Math.floor((availableHeight - totalHeight) / 2) + this.headerHeight;
+
+    this.width = totalWidth;
+    this.height = totalHeight;
+      
+    this.drawGrid(ctx, caseSize, totalWidth, offsetX, offsetY);
+
+    this.drawSnakes(ctx, caseSize, offsetX, offsetY, totalWidth, this.currentPlayer);
+
+    this.saveCurrentState(canvas);
+
+    ctx.restore();
   }
 
   saveCurrentState(canvas) {
     this.forceRedraw = false;
     this.oldGridState = JSON.parse(JSON.stringify(this.grid.grid));
-    this.oldWidth = canvas.width;
-    this.oldHeight = canvas.height;
+    this.oldWidth = canvas?.width || 0;
+    this.oldHeight = canvas?.height || 0;
     this.oldSnakesState = [];
 
     for(const snake of this.snakes) {

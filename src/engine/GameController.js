@@ -58,7 +58,7 @@ export default class GameController {
     });
   }
   
-  init() {
+  async init() {
     this.update("init", {
       "snakes": this.gameEngine.snakes,
       "grid": this.gameEngine.grid,
@@ -261,6 +261,11 @@ export default class GameController {
       
       this.reactor.dispatchEvent("onUpdateCounter");
     });
+
+    if(!this.gameEngine.isInit) {
+      await this.gameEngine.init();
+      await this.gameUI.init();
+    }
   }
 
   reset() {
@@ -268,10 +273,6 @@ export default class GameController {
   }
 
   async start() {
-    if(!this.gameEngine.isInit) {
-      await this.gameEngine.init();
-    }
-
     this.gameEngine.start();
   }
 

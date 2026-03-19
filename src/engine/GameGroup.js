@@ -65,8 +65,17 @@ export default class GameGroup {
     }
   }
 
-  start() {
+  async start() {
+    await this.initAll(null);
     this.startAll(null);
+  }
+
+  async initAll(game) {
+    for(let i = 0; i < this.games.length; i++) {
+      if(game == null || i != game) {
+        await this.games[i].init();
+      }
+    }
   }
 
   startAll(game) {

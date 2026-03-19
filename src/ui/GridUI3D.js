@@ -230,7 +230,7 @@ export default class GridUI3D extends GridUI {
   }
 
   setupControls(canvas) {
-    if(!this.areControlsInit && this.debugMode) {
+    if(!this.areControlsInit && this.debugMode && canvas) {
       this.controls = new OrbitControls(this.camera, canvas);
       this.controls.enableDamping = true;
       this.controls.dampingFactor = 0.1;
@@ -244,12 +244,15 @@ export default class GridUI3D extends GridUI {
   }
 
   calculateRenderingSizeAndPosition(canvas) {
-    if(this.oldCanvasWidth === canvas.width && this.oldCanvasHeight === canvas.height) {
+    const canvasWidth = canvas?.width || 800;
+    const canvasHeight = canvas?.height || 600;
+
+    if(this.oldCanvasWidth === canvasWidth && this.oldCanvasHeight === canvasHeight) {
       return this.currentRenderingSizeAndPosition;
     }
 
-    const availableHeight = canvas.height - this.headerHeight;
-    const availableWidth = canvas.width;
+    const availableHeight = canvasHeight - this.headerHeight;
+    const availableWidth = canvasWidth;
 
     const caseSize = this.calculateCaseSize(availableHeight, availableWidth);
 
@@ -262,8 +265,8 @@ export default class GridUI3D extends GridUI {
     this.width = totalWidth;
     this.height = totalHeight;
 
-    this.oldCanvasWidth = canvas.width;
-    this.oldCanvasHeight = canvas.height;
+    this.oldCanvasWidth = canvasWidth;
+    this.oldCanvasHeight = canvasHeight;
 
     this.currentRenderingSizeAndPosition = { offsetX, offsetY, totalWidth, totalHeight, caseSize };
 
@@ -271,47 +274,49 @@ export default class GridUI3D extends GridUI {
   }
 
   draw(context) {
-    if(this.grid && this.grid.grid) {
-      const canvas = context.canvas;
-      const ctx = canvas.getContext("2d");
-
-      if(this.oldHeight != canvas.height || this.oldWidth != canvas.width) {
-        this.forceRedraw = true;
-      }
-  
-      ctx.save();
-
-      const { offsetX, offsetY, totalWidth, totalHeight, caseSize } = this.calculateRenderingSizeAndPosition(canvas);
-
-      this.setupControls(canvas);
-
-      this.setupLights();
-
-      this.setupCameraAndSize();
-
-      this.setupFruit();
-      this.setupGoldFruit();
-  
-      this.setupGrid();
-
-      this.updateSnakes();
-
-      if(!this.disableAnimation && (!Object.keys(this.qualitySettings).includes("fruitsAnimation") || this.qualitySettings.fruitsAnimation)) {
-        this.animateFruits();
-      }
-
-      this.drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize);
-
-      this.saveCurrentState(canvas);
-    
-      this.oldTicks = this.ticks;
-
-      if(this.debugMode) {
-        Utils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.85)", Math.round(this.fontSize / 1.5), GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
-      }
-  
-      ctx.restore();
+    if(!this.grid || !this.grid.grid) {
+      return;
     }
+
+    const canvas = context?.canvas;
+    const ctx = canvas?.getContext("2d");
+
+    if(this.oldHeight != canvas?.height || this.oldWidth != canvas?.width) {
+      this.forceRedraw = true;
+    }
+
+    ctx?.save();
+
+    const { offsetX, offsetY, totalWidth, totalHeight, caseSize } = this.calculateRenderingSizeAndPosition(canvas);
+
+    this.setupControls(canvas);
+
+    this.setupLights();
+
+    this.setupCameraAndSize();
+
+    this.setupFruit();
+    this.setupGoldFruit();
+
+    this.setupGrid();
+
+    this.updateSnakes();
+
+    if(!this.disableAnimation && (!Object.keys(this.qualitySettings).includes("fruitsAnimation") || this.qualitySettings.fruitsAnimation)) {
+      this.animateFruits();
+    }
+
+    this.drawGrid(ctx, offsetX, offsetY, totalWidth, totalHeight, caseSize);
+
+    this.saveCurrentState(canvas);
+  
+    this.oldTicks = this.ticks;
+
+    if(this.debugMode && ctx) {
+      Utils.drawText(ctx, this.getDebugText(), "rgba(255, 255, 255, 0.85)", Math.round(this.fontSize / 1.5), GameConstants.Setting.FONT_FAMILY, "left", "bottom", null, null, true);
+    }
+
+    ctx?.restore();
   }
 
   getDebugText() {
@@ -374,10 +379,12 @@ export default class GridUI3D extends GridUI {
       this.renderer.render(this.scene, this.camera);
     }
 
-    Utils.drawImageData(ctx, this.renderer.domElement, offsetX, offsetY, totalWidth, totalHeight, 0, 0, totalWidth, totalHeight);
+    if(ctx) {
+      Utils.drawImageData(ctx, this.renderer.domElement, offsetX, offsetY, totalWidth, totalHeight, 0, 0, totalWidth, totalHeight);
 
-    if(this.snakes.length > 1) {
-      this.drawSnakeInfos(ctx, offsetX, offsetY, caseSize, this.currentPlayer);
+      if(this.snakes.length > 1) {
+        this.drawSnakeInfos(ctx, offsetX, offsetY, caseSize, this.currentPlayer);
+      }
     }
   }
 
@@ -532,12 +539,17 @@ export default class GridUI3D extends GridUI {
   /** Grid handling */
 
   hideFruits() {
-    this.fruitModel.visible = false;
-    this.fruitModelGold.visible = false;
-    this.fruitPointLight.visible = false;
-    this.fruitGoldPointLight.visible = false;
-    this.fruitHalo.visible = false;
-    this.fruitGoldHalo.visible = false;
+    if(this.fruitModel) {
+      this.fruitModel.visible = false;
+      this.fruitPointLight.visible = false;
+      this.fruitHalo.visible = false;
+    }
+    
+    if(this.fruitModelGold) {
+      this.fruitModelGold.visible = false;
+      this.fruitGoldPointLight.visible = false;
+      this.fruitGoldHalo.visible = false;
+    }
   }
   
   setupGrid() {
