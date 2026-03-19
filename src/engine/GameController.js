@@ -265,6 +265,7 @@ export default class GameController {
 
     if(!this.gameEngine.isInit) {
       await this.gameEngine.init();
+      this.update("init", { "engineLoading": false });
       await this.gameUI.startAfterEngineInit();
     }
   }
