@@ -230,8 +230,6 @@ test("fruit eaten should increase score", async () => {
     
     engine.doTick();
 
-    console.log(theGrid);
-
     expect(theSnake.gameOver).toBe(false);
     expect(engine.gameOver).toBe(false);
     expect(theSnake.score).toBe(1);

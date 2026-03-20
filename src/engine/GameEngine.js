@@ -519,9 +519,7 @@ export default class GameEngine {
 
   handleStuckFruits(setFruitError) {
     // If the fruit is in a corridor, we set it in a new cell
-    console.log(this.grid.fruitPositions);
     for(const fruitPos of this.grid.fruitPositions) {
-      console.log(this.grid.detectCorridor(fruitPos), this.grid.isFruitSurrounded(fruitPos, true));
       if(!this.scoreMax && !setFruitError && (this.grid.detectCorridor(fruitPos) || this.grid.isFruitSurrounded(fruitPos, true)) && !this.clientSidePredictionsMode) {
         this.grid.removeFruit(fruitPos);
         setFruitError = !this.grid.setFruits(this.snakes.length);
