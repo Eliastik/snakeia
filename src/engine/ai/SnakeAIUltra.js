@@ -722,6 +722,21 @@ export default class SnakeAIUltra extends SnakeAI {
     return null;
   }
 
+  findAllPositionsInState(stateArray, targetValue) {
+    const positions = [];
+    const targetTypeValue = GameConstants.CaseTypeAIValue[targetValue];
+    
+    for(let i = 0; i < stateArray.length; i++) {
+      for(let j = 0; j < stateArray[i].length; j++) {
+        if(stateArray[i][j] === targetTypeValue) {
+          positions.push({ x: j, y: i });
+        }
+      }
+    }
+
+    return positions;
+  }
+
   // Frame stacking
 
   getFrameStack(instanceId) {
@@ -1040,10 +1055,10 @@ export default class SnakeAIUltra extends SnakeAI {
     const { gameOver } = snake;
     const head = snake.getHeadPosition();
 
-    const fruit = this.findPositionInState(currentState.fruitsAndWallsLayer, GameConstants.CaseType.FRUIT);
-    const fruitGold = this.findPositionInState(currentState.fruitsAndWallsLayer, GameConstants.CaseType.FRUIT_GOLD);
+    const fruits = this.findAllPositionsInState(currentState.fruitsAndWallsLayer, GameConstants.CaseType.FRUIT);
+    const goldFruits = this.findAllPositionsInState(currentState.fruitsAndWallsLayer, GameConstants.CaseType.FRUIT_GOLD);
 
-    if(!fruit) {
+    if(fruits.length === 0 && goldFruits.length === 0) {
       this.logger.warn("No fruit detected\n");
     }
 
@@ -1069,26 +1084,63 @@ export default class SnakeAIUltra extends SnakeAI {
       return GameConstants.AIRewards.MOVE - penalty;
     }
 
-    if(fruit && head.x === fruit.x && head.y === fruit.y) {
-      return GameConstants.AIRewards.FRUIT_EATEN;
+    for(const fruit of fruits) {
+      if(head.x === fruit.x && head.y === fruit.y) {
+        return GameConstants.AIRewards.FRUIT_EATEN;
+      }
     }
 
-    if(fruitGold && head.x === fruitGold.x && head.y === fruitGold.y) {
-      return GameConstants.AIRewards.GOLD_FRUIT_EATEN;
+    for(const fruitGold of goldFruits) {
+      if(head.x === fruitGold.x && head.y === fruitGold.y) {
+        return GameConstants.AIRewards.GOLD_FRUIT_EATEN;
+      }
     }
 
-    if(fruit) {
+    if(fruits.length > 0 || goldFruits.length > 0) {
       const prevHead = snake.get(1);
 
       if(prevHead) {
-        const distBefore = this.bfsDistance(snake, prevHead.x, prevHead.y, fruit.x, fruit.y);
-        const distAfter = this.bfsDistance(snake, head.x, head.y, fruit.x, fruit.y);
-
-        if(distAfter === -1) {
-          return GameConstants.AIRewards.MOVE - 0.05;
+        let closestFruit = null;
+        let closestFruitDist = Infinity;
+        
+        for(const fruit of fruits) {
+          const distAfter = this.bfsDistance(snake, head.x, head.y, fruit.x, fruit.y);
+          if(distAfter !== -1 && distAfter < closestFruitDist) {
+            closestFruitDist = distAfter;
+            closestFruit = fruit;
+          }
         }
 
-        return GameConstants.AIRewards.MOVE + (distBefore - distAfter) * 0.05;
+        let closestGoldFruit = null;
+        let closestGoldFruitDist = Infinity;
+        
+        for(const fruitGold of goldFruits) {
+          const distAfter = this.bfsDistance(snake, head.x, head.y, fruitGold.x, fruitGold.y);
+          if(distAfter !== -1 && distAfter < closestGoldFruitDist) {
+            closestGoldFruitDist = distAfter;
+            closestGoldFruit = fruitGold;
+          }
+        }
+
+        let targetFruit = null;
+        if(closestFruit && closestGoldFruit) {
+          targetFruit = closestGoldFruitDist <= closestFruitDist * 0.8 ? closestGoldFruit : closestFruit;
+        } else if(closestFruit) {
+          targetFruit = closestFruit;
+        } else if(closestGoldFruit) {
+          targetFruit = closestGoldFruit;
+        }
+
+        if(targetFruit) {
+          const distBefore = this.bfsDistance(snake, prevHead.x, prevHead.y, targetFruit.x, targetFruit.y);
+          const distAfter = this.bfsDistance(snake, head.x, head.y, targetFruit.x, targetFruit.y);
+
+          if(distAfter === -1) {
+            return GameConstants.AIRewards.MOVE - 0.05;
+          }
+
+          return GameConstants.AIRewards.MOVE + (distBefore - distAfter) * 0.05;
+        }
       }
     }
 
