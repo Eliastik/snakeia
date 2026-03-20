@@ -29,9 +29,9 @@ export default class SnakeAILow extends SnakeAI {
   ai(snake) {
     super.ai(snake);
 
-    if(snake.grid.fruitPos != null) {
+    if(this.aiFruitTargetPos != null) {
       const currentPosition = snake.getHeadPosition();
-      const fruitPos = this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? snake.grid.fruitPosGold : snake.grid.fruitPos;
+      const fruitPos = this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? snake.grid.fruitPosGold : this.aiFruitTargetPos;
       let directionNext = GameConstants.Key.RIGHT;
 
       if(fruitPos.x > currentPosition.x) {

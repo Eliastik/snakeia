@@ -135,7 +135,7 @@ export default class GameEngine {
       }
     }
 
-    this.grid.setFruit(this.snakes.length);
+    this.grid.setFruits(this.snakes.length);
   }
 
   async initAIUltra() {
@@ -383,15 +383,15 @@ export default class GameEngine {
             if(this.grid.isDeadPosition(headSnakePos)) {
               snake.setGameOver(this.ticks);
             } else {
-              const { scoreHasIncreased, setFruit } = this.handleSnakeMoveResult(headSnakePos, snake);
+              const { scoreHasIncreased, setFruits } = this.handleSnakeMoveResult(headSnakePos, snake);
   
               if(scoreHasIncreased) {
                 scoreIncreased = true;
               }
   
               // Set a new fruit if the current fruit is eaten
-              if(!this.scoreMax && setFruit && !this.clientSidePredictionsMode) {
-                setFruitError = !this.grid.setFruit(this.snakes.length);
+              if(!this.scoreMax && setFruits && !this.clientSidePredictionsMode) {
+                setFruitError = !this.grid.setFruits(this.snakes.length);
               }
             }
           }
@@ -466,18 +466,16 @@ export default class GameEngine {
       }
     }
 
-    return { goldFruit: false, scoreHasIncreased: false, setFruit: false };
+    return { goldFruit: false, scoreHasIncreased: false, setFruits: false };
   }
 
   handleScoreIncrease(snake, cellType, headSnakePos) {
-    let setFruit = false;
+    let setFruits = false;
     let goldFruit = false;
 
     if(cellType == GameConstants.CaseType.FRUIT) {
       snake.increaseScore(1);
-
-      this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPos);
-      this.grid.fruitPos = null;
+      this.grid.removeFruit(headSnakePos);
     } else if(cellType == GameConstants.CaseType.FRUIT_GOLD) {
       snake.increaseScore(3);
       
@@ -503,13 +501,13 @@ export default class GameEngine {
       this.numFruit++;
 
       if(!goldFruit) {
-        setFruit = true;
+        setFruits = true;
       }
     }
 
     this.handleSpeedIncrease(snake);
 
-    return { goldFruit, scoreHasIncreased: true, setFruit };
+    return { goldFruit, scoreHasIncreased: true, setFruits };
   }
 
   handleSpeedIncrease(snake) {
@@ -521,8 +519,13 @@ export default class GameEngine {
 
   handleStuckFruits(setFruitError) {
     // If the fruit is in a corridor, we set it in a new cell
-    if(!this.scoreMax && !setFruitError && (this.grid.detectCorridor(this.grid.fruitPos) || this.grid.isFruitSurrounded(this.grid.fruitPos, true)) && !this.clientSidePredictionsMode) {
-      setFruitError = !this.grid.setFruit(this.snakes.length);
+    console.log(this.grid.fruitPositions);
+    for(const fruitPos of this.grid.fruitPositions) {
+      console.log(this.grid.detectCorridor(fruitPos), this.grid.isFruitSurrounded(fruitPos, true));
+      if(!this.scoreMax && !setFruitError && (this.grid.detectCorridor(fruitPos) || this.grid.isFruitSurrounded(fruitPos, true)) && !this.clientSidePredictionsMode) {
+        this.grid.removeFruit(fruitPos);
+        setFruitError = !this.grid.setFruits(this.snakes.length);
+      }
     }
 
     // If gold fruit is in a corridor, we remove it

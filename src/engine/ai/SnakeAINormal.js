@@ -57,7 +57,7 @@ export default class SnakeAINormal extends SnakeAI {
       return true;
     }
 
-    const fruitPos = snake.grid.fruitPos;
+    const fruitPos = this.aiFruitTargetPos;
     const fruitPosGold = snake.grid.fruitPosGold;
 
     if(this.aiFruitGoal === GameConstants.CaseType.FRUIT_GOLD
@@ -83,7 +83,7 @@ export default class SnakeAINormal extends SnakeAI {
 
   updatePath(snake) {
     const currentPosition = snake.getHeadPosition();
-    const fruitPos = snake.grid.fruitPos;
+    const fruitPos = this.aiFruitTargetPos;
     const fruitPosGold = snake.grid.fruitPosGold;
     let fruitTarget = fruitPos;
 

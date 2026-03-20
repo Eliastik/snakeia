@@ -33,7 +33,7 @@ export default class Grid {
     this.mazeForceAuto = mazeForceAuto == undefined ? false : mazeForceAuto;
     this.grid;
     this.initialGrid;
-    this.fruitPos;
+    this.fruitPositions = [];
     this.fruitPosGold;
     this.customGrid = customGrid;
     this.seedGrid = seedGrid ? "" + parseInt(seedGrid) : undefined;
@@ -91,7 +91,7 @@ export default class Grid {
   reset() {
     this.grid = undefined;
     this.initialGrid = undefined;
-    this.fruitPos = undefined;
+    this.fruitPositions = [];
     this.fruitPosGold = undefined;
     this.rngGrid = new seedrandom(this.seedGrid);
     this.rngGame = new seedrandom(this.seedGame);
@@ -226,40 +226,15 @@ export default class Grid {
     return new Position(GameUtils.randRange(0, this.width - 1, this.rngGame), GameUtils.randRange(0, this.height - 1, this.rngGame));
   }
 
-  setFruit(numberPlayers, gold) {
+  setFruits(numberPlayers) {
     const tried = [1];
 
-    if(!gold && this.fruitPos != null && this.get(this.fruitPos) == GameConstants.CaseType.FRUIT) {
-      this.set(GameConstants.CaseType.EMPTY, this.fruitPos);
-    }
-
     if(this.getTotal(GameConstants.CaseType.EMPTY) > 0) {
-      let randomPos, isCorridor;
+      let errorSettingFruit = false;
 
       do {
-        randomPos = this.getRandomPosition();
-        isCorridor = this.detectCorridor(randomPos);
-
-        if(isCorridor && this.get(randomPos) == GameConstants.CaseType.EMPTY) {
-          this.set(GameConstants.CaseType.SURROUNDED, randomPos);
-        }
-
-        if(this.getTotal(GameConstants.CaseType.EMPTY) <= 0) {
-          if(this.fruitPosGold) {
-            return true;
-          } else {
-            return false;
-          }
-        }
-      } while(this.get(randomPos) != GameConstants.CaseType.EMPTY || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos, tried)) || isCorridor);
-
-      if(gold) {
-        this.fruitPosGold = randomPos;
-        this.set(GameConstants.CaseType.FRUIT_GOLD, randomPos);
-      } else {
-        this.fruitPos = randomPos;
-        this.set(GameConstants.CaseType.FRUIT, randomPos);
-      }
+        errorSettingFruit = !this.setSingleFruit(tried, false);
+      } while(!errorSettingFruit && this.fruitPositions.length < Math.min(numberPlayers, GameConstants.Setting.MAX_FRUITS_PER_GRID));
     } else if(this.getTotal(GameConstants.CaseType.EMPTY) <= 0 && this.fruitPosGold) {
       return true;
     } else {
@@ -269,10 +244,46 @@ export default class Grid {
     const shouldSetGoldFruit = GameUtils.randRange(1, (this.probGoldFruitIncrease ? 3 : (numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER)), this.rngGame) == 1;
 
     if(!this.maze && this.fruitPosGold == null && shouldSetGoldFruit) {
-      this.setFruit(numberPlayers, true);
+      this.setSingleFruit(tried, true);
+    }
+
+    if(this.fruitPositions.length === 0) {
+      return false;
     }
 
     return true;
+  }
+
+  setSingleFruit(tried, gold) {
+    let randomPos, isCorridor;
+
+    do {
+      randomPos = this.getRandomPosition();
+      isCorridor = this.detectCorridor(randomPos);
+
+      if(isCorridor && this.get(randomPos) == GameConstants.CaseType.EMPTY) {
+        this.set(GameConstants.CaseType.SURROUNDED, randomPos);
+      }
+
+      if(this.getTotal(GameConstants.CaseType.EMPTY) <= 0) {
+        return false;
+      }
+    } while(this.get(randomPos) != GameConstants.CaseType.EMPTY || this.isFruitSurrounded(randomPos, true) || (this.maze && !this.testFruitMaze(randomPos, tried)) || isCorridor);
+
+    if(gold) {
+      this.fruitPosGold = randomPos;
+      this.set(GameConstants.CaseType.FRUIT_GOLD, randomPos);
+    } else {
+      this.fruitPositions.push(randomPos);
+      this.set(GameConstants.CaseType.FRUIT, randomPos);
+    }
+
+    return true;
+  }
+
+  removeFruit(fruitPosition) {
+    this.set(GameConstants.CaseType.EMPTY, fruitPosition);
+    this.fruitPositions = this.fruitPositions.filter(position => !fruitPosition.equals(position));
   }
 
   testFruitMaze(position, tried) { // Maze mode: avoid putting the fruit too close to the Snake

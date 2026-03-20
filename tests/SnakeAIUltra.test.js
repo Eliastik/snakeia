@@ -30,7 +30,7 @@ test("get state from ai test - test 1", async () => {
     
     theGrid.init();
     await theSnake.init();
-    theGrid.setFruit();
+    theGrid.setFruits();
 
     const theSnakeAI = new SnakeAIUltra();
     theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
@@ -78,7 +78,7 @@ test("get state from ai test - test 2", async () => {
     
     theGrid.init();
     await theSnake.init();
-    theGrid.setFruit();
+    theGrid.setFruits();
 
     const theSnakeAI = new SnakeAIUltra();
     theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
@@ -129,7 +129,7 @@ test("get state from ai test - test 3", async () => {
     
     theGrid.init();
     await theSnake.init();
-    theGrid.setFruit();
+    theGrid.setFruits();
 
     const theSnakeAI = new SnakeAIUltra();
     theSnakeAI.enableStateRotation = false; // Disable state rotation for testing

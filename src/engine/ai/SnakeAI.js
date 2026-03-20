@@ -21,29 +21,43 @@ import GameConstants from "../Constants.js";
 export default class SnakeAI {
   constructor() {
     this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+    this.aiFruitTargetPos = null; // Stocker la position du fruit cible
     this.aiLevelText = "custom";
   }
 
   ai(snake) {
     const currentPosition = snake.getHeadPosition();
-    const fruitPos = snake.grid.fruitPos;
+    const fruitPositions = snake.grid.fruitPositions || [];
     const fruitPosGold = snake.grid.fruitPosGold;
 
-    if(fruitPos && snake.grid.get(fruitPos) == GameConstants.CaseType.FRUIT) {
-      const distFruit = Math.abs(fruitPos.x - currentPosition.x) + Math.abs(fruitPos.y - currentPosition.y);
-      const distFruitGold = fruitPosGold ? Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y) : -1;
-    
-      if(fruitPosGold && snake.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD && this.aiFruitGoal == GameConstants.CaseType.FRUIT) {
-        if(distFruitGold <= distFruit) {
-          this.aiFruitGoal = GameConstants.CaseType.FRUIT_GOLD;
-        } else {
-          this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+    let closestFruitPos = null;
+    let minDistFruit = Infinity;
+
+    for(const fruitPos of fruitPositions) {
+      if(snake.grid.get(fruitPos) == GameConstants.CaseType.FRUIT) {
+        const dist = Math.abs(fruitPos.x - currentPosition.x) + Math.abs(fruitPos.y - currentPosition.y);
+        if(dist < minDistFruit) {
+          minDistFruit = dist;
+          closestFruitPos = fruitPos;
         }
-      } else if(!fruitPosGold || snake.grid.get(fruitPosGold) != GameConstants.CaseType.FRUIT_GOLD) {
-        this.aiFruitGoal = GameConstants.CaseType.FRUIT;
       }
-    } else if((!fruitPos || snake.grid.get(fruitPos) != GameConstants.CaseType.FRUIT) && fruitPosGold && snake.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD) {
+    }
+
+    const distFruitGold = fruitPosGold && snake.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD
+      ? Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y)
+      : Infinity;
+
+    if(closestFruitPos && minDistFruit <= distFruitGold * 0.8) {
+      this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+      this.aiFruitTargetPos = closestFruitPos;
+    } else if(distFruitGold !== Infinity) {
       this.aiFruitGoal = GameConstants.CaseType.FRUIT_GOLD;
+      this.aiFruitTargetPos = fruitPosGold;
+    } else if(closestFruitPos) {
+      this.aiFruitGoal = GameConstants.CaseType.FRUIT;
+      this.aiFruitTargetPos = closestFruitPos;
+    } else {
+      this.aiFruitTargetPos = null;
     }
 
     return null;

@@ -165,7 +165,7 @@ test("eating fruit should reset the stuck counter", async () => {
     ).flat();
 
     return restrictedArea.every(pos =>
-      theSnake.queue.some(sq => sq.equals(pos)) || pos.equals(theGrid.fruitPos)
+      theSnake.queue.some(sq => sq.equals(pos)) || theGrid.fruitPositions.some(fruitPos => pos.equals(fruitPos))
     );
   }
 
@@ -229,6 +229,8 @@ test("fruit eaten should increase score", async () => {
     expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 2, direction: Constants.Direction.RIGHT });
     
     engine.doTick();
+
+    console.log(theGrid);
 
     expect(theSnake.gameOver).toBe(false);
     expect(engine.gameOver).toBe(false);

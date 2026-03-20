@@ -352,7 +352,7 @@ export default class Snake {
   }
 
   hasMaxScore() {
-    return this.grid.getTotal(GameConstants.CaseType.EMPTY) <= 0 && !this.grid.fruitPosGold && !this.grid.fruitPos;
+    return this.grid.getTotal(GameConstants.CaseType.EMPTY) <= 0 && !this.grid.fruitPosGold && this.grid.fruitPositions.length === 0;
   }
 
   setGameOver(ticks) {

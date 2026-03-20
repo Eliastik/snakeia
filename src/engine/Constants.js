@@ -82,7 +82,8 @@ export default {
     PROB_GOLD_FRUIT_1_PLAYER: 100,
     PROB_GOLD_FRUIT_MULTIPLE_PLAYERS: 50,
     INFO_NOTIF_COLOR: "rgba(52, 152, 219, 0.5)",
-    ERROR_NOTIF_COLOR: "rgba(231, 76, 60, 0.5)"
+    ERROR_NOTIF_COLOR: "rgba(231, 76, 60, 0.5)",
+    MAX_FRUITS_PER_GRID: 5
   },
   Direction: {
     UP: 0,
