@@ -86,7 +86,6 @@ export default class GridUI3D extends GridUI {
 
     this.fruitInstances = [];
     this.fruitInstancesMap = new Map();
-    this.fruitGoldInstance = null;
     this.fruitGoldPositionKey = null;
 
     this.segmentGeometryCache = {};
@@ -372,7 +371,7 @@ export default class GridUI3D extends GridUI {
     }
 
     if(this.shouldUpdateDynamicReflections()) {
-      this.updateReflections(this.fruitGoldInstance.mesh.position.x, this.fruitGoldInstance.mesh.position.y, this.fruitGoldInstance.mesh.position.z);
+      this.updateReflections(this.fruitModelGold.position.x, this.fruitModelGold.position.y, this.fruitModelGold.position.z);
       this.firstUpdatedReflections = true;
     }
     
@@ -543,18 +542,12 @@ export default class GridUI3D extends GridUI {
 
   /** Grid handling */
 
-  hideFruits() {
-    for(const fruitInstance of this.fruitInstances) {
-      this.cleanFruitInstance(fruitInstance);
+  hideGoldFruit() {
+    if(this.fruitModelGold) {
+      this.fruitModelGold.visible = false;
+      this.fruitGoldPointLight.visible = false;
+      this.fruitGoldHalo.visible = false;
     }
-
-    this.fruitInstances = [];
-    
-    if(this.fruitGoldInstance) {
-      this.cleanFruitInstance(this.fruitGoldInstance);
-    }
-    
-    this.fruitGoldInstance = null;
   }
   
   cleanFruitInstance(fruitInstance) {
@@ -658,6 +651,7 @@ export default class GridUI3D extends GridUI {
     for(let y = 0; y < this.grid.height; y++) {
       for(let x = 0; x < this.grid.width; x++) {
         const caseType = this.grid.get(new Position(x, y));
+        
         if(caseType === GameConstants.CaseType.FRUIT || caseType === GameConstants.CaseType.FRUIT_GOLD) {
           currentFruits.set(`${x},${y}`, { caseType, x, y });
         }
@@ -676,20 +670,24 @@ export default class GridUI3D extends GridUI {
     }
 
     if(this.fruitGoldPositionKey && !currentFruits.has(this.fruitGoldPositionKey)) {
-      if(this.fruitGoldInstance) {
-        this.cleanFruitInstance(this.fruitGoldInstance);
-      }
-
-      this.fruitGoldInstance = null;
+      this.hideGoldFruit();
       this.fruitGoldPositionKey = null;
       this.hasGoldFruit = false;
     }
 
     for(const [posKey, fruit] of currentFruits) {
+      const xPosition = fruit.x - halfGridWidth + 0.5;
+      const yPosition = (this.grid.height - 1 - fruit.y) - halfGridHeight + 0.5;
+        
       if(!this.fruitInstancesMap.has(posKey) && posKey !== this.fruitGoldPositionKey) {
-        const xPosition = fruit.x - halfGridWidth + 0.5;
-        const yPosition = (this.grid.height - 1 - fruit.y) - halfGridHeight + 0.5;
-        this.displayFruit(xPosition, yPosition, fruit.caseType, posKey);
+        const fruitType = fruit.caseType;
+
+        if(fruitType === GameConstants.CaseType.FRUIT) {
+          this.displayFruitMultiple(xPosition, yPosition, fruitType, posKey);
+        } else if(fruitType === GameConstants.CaseType.FRUIT_GOLD) {
+          this.displayFruitSingle(xPosition, yPosition, fruitType);
+          this.fruitGoldPositionKey = posKey;
+        }
       }
     }
   }
@@ -1031,13 +1029,57 @@ export default class GridUI3D extends GridUI {
     return this.haloTexture;
   }
 
-  displayFruit(xPosition, yPosition, caseType, posKey = null) {
+  displayFruitSingle(xPosition, yPosition, caseType) {
+    const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
+    const fruitModel = isGoldFruit ? this.fruitModelGold : this.fruitModel;
+    const pointLight = isGoldFruit ? this.fruitGoldPointLight : this.fruitPointLight;
+    const halo = isGoldFruit ? this.fruitGoldHalo : this.fruitHalo;
+
+    if(!fruitModel) {
+      return;
+    }
+
+    if(this.qualitySettings.fruitLights) {
+      pointLight.visible = true;
+      halo.visible = true;
+      pointLight.position.set(xPosition, yPosition, 0.5);
+      halo.position.set(xPosition, yPosition, 0.5);
+    } else {
+      pointLight.visible = false;
+      halo.visible = false;
+    }
+
+    fruitModel.visible = true;
+
+    const prevX = fruitModel.position.x;
+    const prevY = fruitModel.position.y;
+
+    fruitModel.position.set(xPosition, yPosition, 0.5);
+
+    const positionChanged = prevX !== xPosition || prevY !== yPosition;
+
+    if(positionChanged) {
+      fruitModel.userData.spawnAnim = {
+        progress: 0,
+        duration: 0.7,
+        startTime: performance.now()
+      };
+    }
+
+    if(isGoldFruit) {
+      this.hasGoldFruit = true;
+    }
+  }
+
+  displayFruitMultiple(xPosition, yPosition, caseType, posKey = null) {
     const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
     const baseModel = isGoldFruit ? this.fruitModelGold : this.fruitModel;
     const basePointLight = isGoldFruit ? this.fruitGoldPointLight : this.fruitPointLight;
     const baseHalo = isGoldFruit ? this.fruitGoldHalo : this.fruitHalo;
 
-    if(!baseModel) return;
+    if(!baseModel) {
+      return;
+    }
 
     const fruitMesh = baseModel.clone();
     fruitMesh.position.set(xPosition, yPosition, 0.5);
@@ -1104,11 +1146,11 @@ export default class GridUI3D extends GridUI {
       });
     }
     
-    if(this.fruitGoldInstance) {
+    if(this.fruitModelGold.visible) {
       fruitsToAnimate.push({
-        model: this.fruitGoldInstance.mesh,
-        light: this.fruitGoldInstance.light,
-        halo: this.fruitGoldInstance.halo,
+        model: this.fruitModelGold,
+        light: this.fruitGoldPointLight,
+        halo: this.fruitGoldHalo,
         speed: 2.0,
         bobFreq: 2.5
       });
@@ -2271,7 +2313,6 @@ export default class GridUI3D extends GridUI {
     for(const fruitInstance of this.fruitInstances) {
       const fruitPos = new THREE.Vector3().copy(fruitInstance.mesh.position);
       const dist = headPosWorld.distanceTo(fruitPos);
-      
       if(dist < closestRegularDist) {
         closestRegularDist = dist;
         closestRegularFruit = fruitPos;
@@ -2282,7 +2323,7 @@ export default class GridUI3D extends GridUI {
     let closestGoldDist = Infinity;
 
     if(this.fruitGoldInstance) {
-      closestGoldFruit = new THREE.Vector3().copy(this.fruitGoldInstance.mesh.position);
+      closestGoldFruit = new THREE.Vector3().copy(this.fruitModelGold.position);
       closestGoldDist = headPosWorld.distanceTo(closestGoldFruit);
     }
 
