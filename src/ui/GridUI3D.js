@@ -2699,6 +2699,12 @@ export default class GridUI3D extends GridUI {
       this[obj]?.clear();
       this[obj] = null;
     }
+
+    for(const instance of this.fruitInstances) {
+      this.cleanFruitInstance(instance);
+    }
+
+    this.fruitInstances = [];
   }
 
   disposeSnakes() {
