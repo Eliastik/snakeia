@@ -1039,6 +1039,15 @@ export default class GridUI3D extends GridUI {
       return;
     }
 
+    const prevX = fruitModel.position.x;
+    const prevY = fruitModel.position.y;
+
+    const positionChanged = prevX !== xPosition || prevY !== yPosition;
+
+    if(!positionChanged) {
+      return;
+    }
+
     if(this.qualitySettings.fruitLights) {
       pointLight.visible = true;
       halo.visible = true;
@@ -1050,13 +1059,7 @@ export default class GridUI3D extends GridUI {
     }
 
     fruitModel.visible = true;
-
-    const prevX = fruitModel.position.x;
-    const prevY = fruitModel.position.y;
-
     fruitModel.position.set(xPosition, yPosition, 0.5);
-
-    const positionChanged = prevX !== xPosition || prevY !== yPosition;
 
     if(positionChanged) {
       fruitModel.userData.spawnAnim = {
