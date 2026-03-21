@@ -228,13 +228,14 @@ export default class Grid {
 
   setFruits(numberPlayers) {
     const tried = [1];
+    const fruitCountToSpawn = Math.min(numberPlayers, GameConstants.Setting.MAX_FRUITS_PER_GRID);
 
-    if(this.getTotal(GameConstants.CaseType.EMPTY) > 0) {
+    if(this.getTotal(GameConstants.CaseType.EMPTY) > 0 && this.fruitPositions.length < fruitCountToSpawn) {
       let errorSettingFruit = false;
 
       do {
         errorSettingFruit = !this.setSingleFruit(tried, false);
-      } while(!errorSettingFruit && this.fruitPositions.length < Math.min(numberPlayers, GameConstants.Setting.MAX_FRUITS_PER_GRID));
+      } while(!errorSettingFruit && this.fruitPositions.length < fruitCountToSpawn);
     }
 
     const shouldSetGoldFruit = GameUtils.randRange(1, (this.probGoldFruitIncrease ? 3 : (numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER)), this.rngGame) == 1;
