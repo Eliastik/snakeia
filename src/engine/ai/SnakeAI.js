@@ -20,8 +20,7 @@ import GameConstants from "../Constants.js";
 
 export default class SnakeAI {
   constructor() {
-    this.aiFruitGoal = GameConstants.CaseType.FRUIT;
-    this.aiFruitTargetPos = null; // Stocker la position du fruit cible
+    this.aiFruitGoalsSorted = [];
     this.aiLevelText = "custom";
   }
 
@@ -30,35 +29,24 @@ export default class SnakeAI {
     const fruitPositions = snake.grid.fruitPositions || [];
     const fruitPosGold = snake.grid.fruitPosGold;
 
-    let closestFruitPos = null;
-    let minDistFruit = Infinity;
+    const goals = [];
+
+    if(fruitPosGold && snake.grid.get(fruitPosGold) === GameConstants.CaseType.FRUIT_GOLD) {
+      const dist = Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y);
+      goals.push({ type: GameConstants.CaseType.FRUIT_GOLD, position: fruitPosGold, dist });
+    }
 
     for(const fruitPos of fruitPositions) {
-      if(snake.grid.get(fruitPos) == GameConstants.CaseType.FRUIT) {
+      if(snake.grid.get(fruitPos) === GameConstants.CaseType.FRUIT) {
         const dist = Math.abs(fruitPos.x - currentPosition.x) + Math.abs(fruitPos.y - currentPosition.y);
-        if(dist < minDistFruit) {
-          minDistFruit = dist;
-          closestFruitPos = fruitPos;
-        }
+        goals.push({ type: GameConstants.CaseType.FRUIT, position: fruitPos, dist });
       }
     }
 
-    const distFruitGold = fruitPosGold && snake.grid.get(fruitPosGold) == GameConstants.CaseType.FRUIT_GOLD
-      ? Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y)
-      : Infinity;
+    const gold = goals.filter(g => g.type === GameConstants.CaseType.FRUIT_GOLD);
+    const normals = goals.filter(g => g.type === GameConstants.CaseType.FRUIT).sort((a, b) => a.dist - b.dist);
 
-    if(closestFruitPos && minDistFruit <= distFruitGold * 0.8) {
-      this.aiFruitGoal = GameConstants.CaseType.FRUIT;
-      this.aiFruitTargetPos = closestFruitPos;
-    } else if(distFruitGold !== Infinity) {
-      this.aiFruitGoal = GameConstants.CaseType.FRUIT_GOLD;
-      this.aiFruitTargetPos = fruitPosGold;
-    } else if(closestFruitPos) {
-      this.aiFruitGoal = GameConstants.CaseType.FRUIT;
-      this.aiFruitTargetPos = closestFruitPos;
-    } else {
-      this.aiFruitTargetPos = null;
-    }
+    this.aiFruitGoalsSorted = [...gold, ...normals];
 
     return null;
   }

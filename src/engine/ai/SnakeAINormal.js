@@ -30,8 +30,7 @@ export default class SnakeAINormal extends SnakeAI {
     this.aiLevelText = "normal";
 
     this.path = [];
-    this.oldFruitPosition = null;
-    this.oldFruitPositionGold = null;
+    this.oldTargetFruit = null;
   }
 
   ai(snake) {
@@ -46,6 +45,7 @@ export default class SnakeAINormal extends SnakeAI {
     if(this.path.length > 0) {
       const nextPositionPath = this.path.pop();
       const nextPosition = new Position(nextPositionPath.x, nextPositionPath.y);
+
       return new Position(null, null, snake.getDirectionTo(currentPosition, nextPosition)).convertToKeyDirection();
     }
 
@@ -57,18 +57,7 @@ export default class SnakeAINormal extends SnakeAI {
       return true;
     }
 
-    const fruitPos = this.aiFruitTargetPos;
-    const fruitPosGold = snake.grid.fruitPosGold;
-
-    if(this.aiFruitGoal === GameConstants.CaseType.FRUIT_GOLD
-      && !fruitPosGold.equals(this.oldFruitPositionGold)
-    ) {
-      return true;
-    }
-
-    if(this.aiFruitGoal === GameConstants.CaseType.FRUIT
-      && !fruitPos.equals(this.oldFruitPosition)
-    ) {
+    if(this.oldTargetFruit && snake.grid.get(this.oldTargetFruit.position) != this.oldTargetFruit.type) {
       return true;
     }
 
@@ -83,42 +72,38 @@ export default class SnakeAINormal extends SnakeAI {
 
   updatePath(snake) {
     const currentPosition = snake.getHeadPosition();
-    const fruitPos = this.aiFruitTargetPos;
-    const fruitPosGold = snake.grid.fruitPosGold;
-    let fruitTarget = fruitPos;
+    const targetFruit = this.aiFruitGoalsSorted.shift();
 
-    if(currentPosition && (fruitPos || fruitPosGold)) {
-      const grid = snake.grid.getGraph(false);
-
-      const graph = new Lowlight.Astar.Configuration(grid, {
-        order: "yx",
-        torus: this.enableTorus ? true : false,
-        diagonals: false,
-        cutting: false,
-        static: true,
-        cost(a, b) { return b == 1 ? null : 1; }
-      });
-
-      if(fruitPosGold && this.aiFruitGoal === GameConstants.CaseType.FRUIT_GOLD) {
-        fruitTarget = fruitPosGold;
-      }
-
-      let calculatedPath = this.calculatePath(graph, currentPosition, fruitTarget);
-
-      if(calculatedPath.length < 1) {
-        if(this.aiFruitGoal === GameConstants.CaseType.FRUIT_GOLD || !fruitPosGold) {
-          fruitTarget = fruitPos;
-        }
-
-        calculatedPath = this.calculatePath(graph, currentPosition, fruitTarget);
-      }
-
-      this.path = calculatedPath.reverse();
-      this.path.pop();
-
-      this.oldFruitPosition = fruitPos;
-      this.oldFruitPositionGold = fruitPosGold;
+    if(!currentPosition || !targetFruit) {
+      return;
     }
+
+    const targetPosition = targetFruit.position;
+
+    const grid = snake.grid.getGraph(false);
+
+    const graph = new Lowlight.Astar.Configuration(grid, {
+      order: "yx",
+      torus: this.enableTorus ? true : false,
+      diagonals: false,
+      cutting: false,
+      static: true,
+      cost(a, b) { return b == 1 ? null : 1; }
+    });
+
+    const calculatedPath = this.calculatePath(graph, currentPosition, targetPosition);
+
+    if(calculatedPath.length < 1) {
+      // If no path found, we try the next fruit
+      return this.updatePath(snake);
+    }
+
+    this.path = calculatedPath.reverse();
+    this.path.pop();
+
+    this.oldTargetFruit = targetFruit;
+
+    return calculatedPath;
   }
 
   calculatePath(graph, currentPosition, fruitTarget) {

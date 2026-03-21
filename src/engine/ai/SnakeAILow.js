@@ -29,68 +29,73 @@ export default class SnakeAILow extends SnakeAI {
   ai(snake) {
     super.ai(snake);
 
-    if(this.aiFruitTargetPos != null) {
-      const currentPosition = snake.getHeadPosition();
-      const fruitPos = this.aiFruitGoal == GameConstants.CaseType.FRUIT_GOLD ? snake.grid.fruitPosGold : this.aiFruitTargetPos;
-      let directionNext = GameConstants.Key.RIGHT;
+    const currentPosition = snake.getHeadPosition();
+    const fruitGoal = this.aiFruitGoalsSorted[0];
 
-      if(fruitPos.x > currentPosition.x) {
-        if(fruitPos.x - currentPosition.x > snake.grid.width / 2) {
-          directionNext = GameConstants.Key.LEFT;
-        } else {
-          directionNext = GameConstants.Key.RIGHT;
-        }
-      } else if(fruitPos.x < currentPosition.x) {
-        if(currentPosition.x - fruitPos.x > snake.grid.width / 2) {
-          directionNext = GameConstants.Key.RIGHT;
-        } else {
-          directionNext = GameConstants.Key.LEFT;
-        }
-      } else if(fruitPos.y < currentPosition.y) {
-        if(currentPosition.y - fruitPos.y > snake.grid.height / 2) {
-          directionNext = GameConstants.Key.BOTTOM;
-        } else {
-          directionNext = GameConstants.Key.UP;
-        }
-      } else if(fruitPos.y > currentPosition.y) {
-        if(fruitPos.y - currentPosition.y > snake.grid.height / 2) {
-          directionNext = GameConstants.Key.UP;
-        } else {
-          directionNext = GameConstants.Key.BOTTOM;
+    if(!fruitGoal) {
+      return;
+    }
+
+    const fruitPos = fruitGoal.position;
+
+    let directionNext = GameConstants.Key.RIGHT;
+
+    if(fruitPos.x > currentPosition.x) {
+      if(fruitPos.x - currentPosition.x > snake.grid.width / 2) {
+        directionNext = GameConstants.Key.LEFT;
+      } else {
+        directionNext = GameConstants.Key.RIGHT;
+      }
+    } else if(fruitPos.x < currentPosition.x) {
+      if(currentPosition.x - fruitPos.x > snake.grid.width / 2) {
+        directionNext = GameConstants.Key.RIGHT;
+      } else {
+        directionNext = GameConstants.Key.LEFT;
+      }
+    } else if(fruitPos.y < currentPosition.y) {
+      if(currentPosition.y - fruitPos.y > snake.grid.height / 2) {
+        directionNext = GameConstants.Key.BOTTOM;
+      } else {
+        directionNext = GameConstants.Key.UP;
+      }
+    } else if(fruitPos.y > currentPosition.y) {
+      if(fruitPos.y - currentPosition.y > snake.grid.height / 2) {
+        directionNext = GameConstants.Key.UP;
+      } else {
+        directionNext = GameConstants.Key.BOTTOM;
+      }
+    }
+
+    let nextPosition = snake.getNextPosition(currentPosition, directionNext);
+
+    if(snake.grid.isDeadPosition(nextPosition)) {
+      const currentDirection = this.direction;
+      let firstDifferentDirection = null;
+
+      for(let i = 1; i < snake.queue.length; i++) {
+        if(snake.get(i).direction != currentDirection) {
+          firstDifferentDirection = snake.get(i).direction;
+          break;
         }
       }
 
-      let nextPosition = snake.getNextPosition(currentPosition, directionNext);
+      nextPosition = snake.getNextPosition(currentPosition, firstDifferentDirection);
 
       if(snake.grid.isDeadPosition(nextPosition)) {
-        const currentDirection = this.direction;
-        let firstDifferentDirection = null;
-
-        for(let i = 1; i < snake.queue.length; i++) {
-          if(snake.get(i).direction != currentDirection) {
-            firstDifferentDirection = snake.get(i).direction;
-            break;
-          }
+        if(!snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.UP))) {
+          directionNext = GameConstants.Key.UP;
+        } else if(!snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.RIGHT))) {
+          directionNext = GameConstants.Key.RIGHT;
+        } else if(!snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.BOTTOM))) {
+          directionNext = GameConstants.Key.BOTTOM;
+        } else if(!snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.LEFT))) {
+          directionNext = GameConstants.Key.LEFT;
         }
-
-        nextPosition = snake.getNextPosition(currentPosition, firstDifferentDirection);
-
-        if(snake.grid.isDeadPosition(nextPosition)) {
-          if(!snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.UP))) {
-            directionNext = GameConstants.Key.UP;
-          } else if(!snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.RIGHT))) {
-            directionNext = GameConstants.Key.RIGHT;
-          } else if(!snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.BOTTOM))) {
-            directionNext = GameConstants.Key.BOTTOM;
-          } else if(!snake.grid.isDeadPosition(snake.getNextPosition(currentPosition, GameConstants.Key.LEFT))) {
-            directionNext = GameConstants.Key.LEFT;
-          }
-        } else {
-          directionNext = nextPosition.convertToKeyDirection();
-        }
+      } else {
+        directionNext = nextPosition.convertToKeyDirection();
       }
-
-      return directionNext;
     }
+
+    return directionNext;
   }
 }
