@@ -127,7 +127,7 @@ test("surrounded fruit test", () => {
   mockRandom.mockReturnValueOnce(new Position(4, 1)).mockReturnValueOnce(new Position(4, 3)).mockReturnValue(new Position(1, 1));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
-  theGrid.setFruits();
+  theGrid.setFruits(1);
   expect(theGrid.get(new Position(4, 1))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid.get(new Position(4, 3))).toBe(Constants.CaseType.SURROUNDED);
 });
@@ -137,7 +137,7 @@ test("surrounded fruit test 2", () => {
   mockRandom.mockReturnValueOnce(new Position(2, 2)).mockReturnValueOnce(new Position(1, 1)).mockReturnValue(new Position(5, 0));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
-  theGrid2.setFruits();
+  theGrid2.setFruits(1);
   expect(theGrid2.get(new Position(2, 2))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid2.get(new Position(1, 1))).toBe(Constants.CaseType.SURROUNDED);
 });
@@ -147,7 +147,7 @@ test("surrounded by 3 walls fruit test", () => {
   mockRandom.mockReturnValueOnce(new Position(1, 1)).mockReturnValueOnce(new Position(4, 3)).mockReturnValueOnce(new Position(4, 1)).mockReturnValue(new Position(2, 0));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
-  theGrid3.setFruits();
+  theGrid3.setFruits(1);
   expect(theGrid3.get(new Position(1, 1))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid3.get(new Position(4, 3))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid3.get(new Position(4, 1))).toBe(Constants.CaseType.FRUIT);
@@ -158,7 +158,7 @@ test("corridor detection fruit test", () => {
   mockRandom.mockReturnValueOnce(new Position(2, 1)).mockReturnValueOnce(new Position(4, 2)).mockReturnValueOnce(new Position(3, 1)).mockReturnValueOnce(new Position(1, 1)).mockReturnValueOnce(new Position(4, 3)).mockReturnValueOnce(new Position(2, 0)).mockReturnValue(new Position(5, 0));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
-  theGrid4.setFruits();
+  theGrid4.setFruits(1);
   expect(theGrid4.get(new Position(2, 1))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid4.get(new Position(4, 2))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid4.get(new Position(3, 1))).toBe(Constants.CaseType.SURROUNDED);
@@ -172,7 +172,7 @@ test("corridor detection fruit test 2", () => {
   mockRandom.mockReturnValueOnce(new Position(3, 1)).mockReturnValueOnce(new Position(2, 0)).mockReturnValue(new Position(5, 0));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
-  theGrid5.setFruits();
+  theGrid5.setFruits(1);
   expect(theGrid5.get(new Position(3, 1))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid5.get(new Position(5, 0))).toBe(Constants.CaseType.FRUIT);
 });
@@ -182,7 +182,7 @@ test("corridor detection fruit test 3", () => {
   mockRandom.mockReturnValueOnce(new Position(5, 3)).mockReturnValueOnce(new Position(5, 4)).mockReturnValueOnce(new Position(1, 3)).mockReturnValueOnce(new Position(1, 4)).mockReturnValue(new Position(7, 1));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
-  theGrid6.setFruits();
+  theGrid6.setFruits(1);
   expect(theGrid6.get(new Position(5, 3))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid6.get(new Position(5, 4))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid6.get(new Position(1, 3))).toBe(Constants.CaseType.SURROUNDED);
@@ -206,7 +206,7 @@ test("corridor detection fruit test 5", () => {
   mockRandom.mockReturnValueOnce(new Position(1, 3)).mockReturnValueOnce(new Position(2, 1)).mockReturnValueOnce(new Position(2, 1));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
-  theGrid8.setFruits();
+  theGrid8.setFruits(1);
   expect(theGrid8.get(new Position(1, 3))).toBe(Constants.CaseType.FRUIT);
   expect(theGrid8.get(new Position(2, 1))).toBe(Constants.CaseType.EMPTY);
   expect(theGrid8.detectCorridor(new Position(2, 3))).toBe(false);
@@ -218,7 +218,7 @@ test("corridor detection fruit test 6", () => {
   mockRandom.mockReturnValueOnce(new Position(8, 2)).mockReturnValueOnce(new Position(7, 4)).mockReturnValue(new Position(2, 4));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
-  theGrid9.setFruits();
+  theGrid9.setFruits(1);
   expect(theGrid9.get(new Position(8, 2))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid9.get(new Position(7, 4))).toBe(Constants.CaseType.SURROUNDED);
   expect(theGrid9.detectCorridor(new Position(2, 4))).toBe(false);
@@ -230,7 +230,7 @@ test("corridor detection fruit test 7", () => {
   mockRandom.mockReturnValueOnce(new Position(8, 2));
   jest.spyOn(Grid.prototype, "getRandomPosition").mockImplementation(mockRandom);
 
-  theGrid10.setFruits();
+  theGrid10.setFruits(1);
   expect(theGrid10.get(new Position(8, 2))).toBe(Constants.CaseType.FRUIT);
   expect(theGrid10.detectCorridor(new Position(8, 2))).toBe(false);
 });

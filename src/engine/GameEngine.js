@@ -135,7 +135,7 @@ export default class GameEngine {
       }
     }
 
-    this.grid.setFruits(this.snakes.length);
+    this.grid.setFruits(this.getNBPlayerAlive());
   }
 
   async initAIUltra() {
@@ -340,6 +340,20 @@ export default class GameEngine {
     return null;
   }
 
+  getNBPlayerAlive() {
+    let numPlayer = 0;
+
+    if(this.snakes != null) {
+      for(const snake of this.snakes) {
+        if(!snake.gameOver) {
+          numPlayer++;
+        }
+      }
+    }
+
+    return numPlayer;
+  }
+
   tick() {
     setTimeout(() => {
       this.doTick();
@@ -390,7 +404,7 @@ export default class GameEngine {
   
               // Set a new fruit if the current fruit is eaten
               if(!this.scoreMax && setFruits && !this.clientSidePredictionsMode) {
-                this.grid.setFruits(this.snakes.length);
+                this.grid.setFruits(this.getNBPlayerAlive());
               }
             }
           }
@@ -521,7 +535,7 @@ export default class GameEngine {
     for(const fruitPos of this.grid.fruitPositions) {
       if(!this.scoreMax && (this.grid.detectCorridor(fruitPos) || this.grid.isFruitSurrounded(fruitPos, true)) && !this.clientSidePredictionsMode) {
         this.grid.removeFruit(fruitPos);
-        this.grid.setFruits(this.snakes.length);
+        this.grid.setFruits(this.getNBPlayerAlive());
       }
     }
 
