@@ -365,14 +365,13 @@ export default class GameEngine {
     }
 
     if(this.shouldUpdateEngine()) {
-      let scoreIncreased, setFruitError = false;
+      let scoreIncreased;
 
       this.ticks++;
 
       for(const snake of this.snakes) {
         const initialDirection = snake.direction;
 
-        setFruitError = false;
         snake.lastTailMoved = false;
         snake.lastHeadMoved = false;
 
@@ -391,7 +390,7 @@ export default class GameEngine {
   
               // Set a new fruit if the current fruit is eaten
               if(!this.scoreMax && setFruits && !this.clientSidePredictionsMode) {
-                setFruitError = !this.grid.setFruits(this.snakes.length);
+                this.grid.setFruits(this.snakes.length);
               }
             }
           }
@@ -405,10 +404,10 @@ export default class GameEngine {
         this.endGame();
       } else {
         // Check stuck fruits
-        setFruitError = this.handleStuckFruits(setFruitError);
+        this.handleStuckFruits();
 
-        // If there was an error setting the fruit, we end the game here
-        if(setFruitError) {
+        // If there are no fruits anymore on the grid, we end the game here
+        if(this.grid.fruitPositions.length === 0 && !this.grid.fruitPosGold) {
           this.endGame();
         }
       }
@@ -517,12 +516,12 @@ export default class GameEngine {
     }
   }
 
-  handleStuckFruits(setFruitError) {
+  handleStuckFruits() {
     // If the fruit is in a corridor, we set it in a new cell
     for(const fruitPos of this.grid.fruitPositions) {
-      if(!this.scoreMax && !setFruitError && (this.grid.detectCorridor(fruitPos) || this.grid.isFruitSurrounded(fruitPos, true)) && !this.clientSidePredictionsMode) {
+      if(!this.scoreMax && (this.grid.detectCorridor(fruitPos) || this.grid.isFruitSurrounded(fruitPos, true)) && !this.clientSidePredictionsMode) {
         this.grid.removeFruit(fruitPos);
-        setFruitError = !this.grid.setFruits(this.snakes.length);
+        this.grid.setFruits(this.snakes.length);
       }
     }
 
@@ -531,8 +530,6 @@ export default class GameEngine {
       this.grid.set(GameConstants.CaseType.EMPTY, this.grid.fruitPosGold);
       this.grid.fruitPosGold = null;
     }
-
-    return setFruitError;
   }
 
   checkSnakeAIStuckStatus(snake) {

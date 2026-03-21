@@ -1123,6 +1123,7 @@ export default class SnakeAIUltra extends SnakeAI {
         }
 
         let targetFruit = null;
+        
         if(closestFruit && closestGoldFruit) {
           targetFruit = closestGoldFruitDist <= closestFruitDist * 0.8 ? closestGoldFruit : closestFruit;
         } else if(closestFruit) {

@@ -235,10 +235,6 @@ export default class Grid {
       do {
         errorSettingFruit = !this.setSingleFruit(tried, false);
       } while(!errorSettingFruit && this.fruitPositions.length < Math.min(numberPlayers, GameConstants.Setting.MAX_FRUITS_PER_GRID));
-    } else if(this.getTotal(GameConstants.CaseType.EMPTY) <= 0 && this.fruitPosGold) {
-      return true;
-    } else {
-      return false;
     }
 
     const shouldSetGoldFruit = GameUtils.randRange(1, (this.probGoldFruitIncrease ? 3 : (numberPlayers > 1 ? GameConstants.Setting.PROB_GOLD_FRUIT_MULTIPLE_PLAYERS : GameConstants.Setting.PROB_GOLD_FRUIT_1_PLAYER)), this.rngGame) == 1;
@@ -246,12 +242,6 @@ export default class Grid {
     if(!this.maze && this.fruitPosGold == null && shouldSetGoldFruit) {
       this.setSingleFruit(tried, true);
     }
-
-    if(this.fruitPositions.length === 0) {
-      return false;
-    }
-
-    return true;
   }
 
   setSingleFruit(tried, gold) {
