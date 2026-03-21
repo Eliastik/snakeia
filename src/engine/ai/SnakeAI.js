@@ -31,11 +31,6 @@ export default class SnakeAI {
 
     const goals = [];
 
-    if(fruitPosGold && snake.grid.get(fruitPosGold) === GameConstants.CaseType.FRUIT_GOLD) {
-      const dist = Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y);
-      goals.push({ type: GameConstants.CaseType.FRUIT_GOLD, position: fruitPosGold, dist });
-    }
-
     for(const fruitPos of fruitPositions) {
       if(snake.grid.get(fruitPos) === GameConstants.CaseType.FRUIT) {
         const dist = Math.abs(fruitPos.x - currentPosition.x) + Math.abs(fruitPos.y - currentPosition.y);
@@ -43,10 +38,22 @@ export default class SnakeAI {
       }
     }
 
-    const gold = goals.filter(g => g.type === GameConstants.CaseType.FRUIT_GOLD);
-    const normals = goals.filter(g => g.type === GameConstants.CaseType.FRUIT).sort((a, b) => a.dist - b.dist);
+    if(fruitPosGold && snake.grid.get(fruitPosGold) === GameConstants.CaseType.FRUIT_GOLD) {
+      const dist = Math.abs(fruitPosGold.x - currentPosition.x) + Math.abs(fruitPosGold.y - currentPosition.y);
+      const closestNormalDist = goals.length > 0 ? Math.min(...goals.map(g => g.dist)) : Infinity;
+      const goldPriority = closestNormalDist <= dist * 0.8 ? 1 : 0;
 
-    this.aiFruitGoalsSorted = [...gold, ...normals];
+      goals.push({ type: GameConstants.CaseType.FRUIT_GOLD, position: fruitPosGold, dist, goldPriority });
+    }
+
+    goals.sort((a, b) => {
+      const pa = a.goldPriority ?? 1;
+      const pb = b.goldPriority ?? 1;
+      if(pa !== pb) return pa - pb;
+      return a.dist - b.dist;
+    });
+
+    this.aiFruitGoalsSorted = goals;
 
     return null;
   }

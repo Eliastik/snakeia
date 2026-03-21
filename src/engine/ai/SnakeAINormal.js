@@ -37,7 +37,14 @@ export default class SnakeAINormal extends SnakeAI {
     super.ai(snake);
 
     if(this.shouldUpdatePath(snake)) {
-      this.updatePath(snake);
+      const { calculatedPath, targetFruit } = this.updatePath(snake);
+
+      if(calculatedPath) {
+        this.path = calculatedPath.reverse();
+        this.path.pop();
+      }
+
+      this.targetFruit = targetFruit;
     }
 
     const currentPosition = snake.getHeadPosition();
@@ -75,7 +82,7 @@ export default class SnakeAINormal extends SnakeAI {
     const targetFruit = this.aiFruitGoalsSorted.shift();
 
     if(!currentPosition || !targetFruit) {
-      return;
+      return { calculatedPath: null, targetFruit: null };
     }
 
     const targetPosition = targetFruit.position;
@@ -98,12 +105,9 @@ export default class SnakeAINormal extends SnakeAI {
       return this.updatePath(snake);
     }
 
-    this.path = calculatedPath.reverse();
-    this.path.pop();
-
     this.oldTargetFruit = targetFruit;
 
-    return calculatedPath;
+    return { calculatedPath, targetFruit };
   }
 
   calculatePath(graph, currentPosition, fruitTarget) {

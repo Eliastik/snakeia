@@ -2271,6 +2271,7 @@ export default class GridUI3D extends GridUI {
     for(const fruitInstance of this.fruitInstances) {
       const fruitPos = new THREE.Vector3().copy(fruitInstance.mesh.position);
       const dist = headPosWorld.distanceTo(fruitPos);
+      
       if(dist < closestRegularDist) {
         closestRegularDist = dist;
         closestRegularFruit = fruitPos;
