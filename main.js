@@ -538,7 +538,7 @@ function setupServerAuthentication(id) {
   document.getElementById("authenticationServerContainer").innerHTML = "";
 
   const authentIframe = document.createElement("iframe");
-  const authentUrl = onlineClient.getURL() + `/authentication?lang=${i18next.language.substring(0, 2)}&theme=${isDarkModeEnabled() ? "dark" : "light"}` + (id ? `&id=${id}` : "");
+  const authentUrl = onlineClient.getURL() + `/authentication?lang=${i18next.language.substring(0, 2)}&version=${GameConstants.Setting.APP_VERSION}&theme=${isDarkModeEnabled() ? "dark" : "light"}` + (id ? `&id=${id}` : "");
 
   authentIframe.id = "authent_frame";
   authentIframe.src = authentUrl;
