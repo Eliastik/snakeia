@@ -84,15 +84,14 @@ export default class GridUI3D extends GridUI {
 
     this.snakesMeshes = [];
 
-    this.fruitInstances = [];
     this.fruitInstancesMap = new Map();
-    this.fruitPool = {};
     this.fruitGoldPositionKey = null;
 
     this.segmentGeometryCache = {};
     this.segmentGeometryCacheParams = {};
     this.transitionSegmentGeometryCache = {};
     this.transitionSegmentGeometryCacheParams = {};
+    this.fruitPool = {};
   }
 
   init3DEngine() {
@@ -663,10 +662,10 @@ export default class GridUI3D extends GridUI {
       if(!currentFruits.has(posKey)) {
         const instance = this.fruitInstancesMap.get(posKey);
 
-        this.releaseFruitToPool(instance);
-
-        this.fruitInstancesMap.delete(posKey);
-        this.fruitInstances = this.fruitInstances.filter(f => f.mesh !== instance.mesh);
+        if(instance) {
+          this.releaseFruitToPool(instance);
+          this.fruitInstancesMap.delete(posKey);
+        }
       }
     }
 
@@ -688,7 +687,6 @@ export default class GridUI3D extends GridUI {
 
           if(instance) {
             this.fruitInstancesMap.set(posKey, instance);
-            this.fruitInstances.push(instance);
           }
         } else if(fruitType === GameConstants.CaseType.FRUIT_GOLD) {
           this.displayFruitSingle(xPosition, yPosition, fruitType);
@@ -1160,7 +1158,7 @@ export default class GridUI3D extends GridUI {
 
     const fruitsToAnimate = [];
     
-    for(const fruitInstance of this.fruitInstances) {
+    for(const fruitInstance of this.fruitInstancesMap.values()) {
       fruitsToAnimate.push({
         model: fruitInstance.mesh,
         light: fruitInstance.light,
@@ -2334,7 +2332,7 @@ export default class GridUI3D extends GridUI {
     let closestRegularFruit = null;
     let closestRegularDist = Infinity;
 
-    for(const fruitInstance of this.fruitInstances) {
+    for(const fruitInstance of this.fruitInstancesMap.values()) {
       const fruitPos = new THREE.Vector3().copy(fruitInstance.mesh.position);
       const dist = headPosWorld.distanceTo(fruitPos);
       if(dist < closestRegularDist) {
@@ -2642,6 +2640,7 @@ export default class GridUI3D extends GridUI {
     this.disposeCameras();
     this.disposePostProcessing();
     this.disposeTextures();
+    this.disposeFruitPool();
     this.disposeSnakes();
 
     this.controls?.dispose();
@@ -2724,11 +2723,31 @@ export default class GridUI3D extends GridUI {
       this[obj] = null;
     }
 
-    for(const instance of this.fruitInstances) {
+    for(const instance of this.fruitInstancesMap.values()) {
       this.cleanFruitInstance(instance);
     }
 
-    this.fruitInstances = [];
+    this.fruitInstancesMap.clear();
+  }
+
+  disposeFruitPool() {
+    if(!this.fruitPool?.meshes) {
+      return;
+    }
+
+    for(let i = 0; i < this.fruitPool.meshes.length; i++) {
+      const mesh = this.fruitPool.meshes[i];
+      const light = this.fruitPool.lights[i];
+      const halo = this.fruitPool.halos[i];
+
+      this.disposeMesh(mesh);
+      this.fruitsGroup.remove(mesh);
+
+      light && this.fruitsGroup.remove(light);
+      halo && this.fruitsGroup.remove(halo);
+    }
+
+    this.fruitPool = {};
   }
 
   disposeSnakes() {
