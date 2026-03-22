@@ -86,6 +86,7 @@ export default class GridUI3D extends GridUI {
 
     this.fruitInstances = [];
     this.fruitInstancesMap = new Map();
+    this.fruitPool = {};
     this.fruitGoldPositionKey = null;
 
     this.segmentGeometryCache = {};
@@ -662,7 +663,7 @@ export default class GridUI3D extends GridUI {
       if(!currentFruits.has(posKey)) {
         const instance = this.fruitInstancesMap.get(posKey);
 
-        this.cleanFruitInstance(instance);
+        this.releaseFruitToPool(instance);
 
         this.fruitInstancesMap.delete(posKey);
         this.fruitInstances = this.fruitInstances.filter(f => f.mesh !== instance.mesh);
@@ -683,7 +684,12 @@ export default class GridUI3D extends GridUI {
         const fruitType = fruit.caseType;
 
         if(fruitType === GameConstants.CaseType.FRUIT) {
-          this.displayFruitMultiple(xPosition, yPosition, fruitType, posKey);
+          const instance = this.acquireFruitFromPool(xPosition, yPosition);
+
+          if(instance) {
+            this.fruitInstancesMap.set(posKey, instance);
+            this.fruitInstances.push(instance);
+          }
         } else if(fruitType === GameConstants.CaseType.FRUIT_GOLD) {
           this.displayFruitSingle(xPosition, yPosition, fruitType);
           this.fruitGoldPositionKey = posKey;
@@ -937,6 +943,8 @@ export default class GridUI3D extends GridUI {
       this.fruitPointLight.visible = false;
       this.fruitHalo.visible = false;
     }
+
+    this.initFruitPool();
   }
 
   setupGoldFruit() {
@@ -1074,57 +1082,70 @@ export default class GridUI3D extends GridUI {
     }
   }
 
-  displayFruitMultiple(xPosition, yPosition, caseType, posKey = null) {
-    const isGoldFruit = caseType === GameConstants.CaseType.FRUIT_GOLD;
-    const baseModel = isGoldFruit ? this.fruitModelGold : this.fruitModel;
-    const basePointLight = isGoldFruit ? this.fruitGoldPointLight : this.fruitPointLight;
-    const baseHalo = isGoldFruit ? this.fruitGoldHalo : this.fruitHalo;
+  initFruitPool() {
+    this.fruitPool = { meshes: [], lights: [], halos: [], available: [] };
 
-    if(!baseModel) {
-      return;
+    const max = GameConstants.Setting.MAX_FRUITS_PER_GRID;
+
+    for(let i = 0; i < max; i++) {
+      const mesh = this.fruitModel.clone();
+      mesh.visible = false;
+      mesh.userData.baseScale = this.fruitModel.userData.baseScale ?? 1.0;
+      this.fruitsGroup.add(mesh);
+      this.fruitPool.meshes.push(mesh);
+
+      const light = this.fruitPointLight.clone();
+      light.intensity = 0;
+      light.visible = true;
+      this.fruitsGroup.add(light);
+      this.fruitPool.lights.push(light);
+
+      const halo = this.fruitHalo.clone();
+      halo.visible = false;
+      this.fruitsGroup.add(halo);
+      this.fruitPool.halos.push(halo);
+
+      this.fruitPool.available.push(i);
     }
 
-    const fruitMesh = baseModel.clone();
-    fruitMesh.position.set(xPosition, yPosition, 0.5);
-    fruitMesh.userData.baseScale = baseModel.userData.baseScale ?? 1.0;
-    fruitMesh.visible = true;
-    fruitMesh.userData.spawnAnim = {
+    this.renderer.compile(this.scene, this.camera);
+  }
+
+  acquireFruitFromPool(x, y) {
+    const idx = this.fruitPool.available.pop();
+
+    if(!idx) {
+      return null;
+    }
+
+    const mesh = this.fruitPool.meshes[idx];
+    const light = this.fruitPool.lights[idx];
+    const halo = this.fruitPool.halos[idx];
+
+    mesh.position.set(x, y, 0.5);
+    mesh.visible = true;
+    mesh.userData.spawnAnim = {
       progress: 0,
       duration: 0.7,
       startTime: performance.now()
     };
 
-    let clonedLight = null;
-    let clonedHalo = null;
-
-    if(basePointLight && this.qualitySettings.fruitLights) {
-      clonedLight = basePointLight.clone();
-      clonedLight.position.set(xPosition, yPosition, 0.5);
-      clonedLight.visible = true;
-      this.fruitsGroup.add(clonedLight);
+    if(this.qualitySettings.fruitLights) {
+      light.intensity = 0.8;
+      light.position.set(x, y, 0.5);
+      halo.position.set(x, y, 0.5);
+      halo.visible = true;
     }
 
-    if(baseHalo && this.qualitySettings.fruitLights) {
-      clonedHalo = baseHalo.clone();
-      clonedHalo.position.set(xPosition, yPosition, 0.5);
-      clonedHalo.visible = true;
-      this.fruitsGroup.add(clonedHalo);
-    }
+    return { mesh, light, halo, poolIndex: idx };
+  }
 
-    this.fruitsGroup.add(fruitMesh);
+  releaseFruitToPool(fruitInstance) {
+    fruitInstance.mesh.visible = false;
+    fruitInstance.light.intensity = 0;
+    fruitInstance.halo.visible = false;
 
-    const instance = { mesh: fruitMesh, light: clonedLight, halo: clonedHalo };
-
-    if(isGoldFruit) {
-      this.fruitGoldInstance = instance;
-      if(posKey) this.fruitGoldPositionKey = posKey;
-      this.hasGoldFruit = true;
-    } else {
-      this.fruitInstances.push(instance);
-      if(posKey) {
-        this.fruitInstancesMap.set(posKey, instance);
-      }
-    }
+    this.fruitPool.available.push(fruitInstance.poolIndex);
   }
 
   springEase(t) {
