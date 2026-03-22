@@ -527,7 +527,7 @@ async function preloadAuthentication(url, port) {
   await new Promise(resolve => {
     const iframe = document.createElement("iframe");
     iframe.style.display = "none";
-    iframe.src = `${url}${port ? ":" + port : ""}/authentication`;
+    iframe.src = `${url}${port ? ":" + port : ""}/authentication?version=${GameConstants.Setting.APP_VERSION}`;
     iframe.addEventListener("load", resolve, { once: true });
     document.body.appendChild(iframe);
     iframe.addEventListener("load", () => document.body.removeChild(iframe), { once: true });
