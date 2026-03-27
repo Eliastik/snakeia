@@ -26,6 +26,7 @@ export default class SnakeAILow extends SnakeAI {
     this.aiLevelText = "low";
     this.prevDirection = null;
     this.currDirection = null;
+    this.loopBreakDirection = null;
   }
 
   ai(snake) {
@@ -87,6 +88,19 @@ export default class SnakeAILow extends SnakeAI {
 
     if(isDeadAt(nextDirection)) {
       nextDirection = [UP, RIGHT, BOTTOM, LEFT].find(dir => !isDeadAt(dir)) ?? nextDirection;
+    }
+
+    if(snake.isAIStuck(1)) {
+      if(!this.loopBreakDirection) {
+        this.loopBreakDirection = [UP, RIGHT, BOTTOM, LEFT]
+          .filter(dir => dir !== nextDirection && !isDeadAt(dir))[0] ?? null;
+      }
+
+      if(this.loopBreakDirection && !isDeadAt(this.loopBreakDirection)) {
+        nextDirection = this.loopBreakDirection;
+      }
+    } else {
+      this.loopBreakDirection = null;
     }
 
     if(nextDirection !== this.currDirection) {
