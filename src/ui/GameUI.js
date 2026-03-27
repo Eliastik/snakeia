@@ -577,7 +577,7 @@ export default class GameUI {
       }
     }
 
-    this.gridUI.cleanAfterGameExit();
+    this.gridUI?.cleanAfterGameExit();
 
     if(this.listenerCanvasResize) {
       window.removeEventListener("resize", this.listenerCanvasResize);
@@ -783,6 +783,10 @@ export default class GameUI {
   }
 
   autoDPI() {
+    if(!this.canvas) {
+      return;
+    }
+
     const rect = this.canvas.getBoundingClientRect();
     const dpr = this.getDevicePixelRatio();
 
