@@ -1082,39 +1082,36 @@ export default class GridUI3D extends GridUI {
 
   initFruitPool() {
     this.fruitPool = { meshes: [], lights: [], halos: [], available: [] };
+    this.fruitPool.available.push(this.createFruitPoolSlot());
+  }
 
-    const max = GameConstants.Setting.MAX_FRUITS_PER_GRID;
+  createFruitPoolSlot() {
+    const idx = this.fruitPool.meshes.length;
 
-    for(let i = 0; i < max; i++) {
-      const mesh = this.fruitModel.clone();
-      mesh.visible = false;
-      mesh.userData.baseScale = this.fruitModel.userData.baseScale ?? 1.0;
-      this.fruitsGroup.add(mesh);
-      this.fruitPool.meshes.push(mesh);
+    const mesh = this.fruitModel.clone();
+    mesh.visible = false;
+    mesh.userData.baseScale = this.fruitModel.userData.baseScale ?? 1.0;
+    this.fruitsGroup.add(mesh);
+    this.fruitPool.meshes.push(mesh);
 
-      const light = this.fruitPointLight.clone();
-      light.intensity = 0;
-      light.visible = true;
-      this.fruitsGroup.add(light);
-      this.fruitPool.lights.push(light);
+    const light = this.fruitPointLight.clone();
+    light.intensity = 0;
+    light.visible = true;
+    this.fruitsGroup.add(light);
+    this.fruitPool.lights.push(light);
 
-      const halo = this.fruitHalo.clone();
-      halo.visible = false;
-      this.fruitsGroup.add(halo);
-      this.fruitPool.halos.push(halo);
+    const halo = this.fruitHalo.clone();
+    halo.visible = false;
+    this.fruitsGroup.add(halo);
+    this.fruitPool.halos.push(halo);
 
-      this.fruitPool.available.push(i);
-    }
-
-    this.renderer.compile(this.scene, this.camera);
+    return idx;
   }
 
   acquireFruitFromPool(x, y) {
-    const idx = this.fruitPool.available.pop();
-
-    if(!idx) {
-      return null;
-    }
+    const idx = this.fruitPool.available.length > 0
+      ? this.fruitPool.available.pop()
+      : this.createFruitPoolSlot();
 
     const mesh = this.fruitPool.meshes[idx];
     const light = this.fruitPool.lights[idx];
