@@ -1100,30 +1100,35 @@ export default class SnakeAIUltra extends SnakeAI {
       const prevHead = snake.get(1);
 
       if(prevHead) {
+        const distFromHead = this.bfsAll(snake, head.x, head.y);
+        const distFromPrev = this.bfsAll(snake, prevHead.x, prevHead.y);
+
+        const key = (pos) => pos.y * snake.grid.width + pos.x;
+
         let closestFruit = null;
         let closestFruitDist = Infinity;
-        
+
         for(const fruit of fruits) {
-          const distAfter = this.bfsDistance(snake, head.x, head.y, fruit.x, fruit.y);
-          if(distAfter !== -1 && distAfter < closestFruitDist) {
-            closestFruitDist = distAfter;
+          const d = distFromHead[key(fruit)];
+          if(d !== -1 && d < closestFruitDist) {
+            closestFruitDist = d;
             closestFruit = fruit;
           }
         }
 
         let closestGoldFruit = null;
         let closestGoldFruitDist = Infinity;
-        
+
         for(const fruitGold of goldFruits) {
-          const distAfter = this.bfsDistance(snake, head.x, head.y, fruitGold.x, fruitGold.y);
-          if(distAfter !== -1 && distAfter < closestGoldFruitDist) {
-            closestGoldFruitDist = distAfter;
+          const d = distFromHead[key(fruitGold)];
+          if(d !== -1 && d < closestGoldFruitDist) {
+            closestGoldFruitDist = d;
             closestGoldFruit = fruitGold;
           }
         }
 
         let targetFruit = null;
-        
+
         if(closestFruit && closestGoldFruit) {
           targetFruit = closestGoldFruitDist <= closestFruitDist * 0.8 ? closestGoldFruit : closestFruit;
         } else if(closestFruit) {
@@ -1133,8 +1138,8 @@ export default class SnakeAIUltra extends SnakeAI {
         }
 
         if(targetFruit) {
-          const distBefore = this.bfsDistance(snake, prevHead.x, prevHead.y, targetFruit.x, targetFruit.y);
-          const distAfter = this.bfsDistance(snake, head.x, head.y, targetFruit.x, targetFruit.y);
+          const distAfter = distFromHead[key(targetFruit)];
+          const distBefore = distFromPrev[key(targetFruit)];
 
           if(distAfter === -1) {
             return GameConstants.AIRewards.MOVE - 0.05;
@@ -1148,43 +1153,46 @@ export default class SnakeAIUltra extends SnakeAI {
     return GameConstants.AIRewards.MOVE;
   }
 
-  bfsDistance(snake, fromX, fromY, toX, toY) {
+  bfsAll(snake, fromX, fromY) {
     const grid = snake.grid;
-    const visited = new Set();
-    const queue = [[fromX, fromY, 0]];
-  
-    visited.add(fromY * grid.width + fromX);
+    const size = grid.width * grid.height;
+    const dist = new Int16Array(size).fill(-1);
+    const queue = new Int32Array(size);
 
-    while(queue.length > 0) {
-      const [x, y, dist] = queue.shift();
+    const startKey = fromY * grid.width + fromX;
+    dist[startKey] = 0;
+    queue[0] = startKey;
+    let head = 0, tail = 1;
 
-      if(x === toX && y === toY) {
-        return dist;
+    while(head < tail) {
+      const key = queue[head++];
+      const x = key % grid.width;
+      const y = (key - x) / grid.width;
+      const d = dist[key];
+
+      if(x > 0) {
+        const nk = key - 1;
+        if(dist[nk] === -1 && !grid.isDeadPositionXY(x - 1, y)) { dist[nk] = d + 1; queue[tail++] = nk; }
       }
-
-      for(const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
-        const nx = x + dx;
-        const ny = y + dy;
-
-        if(nx < 0 || ny < 0 || nx >= grid.width || ny >= grid.height) {
-          continue;
-        }
-
-        const key = ny * grid.width + nx;
-
-        if(visited.has(key)) {
-          continue;
-        }
-
-        visited.add(key);
-
-        if(!grid.isDeadPositionXY(nx, ny)) {
-          queue.push([nx, ny, dist + 1]);
-        }
+      if(x < grid.width - 1) {
+        const nk = key + 1;
+        if(dist[nk] === -1 && !grid.isDeadPositionXY(x + 1, y)) { dist[nk] = d + 1; queue[tail++] = nk; }
+      }
+      if(y > 0) {
+        const nk = key - grid.width;
+        if(dist[nk] === -1 && !grid.isDeadPositionXY(x, y - 1)) { dist[nk] = d + 1; queue[tail++] = nk; }
+      }
+      if(y < grid.height - 1) {
+        const nk = key + grid.width;
+        if(dist[nk] === -1 && !grid.isDeadPositionXY(x, y + 1)) { dist[nk] = d + 1; queue[tail++] = nk; }
       }
     }
 
-    return -1;
+    return dist;
+  }
+
+  bfsDistance(snake, fromX, fromY, toX, toY) {
+    return this.bfsAll(snake, fromX, fromY)[toY * snake.grid.width + toX];
   }
 
   step(snake, currentState, done, reward, action = null, instanceId = "inference") {
