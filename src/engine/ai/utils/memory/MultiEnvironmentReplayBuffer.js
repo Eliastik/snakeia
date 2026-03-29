@@ -35,7 +35,7 @@ export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
   
     this.createBuffer = (type, capacity) => {
       return type === "prioritized"
-        ? new PrioritizedReplayBuffer(capacity, rng, this.logger)
+        ? new PrioritizedReplayBuffer(capacity, rng, this.logger, false)
         : new UniformReplayBuffer(capacity, rng, this.logger);
     };
   }
@@ -48,12 +48,12 @@ export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
     }
   }
   
-  add(state, action, reward, nextState, done) {
+  add(state, action, reward, nextState, done, nStep = null) {
     if(!this.currentEnvironment) {
       throw new Error("No environment selected. Please use changeEnvironment(envId) to setup the current environment.");
     }
   
-    this.buffers.get(this.currentEnvironment).add(state, action, reward, nextState, done);
+    this.buffers.get(this.currentEnvironment).add(state, action, reward, nextState, done, nStep);
   }
   
   sample(batchSize) {

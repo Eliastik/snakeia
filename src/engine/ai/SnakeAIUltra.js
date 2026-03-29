@@ -126,6 +126,8 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Data augmentation (reverse the grid etc...)? -> OK, need tests
     // - Performance optimizations -> OK
     // * Ideas:
+    // - Pass environment characteristics to model (grid size, random walls, opponents, maze mode, etc.)
+    // - Use IS weights for Prioritized Experience Replay
     // - Distributional RL - Categorical DQN?
     // - Reproducible training with seed: some fixes needed?
   }
@@ -826,17 +828,22 @@ export default class SnakeAIUltra extends SnakeAI {
   commitNStep(buffer) {
     let cumulatedReward = 0;
     let discount = 1;
+    let effectiveN = 0;
 
     for(let i = 0; i < buffer.length; i++) {
       cumulatedReward += discount * buffer[i].reward;
       discount *= this.gamma;
-      if(buffer[i].done) break;
+      effectiveN++;
+
+      if(buffer[i].done) {
+        break;
+      }
     }
 
     const first = buffer[0];
     const last = buffer[buffer.length - 1];
 
-    this.remember(first.state, first.action, cumulatedReward, last.nextState, last.done);
+    this.remember(first.state, first.action, cumulatedReward, last.nextState, last.done, effectiveN);
   }
 
   flushNStepBuffer(instanceId) {
@@ -848,30 +855,32 @@ export default class SnakeAIUltra extends SnakeAI {
     }
   }
 
-  remember(state, action, reward, nextState, done) {
+  remember(state, action, reward, nextState, done, effectiveN = null) {
     const stateFlat = state.data ? state : this.stateToFlatArray(state);
     const nextStateFlat = nextState.data ? nextState : this.stateToFlatArray(nextState);
 
-    this.memory.add(stateFlat, action, reward, nextStateFlat, done);
+    const nToStore = effectiveN ?? (this.enableNStepsLearning ? this.nStep : 1);
+
+    this.memory.add(stateFlat, action, reward, nextStateFlat, done, nToStore);
 
     if(this.enableDataAugmentation) {
       // Horizontal flip
       const flippedH = this.flipState(stateFlat, true, false);
       const flippedHNext = this.flipState(nextStateFlat, true, false);
 
-      this.memory.add(flippedH, this.flipActionHorizontal(action), reward, flippedHNext, done);
+      this.memory.add(flippedH, this.flipActionHorizontal(action), reward, flippedHNext, done, nToStore);
 
       // Vertical flip
       const flippedV = this.flipState(stateFlat, false, true);
       const flippedVNext = this.flipState(nextStateFlat, false, true);
 
-      this.memory.add(flippedV, this.flipActionVertical(action), reward, flippedVNext, done);
+      this.memory.add(flippedV, this.flipActionVertical(action), reward, flippedVNext, done, nToStore);
 
       // Horizontal + vertical flip combined
       const flippedHV = this.flipState(stateFlat, true, true);
       const flippedHVNext = this.flipState(nextStateFlat, true, true);
 
-      this.memory.add(flippedHV, this.flipActionHorizontal(this.flipActionVertical(action)), reward, flippedHVNext, done);
+      this.memory.add(flippedHV, this.flipActionHorizontal(this.flipActionVertical(action)), reward, flippedHVNext, done, nToStore);
     }
   }
 
@@ -970,8 +979,11 @@ export default class SnakeAIUltra extends SnakeAI {
       const qValues = qCurrentBatch.clone();
 
       // Bellman equation with optional N-step gamma
-      const gammaN = this.enableNStepsLearning ? Math.pow(this.gamma, this.nStep) : this.gamma;
-      const targetQs = rewards.add(qNextMax.mul(gammaN).mul(dones));
+      const gammaNs = tf.tensor1d(
+        batch.samples.map(s => Math.pow(this.gamma, s.nStep ?? this.nStep)),
+        this.dtype
+      );
+      const targetQs = rewards.add(qNextMax.mul(gammaNs).mul(dones));
 
       const actionMask = tf.oneHot(actions, qValues.shape[1], undefined, undefined, this.dtype);
       const qCurrentActions = qCurrentBatch.mul(actionMask).sum(1);
