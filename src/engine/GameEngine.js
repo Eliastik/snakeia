@@ -136,6 +136,7 @@ export default class GameEngine {
     }
 
     this.grid.setFruits(this.getNBPlayerAlive());
+    this.grid.setHasOpponents(this.snakes.length > 1);
   }
 
   async initAIUltra() {

@@ -48,12 +48,12 @@ export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
     }
   }
   
-  add(state, action, reward, nextState, done, nStep = null) {
+  add(state, action, reward, nextState, done, nStep = null, envFeatures = null) {
     if(!this.currentEnvironment) {
       throw new Error("No environment selected. Please use changeEnvironment(envId) to setup the current environment.");
     }
   
-    this.buffers.get(this.currentEnvironment).add(state, action, reward, nextState, done, nStep);
+    this.buffers.get(this.currentEnvironment).add(state, action, reward, nextState, done, nStep, envFeatures);
   }
   
   sample(batchSize) {

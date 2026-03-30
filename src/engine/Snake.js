@@ -235,42 +235,44 @@ export default class Snake {
   }
 
   async initAI() {
-    if(!this.customAI) {
-      switch(this.aiLevel) {
-      case GameConstants.AiLevel.RANDOM:
-        this.snakeAI = new SnakeAIRandom();
-        break;
-      case GameConstants.AiLevel.LOW:
-        this.snakeAI = new SnakeAILow();
-        break;
-      case GameConstants.AiLevel.DEFAULT:
-        this.snakeAI = new SnakeAINormal();
-        break;
-      case GameConstants.AiLevel.HIGH:
-        this.snakeAI = new SnakeAIHigh();
-        break;
-      case GameConstants.AiLevel.ULTRA: {
-        try {
-          const aiUltra = new SnakeAIUltra(false);
-          await aiUltra.setup();
-          await aiUltra.beginEpisode();
-          this.snakeAI = aiUltra;
-        } catch(e) {
-          console.error(e);
-          this.errorInit = true;
-        }
-        break;
-      }
-      case GameConstants.AiLevel.MOCK:
-        this.snakeAI = new SnakeAIMock();
-        break;
-      default:
-        this.snakeAI = new SnakeAINormal();
-        break;
-      }
-    } else {
+    if(this.customAI) {
       this.snakeAI = this.customAI;
       this.aiLevel = GameConstants.AiLevel.CUSTOM;
+
+      return;
+    }
+
+    switch(this.aiLevel) {
+    case GameConstants.AiLevel.RANDOM:
+      this.snakeAI = new SnakeAIRandom();
+      break;
+    case GameConstants.AiLevel.LOW:
+      this.snakeAI = new SnakeAILow();
+      break;
+    case GameConstants.AiLevel.DEFAULT:
+      this.snakeAI = new SnakeAINormal();
+      break;
+    case GameConstants.AiLevel.HIGH:
+      this.snakeAI = new SnakeAIHigh();
+      break;
+    case GameConstants.AiLevel.ULTRA: {
+      try {
+        const aiUltra = new SnakeAIUltra(false);
+        await aiUltra.setup(aiUltra.extractEnvFeaturesFromGrid(this.grid));
+        aiUltra.beginEpisode();
+        this.snakeAI = aiUltra;
+      } catch(e) {
+        console.error(e);
+        this.errorInit = true;
+      }
+      break;
+    }
+    case GameConstants.AiLevel.MOCK:
+      this.snakeAI = new SnakeAIMock();
+      break;
+    default:
+      this.snakeAI = new SnakeAINormal();
+      break;
     }
   }
 
@@ -418,7 +420,7 @@ export default class Snake {
   }
 
   get maxLastMoves() {
-    return this.queue.length + Math.max(this.grid.width, this.grid.height);
+    return this.grid.width * this.grid.height;
   }
 
   getNextPosition(oldPos, newDirection) {

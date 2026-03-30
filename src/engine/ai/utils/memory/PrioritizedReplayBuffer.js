@@ -35,8 +35,8 @@ export default class PrioritizedReplayBuffer extends BaseReplayBuffer {
     this.sumTree = new SumTree(capacity);
   }
 
-  add(state, action, reward, nextState, done, nStep = null) {
-    const data = { state, action, reward, nextState, done, nStep };
+  add(state, action, reward, nextState, done, nStep = null, envFeatures = null) {
+    const data = { state, action, reward, nextState, done, nStep, envFeatures };
 
     const overwrittenData = this.sumTree.data[this.sumTree.write];
 

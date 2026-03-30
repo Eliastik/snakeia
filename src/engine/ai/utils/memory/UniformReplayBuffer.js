@@ -31,14 +31,14 @@ export default class UniformReplayBuffer extends BaseReplayBuffer {
     this.totalSize = 0;
   }
   
-  add(state, action, reward, nextState, done, nStep = null) {
+  add(state, action, reward, nextState, done, nStep = null, envFeatures = null) {
     const overwrittenData = this.buffer[this.position];
 
     if(overwrittenData) {
       this.cleanOldMemory(overwrittenData);
     }
 
-    this.buffer[this.position] = { state, action, reward, nextState, done, nStep };
+    this.buffer[this.position] = { state, action, reward, nextState, done, nStep, envFeatures };
 
     this.position = (this.position + 1) % this.capacity;
 

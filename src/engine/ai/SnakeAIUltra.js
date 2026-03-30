@@ -68,6 +68,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.enableNStepsLearning = true; // Enable N-Steps learning
     this.enableDataAugmentation = true; // Enable automatic data augmentation
     this.enableActionMasking = true; // Enable Action Masking (avoid dead actions)
+    this.enableEnvEmbedding = true; // Enable Environment Embedding (pass env features to model)
 
     // Hyperparameters
     this.gamma = 0.99;
@@ -81,6 +82,8 @@ export default class SnakeAIUltra extends SnakeAI {
     this.nStep = 3;
     this.frameStackSize = 4; // Number of frames to stack (1 = disabled)
     this.softTargetUpdatesCoefficient = 0.005;
+    this.envFeatureSize = 6; // [gridWidth, gridHeight, hasWalls, hasRandomWalls, isMaze, hasOpponents]
+    this.envEmbedSize = 16; // Size of the env embedding layer
     // END OF SETTINGS
 
     // Replay memory
@@ -94,6 +97,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
     // Training state
     this.currentEnv = null;
+    this.currentEnvFeatures = null;
     this.lastAction = null;
     this.currentQValue = 0;
     this.currentEpoch = 0;
@@ -122,11 +126,11 @@ export default class SnakeAIUltra extends SnakeAI {
     // - Always keep the grid "UP" -> OK
     // - Add direction information for Snake head? -> Not needed with state rotation
     // - N Step Learning -> OK
-    // - Frame stacking -> OK, need tests
-    // - Data augmentation (reverse the grid etc...)? -> OK, need tests
+    // - Frame stacking -> OK
+    // - Data augmentation (reverse the grid etc...)? -> OK
     // - Performance optimizations -> OK
+    // - Pass environment characteristics to model (grid size, random walls, opponents, maze mode, etc.) -> OK, need tests
     // * Ideas:
-    // - Pass environment characteristics to model (grid size, random walls, opponents, maze mode, etc.)
     // - Use IS weights for Prioritized Experience Replay
     // - Distributional RL - Categorical DQN?
     // - Reproducible training with seed: some fixes needed?
@@ -136,8 +140,9 @@ export default class SnakeAIUltra extends SnakeAI {
     return this.frameStackSize > 1;
   }
 
-  async setup(summaryWriter) {
+  async setup(summaryWriter, envFeatures = null) {
     this.mainModel = await this.createOrLoadModel(this.enableTrainingMode, this.modelLocation);
+    this.currentEnvFeatures = envFeatures;
 
     if(this.enableTrainingMode && this.modelLocation) {
       await this.loadMemory(`${this.modelLocation}/memory.json`);
@@ -180,6 +185,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.logger.info(this.enableFrameStacking ? `Frame stacking enabled (size=${this.frameStackSize})\n` : "Frame stacking disabled\n");
     this.logger.info(this.enableDataAugmentation ? "Data augmentation enabled\n" : "Data augmentation disabled\n");
     this.logger.info(this.enableActionMasking ? "Action masking enabled\n" : "Action masking disabled\n");
+    this.logger.info(this.enableEnvEmbedding ? `Env embedding enabled (features=${this.envFeatureSize}, embed=${this.envEmbedSize})\n` : "Env embedding disabled\n");
     this.logger.info(`Model input shape: [${this.enableVariableInputSize ? "variable" : this.modelHeight}, ${this.enableVariableInputSize ? "variable" : this.modelWidth}, ${this.modelDepth * this.frameStackSize}]\n`);
     this.logger.info(`Model output (number of possible actions): ${this.numberOfPossibleActions}\n`);
   }
@@ -225,22 +231,24 @@ export default class SnakeAIUltra extends SnakeAI {
   createModel() {
     const DenseLayer = (config) => this.enableNoisyNetwork ? new NoisyDense(config) : tf.layers.dense(config);
 
-    const input = tf.input({
+    // Input 1: visual state (grid)
+    const stateInput = tf.input({
       shape: [
         this.enableVariableInputSize ? null : this.modelHeight,
         this.enableVariableInputSize ? null : this.modelWidth,
         this.modelDepth * this.frameStackSize
-      ]
+      ],
+      name: "state_input"
     });
-  
+
     const conv1 = tf.layers.conv2d({
       filters: 32,
       kernelSize: 3,
       activation: "relu",
       padding: "same",
       dtype: this.dtype
-    }).apply(input);
-  
+    }).apply(stateInput);
+
     const conv2 = tf.layers.conv2d({
       filters: 64,
       kernelSize: 3,
@@ -248,17 +256,38 @@ export default class SnakeAIUltra extends SnakeAI {
       padding: "same",
       dtype: this.dtype
     }).apply(conv1);
-  
+
     const flattenOrPooling = this.enableVariableInputSize ?
       tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true, dtype: this.dtype }).apply(conv2) :
       tf.layers.flatten({ dtype: this.dtype }).apply(conv2);
-  
+
+    // Input 2: environment features (optional)
+    let merged = flattenOrPooling;
+    let modelInputs = stateInput;
+
+    if(this.enableEnvEmbedding) {
+      const envInput = tf.input({
+        shape: [this.envFeatureSize],
+        name: "env_input"
+      });
+
+      const envEmbed = tf.layers.dense({
+        units: this.envEmbedSize,
+        activation: "relu",
+        dtype: this.dtype,
+        name: "env_embed"
+      }).apply(envInput);
+
+      merged = tf.layers.concatenate({ name: "merged" }).apply([flattenOrPooling, envEmbed]);
+      modelInputs = [stateInput, envInput];
+    }
+
     const dense1 = DenseLayer({
       units: 64,
       activation: "relu",
       dtype: this.dtype,
       seed: this.trainingRng()
-    }).apply(flattenOrPooling);
+    }).apply(merged);
 
     const advantage = DenseLayer({
       units: this.numberOfPossibleActions,
@@ -268,14 +297,14 @@ export default class SnakeAIUltra extends SnakeAI {
     }).apply(dense1);
 
     let model;
-  
+
     if(this.enableDuelingQLearning) {
       const dense2 = DenseLayer({
         units: 64,
         activation: "relu",
         dtype: this.dtype,
         seed: this.trainingRng()
-      }).apply(flattenOrPooling);
+      }).apply(merged);
 
       const value = DenseLayer({
         units: 1,
@@ -283,17 +312,17 @@ export default class SnakeAIUltra extends SnakeAI {
         dtype: this.dtype,
         seed: this.trainingRng()
       }).apply(dense2);
-    
+
       const qValues = new DuelingQLayer().apply([value, advantage]);
-    
+
       model = tf.model({
-        inputs: input,
+        inputs: modelInputs,
         outputs: qValues,
         dtype: this.dtype
       });
     } else {
       model = tf.model({
-        inputs: input,
+        inputs: modelInputs,
         outputs: advantage,
         dtype: this.dtype
       });
@@ -302,6 +331,33 @@ export default class SnakeAIUltra extends SnakeAI {
     return model;
   }
   
+  // Build the model input: single tensor or [state, env] depending on enableEnvEmbedding
+  buildModelInput(stateTensor, envFeatures = null) {
+    if(!this.enableEnvEmbedding) {
+      return stateTensor;
+    }
+
+    const features = envFeatures ?? this.currentEnvFeatures ?? this.neutralEnvFeatures();
+    const envTensor = this.envFeaturesToTensor(features);
+
+    return [stateTensor, envTensor];
+  }
+
+  // Batch version: stacks individual env tensors alongside state batch
+  buildModelInputBatch(statesBatch, envFeaturesArray) {
+    if(!this.enableEnvEmbedding) {
+      return statesBatch;
+    }
+
+    const envTensors = envFeaturesArray.map(f => this.envFeaturesToTensor(f ?? this.currentEnvFeatures ?? this.neutralEnvFeatures()));
+    const envBatch = tf.stack(envTensors);
+
+    // envTensors are now stacked — dispose intermediates
+    envTensors.forEach(t => t.dispose());
+
+    return [statesBatch, envBatch];
+  }
+
   compileModel(model) {
     model.compile({
       optimizer: tf.train.rmsprop(this.learningRate), // Or Adam
@@ -389,9 +445,11 @@ export default class SnakeAIUltra extends SnakeAI {
 
     return tf.tidy(() => {
       const state = this.getState(snake, instanceId);
-      const currentStateTensor = this.stateToTensor(state).expandDims(0);
-  
-      const qValues = this.mainModel.predict(currentStateTensor);
+      const stateTensor = this.stateToTensor(state).expandDims(0);
+      const envFeatures = this.currentEnvFeatures ?? this.extractEnvFeaturesFromGrid(snake.grid);
+      const modelInput = this.buildModelInput(stateTensor, envFeatures);
+
+      const qValues = this.mainModel.predict(modelInput);
       const values = Array.from(qValues.dataSync());
 
       if(this.enableActionMasking) {
@@ -435,8 +493,12 @@ export default class SnakeAIUltra extends SnakeAI {
 
       try {
         const batchResults = tf.tidy(() => {
-          const batch = tf.stack(stateTensors);
-          const qValuesBatch = this.mainModel.predict(batch);
+          const statesBatch = tf.stack(stateTensors);
+          const envFeaturesArr = snakesForInference.map(({ snake }) =>
+            this.currentEnvFeatures ?? this.extractEnvFeaturesFromGrid(snake.grid)
+          );
+          const modelInput = this.buildModelInputBatch(statesBatch, envFeaturesArr);
+          const qValuesBatch = this.mainModel.predict(modelInput);
           const qValuesArray = qValuesBatch.arraySync();
 
           return qValuesArray.map((qValues, i) => {
@@ -860,27 +922,28 @@ export default class SnakeAIUltra extends SnakeAI {
     const nextStateFlat = nextState.data ? nextState : this.stateToFlatArray(nextState);
 
     const nToStore = effectiveN ?? (this.enableNStepsLearning ? this.nStep : 1);
+    const envFeatures = this.currentEnvFeatures ?? this.neutralEnvFeatures();
 
-    this.memory.add(stateFlat, action, reward, nextStateFlat, done, nToStore);
+    this.memory.add(stateFlat, action, reward, nextStateFlat, done, nToStore, envFeatures);
 
     if(this.enableDataAugmentation) {
       // Horizontal flip
       const flippedH = this.flipState(stateFlat, true, false);
       const flippedHNext = this.flipState(nextStateFlat, true, false);
 
-      this.memory.add(flippedH, this.flipActionHorizontal(action), reward, flippedHNext, done, nToStore);
+      this.memory.add(flippedH, this.flipActionHorizontal(action), reward, flippedHNext, done, nToStore, envFeatures);
 
       // Vertical flip
       const flippedV = this.flipState(stateFlat, false, true);
       const flippedVNext = this.flipState(nextStateFlat, false, true);
 
-      this.memory.add(flippedV, this.flipActionVertical(action), reward, flippedVNext, done, nToStore);
+      this.memory.add(flippedV, this.flipActionVertical(action), reward, flippedVNext, done, nToStore, envFeatures);
 
       // Horizontal + vertical flip combined
       const flippedHV = this.flipState(stateFlat, true, true);
       const flippedHVNext = this.flipState(nextStateFlat, true, true);
 
-      this.memory.add(flippedHV, this.flipActionHorizontal(this.flipActionVertical(action)), reward, flippedHVNext, done, nToStore);
+      this.memory.add(flippedHV, this.flipActionHorizontal(this.flipActionVertical(action)), reward, flippedHVNext, done, nToStore, envFeatures);
     }
   }
 
@@ -952,30 +1015,41 @@ export default class SnakeAIUltra extends SnakeAI {
 
     if(!batch.samples || batch.samples.length === 0) return;
 
-    const { inputs, targets, meanTDError } = tf.tidy(() => {
+    const actualBatchSize = batch.samples.length;
+
+    const { inputs, envBatch, targets, meanTDError } = tf.tidy(() => {
       const nextStates = tf.stack(batch.samples.map(({ nextState }) => this.stateToTensor(nextState)));
       const states = tf.stack(batch.samples.map(({ state }) => this.stateToTensor(state)));
       const rewards = tf.tensor1d(batch.samples.map(({ reward }) => reward), this.dtype);
       const dones = tf.tensor1d(batch.samples.map(({ done }) => done ? 0 : 1), this.dtype);
       const actions = tf.tensor1d(batch.samples.map(({ action }) => action), "int32");
 
+      // Build env batch — use stored envFeatures per sample, fallback to neutral
+      const envFeaturesArr = batch.samples.map(s => s.envFeatures ?? this.neutralEnvFeatures());
+      const envBatch = this.enableEnvEmbedding
+        ? tf.stack(envFeaturesArr.map(f => this.envFeaturesToTensor(f)))
+        : null;
+
+      const statesInput     = this.enableEnvEmbedding ? [states, envBatch]     : states;
+      const nextStatesInput = this.enableEnvEmbedding ? [nextStates, envBatch] : nextStates;
+
       let qNextMax;
 
       if(this.enableDoubleDQN) {
-        const qNextMain = this.mainModel.predict(nextStates);
-        const qNextTarget = this.targetModel.predict(nextStates);
+        const qNextMain   = this.mainModel.predict(nextStatesInput);
+        const qNextTarget = this.targetModel.predict(nextStatesInput);
 
         const bestNextActions = qNextMain.argMax(1);
 
-        const batchIndices = tf.range(0, this.batchSize, 1, "int32");
+        const batchIndices = tf.range(0, actualBatchSize, 1, "int32");
         const stackedIndices = tf.stack([batchIndices, bestNextActions], 1);
 
         qNextMax = tf.gatherND(qNextTarget, stackedIndices);
       } else {
-        qNextMax = this.mainModel.predict(nextStates).max(1);
+        qNextMax = this.mainModel.predict(nextStatesInput).max(1);
       }
-  
-      const qCurrentBatch = this.mainModel.predict(states);
+
+      const qCurrentBatch = this.mainModel.predict(statesInput);
       const qValues = qCurrentBatch.clone();
 
       // Bellman equation with optional N-step gamma
@@ -996,15 +1070,16 @@ export default class SnakeAIUltra extends SnakeAI {
       tdErrorsArray.forEach((error, index) => {
         this.memory.updatePriority(batch.indices[index], error, batch.envAssignments ? batch.envAssignments[index] : null);
       });
-      
+
       const updatedQValues = qValues.mul(this.tfOne.sub(actionMask)).add(actionMask.mul(targetQs.expandDims(1)));
 
       qValues.dispose();
 
-      return { inputs: states, targets: updatedQValues, meanTDError };
+      return { inputs: states, envBatch, targets: updatedQValues, meanTDError };
     });
 
-    const fitData = await this.mainModel.fit(inputs, targets, { batchSize: this.batchSize, epochs: 1, verbose: 0, shuffle: true });
+    const fitInputs = this.enableEnvEmbedding ? [inputs, envBatch] : inputs;
+    const fitData = await this.mainModel.fit(fitInputs, targets, { batchSize: actualBatchSize, epochs: 1, verbose: 0, shuffle: true });
 
     if(this.summaryWriter) {
       this.summaryWriter.scalar("loss", fitData.history.loss[0], this.currentEpoch);
@@ -1015,6 +1090,10 @@ export default class SnakeAIUltra extends SnakeAI {
     // Cleanup tensors
     inputs.dispose();
     targets.dispose();
+    
+    if(envBatch) {
+      envBatch.dispose();
+    }
 
     if(this.enableSoftTargetUpdates) {
       this.synchronizeTargetNetwork();
@@ -1114,7 +1193,6 @@ export default class SnakeAIUltra extends SnakeAI {
       if(prevHead) {
         const distFromHead = this.bfsAll(snake, head.x, head.y);
         const distFromPrev = this.bfsAll(snake, prevHead.x, prevHead.y);
-
         const key = (pos) => pos.y * snake.grid.width + pos.x;
 
         let closestFruit = null;
@@ -1122,6 +1200,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
         for(const fruit of fruits) {
           const d = distFromHead[key(fruit)];
+
           if(d !== -1 && d < closestFruitDist) {
             closestFruitDist = d;
             closestFruit = fruit;
@@ -1133,6 +1212,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
         for(const fruitGold of goldFruits) {
           const d = distFromHead[key(fruitGold)];
+
           if(d !== -1 && d < closestGoldFruitDist) {
             closestGoldFruitDist = d;
             closestGoldFruit = fruitGold;
@@ -1186,14 +1266,17 @@ export default class SnakeAIUltra extends SnakeAI {
         const nk = key - 1;
         if(dist[nk] === -1 && !grid.isDeadPositionXY(x - 1, y)) { dist[nk] = d + 1; queue[tail++] = nk; }
       }
+
       if(x < grid.width - 1) {
         const nk = key + 1;
         if(dist[nk] === -1 && !grid.isDeadPositionXY(x + 1, y)) { dist[nk] = d + 1; queue[tail++] = nk; }
       }
+
       if(y > 0) {
         const nk = key - grid.width;
         if(dist[nk] === -1 && !grid.isDeadPositionXY(x, y - 1)) { dist[nk] = d + 1; queue[tail++] = nk; }
       }
+
       if(y < grid.height - 1) {
         const nk = key + grid.width;
         if(dist[nk] === -1 && !grid.isDeadPositionXY(x, y + 1)) { dist[nk] = d + 1; queue[tail++] = nk; }
@@ -1217,7 +1300,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }
   }
 
-  changeEnvironment(envId) {
+  changeEnvironment(envId, envFeatures = null) {
     if(this.currentEnv !== envId) {
       this.logger.info(`Changing environment to: ${envId}\n`);
 
@@ -1226,7 +1309,41 @@ export default class SnakeAIUltra extends SnakeAI {
       }
 
       this.currentEnv = envId;
+      this.currentEnvFeatures = envFeatures;
     }
+  }
+
+  envFeaturesToTensor(features) {
+    return tf.tensor1d([
+      features.gridWidth  / this.modelWidth,
+      features.gridHeight / this.modelHeight,
+      features.hasWalls       ? 1 : 0,
+      features.hasRandomWalls ? 1 : 0,
+      features.isMaze         ? 1 : 0,
+      features.hasOpponents ? 1 : 0
+    ], this.dtype);
+  }
+
+  extractEnvFeaturesFromGrid(grid) {
+    return {
+      gridWidth:      grid.width,
+      gridHeight:     grid.height,
+      hasWalls:       grid.borderWalls  ?? false,
+      hasRandomWalls: grid.randomWalls  ?? false,
+      isMaze:         grid.maze         ?? false,
+      hasOpponents: grid.hasOpponents ?? false
+    };
+  }
+
+  neutralEnvFeatures() {
+    return {
+      gridWidth:      this.modelWidth,
+      gridHeight:     this.modelHeight,
+      hasWalls:       false,
+      hasRandomWalls: false,
+      isMaze:         false,
+      hasOpponents: false
+    };
   }
 
   beginEpisode(instanceId = "inference") {
@@ -1277,6 +1394,7 @@ export default class SnakeAIUltra extends SnakeAI {
         enableNStepsLearning:         { type: "boolean", target: "enableNStepsLearning", fallback: false },
         enableDataAugmentation:       { type: "boolean", target: "enableDataAugmentation" },
         enableActionMasking:          { type: "boolean", target: "enableActionMasking", fallback: false },
+        enableEnvEmbedding:           { type: "boolean", target: "enableEnvEmbedding", fallback: false },
         syncTargetEvery:              { type: "number",  target: "syncTargetEvery", hyperParam: true },
         gamma:                        { type: "number",  target: "gamma", hyperParam: true },
         epsilonMax:                   { type: "number",  target: "epsilonMax", hyperParam: true },
@@ -1294,6 +1412,8 @@ export default class SnakeAIUltra extends SnakeAI {
         numberOfPossibleActions:{ type: "number",  target: "numberOfPossibleActions" },
         enableVariableInputSize:{ type: "boolean", target: "enableVariableInputSize" },
         frameStackSize:         { type: "number",  target: "frameStackSize", fallback: 1 },
+        envFeatureSize:         { type: "number",  target: "envFeatureSize", fallback: 6 },
+        envEmbedSize:           { type: "number",  target: "envEmbedSize",   fallback: 16 },
       },
       trainingState: {
         lastAction:         { type: "number",  target: "lastAction" },
@@ -1321,7 +1441,8 @@ export default class SnakeAIUltra extends SnakeAI {
       trainingState: {
         ...buildSection(schema.trainingState),
         trainingRng: this.trainingRng.state(),
-        currentEnv:  this.currentEnv
+        currentEnv:  this.currentEnv,
+        currentEnvFeatures: this.currentEnvFeatures
       }
     };
   }
@@ -1432,6 +1553,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
         if(state.trainingRng) this.trainingRng = seedrandom("", { state: state.trainingRng });
         if(state.currentEnv !== undefined && this.memoryRestoredFromState) this.currentEnv = state.currentEnv;
+        if(state.currentEnvFeatures !== undefined && this.memoryRestoredFromState) this.currentEnvFeatures = state.currentEnvFeatures;
       }
 
       this.logger.info("Metadata correctly loaded from file\n");

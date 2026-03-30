@@ -1130,6 +1130,9 @@ export default class GridUI3D extends GridUI {
       light.position.set(x, y, 0.5);
       halo.position.set(x, y, 0.5);
       halo.visible = true;
+    } else {
+      halo.visible = false;
+      light.visible = false;
     }
 
     return { mesh, light, halo, poolIndex: idx };

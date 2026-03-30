@@ -599,6 +599,8 @@ Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train
 - [ ] Autres effets graphiques à ajouter à la version 3D ? (idées)
   - [x] Ne plus faire en sorte que le Snake regarde la pomme derrière lui : système de champ de vision (yeux qui bougent vers le fruit que s'il est dans son champ de vision, devant lui)
   - [ ] Effet normal map d'écailles sur les Snakes
+  - [ ] Agrandir taille des yeux
+  - [ ] Textures rayures (basée sur la couleur)
   - [ ] Améliorer l'animation de mort des Snakes (avec particules ?)
   - [ ] Effet "tilt shift" ?
   - [ ] Meilleures textures que le damier gris ? (idée : plusieurs environnements type plaine avec herbe, banquise avec glace, désert etc...)

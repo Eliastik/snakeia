@@ -41,6 +41,7 @@ export default class Grid {
     this.rngGrid;
     this.rngGame;
     this.probGoldFruitIncrease = probGoldFruitIncrease == undefined ? false : probGoldFruitIncrease;
+    this.hasOpponents = false;
   }
 
   init() {
@@ -95,6 +96,10 @@ export default class Grid {
     this.fruitPosGold = undefined;
     this.rngGrid = new seedrandom(this.seedGrid);
     this.rngGame = new seedrandom(this.seedGame);
+  }
+
+  setHasOpponents(hasOpponents) {
+    this.hasOpponents = hasOpponents;
   }
 
   fixWalls(borderWalls) {
