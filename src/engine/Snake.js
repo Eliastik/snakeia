@@ -414,13 +414,17 @@ export default class Snake {
 
     this.lastPositions.push(posKey);
 
-    if(this.lastPositions.length > this.maxLastMoves) {
+    if(this.lastPositions.length > this.maxLastPositionsBuffer) {
       this.lastPositions.shift();
     }
   }
 
   get maxLastMoves() {
-    return this.grid.width * this.grid.height;
+    return Math.max(this.grid.width, this.grid.height);
+  }
+
+  get maxLastPositionsBuffer() {
+    return (this.queue.length + this.grid.width * this.grid.height) * 3;
   }
 
   getNextPosition(oldPos, newDirection) {
