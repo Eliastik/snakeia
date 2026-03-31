@@ -258,7 +258,7 @@ export default class Snake {
     case GameConstants.AiLevel.ULTRA: {
       try {
         const aiUltra = new SnakeAIUltra(false);
-        await aiUltra.setup(aiUltra.extractEnvFeaturesFromGrid(this.grid));
+        await aiUltra.setup();
         aiUltra.beginEpisode();
         this.snakeAI = aiUltra;
       } catch(e) {
