@@ -22,13 +22,17 @@ import GameConstants from "../engine/Constants";
 import GameUtils from "../engine/GameUtils";
 import Position from "../engine/Position";
 import { Utils } from "jsgametools";
-import * as THREE from "three";
+import * as THREE from "three/webgpu";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { FXAAPass } from "three/addons/postprocessing/FXAAPass.js";
 import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import WebGPU from "three/addons/capabilities/WebGPU.js";
+import { pass, mrt, output, normalView, diffuseColor, velocity, add, vec3, vec4, directionToColor, colorToDirection, sample } from "three/tsl";
+import { ssgi } from "three/addons/tsl/display/SSGINode.js";
+import { traa } from "three/addons/tsl/display/TRAANode.js";
 import chroma from "chroma-js";
 
 export default class GridUI3D extends GridUI {
@@ -94,7 +98,7 @@ export default class GridUI3D extends GridUI {
     this.fruitPool = {};
   }
 
-  init3DEngine() {
+  async init3DEngine() {
     this.initThreeJS();
   }
 
@@ -126,7 +130,7 @@ export default class GridUI3D extends GridUI {
     return this.resolveQualitySettings(preset);
   }
 
-  initThreeJS() {
+  async initThreeJS() {
     this.isLightInit = false;
     this.isCameraInit = false;
 
@@ -138,12 +142,20 @@ export default class GridUI3D extends GridUI {
     this.camera.position.set(0, 0, 0);
     this.camera.lookAt(0, 0, 0);
   
-    this.renderer = new THREE.WebGLRenderer({
+    /*if(WebGPU.isAvailable()) {*/
+    this.renderer = new THREE.WebGPURenderer({
       antialias: this.qualitySettings.enableAntialiasing || this.qualitySettings.antialiasing === "msaa",
       alpha: true
     });
+    await this.renderer.init();
+    /*} else {
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: this.qualitySettings.enableAntialiasing || this.qualitySettings.antialiasing === "msaa",
+        alpha: true
+      });
+    }*/
 
-    this.cubeRenderTarget = new THREE.WebGLCubeRenderTarget((this.qualitySettings && this.qualitySettings.reflectionResolution) || 128);
+    this.cubeRenderTarget = new THREE.CubeRenderTarget((this.qualitySettings && this.qualitySettings.reflectionResolution) || 128);
     this.cubeRenderTarget.texture.type = THREE.HalfFloatType;
     
     this.cubeCamera = new THREE.CubeCamera(0.1, 1000, this.cubeRenderTarget);
@@ -171,7 +183,7 @@ export default class GridUI3D extends GridUI {
     this.unknownGroup = new THREE.Group();
     this.snakesGroup = new THREE.Group();
 
-    if(this.qualitySettings.antialiasing === "fxaa" || this.qualitySettings.antialiasing === "smaa") {
+    /*if(this.qualitySettings.antialiasing === "fxaa" || this.qualitySettings.antialiasing === "smaa") {
       this.composer = new EffectComposer(this.renderer);
       this.renderPass = new RenderPass(this.scene, this.camera);
       this.composer.addPass(this.renderPass);
@@ -191,7 +203,65 @@ export default class GridUI3D extends GridUI {
       }
 
       this.postProcessingEnabled = true;
-    }
+    }*/
+    this.renderPipeline = new THREE.RenderPipeline(this.renderer);
+
+    const scenePass = pass(this.scene,this.camera);
+
+    scenePass.setMRT(mrt({
+      output: output,
+      diffuseColor: diffuseColor,
+      normal: directionToColor(normalView),
+      velocity: velocity
+    }));
+
+    const sceneColor = scenePass.getTextureNode("output");
+
+    const sceneDepth = scenePass.getTextureNode("depth");
+
+    const sceneNormalTex = scenePass.getTextureNode("normal");
+
+    const sceneNormal = sample((uv)=>{
+      return colorToDirection(
+        sceneNormalTex.sample(uv)
+      );
+    });
+
+    const sceneVelocity = scenePass.getTextureNode("velocity");
+
+    this.giPass = ssgi(
+      sceneColor,
+      sceneDepth,
+      sceneNormal,
+      this.camera
+    );
+    this.giPass.useTemporalFiltering = false;
+
+    this.giPass.sliceCount.value = 1;
+    this.giPass.stepCount.value = 4;
+    this.giPass.radius.value = 4;
+    this.giPass.giIntensity.value = 2;
+    this.giPass.aoIntensity.value = 1;
+
+    const gi = this.giPass.rgb;
+    const ao = this.giPass.a;
+
+    const composite = vec4(
+      add(
+        sceneColor.rgb.mul(ao),
+        scenePass.getTextureNode('diffuseColor').rgb.mul(gi)
+      ),
+      sceneColor.a
+    );
+
+    this.traaPass = traa(
+      composite,
+      sceneDepth,
+      sceneVelocity,
+      this.camera
+    );
+
+    this.renderPipeline.outputNode = composite;
 
     this.scene.add(this.gridGroup, this.fruitsGroup, this.snakesGroup, this.unknownGroup);
   }
@@ -377,11 +447,12 @@ export default class GridUI3D extends GridUI {
     
     this.goldFruitFirstFrame = false;
 
-    if(this.postProcessingEnabled) {
+    /*if(this.postProcessingEnabled) {
       this.composer.render();
     } else {
       this.renderer.render(this.scene, this.camera);
-    }
+    }*/
+    this.renderPipeline.render();
 
     if(ctx && !dryRun) {
       Utils.drawImageData(ctx, this.renderer.domElement, offsetX, offsetY, totalWidth, totalHeight, 0, 0, totalWidth, totalHeight);
