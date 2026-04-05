@@ -2344,7 +2344,7 @@ export default class GridUI3D extends GridUI {
     let closestGoldFruit = null;
     let closestGoldDist = Infinity;
 
-    if(this.fruitGoldInstance) {
+    if(this.fruitModelGold && this.fruitModelGold.visible) {
       closestGoldFruit = new THREE.Vector3().copy(this.fruitModelGold.position);
       closestGoldDist = headPosWorld.distanceTo(closestGoldFruit);
     }
