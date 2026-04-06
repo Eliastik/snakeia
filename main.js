@@ -2742,37 +2742,45 @@ function getListLevel(player, type) {
   const levels = getLevels(player, type);
   let res = "";
 
-  if(type == DOWNLOADED_LEVEL) {
-    res += "<div class=\"row mb-3\"><div class=\"col text-center\"><button class=\"btn btn-lg btn-warning\" onclick=\"downloadLevels(" + player + ", this);\"><span class=\"fui-plus-circle\"></span>&nbsp; " + i18next.t("levels.download") + "</button><br /><a href=\"#null\" onclick=\"editDownloadURL();\" class=\"small\"><span class=\"fui-new\"></span>&nbsp; " + i18next.t("levels.editDownloadURL") + "</a></div></div>";
+  if(type === DOWNLOADED_LEVEL) {
+    res += `
+      <div class="row mb-3">
+        <div class="col text-center">
+          <button class="btn btn-lg btn-warning" onclick="downloadLevels(${player}, this);">
+            <span class="fui-plus-circle"></span>&nbsp; ${i18next.t("levels.download")}
+          </button><br />
+          <a href="#null" onclick="editDownloadURL();" class="small">
+            <span class="fui-new"></span>&nbsp; ${i18next.t("levels.editDownloadURL")}
+          </a>
+        </div>
+      </div>
+    `;
   }
 
-  if(levels == null || !levels.series || levels.series.length == 0) {
-    return res + "<strong>" + i18next.t("levels.emptyList") + "</strong>";
+  if(!levels || !levels.series || levels.series.length === 0) {
+    return res + `<strong>${i18next.t("levels.emptyList")}</strong>`;
   }
 
   const currentSeriesIndex = player === PLAYER_HUMAN ? currentSeriesIndexHuman : currentSeriesIndexAI;
-
   const serie = levels.series[currentSeriesIndex];
 
   if(serie.levels.length > 1) {
-    res += "<div class=\"row mb-3 align-items-center\">";
-
-    res += "<div class=\"col-2 text-left\">";
-    res += "<button class=\"btn btn-secondary\" onclick=\"changeSeries(" + player + "," + type + ",-1)\">◀</button>";
-    res += "</div>";
-
-    res += "<div class=\"col-8 text-center\">";
-    res += "<h4>" + i18next.t("levels.waveProgress", {
-      current: currentSeriesIndex + 1,
-      total: levels.series.length
-    }) + "</h4>";
-    res += "</div>";
-
-    res += "<div class=\"col-2 text-right\">";
-    res += "<button class=\"btn btn-secondary\" onclick=\"changeSeries(" + player + "," + type + ",1)\">▶</button>";
-    res += "</div>";
-
-    res += "</div>";
+    res += `
+      <div class="row mb-3 align-items-center">
+        <div class="col-2 text-left">
+          <button class="btn btn-secondary" onclick="changeSeries(${player}, ${type}, -1)">◀</button>
+        </div>
+        <div class="col-8 text-center">
+          <h4>${i18next.t("levels.waveProgress", {
+    current: currentSeriesIndex + 1,
+    total: levels.series.length
+  })}</h4>
+        </div>
+        <div class="col-2 text-right">
+          <button class="btn btn-secondary" onclick="changeSeries(${player}, ${type}, 1)">▶</button>
+        </div>
+      </div>
+    `;
   }
 
   let index = 1;
@@ -2781,42 +2789,33 @@ function getListLevel(player, type) {
   for(const key in serie.levels) {
     if(Object.prototype.hasOwnProperty.call(serie.levels, key)) {
       let button;
+      const levelData = serie.levels[key];
 
       if(!canPlay(key, player, type, currentSeriesIndex)) {
-        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" disabled aria-label=\""
-          + i18next.t("levels.disabledLevel") + "\">"
-          + i18next.t("levels.level") + " " + index
-          + "</button>";
-      } else if(!levelCompatible(serie.levels[key]["type"], serie.levels[key]["version"])) {
-        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" disabled aria-label=\""
-          + i18next.t("levels.notCompatible") + "\">"
-          + i18next.t("levels.level") + " " + index
-          + "</button>";
+        button = `<button class="btn btn-lg btn-primary d-inline-block" disabled style="min-width: 170px;"
+          aria-label="${i18next.t("levels.disabledLevel")}" data-balloon-length="fit" data-balloon-pos="up">
+            ${i18next.t("levels.level")} ${index}
+        </button>`;
+      } else if(!levelCompatible(levelData.type, levelData.version)) {
+        button = `<button class="btn btn-lg btn-primary d-inline-block" disabled style="min-width: 170px;"
+          aria-label="${i18next.t("levels.notCompatible")}" data-balloon-length="fit" data-balloon-pos="up">
+            ${i18next.t("levels.level")} ${index}
+        </button>`;
       } else {
-        const resultLevel = printResultLevel(key, player, serie.levels[key]["type"], type, false, currentSeriesIndex);
+        const resultLevel = printResultLevel(key, player, levelData.type, type, false, currentSeriesIndex);
 
-        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" onclick=\"playLevel("
-          + key + "," + player + "," + type + "," + currentSeriesIndex + ");\" "
-          + (resultLevel.trim() != "" 
-            ? "aria-label=\"" + resultLevel + "\" data-balloon-length=\"fit\" data-balloon-pos=\"up\"" 
-            : "")
-          + ">"
-          + i18next.t("levels.level") + " " + index
-          + "</button>";
+        button = `<button class="btn btn-lg btn-primary d-inline-block" style="min-width: 170px;"
+          onclick="playLevel(${key}, ${player}, ${type}, ${currentSeriesIndex});"
+          ${resultLevel.trim() !== "" ? `aria-label="${resultLevel}" data-balloon-length="fit" data-balloon-pos="up"` : ""}>
+            ${i18next.t("levels.level")} ${index}
+        </button>`;
       }
 
-      if(index == 1) {
+      if(index % 2 === 1) {
         res += "<div class=\"row mb-2\">";
-      }
-
-      if(index % 2 == 0) {
-        res += "<div class=\"col pl-0 justify-content-center\">" 
-          + button 
-          + "</div></div><div class=\"row mb-2\">";
+        res += `<div class="col pr-0 justify-content-center">${button}</div>`;
       } else {
-        res += "<div class=\"col pr-0 justify-content-center\">" 
-          + button 
-          + "</div>";
+        res += `<div class="col pl-0 justify-content-center">${button}</div></div>`;
       }
 
       empty = false;
@@ -2824,15 +2823,15 @@ function getListLevel(player, type) {
     }
   }
 
+  if((index - 1) % 2 === 1) {
+    res += "<div class=\"col pl-0 justify-content-center\"></div></div>";
+  }
+
   if(empty) {
-    return res + "<strong>" + i18next.t("levels.emptyList") + "</strong>";
+    return res + `<strong>${i18next.t("levels.emptyList")}</strong>`;
   }
 
-  if(index % 2 == 0) {
-    res += "<div class=\"col pr-0\"></div>";
-  }
-
-  return res + "</div>";
+  return res;
 }
 
 function getListBonus(player) {
