@@ -2157,8 +2157,6 @@ function printResultLevel(level, player, levelType, type, shortVersion, serieInd
   let val = "";
   let resultLevel = getLevelSave(level, player, type, serieIndex);
 
-  console.log(level, resultLevel);
-
   if(resultLevel == null) {
     return "";
   }
@@ -2189,446 +2187,454 @@ function printResultLevel(level, player, levelType, type, shortVersion, serieInd
 window.playLevel = (level, player, type, serieIndex = 0) => {
   const levelSave = getLevelSave(level, player, type, serieIndex);
   const bonus = getSave(player, DEFAULT_LEVEL)["currentBonus"];
+
   const levels = getLevels(player, type);
 
   if(levels == null) {
     return false;
   }
 
-  if(levels[level] != null) {
-    const levelSelected = levels[level];
-    const levelSettings = levelSelected["settings"];
-    const levelType = levelSelected["type"];
-    let levelTypeValue = levelSelected["typeValue"];
-    const levelVersion = levelSelected["version"];
+  const serie = levels.series[serieIndex];
 
-    if(!levelCompatible(levelType, levelVersion)) {
-      alert(i18next.t("levels.notCompatible"));
-      return false;
+  if(serie == null) {
+    return false;
+  }
+
+  const levelSelected = serie.levels[level];
+
+  if(levelSelected == null) {
+    return false;
+  }
+
+  const levelSettings = levelSelected["settings"];
+  const levelType = levelSelected["type"];
+  let levelTypeValue = levelSelected["typeValue"];
+  const levelVersion = levelSelected["version"];
+
+  if(!levelCompatible(levelType, levelVersion)) {
+    alert(i18next.t("levels.notCompatible"));
+    return false;
+  }
+
+  if(!canPlay(level, player, type, serieIndex)) {
+    alert(i18next.t("levels.disabledLevel"));
+    return false;
+  }
+
+  if(bonus == "BONUS_PASS_LEVEL" && (!levelSave || levelSave[0] != true)) {
+    setLevelSave([true, Array.isArray(levelTypeValue) && levelTypeValue.length >= 2 ? levelTypeValue[1] : levelTypeValue], level, player, type, serieIndex);
+    buyBonus(null, player);
+    displayLevelList(player);
+    return true;
+  }
+
+  if(bonus == "BONUS_NO_TIME_LIMIT" && levelType == LEVEL_REACH_SCORE_ON_TIME) {
+    levelTypeValue = [levelTypeValue[0], -1];
+    buyBonus(null, player);
+  }
+
+  const heightGrid = levelSettings[0];
+  const widthGrid = levelSettings[1];
+  const borderWalls = levelSettings[2];
+  const generateWalls = levelSettings[3];
+  const sameGrid = levelSettings[4];
+  const speed = levelSettings[5];
+  const progressiveSpeed = levelSettings[6];
+  const aiLevel = levelSettings[7];
+  const numberIA = levelSettings[8];
+  const generateMaze = levelSettings[9];
+  const customGrid = levelSettings[10];
+  const mazeForceAuto = levelSettings[11];
+  const seedGrid = levelSettings[12];
+  const seedGame = levelSettings[13];
+  let destroyAis = false;
+
+  const games = [];
+
+  const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame, !generateMaze && bonus == "BONUS_INCREASE_GOLD_FRUIT_PROB");
+  let playerSnake;
+  let playerGame;
+
+  if(!generateMaze && bonus == "BONUS_INCREASE_GOLD_FRUIT_PROB") {
+    buyBonus(null, player);
+  }
+
+  if(player == PLAYER_AI) {
+    const settings = getSettings();
+    let aiLevel = AI_LEVEL_HIGH;
+
+    switch(settings.levelsAILevel) {
+    case "random":
+      aiLevel = AI_LEVEL_RANDOM;
+      break;
+    case "low":
+      aiLevel = AI_LEVEL_LOW;
+      break;
+    case "normal":
+      aiLevel = AI_LEVEL_DEFAULT;
+      break;
+    case "high":
+      aiLevel = AI_LEVEL_HIGH;
+      break;
+    case "ultra":
+      aiLevel = AI_LEVEL_ULTRA;
+      break;
+    default:
+      aiLevel = AI_LEVEL_DEFAULT;
+      break;
     }
 
-    if(!canPlay(level, player, type, serieIndex)) {
-      alert(i18next.t("levels.disabledLevel"));
-      return false;
-    }
-
-    if(bonus == "BONUS_PASS_LEVEL" && (!levelSave || levelSave[0] != true)) {
-      setLevelSave([true, Array.isArray(levelTypeValue) && levelTypeValue.length >= 2 ? levelTypeValue[1] : levelTypeValue], level, player, type, serieIndex);
+    playerSnake = new Snake(RIGHT, 3, grid, player, aiLevel);
+  } else if(player == PLAYER_HUMAN) {
+    if(bonus == "BONUS_AI_ASSISTANT" && !generateMaze) {
+      playerSnake = new Snake(RIGHT, 3, grid, GameConstants.PlayerType.HYBRID_HUMAN_AI);
       buyBonus(null, player);
-      displayLevelList(player);
-      return true;
-    }
-
-    if(bonus == "BONUS_NO_TIME_LIMIT" && levelType == LEVEL_REACH_SCORE_ON_TIME) {
-      levelTypeValue = [levelTypeValue[0], -1];
-      buyBonus(null, player);
-    }
-
-    const heightGrid = levelSettings[0];
-    const widthGrid = levelSettings[1];
-    const borderWalls = levelSettings[2];
-    const generateWalls = levelSettings[3];
-    const sameGrid = levelSettings[4];
-    const speed = levelSettings[5];
-    const progressiveSpeed = levelSettings[6];
-    const aiLevel = levelSettings[7];
-    const numberIA = levelSettings[8];
-    const generateMaze = levelSettings[9];
-    const customGrid = levelSettings[10];
-    const mazeForceAuto = levelSettings[11];
-    const seedGrid = levelSettings[12];
-    const seedGame = levelSettings[13];
-    let destroyAis = false;
-
-    const games = [];
-
-    const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame, !generateMaze && bonus == "BONUS_INCREASE_GOLD_FRUIT_PROB");
-    let playerSnake;
-    let playerGame;
-
-    if(!generateMaze && bonus == "BONUS_INCREASE_GOLD_FRUIT_PROB") {
-      buyBonus(null, player);
-    }
-
-    if(player == PLAYER_AI) {
-      const settings = getSettings();
-      let aiLevel = AI_LEVEL_HIGH;
-
-      switch(settings.levelsAILevel) {
-      case "random":
-        aiLevel = AI_LEVEL_RANDOM;
-        break;
-      case "low":
-        aiLevel = AI_LEVEL_LOW;
-        break;
-      case "normal":
-        aiLevel = AI_LEVEL_DEFAULT;
-        break;
-      case "high":
-        aiLevel = AI_LEVEL_HIGH;
-        break;
-      case "ultra":
-        aiLevel = AI_LEVEL_ULTRA;
-        break;
-      default:
-        aiLevel = AI_LEVEL_DEFAULT;
-        break;
-      }
-
-      playerSnake = new Snake(RIGHT, 3, grid, player, aiLevel);
-    } else if(player == PLAYER_HUMAN) {
-      if(bonus == "BONUS_AI_ASSISTANT" && !generateMaze) {
-        playerSnake = new Snake(RIGHT, 3, grid, GameConstants.PlayerType.HYBRID_HUMAN_AI);
-        buyBonus(null, player);
-      } else {
-        playerSnake = new Snake(RIGHT, 3, grid, player);
-      }
-    }
-
-    if(sameGrid) {
-      const snakes = [playerSnake];
-
-      for(let i = 0; i < numberIA; i++) {
-        snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel));
-        destroyAis = bonus == "BONUS_DESTROY_AIS";
-      }
-
-      playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings);
-      games.push(playerGame);
     } else {
-      let width, height;
+      playerSnake = new Snake(RIGHT, 3, grid, player);
+    }
+  }
 
-      if(numberIA + 1 <= 2) {
-        width = null;
-        height = null;
-      } else {
-        width = 350;
-        height = 250;
-      }
+  if(sameGrid) {
+    const snakes = [playerSnake];
 
-      playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height, null, null, customSettings);
-      games.push(playerGame);
-
-      for(let i = 0; i < numberIA; i++) {
-        const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame);
-        const snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, false);
-        destroyAis = bonus == "BONUS_DESTROY_AIS";
-
-        games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, width, height, null, null, customSettings));
-      }
+    for(let i = 0; i < numberIA; i++) {
+      snakes.push(new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel));
+      destroyAis = bonus == "BONUS_DESTROY_AIS";
     }
 
-    document.getElementById("settings").style.display = "none";
-    document.getElementById("menu").style.display = "none";
-    document.getElementById("levelContainer").style.display = "none";
-    document.getElementById("serverListContainer").style.display = "none";
-    document.getElementById("roomsOnlineListContainer").style.display = "none";
-    document.getElementById("roomsOnlineCreation").style.display = "none";
-    document.getElementById("errorRoomCreation").style.display = "none";
-    document.getElementById("gameContainer").style.display = "block";
-    document.getElementById("connectingToServer").style.display = "none";
-    document.getElementById("roomsOnlineJoin").style.display = "none";
-    document.getElementById("authenticationServer").style.display = "none";
+    playerGame = new Game(grid, snakes, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, null, null, null, null, customSettings);
+    games.push(playerGame);
+  } else {
+    let width, height;
 
-    document.getElementById("resultLevels").innerHTML = "";
-    document.getElementById("gameStatus").innerHTML = "";
-    document.getElementById("gameOrder").innerHTML = "";
-    document.getElementById("gameStatusError").innerHTML = "";
+    if(numberIA + 1 <= 2) {
+      width = null;
+      height = null;
+    } else {
+      width = 350;
+      height = 250;
+    }
 
-    document.getElementById("titleGame").innerHTML = i18next.t("levels.level") + " " + level;
+    playerGame = new Game(grid, playerSnake, speed, document.getElementById("gameContainer"), true, true, progressiveSpeed, width, height, null, null, customSettings);
+    games.push(playerGame);
 
-    const group = new GameGroup(games);
-    group.setDebugMode(customSettings.showDebugInfo ? true : false);
-    group.start();
-    group.closeRanking();
+    for(let i = 0; i < numberIA; i++) {
+      const grid = new Grid(widthGrid, heightGrid, generateWalls, borderWalls, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame);
+      const snake = new Snake(RIGHT, 3, grid, PLAYER_AI, aiLevel, false);
+      destroyAis = bonus == "BONUS_DESTROY_AIS";
 
-    document.getElementById("gameOrder").scrollIntoView();
+      games.push(new Game(grid, snake, speed, document.getElementById("gameContainer"), false, false, progressiveSpeed, width, height, null, null, customSettings));
+    }
+  }
 
-    let levelTimer = new Timer(null, 0);
-    let notificationEndDisplayed = false;
-    let notificationStartDisplayed = false;
-    const notifErrorColor = GameConstants.Setting.ERROR_NOTIF_COLOR;
-    const notifInfosColor = GameConstants.Setting.INFO_NOTIF_COLOR;
-    let notifInfo;
-    let textToDisplayGoal;
+  document.getElementById("settings").style.display = "none";
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("levelContainer").style.display = "none";
+  document.getElementById("serverListContainer").style.display = "none";
+  document.getElementById("roomsOnlineListContainer").style.display = "none";
+  document.getElementById("roomsOnlineCreation").style.display = "none";
+  document.getElementById("errorRoomCreation").style.display = "none";
+  document.getElementById("gameContainer").style.display = "block";
+  document.getElementById("connectingToServer").style.display = "none";
+  document.getElementById("roomsOnlineJoin").style.display = "none";
+  document.getElementById("authenticationServer").style.display = "none";
 
-    document.getElementById("backToMenuGame").onclick = () => {
-      if(confirm(i18next.t("game.confirmQuit"))) {
-        levelTimer.pause();
-        group.killAll();
-        displayLevelList(player);
-      }
-    };
+  document.getElementById("resultLevels").innerHTML = "";
+  document.getElementById("gameStatus").innerHTML = "";
+  document.getElementById("gameOrder").innerHTML = "";
+  document.getElementById("gameStatusError").innerHTML = "";
 
-    function initGoal() {
-      let lastScorePlayer = 0;
+  document.getElementById("titleGame").innerHTML = i18next.t("levels.level") + " " + level;
 
-      if(levelType == LEVEL_REACH_SCORE) {
-        playerGame.onScoreIncreased(() => {
-          setAddFruitLevelSave(player, playerGame.snakes[0].score - lastScorePlayer);
-          lastScorePlayer = playerGame.snakes[0].score;
+  const group = new GameGroup(games);
+  group.setDebugMode(customSettings.showDebugInfo ? true : false);
+  group.start();
+  group.closeRanking();
 
-          if(playerGame.snakes[0].score >= levelTypeValue) {
-            setLevelSave([true, playerGame.snakes[0].score], level, player, type, serieIndex);
-            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
+  document.getElementById("gameOrder").scrollIntoView();
 
-            if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved")));
-              notificationEndDisplayed = true;
-            }
+  let levelTimer = new Timer(null, 0);
+  let notificationEndDisplayed = false;
+  let notificationStartDisplayed = false;
+  const notifErrorColor = GameConstants.Setting.ERROR_NOTIF_COLOR;
+  const notifInfosColor = GameConstants.Setting.INFO_NOTIF_COLOR;
+  let notifInfo;
+  let textToDisplayGoal;
+
+  document.getElementById("backToMenuGame").onclick = () => {
+    if(confirm(i18next.t("game.confirmQuit"))) {
+      levelTimer.pause();
+      group.killAll();
+      displayLevelList(player);
+    }
+  };
+
+  function initGoal() {
+    let lastScorePlayer = 0;
+
+    if(levelType == LEVEL_REACH_SCORE) {
+      playerGame.onScoreIncreased(() => {
+        setAddFruitLevelSave(player, playerGame.snakes[0].score - lastScorePlayer);
+        lastScorePlayer = playerGame.snakes[0].score;
+
+        if(playerGame.snakes[0].score >= levelTypeValue) {
+          setLevelSave([true, playerGame.snakes[0].score], level, player, type, serieIndex);
+          playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
+
+          if(!notificationEndDisplayed) {
+            playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved")));
+            notificationEndDisplayed = true;
           }
-        });
-
-        playerGame.onStop(() => {
-          lastScorePlayer = 0;
-
-          if(playerGame.snakes[0].score < levelTypeValue) {
-            if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
-              notificationEndDisplayed = true;
-            }
-          }
-        });
-
-        playerGame.onReset(() => {
-          lastScorePlayer = 0;
-        });
-      } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
-        if(levelTypeValue[1] >= 0) {
-          levelTimer = new Timer(() => {
-            playerGame.setTimeToDisplay(0);
-            document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: 0 });
-  
-            if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
-              notificationEndDisplayed = true;
-            }
-  
-            group.stopAll(true);
-          }, levelTypeValue[1] * 1000 - 1, new TimerInterval(() => {
-            document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: Math.round(levelTimer.getTime() / 1000) });
-            playerGame.setTimeToDisplay(Math.round(levelTimer.getTime() / 1000));
-          }));
         }
+      });
 
-        playerGame.onStart(() => {
-          levelTimer.resume();
-        });
+      playerGame.onStop(() => {
+        lastScorePlayer = 0;
 
-        playerGame.onPause(() => {
-          levelTimer.pause();
-        });
-
-        playerGame.onReset(() => {
-          levelTimer.reset();
-        });
-
-        playerGame.onStop(() => {
-          levelTimer.pause();
-        });
-
-        playerGame.onScoreIncreased(() => {
-          if(playerGame.snakes[0].score >= levelTypeValue[0]) {
-            const stop = (levelTypeValue[1] * 1000) - levelTimer.getTime();
-            levelTimer.reset();
-            group.stopAll(true);
-            setLevelSave([true, stop / 1000], level, player, type, serieIndex);
-            setAddFruitLevelSave(player, playerGame.snakes[0].score);
-            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
-
-            if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
-              notificationEndDisplayed = true;
-            }
-          }
-        });
-      } else if(levelType == LEVEL_REACH_MAX_SCORE) {
-        playerGame.onStop(() => {
-          if(playerGame.scoreMax) {
-            setLevelSave([true, playerGame.snakes[0].score], level, player, type, serieIndex);
-            setAddFruitLevelSave(player, playerGame.snakes[0].score);
-            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
-
-            if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
-              notificationEndDisplayed = true;
-            }
-          } else {
-            if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
-              notificationEndDisplayed = true;
-            }
-          }
-        });
-      } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
-        group.onStop(() => {
-          const winners = group.getWinners();
-          let won = false;
-
-          for(let i = 0; i < winners.winners.length; i++) {
-            if(winners.winners[i] == playerGame.snakes[0]) {
-              won = true;
-              setLevelSave([true, playerGame.snakes[0].score], level, player, type, serieIndex);
-              setAddFruitLevelSave(player, playerGame.snakes[0].score);
-              playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
-
-              if(!notificationEndDisplayed) {
-                playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
-                notificationEndDisplayed = true;
-              }
-            }
-          }
-
-          if(!won && !notificationEndDisplayed) {
+        if(playerGame.snakes[0].score < levelTypeValue) {
+          if(!notificationEndDisplayed) {
             playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
             notificationEndDisplayed = true;
           }
-        });
-      } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
-        let time = 0;
+        }
+      });
 
-        const timerInterval = new TimerInterval(() => {
-          time++;
-        });
+      playerGame.onReset(() => {
+        lastScorePlayer = 0;
+      });
+    } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
+      if(levelTypeValue[1] >= 0) {
+        levelTimer = new Timer(() => {
+          playerGame.setTimeToDisplay(0);
+          document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: 0 });
 
-        playerGame.onStart(() => {
-          timerInterval.start();
-        });
+          if(!notificationEndDisplayed) {
+            playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
+            notificationEndDisplayed = true;
+          }
 
-        playerGame.onPause(() => {
-          timerInterval.stop();
-        });
+          group.stopAll(true);
+        }, levelTypeValue[1] * 1000 - 1, new TimerInterval(() => {
+          document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: Math.round(levelTimer.getTime() / 1000) });
+          playerGame.setTimeToDisplay(Math.round(levelTimer.getTime() / 1000));
+        }));
+      }
 
-        playerGame.onReset(() => {
-          time = 0;
-          timerInterval.stop();
-        });
+      playerGame.onStart(() => {
+        levelTimer.resume();
+      });
 
-        playerGame.onStop(() => {
-          timerInterval.stop();
-        });
+      playerGame.onPause(() => {
+        levelTimer.pause();
+      });
 
-        group.onScoreIncreased(() => {
-          for(let i = 0; i < group.games.length; i++) {
-            for(let j = 0; j < group.games[i].snakes.length; j++) {
-              if(group.games[i].snakes[j].score >= levelTypeValue) {
-                if(group.games[i].snakes[j] == playerGame.snakes[0]) {
-                  group.stopAll(true);
-                  setLevelSave([true, time], level, player, type, serieIndex);
-                  setAddFruitLevelSave(player, playerGame.snakes[0].score);
-                  playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
+      playerGame.onReset(() => {
+        levelTimer.reset();
+      });
 
-                  if(!notificationEndDisplayed) {
-                    playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
-                    notificationEndDisplayed = true;
-                  }
-                } else {
-                  group.stopAll(true);
+      playerGame.onStop(() => {
+        levelTimer.pause();
+      });
 
-                  if(!notificationEndDisplayed) {
-                    playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
-                    notificationEndDisplayed = true;
-                  }
+      playerGame.onScoreIncreased(() => {
+        if(playerGame.snakes[0].score >= levelTypeValue[0]) {
+          const stop = (levelTypeValue[1] * 1000) - levelTimer.getTime();
+          levelTimer.reset();
+          group.stopAll(true);
+          setLevelSave([true, stop / 1000], level, player, type, serieIndex);
+          setAddFruitLevelSave(player, playerGame.snakes[0].score);
+          playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
+
+          if(!notificationEndDisplayed) {
+            playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
+            notificationEndDisplayed = true;
+          }
+        }
+      });
+    } else if(levelType == LEVEL_REACH_MAX_SCORE) {
+      playerGame.onStop(() => {
+        if(playerGame.scoreMax) {
+          setLevelSave([true, playerGame.snakes[0].score], level, player, type, serieIndex);
+          setAddFruitLevelSave(player, playerGame.snakes[0].score);
+          playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
+
+          if(!notificationEndDisplayed) {
+            playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
+            notificationEndDisplayed = true;
+          }
+        } else {
+          if(!notificationEndDisplayed) {
+            playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
+            notificationEndDisplayed = true;
+          }
+        }
+      });
+    } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
+      group.onStop(() => {
+        const winners = group.getWinners();
+        let won = false;
+
+        for(let i = 0; i < winners.winners.length; i++) {
+          if(winners.winners[i] == playerGame.snakes[0]) {
+            won = true;
+            setLevelSave([true, playerGame.snakes[0].score], level, player, type, serieIndex);
+            setAddFruitLevelSave(player, playerGame.snakes[0].score);
+            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
+
+            if(!notificationEndDisplayed) {
+              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
+              notificationEndDisplayed = true;
+            }
+          }
+        }
+
+        if(!won && !notificationEndDisplayed) {
+          playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
+          notificationEndDisplayed = true;
+        }
+      });
+    } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
+      let time = 0;
+
+      const timerInterval = new TimerInterval(() => {
+        time++;
+      });
+
+      playerGame.onStart(() => {
+        timerInterval.start();
+      });
+
+      playerGame.onPause(() => {
+        timerInterval.stop();
+      });
+
+      playerGame.onReset(() => {
+        time = 0;
+        timerInterval.stop();
+      });
+
+      playerGame.onStop(() => {
+        timerInterval.stop();
+      });
+
+      group.onScoreIncreased(() => {
+        for(let i = 0; i < group.games.length; i++) {
+          for(let j = 0; j < group.games[i].snakes.length; j++) {
+            if(group.games[i].snakes[j].score >= levelTypeValue) {
+              if(group.games[i].snakes[j] == playerGame.snakes[0]) {
+                group.stopAll(true);
+                setLevelSave([true, time], level, player, type, serieIndex);
+                setAddFruitLevelSave(player, playerGame.snakes[0].score);
+                playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
+
+                if(!notificationEndDisplayed) {
+                  playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
+                  notificationEndDisplayed = true;
+                }
+              } else {
+                group.stopAll(true);
+
+                if(!notificationEndDisplayed) {
+                  playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalNotAchieved"), null, notifErrorColor, null, null, null, null, true));
+                  notificationEndDisplayed = true;
                 }
               }
             }
           }
-        });
-      } else if(levelType == LEVEL_MAZE_WIN) {
-        let time = 0;
+        }
+      });
+    } else if(levelType == LEVEL_MAZE_WIN) {
+      let time = 0;
 
-        const timerInterval = new TimerInterval(() => {
-          time++;
-        });
+      const timerInterval = new TimerInterval(() => {
+        time++;
+      });
 
-        playerGame.onStart(() => {
-          timerInterval.start();
-        });
+      playerGame.onStart(() => {
+        timerInterval.start();
+      });
 
-        playerGame.onPause(() => {
-          timerInterval.stop();
-        });
+      playerGame.onPause(() => {
+        timerInterval.stop();
+      });
 
-        playerGame.onReset(() => {
-          time = 0;
-          timerInterval.stop();
-        });
+      playerGame.onReset(() => {
+        time = 0;
+        timerInterval.stop();
+      });
 
-        playerGame.onStop(() => {
-          timerInterval.stop();
-        });
+      playerGame.onStop(() => {
+        timerInterval.stop();
+      });
 
-        playerGame.onScoreIncreased(() => {
-          if(playerGame.snakes[0].score >= 1) {
-            setLevelSave([true, time], level, player, type, serieIndex);
-            setAddFruitLevelSave(player, Math.round((playerGame.grid.width * playerGame.grid.height) / 50));
-            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
+      playerGame.onScoreIncreased(() => {
+        if(playerGame.snakes[0].score >= 1) {
+          setLevelSave([true, time], level, player, type, serieIndex);
+          setAddFruitLevelSave(player, Math.round((playerGame.grid.width * playerGame.grid.height) / 50));
+          playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
 
-            if(!notificationEndDisplayed) {
-              playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
-              notificationEndDisplayed = true;
-            }
+          if(!notificationEndDisplayed) {
+            playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
+            notificationEndDisplayed = true;
           }
-        });
-      }
+        }
+      });
+    }
+  }
+
+  function displayInfosGoal() {
+    playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
+
+    if(levelType == LEVEL_REACH_SCORE) {
+      textToDisplayGoal = i18next.t("levels.reachScore", { value: levelTypeValue });
+    } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
+      textToDisplayGoal = i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
+      if(levelTypeValue[1] >= 0) document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: levelTypeValue[1] });
+      playerGame.setTimeToDisplay(levelTypeValue[1]);
+    } else if(levelType == LEVEL_REACH_MAX_SCORE) {
+      textToDisplayGoal = i18next.t("levels.reachMaxScore");
+    } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
+      textToDisplayGoal = i18next.t("levels.multiBestScore", { count: numberIA });
+    } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
+      textToDisplayGoal = i18next.t("levels.multiReachScoreFirst", { value: levelTypeValue, count: numberIA });
+    } else if(levelType == LEVEL_MAZE_WIN) {
+      textToDisplayGoal = i18next.t("levels.mazeMode", { value: levelTypeValue, count: numberIA });
     }
 
-    function displayInfosGoal() {
-      playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
+    document.getElementById("gameOrder").innerHTML = textToDisplayGoal.replace("\n", "<br />");
+  }
 
-      if(levelType == LEVEL_REACH_SCORE) {
-        textToDisplayGoal = i18next.t("levels.reachScore", { value: levelTypeValue });
-      } else if(levelType == LEVEL_REACH_SCORE_ON_TIME) {
-        textToDisplayGoal = i18next.t("levels.reachScoreTime", { value: levelTypeValue[0], count: levelTypeValue[1] });
-        if(levelTypeValue[1] >= 0) document.getElementById("gameStatus").innerHTML = i18next.t("levels.timerRemaining", { count: levelTypeValue[1] });
-        playerGame.setTimeToDisplay(levelTypeValue[1]);
-      } else if(levelType == LEVEL_REACH_MAX_SCORE) {
-        textToDisplayGoal = i18next.t("levels.reachMaxScore");
-      } else if(levelType == LEVEL_MULTI_BEST_SCORE) {
-        textToDisplayGoal = i18next.t("levels.multiBestScore", { count: numberIA });
-      } else if(levelType == LEVEL_MULTI_REACH_SCORE_FIRST) {
-        textToDisplayGoal = i18next.t("levels.multiReachScoreFirst", { value: levelTypeValue, count: numberIA });
-      } else if(levelType == LEVEL_MAZE_WIN) {
-        textToDisplayGoal = i18next.t("levels.mazeMode", { value: levelTypeValue, count: numberIA });
-      }
+  initGoal();
+  displayInfosGoal();
 
-      document.getElementById("gameOrder").innerHTML = textToDisplayGoal.replace("\n", "<br />");
-    }
+  group.onExit(() => {
+    levelTimer.pause();
+    group.killAll();
+    displayLevelList(player);
+  });
 
-    initGoal();
+  group.onReset(() => {
+    document.getElementById("resultLevels").innerHTML = "";
+    document.getElementById("gameStatus").innerHTML = "";
+    document.getElementById("gameOrder").innerHTML = "";
+    document.getElementById("gameStatusError").innerHTML = "";
+    notificationEndDisplayed = false;
+    notificationStartDisplayed = false;
     displayInfosGoal();
+  });
 
-    group.onExit(() => {
-      levelTimer.pause();
-      group.killAll();
-      displayLevelList(player);
-    });
-
-    group.onReset(() => {
-      document.getElementById("resultLevels").innerHTML = "";
-      document.getElementById("gameStatus").innerHTML = "";
-      document.getElementById("gameOrder").innerHTML = "";
-      document.getElementById("gameStatusError").innerHTML = "";
-      notificationEndDisplayed = false;
-      notificationStartDisplayed = false;
-      displayInfosGoal();
-    });
-
-    playerGame.onStart(() => {
-      if(destroyAis) {
-        group.destroySnakes([0], [GameConstants.PlayerType.AI]);
-        buyBonus(null, player);
-      }
-    });
-
-    if(!notificationEndDisplayed && !notificationStartDisplayed) {
-      notifInfo = new NotificationMessage(textToDisplayGoal, null, notifInfosColor, 5, null, null, null, true);
-      playerGame.setNotification(notifInfo);
-      playerGame.setGoal(textToDisplayGoal);
-      notificationStartDisplayed = true;
+  playerGame.onStart(() => {
+    if(destroyAis) {
+      group.destroySnakes([0], [GameConstants.PlayerType.AI]);
+      buyBonus(null, player);
     }
-  } else {
-    return false;
+  });
+
+  if(!notificationEndDisplayed && !notificationStartDisplayed) {
+    notifInfo = new NotificationMessage(textToDisplayGoal, null, notifInfosColor, 5, null, null, null, true);
+    playerGame.setNotification(notifInfo);
+    playerGame.setGoal(textToDisplayGoal);
+    notificationStartDisplayed = true;
   }
 };
 
@@ -2748,24 +2754,26 @@ function getListLevel(player, type) {
 
   const serie = levels.series[currentSeriesIndex];
 
-  res += "<div class=\"row mb-3 align-items-center\">";
+  if(serie.levels.length > 1) {
+    res += "<div class=\"row mb-3 align-items-center\">";
 
-  res += "<div class=\"col-2 text-left\">";
-  res += "<button class=\"btn btn-secondary\" onclick=\"changeSeries(" + player + "," + type + ",-1)\">◀</button>";
-  res += "</div>";
+    res += "<div class=\"col-2 text-left\">";
+    res += "<button class=\"btn btn-secondary\" onclick=\"changeSeries(" + player + "," + type + ",-1)\">◀</button>";
+    res += "</div>";
 
-  res += "<div class=\"col-8 text-center\">";
-  res += "<h4>" + i18next.t("levels.waveProgress", {
-    current: currentSeriesIndex + 1,
-    total: levels.series.length
-  }) + "</h4>";
-  res += "</div>";
+    res += "<div class=\"col-8 text-center\">";
+    res += "<h4>" + i18next.t("levels.waveProgress", {
+      current: currentSeriesIndex + 1,
+      total: levels.series.length
+    }) + "</h4>";
+    res += "</div>";
 
-  res += "<div class=\"col-2 text-right\">";
-  res += "<button class=\"btn btn-secondary\" onclick=\"changeSeries(" + player + "," + type + ",1)\">▶</button>";
-  res += "</div>";
+    res += "<div class=\"col-2 text-right\">";
+    res += "<button class=\"btn btn-secondary\" onclick=\"changeSeries(" + player + "," + type + ",1)\">▶</button>";
+    res += "</div>";
 
-  res += "</div>";
+    res += "</div>";
+  }
 
   let index = 1;
   let empty = true;
