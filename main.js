@@ -56,26 +56,33 @@ const LEVEL_TYPES = [LEVEL_REACH_SCORE, LEVEL_REACH_MAX_SCORE, LEVEL_MULTI_BEST_
 // Default levels :
 // Level model : { settings: [heightGrid, widthGrid, borderWalls, generateWalls, sameGrid, speed, progressiveSpeed, aiLevel, numberIA, generateMaze, customGrid, mazeForceAuto, seedGrid, seedGame], type: levelType(see below), typeValue: levelTypeValue(score, time, ...), version: (version min to play the level) }
 window.DEFAULT_LEVELS_SOLO_PLAYER = {
-  1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
-  2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
-  3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 15, version: GameConstants.Setting.APP_VERSION },
-  4: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 60], version: GameConstants.Setting.APP_VERSION },
-  5: { settings: [10, 10, true, false, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
-  6: { settings: [15, 15, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
-  7: { settings: [15, 15, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 45], version: GameConstants.Setting.APP_VERSION },
-  8: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 35, version: GameConstants.Setting.APP_VERSION },
-  9: { settings: [15, 15, false, false, false, null, false, null, 1], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: GameConstants.Setting.APP_VERSION },
-  10: { settings: [10, 10, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [10, 15], version: GameConstants.Setting.APP_VERSION },
-  11: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: GameConstants.Setting.APP_VERSION },
-  12: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: GameConstants.Setting.APP_VERSION },
-  13: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: GameConstants.Setting.APP_VERSION },
-  14: { settings: [20, 20, true, false, true, 5, true, null, 0], type: LEVEL_REACH_SCORE, typeValue: 30, version: GameConstants.Setting.APP_VERSION },
-  15: { settings: [15, 15, false, false, true, null, false, null, 1], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: GameConstants.Setting.APP_VERSION },
-  16: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 75, version: GameConstants.Setting.APP_VERSION },
-  17: { settings: [15, 15, true, false, true, 15, false, null, 2], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: GameConstants.Setting.APP_VERSION },
-  18: { settings: [5, 5, true, false, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: GameConstants.Setting.APP_VERSION },
-  19: { settings: [5, 5, false, true, true, 10, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 10, version: GameConstants.Setting.APP_VERSION },
-  20: { settings: [20, 20, false, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: GameConstants.Setting.APP_VERSION }
+  "series": [
+    {
+      "serieIndex": 0,
+      "levels": {
+        1: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
+        2: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
+        3: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 15, version: GameConstants.Setting.APP_VERSION },
+        4: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 60], version: GameConstants.Setting.APP_VERSION },
+        5: { settings: [10, 10, true, false, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
+        6: { settings: [15, 15, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
+        7: { settings: [15, 15, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [20, 45], version: GameConstants.Setting.APP_VERSION },
+        8: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 35, version: GameConstants.Setting.APP_VERSION },
+        9: { settings: [15, 15, false, false, false, null, false, null, 1], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: GameConstants.Setting.APP_VERSION },
+        10: { settings: [10, 10, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [10, 15], version: GameConstants.Setting.APP_VERSION },
+        11: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: GameConstants.Setting.APP_VERSION },
+        12: { settings: [20, 20, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: GameConstants.Setting.APP_VERSION },
+        13: { settings: [20, 20, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: GameConstants.Setting.APP_VERSION },
+        14: { settings: [20, 20, true, false, true, 5, true, null, 0], type: LEVEL_REACH_SCORE, typeValue: 30, version: GameConstants.Setting.APP_VERSION },
+        15: { settings: [15, 15, false, false, true, null, false, null, 1], type: LEVEL_REACH_SCORE_ON_TIME, typeValue: [15, 60], version: GameConstants.Setting.APP_VERSION },
+        16: { settings: [20, 20, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 75, version: GameConstants.Setting.APP_VERSION },
+        17: { settings: [15, 15, true, false, true, 15, false, null, 2], type: LEVEL_MULTI_BEST_SCORE, typeValue: null, version: GameConstants.Setting.APP_VERSION },
+        18: { settings: [5, 5, true, false, true, 25, false, null, 0], type: LEVEL_REACH_MAX_SCORE, typeValue: null, version: GameConstants.Setting.APP_VERSION },
+        19: { settings: [5, 5, false, true, true, 10, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 10, version: GameConstants.Setting.APP_VERSION },
+        20: { settings: [20, 20, false, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: GameConstants.Setting.APP_VERSION }
+      }
+    }
+  ]
 };
 window.SOLO_PLAYER_SAVE = "snakeia_solo_player_";
 window.DEFAULT_LEVELS_SOLO_AI = DEFAULT_LEVELS_SOLO_PLAYER;
@@ -1917,51 +1924,93 @@ function getTitleSave(player, type) {
   return null;
 }
 
+function migrateSave(save, levels) {
+  if(!save) {
+    return null;
+  }
+
+  if(save.series && Array.isArray(save.series)) {
+    return save;
+  }
+
+  const serieLevels = {};
+
+  if(levels && levels.series && levels.series.length > 0) {
+    const firstSerie = levels.series[0];
+
+    for(const key in firstSerie.levels) {
+      if(Object.prototype.hasOwnProperty.call(firstSerie.levels, key)) {
+        serieLevels[key] = save[key] || [false, 0];
+      }
+    }
+  }
+
+  return {
+    ...save,
+    series: [
+      {
+        serieIndex: 0,
+        levels: serieLevels
+      }
+    ]
+  };
+}
+
 function getSave(player, type) {
-  if(storageGlobal.getItem(getTitleSave(player, type)) == null) {
+  const title = getTitleSave(player, type);
+
+  if(storageGlobal.getItem(title) == null) {
     initSaveLevel(player, type, false);
   }
 
   try {
-    const res = JSON.parse(storageGlobal.getItem(getTitleSave(player, type)));
-    return res;
+    const rawSave = JSON.parse(storageGlobal.getItem(title));
+    const levels = getLevels(player, type);
+    return migrateSave(rawSave, levels);
   } catch(e) {
     console.error(e);
-
     initSaveLevel(player, type, true);
     return getSave(player, type);
   }
 }
 
-function getLevelSave(level, player, type) {
-  return getSave(player, type)[level];
-}
+function getLevelSave(level, player, type, serieIndex = 0) {
+  const save = getSave(player, type);
 
-function setLevelSave(value, level, player, type) {
-  const save = getTitleSave(player, type);
-  const item = getSave(player, type);
-  const levels = getLevels(player, type);
-
-  if(item != null) {
-    if(Array.isArray(value) && value.length >= 2 && Array.isArray(item[level]) && item[level].length >= 2 && item[level][0] == true) {
-      if(levels[level]["type"] != LEVEL_REACH_SCORE_ON_TIME && levels[level]["type"] != LEVEL_MULTI_REACH_SCORE_FIRST && levels[level]["type"] != LEVEL_MAZE_WIN) {
-        if(value[1] < item[level][1]) {
-          value[1] = item[level][1];
-        }
-      } else {
-        if(value[1] > item[level][1]) {
-          value[1] = item[level][1];
-        }
-      }
-    }
-
-    item[level] = value;
-    storageGlobal.setItem(save, JSON.stringify(item));
-
-    return true;
+  if(!save || !save.series || !save.series[serieIndex]) {
+    return null;
   }
 
-  return false;
+  return save.series[serieIndex].levels[level];
+}
+
+function setLevelSave(value, level, player, type, serieIndex = 0) {
+  const saveTitle = getTitleSave(player, type);
+  const save = getSave(player, type);
+  const levels = getLevels(player, type);
+
+  if(!save || !save.series || !save.series[serieIndex]) {
+    return false;
+  }
+
+  const serie = save.series[serieIndex];
+
+  if(Array.isArray(value) && value.length >= 2 && Array.isArray(serie.levels[level]) && serie.levels[level].length >= 2 && serie.levels[level][0] === true) {
+    const lvlData = levels.series[serieIndex].levels[level];
+
+    if(lvlData["type"] != LEVEL_REACH_SCORE_ON_TIME &&
+       lvlData["type"] != LEVEL_MULTI_REACH_SCORE_FIRST &&
+       lvlData["type"] != LEVEL_MAZE_WIN) {
+      if(value[1] < serie.levels[level][1]) value[1] = serie.levels[level][1];
+    } else {
+      if(value[1] > serie.levels[level][1]) value[1] = serie.levels[level][1];
+    }
+  }
+
+  serie.levels[level] = value;
+  storageGlobal.setItem(saveTitle, JSON.stringify(save));
+
+  return true;
 }
 
 function setAddFruitLevelSave(player, score) {
@@ -1983,19 +2032,67 @@ function setAddFruitLevelSave(player, score) {
 }
 
 function initSaveLevel(player, type, force) {
-  if(typeof(Storage) !== "undefined") {
-    const save = getTitleSave(player, type);
-    const item = storageGlobal.getItem(save);
-
-    if(item == null || force) {
-      storageGlobal.setItem(save, JSON.stringify({ version: GameConstants.Setting.APP_VERSION, numFruits: 0, currentBonus: null, unlockAllLevels: false }));
-      setLevelSave([false, 0], 1, player, type);
-    }
-
-    return false;
-  } else {
+  if(typeof(Storage) === "undefined") {
     return false;
   }
+
+  const saveTitle = getTitleSave(player, type);
+  const item = storageGlobal.getItem(saveTitle);
+  const levels = getLevels(player, type);
+
+  if(item == null || force) {
+    const saveStructure = {
+      version: GameConstants.Setting.APP_VERSION,
+      numFruits: 0,
+      currentBonus: null,
+      unlockAllLevels: false,
+      series: []
+    };
+
+    if(levels && levels.series) {
+      for(const serie of levels.series) {
+        const serieLevels = [];
+        
+        for(const key in serie.levels) {
+          if(Object.prototype.hasOwnProperty.call(serie.levels, key)) {
+            serieLevels.push([false, 0]);
+          }
+        }
+
+        saveStructure.series.push({
+          serieIndex: serie.serieIndex,
+          levels: serieLevels
+        });
+      }
+    }
+
+    storageGlobal.setItem(saveTitle, JSON.stringify(saveStructure));
+
+    if(saveStructure.series.length > 0 && saveStructure.series[0].levels.length > 0) {
+      setLevelSave([false, 0], 0, player, type, 0);
+    }
+  }
+
+  return false;
+}
+
+function migrateDownloadedLevels(levels) {
+  if(levels == null) {
+    return null;
+  }
+
+  if(!Object.keys(levels).includes("series")) {
+    const migratedLevels = {
+      series: [{
+        serieIndex: 0,
+        levels
+      }]
+    };
+
+    return migratedLevels;
+  }
+
+  return levels;
 }
 
 function getLevels(player, type) {
@@ -2008,14 +2105,14 @@ function getLevels(player, type) {
   } else if(type == DOWNLOADED_LEVEL) {
     if(player == PLAYER_HUMAN) {
       try {
-        return JSON.parse(storageGlobal.getItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO));
+        return migrateDownloadedLevels(JSON.parse(storageGlobal.getItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO)));
       } catch(e) {
         console.error(e);
         return null;
       }
     } else if(player == PLAYER_AI) {
       try {
-        return JSON.parse(storageGlobal.getItem(SOLO_AI_DOWNLOAD_LEVELS_TO));
+        return migrateDownloadedLevels(JSON.parse(storageGlobal.getItem(SOLO_AI_DOWNLOAD_LEVELS_TO)));
       } catch(e) {
         console.error(e);
         return null;
@@ -2026,7 +2123,7 @@ function getLevels(player, type) {
   return null;
 }
 
-function canPlay(level, player, type) {
+function canPlay(level, player, type, serieIndex = 0) {
   if(customSettings.unlockAllLevels) return true;
   if(getSave(player, DEFAULT_LEVEL).unlockAllLevels) return true;
 
@@ -2038,9 +2135,10 @@ function canPlay(level, player, type) {
   }
 
   for(let i = 1; i < level; i++) {
-    const save = getLevelSave(i, player, type);
+    const save = getLevelSave(i, player, type, serieIndex);
+    const currentLevel = levels.series[serieIndex].levels[i];
 
-    if(save == null || (!save[0] && levelCompatible(levels[i]["type"], levels[i]["version"]))) {
+    if(save == null || (!save[0] && levelCompatible(currentLevel["type"], currentLevel["version"]))) {
       res = false;
     }
   }
@@ -2055,9 +2153,11 @@ function levelCompatible(levelType, version) {
   return isKnownLevelType && isCompatibleVersion;
 }
 
-function printResultLevel(level, player, levelType, type, shortVersion) {
+function printResultLevel(level, player, levelType, type, shortVersion, serieIndex = 0) {
   let val = "";
-  let resultLevel = getLevelSave(level, player, type);
+  let resultLevel = getLevelSave(level, player, type, serieIndex);
+
+  console.log(level, resultLevel);
 
   if(resultLevel == null) {
     return "";
@@ -2086,8 +2186,8 @@ function printResultLevel(level, player, levelType, type, shortVersion) {
   return val;
 }
 
-window.playLevel = (level, player, type) => {
-  const levelSave = getLevelSave(level, player, type);
+window.playLevel = (level, player, type, serieIndex = 0) => {
+  const levelSave = getLevelSave(level, player, type, serieIndex);
   const bonus = getSave(player, DEFAULT_LEVEL)["currentBonus"];
   const levels = getLevels(player, type);
 
@@ -2107,13 +2207,13 @@ window.playLevel = (level, player, type) => {
       return false;
     }
 
-    if(!canPlay(level, player, type)) {
+    if(!canPlay(level, player, type, serieIndex)) {
       alert(i18next.t("levels.disabledLevel"));
       return false;
     }
 
     if(bonus == "BONUS_PASS_LEVEL" && (!levelSave || levelSave[0] != true)) {
-      setLevelSave([true, Array.isArray(levelTypeValue) && levelTypeValue.length >= 2 ? levelTypeValue[1] : levelTypeValue], level, player, type);
+      setLevelSave([true, Array.isArray(levelTypeValue) && levelTypeValue.length >= 2 ? levelTypeValue[1] : levelTypeValue], level, player, type, serieIndex);
       buyBonus(null, player);
       displayLevelList(player);
       return true;
@@ -2269,8 +2369,8 @@ window.playLevel = (level, player, type) => {
           lastScorePlayer = playerGame.snakes[0].score;
 
           if(playerGame.snakes[0].score >= levelTypeValue) {
-            setLevelSave([true, playerGame.snakes[0].score], level, player, type);
-            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
+            setLevelSave([true, playerGame.snakes[0].score], level, player, type, serieIndex);
+            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
 
             if(!notificationEndDisplayed) {
               playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved")));
@@ -2332,9 +2432,9 @@ window.playLevel = (level, player, type) => {
             const stop = (levelTypeValue[1] * 1000) - levelTimer.getTime();
             levelTimer.reset();
             group.stopAll(true);
-            setLevelSave([true, stop / 1000], level, player, type);
+            setLevelSave([true, stop / 1000], level, player, type, serieIndex);
             setAddFruitLevelSave(player, playerGame.snakes[0].score);
-            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
+            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
 
             if(!notificationEndDisplayed) {
               playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
@@ -2345,9 +2445,9 @@ window.playLevel = (level, player, type) => {
       } else if(levelType == LEVEL_REACH_MAX_SCORE) {
         playerGame.onStop(() => {
           if(playerGame.scoreMax) {
-            setLevelSave([true, playerGame.snakes[0].score], level, player, type);
+            setLevelSave([true, playerGame.snakes[0].score], level, player, type, serieIndex);
             setAddFruitLevelSave(player, playerGame.snakes[0].score);
-            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
+            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
 
             if(!notificationEndDisplayed) {
               playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
@@ -2368,9 +2468,9 @@ window.playLevel = (level, player, type) => {
           for(let i = 0; i < winners.winners.length; i++) {
             if(winners.winners[i] == playerGame.snakes[0]) {
               won = true;
-              setLevelSave([true, playerGame.snakes[0].score], level, player, type);
+              setLevelSave([true, playerGame.snakes[0].score], level, player, type, serieIndex);
               setAddFruitLevelSave(player, playerGame.snakes[0].score);
-              playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
+              playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
 
               if(!notificationEndDisplayed) {
                 playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
@@ -2414,9 +2514,9 @@ window.playLevel = (level, player, type) => {
               if(group.games[i].snakes[j].score >= levelTypeValue) {
                 if(group.games[i].snakes[j] == playerGame.snakes[0]) {
                   group.stopAll(true);
-                  setLevelSave([true, time], level, player, type);
+                  setLevelSave([true, time], level, player, type, serieIndex);
                   setAddFruitLevelSave(player, playerGame.snakes[0].score);
-                  playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
+                  playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
 
                   if(!notificationEndDisplayed) {
                     playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
@@ -2460,9 +2560,9 @@ window.playLevel = (level, player, type) => {
 
         playerGame.onScoreIncreased(() => {
           if(playerGame.snakes[0].score >= 1) {
-            setLevelSave([true, time], level, player, type);
+            setLevelSave([true, time], level, player, type, serieIndex);
             setAddFruitLevelSave(player, Math.round((playerGame.grid.width * playerGame.grid.height) / 50));
-            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
+            playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
 
             if(!notificationEndDisplayed) {
               playerGame.setNotification(new NotificationMessage(i18next.t("levels.goalAchieved"), null, null, null, null, null, null, true));
@@ -2474,7 +2574,7 @@ window.playLevel = (level, player, type) => {
     }
 
     function displayInfosGoal() {
-      playerGame.setBestScore(printResultLevel(level, player, levelType, type, true));
+      playerGame.setBestScore(printResultLevel(level, player, levelType, type, true, serieIndex));
 
       if(levelType == LEVEL_REACH_SCORE) {
         textToDisplayGoal = i18next.t("levels.reachScore", { value: levelTypeValue });
@@ -2558,9 +2658,9 @@ window.downloadLevels = (player, button) => {
     .then(response => response.json())
     .then(data => {
       if (player == PLAYER_HUMAN) {
-        storageGlobal.setItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
+        storageGlobal.setItem(SOLO_PLAYER_DOWNLOAD_LEVELS_TO, JSON.stringify(migrateDownloadedLevels(data)));
       } else if (player == PLAYER_AI) {
-        storageGlobal.setItem(SOLO_AI_DOWNLOAD_LEVELS_TO, JSON.stringify(data));
+        storageGlobal.setItem(SOLO_AI_DOWNLOAD_LEVELS_TO, JSON.stringify(migrateDownloadedLevels(data)));
       }
 
       displayLevelList(player);
@@ -2592,6 +2692,46 @@ function getNumberFruits(player) {
   return false;
 }
 
+let currentSeriesIndexHuman = 0;
+let currentSeriesIndexAI = 0;
+
+window.changeSeries = (player, type, delta) => {
+  const levels = getLevels(player, type);
+  
+  if(!levels || !levels.series) {
+    return;
+  }
+
+  if(player === PLAYER_HUMAN) {
+    currentSeriesIndexHuman += delta;
+
+    if(currentSeriesIndexHuman < 0) {
+      currentSeriesIndexHuman = levels.series.length - 1;
+    }
+
+    if(currentSeriesIndexHuman >= levels.series.length) {
+      currentSeriesIndexHuman = 0;
+    }
+  } else {
+    currentSeriesIndexAI += delta;
+
+    if(currentSeriesIndexAI < 0) {
+      currentSeriesIndexAI = levels.series.length - 1;
+    }
+
+    if(currentSeriesIndexAI >= levels.series.length) {
+      currentSeriesIndexAI = 0;
+    }
+  }
+
+
+  if(type == DEFAULT_LEVEL) {
+    document.getElementById("levelListDefault").innerHTML = getListLevel(player, type);
+  } else if(type == DOWNLOADED_LEVEL) {
+    document.getElementById("levelListDownloadPlayer").innerHTML = getListLevel(player, type);
+  }
+};
+
 function getListLevel(player, type) {
   const levels = getLevels(player, type);
   let res = "";
@@ -2600,25 +2740,61 @@ function getListLevel(player, type) {
     res += "<div class=\"row mb-3\"><div class=\"col text-center\"><button class=\"btn btn-lg btn-warning\" onclick=\"downloadLevels(" + player + ", this);\"><span class=\"fui-plus-circle\"></span>&nbsp; " + i18next.t("levels.download") + "</button><br /><a href=\"#null\" onclick=\"editDownloadURL();\" class=\"small\"><span class=\"fui-new\"></span>&nbsp; " + i18next.t("levels.editDownloadURL") + "</a></div></div>";
   }
 
-  if(levels == null) {
+  if(levels == null || !levels.series || levels.series.length == 0) {
     return res + "<strong>" + i18next.t("levels.emptyList") + "</strong>";
   }
+
+  const currentSeriesIndex = player === PLAYER_HUMAN ? currentSeriesIndexHuman : currentSeriesIndexAI;
+
+  const serie = levels.series[currentSeriesIndex];
+
+  res += "<div class=\"row mb-3 align-items-center\">";
+
+  res += "<div class=\"col-2 text-left\">";
+  res += "<button class=\"btn btn-secondary\" onclick=\"changeSeries(" + player + "," + type + ",-1)\">◀</button>";
+  res += "</div>";
+
+  res += "<div class=\"col-8 text-center\">";
+  res += "<h4>" + i18next.t("levels.waveProgress", {
+    current: currentSeriesIndex + 1,
+    total: levels.series.length
+  }) + "</h4>";
+  res += "</div>";
+
+  res += "<div class=\"col-2 text-right\">";
+  res += "<button class=\"btn btn-secondary\" onclick=\"changeSeries(" + player + "," + type + ",1)\">▶</button>";
+  res += "</div>";
+
+  res += "</div>";
 
   let index = 1;
   let empty = true;
 
-  for(const key in levels) {
-    let button;
+  for(const key in serie.levels) {
+    if(Object.prototype.hasOwnProperty.call(serie.levels, key)) {
+      let button;
 
-    if(Object.prototype.hasOwnProperty.call(levels, key)) {
-      if(!canPlay(key, player, type)) {
-        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" disabled aria-label=\"" + i18next.t("levels.disabledLevel") + "\" data-balloon-length=\"fit\" data-balloon-pos=\"up\">" + i18next.t("levels.level") + " " + index + "</button>";
-      } else if(!levelCompatible(levels[key]["type"], levels[key]["version"])) {
-        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" disabled aria-label=\"" + i18next.t("levels.notCompatible") + "\" data-balloon-length=\"fit\" data-balloon-pos=\"up\">" + i18next.t("levels.level") + " " + index + "</button>";
+      if(!canPlay(key, player, type, currentSeriesIndex)) {
+        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" disabled aria-label=\""
+          + i18next.t("levels.disabledLevel") + "\">"
+          + i18next.t("levels.level") + " " + index
+          + "</button>";
+      } else if(!levelCompatible(serie.levels[key]["type"], serie.levels[key]["version"])) {
+        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" disabled aria-label=\""
+          + i18next.t("levels.notCompatible") + "\">"
+          + i18next.t("levels.level") + " " + index
+          + "</button>";
       } else {
-        const resultLevel = printResultLevel(key, player, levels[key]["type"], type);
+        const resultLevel = printResultLevel(key, player, serie.levels[key]["type"], type, false, currentSeriesIndex);
 
-        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" onclick=\"playLevel(" + key + ", " + player  + ", " + type + ");\" " + (resultLevel.trim() != "" ? "aria-label=\"" + printResultLevel(key, player, levels[key]["type"], type) + "\" data-balloon-length=\"fit\" data-balloon-pos=\"up\"" : "") + ">" + i18next.t("levels.level") + " " + index + "</button>";
+        button = "<button class=\"btn btn-lg btn-primary btn-block-85\" onclick=\"playLevel("
+          + key + "," + player + "," + type + "," + currentSeriesIndex + ");\" "
+          + (resultLevel.trim() != "" 
+            ? "aria-label=\"" + resultLevel + "\" data-balloon-length=\"fit\" data-balloon-pos=\"up\"" 
+            : "")
+          + ">"
+          + i18next.t("levels.level") + " " + index
+          + "</button>";
       }
 
       if(index == 1) {
@@ -2626,15 +2802,18 @@ function getListLevel(player, type) {
       }
 
       if(index % 2 == 0) {
-        res += "<div class=\"col pl-0 justify-content-center\">" + button + "</div></div><div class=\"row mb-2\">";
+        res += "<div class=\"col pl-0 justify-content-center\">" 
+          + button 
+          + "</div></div><div class=\"row mb-2\">";
       } else {
-        res += "<div class=\"col pr-0 justify-content-center\">" + button + "</div>";
+        res += "<div class=\"col pr-0 justify-content-center\">" 
+          + button 
+          + "</div>";
       }
 
       empty = false;
+      index++;
     }
-
-    index++;
   }
 
   if(empty) {
@@ -2642,7 +2821,7 @@ function getListLevel(player, type) {
   }
 
   if(index % 2 == 0) {
-    res += "<div class=\"col pr-0 justify-content-center\"></div>";
+    res += "<div class=\"col pr-0\"></div>";
   }
 
   return res + "</div>";

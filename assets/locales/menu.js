@@ -222,7 +222,8 @@ i18next.addResourceBundle("fr", "translation", {
       "unknownInfo": "Ce bonus est inconnu. Peut-être a-t-il été acheté sur une version plus récente du jeu. Voulez-vous le vendre quand même, sachant que son prix est inconnu ? Autrement dit, vous ne serez pas remboursé.",
       "noTimeLimit": "Pas de limite de temps",
       "noTimeLimitInfo": "Désactive la limite de temps pour les niveaux qui en ont une."
-    }
+    },
+    "waveProgress": "Vague {{current}} / {{total}}"
   },
   "servers": {
     "serverList": "Liste des serveurs",
@@ -583,7 +584,8 @@ i18next.addResourceBundle("en", "translation", {
       "unknownInfo": "This bonus is unknown. Perhaps it was purchased on a newer version of the game. Do you want to sell it anyway, knowing that its price is unknown? In other words, you will not be refunded.",
       "noTimeLimit": "No time limit",
       "noTimeLimitInfo": "Disables the time limit for levels that have one."
-    }
+    },
+    "waveProgress": "Serie {{current}} / {{total}}"
   },
   "servers": {
     "serverList": "Servers list",
