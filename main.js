@@ -2758,7 +2758,7 @@ const currentSeriesIndex = {};
 
 window.changeSeries = (player, type, delta) => {
   const levels = getLevels(player, type);
-  
+
   if(!levels || !levels.series) {
     return;
   }
@@ -2784,7 +2784,11 @@ window.changeSeries = (player, type, delta) => {
   if(type === DEFAULT_LEVEL) {
     document.getElementById("levelListDefault").innerHTML = getListLevel(player, type);
   } else if (type === DOWNLOADED_LEVEL) {
-    document.getElementById("levelListDownloadPlayer").innerHTML = getListLevel(player, type);
+    if(player === PLAYER_HUMAN) {
+      document.getElementById("levelListDownloadPlayer").innerHTML = getListLevel(player, type);
+    } else if(player === PLAYER_AI) {
+      document.getElementById("levelListDownloadAI").innerHTML = getListLevel(player, type);
+    }
   }
 };
 
