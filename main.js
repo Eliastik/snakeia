@@ -2400,7 +2400,7 @@ window.playLevel = (level, player, type, serieIndex = 0) => {
   document.getElementById("gameOrder").innerHTML = "";
   document.getElementById("gameStatusError").innerHTML = "";
 
-  document.getElementById("titleGame").innerHTML = i18next.t("levels.wave") + " " + serieIndex + " – " + i18next.t("levels.level") + " " + level;
+  document.getElementById("titleGame").innerHTML = i18next.t("levels.wave") + " " + (serieIndex + 1) + " – " + i18next.t("levels.level") + " " + level;
 
   const group = new GameGroup(games);
   group.setDebugMode(customSettings.showDebugInfo ? true : false);
