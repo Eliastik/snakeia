@@ -81,6 +81,14 @@ window.DEFAULT_LEVELS_SOLO_PLAYER = {
         19: { settings: [5, 5, false, true, true, 10, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 10, version: GameConstants.Setting.APP_VERSION },
         20: { settings: [20, 20, false, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 50, version: GameConstants.Setting.APP_VERSION }
       }
+    },
+    {
+      "serieIndex": 1,
+      "levels": {
+        1: { settings: [10, 10, false, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
+        2: { settings: [10, 10, true, false, true, null, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 20, version: GameConstants.Setting.APP_VERSION },
+        3: { settings: [10, 10, true, true, true, 15, false, null, 0], type: LEVEL_REACH_SCORE, typeValue: 15, version: GameConstants.Setting.APP_VERSION }
+      }
     }
   ]
 };
@@ -1941,6 +1949,7 @@ function migrateSave(save, levels) {
     for(const key in firstSerie.levels) {
       if(Object.prototype.hasOwnProperty.call(firstSerie.levels, key)) {
         serieLevels[key] = save[key] || [false, 0];
+        delete save[key];
       }
     }
   }
@@ -1952,7 +1961,8 @@ function migrateSave(save, levels) {
         serieIndex: 0,
         levels: serieLevels
       }
-    ]
+    ],
+    version: GameConstants.Setting.APP_VERSION
   };
 }
 
@@ -1977,8 +1987,25 @@ function getSave(player, type) {
 function getLevelSave(level, player, type, serieIndex = 0) {
   const save = getSave(player, type);
 
-  if(!save || !save.series || !save.series[serieIndex]) {
+  console.log(save);
+
+  if(!save) {
     return null;
+  }
+
+  if(!save.series) {
+    save.series = [];
+  }
+
+  if(!save.series[serieIndex]) {
+    save.series[serieIndex] = {
+      serieIndex: serieIndex + 1,
+      levels: {}
+    };
+  }
+
+  if(!save.series[serieIndex].levels[level]) {
+    save.series[serieIndex].levels[level] = [false, 0];
   }
 
   return save.series[serieIndex].levels[level];
@@ -1989,25 +2016,49 @@ function setLevelSave(value, level, player, type, serieIndex = 0) {
   const save = getSave(player, type);
   const levels = getLevels(player, type);
 
-  if(!save || !save.series || !save.series[serieIndex]) {
+  if(!save) {
     return false;
+  }
+
+  if(!save.series) {
+    save.series = [];
+  }
+
+  if(!save.series[serieIndex]) {
+    save.series[serieIndex] = {
+      serieIndex: serieIndex + 1,
+      levels: {}
+    };
   }
 
   const serie = save.series[serieIndex];
 
-  if(Array.isArray(value) && value.length >= 2 && Array.isArray(serie.levels[level]) && serie.levels[level].length >= 2 && serie.levels[level][0] === true) {
+  if(!serie.levels[level]) {
+    serie.levels[level] = [false,0];
+  }
+
+  if(Array.isArray(value) &&
+     value.length >= 2 &&
+     Array.isArray(serie.levels[level]) &&
+     serie.levels[level][0] === true) {
     const lvlData = levels.series[serieIndex].levels[level];
 
-    if(lvlData["type"] != LEVEL_REACH_SCORE_ON_TIME &&
-       lvlData["type"] != LEVEL_MULTI_REACH_SCORE_FIRST &&
-       lvlData["type"] != LEVEL_MAZE_WIN) {
-      if(value[1] < serie.levels[level][1]) value[1] = serie.levels[level][1];
+    if(lvlData.type != LEVEL_REACH_SCORE_ON_TIME &&
+       lvlData.type != LEVEL_MULTI_REACH_SCORE_FIRST &&
+       lvlData.type != LEVEL_MAZE_WIN) {
+
+      if(value[1] < serie.levels[level][1]) {
+        value[1] = serie.levels[level][1];
+      }
     } else {
-      if(value[1] > serie.levels[level][1]) value[1] = serie.levels[level][1];
+      if(value[1] > serie.levels[level][1]) {
+        value[1] = serie.levels[level][1];
+      }
     }
   }
 
   serie.levels[level] = value;
+
   storageGlobal.setItem(saveTitle, JSON.stringify(save));
 
   return true;
@@ -2051,11 +2102,11 @@ function initSaveLevel(player, type, force) {
 
     if(levels && levels.series) {
       for(const serie of levels.series) {
-        const serieLevels = [];
+        const serieLevels = {};
         
         for(const key in serie.levels) {
           if(Object.prototype.hasOwnProperty.call(serie.levels, key)) {
-            serieLevels.push([false, 0]);
+            serieLevels[key] = [false, 0];
           }
         }
 
@@ -2344,7 +2395,7 @@ window.playLevel = (level, player, type, serieIndex = 0) => {
   document.getElementById("gameOrder").innerHTML = "";
   document.getElementById("gameStatusError").innerHTML = "";
 
-  document.getElementById("titleGame").innerHTML = i18next.t("levels.level") + " " + level;
+  document.getElementById("titleGame").innerHTML = i18next.t("levels.wave") + " " + serieIndex + " – " + i18next.t("levels.level") + " " + level;
 
   const group = new GameGroup(games);
   group.setDebugMode(customSettings.showDebugInfo ? true : false);
@@ -2762,9 +2813,8 @@ function getListLevel(player, type) {
   }
 
   const currentSeriesIndex = player === PLAYER_HUMAN ? currentSeriesIndexHuman : currentSeriesIndexAI;
-  const serie = levels.series[currentSeriesIndex];
 
-  if(serie.levels.length > 1) {
+  if(levels.series.length > 1) {
     res += `
       <div class="row mb-3 align-items-center">
         <div class="col-2 text-left">
@@ -2783,7 +2833,13 @@ function getListLevel(player, type) {
     `;
   }
 
-  let index = 1;
+  const serie = levels.series[currentSeriesIndex];
+
+  if(!serie || !serie.levels) {
+    return res + `<strong>${i18next.t("levels.emptyList")}</strong>`;
+  }
+
+  let levelIndex = 1;
   let empty = true;
 
   for(const key in serie.levels) {
@@ -2794,12 +2850,12 @@ function getListLevel(player, type) {
       if(!canPlay(key, player, type, currentSeriesIndex)) {
         button = `<button class="btn btn-lg btn-primary d-inline-block" disabled style="min-width: 170px;"
           aria-label="${i18next.t("levels.disabledLevel")}" data-balloon-length="fit" data-balloon-pos="up">
-            ${i18next.t("levels.level")} ${index}
+            ${i18next.t("levels.level")} ${levelIndex}
         </button>`;
       } else if(!levelCompatible(levelData.type, levelData.version)) {
         button = `<button class="btn btn-lg btn-primary d-inline-block" disabled style="min-width: 170px;"
           aria-label="${i18next.t("levels.notCompatible")}" data-balloon-length="fit" data-balloon-pos="up">
-            ${i18next.t("levels.level")} ${index}
+            ${i18next.t("levels.level")} ${levelIndex}
         </button>`;
       } else {
         const resultLevel = printResultLevel(key, player, levelData.type, type, false, currentSeriesIndex);
@@ -2807,11 +2863,11 @@ function getListLevel(player, type) {
         button = `<button class="btn btn-lg btn-primary d-inline-block" style="min-width: 170px;"
           onclick="playLevel(${key}, ${player}, ${type}, ${currentSeriesIndex});"
           ${resultLevel.trim() !== "" ? `aria-label="${resultLevel}" data-balloon-length="fit" data-balloon-pos="up"` : ""}>
-            ${i18next.t("levels.level")} ${index}
+            ${i18next.t("levels.level")} ${levelIndex}
         </button>`;
       }
 
-      if(index % 2 === 1) {
+      if(levelIndex % 2 === 1) {
         res += "<div class=\"row mb-2\">";
         res += `<div class="col pr-0 justify-content-center">${button}</div>`;
       } else {
@@ -2819,11 +2875,11 @@ function getListLevel(player, type) {
       }
 
       empty = false;
-      index++;
+      levelIndex++;
     }
   }
 
-  if((index - 1) % 2 === 1) {
+  if((levelIndex - 1) % 2 === 1) {
     res += "<div class=\"col pl-0 justify-content-center\"></div></div>";
   }
 

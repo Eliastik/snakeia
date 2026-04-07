@@ -223,7 +223,8 @@ i18next.addResourceBundle("fr", "translation", {
       "noTimeLimit": "Pas de limite de temps",
       "noTimeLimitInfo": "Désactive la limite de temps pour les niveaux qui en ont une."
     },
-    "waveProgress": "Vague {{current}} / {{total}}"
+    "waveProgress": "Vague {{current}} / {{total}}",
+    "wave": "Vague"
   },
   "servers": {
     "serverList": "Liste des serveurs",
@@ -585,7 +586,8 @@ i18next.addResourceBundle("en", "translation", {
       "noTimeLimit": "No time limit",
       "noTimeLimitInfo": "Disables the time limit for levels that have one."
     },
-    "waveProgress": "Serie {{current}} / {{total}}"
+    "waveProgress": "Serie {{current}} / {{total}}",
+    "wave": "Serie"
   },
   "servers": {
     "serverList": "Servers list",
