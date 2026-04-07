@@ -2754,8 +2754,7 @@ function getNumberFruits(player) {
   return false;
 }
 
-let currentSeriesIndexHuman = 0;
-let currentSeriesIndexAI = 0;
+const currentSeriesIndex = {};
 
 window.changeSeries = (player, type, delta) => {
   const levels = getLevels(player, type);
@@ -2764,35 +2763,42 @@ window.changeSeries = (player, type, delta) => {
     return;
   }
 
-  if(player === PLAYER_HUMAN) {
-    currentSeriesIndexHuman += delta;
-
-    if(currentSeriesIndexHuman < 0) {
-      currentSeriesIndexHuman = levels.series.length - 1;
-    }
-
-    if(currentSeriesIndexHuman >= levels.series.length) {
-      currentSeriesIndexHuman = 0;
-    }
-  } else {
-    currentSeriesIndexAI += delta;
-
-    if(currentSeriesIndexAI < 0) {
-      currentSeriesIndexAI = levels.series.length - 1;
-    }
-
-    if(currentSeriesIndexAI >= levels.series.length) {
-      currentSeriesIndexAI = 0;
-    }
+  if(!currentSeriesIndex[player]) {
+    currentSeriesIndex[player] = {};
   }
 
+  if(currentSeriesIndex[player][type] == null) {
+    currentSeriesIndex[player][type] = 0;
+  }
 
-  if(type == DEFAULT_LEVEL) {
+  currentSeriesIndex[player][type] += delta;
+
+  if(currentSeriesIndex[player][type] < 0) {
+    currentSeriesIndex[player][type] = levels.series.length - 1;
+  }
+
+  if(currentSeriesIndex[player][type] >= levels.series.length) {
+    currentSeriesIndex[player][type] = 0;
+  }
+
+  if(type === DEFAULT_LEVEL) {
     document.getElementById("levelListDefault").innerHTML = getListLevel(player, type);
-  } else if(type == DOWNLOADED_LEVEL) {
+  } else if (type === DOWNLOADED_LEVEL) {
     document.getElementById("levelListDownloadPlayer").innerHTML = getListLevel(player, type);
   }
 };
+
+function getCurrentSeriesIndex(player, type) {
+  if(!currentSeriesIndex[player]) {
+    return 0;
+  }
+
+  if(currentSeriesIndex[player][type] == null) {
+    return 0;
+  }
+
+  return currentSeriesIndex[player][type];
+}
 
 function getListLevel(player, type) {
   const levels = getLevels(player, type);
@@ -2817,7 +2823,7 @@ function getListLevel(player, type) {
     return res + `<strong>${i18next.t("levels.emptyList")}</strong>`;
   }
 
-  const currentSeriesIndex = player === PLAYER_HUMAN ? currentSeriesIndexHuman : currentSeriesIndexAI;
+  const currentSeriesIndex = getCurrentSeriesIndex(player, type);
 
   if(levels.series.length > 1) {
     res += `
