@@ -1976,20 +1976,21 @@ function getSave(player, type) {
   try {
     const rawSave = JSON.parse(storageGlobal.getItem(title));
     const levels = getLevels(player, type);
+
     return migrateSave(rawSave, levels);
   } catch(e) {
     console.error(e);
     initSaveLevel(player, type, true);
+
     return getSave(player, type);
   }
 }
 
 function getLevelSave(level, player, type, serieIndex = 0) {
   const save = getSave(player, type);
+  const levels = getLevels(player, type);
 
-  console.log(save);
-
-  if(!save) {
+  if(!save || !levels || !levels.series) {
     return null;
   }
 
@@ -1997,18 +1998,29 @@ function getLevelSave(level, player, type, serieIndex = 0) {
     save.series = [];
   }
 
-  if(!save.series[serieIndex]) {
-    save.series[serieIndex] = {
-      serieIndex: serieIndex + 1,
-      levels: {}
-    };
+  if(!save.series[serieIndex] || !save.series[serieIndex].levels || Object.keys(save.series[serieIndex].levels).length === 0) {
+    initSerieLevelsSave(levels, serieIndex, save);
   }
 
-  if(!save.series[serieIndex].levels[level]) {
+  if(!save.series[serieIndex].levels[level]){
     save.series[serieIndex].levels[level] = [false, 0];
   }
 
   return save.series[serieIndex].levels[level];
+}
+
+function initSerieLevelsSave(levels, serieIndex, save) {
+  const levelsSave = {};
+  const levelKeys = Object.keys(levels.series[serieIndex].levels);
+
+  for(const key of levelKeys) {
+    levelsSave[key] = [false, 0];
+  }
+
+  save.series[serieIndex] = {
+    serieIndex,
+    levels: levelsSave
+  };
 }
 
 function setLevelSave(value, level, player, type, serieIndex = 0) {
@@ -2024,17 +2036,14 @@ function setLevelSave(value, level, player, type, serieIndex = 0) {
     save.series = [];
   }
 
-  if(!save.series[serieIndex]) {
-    save.series[serieIndex] = {
-      serieIndex: serieIndex + 1,
-      levels: {}
-    };
+  if(!save.series[serieIndex] || !save.series[serieIndex].levels || Object.keys(save.series[serieIndex].levels).length === 0) {
+    initSerieLevelsSave(levels, serieIndex, save);
   }
 
   const serie = save.series[serieIndex];
 
   if(!serie.levels[level]) {
-    serie.levels[level] = [false,0];
+    serie.levels[level] = [false, 0];
   }
 
   if(Array.isArray(value) &&
@@ -2118,10 +2127,6 @@ function initSaveLevel(player, type, force) {
     }
 
     storageGlobal.setItem(saveTitle, JSON.stringify(saveStructure));
-
-    if(saveStructure.series.length > 0 && saveStructure.series[0].levels.length > 0) {
-      setLevelSave([false, 0], 0, player, type, 0);
-    }
   }
 
   return false;
