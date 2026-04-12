@@ -78,7 +78,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.learningRate = 0.0001;
     this.batchSize = 256;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
-    this.maxMemoryLength = 50000;
+    this.maxMemoryLength = 30000;
     this.nStep = 3;
     this.frameStackSize = 4; // Number of frames to stack (1 = disabled)
     this.softTargetUpdatesCoefficient = 0.005;
@@ -361,10 +361,15 @@ export default class SnakeAIUltra extends SnakeAI {
 
   // For a batch call: statesBatch is [N,H,W,C], envFeaturesArr is Array(N)
   wrapInputBatch(statesBatch, envFeaturesArr) {
-    if(!this.enableEnvEmbedding) return statesBatch;
+    if(!this.enableEnvEmbedding) {
+      return statesBatch;
+    }
+
     const rows = envFeaturesArr.map(f => this.envFeaturesToArray(f ?? this.currentEnvFeatures ?? this.neutralEnvFeatures()));
     const flat = new Float32Array(rows.length * this.envFeatureSize);
+
     rows.forEach((r, i) => flat.set(r, i * this.envFeatureSize));
+
     return [statesBatch, tf.tensor2d(flat, [rows.length, this.envFeatureSize], this.dtype)];
   }
 
@@ -733,25 +738,48 @@ export default class SnakeAIUltra extends SnakeAI {
 
   stateToTensor(stateArray) {
     if(stateArray?.data) {
-      let data;
+      let float32Data;
 
       if(stateArray.data instanceof Float32Array) {
-        // Memory already stored as Float32Array format
-        data = stateArray.data;
+        float32Data = stateArray.data;
       } else if(stateArray.data instanceof Uint8Array) {
-        // Memory already stored as Uint8Array format (msgpack)
-        const bytes = stateArray.data;
-        const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
-        data = new Float32Array(buffer);
+        const expectedValues = stateArray.width * stateArray.height * stateArray.channels;
+
+        if(stateArray.data.length === expectedValues) {
+          // From raw Uint8Array (no msgpack, no saved memory)
+          float32Data = new Float32Array(stateArray.data.length);
+          for(let i = 0; i < stateArray.data.length; i++) {
+            float32Data[i] = stateArray.data[i] - 1;
+          }
+        } else {
+          // From msgpack (saved memory)
+          const buf = stateArray.data.buffer.slice(
+            stateArray.data.byteOffset,
+            stateArray.data.byteOffset + stateArray.data.byteLength
+          );
+
+          float32Data = new Float32Array(buf);
+        }
       }
 
-      return tf.tensor(data, [stateArray.height, stateArray.width, stateArray.channels], this.dtype);
+      return tf.tensor(float32Data, [stateArray.height, stateArray.width, stateArray.channels], this.dtype);
     }
 
     // 2D format from getState (no frame stacking, or old memory)
     const { data, width: targetWidth, height: targetHeight, channels } = this.stateToFlatArray(stateArray);
+    let float32Data;
 
-    return tf.tensor(data, [targetHeight, targetWidth, channels], this.dtype);
+    if(data instanceof Uint8Array) {
+      float32Data = new Float32Array(data.length);
+      
+      for(let i = 0; i < data.length; i++) {
+        float32Data[i] = data[i] - 1;
+      }
+    } else {
+      float32Data = data;
+    }
+
+    return tf.tensor(float32Data, [targetHeight, targetWidth, channels], this.dtype);
   }
 
   stateToFlatArray(stateArray) {
@@ -761,14 +789,12 @@ export default class SnakeAIUltra extends SnakeAI {
     const firstChannel = layers[0];
     const inputHeight = firstChannel.length;
     const inputWidth = firstChannel[0].length;
-
     const targetHeight = this.enableVariableInputSize ? inputHeight : this.modelHeight;
     const targetWidth = this.enableVariableInputSize ? inputWidth : this.modelWidth;
-
     const channels = layers.length;
 
-    const padValue = -1;
-    const data = new Float32Array(targetHeight * targetWidth * channels);
+    const padValue = 0;
+    const data = new Uint8Array(targetHeight * targetWidth * channels);
 
     for(let y = 0; y < targetHeight; y++) {
       for(let x = 0; x < targetWidth; x++) {
@@ -776,12 +802,18 @@ export default class SnakeAIUltra extends SnakeAI {
         const isInside = y < inputHeight && x < inputWidth;
 
         for(let c = 0; c < channels; c++) {
-          data[index + c] = isInside ? layers[c][y][x] : padValue;
+          data[index + c] = isInside ? layers[c][y][x] + 1 : padValue;
         }
       }
     }
 
-    return { data, width: targetWidth, height: targetHeight, channels, headDirection: stateArray.headDirection };
+    return {
+      data,
+      width: targetWidth,
+      height: targetHeight,
+      channels,
+      headDirection: stateArray.headDirection
+    };
   }
 
   findPositionInState(stateArray, targetValue) {
@@ -1132,9 +1164,14 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   synchronizeTargetNetwork(forceHardTargetUpdates = false) {
-    if(this.enableDoubleDQN) {
+    if(!this.enableDoubleDQN) {
+      return;
+    }
+
+    tf.tidy(() => {
+      const mainWeights = this.mainModel.getWeights();
+
       if(!forceHardTargetUpdates && this.enableSoftTargetUpdates) {
-        const mainWeights = this.mainModel.getWeights();
         const targetWeights = this.targetModel.getWeights();
 
         const updatedWeights = mainWeights.map((w, i) =>
@@ -1142,13 +1179,17 @@ export default class SnakeAIUltra extends SnakeAI {
         );
 
         this.targetModel.setWeights(updatedWeights);
+
+        // Cleanup tensors
         updatedWeights.forEach(w => w.dispose());
       } else {
         this.logger.info("Synchronizing target network...\n");
-        this.targetModel.setWeights(this.mainModel.getWeights());
+        
+        this.targetModel.setWeights(mainWeights);
+        
         this.logger.info("Target network synchronized!\n");
       }
-    }
+    });
   }
 
   // eslint-disable-next-line no-unused-vars

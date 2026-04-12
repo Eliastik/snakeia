@@ -20,7 +20,7 @@ const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE"];
-const NUM_EPISODES_PER_TYPE     = 2000;
+const NUM_EPISODES_PER_TYPE     = 50;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 30;
 const MAX_TICKS                 = 1000;
@@ -37,11 +37,11 @@ const GRID_SEED                 = 2;
 const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
-const EXPORT_MEMORY             = false;
+const EXPORT_MEMORY             = true;
 const LOAD_MODEL_PATH           = null;
 const LOAD_HYPERPARAMETERS      = false;
-const LOAD_MEMORY               = false;
-const NUM_PARALLEL_ENVS         = 1;
+const LOAD_MEMORY               = true;
+const NUM_PARALLEL_ENVS         = 3;
 // End of settings
 
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
