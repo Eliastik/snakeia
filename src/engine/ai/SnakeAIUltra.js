@@ -68,7 +68,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.enableNStepsLearning = true; // Enable N-Steps learning
     this.enableDataAugmentation = true; // Enable automatic data augmentation
     this.enableActionMasking = true; // Enable Action Masking (avoid dead actions)
-    this.enableEnvEmbedding = true; // Enable Environment Embedding (pass env features to model)
+    this.enableEnvEmbedding = false; // Enable Environment Embedding (pass env features to model)
 
     // Hyperparameters
     this.gamma = 0.99;
@@ -78,7 +78,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.learningRate = 0.0001;
     this.batchSize = 256;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
-    this.maxMemoryLength = 30000;
+    this.maxMemoryLength = 20000;
     this.nStep = 3;
     this.frameStackSize = 4; // Number of frames to stack (1 = disabled)
     this.softTargetUpdatesCoefficient = 0.005;

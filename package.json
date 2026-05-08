@@ -1,6 +1,6 @@
 {
   "name": "snakeia",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "A Snake version with an artificial intelligence. This version has many game modes. You can play against the AI, or let it play alone. A Battle Royale mode is also available, this mode sees between 2 and 100 AI fight! Many settings are available to vary the games. A Levels mode (for the player and the AI) is also available, it's a series of level with a particular goal to achieve (get a minimum score, get a score in time, …). Downloadable levels are available.",
   "main": "dist/SnakeIA-node.js",
   "scripts": {
@@ -39,33 +39,33 @@
     "@babel/core": "^7.29.0",
     "@babel/eslint-parser": "^7.28.6",
     "@babel/plugin-transform-runtime": "^7.29.0",
-    "@babel/preset-env": "^7.29.2",
+    "@babel/preset-env": "^7.29.5",
     "@babel/runtime": "^7.29.2",
     "@eslint/js": "^9.39.2",
     "@msgpack/msgpack": "^3.1.3",
     "@tensorflow/tfjs-node-gpu": "^4.22.0",
-    "babel-jest": "^30.3.0",
+    "babel-jest": "^30.4.1",
     "babel-loader": "^10.1.1",
     "cli-progress": "^3.12.0",
     "eslint": "^9.39.2",
-    "eslint-webpack-plugin": "^5.0.3",
-    "globals": "^17.4.0",
-    "jest": "^30.3.0",
-    "jest-environment-jsdom": "^30.3.0",
-    "webpack": "^5.105.4",
+    "eslint-webpack-plugin": "^6.0.0",
+    "globals": "^17.6.0",
+    "jest": "^30.4.1",
+    "jest-environment-jsdom": "^30.4.1",
+    "webpack": "^5.106.2",
     "webpack-cli": "^7.0.2",
     "webpack-dev-server": "^5.2.3"
   },
   "dependencies": {
     "@tensorflow/tfjs-node": "^4.22.0",
     "chroma-js": "^3.2.0",
-    "i18next": "^25.10.10",
+    "i18next": "^26.0.10",
     "i18next-browser-languagedetector": "^8.2.1",
     "jsgametools": "0.0.1",
     "seedrandom": "^3.0.5",
     "semver": "^7.7.4",
     "socket.io-client": "~4.8.3",
-    "three": "^0.183.2"
+    "three": "^0.184.0"
   },
   "overrides": {
     "@tensorflow/tfjs-node": {

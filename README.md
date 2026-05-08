@@ -28,8 +28,8 @@ Other AI modes include:
 
 ## About this game
 
-* Version: 3.1.0
-* Version date: 02/22/2026
+* Version: 3.2.0
+* Version date: 05/08/2026
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * License: GNU GPLv3 (see LICENCE.txt file)
 
@@ -48,6 +48,53 @@ Other AI modes include:
 * Uses a 3D model of an apple created by [bariacg](https://sketchfab.com/bariacg), available on [Sketchfab website](https://sketchfab.com/3d-models/apple-8cc60d44baec49558156ac767839c2ed), licensed under [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## Changelog
+
+* Version 3.2.0 (05/08/2026):
+  - Gameplay improvements:
+    - The number of apples available on the grid now depends on the number of living Snakes on the grid (up to 5 apples at once). Previously, only 1 apple could spawn per grid;
+  - Improvements to the Ultra AI (still in preview) with the implementation of new AI techniques. New models based on these improvements will be available soon:
+    - Added state rotation (rotates the grid according to the direction of the controlled Snake’s head);
+    - Added frame stacking (feeds the model with the history of the last X game frames);
+    - Added data augmentation (stores rotated versions of game states);
+    - Added N-Step Learning (one more step toward Rainbow DQN);
+    - Added action masking (prevents the model from selecting deadly actions);
+    - Added Soft Target Update (for Double DQN);
+    - Added environment embedding (feeds environmental information into the model);
+    - Added parallel training (multiple games running simultaneously), significantly speeding up model training;
+    - Fixed the Double DQN implementation;
+    - Improved reward calculation;
+    - Optimized the model architecture;
+    - Optimized memory storage with compression, msgpack usage, and UInt8 memory storage for reduced memory usage;
+  - Added support for multiple series in Level mode;
+  - Improved the Low and High AI difficulties with a better heuristic algorithm;
+  - Fixed blocked AI detection;
+  - The game rendering resolution is now adapted for high-DPI displays (such as mobile devices):
+    - Rendering is now sharper on these devices;
+    - This feature can be disabled to improve performance;
+  - User interface improvements:
+    - Controls are now displayed when the game starts (depending on the device);
+    - The pause menu has been reorganized;
+    - Level objectives can now be viewed directly from the pause menu;
+  - Mobile device improvements:
+    - The game now launches in fullscreen mode by default (can be disabled in settings);
+    - Additional mobile-specific improvements have been added;
+  - Improvements to the 3D rendering engine:
+    - Improved Snake eye animations:
+      - Fixed an animation bug where the Snake could look behind itself;
+      - Eye animations now take walls into account: if a wall is between the apple and the Snake’s eyes, the Snake is considered unable to see the apple;
+      - Fixed the animation when there are no apples on the grid
+    - Fixed a bug affecting golden apple reflections;
+    - Improved performance with optimized game grid updates;
+    - Optimized rendering performance when displaying large numbers of 3D models;
+    - Fixed a bug occurring when fruit lights were disabled;
+    - Fixed a memory leak issue;
+  - Improved game loading screen handling:
+    - The loading screen now takes 3D engine initialization into account;
+  - Other minor bug fixes:
+    - Fixed online authentication handling when using multiple servers;
+    - Fixed an issue with the Enter key on some forms;
+  - Updated compatibility with the latest SnakeIA Server (online multiplayer server);
+  - Updated dependencies.
 
 * Version 3.1.0 (02/22/2026):
   - 3D rendering engine improvements:
@@ -316,8 +363,8 @@ Les autres modes d’IA sont :
 
 ## À propos du jeu
 
-* Version du jeu : 3.1.0
-* Date de version : 22/02/2026
+* Version du jeu : 3.2.0
+* Date de version : 08/05/2026
 * Made in France by Eliastik - [eliastiksofts.com](http://eliastiksofts.com) - Contact : [eliastiksofts.com/contact](http://eliastiksofts.com/contact)
 * Licence : GNU GPLv3 (voir le fichier LICENCE.txt)
 
@@ -336,6 +383,52 @@ Les autres modes d’IA sont :
 * Utilise un modèle 3D de pomme réalisé par [bariacg](https://sketchfab.com/bariacg) et disponible sur le [site Sketchfab](https://sketchfab.com/3d-models/apple-8cc60d44baec49558156ac767839c2ed), sous [licence Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ## Journal des changements
+
+* Version 3.2.0 (08/05/2026) :
+  - Amélioration du gameplay du jeu :
+    - Le nombre de pommes disponibles sur la grille dépend du nombre de Snake vivants sur la grille (5 pommes maximum). Auparavant, seule 1 pomme par grille était disponible ;
+  - Améliorations de l'IA Ultra (encore en preview) avec l'implémentation de nouvelles techniques d'IA. De nouveaux modèles basés sur ces améliorations seront disponibles prochainement :
+    - Implémentation du state rotation (effectue une rotation de la grille dans la direction de la tête du Snake contrôlé par l'IA) ;
+    - Implémentation du frame stacking (passe l'historique des X dernières frames du jeu en entrée du modèle) ;
+    - Implémentation de la data augmentation (stocke des versions avec rotation des différents états du jeu) ;
+    - Implémentation du N Steps Learning (une étape vers le Rainbow DQN) ;
+    - Implémentation de l'action masking (évite au modèle de choisir une action qui est mortelle) ;
+    - Implémentation du Soft Target Update (pour le Double DQN) ;
+    - Implémentation de l'environment embedding (passe en entrée du modèle les informations sur l'environnement) ;
+    - Implémentation de l'entraînement parallèle (plusieurs parties en parallèle) : accélère l'entrainement du modèle ;
+    - Correction de l'implémentation du Double DQN ;
+    - Améliorations du calcul du reward ;
+    - Optimisations de l'architecture du modèle ;
+    - Optimisation du stockage de la mémoire (compression), utilisation de msgpack et stockage de la mémoire en UInt8 (plus léger)
+  - Implémentation de la possibilité d'avoir plusieurs séries dans le mode de jeu Niveaux ;
+  - Amélioration des IA Faible et Élevé (meilleur algorithme heuristique) ;
+  - Correction de la détection des IA bloquées ;
+  - La résolution de rendu du jeu est désormais adaptée aux appareils avec un écran à haut DPI (appareils mobiles par exemple) :
+    - Le rendu est désormais plus net dans ce cas précis ;
+    - Cette amélioration peut être désactivée pour améliorer les performances
+  - Amélioration de l'interface utilisateur du jeu :
+    - Affichage des contrôles au démarrage du jeu (différents selon l'appareil) ;
+    - Le menu pause du jeu a été réorganisé ;
+    - Possibilité de consulter l'objectif d'un niveau dans le menu pause du jeu
+  - Amélioration de l'adaptation aux appareils mobiles :
+    - Le jeu s'affiche par défaut en mode plein écran - cela peut être désactivé dans les paramètres ;
+    - D'autres améliorations destinées aux appareils mobiles ont été apportées
+  - Amélioration du moteur de rendu 3D :
+    - L'animation des yeux du Snake a été améliorée
+      - Un bug d'animation a été corrigé : auparavant, le Snake pouvait regarder derrière lui, ce qui a été corrigé ;
+      - L'animation prend en compte les murs : si un mur est présent entre la pomme et les yeux du Snake, l'on considère que le Snake ne voit pas la pomme ;
+      - Correction de l'animation quand aucune pomme n'est sur la grille
+    - Un bug avec les reflets des pommes en or a été corrigé ;
+    - Optimisation des performances avec la gestion de la mise à jour de la grille de jeu ;
+    - Optimisation de l'affichage de certains modèles 3D en grand nombre ;
+    - Correction d'un bug lorsque les lumières des fruits sont désactivées ;
+    - Un problème de fuite mémoire a été corrigé
+  - Amélioration de la gestion de l'écran de chargement du jeu : prend en compte l'initialisation du moteur 3D ;
+  - Correction d'autres bugs mineurs :
+    - Correction de la gestion de l'authentification au mode de jeu en ligne avec plusieurs serveurs ;
+    - Correction d'un bug avec la touche Entrée sur certains formulaires ;
+  - Adaptation à la dernière version du SnakeIA Server (serveur multijoueur en ligne) ;
+  - Mise à jour des dépendances
 
 * Version 3.1.0 (22/02/2026) :
   - Améliorations du moteur de rendu 3D :
