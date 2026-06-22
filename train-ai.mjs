@@ -20,7 +20,7 @@ const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE"];
-const NUM_EPISODES_PER_TYPE     = 1000;
+const NUM_EPISODES_PER_TYPE     = 2000;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const TRAIN_EVERY               = 30;
 const MAX_TICKS                 = 1000;
@@ -42,9 +42,12 @@ const LOAD_MODEL_PATH           = null;
 const LOAD_HYPERPARAMETERS      = false;
 const LOAD_MEMORY               = false;
 const NUM_PARALLEL_ENVS         = 3;
+const TF_GPU_ALLOW_GROWTH       = true;
+const ENABLE_DEBUG_LOG          = false;
 // End of settings
 
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
+tf.env().set("TF_FORCE_GPU_ALLOW_GROWTH", TF_GPU_ALLOW_GROWTH);
 
 class MultiBarCustom extends cliProgress.MultiBar {
   log(text) {
@@ -67,6 +70,7 @@ const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, TRAINING_SEED, {
   log: (text) => multiBar.log(text),
   info: (text) => multiBar.log(text),
   warn: (text) => multiBar.log(`[WARNING] ${text}`),
+  debug: (text) => ENABLE_DEBUG_LOG && multiBar.log(`[DEBUG] ${text}`),
   error: (text) => multiBar.log(`[ERROR] ${text}`)
 }, {
   readJSON: async (location) => {

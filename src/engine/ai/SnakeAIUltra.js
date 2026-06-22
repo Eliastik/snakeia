@@ -76,7 +76,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.0001;
-    this.batchSize = 256;
+    this.batchSize = 64;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
     this.maxMemoryLength = 20000;
     this.nStep = 3;
@@ -200,9 +200,17 @@ export default class SnakeAIUltra extends SnakeAI {
   }
 
   async loadModelTrainingMode(modelLocation, modelLoader) {
-    const model = modelLocation ?
-      await modelLoader.loadModel(this.processModelLocation(modelLocation)) :
-      this.createModel();
+    const finalModelLocation = modelLocation
+      ? this.processModelLocation(modelLocation)
+      : null;
+
+    const model = modelLocation
+      ? await modelLoader.loadModel(finalModelLocation)
+      : this.createModel();
+
+    if(modelLocation) {
+      this.logger.info(`Model loaded from ${finalModelLocation}\n`);
+    }
 
     this.compileModel(model);
 
@@ -885,7 +893,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     const totalLength = currentStateFlat.data.length * this.frameStackSize;
-    const stackedData = new Float32Array(totalLength);
+    const stackedData = new Uint8Array(totalLength);
 
     for(let i = 0; i < this.frameStackSize; i++) {
       stackedData.set(frames[i].data, i * currentStateFlat.data.length);
@@ -991,7 +999,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
   flipState(stateFlat, flipH = false, flipV = false) {
     const { data, width, height, channels, headDirection } = stateFlat;
-    const flipped = new Float32Array(data.length);
+    const flipped = data instanceof Uint8Array ? new Uint8Array(data.length) : new Float32Array(data.length);
 
     for(let y = 0; y < height; y++) {
       for(let x = 0; x < width; x++) {
@@ -1142,6 +1150,11 @@ export default class SnakeAIUltra extends SnakeAI {
     } else if(this.stepsSinceLastSync >= this.syncTargetEvery) {
       this.synchronizeTargetNetwork();
       this.stepsSinceLastSync = 0;
+    }
+
+    if(this.currentEpoch % 50 === 0) {
+      const mem = tf.memory();
+      this.logger.debug(`[TF Memory] Tensors: ${mem.numTensors} | Bytes GPU: ${(mem.numBytes / 1024 / 1024).toFixed(1)} MB\n`);
     }
 
     this.stepsSinceLastSync++;
