@@ -42,12 +42,10 @@ const LOAD_MODEL_PATH           = null;
 const LOAD_HYPERPARAMETERS      = false;
 const LOAD_MEMORY               = false;
 const NUM_PARALLEL_ENVS         = 3;
-const TF_GPU_ALLOW_GROWTH       = true;
 const ENABLE_DEBUG_LOG          = false;
 // End of settings
 
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
-tf.env().set("TF_FORCE_GPU_ALLOW_GROWTH", TF_GPU_ALLOW_GROWTH);
 
 class MultiBarCustom extends cliProgress.MultiBar {
   log(text) {
