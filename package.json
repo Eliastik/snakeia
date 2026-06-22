@@ -49,12 +49,12 @@
     "cli-progress": "^3.12.0",
     "eslint": "^9.39.2",
     "eslint-webpack-plugin": "^6.0.0",
-    "globals": "^17.6.0",
+    "globals": "^17.7.0",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "webpack": "^5.107.2",
     "webpack-cli": "^7.0.3",
-    "webpack-dev-server": "^5.2.4"
+    "webpack-dev-server": "^5.2.5"
   },
   "dependencies": {
     "@tensorflow/tfjs-node": "^4.22.0",
@@ -63,7 +63,7 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "jsgametools": "0.0.1",
     "seedrandom": "^3.0.5",
-    "semver": "^7.8.4",
+    "semver": "^7.8.5",
     "socket.io-client": "~4.8.3",
     "three": "^0.184.0"
   },
