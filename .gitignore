@@ -4,3 +4,4 @@ node_modules
 *.cpuprofile
 .vscode
 /models/
+*.log

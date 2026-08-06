@@ -302,5 +302,3 @@
  * limitations under the License.
  * =============================================================================
  */
-
-/** @license See the LICENSE file. */

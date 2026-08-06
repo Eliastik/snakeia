@@ -49,33 +49,35 @@
     "cli-progress": "^3.12.0",
     "eslint": "^9.39.2",
     "eslint-webpack-plugin": "^6.0.0",
-    "globals": "^17.7.0",
+    "globals": "^17.9.0",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
-    "webpack": "^5.107.2",
-    "webpack-cli": "^7.0.3",
-    "webpack-dev-server": "^5.2.5"
+    "webpack": "^5.109.2",
+    "webpack-cli": "^7.2.2",
+    "webpack-dev-server": "^6.0.0"
   },
   "dependencies": {
     "@tensorflow/tfjs-node": "^4.22.0",
     "chroma-js": "^3.2.0",
-    "i18next": "^26.3.1",
+    "i18next": "^26.3.6",
     "i18next-browser-languagedetector": "^8.2.1",
     "jsgametools": "0.0.1",
     "seedrandom": "^3.0.5",
     "semver": "^7.8.5",
     "socket.io-client": "~4.8.3",
-    "three": "^0.184.0"
+    "three": "^0.185.1"
   },
   "overrides": {
     "@tensorflow/tfjs-node": {
-      "tar": "^7.5.10"
+      "tar": "^7.5.22",
+      "adm-zip": "^0.6.0"
     },
     "@tensorflow/tfjs-node-gpu": {
-      "tar": "^7.5.10"
+      "tar": "^7.5.22",
+      "adm-zip": "^0.6.0"
     },
     "@mapbox/node-pre-gyp": {
-      "tar": "^7.5.10"
+      "tar": "^7.5.22"
     }
   }
 }

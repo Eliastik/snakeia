@@ -66,7 +66,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.enableVariableInputSize = false;
     this.enableStateRotation = true; // Rotate the state so that the snake head is always facing "UP"
     this.enableNStepsLearning = true; // Enable N-Steps learning
-    this.enableDataAugmentation = true; // Enable automatic data augmentation
+    this.enableDataAugmentation = false; // Enable automatic data augmentation
     this.enableActionMasking = true; // Enable Action Masking (avoid dead actions)
     this.enableEnvEmbedding = false; // Enable Environment Embedding (pass env features to model)
 
@@ -76,7 +76,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.0001;
-    this.batchSize = 64;
+    this.batchSize = 256;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
     this.maxMemoryLength = 20000;
     this.nStep = 3;

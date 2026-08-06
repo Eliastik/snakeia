@@ -41,11 +41,13 @@ const EXPORT_MEMORY             = false;
 const LOAD_MODEL_PATH           = null;
 const LOAD_HYPERPARAMETERS      = false;
 const LOAD_MEMORY               = false;
-const NUM_PARALLEL_ENVS         = 3;
-const ENABLE_DEBUG_LOG          = false;
+const NUM_PARALLEL_ENVS         = 1;
+const ENABLE_DEBUG_LOG          = true;
 // End of settings
 
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
+
+// TF_GPU_ALLOCATOR=cuda_malloc_async TF_FORCE_GPU_ALLOW_GROWTH=true node --max-old-space-size=16384 train-ai.mjs
 
 class MultiBarCustom extends cliProgress.MultiBar {
   log(text) {
