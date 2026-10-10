@@ -525,6 +525,11 @@ export default class GridUI3D extends GridUI {
   disposeMesh(mesh) {
     mesh.geometry?.dispose();
 
+    if(mesh.isMaterial) {
+      mesh.dispose();
+      return;
+    }
+
     if(Array.isArray(mesh.material)) {
       mesh.material.forEach(mat => mat?.dispose());
     } else {
@@ -1262,6 +1267,7 @@ export default class GridUI3D extends GridUI {
       headMesh: headMesh,
       tailMesh: tailMesh,
       snakeMaterial,
+      snakeMaterialBody: this.getSnakeMaterial(snake, false),
       eyesGroup,
       snakeIndex,
       firstRender: true
@@ -1389,6 +1395,7 @@ export default class GridUI3D extends GridUI {
     this.disposeMesh(meshes.headMesh);
     this.disposeMesh(meshes.tailMesh);
     this.disposeMesh(meshes.snakeMaterial);
+    this.disposeMesh(meshes.snakeMaterialBody);
     this.disposeGroup(meshes.eyesGroup);
 
     this.snakesGroup.remove(meshes.headMesh, meshes.tailMesh, meshes.eyesGroup);
@@ -1806,7 +1813,7 @@ export default class GridUI3D extends GridUI {
       }
     } else {
       if(!snakeMeshes[meshKey]) {
-        const mesh = new THREE.Mesh(geometry, snakeMeshes.snakeMaterial);
+        const mesh = new THREE.Mesh(geometry, snakeMeshes.snakeMaterialBody);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         this.snakesGroup.add(mesh);
@@ -2039,7 +2046,7 @@ export default class GridUI3D extends GridUI {
 
   updateSnakeBodyGeometry(snakeIndex, snake) {
     const snakeMeshes = this.snakesMeshes[snakeIndex];
-    const snakeMaterial = snakeMeshes.snakeMaterial;
+    const snakeMaterial = snakeMeshes.snakeMaterialBody;
     const segmentsPositions = this.calculateSnakeSegmentsPositions(snake);
 
     const snakeBodyMeshes = this.snakeBodyRenderingMethod === "TUBES" ? 
@@ -2492,14 +2499,20 @@ export default class GridUI3D extends GridUI {
 
   /** Snake meshes utility methods */
 
-  getSnakeMaterial(snake) {
+  getSnakeMaterial(snake, enableTexture = false) {
     const baseColor = chroma(this.baseSnakeColor);
     const rotated = baseColor.set("hsl.h", (baseColor.get("hsl.h") + snake.color) % 360);
     const [r, g, b] = rotated.rgb();
     const snakeColor = new THREE.Color(r / 255, g / 255, b / 255);
     snakeColor.convertSRGBToLinear();
 
-    return this.getMaterial({ color: snakeColor, roughness: 0.6, metalness: 0.25 });
+    if(enableTexture && !this.snakeBodyTexture) {
+      const snakeBodyImage = this.imageLoader.get(`assets/images/skin/${this.graphicSkin}/snake_body_texture.png`);
+      this.snakeBodyTexture = new THREE.CanvasTexture(snakeBodyImage);
+      this.snakeBodyTexture.colorSpace = THREE.SRGBColorSpace;
+    }
+
+    return this.getMaterial({ color: snakeColor, roughness: 0.6, metalness: 0.25, map: enableTexture ? this.snakeBodyTexture : null });
   }
 
   calculateSnakeGeometryQualityTubes(snake) {

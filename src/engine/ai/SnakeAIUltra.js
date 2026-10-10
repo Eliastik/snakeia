@@ -263,9 +263,16 @@ export default class SnakeAIUltra extends SnakeAI {
       dtype: this.dtype
     }).apply(conv1);
 
+    // Reduce spatial dimensions before flatten to cut dense layer parameters
+    const pool = tf.layers.maxPooling2d({
+      poolSize: 2,
+      dataFormat: "channelsLast",
+      dtype: this.dtype
+    }).apply(conv2);
+
     const flattenOrPooling = this.enableVariableInputSize ?
-      tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true, dtype: this.dtype }).apply(conv2) :
-      tf.layers.flatten({ dtype: this.dtype }).apply(conv2);
+      tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true, dtype: this.dtype }).apply(pool) :
+      tf.layers.flatten({ dtype: this.dtype }).apply(pool);
 
     // Optional second input: environment features
     let trunk = flattenOrPooling;
@@ -286,7 +293,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     const dense1 = DenseLayer({
-      units: 64,
+      units: 32,
       activation: "relu",
       dtype: this.dtype,
       seed: this.trainingRng()
@@ -303,7 +310,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
     if(this.enableDuelingQLearning) {
       const dense2 = DenseLayer({
-        units: 64,
+        units: 32,
         activation: "relu",
         dtype: this.dtype,
         seed: this.trainingRng()
