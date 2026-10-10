@@ -308,7 +308,18 @@ The Ultra AI mode is powered by a Deep Q-Learning algorithm, trained on multiple
 
 Training AI requires a powerful machine with a dedicated graphics card (it is possible to run the training without a graphics card, but it will be very slow).
 
-Training AI needs NodeJS 22 (higher versions doesn't work yet).
+Training requires the following versions of dependencies — other versions **are not compatible** (due to limitations of the version of TensorFlow.js used):
+
+- Node.js 22
+- CUDA 11.8 (for training on an NVIDIA GPU)
+- cuDNN 8 (for training on an NVIDIA GPU)
+
+You will need to install the CUDA Toolkit and cuDNN yourself from the NVIDIA website (requires an NVIDIA developer account):
+
+- CUDA Toolkit 11.8: [https://developer.nvidia.com/cuda-11-8-0-download-archive](https://developer.nvidia.com/cuda-11-8-0-download-archive)
+- cuDNN 8: [https://developer.nvidia.com/rdp/cudnn-archive](https://developer.nvidia.com/rdp/cudnn-archive) (**select "Download cuDNN v8.9.7 (December 5, 2023), for CUDA 11.x"**)
+
+You must then add the installed folders to your system PATH so that TensorFlow.js can find them.
 
 To train the AI, first install the dependencies:
 
@@ -320,6 +331,12 @@ Then run the following command:
 
 ```
 npm run train-ai
+```
+
+On Nvidia GPUs, running the following command will prevent the system from allocating all available VRAM by default (only the necessary VRAM will be allocated):
+
+```
+TF_GPU_ALLOCATOR=cuda_malloc_async TF_FORCE_GPU_ALLOW_GROWTH=true node train-ai.mjs
 ```
 
 You can customize the training settings in the train-ai.mjs script.
@@ -642,7 +659,18 @@ Le mode IA Ultra fonctionne avec un algorithme de Deep Q-Learning, entraîné su
 
 L'entrainement de l'IA nécessite une machine puissante avec une carte graphique dédiée (il est possible de lancer l'entrainement sans carte graphique, mais il sera très lent).
 
-L'entrainement nécessite NodeJS 22 (les versions supérieures ne sont pas encore compatibles).
+L'entrainement nécessite les versions de dépendances suivantes - les autres versions ne **sont pas compatibles** (limitation de la version de Tensorflow.js utilisée) :
+
+- NodeJS 22
+- Cuda Toolkit 11.8 (pour l'entrainement via un GPU NVIDIA)
+- cuDNN 8 (pour l'entrainement via un GPU NVIDIA)
+
+Vous devrez instaler Cuda Toolkit et cuDNN vous même depuis le site de Nvidia (nécessite un compte développeur Nvidia) :
+
+- Cuda Toolkit 11.8 : [https://developer.nvidia.com/cuda-11-8-0-download-archive](https://developer.nvidia.com/cuda-11-8-0-download-archive)
+- cuDNN 8 : [https://developer.nvidia.com/rdp/cudnn-archive](https://developer.nvidia.com/rdp/cudnn-archive) (**choisir Download cuDNN v8.9.7 (December 5th, 2023), for CUDA 11.x**)
+
+Il faut ensuite ajouter les dossiers installés dans votre PATH système pour que Tensorflow.js puisse les trouver.
 
 Pour entraîner l’IA, commencez par installer les dépendances :
 
@@ -654,6 +682,12 @@ Puis lancez la commande suivante :
 
 ```
 npm run train-ai
+```
+
+Sur les GPU Nvidia, lancer la commande suivante permettra d'éviter d'allouer toute la VRAM disponible par défaut (seule la VRAM nécessaire sera allouée) :
+
+```
+TF_GPU_ALLOCATOR=cuda_malloc_async TF_FORCE_GPU_ALLOW_GROWTH=true node train-ai.mjs
 ```
 
 Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train-ai.mjs`.

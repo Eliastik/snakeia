@@ -47,8 +47,6 @@ const ENABLE_DEBUG_LOG          = true;
 
 const tensorboardSummaryWriter = tf.node.summaryFileWriter("./models/logs");
 
-// TF_GPU_ALLOCATOR=cuda_malloc_async TF_FORCE_GPU_ALLOW_GROWTH=true node --max-old-space-size=16384 train-ai.mjs
-
 class MultiBarCustom extends cliProgress.MultiBar {
   log(text) {
     super.log(`[${new Date().toISOString()}] ${text}`);
