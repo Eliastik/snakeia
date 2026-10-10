@@ -311,13 +311,13 @@ Training AI requires a powerful machine with a dedicated graphics card (it is po
 Training requires the following versions of dependencies — other versions **are not compatible** (due to limitations of the version of TensorFlow.js used):
 
 - Node.js 22
-- CUDA 11.8 (for training on an NVIDIA GPU)
+- CUDA 12.8 (for training on an NVIDIA GPU)
 - cuDNN 8 (for training on an NVIDIA GPU)
 
 You will need to install the CUDA Toolkit and cuDNN yourself from the NVIDIA website (requires an NVIDIA developer account):
 
-- CUDA Toolkit 11.8: [https://developer.nvidia.com/cuda-11-8-0-download-archive](https://developer.nvidia.com/cuda-11-8-0-download-archive)
-- cuDNN 8: [https://developer.nvidia.com/rdp/cudnn-archive](https://developer.nvidia.com/rdp/cudnn-archive) (**select "Download cuDNN v8.9.7 (December 5, 2023), for CUDA 11.x"**)
+- CUDA Toolkit 12.8: [https://developer.nvidia.com/cuda-12-8-0-download-archive](https://developer.nvidia.com/cuda-12-8-0-download-archive)
+- cuDNN 8: [https://developer.nvidia.com/rdp/cudnn-archive](https://developer.nvidia.com/rdp/cudnn-archive) (**select "Download cuDNN v8.9.7 (December 5, 2023), for CUDA 12.x"**)
 
 You must then add the installed folders to your system PATH so that TensorFlow.js can find them.
 
@@ -662,13 +662,13 @@ L'entrainement de l'IA nécessite une machine puissante avec une carte graphique
 L'entrainement nécessite les versions de dépendances suivantes - les autres versions ne **sont pas compatibles** (limitation de la version de Tensorflow.js utilisée) :
 
 - NodeJS 22
-- Cuda Toolkit 11.8 (pour l'entrainement via un GPU NVIDIA)
+- CUDA Toolkit 12.8 (pour l'entrainement via un GPU NVIDIA)
 - cuDNN 8 (pour l'entrainement via un GPU NVIDIA)
 
 Vous devrez instaler Cuda Toolkit et cuDNN vous même depuis le site de Nvidia (nécessite un compte développeur Nvidia) :
 
-- Cuda Toolkit 11.8 : [https://developer.nvidia.com/cuda-11-8-0-download-archive](https://developer.nvidia.com/cuda-11-8-0-download-archive)
-- cuDNN 8 : [https://developer.nvidia.com/rdp/cudnn-archive](https://developer.nvidia.com/rdp/cudnn-archive) (**choisir Download cuDNN v8.9.7 (December 5th, 2023), for CUDA 11.x**)
+- CUDA Toolkit 12.8 : [https://developer.nvidia.com/cuda-12-8-0-download-archive](https://developer.nvidia.com/cuda-12-8-0-download-archive)
+- cuDNN 8 : [https://developer.nvidia.com/rdp/cudnn-archive](https://developer.nvidia.com/rdp/cudnn-archive) (**choisir Download cuDNN v8.9.7 (December 5th, 2023), for CUDA 12.x**)
 
 Il faut ensuite ajouter les dossiers installés dans votre PATH système pour que Tensorflow.js puisse les trouver.
 
