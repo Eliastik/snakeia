@@ -17,15 +17,16 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE"];
+const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
 // OR:
-// const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE"];
-const NUM_EPISODES_PER_TYPE     = 2000;
+// const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
+const NUM_EPISODES_PER_TYPE     = 250;
 const MAX_EPISODES              = "auto"; // number OR "auto"
+const MAX_CYCLES                = 3; // Maximum number of cycles to run through all episode types (only used if MAX_EPISODES is "auto" and EPISODES_TYPES contains "RESET_TO_INITIAL_GRID_SIZE_AT_END")
 const TRAIN_EVERY               = 100;
 const MAX_TICKS                 = 1000;
-const INITAL_GRID_WIDTH         = 5;
-const INITAL_GRID_HEIGHT        = 5;
+const INITIAL_GRID_WIDTH        = 5;
+const INITIAL_GRID_HEIGHT       = 5;
 const GRID_INCREASE_INCREMENT   = 5;
 const MAX_GRID_WIDTH            = 25;
 const MAX_GRID_HEIGHT           = 25;
@@ -36,7 +37,7 @@ const TRAINING_SEED             = 1;
 const GRID_SEED                 = 2;
 const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
-const SAVE_CHECKPOINT_MODELS    = true;
+const SAVE_CHECKPOINT_MODELS    = false;
 const EXPORT_MEMORY             = false;
 const LOAD_MODEL_PATH           = null;
 const LOAD_HYPERPARAMETERS      = false;
@@ -108,26 +109,35 @@ let totalReward = 0;
 
 let currentGridSeed = GRID_SEED;
 let currentGameSeed = GAME_SEED;
-let currentGridWidth = INITAL_GRID_WIDTH;
-let currentGridHeight = INITAL_GRID_HEIGHT;
+let currentGridWidth = INITIAL_GRID_WIDTH;
+let currentGridHeight = INITIAL_GRID_HEIGHT;
+let precGridWidth = INITIAL_GRID_WIDTH;
+let precGridHeight = INITIAL_GRID_HEIGHT;
 
 // Counter for unique instance IDs across all envs and episodes
 let instanceCounter = 0;
 
 function getMaxEpisodesCount() {
   if(MAX_EPISODES === "auto") {
-    const staticTypesCount = EPISODES_TYPES.filter(t => t !== "INCREASE_GRID_SIZE").length;
+    const staticTypesCount = EPISODES_TYPES.filter(t => t !== "INCREASE_GRID_SIZE" && t !== "RESET_TO_INITIAL_GRID_SIZE_AT_END").length;
     const hasIncreaseGridSize = EPISODES_TYPES.find(type => type === "INCREASE_GRID_SIZE");
+    const hasResetToInitialGrid = EPISODES_TYPES.find(type => type === "RESET_TO_INITIAL_GRID_SIZE_AT_END");
 
     let gridSteps = 1;
 
     if(hasIncreaseGridSize) {
-      const gridRangeW = Math.ceil((Math.min(MAX_GRID_WIDTH, theSnakeAI.modelWidth) - INITAL_GRID_WIDTH) / GRID_INCREASE_INCREMENT);
-      const gridRangeH = Math.ceil((Math.min(MAX_GRID_HEIGHT, theSnakeAI.modelHeight) - INITAL_GRID_HEIGHT) / GRID_INCREASE_INCREMENT);
+      const gridRangeW = Math.ceil((Math.min(MAX_GRID_WIDTH, theSnakeAI.modelWidth) - INITIAL_GRID_WIDTH) / GRID_INCREASE_INCREMENT);
+      const gridRangeH = Math.ceil((Math.min(MAX_GRID_HEIGHT, theSnakeAI.modelHeight) - INITIAL_GRID_HEIGHT) / GRID_INCREASE_INCREMENT);
       gridSteps = Math.max(gridRangeW, gridRangeH) + 1;
     }
 
-    return gridSteps * staticTypesCount * NUM_EPISODES_PER_TYPE;
+    let totalEpisodes = gridSteps * staticTypesCount * NUM_EPISODES_PER_TYPE;
+
+    if(hasResetToInitialGrid) {
+      totalEpisodes = MAX_CYCLES * totalEpisodes;
+    }
+
+    return totalEpisodes;
   }
 
   return MAX_EPISODES;
@@ -419,9 +429,26 @@ async function train() {
     let currentEpisodeTypeReward = 0;
 
     for(let episode = 1; episode <= NUM_EPISODES_PER_TYPE; episode++) {
+      const currentWidth = Math.min(MAX_GRID_WIDTH, theSnakeAI.modelWidth);
+      const currentHeight = Math.min(MAX_GRID_HEIGHT, theSnakeAI.modelHeight);
+
       if(currentEpisodeType === "INCREASE_GRID_SIZE") {
-        currentGridWidth = Math.min(Math.min(MAX_GRID_WIDTH, theSnakeAI.modelWidth), currentGridWidth + GRID_INCREASE_INCREMENT);
-        currentGridHeight = Math.min(Math.min(MAX_GRID_HEIGHT, theSnakeAI.modelHeight), currentGridHeight + GRID_INCREASE_INCREMENT);
+        precGridWidth = currentGridWidth;
+        precGridHeight = currentGridHeight;
+
+        currentGridWidth = Math.min(currentWidth, currentGridWidth + GRID_INCREASE_INCREMENT);
+        currentGridHeight = Math.min(currentHeight, currentGridHeight + GRID_INCREASE_INCREMENT);
+
+        currentEpisodeType = getNextEpisodeType(currentEpisodeType);
+      }
+
+      if(currentEpisodeType === "RESET_TO_INITIAL_GRID_SIZE_AT_END") {
+        // Reset grid size to initial values after completing a cycle of episodes
+        if(precGridWidth >= currentWidth && precGridHeight >= currentHeight) {
+          currentGridWidth = INITIAL_GRID_WIDTH;
+          currentGridHeight = INITIAL_GRID_HEIGHT;
+        }
+
         currentEpisodeType = getNextEpisodeType(currentEpisodeType);
       }
 
