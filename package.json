@@ -44,28 +44,28 @@
     "@eslint/js": "^9.39.2",
     "@msgpack/msgpack": "^3.1.3",
     "@tensorflow/tfjs-node-gpu": "^4.22.0",
-    "babel-jest": "^30.4.1",
+    "babel-jest": "^30.5.2",
     "babel-loader": "^10.1.1",
     "cli-progress": "^3.12.0",
     "eslint": "^9.39.2",
     "eslint-webpack-plugin": "^6.0.0",
-    "globals": "^17.11.0",
-    "jest": "^30.4.2",
-    "jest-environment-jsdom": "^30.4.1",
-    "webpack": "^5.109.2",
-    "webpack-cli": "^7.2.2",
+    "globals": "^17.13.0",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
+    "webpack": "^5.111.1",
+    "webpack-cli": "^7.2.3",
     "webpack-dev-server": "^6.0.0"
   },
   "dependencies": {
     "@tensorflow/tfjs-node": "^4.22.0",
     "chroma-js": "^3.2.0",
-    "i18next": "^26.4.0",
+    "i18next": "^26.4.3",
     "i18next-browser-languagedetector": "^8.2.1",
     "jsgametools": "0.0.1",
     "seedrandom": "^3.0.5",
     "semver": "^7.8.5",
-    "socket.io-client": "~4.8.3",
-    "three": "^0.185.1"
+    "socket.io-client": "~4.8.4",
+    "three": "^0.186.1"
   },
   "overrides": {
     "@tensorflow/tfjs-node": {
@@ -79,5 +79,9 @@
     "@mapbox/node-pre-gyp": {
       "tar": "^7.5.22"
     }
+  },
+  "allowScripts": {
+    "@tensorflow/tfjs-node@4.22.0": true,
+    "@tensorflow/tfjs-node-gpu@4.22.0": true
   }
 }
