@@ -669,8 +669,7 @@ export default class GameUI {
       imageToLoad.push(
         `assets/images/skin/${this.graphicSkin}/wall_normal.png`,
         `assets/images/skin/${this.graphicSkin}/wall_ao.png`,
-        `assets/images/skin/${this.graphicSkin}/wall_height.png`,
-        `assets/images/skin/${this.graphicSkin}/snake_body_texture.png`
+        `assets/images/skin/${this.graphicSkin}/wall_height.png`
       );
     } else {
       imageToLoad.push(
