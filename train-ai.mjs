@@ -38,6 +38,7 @@ const GRID_SEED                 = 2;
 const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = false;
+const SAVE_CHECKPOINT_EVERY     = -1; // Save model every N episodes (only used if SAVE_CHECKPOINT_MODELS is true) ; -1 to save at the end of each episode type
 const EXPORT_MEMORY             = false;
 const LOAD_MODEL_PATH           = null;
 const LOAD_HYPERPARAMETERS      = false;
@@ -481,7 +482,9 @@ async function train() {
     theSnakeAI.epsilon = 0.75;
 
     if(SAVE_CHECKPOINT_MODELS && currentEpisodeNumber <= currentMaxEpisodes) {
-      await saveState(false, theSnakeAI.currentEnv);
+      if(SAVE_CHECKPOINT_EVERY === -1 || currentEpisodeNumber % SAVE_CHECKPOINT_EVERY === 0) {
+        await saveState(false, theSnakeAI.currentEnv);
+      }
     }
 
     currentEpisodeType = getNextEpisodeType(currentEpisodeType);
