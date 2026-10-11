@@ -17,7 +17,7 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
+const EPISODES_TYPES            = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "INCREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
 const NUM_EPISODES_PER_TYPE     = 250;
@@ -37,7 +37,7 @@ const TRAINING_SEED             = 1;
 const GRID_SEED                 = 2;
 const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
-const SAVE_CHECKPOINT_MODELS    = false;
+const SAVE_CHECKPOINT_MODELS    = true;
 const SAVE_CHECKPOINT_EVERY     = -1; // Save model every N episodes (only used if SAVE_CHECKPOINT_MODELS is true) ; -1 to save at the end of each episode type
 const EXPORT_MEMORY             = false;
 const LOAD_MODEL_PATH           = null;
@@ -468,6 +468,11 @@ async function train() {
       multiBar.update();
 
       currentEpisodeNumber++;
+
+      if(SAVE_CHECKPOINT_MODELS && currentEpisodeNumber <= currentMaxEpisodes
+          && SAVE_CHECKPOINT_EVERY !== -1 && currentEpisodeNumber % SAVE_CHECKPOINT_EVERY === 0) {
+        await saveState(false, theSnakeAI.currentEnv);
+      }
     }
 
     multiBar.log(
@@ -481,10 +486,8 @@ async function train() {
     theSnakeAI.epsilonMax = 0.75;
     theSnakeAI.epsilon = 0.75;
 
-    if(SAVE_CHECKPOINT_MODELS && currentEpisodeNumber <= currentMaxEpisodes) {
-      if(SAVE_CHECKPOINT_EVERY === -1 || currentEpisodeNumber % SAVE_CHECKPOINT_EVERY === 0) {
-        await saveState(false, theSnakeAI.currentEnv);
-      }
+    if(SAVE_CHECKPOINT_MODELS && currentEpisodeNumber <= currentMaxEpisodes && SAVE_CHECKPOINT_EVERY === -1) {
+      await saveState(false, theSnakeAI.currentEnv);
     }
 
     currentEpisodeType = getNextEpisodeType(currentEpisodeType);
