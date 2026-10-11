@@ -25,7 +25,7 @@ import PrioritizedReplayBuffer from "./utils/memory/PrioritizedReplayBuffer.js";
 import UniformReplayBuffer from "./utils/memory/UniformReplayBuffer.js";
 import DuelingQLayer from "./utils/layers/DuelingQLayer.js";
 import NoisyDense from "./utils/layers/NoisyDenseLayer.js";
-import BFSRewardStrategy from "./rewards/BFSRewardStrategy.js";
+import SimpleRewardStrategy from "./rewards/SimpleRewardStrategy.js";
 import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
@@ -91,7 +91,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger, "prioritized");
 
     // Reward strategy
-    this.rewardStrategy = new BFSRewardStrategy();
+    this.rewardStrategy = new SimpleRewardStrategy();
 
     // N-Steps buffers (key = instanceId)
     this.nStepBuffers = new Map();
@@ -833,33 +833,6 @@ export default class SnakeAIUltra extends SnakeAI {
       channels,
       headDirection: stateArray.headDirection
     };
-  }
-
-  findPositionInState(stateArray, targetValue) {
-    for(let i = 0; i < stateArray.length; i++) {
-      for(let j = 0; j < stateArray[i].length; j++) {
-        if(stateArray[i][j] === GameConstants.CaseTypeAIValue[targetValue]) {
-          return { x: j, y: i };
-        }
-      }
-    }
-
-    return null;
-  }
-
-  findAllPositionsInState(stateArray, targetValue) {
-    const positions = [];
-    const targetTypeValue = GameConstants.CaseTypeAIValue[targetValue];
-    
-    for(let i = 0; i < stateArray.length; i++) {
-      for(let j = 0; j < stateArray[i].length; j++) {
-        if(stateArray[i][j] === targetTypeValue) {
-          positions.push({ x: j, y: i });
-        }
-      }
-    }
-
-    return positions;
   }
 
   // Frame stacking

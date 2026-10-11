@@ -21,7 +21,6 @@ import BaseRewardStrategy from "./BaseRewardStrategy.js";
 
 export default class SimpleRewardStrategy extends BaseRewardStrategy {
 
-  // eslint-disable-next-line no-unused-vars
   calculateReward(snake, currentState, done) {
     const { gameOver } = snake;
     const head = snake.getHeadPosition();

@@ -16,10 +16,39 @@
  * You should have received a copy of the GNU General Public License
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
+import GameConstants from "../../Constants.js";
+
 export default class BaseRewardStrategy {
 
   // eslint-disable-next-line no-unused-vars
   calculateReward(snake, currentState, done) {
     throw new Error("calculateReward method must be implemented in the subclass.");
+  }
+
+  findPositionInState(stateArray, targetValue) {
+    for(let i = 0; i < stateArray.length; i++) {
+      for(let j = 0; j < stateArray[i].length; j++) {
+        if(stateArray[i][j] === GameConstants.CaseTypeAIValue[targetValue]) {
+          return { x: j, y: i };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  findAllPositionsInState(stateArray, targetValue) {
+    const positions = [];
+    const targetTypeValue = GameConstants.CaseTypeAIValue[targetValue];
+    
+    for(let i = 0; i < stateArray.length; i++) {
+      for(let j = 0; j < stateArray[i].length; j++) {
+        if(stateArray[i][j] === targetTypeValue) {
+          positions.push({ x: j, y: i });
+        }
+      }
+    }
+
+    return positions;
   }
 }
