@@ -3,6 +3,7 @@ import Position from "../src/engine/Position.js";
 import Constants from "../src/engine/Constants.js";
 import GameUtils from "../src/engine/GameUtils.js";
 import SnakeAIUltra from "../src/engine/ai/SnakeAIUltra.js";
+import BFSRewardStrategy from "../src/engine/ai/rewards/BFSRewardStrategy.js";
 import Snake from "../src/engine/Snake.js";
 import GameEngine from "../src/engine/GameEngine.js";
 import SnakeAI from "../src/engine/ai/SnakeAI.js";
@@ -253,6 +254,7 @@ test("calculate reward - game over reward when there are no empty cases around",
     engine.started = true;
 
     const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.rewardStrategy = new BFSRewardStrategy();
 
     expect(theSnake.errorInit).toBe(false);
     expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 1, direction: Constants.Direction.RIGHT });
@@ -288,6 +290,7 @@ test("calculate reward - game over reward when there are 1 empty case around", a
     engine.started = true;
 
     const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.rewardStrategy = new BFSRewardStrategy();
 
     expect(theSnake.errorInit).toBe(false);
     expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 1, direction: Constants.Direction.RIGHT });
@@ -323,6 +326,7 @@ test("calculate reward - game over reward when there are 2 empty cases around", 
     engine.started = true;
 
     const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.rewardStrategy = new BFSRewardStrategy();
 
     expect(theSnake.errorInit).toBe(false);
     expect(theSnake.getHeadPosition()).toEqual({ x: 7, y: 2, direction: Constants.Direction.RIGHT });
@@ -358,7 +362,9 @@ test("calculate reward - fruit eaten", async () => {
     engine.started = true;
 
     const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.rewardStrategy = new BFSRewardStrategy();
     theSnakeAI.enableStateRotation = false; // Disable state rotation for testing
+
     const currentState = theSnakeAI.getStateRaw(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
@@ -394,6 +400,7 @@ test("calculate reward - move", async () => {
     engine.started = true;
 
     const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.rewardStrategy = new BFSRewardStrategy();
     const currentState = theSnakeAI.getStateRaw(theSnake);
 
     expect(theSnake.errorInit).toBe(false);
@@ -432,6 +439,7 @@ test("calculate reward - stuck", async () => {
     }
 
     const theSnakeAI = new SnakeAIUltra();
+    theSnakeAI.rewardStrategy = new BFSRewardStrategy();
     const currentState = theSnakeAI.getStateRaw(theSnake);
 
     expect(engine.gameOver).toBe(true);
