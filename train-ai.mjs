@@ -17,7 +17,7 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
+const EPISODES_TYPES            = ["DEFAULT", "DECREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE", "DECREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
 const NUM_EPISODES_PER_TYPE     = 500;
@@ -25,8 +25,8 @@ const MAX_EPISODES              = "auto"; // number OR "auto"
 const MAX_CYCLES                = 5; // Maximum number of cycles to run through all episode types (only used if MAX_EPISODES is "auto" and EPISODES_TYPES contains "RESET_TO_INITIAL_GRID_SIZE_AT_END")
 const TRAIN_EVERY               = 100;
 const MAX_TICKS                 = 1000;
-const INITIAL_GRID_WIDTH        = 5;
-const INITIAL_GRID_HEIGHT       = 5;
+const INITIAL_GRID_WIDTH        = 20;
+const INITIAL_GRID_HEIGHT       = 20;
 const GRID_INCREMENT            = 5;
 const MIN_GRID_WIDTH            = 5; // Minimum grid width for DECREASE_GRID_SIZE episode types
 const MIN_GRID_HEIGHT           = 5; // Minimum grid height for DECREASE_GRID_SIZE episode types
@@ -40,12 +40,12 @@ const GRID_SEED                 = 2;
 const GAME_SEED                 = 3;
 const MODEL_SAVE_DIRECTORY      = `models/${timestamp}`;
 const SAVE_CHECKPOINT_MODELS    = true;
-const SAVE_CHECKPOINT_EVERY     = 1000; // Save model every N episodes (only used if SAVE_CHECKPOINT_MODELS is true) ; -1 to save at the end of each episode type
+const SAVE_CHECKPOINT_EVERY     = 50; // Save model every N episodes (only used if SAVE_CHECKPOINT_MODELS is true) ; -1 to save at the end of each episode type
 const EXPORT_MEMORY             = false;
 const LOAD_MODEL_PATH           = null;
 const LOAD_HYPERPARAMETERS      = false;
 const LOAD_MEMORY               = false;
-const NUM_PARALLEL_ENVS         = 1;
+const NUM_PARALLEL_ENVS         = 100;
 const ENABLE_DEBUG_LOG          = true;
 // End of settings
 

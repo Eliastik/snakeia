@@ -359,7 +359,7 @@ export default class GameEngine {
     setTimeout(() => {
       this.doTick();
 
-      if(this.shouldUpdateEngine()) {
+      if(this.shouldRestartTickTimer()) {
         this.tick();
       }
     }, this.initialSpeed * GameConstants.Setting.TIME_MULTIPLIER);
@@ -373,10 +373,18 @@ export default class GameEngine {
     const totalHuman = nbHuman + nbHybrid;
     const playerInput = (this.getPlayer(1, GameConstants.PlayerType.HYBRID_HUMAN_AI) ||
                          this.getPlayer(1, GameConstants.PlayerType.HUMAN))?.lastKey;
+    const gamePausedOrKilled = this.paused || this.killed;
 
     return this.grid &&
       (!isMaze || forceAuto || totalHuman === 0 || (totalHuman > 0 && playerInput !== -1)) &&
-      (!this.paused && !this.killed);
+      (!gamePausedOrKilled);
+  }
+
+  shouldRestartTickTimer() {
+    const isMaze = this.grid.maze;
+    const gamePausedOrKilled = this.paused || this.killed;
+
+    return this.shouldUpdateEngine() || (isMaze && !gamePausedOrKilled);
   }
 
   doTick() {
