@@ -292,6 +292,9 @@ async function executeTrainingEpisode(currentEpisodeType, episode) {
   // Final train at end of episode
   await theSnakeAI.train();
 
+  // Kill the games
+  envs.forEach(env => env.gameEngine.kill());
+
   const avgScore = envs.reduce((sum, env) => sum + env.snake.score, 0) / envs.length;
   const maxScore = Math.max(...envs.map(env => env.snake.score));
 
