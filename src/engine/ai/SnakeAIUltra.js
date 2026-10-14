@@ -25,7 +25,7 @@ import PrioritizedReplayBuffer from "./utils/memory/PrioritizedReplayBuffer.js";
 import UniformReplayBuffer from "./utils/memory/UniformReplayBuffer.js";
 import DuelingQLayer from "./utils/layers/DuelingQLayer.js";
 import NoisyDense from "./utils/layers/NoisyDenseLayer.js";
-import SimpleRewardStrategy from "./rewards/SimpleRewardStrategy.js";
+import BFSRewardStrategy from "./rewards/BFSRewardStrategy.js";
 import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
@@ -88,10 +88,10 @@ export default class SnakeAIUltra extends SnakeAI {
     // END OF SETTINGS
 
     // Replay memory
-    this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger, "prioritized");
+    this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger, "uniform");
 
     // Reward strategy
-    this.rewardStrategy = new SimpleRewardStrategy();
+    this.rewardStrategy = new BFSRewardStrategy();
 
     // N-Steps buffers (key = instanceId)
     this.nStepBuffers = new Map();

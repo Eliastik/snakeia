@@ -2,6 +2,8 @@ angle-tests.txt
 node_modules
 /models/logs/*
 *.cpuprofile
+*.heapsnapshot
+*.heapprofile
 .vscode
 /models/
 *.log

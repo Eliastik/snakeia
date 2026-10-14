@@ -17,16 +17,16 @@ import tf from "@tensorflow/tfjs-node-gpu";
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
 // Settings
-const EPISODES_TYPES            = ["DEFAULT", "DECREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
+const EPISODES_TYPES            = ["DEFAULT", "INCREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
 // OR:
 // const EPISODES_TYPES         = ["DEFAULT", "BORDER_WALLS", "RANDOM_WALLS", "OPPONENTS", "MAZE", "INCREASE_GRID_SIZE", "DECREASE_GRID_SIZE", "RESET_TO_INITIAL_GRID_SIZE_AT_END"];
 const NUM_EPISODES_PER_TYPE     = 500;
 const MAX_EPISODES              = "auto"; // number OR "auto"
 const MAX_CYCLES                = 5; // Maximum number of cycles to run through all episode types (only used if MAX_EPISODES is "auto" and EPISODES_TYPES contains "RESET_TO_INITIAL_GRID_SIZE_AT_END")
-const TRAIN_EVERY               = 50;
+const TRAIN_EVERY               = 100;
 const MAX_TICKS                 = 1000;
-const INITIAL_GRID_WIDTH        = 20;
-const INITIAL_GRID_HEIGHT       = 20;
+const INITIAL_GRID_WIDTH        = 5;
+const INITIAL_GRID_HEIGHT       = 5;
 const GRID_INCREMENT            = 5;
 const MIN_GRID_WIDTH            = 5; // Minimum grid width for DECREASE_GRID_SIZE episode types
 const MIN_GRID_HEIGHT           = 5; // Minimum grid height for DECREASE_GRID_SIZE episode types

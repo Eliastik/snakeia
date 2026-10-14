@@ -358,6 +358,10 @@ export default class GameEngine {
   tick() {
     setTimeout(() => {
       this.doTick();
+
+      if(this.shouldUpdateEngine()) {
+        this.tick();
+      }
     }, this.initialSpeed * GameConstants.Setting.TIME_MULTIPLIER);
   }
 
@@ -371,71 +375,68 @@ export default class GameEngine {
                          this.getPlayer(1, GameConstants.PlayerType.HUMAN))?.lastKey;
 
     return this.grid &&
-      (!isMaze || forceAuto || totalHuman === 0 || (totalHuman > 0 && playerInput !== -1));
+      (!isMaze || forceAuto || totalHuman === 0 || (totalHuman > 0 && playerInput !== -1)) &&
+      (!this.paused && !this.killed);
   }
 
   doTick() {
-    if(this.paused || this.killed) {
+    if(!this.shouldUpdateEngine()) {
       return;
     }
 
-    if(this.shouldUpdateEngine()) {
-      let scoreIncreased;
+    let scoreIncreased;
 
-      this.ticks++;
+    this.ticks++;
 
-      for(const snake of this.snakes) {
-        const initialDirection = snake.direction;
+    for(const snake of this.snakes) {
+      const initialDirection = snake.direction;
 
-        snake.lastTailMoved = false;
-        snake.lastHeadMoved = false;
+      snake.lastTailMoved = false;
+      snake.lastHeadMoved = false;
 
-        if(!snake.gameOver && !snake.scoreMax) {
-          const headSnakePos = this.moveSnake(snake, initialDirection);
+      if(!snake.gameOver && !snake.scoreMax) {
+        const headSnakePos = this.moveSnake(snake, initialDirection);
 
-          if(headSnakePos) {
-            if(this.grid.isDeadPosition(headSnakePos)) {
-              snake.setGameOver(this.ticks);
-            } else {
-              const { scoreHasIncreased, setFruits } = this.handleSnakeMoveResult(headSnakePos, snake);
-  
-              if(scoreHasIncreased) {
-                scoreIncreased = true;
-              }
-  
-              // Set a new fruit if the current fruit is eaten
-              if(!this.scoreMax && setFruits && !this.clientSidePredictionsMode) {
-                this.grid.setFruits(this.getNBPlayerAlive());
-              }
+        if(headSnakePos) {
+          if(this.grid.isDeadPosition(headSnakePos)) {
+            snake.setGameOver(this.ticks);
+          } else {
+            const { scoreHasIncreased, setFruits } = this.handleSnakeMoveResult(headSnakePos, snake);
+
+            if(scoreHasIncreased) {
+              scoreIncreased = true;
+            }
+
+            // Set a new fruit if the current fruit is eaten
+            if(!this.scoreMax && setFruits && !this.clientSidePredictionsMode) {
+              this.grid.setFruits(this.getNBPlayerAlive());
             }
           }
         }
       }
+    }
 
-      // Check if the game should end
-      const shouldEndGame = this.checkEndGameCondition();
+    // Check if the game should end
+    const shouldEndGame = this.checkEndGameCondition();
 
-      if(shouldEndGame) {
+    if(shouldEndGame) {
+      this.endGame();
+    } else {
+      // Check stuck fruits
+      this.handleStuckFruits();
+
+      // If there are no fruits anymore on the grid, we end the game here
+      if(this.grid.fruitPositions.length === 0 && !this.grid.fruitPosGold) {
         this.endGame();
-      } else {
-        // Check stuck fruits
-        this.handleStuckFruits();
-
-        // If there are no fruits anymore on the grid, we end the game here
-        if(this.grid.fruitPositions.length === 0 && !this.grid.fruitPosGold) {
-          this.endGame();
-        }
-      }
-
-      // Send events about the current game state update
-      this.reactor.dispatchEvent("onUpdate");
-
-      if(scoreIncreased) {
-        this.reactor.dispatchEvent("onScoreIncreased");
       }
     }
 
-    this.tick();
+    // Send events about the current game state update
+    this.reactor.dispatchEvent("onUpdate");
+
+    if(scoreIncreased) {
+      this.reactor.dispatchEvent("onScoreIncreased");
+    }
   }
 
   moveSnake(snake, initialDirection) {
