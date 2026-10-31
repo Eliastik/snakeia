@@ -17,6 +17,10 @@
  * along with "SnakeIA".  If not, see <http://www.gnu.org/licenses/>.
  */
 export default class BaseReplayBuffer {
+  setRng(rng) {
+    this.rng = rng;
+  }
+
   cleanOldMemory(removedMemory) {
     if(removedMemory && removedMemory.state?.dispose) {
       removedMemory.state.dispose();

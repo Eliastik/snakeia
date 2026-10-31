@@ -36,7 +36,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.aiLevelText = "ultra";
     this.enableTrainingMode = enableTrainingMode;
     this.modelLocation = modelLocation;
-    this.trainingRandomSeed = seed || new seedrandom().int32();
+    this.trainingRandomSeed = seed ?? new seedrandom().int32();
     this.trainingRng = new seedrandom(this.trainingRandomSeed, { state: true });
     this.logger = logger || console;
     this.fileReader = fileReader || {
@@ -77,7 +77,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.epsilonMin = 0.005; // Not used if Noisy Network is enabled
     this.epsilon = this.epsilonMax; // Not used if Noisy Network is enabled
     this.learningRate = 0.0001;
-    this.batchSize = 256;
+    this.batchSize = 128;
     this.syncTargetEvery = 1000; // Sync the Target Model each N training steps
     this.maxMemoryLength = 20000;
     this.nStep = 3;
@@ -88,7 +88,7 @@ export default class SnakeAIUltra extends SnakeAI {
     // END OF SETTINGS
 
     // Replay memory
-    this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger, "uniform");
+    this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger, "prioritized");
 
     // Reward strategy
     this.rewardStrategy = new BFSRewardStrategy();
@@ -142,6 +142,11 @@ export default class SnakeAIUltra extends SnakeAI {
 
   get enableFrameStacking() {
     return this.frameStackSize > 1;
+  }
+
+  setTrainingRng(rng) {
+    this.trainingRng = rng;
+    this.memory?.setRng(rng);
   }
 
   async setup(summaryWriter) {
@@ -251,19 +256,25 @@ export default class SnakeAIUltra extends SnakeAI {
       name: "state_input"
     });
 
+    const kernelInitializer = tf.initializers.glorotUniform({
+      seed: Math.floor(this.trainingRng() * 0x7fffffff)
+    });
+
     const conv1 = tf.layers.conv2d({
       filters: 32,
-      kernelSize: 3,
+      kernelSize: 2,
       activation: "relu",
       padding: "same",
+      kernelInitializer,
       dtype: this.dtype
     }).apply(stateInput);
 
     const conv2 = tf.layers.conv2d({
       filters: 64,
-      kernelSize: 3,
+      kernelSize: 2,
       activation: "relu",
       padding: "same",
+      kernelInitializer,
       dtype: this.dtype
     }).apply(conv1);
 
@@ -271,12 +282,13 @@ export default class SnakeAIUltra extends SnakeAI {
     const pool = tf.layers.maxPooling2d({
       poolSize: 2,
       dataFormat: "channelsLast",
-      dtype: this.dtype
+      dtype: this.dtype,
+      kernelInitializer
     }).apply(conv2);
 
     const flattenOrPooling = this.enableVariableInputSize ?
-      tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true, dtype: this.dtype }).apply(pool) :
-      tf.layers.flatten({ dtype: this.dtype }).apply(pool);
+      tf.layers.globalAveragePooling2d({ dataFormat: "channelsLast", trainable: true, dtype: this.dtype, kernelInitializer }).apply(pool) :
+      tf.layers.flatten({ dtype: this.dtype, kernelInitializer }).apply(pool);
 
     // Optional second input: environment features
     let trunk = flattenOrPooling;
@@ -289,10 +301,11 @@ export default class SnakeAIUltra extends SnakeAI {
         units: this.envEmbedSize,
         activation: "relu",
         dtype: this.dtype,
-        name: "env_embed"
+        name: "env_embed",
+        kernelInitializer
       }).apply(envInput);
 
-      trunk = tf.layers.concatenate({ name: "trunk_merged" }).apply([flattenOrPooling, envEmbed]);
+      trunk = tf.layers.concatenate({ name: "trunk_merged", kernelInitializer }).apply([flattenOrPooling, envEmbed]);
       modelInputs = [stateInput, envInput];
     }
 
@@ -300,14 +313,16 @@ export default class SnakeAIUltra extends SnakeAI {
       units: 32,
       activation: "relu",
       dtype: this.dtype,
-      seed: this.trainingRng()
+      seed: Math.floor(this.trainingRng() * 0x7fffffff),
+      kernelInitializer
     }).apply(trunk);
 
     const advantage = DenseLayer({
       units: this.numberOfPossibleActions,
       activation: "linear",
       dtype: this.dtype,
-      seed: this.trainingRng()
+      seed: Math.floor(this.trainingRng() * 0x7fffffff),
+      kernelInitializer
     }).apply(dense1);
 
     let model;
@@ -317,21 +332,23 @@ export default class SnakeAIUltra extends SnakeAI {
         units: 32,
         activation: "relu",
         dtype: this.dtype,
-        seed: this.trainingRng()
+        seed: Math.floor(this.trainingRng() * 0x7fffffff),
+        kernelInitializer
       }).apply(trunk);
 
       const value = DenseLayer({
         units: 1,
         activation: "linear",
         dtype: this.dtype,
-        seed: this.trainingRng()
+        seed: Math.floor(this.trainingRng() * 0x7fffffff),
+        kernelInitializer
       }).apply(dense2);
 
       const qValues = new DuelingQLayer().apply([value, advantage]);
 
-      model = tf.model({ inputs: modelInputs, outputs: qValues, dtype: this.dtype });
+      model = tf.model({ inputs: modelInputs, outputs: qValues, dtype: this.dtype, kernelInitializer });
     } else {
-      model = tf.model({ inputs: modelInputs, outputs: advantage, dtype: this.dtype });
+      model = tf.model({ inputs: modelInputs, outputs: advantage, dtype: this.dtype, kernelInitializer });
     }
 
     return model;
@@ -1112,7 +1129,7 @@ export default class SnakeAIUltra extends SnakeAI {
     const envFeaturesArrFit = batch.samples.map(s => s.envFeatures ?? this.neutralEnvFeatures());
     const fitInputs = this.wrapInputBatch(inputs, envFeaturesArrFit);
 
-    const fitData = await this.mainModel.fit(fitInputs, targets, { batchSize: actualBatchSize, epochs: 1, verbose: 0, shuffle: true });
+    const fitData = await this.mainModel.fit(fitInputs, targets, { batchSize: actualBatchSize, epochs: 1, verbose: 0, shuffle: false });
 
     // Dispose env tensor created for fit (state tensor disposed below)
     if(this.enableEnvEmbedding && Array.isArray(fitInputs)) {
@@ -1409,7 +1426,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
         if(typeof config.trainingRandomSeed === "number") {
           this.trainingRandomSeed = config.trainingRandomSeed;
-          this.trainingRng = new seedrandom(this.trainingRandomSeed, { state: true });
+          this.setTrainingRng(new seedrandom(this.trainingRandomSeed, { state: true }));
         }
       }
 
@@ -1424,7 +1441,7 @@ export default class SnakeAIUltra extends SnakeAI {
       if(metadata.trainingState) {
         const state = metadata.trainingState;
 
-        if(state.trainingRng) this.trainingRng = seedrandom("", { state: state.trainingRng });
+        if(state.trainingRng) this.setTrainingRng(seedrandom("", { state: state.trainingRng }));
         if(state.currentEnv !== undefined && this.memoryRestoredFromState) this.currentEnv = state.currentEnv;
       }
 

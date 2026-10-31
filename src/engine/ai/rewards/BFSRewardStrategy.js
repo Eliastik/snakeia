@@ -21,9 +21,11 @@ import BaseRewardStrategy from "./BaseRewardStrategy.js";
 
 export default class BFSRewardStrategy extends BaseRewardStrategy {
 
-  // eslint-disable-next-line no-unused-vars
-  calculateReward(snake, currentState, done) {
+  calculateReward(snake, currentState, done = false) {
     const { gameOver } = snake;
+
+    const isTerminalTransition = Boolean(done) || gameOver;
+
     const head = snake.getHeadPosition();
     
     const fruits = this.findAllPositionsInState(currentState.fruitsAndWallsLayer, GameConstants.CaseType.FRUIT);
@@ -65,6 +67,10 @@ export default class BFSRewardStrategy extends BaseRewardStrategy {
       if(head.x === fruitGold.x && head.y === fruitGold.y) {
         return GameConstants.AIRewards.GOLD_FRUIT_EATEN;
       }
+    }
+    
+    if(isTerminalTransition) {
+      return GameConstants.AIRewards.MOVE;
     }
     
     if(fruits.length > 0 || goldFruits.length > 0) {

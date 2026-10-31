@@ -32,8 +32,12 @@ export default class SimpleRewardStrategy extends BaseRewardStrategy {
       this.logger.warn("No fruit detected\n");
     }
     
-    if(gameOver || done) {
+    if(gameOver) {
       return GameConstants.AIRewards.GAME_OVER;
+    }
+
+    if(done) {
+      return GameConstants.AIRewards.MOVE;
     }
 
     for(const fruit of fruits) {

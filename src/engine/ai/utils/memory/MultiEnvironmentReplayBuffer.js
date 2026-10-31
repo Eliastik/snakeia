@@ -35,9 +35,17 @@ export default class MultiEnvironmentReplayBuffer extends BaseReplayBuffer {
   
     this.createBuffer = (type, capacity) => {
       return type === "prioritized"
-        ? new PrioritizedReplayBuffer(capacity, rng, this.logger, false)
-        : new UniformReplayBuffer(capacity, rng, this.logger);
+        ? new PrioritizedReplayBuffer(capacity, this.rng, this.logger, false)
+        : new UniformReplayBuffer(capacity, this.rng, this.logger);
     };
+  }
+
+  setRng(rng) {
+    super.setRng(rng);
+
+    for(const buffer of this.buffers.values()) {
+      buffer.setRng(rng);
+    }
   }
   
   changeEnvironment(envId) {

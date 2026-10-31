@@ -375,6 +375,8 @@ test("calculate reward - fruit eaten", async () => {
     expect(theSnake.gameOver).toBe(false);
     expect(theSnake.score).toBe(1);
     expect(theSnakeAI.calculateReward(theSnake, currentState)).toBe(Constants.AIRewards.FRUIT_EATEN);
+
+    expect(theSnakeAI.calculateReward(theSnake, currentState, true)).toBe(Constants.AIRewards.FRUIT_EATEN);
 });
 
 test("calculate reward - move", async () => {
@@ -411,7 +413,8 @@ test("calculate reward - move", async () => {
     expect(theSnake.gameOver).toBe(false);
     expect(theSnake.score).toBe(0);
     expect(theSnakeAI.calculateReward(theSnake, currentState).toFixed(3)).toBe("-0.051");
-    expect(theSnakeAI.calculateReward(theSnake, currentState, true)).not.toBe(Constants.AIRewards.STUCK);
+
+    expect(theSnakeAI.calculateReward(theSnake, currentState, true)).toBe(Constants.AIRewards.MOVE);
 });
 
 test("calculate reward - stuck", async () => {
@@ -483,4 +486,36 @@ test("action to key test 3", async () => {
     await theSnake.init();
 
     expect(theSnakeAI.actionToKey(theSnake, Constants.AIActions.TURN_RIGHT)).toBe(Constants.Key.BOTTOM);
+});
+
+test("conv2d initializers are reproducible for the same seed", () => {
+    const firstAI = new SnakeAIUltra(true, null, 123);
+    const secondAI = new SnakeAIUltra(true, null, 123);
+    const firstModel = firstAI.createModel();
+    const secondModel = secondAI.createModel();
+
+    const getConvolutionKernels = model => model.layers
+        .filter(layer => layer.getClassName() === "Conv2D")
+        .map(layer => layer.getWeights()[0].arraySync());
+
+    expect(getConvolutionKernels(firstModel)).toEqual(getConvolutionKernels(secondModel));
+
+    firstModel.dispose();
+    secondModel.dispose();
+});
+
+test("restoring the training RNG updates existing and future replay buffers", () => {
+    const theSnakeAI = new SnakeAIUltra(true, null, 123);
+    const restoredRng = () => 0.5;
+
+    theSnakeAI.memory.changeEnvironment("existing");
+    theSnakeAI.setTrainingRng(restoredRng);
+
+    expect(theSnakeAI.trainingRng).toBe(restoredRng);
+    expect(theSnakeAI.memory.rng).toBe(restoredRng);
+    expect(theSnakeAI.memory.buffers.get("existing").rng).toBe(restoredRng);
+
+    theSnakeAI.memory.changeEnvironment("future");
+
+    expect(theSnakeAI.memory.buffers.get("future").rng).toBe(restoredRng);
 });
