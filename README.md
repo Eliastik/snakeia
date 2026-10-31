@@ -116,6 +116,16 @@ TF_GPU_ALLOCATOR=cuda_malloc_async TF_FORCE_GPU_ALLOW_GROWTH=true node train-ai.
 
 You can customize the training settings in the train-ai.mjs script.
 
+### Reproducible training
+
+To ensure that the training is deterministic and reproducible, add the following value before the `node train-ai.mjs` command:
+
+```
+TF_DETERMINISTIC_OPS=1 
+```
+
+The training seeds can be configured in the `train-ai.mjs` file.
+
 ### Troubleshooting during training:
 
 - If you encounter an error similar to the following: TypeError: (0, util_1.isNullOrUndefined) is not a function
@@ -242,6 +252,16 @@ TF_GPU_ALLOCATOR=cuda_malloc_async TF_FORCE_GPU_ALLOW_GROWTH=true node train-ai.
 ```
 
 Vous pouvez personnaliser les paramètres d'entraînement dans le fichier `train-ai.mjs`.
+
+### Entraînement reproductible
+
+Pour que l'entraînement soit déterministe et reproductible, ajouter avant la commande `node train-ai.mjs` la valeur suivante :
+
+```
+TF_DETERMINISTIC_OPS=1 
+```
+
+Les seeds d'entraînement peut être paramétrée dans le fichier `train-ai.mjs`.
 
 ### Résolution de problèmes lors de l'entrainement :
 

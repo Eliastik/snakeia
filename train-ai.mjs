@@ -10,9 +10,9 @@ import SnakeAIUltra from "./src/engine/ai/SnakeAIUltra.js";
 import cliProgress from "cli-progress";
 import { encode, decodeAsync } from "@msgpack/msgpack";
 
-import tf from "@tensorflow/tfjs-node";
+// import tf from "@tensorflow/tfjs-node";
 // Uncomment to enable GPU, and comment above import
-//import tf from "@tensorflow/tfjs-node-gpu";
+import tf from "@tensorflow/tfjs-node-gpu";
 
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
