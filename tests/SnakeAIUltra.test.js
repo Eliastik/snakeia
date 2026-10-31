@@ -449,6 +449,37 @@ test("calculate reward - stuck", async () => {
     expect(theSnakeAI.calculateReward(theSnake, currentState, true)).toBe(-0.004);
 });
 
+test("calculate reward - grid with no fruits does not throw", async () => {
+    const theGrid = new Grid(10, 10, false, true, false, [
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    ]);
+    const theSnake = new Snake(Constants.Direction.RIGHT, 3, theGrid);
+
+    theGrid.init();
+    await theSnake.init();
+
+    const theSnakeAI = new SnakeAIUltra();
+    const warnings = [];
+    const testLogger = { warn: (msg) => { warnings.push(msg); }, info: () => {}, debug: () => {}, error: () => {} };
+
+    theSnakeAI.rewardStrategy = new BFSRewardStrategy(testLogger);
+    const currentState = theSnakeAI.getStateRaw(theSnake);
+
+    expect(theSnakeAI.rewardStrategy.logger).toBe(testLogger);
+    expect(theSnakeAI.calculateReward(theSnake, currentState)).toBe(Constants.AIRewards.MOVE);
+    expect(warnings.length).toBe(1);
+    expect(warnings[0]).toContain("No fruit detected");
+});
+
 test("action to key test 1", async () => {
     const theSnakeAI = new SnakeAIUltra();
     theSnakeAI.numberOfPossibleActions = 3;

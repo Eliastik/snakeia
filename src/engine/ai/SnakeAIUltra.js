@@ -91,7 +91,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger, "prioritized");
 
     // Reward strategy
-    this.rewardStrategy = new BFSRewardStrategy();
+    this.rewardStrategy = new BFSRewardStrategy(this.logger);
 
     // N-Steps buffers (key = instanceId)
     this.nStepBuffers = new Map();

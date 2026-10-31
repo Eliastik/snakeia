@@ -20,6 +20,10 @@ import GameConstants from "../../Constants.js";
 
 export default class BaseRewardStrategy {
 
+  constructor(logger = null) {
+    this.logger = logger || console;
+  }
+
   // eslint-disable-next-line no-unused-vars
   calculateReward(snake, currentState, done) {
     throw new Error("calculateReward method must be implemented in the subclass.");
