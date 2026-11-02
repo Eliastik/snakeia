@@ -26,6 +26,8 @@ import UniformReplayBuffer from "./utils/memory/UniformReplayBuffer.js";
 import DuelingQLayer from "./utils/layers/DuelingQLayer.js";
 import NoisyDense from "./utils/layers/NoisyDenseLayer.js";
 import BFSRewardStrategy from "./rewards/BFSRewardStrategy.js";
+import PotentialRewardStrategy from "./rewards/PotentialRewardStrategy.js";
+import SimpleRewardStrategy from "./rewards/SimpleRewardStrategy.js";
 import * as tf from "@tensorflow/tfjs";
 import seedrandom from "seedrandom";
 
@@ -85,13 +87,25 @@ export default class SnakeAIUltra extends SnakeAI {
     this.softTargetUpdatesCoefficient = 0.005;
     this.envFeatureSize = 6; // [gridWidth/W, gridHeight/H, hasWalls, hasRandomWalls, isMaze, hasOpponents]
     this.envEmbedSize = 16;
+
+    // Reward strategy settings
+    this.rewardStrategyName = "potential"; // simple, bfs, potential
+
+    this.rewardStrategyOptions = {
+      distanceWeight: 0.10,      // weight of the "fruit reachable" term (keep it small vs FRUIT_EATEN = 0.5)
+      spaceWeight: 0.05,         // weight of the "free space" term
+      goldBonus: 3,              // a gold fruit is treated as being this many steps closer
+      includeSurrounded: true,   // SURROUNDED cells block the flood fill
+      enableStuckPenalty: false  // potential shaping already discourages pointless moves
+    };
     // END OF SETTINGS
 
     // Replay memory
     this.memory = new MultiEnvironmentReplayBuffer(this.maxMemoryLength, this.trainingRng, this.logger, "prioritized");
 
-    // Reward strategy
-    this.rewardStrategy = new BFSRewardStrategy(this.logger);
+    // Reward strategy (instantiated from the settings above)
+    this.rewardStrategyManuallySet = false;
+    this.rewardStrategy = this.createRewardStrategy(this.rewardStrategyName, this.rewardStrategyOptions);
 
     // N-Steps buffers (key = instanceId)
     this.nStepBuffers = new Map();
@@ -196,6 +210,7 @@ export default class SnakeAIUltra extends SnakeAI {
     this.logger.info(this.enableEnvEmbedding ? `Env embedding enabled (features=${this.envFeatureSize}, embed=${this.envEmbedSize})\n` : "Env embedding disabled\n");
     this.logger.info(`Model input shape: [${this.enableVariableInputSize ? "variable" : this.modelHeight}, ${this.enableVariableInputSize ? "variable" : this.modelWidth}, ${this.modelDepth * this.frameStackSize}]\n`);
     this.logger.info(`Model output (number of possible actions): ${this.numberOfPossibleActions}\n`);
+    this.logger.info(`Reward strategy: ${this.rewardStrategyName}\n`);
   }
 
   async createOrLoadModel(enableTrainingMode, modelLocation) {
@@ -310,7 +325,7 @@ export default class SnakeAIUltra extends SnakeAI {
     }
 
     const dense1 = DenseLayer({
-      units: 32,
+      units: 64,
       activation: "relu",
       dtype: this.dtype,
       seed: Math.floor(this.trainingRng() * 0x7fffffff),
@@ -329,7 +344,7 @@ export default class SnakeAIUltra extends SnakeAI {
 
     if(this.enableDuelingQLearning) {
       const dense2 = DenseLayer({
-        units: 32,
+        units: 64,
         activation: "relu",
         dtype: this.dtype,
         seed: Math.floor(this.trainingRng() * 0x7fffffff),
@@ -624,7 +639,6 @@ export default class SnakeAIUltra extends SnakeAI {
     throw new Error(`Error: no action was mapped for actionIndex ${actionIndex}`);
   }
 
-  // TODO fix
   getDeadActions(snake) {
     const head = snake.getHeadPosition();
     const deadActions = new Set();
@@ -1206,12 +1220,34 @@ export default class SnakeAIUltra extends SnakeAI {
     });
   }
 
-  calculateReward(snake, currentState, done) {
+  createRewardStrategy(name, options = {}) {
+    switch(name) {
+    case "simple":
+      return new SimpleRewardStrategy(this.logger);
+    case "potential":
+      return new PotentialRewardStrategy(this.logger, { gamma: this.gamma, ...options });
+    case "bfs":
+      return new BFSRewardStrategy(this.logger);
+    default:
+      this.logger.warn(`Unknown reward strategy "${name}", falling back to "bfs"\n`);
+      return new BFSRewardStrategy(this.logger);
+    }
+  }
+
+  setRewardStrategy(name, options = {}) {
+    this.rewardStrategyName = name;
+    this.rewardStrategyOptions = { ...this.rewardStrategyOptions, ...options };
+    this.rewardStrategy = this.createRewardStrategy(name, this.rewardStrategyOptions);
+    this.rewardStrategyManuallySet = true;
+    return this.rewardStrategy;
+  }
+
+  calculateReward(snake, currentState, done = false, instanceId = "inference") {
     if(!this.rewardStrategy) {
       throw new Error("Reward strategy is not defined. Please set a reward strategy.");
     }
 
-    return this.rewardStrategy.calculateReward(snake, currentState, done);
+    return this.rewardStrategy.calculateReward(snake, currentState, done, instanceId);
   }
 
   step(snake, currentState, done, reward, action = null, instanceId = "inference") {
@@ -1252,6 +1288,10 @@ export default class SnakeAIUltra extends SnakeAI {
       }
 
       this.nStepBuffers.delete(instanceId);
+
+      if(this.rewardStrategy && typeof this.rewardStrategy.reset === "function") {
+        this.rewardStrategy.reset(instanceId);
+      }
     }
   }
 
@@ -1286,6 +1326,8 @@ export default class SnakeAIUltra extends SnakeAI {
         enableDataAugmentation:       { type: "boolean", target: "enableDataAugmentation" },
         enableActionMasking:          { type: "boolean", target: "enableActionMasking", fallback: false },
         enableEnvEmbedding:           { type: "boolean", target: "enableEnvEmbedding",   fallback: false },
+        rewardStrategyName:           { type: "string",  target: "rewardStrategyName" },
+        rewardStrategyOptions:        { type: "object",  target: "rewardStrategyOptions" },
         syncTargetEvery:              { type: "number",  target: "syncTargetEvery", hyperParam: true },
         gamma:                        { type: "number",  target: "gamma", hyperParam: true },
         epsilonMax:                   { type: "number",  target: "epsilonMax", hyperParam: true },
@@ -1443,6 +1485,10 @@ export default class SnakeAIUltra extends SnakeAI {
 
         if(state.trainingRng) this.setTrainingRng(seedrandom("", { state: state.trainingRng }));
         if(state.currentEnv !== undefined && this.memoryRestoredFromState) this.currentEnv = state.currentEnv;
+      }
+
+      if(!this.rewardStrategyManuallySet) {
+        this.rewardStrategy = this.createRewardStrategy(this.rewardStrategyName, this.rewardStrategyOptions);
       }
 
       this.logger.info("Metadata correctly loaded from file\n");

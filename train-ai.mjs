@@ -98,6 +98,8 @@ const theSnakeAI = new SnakeAIUltra(true, LOAD_MODEL_PATH, TRAINING_SEED, {
   }
 }, LOAD_HYPERPARAMETERS, LOAD_MEMORY);
 
+theSnakeAI.logger.info(`Reward strategy: ${theSnakeAI.rewardStrategyName}\n`);
+
 const currentMaxEpisodes = getMaxEpisodesCount();
 const progressBar = multiBar.create(currentMaxEpisodes, 0, {
   task: "Training",
@@ -230,7 +232,7 @@ async function executeTickBatch(envs, currentTick) {
     const { snake, gameEngine } = envs[i];
     const done = gameEngine.gameFinished || gameEngine.gameOver || snake.gameOver || currentTick + 1 >= MAX_TICKS;
 
-    const reward = theSnakeAI.calculateReward(snake, rawStates[i], done);
+    const reward = theSnakeAI.calculateReward(snake, rawStates[i], done, envs[i].instanceId);
     batchTotalReward += reward;
 
     theSnakeAI.step(snake, currentStates[i], done, reward, actions[i], envs[i].instanceId);
